@@ -567,6 +567,9 @@ function npcMissions(ui, npc) {
   const act = st.missions?.active || [], done = st.missions?.completed || [];
   const map = new Map();
   for (const a of guard('missions.available', () => mm?.available?.(npc.id), []) || []) { const m = missionDef(a); if (m) map.set(m.id, m); }
+  // 報告先は m.turnIn || m.giver（MissionManager.completable / inProgress も併用）
+  for (const a of guard('missions.completable', () => mm?.completable?.(npc.id), []) || []) { const m = missionDef(a); if (m) map.set(m.id, m); }
+  for (const a of guard('missions.inProgress', () => mm?.inProgress?.(npc.id), []) || []) { const m = missionDef(a); if (m) map.set(m.id, m); }
   for (const id of act) { const m = missionDef(id); if (m && turnInNpc(m) === npc.id) map.set(id, m); }
   const out = [];
   for (const m of map.values()) {

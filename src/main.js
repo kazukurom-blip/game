@@ -12,6 +12,7 @@ import { Spawner } from './entities/spawner.js';
 import { newState, computeStats, expToNext } from './systems/progression.js';
 import { MissionManager } from './systems/missions.js';
 import { updateSkills } from './systems/skills.js';
+import { setPlayerInvuln } from './systems/combat.js';
 
 import { drawBackground, drawMapTiles } from './render/background.js';
 import { spawnEffect, updateEffects, drawEffects } from './render/effects.js';
@@ -117,9 +118,9 @@ game.events.on('playerDied', () => {
       s.mp = Math.ceil(st.maxMp * 0.5);
       game.wanted = 0; game.wantedHeat = 0;
       game.player.dead = false;
-      game.player.invulnT = 3;
       const town = MAPS.beach ? 'beach' : game.state.mapId;
       game.changeMap(town);
+      setPlayerInvuln(game, 3);
       game.save();
     },
   });

@@ -442,7 +442,7 @@ function drawLeg(ctx, K, front, hx, hy, a, k) {
   } else if (bs === 'shorts') {
     const col = shade(bc, dark);
     const torn = dmg >= 0.5;
-    const end = torn ? THIGH * 0.72 : THIGH * 0.9;
+    const end = torn ? THIGH * 0.9 : THIGH * 1.05;
     strokeLimb(ctx, hx, hy, a, e, THIGH, SHIN, 0, end, LEG_W + 1.2, col, torn ? 'butt' : 'round');
     if (torn) { limbAt(hx, hy, a, e, THIGH, SHIN, end); jagEnd(ctx, PT.x, PT.y, PT.a, LEG_W + 1.2, col, 1.8); }
     if (K.eq.bottom && K.eq.bottom.accent && !torn) {
