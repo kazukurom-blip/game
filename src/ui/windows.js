@@ -537,7 +537,9 @@ function rewardText(rw) {
   if (rw.exp) parts.push(`EXP +${rw.exp}`);
   if (rw.money) parts.push(fmtMoney(rw.money));
   if (rw.sp) parts.push(`SP +${rw.sp}`);
-  for (const id of rw.items || []) { const it = getItemDef(id); if (it) parts.push(it.name); }
+  const cnt = new Map();
+  for (const id of rw.items || []) cnt.set(id, (cnt.get(id) || 0) + 1);
+  for (const [id, n] of cnt) { const it = getItemDef(id); if (it) parts.push(it.name + (n > 1 ? `×${n}` : '')); }
   return parts.join('   ') || '—';
 }
 

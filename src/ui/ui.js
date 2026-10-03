@@ -9,7 +9,7 @@ const W = 1280, H = 720;
 const MODAL = new Set(['dialog', 'shop', 'death']);
 const LAYOUT = {
   inventory: { w: 800, h: 520, title: 'インベントリ', key: 'I' },
-  skills: { w: 520, h: 610, title: 'スキル', key: 'K' },
+  skills: { w: 520, h: 610, title: 'スキル', key: 'K', y: 14 },
   stats: { w: 420, h: 510, title: 'ステータス', key: 'T' },
   missions: { w: 640, h: 480, title: 'ミッション', key: 'J' },
   dialog: { w: 940, h: 260, title: null, x: (W - 940) / 2, y: H - 290 },
@@ -160,13 +160,18 @@ export class UIManager {
           if (hit.drag) this.dnd = { payload: hit.drag, sx: m.x, sy: m.y, active: false };
           const t = now();
           const dbl = this.lastClick.id === hit.id && t - this.lastClick.t < 0.38;
-          if (dbl && hit.onDbl) { hit.onDbl(); this.lastClick = { id: null, t: -9 }; } else {
+          if (dbl && hit.onDbl) { hit.onDbl(); this.lastClick = { id: null, t: -9 }; this._dblAt = t; } else {
             hit.onClick?.();
             this.lastClick = { id: hit.id, t };
           }
         } else if (top && m.y < top.y + 40 && top.name !== 'death') {
           this.drag = { win: top, dx: m.x - top.x, dy: m.y - top.y };
         }
+      }
+      // ブラウザの dblclick（2回の mousedown が同一フレームに入った場合の救済）
+      if (m.dblClicked && !(now() - (this._dblAt || -9) < 0.5)) {
+        const hit = this.hitAt(m.x, m.y, top);
+        if (hit?.onDbl) { hit.onDbl(); this._dblAt = now(); this.lastClick = { id: null, t: -9 }; consumed = true; }
       }
       if (m.rightClicked) {
         const hit = this.hitAt(m.x, m.y, top);

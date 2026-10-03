@@ -221,7 +221,7 @@ function drawStatus(ctx, game, s, dt) {
   // 名前
   const name = HERO_NAMES[st.heroId] || st.heroId || 'HERO';
   txt(ctx, name, x + 92, y + 20, { size: 17, color: '#fff' });
-  const sub = st.heroId === 'jin' ? 'ガンスリンガー' : st.heroId === 'luna' ? 'ストリートブレイダー' : '';
+  const sub = st.heroId === 'jin' ? 'ストリートブロウラー' : st.heroId === 'luna' ? 'ストリートアイドル' : '';
   if (sub) txt(ctx, sub, x + 92 + measure(ctx, name, 17) + 10, y + 21, { size: 11, color: COL.sub, sw: 3 });
   // バー
   const maxHp = Math.max(1, cs.maxHp || 1), maxMp = Math.max(1, cs.maxMp || 1);
@@ -344,7 +344,7 @@ function drawMoney(ctx, game, s, dt) {
     d.t += dt;
     const a = 1 - clamp((d.t - 1.0) / 0.6, 0, 1);
     if (a <= 0) return;
-    const yy = y + 28 + i * 20 - Math.min(d.t, 1) * 6;
+    const yy = y + 70 + i * 18 + Math.min(d.t, 1) * 4;
     txt(ctx, (d.v > 0 ? '+' : '-') + fmtMoney(Math.abs(d.v)), rx, yy, {
       size: 17, align: 'right', color: d.v > 0 ? COL.money : COL.bad, alpha: a, sw: 4, stroke: d.v > 0 ? COL.moneyShadow : '#3d0b14',
     });
@@ -357,7 +357,7 @@ function drawMoney(ctx, game, s, dt) {
   const seen = wanted > 0 && copsNear(game);
   const t = game.time || 0;
   const since = t - s.wantedT;
-  const sy = 82 + (s.deltas.length ? 8 : 0) * 0;
+  const sy = 80;
   const sz = 15, gap = 34;
   const sx0 = rx - 14 - gap * 4;
   ctx.save();
@@ -401,7 +401,7 @@ function drawTracker(ctx, game) {
   const list = guard('missions.tracked', () => game.missions?.tracked?.(), []) || [];
   if (!list.length) return;
   const w = 290, x = W - w - 12;
-  let y = 116;
+  let y = 140;
   // 高さを計算
   const items = list.slice(0, 4).map((m) => ({ name: m.name || '', lines: (m.lines || []).slice(0, 4), done: !!(m.done || m.complete) }));
   const hgt = 34 + items.reduce((a, m) => a + 22 + m.lines.length * 19 + 6, 0);
@@ -471,7 +471,7 @@ function drawBanner(ctx, game) {
   const inK = ease(t / 0.35), outK = 1 - clamp((t - life + 0.4) / 0.4, 0, 1);
   const a = Math.min(inK, outK);
   if (a <= 0) return;
-  const cy = 196, bw = 640 * (0.6 + 0.4 * inK), bh = 76;
+  const cy = 252, bw = 640 * (0.6 + 0.4 * inK), bh = 76;
   const x = W / 2 - bw / 2, y = cy - bh / 2;
   ctx.save();
   ctx.globalAlpha = a;

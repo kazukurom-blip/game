@@ -859,19 +859,21 @@ function drawArm(ctx, K, front, sx, sy, a, e) {
 function drawSwoosh(ctx, K, sx, sy) {
   const sw = K.P.swoosh;
   const len = WEAPON_LEN[K.ws] || 20;
-  const r = UPPER + FORE + len * 0.85;
+  const r = Math.max(28, UPPER + FORE + len * 0.85);
   const col = K.eq.weapon ? itemColors(K.eq.weapon)[K.ws === 'neonSword' ? 0 : 1] : '#ffffff';
   ctx.save();
   ctx.globalAlpha *= clamp(sw.alpha, 0, 1) * 0.85;
   ctx.globalCompositeOperation = 'lighter';
-  const span = sw.to - sw.from;
+  const from = Math.max(sw.from, -1.0);
+  if (sw.to <= from + 0.05) { ctx.restore(); return; }
+  const span = sw.to - from;
   ctx.beginPath();
-  ctx.arc(sx, sy, r, sw.from, sw.to);
-  ctx.arc(sx, sy, r - 9, sw.to, sw.from + span * 0.25, true);
+  ctx.arc(sx, sy, r, from, sw.to);
+  ctx.arc(sx, sy, r - 9, sw.to, from + span * 0.25, true);
   ctx.closePath();
   ctx.fillStyle = FL ? '#ffffff' : rgba(col === '#ffffff' ? '#ffe7f5' : col, 0.55);
   ctx.fill();
-  ctx.beginPath(); ctx.arc(sx, sy, r - 1.5, sw.from + span * 0.2, sw.to);
+  ctx.beginPath(); ctx.arc(sx, sy, r - 1.5, from + span * 0.2, sw.to);
   ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 2; ctx.stroke();
   ctx.restore();
 }

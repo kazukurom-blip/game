@@ -5,9 +5,9 @@ import { guard, drawChar, heroLook, starterEquip, getItemDef, looksFrom } from '
 const W = 1280, H = 720;
 const HEROES = [
   { id: 'luna', name: 'ルナ', en: 'LUNA', color: COL.pink,
-    role: 'ストリートブレイダー', lines: ['スピードと華麗な連撃で', '敵をなぎ払うアタッカー'] },
+    role: 'ストリートアイドル', lines: ['スピードとクリティカルで魅せる', 'テクニカル型アタッカー'] },
   { id: 'jin', name: 'ジン', en: 'JIN', color: COL.teal,
-    role: 'ガンスリンガー', lines: ['銃と度胸で道を切り開く', '遠距離のスペシャリスト'] },
+    role: 'ストリートブロウラー', lines: ['パワーとタフさで押し切る', '頼れる喧嘩屋'] },
 ];
 const WT = { melee: '近接', gun: '銃', magic: '魔法' };
 
@@ -237,7 +237,7 @@ function drawLogo(ctx, t) {
 // ---------- 主人公 ----------
 function drawHeroes(ctx, game, t) {
   const pos = [W / 2 - 230, W / 2 + 230];
-  const baseY = 560;
+  const baseY = 540;
   // 非選択→選択の順で描画（選択中が前）
   const order = [0, 1].sort((a, b) => (a === T.sel ? 1 : 0) - (b === T.sel ? 1 : 0));
   for (const i of order) {
@@ -272,20 +272,25 @@ function drawHeroes(ctx, game, t) {
     });
     ctx.restore();
     // ネームカード
-    const cw = 250, ch = 96;
-    const cx = pos[i] - cw / 2, cy = baseY + 26;
+    const cw = 260, ch = 110;
+    const cx = pos[i] - cw / 2, cy = baseY + 22;
     panel(ctx, cx, cy, cw, ch, {
       r: 16, glow: sel ? rgba(h.color, 0.8) : null, stroke: sel ? '#fff' : 'rgba(255,255,255,0.5)',
       inner: rgba(h.color, 0.7), top: sel ? 'rgba(60,30,120,0.92)' : 'rgba(30,20,70,0.8)',
     });
     txt(ctx, h.name, cx + 18, cy + 26, { size: 26, color: '#fff', glow: sel ? h.color : null, sw: 5 });
-    txt(ctx, h.en, cx + 18 + 70, cy + 28, { size: 13, color: h.color, sw: 3 });
+    const nw = 26 * h.name.length + 8;
+    txt(ctx, h.en, cx + 18 + nw, cy + 29, { size: 13, color: h.color, sw: 3 });
     // 武器種
     const wpn = getItemDef(se?.weapon);
     const role = h.role + (wpn?.weaponType ? ` ・ ${WT[wpn.weaponType] || wpn.weaponType}` : '');
-    txt(ctx, role, cx + cw - 14, cy + 27, { size: 11.5, color: COL.gold, align: 'right', sw: 3 });
-    txt(ctx, h.lines[0], cx + 18, cy + 56, { size: 12.5, color: '#efeaff', weight: 700, sw: 3 });
-    txt(ctx, h.lines[1], cx + 18, cy + 76, { size: 12.5, color: '#efeaff', weight: 700, sw: 3 });
+    ctx.save();
+    rrPath(ctx, cx + 16, cy + 44, cw - 32, 20, 10);
+    ctx.fillStyle = rgba(h.color, 0.25); ctx.fill();
+    ctx.restore();
+    txt(ctx, role, cx + cw / 2, cy + 54.5, { size: 12, color: COL.gold, align: 'center', sw: 3 });
+    txt(ctx, h.lines[0], cx + 18, cy + 77, { size: 12.5, color: '#efeaff', weight: 700, sw: 3 });
+    txt(ctx, h.lines[1], cx + 18, cy + 96, { size: 12.5, color: '#efeaff', weight: 700, sw: 3 });
     if (sel) {
       const ay = cy + ch / 2, k = Math.sin(t * 6) * 4;
       txt(ctx, '◀', cx - 22 - k, ay, { size: 22, align: 'center', color: h.color, glow: h.color });
@@ -306,7 +311,7 @@ function drawMenu(ctx, t, hasSave) {
   if (startFocus) { ctx.shadowColor = h.color; ctx.shadowBlur = 16 + pulse * 14; }
   drawButton(ctx, sr, `${h.name} ではじめる`, { color: h.color === COL.pink ? '#d93f86' : '#109f95', hover: startFocus || T.hover === 'start', size: 18, r: 25 });
   ctx.restore();
-  txt(ctx, 'Enter / Space', W / 2, sr.y + sr.h + 14, { size: 11, align: 'center', color: COL.sub, sw: 2.5, alpha: startFocus ? 1 : 0.5 });
+  txt(ctx, '←→ 主人公を選択  /  Enter・Space で決定', W / 2, sr.y + sr.h + 14, { size: 11, align: 'center', color: COL.sub, sw: 2.5, alpha: startFocus ? 1 : 0.5 });
   if (hasSave) {
     const cr = { x: W / 2 - 100, y: 500, w: 200, h: 40 };
     T.regions.cont = cr;
