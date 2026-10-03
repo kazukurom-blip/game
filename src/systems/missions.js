@@ -7,7 +7,8 @@ import { gainExp } from './progression.js';
 
 export { MISSIONS, MISSION_NPCS };
 
-const todayKey = () => new Date().toISOString().slice(0, 10);
+// デイリーの日付キーはローカル日付（toISOString は UTC なので JST だと朝9時に切り替わっていた）
+const todayKey = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 
 function targetName(o) {
   switch (o.type) {

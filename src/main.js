@@ -9,9 +9,9 @@ import { NPC } from './entities/npc.js';
 import { Vehicle } from './entities/vehicle.js';
 import { Spawner } from './entities/spawner.js';
 
-import { newState, computeStats, expToNext } from './systems/progression.js';
+import { newState, computeStats, expToNext, setActiveBuffs } from './systems/progression.js';
 import { MissionManager } from './systems/missions.js';
-import { updateSkills } from './systems/skills.js';
+import { updateSkills, resetCooldowns } from './systems/skills.js';
 import { setPlayerInvuln } from './systems/combat.js';
 
 import { drawBackground, drawMapTiles } from './render/background.js';
@@ -24,6 +24,9 @@ import { drawTitle, titleInput } from './ui/title.js';
 import { DebugPanel } from './debug/debug.js';
 
 const W = 1280, H = 720;
+// カメラ下端: 地面が画面 y≈560 に来るまで下げる（HUD 下部 ~120px に足元や NPC 名が隠れないように）
+const HUD_BOTTOM = 160;
+const camMaxY = (map) => Math.max(0, Math.max(map.height || 0, (map.groundY || 0) + HUD_BOTTOM) - H);
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
@@ -75,7 +78,7 @@ const game = {
     }
     this.spawner.reset(map);
     this.cam.x = Math.max(0, Math.min(map.width - W, (p?.x ?? 0) - W / 2));
-    this.cam.y = Math.max(0, Math.min(map.height - H, (p?.y ?? 0) - H * 0.62));
+    this.cam.y = Math.max(0, Math.min(camMaxY(map), (p?.y ?? 0) - H * 0.62));
     safe('fx', () => spawnEffect(this, 'portal', p.x, p.y - 40));
     this.events.emit('mapChanged', { mapId });
     this.notify(`📍 ${map.name}`, '#19d3c5');
@@ -96,6 +99,11 @@ function startGame(choice) {
   if (!state) state = newState(choice === 'continue' ? 'luna' : choice);
   game.state = state;
   game.wanted = 0; game.wantedHeat = 0;
+  // 2回目以降の開始に備えて旧インスタンスのイベント購読・モジュール内状態を破棄
+  game.missions?.destroy?.();
+  game.player?.destroy?.();
+  resetCooldowns();
+  game.buffs = []; setActiveBuffs([]);
   game.missions = new MissionManager(game);
   game.spawner = new Spawner(game);
   game.player = new Player(game);
@@ -149,7 +157,7 @@ function updateCamera(dt) {
   game.cam.x += (tx - game.cam.x) * k;
   game.cam.y += (ty - game.cam.y) * k;
   game.cam.x = Math.max(0, Math.min(map.width - W, game.cam.x));
-  game.cam.y = Math.max(0, Math.min(map.height - H, game.cam.y));
+  game.cam.y = Math.max(0, Math.min(camMaxY(map), game.cam.y));
   game.shake = Math.max(0, game.shake - dt * 30);
 }
 
