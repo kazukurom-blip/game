@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>NEON VICE STORY</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="wrap">
+    <canvas id="game" width="1280" height="720" tabindex="0"></canvas>
+    <div id="touch" aria-hidden="true">
+      <div class="pad">
+        <button data-a="left">◀</button><button data-a="up">▲</button><button data-a="down">▼</button><button data-a="right">▶</button>
+      </div>
+      <div class="acts">
+        <button data-a="skill1">A</button><button data-a="skill2">S</button><button data-a="skill3">D</button><button data-a="skill4">F</button>
+        <button data-a="interact">E</button><button data-a="pickup">Z</button>
+        <button class="big" data-a="attack">攻</button><button class="big" data-a="jump">跳</button>
+      </div>
+      <div class="menu">
+        <button data-a="inventory">装備</button><button data-a="skillWin">スキル</button><button data-a="missionWin">任務</button><button data-a="statWin">能力</button>
+      </div>
+    </div>
+  </div>
+  <noscript>JavaScript を有効にしてください。</noscript>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

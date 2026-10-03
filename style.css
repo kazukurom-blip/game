@@ -1,0 +1,24 @@
+html, body {
+  margin: 0; height: 100%; background: #0b0614; overflow: hidden;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  -webkit-user-select: none; user-select: none; touch-action: none;
+}
+#wrap { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
+#game {
+  display: block; outline: none;
+  width: min(100vw, calc(100vh * 16 / 9));
+  height: min(100vh, calc(100vw * 9 / 16));
+  image-rendering: auto;
+  box-shadow: 0 0 60px #ff5fa255, 0 0 120px #7b2ff733;
+}
+#touch { display: none; position: fixed; inset: 0; pointer-events: none; }
+#touch button {
+  pointer-events: auto; width: 54px; height: 54px; margin: 4px; border-radius: 50%;
+  border: 2px solid #ffffffaa; background: #1b0f2ccc; color: #fff; font: 700 18px 'M PLUS Rounded 1c', sans-serif;
+}
+#touch button.big { width: 74px; height: 74px; background: #ff5fa2cc; }
+#touch .pad { position: absolute; left: 12px; bottom: 12px; width: 190px; display: flex; flex-wrap: wrap; }
+#touch .acts { position: absolute; right: 12px; bottom: 12px; width: 260px; display: flex; flex-wrap: wrap; justify-content: flex-end; }
+#touch .menu { position: absolute; right: 12px; top: 12px; display: flex; }
+#touch .menu button { width: auto; height: 36px; border-radius: 18px; padding: 0 12px; font-size: 13px; }
+@media (pointer: coarse) { #touch { display: block; } }
