@@ -1,0 +1,163 @@
+// アイテムデータ（装備 / 消費 / etc素材）
+// stats の単位: atk/def/maxHp/maxMp = 実数, speed = px/s 加算, crit = % (3 → +3%), str/dex/int/luk = 能力値加算
+// 武器: range = px（近接は前方リーチ／銃・魔法は射程）, attackSpeed = 1秒あたりの攻撃回数
+
+const STAT_KEYS = ['atk', 'def', 'maxHp', 'maxMp', 'speed', 'crit', 'str', 'dex', 'int', 'luk'];
+function fillStats(s = {}) {
+  const o = {};
+  for (const k of STAT_KEYS) o[k] = s[k] || 0;
+  return o;
+}
+
+const RARITY_PRICE = { common: 1, rare: 4, epic: 12, legendary: 40, mythic: 120 };
+
+const list = [];
+
+function equip(id, name, slot, rarity, reqLevel, stats, look, extra = {}) {
+  list.push({
+    id, name, slot, type: 'equip', rarity, reqLevel,
+    stats: fillStats(stats),
+    look: { style: look[0], color: look[1], accent: look[2] || '#ffffff' },
+    icon: null,
+    effect: null,
+    price: Math.round((60 + reqLevel * 40) * RARITY_PRICE[rarity]),
+    desc: extra.desc || '',
+    ...extra,
+  });
+}
+function weapon(id, name, rarity, reqLevel, stats, look, weaponType, range, attackSpeed, extra = {}) {
+  equip(id, name, 'weapon', rarity, reqLevel, stats, look, { weaponType, range, attackSpeed, ...extra });
+}
+function consumable(id, name, rarity, effect, icon, price, desc) {
+  list.push({ id, name, slot: null, type: 'consumable', rarity, reqLevel: 0, stats: fillStats(), look: null,
+    effect: { hp: 0, mp: 0, buff: null, ...effect }, icon, price, desc, stack: 999 });
+}
+function etc(id, name, rarity, icon, price, desc) {
+  list.push({ id, name, slot: null, type: 'etc', rarity, reqLevel: 0, stats: fillStats(), look: null,
+    effect: null, icon, price, desc, stack: 999 });
+}
+
+// ============ 帽子 hat ============
+equip('cat_ears_pink', 'ピンクのネコミミ', 'hat', 'common', 0, { def: 2, luk: 1 }, ['catEars', '#ff8ac8', '#ffe0f0'], { desc: 'ルナのお気に入り。ぴこぴこ動く。' });
+equip('cap_street', 'ストリートキャップ', 'hat', 'common', 0, { def: 3 }, ['cap', '#2b2b38', '#ff3d7f'], { desc: 'ツバを後ろに回すのが流儀。' });
+equip('beanie_gray', 'グレーのビーニー', 'hat', 'common', 5, { def: 4, maxHp: 10 }, ['beanie', '#7a7f8c', '#c9ccd6']);
+equip('bandana_red', 'レッドバンダナ', 'hat', 'common', 10, { def: 5, str: 1 }, ['bandana', '#d8283c', '#ffffff']);
+equip('headphones_neon', 'ネオンヘッドホン', 'hat', 'rare', 15, { def: 6, dex: 2, maxMp: 20 }, ['headphones', '#19f0ff', '#ff3dd2'], { desc: 'DJパルス御用達。低音が骨に響く。' });
+equip('cowboy_hat', 'デザートカウボーイ', 'hat', 'rare', 22, { def: 9, str: 2, luk: 1 }, ['cowboy', '#8a5a2b', '#e8c27a']);
+equip('helmet_moto', 'バイカーヘルメット', 'hat', 'epic', 30, { def: 18, maxHp: 80 }, ['helmet', '#16161e', '#ff8a00']);
+equip('cat_ears_neon', 'サイバーネコミミ', 'hat', 'epic', 35, { def: 14, luk: 4, dex: 3, crit: 2 }, ['catEars', '#b04dff', '#19f0ff']);
+equip('crown_gold', 'ベイの王冠', 'hat', 'legendary', 45, { def: 25, str: 4, dex: 4, int: 4, luk: 4 }, ['crown', '#ffd23f', '#ff3d7f'], { desc: 'この街の頂点に立つ者の証。' });
+equip('crown_neon', 'ネオン・エンペラー', 'hat', 'mythic', 55, { def: 40, atk: 10, str: 7, dex: 7, int: 7, luk: 7 }, ['crown', '#19f0ff', '#ff3dd2'], { desc: '夜の街そのものが頭上で輝く。' });
+
+// ============ 上着 top ============
+equip('hoodie_pink', 'ピンクのパーカー', 'top', 'common', 0, { def: 4, maxHp: 10 }, ['hoodie', '#ff6fb5', '#ffffff'], { desc: 'もこもこ。フードにネコ耳つき。' });
+equip('leather_jacket', 'ブラックレザージャケット', 'top', 'common', 0, { def: 6, maxHp: 15 }, ['leatherJacket', '#1d1d24', '#c0c0c8'], { desc: 'ジンの一張羅。肩に傷あり。' });
+equip('tshirt_white', 'ホワイトTシャツ', 'top', 'common', 3, { def: 5 }, ['tshirt', '#f4f4f4', '#ff3d7f']);
+equip('tank_black', 'ブラックタンクトップ', 'top', 'common', 8, { def: 6, str: 1 }, ['tank', '#222228', '#ffd23f']);
+equip('hawaiian_shirt', 'サンセット・アロハ', 'top', 'common', 12, { def: 8, luk: 2 }, ['hawaiian', '#ff8a00', '#19d3a0'], { desc: 'ヴァイス・ベイの夕焼け柄。' });
+equip('tracksuit_green', 'グリーンジャージ', 'top', 'rare', 18, { def: 12, dex: 2, speed: 10 }, ['tracksuit', '#1fae5b', '#ffffff']);
+equip('police_uniform', '奪った警官制服', 'top', 'rare', 25, { def: 16, maxHp: 60 }, ['police', '#20335c', '#ffd23f'], { desc: '着ていると妙に落ち着かない。' });
+equip('suit_black', 'マフィアスーツ', 'top', 'rare', 30, { def: 18, str: 2, luk: 2 }, ['suit', '#15151b', '#d8283c']);
+equip('idol_dress', 'ステージ・アイドルドレス', 'top', 'epic', 32, { def: 18, maxMp: 60, dex: 3, luk: 3 }, ['idolDress', '#ff6fb5', '#fff06a'], { desc: 'スポットライトが似合う一着。' });
+equip('armor_vest', 'タクティカルベスト', 'top', 'epic', 40, { def: 34, maxHp: 150 }, ['armorVest', '#3b4231', '#9aa07a'], { desc: 'SWATの装備を拝借。' });
+equip('suit_gold', 'ゴールデン・ボススーツ', 'top', 'legendary', 48, { def: 38, atk: 8, str: 5, luk: 5 }, ['suit', '#ffd23f', '#15151b'], { desc: 'ドンのクローゼットから。' });
+equip('idol_dress_mythic', 'ギャラクシー・アイドル', 'top', 'mythic', 58, { def: 50, maxMp: 200, dex: 8, luk: 8, crit: 4 }, ['idolDress', '#7a3dff', '#19f0ff'], { desc: '星空を纏う伝説のステージ衣装。' });
+
+// ============ 下 bottom ============
+equip('skirt_pink', 'プリーツスカート', 'bottom', 'common', 0, { def: 3, dex: 1 }, ['skirt', '#ff8ac8', '#ffffff'], { desc: '下にはしっかりスパッツ。' });
+equip('jeans_blue', 'ダメージジーンズ', 'bottom', 'common', 0, { def: 4 }, ['jeans', '#3a5a8c', '#c9d6ea']);
+equip('shorts_beach', 'ビーチショーツ', 'bottom', 'common', 5, { def: 4, speed: 5 }, ['shorts', '#19d3a0', '#ffffff']);
+equip('cargo_khaki', 'カーゴパンツ', 'bottom', 'common', 12, { def: 7, maxHp: 20 }, ['cargo', '#8a7a52', '#4a4232']);
+equip('track_pants', 'トラックパンツ', 'bottom', 'rare', 18, { def: 10, dex: 2, speed: 10 }, ['trackPants', '#1d1d24', '#ff3d7f']);
+equip('suit_pants', 'スーツパンツ', 'bottom', 'rare', 28, { def: 14, str: 2 }, ['suitPants', '#15151b', '#5a5a66']);
+equip('armor_pants', 'タクティカルパンツ', 'bottom', 'epic', 40, { def: 26, maxHp: 100 }, ['armorPants', '#3b4231', '#9aa07a']);
+equip('skirt_star', 'スターダストスカート', 'bottom', 'legendary', 48, { def: 30, dex: 5, luk: 5, crit: 2 }, ['skirt', '#7a3dff', '#fff06a']);
+
+// ============ 靴 shoes ============
+equip('sneakers_white', 'ホワイトスニーカー', 'shoes', 'common', 0, { def: 2, speed: 8 }, ['sneakers', '#f4f4f4', '#ff6fb5']);
+equip('boots_black', 'エンジニアブーツ', 'shoes', 'common', 0, { def: 3, speed: 4 }, ['boots', '#2a2018', '#8a8a8a']);
+equip('sandals_beach', 'ビーチサンダル', 'shoes', 'common', 3, { def: 1, speed: 12 }, ['sandals', '#ffd23f', '#19d3a0']);
+equip('loafers_brown', 'ブラウンローファー', 'shoes', 'common', 15, { def: 6, luk: 2 }, ['loafers', '#5a3a22', '#c9a26a']);
+equip('heels_red', 'レッドヒール', 'shoes', 'rare', 20, { def: 6, dex: 3, crit: 1 }, ['heels', '#d8283c', '#ffd23f']);
+equip('sneakers_neon', 'ネオン・エアスニーカー', 'shoes', 'epic', 32, { def: 12, speed: 25, dex: 3 }, ['sneakers', '#19f0ff', '#ff3dd2'], { desc: '靴底が光る。足取りが軽い。' });
+equip('boots_rocket', 'ニトロブーツ', 'shoes', 'legendary', 45, { def: 20, speed: 35, str: 4 }, ['boots', '#ff8a00', '#ffd23f']);
+equip('heels_glass', 'ガラスのヒール', 'shoes', 'mythic', 55, { def: 26, speed: 40, dex: 6, luk: 6 }, ['heels', '#bff6ff', '#ffffff'], { desc: '零時を過ぎても魔法は解けない。' });
+
+// ============ アクセ accessory ============
+equip('sunglasses_aviator', 'アビエーターサングラス', 'accessory', 'common', 5, { def: 2, dex: 1 }, ['sunglasses', '#2a2a2a', '#ffd23f']);
+equip('scarf_red', 'レッドスカーフ', 'accessory', 'common', 10, { def: 4, maxHp: 30 }, ['scarf', '#d8283c', '#ffffff']);
+equip('gold_chain', 'ゴールドチェーン', 'accessory', 'rare', 15, { def: 3, str: 2, luk: 2 }, ['goldChain', '#ffd23f', '#fff4b0']);
+equip('mask_skull', 'スカルマスク', 'accessory', 'rare', 22, { def: 6, atk: 3 }, ['mask', '#e8e8e8', '#16161e']);
+equip('sunglasses_neon', 'ネオンシェード', 'accessory', 'rare', 28, { def: 5, dex: 3, crit: 2 }, ['sunglasses', '#ff3dd2', '#19f0ff']);
+equip('gold_chain_heavy', 'ヘビーゴールドチェーン', 'accessory', 'epic', 36, { def: 8, str: 4, luk: 4, atk: 4 }, ['goldChain', '#ffb800', '#ffffff']);
+equip('wings_angel', 'エンジェルウィング', 'accessory', 'legendary', 45, { def: 15, speed: 20, maxHp: 120, maxMp: 120 }, ['wings', '#ffffff', '#bff6ff'], { desc: '背中に小さな白い翼。' });
+equip('halo_angel', '天使の輪', 'accessory', 'mythic', 52, { def: 18, atk: 10, int: 8, luk: 8, crit: 3 }, ['halo', '#fff06a', '#ffffff'], { desc: '罪深き街に降りた奇跡。' });
+equip('wings_neon', 'ネオン・セラフ', 'accessory', 'mythic', 58, { def: 24, atk: 14, speed: 30, crit: 4 }, ['wings', '#ff3dd2', '#19f0ff'], { desc: 'ネオン管でできた六枚の翼。' });
+
+// ============ 武器 weapon ============
+weapon('knife_basic', 'ポケットナイフ', 'common', 0, { atk: 12 }, ['knife', '#c9ccd6', '#ff6fb5'], 'melee', 70, 3.0, { desc: '軽くて素早い。' });
+weapon('bat_wood', 'ウッドバット', 'common', 0, { atk: 15 }, ['bat', '#b98a52', '#5a3a22'], 'melee', 90, 2.0, { desc: 'ジンの相棒。ホームランしか狙わない。' });
+weapon('pistol_9mm', '9mmピストル', 'common', 5, { atk: 14 }, ['pistol', '#2a2a30', '#8a8a8a'], 'gun', 520, 2.6);
+weapon('katana_steel', 'スチールカタナ', 'common', 10, { atk: 26 }, ['katana', '#dfe4ee', '#d8283c'], 'melee', 110, 2.0);
+weapon('knife_butterfly', 'バタフライナイフ', 'rare', 12, { atk: 24, dex: 2, crit: 3 }, ['knife', '#ff3dd2', '#19f0ff'], 'melee', 75, 3.4);
+weapon('bat_nail', '釘バット', 'rare', 15, { atk: 34, str: 2 }, ['bat', '#8a5a2b', '#c9ccd6'], 'melee', 95, 1.8);
+weapon('smg_compact', 'コンパクトSMG', 'rare', 18, { atk: 18, dex: 2 }, ['smg', '#1d1d24', '#ff8a00'], 'gun', 480, 6.0);
+weapon('guitar_electric', 'エレキギター', 'rare', 20, { atk: 38, str: 2, luk: 2 }, ['guitar', '#d8283c', '#f4f4f4'], 'melee', 100, 1.6, { desc: 'ライブの後は鈍器になる。' });
+weapon('staff_neon', 'ネオンスタッフ', 'rare', 20, { atk: 30, int: 4, maxMp: 40 }, ['staff', '#19f0ff', '#b04dff'], 'magic', 420, 1.8, { desc: 'ネオン管を束ねた魔法の杖。' });
+weapon('pistol_gold', 'ゴールデン・デザート', 'epic', 28, { atk: 40, dex: 4, crit: 3 }, ['pistol', '#ffd23f', '#16161e'], 'gun', 580, 2.8);
+weapon('katana_blood', '紅月の太刀', 'epic', 32, { atk: 58, str: 4, crit: 4 }, ['katana', '#d8283c', '#16161e'], 'melee', 120, 2.0);
+weapon('guitar_thunder', 'サンダー・フライングV', 'epic', 36, { atk: 64, str: 5, luk: 3 }, ['guitar', '#7a3dff', '#fff06a'], 'melee', 110, 1.7);
+weapon('smg_neon', 'ネオン・ストーム', 'legendary', 42, { atk: 46, dex: 6, crit: 4 }, ['smg', '#ff3dd2', '#19f0ff'], 'gun', 540, 7.0);
+weapon('neon_sword', 'ネオンソード', 'legendary', 45, { atk: 85, str: 5, dex: 5, crit: 5 }, ['neonSword', '#19f0ff', '#ffffff'], 'melee', 130, 2.2, { desc: '光の刃。ヴァイス・ベイの夜を切り裂く。' });
+weapon('staff_moon', 'ムーンライト・ワンド', 'legendary', 45, { atk: 70, int: 10, maxMp: 150 }, ['staff', '#bff6ff', '#fff06a'], 'magic', 460, 2.0);
+weapon('neon_sword_mythic', '覇王ネオンブレード', 'mythic', 55, { atk: 130, str: 10, dex: 10, crit: 8 }, ['neonSword', '#ff3dd2', '#fff06a'], 'melee', 145, 2.4, { desc: '街の夜明けを告げる、伝説の刃。' });
+weapon('pistol_mythic', 'ラスト・サンセット', 'mythic', 55, { atk: 95, dex: 12, luk: 8, crit: 8 }, ['pistol', '#ff8a00', '#ff3dd2'], 'gun', 640, 3.2, { desc: '夕陽色の銃身。撃つたびに空が燃える。' });
+
+// ============ 消費アイテム ============
+consumable('potion_red', '赤ポーション', 'common', { hp: 50 }, 'potionRed', 25, 'HPを50回復。');
+consumable('potion_orange', 'オレンジポーション', 'common', { hp: 150 }, 'potionRed', 80, 'HPを150回復。');
+consumable('potion_white', 'ホワイトポーション', 'rare', { hp: 400 }, 'potionRed', 240, 'HPを400回復。');
+consumable('potion_blue', '青ポーション', 'common', { mp: 50 }, 'potionBlue', 40, 'MPを50回復。');
+consumable('potion_mana', 'マナエリクサー', 'rare', { mp: 200 }, 'potionBlue', 260, 'MPを200回復。');
+consumable('elixir', 'エリクサー', 'epic', { hpPct: 1, mpPct: 1 }, 'elixir', 1500, 'HPとMPを全回復。');
+consumable('power_elixir', 'ハーフエリクサー', 'rare', { hpPct: 0.5, mpPct: 0.5 }, 'elixir', 700, 'HPとMPを50%回復。');
+consumable('drink_energy', 'ネオン・エナジー', 'rare', { buff: { id: 'drink_energy', name: 'エナジー', duration: 120, atkPct: 0.15, speedPct: 0.1, color: '#19f0ff' } }, 'potionBlue', 500, '120秒間 攻撃+15% 移動速度+10%。');
+consumable('drink_tough', 'アイアン・ミルク', 'rare', { buff: { id: 'drink_tough', name: 'アイアン', duration: 120, defPct: 0.3, color: '#ffd23f' } }, 'potionRed', 500, '120秒間 防御+30%。');
+consumable('drink_lucky', 'ラッキー・ソーダ', 'epic', { buff: { id: 'drink_lucky', name: 'ラッキー', duration: 180, luckAdd: 100, critAdd: 0.05, color: '#ff3dd2' } }, 'elixir', 1200, '180秒間 ドロップ率UP・クリティカル+5%。');
+
+// ============ etc 素材 ============
+etc('slime_jelly', 'スライムゼリー', 'common', 'gem', 5, 'ぷるぷる。ほんのりソーダ味。');
+etc('mushroom_cap', 'キノコのかさ', 'common', 'gem', 8, '路地裏キノコのかさ。');
+etc('flamingo_feather', 'フラミンゴの羽', 'common', 'gem', 12, '鮮やかなピンクの羽根。');
+etc('street_tag', 'ギャングのワッペン', 'common', 'chip', 15, 'チンピラが付けていたワッペン。');
+etc('cop_badge', '警官バッジ', 'rare', 'chip', 60, '持っているとヤバい代物。');
+etc('stolen_vinyl', '盗まれたレコード', 'common', 'chip', 20, 'DJパルスの貴重なレコード。');
+etc('toxic_goo', '毒々しいゼリー', 'common', 'gem', 18, '港の排水で育ったスライムの残骸。');
+etc('gator_tooth', 'ワニの牙', 'common', 'gem', 25, '沼のワニの鋭い牙。');
+etc('gator_scale', 'アルビノの鱗', 'rare', 'gem', 80, '真っ白なワニの鱗。');
+etc('drone_chip', 'ドローンのチップ', 'common', 'chip', 30, '監視ドローンの制御チップ。');
+etc('casino_chip', 'カジノチップ', 'common', 'cash', 35, 'ネオン・パレスの高額チップ。');
+etc('gold_bar', '金の延べ棒', 'rare', 'cash', 1000, '高く売れる。');
+etc('diamond', 'ブルーダイヤ', 'epic', 'gem', 5000, 'とても高く売れる。');
+etc('neon_core', 'ネオンコア', 'epic', 'chip', 2500, 'メカ・ドローンの動力源。');
+etc('king_crown_shard', '王冠のかけら', 'rare', 'gem', 400, 'キングゼリーの王冠の破片。');
+
+export const ITEMS = Object.fromEntries(list.map((it) => [it.id, it]));
+
+export function getItem(id) {
+  return ITEMS[id] || null;
+}
+
+export const EQUIP_SLOTS = ['hat', 'top', 'bottom', 'shoes', 'accessory', 'weapon'];
+
+export const STARTER_EQUIP = {
+  luna: { hat: 'cat_ears_pink', top: 'hoodie_pink', bottom: 'skirt_pink', shoes: 'sneakers_white', accessory: null, weapon: 'knife_basic' },
+  jin: { hat: null, top: 'leather_jacket', bottom: 'jeans_blue', shoes: 'boots_black', accessory: null, weapon: 'bat_wood' },
+};
+
+// 装備IDのテーブル {slot: itemId} から look テーブルを作る（敵の equip 等で使用）
+export function looksFromIds(ids) {
+  const o = { hat: null, top: null, bottom: null, shoes: null, weapon: null, accessory: null };
+  for (const [slot, id] of Object.entries(ids || {})) o[slot] = id && ITEMS[id] ? ITEMS[id].look : null;
+  return o;
+}

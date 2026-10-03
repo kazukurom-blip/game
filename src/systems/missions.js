@@ -1,0 +1,255 @@
+// ミッション進行管理
+import { MISSIONS, MISSION_NPCS, turnInNpcOf } from '../data/missions.js';
+import { ENEMIES } from '../data/enemies.js';
+import { ITEMS } from '../data/items.js';
+import { countItem, removeItem, addItem } from './inventory.js';
+import { gainExp } from './progression.js';
+
+export { MISSIONS, MISSION_NPCS };
+
+const todayKey = () => new Date().toISOString().slice(0, 10);
+
+function targetName(o) {
+  switch (o.type) {
+    case 'kill': case 'boss': return ENEMIES[o.target]?.name || o.target;
+    case 'collect': return ITEMS[o.target]?.name || o.target;
+    case 'talk': return MISSION_NPCS[o.target]?.name || o.target;
+    default: return o.target;
+  }
+}
+
+export class MissionManager {
+  constructor(game) {
+    this.game = game;
+    this._unsub = [];
+    this._notifiedDone = new Set();
+    this._lastDriveX = null;
+    this._ensureState();
+    const ev = game.events;
+    if (ev) {
+      const on = (n, fn) => { const u = ev.on(n, fn); this._unsub.push(typeof u === 'function' ? u : () => ev.off(n, fn)); };
+      on('enemyKilled', (d) => this._onKill(d?.enemy));
+      on('talkNpc', (d) => this._onTalk(d?.npcId));
+      on('mapChanged', (d) => this._onReach(d?.mapId));
+      on('wantedChanged', (d) => this._onWanted(d?.level));
+    }
+  }
+
+  destroy() { this._unsub.forEach((u) => u()); this._unsub = []; }
+
+  get ms() { return this._ensureState(); }
+
+  _ensureState() {
+    const st = this.game.state;
+    if (!st) return { active: [], completed: [], progress: {}, objProgress: {}, daily: {} };
+    if (!st.missions) st.missions = {};
+    const m = st.missions;
+    m.active ||= []; m.completed ||= []; m.progress ||= {}; m.objProgress ||= {}; m.daily ||= {};
+    return m;
+  }
+
+  _prog(id) {
+    const m = MISSIONS[id];
+    const ms = this.ms;
+    if (!ms.objProgress[id] || ms.objProgress[id].length !== m.objectives.length) {
+      ms.objProgress[id] = m.objectives.map(() => 0);
+    }
+    return ms.objProgress[id];
+  }
+
+  // 現在の各目的の進捗値（collect は所持数、drive は m）
+  objectiveValues(id) {
+    const m = MISSIONS[id];
+    if (!m) return [];
+    const pr = this._prog(id);
+    return m.objectives.map((o, i) => (o.type === 'collect' ? countItem(this.game.state, o.target) : pr[i]));
+  }
+
+  _bump(pred, amount = 1) {
+    let changed = false;
+    for (const id of this.ms.active) {
+      const m = MISSIONS[id];
+      if (!m) continue;
+      const pr = this._prog(id);
+      m.objectives.forEach((o, i) => {
+        if (o.type !== 'collect' && pred(o) && pr[i] < o.count) {
+          pr[i] = Math.min(o.count, pr[i] + amount);
+          changed = true;
+        }
+      });
+      this._syncProgress(id);
+    }
+    return changed;
+  }
+
+  _syncProgress(id) {
+    const m = MISSIONS[id];
+    const vals = this.objectiveValues(id);
+    this.ms.progress[id] = vals.reduce((a, v, i) => a + Math.min(v, m.objectives[i].count), 0);
+  }
+
+  _onKill(enemy) {
+    const eid = enemy?.def?.id || enemy?.defId;
+    if (!eid) return;
+    this._bump((o) => (o.type === 'kill' || o.type === 'boss') && o.target === eid);
+  }
+  _onTalk(npcId) { if (npcId) this._bump((o) => o.type === 'talk' && o.target === npcId); }
+  _onReach(mapId) { if (mapId) this._bump((o) => o.type === 'reach' && o.target === mapId); }
+  _onWanted(level) { if (level != null) this._bump((o) => o.type === 'wanted' && level >= o.target); }
+
+  /** NPC が今オファーできるミッション */
+  available(npcId) {
+    return Object.values(MISSIONS).filter((m) => m.giver === npcId && this.canAccept(m.id));
+  }
+
+  /** NPC に報告できる（完了済み）ミッション */
+  completable(npcId) {
+    return this.ms.active.map((id) => MISSIONS[id]).filter((m) => m && turnInNpcOf(m) === npcId && this.isComplete(m.id));
+  }
+
+  /** NPC の進行中（未完了）ミッション */
+  inProgress(npcId) {
+    return this.ms.active.map((id) => MISSIONS[id]).filter((m) => m && turnInNpcOf(m) === npcId && !this.isComplete(m.id));
+  }
+
+  /** NPC 頭上マーカー: '?'（報告可）| '!'（受注可）| null */
+  npcMarker(npcId) {
+    if (this.completable(npcId).length) return '?';
+    if (this.available(npcId).length) return '!';
+    return null;
+  }
+
+  canAccept(id) {
+    const m = MISSIONS[id];
+    const st = this.game.state;
+    if (!m || !st) return false;
+    const ms = this.ms;
+    if (ms.active.includes(id)) return false;
+    if (m.daily) {
+      if (ms.daily[id] === todayKey()) return false;
+    } else if (ms.completed.includes(id)) return false;
+    if (st.level < (m.reqLevel || 1)) return false;
+    return (m.prereq || []).every((p) => ms.completed.includes(p));
+  }
+
+  accept(id) {
+    if (!this.canAccept(id)) return false;
+    const m = MISSIONS[id];
+    const ms = this.ms;
+    ms.active.push(id);
+    ms.objProgress[id] = m.objectives.map(() => 0);
+    // 受注時点で満たしている reach / wanted
+    const g = this.game;
+    const curMap = g.map?.id || g.state.mapId;
+    m.objectives.forEach((o, i) => {
+      if (o.type === 'reach' && o.target === curMap) ms.objProgress[id][i] = o.count;
+      if (o.type === 'wanted' && (g.wanted || 0) >= o.target) ms.objProgress[id][i] = o.count;
+    });
+    this._syncProgress(id);
+    this._notifiedDone.delete(id);
+    g.notify?.(`ミッション受注: ${m.name}`, '#ffd23f');
+    g.events?.emit('missionAccepted', { id });
+    return true;
+  }
+
+  abandon(id) {
+    const ms = this.ms;
+    const i = ms.active.indexOf(id);
+    if (i < 0) return false;
+    ms.active.splice(i, 1);
+    delete ms.objProgress[id];
+    delete ms.progress[id];
+    return true;
+  }
+
+  isComplete(id) {
+    const m = MISSIONS[id];
+    if (!m || !this.ms.active.includes(id)) return false;
+    const vals = this.objectiveValues(id);
+    const turnInNpc = turnInNpcOf(m);
+    // 報告先 NPC との talk は報告時に満たされるものとして扱う
+    return m.objectives.every((o, i) => vals[i] >= o.count || (o.type === 'talk' && o.target === turnInNpc));
+  }
+
+  /** turnIn(id) → reward | false */
+  turnIn(id) {
+    if (!this.isComplete(id)) return false;
+    const m = MISSIONS[id];
+    const g = this.game;
+    const st = g.state;
+    const ms = this.ms;
+    // 報酬アイテムの空き確認（足りなくても報告は可能、溢れた分は通知）
+    for (const o of m.objectives) if (o.type === 'collect') removeItem(st, o.target, o.count);
+    ms.active.splice(ms.active.indexOf(id), 1);
+    delete ms.objProgress[id];
+    delete ms.progress[id];
+    if (m.daily) ms.daily[id] = todayKey();
+    if (!ms.completed.includes(id)) ms.completed.push(id);
+
+    const r = m.reward || {};
+    if (r.money) st.money += r.money;
+    if (r.sp) st.sp += r.sp;
+    if (r.flag) st.flags[r.flag] = true;
+    for (const itemId of r.items || []) {
+      if (!addItem(g, itemId, 1)) g.notify?.(`${ITEMS[itemId]?.name} を受け取れなかった（満杯）`, '#ff5555');
+    }
+    g.notify?.(`ミッション完了: ${m.name}  EXP+${r.exp || 0} $${r.money || 0}`, '#5cff9a');
+    if (r.exp) gainExp(g, r.exp);
+    g.events?.emit('missionComplete', { id });
+    return r;
+  }
+
+  /** HUD 用: [{name, lines:[str]}] */
+  tracked() {
+    const out = [];
+    for (const id of this.ms.active) {
+      const m = MISSIONS[id];
+      if (!m) continue;
+      const vals = this.objectiveValues(id);
+      const done = this.isComplete(id);
+      const turnInNpc = turnInNpcOf(m);
+      const lines = m.objectives.map((o, i) => {
+        const v = Math.min(vals[i], o.count);
+        const ok = v >= o.count;
+        let t;
+        if (o.type === 'reach' || o.type === 'talk' || o.type === 'boss' || o.type === 'wanted') t = o.text;
+        else t = `${o.text} ${Math.floor(v)}/${o.count}`;
+        if (o.type === 'talk' && o.target === turnInNpc && !ok) return done ? null : `・${t}`;
+        return `${ok ? '✔' : '・'}${t}`;
+      }).filter(Boolean);
+      if (done) lines.push(`→ ${MISSION_NPCS[turnInNpc]?.name || turnInNpc} に報告`);
+      out.push({ id, name: m.name, lines, complete: done, category: m.category });
+    }
+    return out;
+  }
+
+  update(dt) {
+    const g = this.game;
+    if (!g.state) return;
+    const active = this.ms.active;
+    if (!active.length) { this._lastDriveX = null; return; }
+    // drive: 乗車中の移動距離（10px = 1m）
+    const p = g.player;
+    const v = p?.inVehicle;
+    if (v) {
+      const x = typeof v === 'object' && typeof v.x === 'number' ? v.x : p.x;
+      if (this._lastDriveX != null) {
+        const dx = Math.abs(x - this._lastDriveX);
+        if (dx > 0 && dx < 400) this._bump((o) => o.type === 'drive', dx / 10);
+      }
+      this._lastDriveX = x;
+    } else this._lastDriveX = null;
+    // reach / wanted のポーリング（イベント取りこぼし対策）
+    const curMap = g.map?.id || g.state.mapId;
+    this._bump((o) => (o.type === 'reach' && o.target === curMap) || (o.type === 'wanted' && (g.wanted || 0) >= o.target), 1e9);
+    // 完了通知
+    for (const id of active) {
+      if (!this._notifiedDone.has(id) && this.isComplete(id)) {
+        this._notifiedDone.add(id);
+        const m = MISSIONS[id];
+        const npc = MISSION_NPCS[turnInNpcOf(m)]?.name || '';
+        g.notify?.(`「${m.name}」達成！ ${npc}に報告しよう`, '#ffd23f');
+      }
+    }
+  }
+}

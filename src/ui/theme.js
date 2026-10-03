@@ -4,16 +4,17 @@ export const FONT = "'M PLUS Rounded 1c', 'Hiragino Maru Gothic ProN', 'Meiryo',
 export const COL = {
   pink: '#ff5fa2', teal: '#19d3c5', purple: '#7b2ff7', orange: '#ff8a3d', sun: '#ffb347',
   gold: '#ffd447', navy: '#1a1440', text: '#ffffff', sub: '#cfc8ff', dim: '#8d88bd',
-  hp: '#ff3b5c', hp2: '#ff8a8a', mp: '#2f7bff', mp2: '#8ec5ff', exp: '#ffd23f', exp2: '#fff2a8',
-  good: '#5dff9a', bad: '#ff5a6e',
+  hp: '#FF4D6D', hp2: '#ffa0b0', mp: '#3d8eff', mp2: '#a6d4ff', exp: '#ffd23f', exp2: '#fff2a8',
+  good: '#7CFF9B', bad: '#ff5a6e', money: '#7CFF9B', moneyShadow: '#0B3D1E', star: '#FFC93C',
+  copRed: '#FF2E4D', copBlue: '#2E7BFF',
 };
 
 export const RARITY_FALLBACK = {
-  common: { name: 'ノーマル', color: '#e8e8f0' },
-  rare: { name: 'レア', color: '#4fb3ff' },
-  epic: { name: 'エピック', color: '#b56bff' },
-  legendary: { name: 'レジェンダリー', color: '#ffb020' },
-  mythic: { name: 'ミシック', color: '#ff5fa2' },
+  common: { name: 'ノーマル', color: '#E8E8F0' },
+  rare: { name: 'レア', color: '#4FA8FF' },
+  epic: { name: 'エピック', color: '#B45CFF' },
+  legendary: { name: 'レジェンダリー', color: '#FFC93C' },
+  mythic: { name: 'ミシック', color: '#FF4FA0', color2: '#3EE6D2' },
 };
 
 export const STAT_LABELS = {
@@ -239,3 +240,12 @@ export function darken(hex, k) {
 }
 export const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 export const ease = (t) => 1 - Math.pow(1 - clamp(t, 0, 1), 3);
+
+// レア色の塗り（mythic はピンク→ティールのグラデ）。x0..x1 に沿ったグラデを返す
+export function rarityFill(ctx, info, x0, y0, x1, y1) {
+  if (!info?.color2) return info?.color || '#fff';
+  const g = ctx.createLinearGradient(x0, y0, x1, y1);
+  g.addColorStop(0, info.color);
+  g.addColorStop(1, info.color2);
+  return g;
+}
