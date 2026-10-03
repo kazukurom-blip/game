@@ -92,7 +92,7 @@ function initParts(e) {
       add(e.opts.count || 7, () => {
         const a = -PI / 2 + (R() - 0.5) * 2.4; const s = 120 + R() * 200;
         const pts = []; const m = 4 + ((R() * 2) | 0);
-        for (let k = 0; k < m; k++) { const an = (k / m) * PI * 2; const rr = (k % 2 ? 2 : 4.5) * (0.7 + R() * 0.6); pts.push(Math.cos(an) * rr, Math.sin(an) * rr); }
+        for (let k = 0; k < m; k++) { const an = (k / m) * PI * 2; const rr = (k % 2 ? 3.5 : 7.5) * (0.7 + R() * 0.6); pts.push(Math.cos(an) * rr, Math.sin(an) * rr); }
         return { x: (R() - 0.5) * 16, y: -30 + (R() - 0.5) * 20, vx: Math.cos(a) * s, vy: Math.sin(a) * s, rot: R() * 6, vr: (R() - 0.5) * 14, pts, c: cols[(R() * cols.length) | 0] };
       });
       break;

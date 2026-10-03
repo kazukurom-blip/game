@@ -9,6 +9,28 @@ import { Projectile } from './projectile.js';
 const rand = (a, b) => a + Math.random() * (b - a);
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
+// ボス技のシャッフルバッグ: opts（重み=出現回数）を並べ替え、隣接する同じ技と
+// 直前の技(last)との連続を避ける。pop() で末尾から使う前提で、末尾が最初に使われる。
+export function makeMoveBag(opts, last) {
+  const cnt = {};
+  for (const o of opts) cnt[o] = (cnt[o] || 0) + 1;
+  const seq = [];
+  let prev = last;
+  for (let n = opts.length; n > 0; n--) {
+    const keys = Object.keys(cnt).filter((k) => cnt[k] > 0);
+    const max = Math.max(...keys.map((k) => cnt[k]));
+    // 残りで隣接回避が不可能にならないよう、多すぎる技は優先して消化
+    let cands = keys.filter((k) => k !== prev && (max * 2 <= n + 1 || cnt[k] === max));
+    if (!cands.length) cands = keys.filter((k) => k !== prev);
+    if (!cands.length) cands = keys;
+    const tot = cands.reduce((a, k) => a + cnt[k], 0);
+    let r = Math.random() * tot, pickK = cands[0];
+    for (const k of cands) { r -= cnt[k]; if (r < 0) { pickK = k; break; } }
+    seq.push(pickK); cnt[pickK]--; prev = pickK;
+  }
+  return seq.reverse();
+}
+
 // def.speed が「px/s」か「倍率」か曖昧なので正規化
 function speedOf(def) {
   const s = def.speed ?? 80;
@@ -300,7 +322,21 @@ export class Enemy {
           const opts = ['charge', 'slam', 'summon'];
           if (this.shootDef) opts.push('shoot', 'shoot');
           if (enraged) opts.push('charge', 'slam', ...(this.shootDef ? ['shoot'] : []));
-          this.phase = pick(opts);
+          // シャッフルバッグ方式: 1巡で各技が重み通りに出る（純ランダムだと同技が5〜6連続したり
+          // 召喚がほとんど出ない等の偏りが起きていた）。巡の境目で同じ技が続かないようにする。
+          if (!this.moveBag || !this.moveBag.length || this.moveBagEnraged !== enraged) {
+            const bag = makeMoveBag(opts, this.lastMove);
+            this.moveBag = bag; this.moveBagEnraged = enraged;
+          }
+          let next = this.moveBag.pop();
+          // 召喚枠が埋まっている時は召喚を後回し
+          if (next === 'summon' && this.moveBag.length && g.enemies.filter((e) => !e.dead && e.summoned).length >= 6) {
+            this.moveBag.unshift(next); next = this.moveBag.pop();
+          }
+          this.moveRun = next === this.lastMove ? (this.moveRun || 1) + 1 : 1;
+          this.lastMove = next;
+          this.phase = next;
+          this.phaseStart = this.t;
           this.phaseT = this.phase === 'charge' ? 0.7 : this.phase === 'slam' ? 0.5 : 0.8;
           this.facing = Math.sign(pdx) || this.facing;
           this.vx = 0;
@@ -317,6 +353,7 @@ export class Enemy {
         this.state = 'attack';
         if (!this.hasActed) {
           this.vx = 0;
+          if (this.phaseT <= 0 && !this.onGround && this.t - (this.phaseStart ?? this.t) > 2.5) { this.endPhase(); break; } // 空中で詰まらない
           if (this.phaseT <= 0 && this.onGround) { this.hasActed = true; this.vy = -900; this.vx = Math.sign(pdx) * Math.min(Math.abs(pdx) * 1.2, 500); this.onGround = false; this.airT = 0; }
         } else {
           this.airT += dt;

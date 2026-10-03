@@ -233,7 +233,7 @@ function makePose(state, t, at, wk, ws, anim) {
       P.hairSway = 1;
       break;
     case 'dead': {
-      const f = anim.fallT != null ? anim.fallT : anim.deadT != null ? anim.deadT : 1;
+      const f = anim.fallT != null ? anim.fallT : anim.deadT != null ? anim.deadT : clamp((anim.t || 0) * 3, 0, 1);
       P.lie = clamp(f, 0, 1); P.eyes = 'x'; P.mouth = 'hurt';
       P.af = [0.9, 0.4]; P.ab = [-0.9, 0.3]; P.lf = [0.1, 0.1]; P.lb = [-0.1, 0.2];
       break;
@@ -255,10 +255,45 @@ function makePose(state, t, at, wk, ws, anim) {
 }
 
 // ---------------------------------------------------------------- メイン
+// ヒーローが最後に描画された装備（乗車中の運転手表示用）
+const LAST_EQUIP = new WeakMap();
+export function lastHeroEquip(look) { return LAST_EQUIP.get(look) || null; }
+
+// 半透明時は重なりが透けないよう一度オフスクリーンに描いてから合成する（半透明時のみ）
+let OFF = null, OFFCTX = null;
 export function drawCharacter(ctx, x, y, look, equip, anim) {
+  if (anim && anim.alpha != null && anim.alpha < 0.999) {
+    const a = Math.max(0, anim.alpha);
+    if (a <= 0.01) return;
+    const m = ctx.getTransform();
+    const k = Math.min(4, Math.max(0.5, Math.hypot(m.a, m.b)));
+    const s = anim.scale || 1;
+    const w = Math.ceil(220 * s * k), h = Math.ceil(170 * s * k);
+    if (typeof document !== 'undefined' || typeof OffscreenCanvas !== 'undefined') {
+      if (!OFF) {
+        OFF = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(w, h) : document.createElement('canvas');
+        OFFCTX = OFF.getContext('2d');
+      }
+      if (OFF.width < w || OFF.height < h) { OFF.width = Math.max(OFF.width, w); OFF.height = Math.max(OFF.height, h); }
+      const oc = OFFCTX;
+      oc.setTransform(1, 0, 0, 1, 0, 0);
+      oc.clearRect(0, 0, w, h);
+      oc.setTransform(k, 0, 0, k, w / 2, h * 0.72);
+      const a2 = Object.assign({}, anim, { alpha: 1 });
+      drawCharacter(oc, 0, 0, look, equip, a2);
+      ctx.save();
+      ctx.globalAlpha *= a;
+      ctx.translate(x, y);
+      ctx.scale(1 / k, 1 / k);
+      ctx.drawImage(OFF, 0, 0, w, h, -w / 2, -h * 0.72, w, h);
+      ctx.restore();
+      return;
+    }
+  }
   look = look || HERO_LOOKS.luna;
   equip = equip || EMPTY;
   anim = anim || EMPTY;
+  if ((look === HERO_LOOKS.luna || look === HERO_LOOKS.jin) && anim.state !== 'drive') LAST_EQUIP.set(look, equip);
   const facing = anim.facing < 0 ? -1 : 1;
   const s = anim.scale || 1;
   const dmg = clamp(anim.damage || 0, 0, 1);
@@ -289,7 +324,6 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
   FL = !!anim.flash;
   ctx.save();
   ctx.translate(x, y);
-  if (anim.alpha != null && anim.alpha < 1) ctx.globalAlpha *= Math.max(0, anim.alpha);
   // 地面の影
   if (state !== 'drive' && !P.lie) {
     ctx.beginPath(); ctx.ellipse(0, 0, 13 * s, 3.2 * s, 0, 0, PI * 2);
@@ -297,7 +331,7 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
   }
   ctx.scale(facing * s, s);
   if (P.lie) {
-    ctx.translate(-4 * P.lie, -9 * P.lie);
+    ctx.translate(34 * P.lie, -9 * P.lie);
     ctx.rotate(-PI / 2 * P.lie);
   }
   ctx.lineJoin = 'round'; ctx.lineCap = 'round';

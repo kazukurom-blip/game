@@ -1,6 +1,6 @@
 // 乗り物描画: 80年代ネオン×現代スポーツカー調（v.x,v.y = 足元中央）
 import { shade, rgba, rr, OUTLINE } from './util.js';
-import { drawCharacter, HERO_LOOKS } from './character.js';
+import { drawCharacter, HERO_LOOKS, lastHeroEquip } from './character.js';
 
 // 運転手の見た目: v.driverLook / v.driverEquip があればそれを使う。プレイヤー運転時は heroId から推定。
 function driverLook(v) {
@@ -8,8 +8,9 @@ function driverLook(v) {
   if (v.driverType === 'player') {
     const hid = v.game && v.game.state && v.game.state.heroId;
     const p = v.game && v.game.player;
-    const eq = (p && (p.equipLooks || p.looks)) || null;
-    return [HERO_LOOKS[hid] || HERO_LOOKS.luna, eq];
+    const look = HERO_LOOKS[hid] || HERO_LOOKS.luna;
+    const eq = (p && (p.equipLooks || p.looks)) || lastHeroEquip(look);
+    return [look, eq];
   }
   return null;
 }
