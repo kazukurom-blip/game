@@ -1,0 +1,13 @@
+{
+  "name": "neon-vice-story",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "NEON VICE STORY — HTML5 Canvas side-scrolling RPG x crime city (no build, ES Modules)",
+  "scripts": {
+    "serve": "http-server . -p 8080 -c-1",
+    "test": "npm run test:unit && npm run test:smoke",
+    "test:unit": "node tests/unit.mjs",
+    "test:smoke": "node tests/smoke.mjs"
+  }
+}

@@ -4,6 +4,8 @@ import { drawVehicle } from '../render/vehicles.js';
 import { spawnEffect } from '../render/effects.js';
 import { calcDamage, damageEnemy, damagePlayer, addWanted } from '../systems/combat.js';
 import { computeStats } from '../systems/progression.js';
+import { getEquipLooks } from '../systems/inventory.js';
+import { HERO_LOOKS } from '../render/character.js';
 
 const SPECS = {
   sports: { w: 150, h: 50, max: 950, accel: 1500 },
@@ -81,6 +83,9 @@ export class Vehicle {
       if (inp.down('down') && this.groundPlat) { this.dropThrough = 0.25; this.vy = 60; }
       else this.vy = -640; // ホップ
     }
+    // 運転手の見た目（vehicles.js が参照）
+    const st = g.state;
+    if (st) { this.driverEquip = getEquipLooks(st); this.driverLook = HERO_LOOKS?.[st.heroId]; this.driverDamage = p?.anim?.damage ?? 0; }
     // プレイヤーを追従
     p.x = this.x; p.y = this.y; p.vx = this.vx; p.vy = this.vy;
     p.facing = this.facing; p.onGround = this.onGround;
