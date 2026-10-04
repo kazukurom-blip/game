@@ -197,7 +197,7 @@ const list = [
     },
     objectives: [
       { type: 'wanted', target: 4, count: 1, text: '手配度★4に到達' },
-      { type: 'kill', target: 'swat_trooper', count: 10, text: '町でSWAT隊員を倒す' },
+      { type: 'kill', target: 'swat_trooper', count: 6, text: '町でSWAT隊員を倒す' },
     ],
     reward: { exp: 34000, money: 40000, items: ['armor_vest', 'armor_pants'] },
   },

@@ -121,13 +121,21 @@ export class Vehicle {
       for (const e of g.enemies) {
         if (e.dead || e.hp <= 0 || (e.ramCd > 0) || e.flying) continue;
         if (!rectOverlap(r, entRect(e))) continue;
+        // 市民には通常攻撃しか当たらない仕様: 車が来たら飛びのいて避ける
+        if (e.def?.civilian) {
+          e.ramCd = 0.8;
+          e.vy = -420; e.vx = Math.sign(e.x - this.x || 1) * 160;
+          e.scared = true; e.fleeT = 2; e.fleeDir = Math.sign(e.x - this.x || 1); e.onGround = false;
+          if (!(e.shoutT > 0)) e.say?.('うわっ、危ない！');
+          continue;
+        }
         e.ramCd = 0.6;
         const { dmg, crit } = calcDamage(st.atk, 1.2 + sp / this.maxSpeed * 1.5, e.def?.def ?? 0, st.crit, st.critDmg);
         damageEnemy(g, e, dmg, crit, Math.sign(this.vx));
         e.vy = -380;
         spawnEffect(g, crit ? 'critHit' : 'hit', e.x, e.y - e.h / 2);
         g.shake = Math.max(g.shake || 0, 6);
-        addWanted(g, e.isCop || e.def?.isCop ? 3 : 0.6);
+        if (!e.def?.civilian) addWanted(g, e.isCop || e.def?.isCop ? 3 : 0.6);
         this.vx *= e.boss ? 0.3 : 0.85;
       }
     } else if (this.driverType === 'cop' && sp > 250) {

@@ -25,7 +25,7 @@ export class Pet {
     this.item = it;
     this.look = it.look || { style: 'slimePet', color: '#5cff9a', accent: '#ffffff' };
     const pd = it.pet || {};
-    this.name = pd.name || (it.name || 'PET').replace(/^ペット[:：]\s*/, '');
+    this.name = (pd.name || it.name || 'PET').replace(/^ペット[:：]\s*/, '');
     this.pickRange = Math.max(160, Math.min(420, pd.pickRange || 160));
     this.pickRate = Math.max(0.3, pd.pickRate || 1);
     this.flying = FLYING.has(this.look.style);

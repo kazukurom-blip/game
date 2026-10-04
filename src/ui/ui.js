@@ -41,7 +41,7 @@ export class UIManager {
     this.dnd = null;    // スキル/アイテムのドラッグ&ドロップ
     this.lastClick = { id: null, t: -9 };
     this.pos = {};      // ウィンドウ位置の記憶
-    this._hudIntFrame = -1; this._hudExtFrame = -9;
+    this._hudFrame = -1;
     this.petFx = null;
     this.bookToasts = [];
     this.bookNewIds = new Set();
@@ -381,8 +381,8 @@ export class UIManager {
     this._hits = [];
     this.tip = null;
     const g = this.game;
-    // main が直前（同じフレーム、frame++ 前）に drawHUD を呼んでいれば描かない
-    if (g && g.state && (g.scene == null || g.scene === 'play') && this._hudExtFrame !== this.frame - 1) {
+    // main が同じフレームに drawHUD を呼んでいれば drawHUD 側で何もしない（game.frameNo で判定）
+    if (g && g.state && (g.scene == null || g.scene === 'play')) {
       ctx.save();
       try { drawHUD(ctx, g, true); } catch (e) { guard('hud', () => { throw e; }); }
       ctx.restore();

@@ -268,6 +268,7 @@ function frame(now) {
   last = now;
   game.dt = dt;
   game.time += dt;
+  game.frameNo = (game.frameNo || 0) + 1;
   game.input.beginFrame();
   safe('audio', () => audio.update(game, dt));
 

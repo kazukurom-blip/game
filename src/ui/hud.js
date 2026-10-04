@@ -40,14 +40,13 @@ export function hudSlots() {
 export function drawHUD(ctx, game, _internal = false) {
   if (!game || !game.state) return;
   const ui = game.ui;
-  // 二重描画防止はフレーム番号（ui.frame）で判定する。時間窓だと HUD 描画が遅い端末で二重に描いてしまう
+  // 二重描画防止はフレーム番号（main の game.frameNo）で判定する。
+  // 以前は時間窓（6〜12ms）だったため、HUD 描画が遅い端末では同じフレームに二重に描いていた
   if (ui) {
-    const fr = ui.frame || 0;
-    if (_internal) ui._hudIntFrame = fr;
-    else {
-      if (ui._hudIntFrame === fr) return; // このフレームは ui.draw が描いた
-      ui._hudExtFrame = fr;
-    }
+    const fr = game.frameNo ?? ui.frame;
+    if (ui._hudFrame === fr) return; // このフレームは描画済み
+    ui._hudFrame = fr;
+    if (_internal) ui._hudByUi = true; else ui._hudByUi = false;
   }
   const s = hs(game);
   const dt = clamp((game.time || 0) - s.lastT, 0, 0.1);

@@ -345,7 +345,7 @@ async function main() {
       gm.enemies.length = 0; gm.spawner.timers = gm.spawner.timers.map(() => -1e9);
       const money0 = gm.state.money;
       const list = [new Drop(gm, p.x + 120, p.y - 20, { money: 77 }), new Drop(gm, p.x - 130, p.y - 20, { id: 'potion_red' }), new Drop(gm, p.x + 140, p.y - 20, { money: 33 })];
-      for (const d of list) gm.drops.push(d);
+      for (const d of list) { d.vx = 0; gm.drops.push(d); }
       window.__petDrops = list;
       return money0;
     });
@@ -375,7 +375,7 @@ async function main() {
     await g(() => { window.game.debug.god = false; });
 
     // HUD は1フレームに1回だけ描く（main の drawHUD と ui.draw の二重描画防止）
-    await check('HUD の二重描画なし', await g(() => { const u = window.game.ui; return u._hudExtFrame === u.frame - 1 && u._hudIntFrame !== u.frame; }));
+    await check('HUD は main から1フレーム1回描画（二重描画なし）', await g(() => { const u = window.game.ui; return u._hudFrame === window.game.frameNo && u._hudByUi === false; }));
     // 昼夜
     const ck0 = await g(() => window.game.clock);
     await page.waitForTimeout(1000);
@@ -451,8 +451,10 @@ async function main() {
     await check('時刻ボタン（夜）', Math.floor(await g(() => window.game.clock)) === 22);
     const pr = await g(() => { const r = window.game.debug.rect; return r.y + r.h; });
     await check('デバッグパネルが画面内に収まる', pr <= 720, `bottom=${pr}`);
+    await g(() => { window.__before = window.game.enemies.filter((e) => !e.dead); });
     await press('F8');
-    await check('F8 全敵撃破', (await g(() => window.game.enemies.filter((e) => !e.dead).length)) === 0);
+    const f8 = await g(() => ({ n: window.__before.length, alive: window.__before.filter((e) => !e.dead && !e.remove).map((e) => `${e.defId}:${e.hp}`), log: window.game.debug.log.at(-1) }));
+    await check('F8 全敵撃破', f8.n > 0 && f8.alive.length === 0, JSON.stringify(f8));
     await press('F10');
     await check('F10 ミッション即完了', await g(() => window.game.state.missions.completed.includes('m01_welcome')));
     await press('F5');
