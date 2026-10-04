@@ -18,6 +18,18 @@ export function tuneRateTable() {
   return TUNE_RATES.map((rate, s) => ({ star: s, to: s + 1, rate, pity: TUNE_PITY[s], expected: TUNE_EXPECTED[s] }));
 }
 
+/**
+ * tuneRoll(star, pity, rng, {hot, ticket}) → {success, guaranteed}（純関数。tuneItem が使用）
+ *  pity = その★での連続失敗数。pity+1 >= 天井 なら確定成功
+ */
+export function tuneRoll(star, pity = 0, rng = Math.random, opts = {}) {
+  const p = TUNE_RATES[star];
+  if (p == null) return { success: false, guaranteed: false };
+  const guaranteed = pity + 1 >= TUNE_PITY[star] || !!opts.ticket;
+  if (guaranteed) return { success: true, guaranteed: true };
+  return { success: rng() < Math.min(1, p * (opts.hot ? 1.05 : 1)), guaranteed: false };
+}
+
 /** その日の費用倍率（サンデー・ネオンで 0.7） */
 export function tuneCostMult(now = Date.now()) {
   return weekdayEvent(now).tuneCostMult ?? 1;
@@ -75,10 +87,7 @@ export function tuneItem(game, itemRef, opts = {}) {
   st.money -= info.cost;
   if (useTicket) removeItem(st, TUNE_TICKET, 1);
   const rng = opts.rng || stateRng(st);
-  const rate = Math.min(1, info.rate * (opts.hot ? 1.05 : 1));
-  const guaranteed = info.guaranteed || useTicket;
-  const roll = rng();
-  const success = guaranteed || roll < rate;
+  const { success, guaranteed } = tuneRoll(info.star, info.pity, rng, { hot: opts.hot, ticket: useTicket });
   const stats = (st.tuneStats ||= { tries: 0, success: 0, spent: 0 });
   stats.tries++; stats.spent += info.cost;
   const it = info.item;

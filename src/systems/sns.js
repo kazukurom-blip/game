@@ -176,6 +176,29 @@ export function attachSNS(game) {
     const n = d?.count || 0;
     if (n > 0 && n % 10 === 0) snsPost(game, T.book(game.state, n, d.total || n), { gain: 20 + n, kind: 'book', tags: ['モンスター図鑑'] });
   });
+  // v3: ★強化の節目（★15/20/25）・ボス難易度の初撃破・スパイア10階ごとの自己ベスト・称号つき実績・ストーリー分岐
+  on('tuneMilestone', (d) => {
+    if (!d?.item || (d.star || 0) < 15) return;
+    snsPost(game, pick([`${d.item.name} を ★${d.star} まで調律した…！ ネオン管の芯まで光ってる✨ #ネオンチューン`, `★${d.star} 達成！！ 失敗しても壊れないって分かってても手が震えた #ネオンチューン #神強化`]), { gain: d.star * 8, kind: 'tune', tags: ['ネオンチューン'] });
+  });
+  on('bossClear', (d) => {
+    if (!d?.firstClear || d.mode === 'normal' || d.mode === 'practice') return;
+    const def = ENEMIES[d.bossId];
+    if (!def) return;
+    const mode = d.mode === 'chaos' ? 'カオス' : 'ハード';
+    snsPost(game, `【${mode}】${def.name} 初撃破！ タイム ${d.time != null ? d.time.toFixed(1) + '秒' : '-'} #ボス撃破 #${mode}`, { gain: Math.round(def.level * (d.mode === 'chaos' ? 30 : 10)), kind: 'boss', tags: ['ボス撃破', mode] });
+  });
+  on('towerMilestone', (d) => {
+    snsPost(game, `#ViceSpire 到達 ${d?.floor}階！ タワーの地下に、タワーより高い塔がある… #ヴァイススパイア`, { gain: 20 + (d?.floor || 0) * 3, kind: 'tower', tags: ['ViceSpire'] });
+  });
+  on('achievementUnlocked', (d) => {
+    if (!d?.title) return;
+    snsPost(game, `称号「${d.title}」をゲット！ 実績「${d.name}」 #実績解除`, { gain: d.points || 10, kind: 'achievement', tags: ['実績'], silent: true });
+  });
+  on('storyChoice', (d) => {
+    const c = MISSIONS[d?.missionId]?.choices?.find((x) => x.id === d?.choiceId);
+    if (c) snsPost(game, d.choiceId === 'police' ? `この街の正義って、まだ死んでないと思うんだ。 #選択 #ヴァイスベイ` : `ルールは自分で決める。それがこの街のやり方。 #選択 #ストリート`, { gain: 15, kind: 'story', tags: ['ストーリー'], silent: true });
+  });
   on('taxiTravel', (d) => {
     if (Math.random() < 0.3) snsPost(game, T.taxi(game.state, d?.name || d?.mapId), { gain: 2, kind: 'taxi', silent: true });
   });

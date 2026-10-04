@@ -28,7 +28,8 @@ export function spawnEffect(game, type, x, y, opts = {}) {
   if (!game) return null;
   if (type === 'impact') { impact(game, opts.power ?? 0.5, opts.color); type = 'impactLines'; }
   if (type === 'cutin') { pushCutin(game, opts); return null; }
-  const fxScale = fxLevel(game);
+  // 描画が重いフレームが続いたら新しいエフェクトの粒を自動で減らす（game._fxCost = drawEffects の平均 ms）
+  const fxScale = fxLevel(game) * ((game._fxCost || 0) > 4 && !opts.screen ? 0.55 : 1);
   // 画面空間（UI窓の上など）に出す演出: opts.screen
   const list = opts.screen ? (game.screenFx || (game.screenFx = [])) : ensure(game);
   if (list.length >= MAX_EFFECTS) list.splice(0, list.length - MAX_EFFECTS + 1);
@@ -189,6 +190,9 @@ export function updateEffects(game, dt) {
   const list = game.effects;
   if (list) updateList(game, list, dt);
   if (p) { const lp = game._fxPrevPlayer || (game._fxPrevPlayer = { x: 0, y: 0 }); lp.x = p.x; lp.y = p.y; }
+  // インスタンス背景用（background.js は game を受け取らないので map に写す）
+  const m = game.map;
+  if (m && m.instance) { m._wave = game.arenaRun ? game.arenaRun.wave | 0 : 0; m._bossMode = game.bossMode || null; }
   // コンボ: 一定時間ヒットが無ければリセット
   const cb = game.combo;
   if (cb && cb.count > 0 && !game.comboExternal) { cb.t = (cb.t || 0) + dt; if (cb.t > COMBO_WINDOW) { cb.count = 0; cb.t = 0; } }
@@ -229,15 +233,18 @@ function updateList(game, list, dt) {
   list.length = w;
 }
 
+const nowMs = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
 export function drawEffects(ctx, game) {
   const list = game && game.effects;
-  if (!list || !list.length) return;
+  if (!list || !list.length) { if (game) game._fxCost = (game._fxCost || 0) * 0.9; return; }
+  const t0 = nowMs();
   // 通常エフェクト（加算）→ ダメージ数字（通常合成・最前面）
   ctx.save();
   for (const e of list) if (e.kind !== 'dmg' && !e.hide) drawFx(ctx, e);
   FXA.m = 1;
   ctx.restore();
   for (const e of list) if (e.kind === 'dmg') drawDmg(ctx, e);
+  game._fxCost = (game._fxCost || 0) * 0.85 + (nowMs() - t0) * 0.15;
 }
 
 /** drawCutins(ctx, game) — 画面空間: カットイン＋画面空間エフェクト（opts.screen）。main が HUD の前に呼ぶ */
@@ -321,7 +328,7 @@ function drawFx(ctx, e) {
       break;
     }
     case 'explosion': {
-      const R = e.size ? e.size * 0.5 : 80;
+      const R = e.size ? Math.min(150, e.size * 0.5) : 80;
       const fk = Math.min(1, k * 3);
       // 閃光
       ctx.globalAlpha = FXA.m * (Math.max(0, 1 - k * 2.2));
@@ -614,3 +621,39 @@ function drawDmg(ctx, e) {
   ctx.restore();
 }
 
+
+// ---------------------------------------------------------------- イベント連動の演出
+const GRADE_COL = { rare: '#4da6ff', epic: '#b04dff', unique: '#ffb800', legendary: '#ffb800', mythic: '#ff3d7f' };
+const GRADE_NAME = { rare: 'RARE', epic: 'EPIC', unique: 'UNIQUE', legendary: 'LEGENDARY', mythic: 'MYTHIC' };
+/**
+ * attachFx(game) — events を購読して演出を出す（main が1回呼ぶ。戻り値で購読解除）
+ *  jobAdvanced → 'jobUp'（足元の魔法陣＋光柱＋職名）。o.jobCutin=true ならカットインも
+ *  tuneResult → 画面中央に 'tuneSuccess' / 'tuneFail'（screen）
+ *  potentialGradeUp → 'gradeUp'（screen）
+ */
+export function attachFx(game, o = {}) {
+  const ev = game && game.events;
+  if (!ev || !ev.on) return () => {};
+  const offs = [];
+  const center = () => [(game.W || 1280) / 2, (game.H || 720) * 0.42];
+  offs.push(ev.on('jobAdvanced', (d) => {
+    const p = game.player, j = d && d.job;
+    if (!p || !j) return;
+    const col = j.aura || '#ffe066';
+    spawnEffect(game, 'jobUp', p.x, p.y, { color: col, name: j.name, title: 'JOB UP!', _child: true });
+    // UI 側に転職演出（JOB ADVANCE!）があるため、カットインは o.jobCutin=true のときだけ
+    if (o.jobCutin) spawnEffect(game, 'cutin', 0, 0, { name: j.name, color: col, line: j.title ? `「${j.title}」の名にかけて！` : undefined });
+    impact(game, 0.6, col);
+  }));
+  offs.push(ev.on('tuneResult', (d) => {
+    const [x, y] = center();
+    if (d && d.success) spawnEffect(game, 'tuneSuccess', x, y, { screen: true, star: d.star });
+    else spawnEffect(game, 'tuneFail', x, y, { screen: true, text: 'FAILED…' });
+  }));
+  offs.push(ev.on('potentialGradeUp', (d) => {
+    const [x, y] = center();
+    const g = d && d.grade;
+    spawnEffect(game, 'gradeUp', x, y, { screen: true, color: GRADE_COL[g] || '#ffb800', grade: GRADE_NAME[g] || g || '' });
+  }));
+  return () => { for (const f of offs) try { f(); } catch (e) { /* ignore */ } };
+}

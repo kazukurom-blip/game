@@ -42,81 +42,68 @@ const TOWER_PAL = [
 function bgTower(ctx, S, sp) {
   const { W, H, gS, time, cam } = S;
   const pal = TOWER_PAL[sp.v] || TOWER_PAL[0];
-  const bossFloor = sp.floor % 10 === 0;
+  const bossFloor = sp.floor % 10 === 0 || !!S.bossFloor;
   S.indoor = true;
   // 背景（塔の吹き抜け）
   const bg = ctx.createLinearGradient(0, 0, 0, H);
   bg.addColorStop(0, shade(pal.bg, -0.3)); bg.addColorStop(0.6, pal.bg); bg.addColorStop(1, pal.wall);
   ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
-  // 奥: 吹き抜けの内壁（縦ネオン管・窓のスリット）
+  // 奥: 吹き抜けの内壁（パネル＋パノラマ窓の夜景＋中央のエネルギー・コア）
   const far = S.layer('towerFar', 720, (P) => {
-    const g = P.g, h = P.h, R = rng(hashStr('tower' + sp.v));
-    for (let x = 0; x < LW; x += 128) {
-      g.fillStyle = shade(pal.wall, -0.15); g.fillRect(x, 0, 128, h);
-      g.fillStyle = pal.wall; g.fillRect(x + 8, 0, 112, h);
-      // 窓スリット（遠い夜景）
-      for (let y = 40; y < h - 60; y += 70) {
-        g.fillStyle = '#05030e'; g.fillRect(x + 24, y, 80, 40);
-        for (let i = 0; i < 6; i++) { P.gl.fillStyle = rgba(R() < 0.5 ? pal.a : pal.b, 0.35 + R() * 0.4); P.gl.fillRect(x + 26 + R() * 74, y + 20 + R() * 18, 2 + R() * 3, 2); }
-      }
-      // 縦ネオン管
-      P.gl.fillStyle = rgba((x / 128) % 2 ? pal.a : pal.b, 0.9); P.gl.fillRect(x + 4, 0, 3, h);
-      g.fillStyle = shade((x / 128) % 2 ? pal.a : pal.b, -0.2); g.fillRect(x + 4, 0, 3, h);
+    const g = P.g, h = P.h, gl = P.gl, R = rng(hashStr('tower' + sp.v));
+    g.fillStyle = pal.wall; g.fillRect(0, 0, LW, h);
+    // パネル目地
+    g.strokeStyle = shade(pal.wall, -0.25); g.lineWidth = 2;
+    for (let y = 0; y < h; y += 90) { g.beginPath(); g.moveTo(0, y); g.lineTo(LW, y); g.stroke(); }
+    for (let x = 0; x < LW; x += 128) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke(); }
+    // パノラマ窓（下界の夜景）
+    for (const wx of [40, 560]) {
+      const wy = 120, ww = 420, wh = 300;
+      g.fillStyle = '#04020c'; g.fillRect(wx, wy, ww, wh);
+      const sg = g.createLinearGradient(0, wy, 0, wy + wh); sg.addColorStop(0, shade(pal.bg, -0.4)); sg.addColorStop(1, shade(pal.a, -0.75));
+      g.fillStyle = sg; g.fillRect(wx, wy, ww, wh);
+      // 遠い街明かり（下ほど密）
+      for (let i = 0; i < 140; i++) { const y = wy + wh * (0.45 + Math.pow(R(), 0.6) * 0.55); gl.fillStyle = rgba(R() < 0.5 ? pal.a : R() < 0.5 ? pal.b : '#ffe6a0', 0.3 + R() * 0.5); gl.fillRect(wx + R() * ww, y, 2, 1.5); }
+      g.fillStyle = shade(pal.wall, -0.4);
+      for (let k = 1; k < 4; k++) g.fillRect(wx + (ww / 4) * k - 3, wy, 6, wh);
+      g.fillRect(wx, wy + wh * 0.5 - 3, ww, 6);
+      g.strokeStyle = shade(pal.mid, 0.25); g.lineWidth = 6; g.strokeRect(wx, wy, ww, wh);
+      gl.fillStyle = rgba(pal.b, 0.55); gl.fillRect(wx, wy + wh + 4, ww, 3);
     }
   });
-  S.tile(far, 0.12, gS + 120, pal.wall);
-  // 中: 構造リング（環状の梁）と柱
+  S.tile(far, 0.12, gS + 140, shade(pal.wall, -0.2));
+  // 中: 中央コア（太い光の柱）＋上階のバルコニー帯
   const mid = S.layer('towerMid', 640, (P) => {
-    const g = P.g, h = P.h;
-    for (let y = 60; y < h; y += 180) {
-      g.fillStyle = pal.mid; g.fillRect(0, y, LW, 26);
-      g.fillStyle = shade(pal.mid, 0.2); g.fillRect(0, y, LW, 4);
-      P.gl.fillStyle = rgba(pal.a, 0.8); P.gl.fillRect(0, y + 22, LW, 2);
-      for (let x = 20; x < LW; x += 64) { P.gl.fillStyle = rgba(pal.b, 0.9); P.gl.fillRect(x, y + 10, 10, 4); }
-    }
-    for (let x = 0; x < LW; x += 256) {
-      g.fillStyle = shade(pal.mid, -0.2); g.fillRect(x + 100, 0, 56, h);
-      g.fillStyle = shade(pal.mid, 0.1); g.fillRect(x + 100, 0, 8, h);
-      // 柱のホロパネル
-      for (let y = 120; y < h - 40; y += 180) { g.fillStyle = '#05030e'; g.fillRect(x + 110, y, 36, 50); P.gl.fillStyle = rgba(pal.b, 0.5); P.gl.fillRect(x + 113, y + 4, 30, 6); P.gl.fillRect(x + 113, y + 14, 18, 3); P.gl.fillRect(x + 113, y + 22, 24, 3); }
-    }
+    const g = P.g, h = P.h, gl = P.gl;
+    // コア
+    g.fillStyle = shade(pal.mid, -0.35); g.fillRect(452, 0, 120, h);
+    g.fillStyle = shade(pal.mid, -0.1); g.fillRect(452, 0, 10, h); g.fillRect(562, 0, 10, h);
+    const cg = gl.createLinearGradient(470, 0, 554, 0);
+    cg.addColorStop(0, rgba(pal.a, 0)); cg.addColorStop(0.5, rgba(pal.a, 0.75)); cg.addColorStop(1, rgba(pal.a, 0));
+    gl.fillStyle = cg; gl.fillRect(470, 0, 84, h);
+    for (let y = 30; y < h; y += 60) { g.fillStyle = shade(pal.mid, 0.15); g.fillRect(448, y, 128, 6); }
+    // バルコニー帯
+    const by = 90;
+    g.fillStyle = pal.mid; g.fillRect(0, by, LW, 30);
+    g.fillStyle = shade(pal.mid, 0.25); g.fillRect(0, by, LW, 4);
+    gl.fillStyle = rgba(pal.b, 0.8); gl.fillRect(0, by + 26, LW, 2);
+    for (let x = 30; x < LW; x += 96) { g.fillStyle = shade(pal.mid, -0.3); g.fillRect(x, by + 30, 6, 40); }
   });
-  S.tile(mid, 0.35, gS + 40, shade(pal.mid, -0.3));
-  // 手前: エレベーターのレールとケーブル
-  const near = S.layer('towerNear', 680, (P) => {
-    const g = P.g, h = P.h;
-    for (const x of [180, 700]) {
-      g.fillStyle = '#0a0614'; g.fillRect(x, 0, 14, h); g.fillRect(x + 90, 0, 14, h);
-      for (let y = 0; y < h; y += 40) { g.fillStyle = '#1a1228'; g.fillRect(x, y, 104, 4); }
-      P.gl.fillStyle = rgba(pal.a, 0.6); P.gl.fillRect(x + 5, 0, 3, h); P.gl.fillRect(x + 95, 0, 3, h);
-    }
-  });
-  S.tile(near, 0.6, gS + 10);
+  S.tile(mid, 0.3, gS + 30);
   // ライブ: 昇る光の粒・エレベーター・階数ホロ
   S.post(() => {
     ctx.save(); ctx.globalCompositeOperation = 'lighter';
     // 上昇するデータの粒
-    for (let i = 0; i < 26; i++) {
-      const x = ((i * 157 - cam.x * 0.2) % (W + 40) + W + 40) % (W + 40) - 20;
+    ctx.fillStyle = rgba(pal.b, 0.45);
+    for (let i = 0; i < 18; i++) {
+      const x = ((i * 157 - cam.x * 0.3) % (W + 40) + W + 40) % (W + 40) - 20;
       const y = H - ((time * (40 + (i % 5) * 18) + i * 97) % (H + 40));
-      ctx.fillStyle = rgba(i % 2 ? pal.a : pal.b, 0.5);
       ctx.fillRect(x, y, 2, 6 + (i % 3) * 3);
-    }
-    // エレベーター（ゆっくり上下）
-    for (let j = 0; j < 2; j++) {
-      const base = [180, 700][j];
-      const ex = ((base + 7 - cam.x * 0.6) % LW + LW) % LW;
-      for (let x = ex - LW; x < W + 120; x += LW) {
-        const ey = gS - 300 + Math.sin(time * 0.35 + j * 2) * 220;
-        ctx.fillStyle = rgba(pal.b, 0.18); ctx.fillRect(x + 7, ey, 84, 70);
-        ctx.strokeStyle = rgba(pal.b, 0.8); ctx.lineWidth = 2; ctx.strokeRect(x + 7, ey, 84, 70);
-        ctx.fillStyle = rgba('#ffffff', 0.5); ctx.fillRect(x + 12, ey + 6, 74, 4);
-      }
     }
     // 階数ホロ（中央・奥）
     const fl = 'F' + sp.floor;
-    const hx = W * 0.5 - ((cam.x * 0.08) % 300), hy = Math.max(110, gS - 330);
-    ctx.globalAlpha = 0.16 + Math.sin(time * 2) * 0.04;
+    const hx = W * 0.5, hy = Math.max(110, gS - 360);
+    ctx.globalAlpha = 0.26 + Math.sin(time * 2) * 0.05;
     ctx.font = '900 150px "Arial Black", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillStyle = pal.a; ctx.fillText(fl, hx, hy);
     ctx.globalAlpha = 0.5;
@@ -198,7 +185,7 @@ function bgArena(ctx, S) {
     const msg = '★ NEON ARENA ★ VICE BAY CHAMPIONSHIP ★ BEAT THE WAVE ★ ';
     const mw = 900;
     const off = -((time * 120 + cam.x * 0.5) % mw);
-    ctx.fillStyle = rgba('#ffd23f', 0.85);
+    ctx.fillStyle = rgba('#ffd23f', 0.5);
     for (let x = off; x < W; x += mw) ctx.fillText(msg, x, ly);
     // スポットライト
     for (let i = 0; i < 4; i++) {
@@ -255,7 +242,7 @@ function bgBoss(ctx, S, sp, map) {
   const { W, H, gS, time, cam } = S;
   const mk = BOSS_MOTIF_IDS[sp.v] || 'jelly';
   const M = MOTIF[mk];
-  const chaos = map && (map.bossMode === 'chaos' || map.mode === 'chaos');
+  const chaos = map && (map._bossMode === 'chaos' || map.bossMode === 'chaos' || map.mode === 'chaos');
   S.indoor = true;
   const bg = ctx.createLinearGradient(0, 0, 0, H);
   bg.addColorStop(0, M.bg[0]); bg.addColorStop(0.55, M.bg[1]); bg.addColorStop(1, M.bg[2]);
@@ -312,7 +299,7 @@ function bgBoss(ctx, S, sp, map) {
       for (let x = 0; x < LW; x += 96) { g.fillStyle = '#24103a'; g.fillRect(x, 0, 12, h); gl.fillStyle = rgba(M.a, 0.5); gl.fillRect(x + 4, 0, 3, h); }
     }
     // 中央の紋章（ボスのシンボル）
-    if (mk !== 'temple' && mk !== 'sewer') { gl.lineWidth = 6; gl.strokeStyle = rgba(M.b, 0.5); sigilPath(gl, M.sigil, 512, 160, 60); gl.stroke(); }
+    if (mk !== "temple" && mk !== "sewer") { gl.lineWidth = 12; gl.strokeStyle = rgba(M.b, 0.22); sigilPath(gl, M.sigil, 512, 170, 84); gl.stroke(); gl.lineWidth = 5; gl.strokeStyle = rgba(M.b, 0.6); gl.stroke(); }
   });
   S.tile(wall, 0.2, gS + 60, M.wall);
   // 手前の柱（左右に重厚なフレーム）
@@ -358,8 +345,8 @@ function bgBoss(ctx, S, sp, map) {
 export function drawSpecial(ctx, S, map) {
   const sp = specialOf(map);
   if (!sp) return false;
-  if (sp.kind === 'tower') bgTower(ctx, S, sp);
-  else if (sp.kind === 'arena') { S.arenaWave = map && (map.wave || map.arenaWave) || 0; bgArena(ctx, S); }
+  if (sp.kind === 'tower') { S.bossFloor = !!(map && map.bossFloor); bgTower(ctx, S, sp); }
+  else if (sp.kind === 'arena') { S.arenaWave = map && (map._wave || map.wave || map.arenaWave) || 0; bgArena(ctx, S); }
   else bgBoss(ctx, S, sp, map);
   return true;
 }

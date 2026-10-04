@@ -160,9 +160,17 @@ async function main() {
   async function startHero(hero, shotTitle = false) {
     await gotoTitle(true);
     if (shotTitle) await shot('title');
-    if (hero === 'jin') await press('ArrowRight');
+    // v3: タイトル → （セーブ無し）キャラ作成: クラス → 性別 → 見た目 → 名前（DOM input で Enter）
+    await press('Enter');
     await frames(3);
-    if (hero === 'jin' && shotTitle) await shot('title_select_jin');
+    if (hero === 'jin') await press('ArrowRight');
+    if (hero === 'hacker') { await press('ArrowRight'); await press('ArrowRight'); }
+    await frames(3);
+    if (shotTitle) await shot(`create_class_${hero}`);
+    await press('Enter'); // → 性別
+    await press('Enter'); // → 見た目
+    await press('Enter'); // → 名前
+    await page.waitForTimeout(250);
     await press('Enter');
     await page.waitForFunction(() => window.game.scene === 'play' && window.game.player, null, { timeout: 5000 });
     await page.waitForTimeout(600);
@@ -498,7 +506,7 @@ async function main() {
     // つづきから
     const saved = await g(() => { window.game.save(); return { lv: window.game.state.level, money: window.game.state.money, pet: window.game.state.equipped.pet }; });
     await gotoTitle(false);
-    await press('ArrowDown');
+    await press('Enter'); // タイトル → キャラ選択（アクティブスロットが選択済み）
     await frames(3);
     await shot('title_continue');
     await press('Enter');
@@ -633,7 +641,7 @@ async function main() {
     await page.goto(URL, { waitUntil: 'load' });
     await g((s) => { localStorage.clear(); localStorage.setItem('nvs_save', JSON.stringify(s)); }, V1_SAVE);
     await gotoTitle(false);
-    await press('ArrowDown');
+    await press('Enter'); // タイトル → キャラ選択
     await frames(3);
     await press('Enter');
     const ok = await waitFor(() => window.game.scene === 'play' && !!window.game.player, 5000);

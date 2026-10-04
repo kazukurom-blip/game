@@ -250,3 +250,55 @@ look/equip は `L(style, c1, c2)` 形式（maps.js の既存 NPC と同じ）の
 - 報告先が依頼主と異なるミッションは `mission.turnIn`（`turnInNpcOf(m)`）。
 - NPC と話したら `events.emit("talkNpc", {npcId})`、マップ移動時は `events.emit("mapChanged", {mapId})`（talk / reach 目的・訪問記録）。
 - 新 art 名: crab, jellyfish, seagull, rat, snake, mosquito, ghost, robot, alien, golem, civilian, bossAlien。色違いは `def.color` / `def.accent`、大きさは `def.scale`。
+
+---
+
+## v3（エンドコンテンツ・システム担当）
+
+### ストーリー分岐（`MISSIONS[id].choices`）
+報告時に選択（UI: `game.missions.needsChoice(id)` が true なら `m.choicePrompt` と `m.choices[].text` を表示 → `game.missions.choose(id, choiceId)` → `turnIn(id)`）。未選択で報告すると `choices[0]`。
+セリフは `game.missions.dialog(id, 'offer'|'done')`（= `missionDialog(state, id, phase)`）を使うこと（flag と選択で変化）。
+
+| ミッション | 依頼/報告 | 選択肢 `police` | 選択肢 `street` | 後の変化 |
+|---|---|---|---|---|
+| `m06_dirty_badge` 汚れたバッジ | カイ巡査 | 証拠を署の正義派に渡す（flag `sidePolice`、称号「VBPDの協力者」、$+1000・アイアン・ミルク） | 証拠を情報屋に売る（flag `sideStreet`、称号「裏通りの顔」、$+4000・リロール・チップ） | m07 / m13 の offer セリフ |
+| `m13_heat` ヴァイス・ベイ大炎上 | カイ巡査 | カイと正義派に付く（`sidePolice2`） | ギャングと共闘（`sideStreet2`） | m14 の done セリフ |
+| `m15_don` 最終話 | ノヴァ | ドンを警察に引き渡す（`endingHero`、称号「ヴァイス・ベイの英雄」） | ドンの座を奪う（`endingDon`、称号「新しいドン」） | エンディングのセリフ（choice.dialog） |
+
+3回とも同じ側を選ぶと隠し実績＋称号（「VBPDの英雄」/「裏通りの王」）。
+
+### 夜だけ開く店（`src/data/shops.js` `NIGHT_SHOPS`、20〜5時）
+ワールド担当が配置済みの夜 NPC（`npc.hours`）と同じ npcId。夜限定の目玉としてチップ類の追加を提案:
+
+| npcId | 町 | hours | 品揃え（提案） |
+|---|---|---|---|
+| `night_marin` | beach | [20,5] | drink_energy, drink_tough, potion_red, potion_blue, **pet_food** |
+| `night_noodle` | downtown | [21,5] | potion_orange, potion_white, drink_energy, drink_tough |
+| `night_smuggler` | slums | [22,4] | potion_white, potion_mana, smg_compact, mask_skull, drink_lucky, **chip_reroll, chip_lock** |
+| `night_bartender` | casino | [20,5] | drink_lucky, power_elixir, elixir, sunglasses_neon, **chip_reroll** |
+| `night_astro` | spaceport | [20,5] | elixir, potion_white, potion_mana, power_elixir, **tune_ticket** |
+
+判定は `systems/night.js`: `isNightNow(game)`, `isOpenAt(hours, clock)`, `npcAvailableNow(game, npc)`。
+
+### 夜限定の敵（`night:true`。spawner は `enemyAvailableNow(game, def)` で昼は出さない）
+
+| enemyId | 名前 | Lv | 出現 | 備考 |
+|---|---|---|---|---|
+| `jelly_moonlit` | ムーンライト・クラゲ | 8 | beach_f3 | 経験値・$多め、チップ 2% |
+| `thug_night_racer` | ナイト・ゴーストレーサー | 21 | down_f3 | 人型（look/equip あり） |
+| `ghost_bayou` | バイユーの鬼火 | 42 | swamp_f4 | |
+| `ghost_after_hours` | アフターアワーズの客 | 57 | casino_f4 | ダイヤ 0.5% |
+| `drone_night_owl` | ナイトオウル観測機 | 48 | space_f2 | ロック・チップ 0.2% |
+
+### 新アイテム
+| itemId | 種類 | 入手 |
+|---|---|---|
+| `chip_reroll` リロール・チップ | etc | 全モンスター低確率（Lv15+ 0.2%、エリート/夜 0.6%）、ボス 60%、ショップ（vivi/nova/夜の店）、ログイン、タワー/アリーナ/ボス報酬 |
+| `chip_lock` ロック・チップ | etc | ボス 5%、nova、夜の闇市、交換所 |
+| `tune_ticket` チューン・チケット | etc | タワー50階ごと、ログイン7日/21日、交換所、夜間補給所 |
+| `pet_food` ネオン・ペットフード | etc（`use:'petFood'`） | 全モンスター 0.4%、ボス 50%、sunny/vivi/ace_jet、ログイン |
+| `spire_token` / `boss_trophy` | etc | 表示用（実数は `state.tower.tokens` / `state.bossTrophies`） |
+| `crown_caiman` / `suit_vice` / `neon_sword_spire` / `pistol_spire` / `staff_spire` / `halo_zog` | 装備（Lv100〜150, ★20/25 まで） | カオス固有・トロフィー交換所・スパイア100階 |
+
+### コンテンツ受付（ワールド担当の `concierge_<town>`, service:'content'）
+UI のコンテンツ窓（U）から: `towerEnter(game, floor)` / `arenaEnter(game, stageId)` / `bossEntry(game, bossId, mode)`。一覧データは `towerBest(state)` / `arenaInfo(state)` / `bossClears(state)`。

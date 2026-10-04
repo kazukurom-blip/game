@@ -12,7 +12,7 @@ import { ITEMS } from '../data/items.js';
 import { MAPS } from '../world/maps.js';
 import { MAP_INFO, mapName } from './travel.js';
 import { refreshTicket, TICKET_CAP } from './daily.js';
-import { addItem, countItem, removeItem } from './inventory.js';
+import { addItem } from './inventory.js';
 import { gameNow } from './combat.js';
 
 export const BOSS_MODES = {
@@ -128,7 +128,9 @@ export function bossEntry(game, bossId, mode = 'normal', opts = {}) {
   const m = BOSS_MODES[mode];
   game.bossMode = mode;
   game.bossMaxHit = 0;
-  game.bossRun = { bossId, mode, t0: game.time || 0, deaths: 0, lives: m.lives, timeLimit: m.timeLimit, returnMap: game.map?.id || st.mapId, roomId: room, cleared: false, failed: false };
+  const cur = game.map?.id || st.mapId;
+  const returnMap = MAPS[cur] && !MAPS[cur].instance ? cur : (game.lastTownId && MAPS[game.lastTownId] ? game.lastTownId : bossFieldId(bossId));
+  game.bossRun = { bossId, mode, t0: game.time || 0, deaths: 0, lives: m.lives, timeLimit: m.timeLimit, returnMap, roomId: room, cleared: false, failed: false };
   game.events?.emit('bossEnter', { bossId, mode });
   game.changeMap(room);
   game.notify?.(`${ENEMIES[bossId].name}（${m.name}）に挑戦！${Number.isFinite(m.timeLimit) ? ` 制限 ${Math.round(m.timeLimit / 60)}分` : ''}`, '#ff4d6d');

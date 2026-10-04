@@ -137,7 +137,8 @@ export function updateSharedChar(state, slot = _curSlot) {
   if (!state) return;
   if (Number.isInteger(slot)) _curSlot = slot;
   const sh = loadShared();
-  const k = slotKey(state);
+  const k = Number.isInteger(slot) && slot >= 0 ? 's' + slot : state.sharedKey || slotKey(state);
+  state.sharedKey = k; // このキャラの共有キー（リンクボーナスで自分を除外する用）
   const prev = sh.chars[k];
   const cur = { heroId: state.heroId, name: state.name, level: state.level || 1, tier: state.job?.tier || 0, t: Date.now() };
   if (prev && prev.heroId === cur.heroId && prev.level === cur.level && prev.tier === cur.tier && prev.name === cur.name) return;
@@ -161,7 +162,7 @@ let _linkKey = null, _linkVal = null;
 export function linkBonus(state) {
   let sh;
   try { sh = loadShared(); } catch { return ZERO_LINK(); }
-  const me = slotKey(state);
+  const me = state?.sharedKey || slotKey(state);
   const key = _ver + '|' + me;
   if (key === _linkKey && _linkVal) return _linkVal;
   const out = ZERO_LINK();

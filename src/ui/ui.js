@@ -6,6 +6,7 @@ import { guard, getItemDef, skillDef, drawItemIco, drawSkillIco } from './deps.j
 import { WINDOW_DRAW, drawTooltipBox, initDialog, dialogKey } from './windows.js';
 import { drawWorldMap, drawBook, drawPhone, rideTaxi } from './v2windows.js';
 import { V3_WINDOWS, V3_LAYOUT, drawPopup } from './v3windows.js';
+import { drawJobFx } from './hud3.js';
 import { loadSettings, applySettings, SKILL_BAR_SIZE, BAR_KEYS } from './v3deps.js';
 import { enemyDef } from './deps.js';
 import { audio } from '../audio/audio.js';
@@ -486,6 +487,12 @@ export class UIManager {
       } catch (e) {
         guard('win.' + n, () => { throw e; });
       }
+      ctx.restore();
+    }
+    // 転職の祝福演出（ウィンドウより前面）
+    if (this.jobFx && g?.state) {
+      ctx.save();
+      try { drawJobFx(ctx, g); } catch (e) { guard('jobFx', () => { throw e; }); }
       ctx.restore();
     }
     // 右クリックメニュー

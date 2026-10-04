@@ -8,8 +8,8 @@ import {
   guard, stats, expNeed, HERO_NAMES, skillDef, getItemDef, cooldown, skillMp, countItem,
   drawSkillIco, drawItemIco, rarityInfo, snsTitleOf, drawPetArt, drawEnemyArt, mapInfo, regionColor,
 } from './deps.js';
-import { charName, currentJob, classOf, BAR_KEYS, SKILL_BAR_SIZE } from './v3deps.js';
-import { drawJobBubble, drawNavArrow, drawJobFx, trackerHit } from './hud3.js';
+import { charName, currentJob, classOf, BAR_KEYS, SKILL_BAR_SIZE, call } from './v3deps.js';
+import { drawJobBubble, drawNavArrow, trackerHit } from './hud3.js';
 
 const W = 1280, H = 720;
 const hudState = new WeakMap();
@@ -62,7 +62,7 @@ export function drawHUD(ctx, game, _internal = false) {
     ['vignette', drawVignette], ['copFlash', drawCopFlash], ['jobBubble', drawJobBubble], ['navArrow', drawNavArrow], ['minimap', drawMinimap], ['status', drawStatus],
     ['skillbar', drawSkillBar], ['money', drawMoney], ['tracker', drawTracker], ['clock', drawClockBadge],
     ['radio', drawRadio], ['bookNew', drawBookToasts],
-    ['levelUp', drawLevelUp], ['jobFx', drawJobFx], ['banner', drawBanner], ['toasts', drawToasts], ['petFx', drawPetFx],
+    ['levelUp', drawLevelUp], ['banner', drawBanner], ['toasts', drawToasts], ['petFx', drawPetFx],
   ];
   const prof = game.debug?.profile ? (game.debug.hudProf ||= {}) : null; // デバッグ: 部位ごとの描画時間(ms, EMA)
   for (const [tag, fn] of parts) {
@@ -193,7 +193,7 @@ function drawMinimap(ctx, game) {
     ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.lineWidth = 1; ctx.stroke();
   };
   const npcs = (game.npcs && game.npcs.length ? game.npcs : map.npcs) || [];
-  for (const n of npcs) dot(n.x, n.y ?? map.groundY ?? 0, '#5dff7a', 2.8);
+  for (const n of npcs) if (!n.hidden) dot(n.x, n.y ?? map.groundY ?? 0, '#5dff7a', 2.8);
   // 敵（警官はミニマップに出さない：画面端フラッシュで表現）
   for (const e of game.enemies || []) {
     if (!e || e.dead) continue;
@@ -260,7 +260,7 @@ function drawStatus(ctx, game, s, dt) {
   // パネル上: クラス名 ＋ SNS 称号
   const cls = classOf(st.heroId)?.name || '';
   const title = snsTitleOf(st);
-  const ttl = st.title?.name || (typeof st.title === 'string' ? st.title : null);
+  const ttl = call('achievements', 'currentTitle', [st], null)?.name || null;
   const tagParts = [cls, ttl || title.name].filter(Boolean);
   if (tagParts.length) {
     const label = tagParts.join('  ・  ');

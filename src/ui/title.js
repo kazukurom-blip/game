@@ -60,10 +60,13 @@ function setStep(n) {
 function setClass(cls) {
   const c = T.c;
   if (c.cls === cls) return;
-  c.cls = cls; c.look = defaultLook(cls, c.gender);
+  c.cls = cls;
+  if (!c.genderTouched) c.gender = legacyGender(cls);
+  c.look = defaultLook(cls, c.gender);
 }
 function setGender(g) {
   const c = T.c;
+  c.genderTouched = true;
   if (c.gender === g) return;
   c.gender = g; c.look = defaultLook(c.cls, g);
 }
@@ -216,6 +219,8 @@ function region(ctx, id, r, fn, o = {}) { T.btns.push({ id, r, fn, disabled: o.d
 export function drawTitle(ctx, game, t) {
   t = t ?? game?.time ?? 0;
   T.btns = [];
+  const bgm = T.screen === 'title' ? 'title' : 'select';
+  if (T._bgm !== bgm) { T._bgm = bgm; guard('setTitleScreen', () => audio?.setTitleScreen?.(bgm)); }
   ctx.save();
   try {
     drawBackdrop(ctx, t);

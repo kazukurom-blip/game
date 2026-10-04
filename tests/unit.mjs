@@ -1432,6 +1432,8 @@ test('v3 classes: newState(classId, {name, gender, look}) と性別別の初期�
   for (const s of skillsForHero('hacker')) { if (s.kind === 'passive') continue; g.time += 100; resetCooldowns(); assert.ok(useSkill(g, s.id), 'use ' + s.id); for (let i = 0; i < 20; i++) step(g); }
 });
 
+// v3 ゲームシステム（tests/sys_v3.mjs）
+(await import('./sys_v3.mjs')).default({ test, makeGame, step, fin });
 // v3 ワールド＆エンティティ（tests/world_v3.mjs）
 (await import('./world_v3.mjs')).default({ test, makeGame, step, fin });
 

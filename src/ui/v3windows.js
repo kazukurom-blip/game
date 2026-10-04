@@ -14,7 +14,7 @@ import { audio } from '../audio/audio.js';
 
 const W = 1280, H = 720;
 export const V3_LAYOUT = {
-  jobOffer: { w: 1000, h: 590, title: '転職 — 職業を選ぶ' },
+  jobOffer: { w: 1000, h: 640, title: '転職 — 職業を選ぶ' },
   tune: { w: 900, h: 590, title: 'ネオン・チューン（★強化）', y: 40 },
   potential: { w: 960, h: 600, title: 'ハックチップ（潜在能力）', y: 36 },
   content: { w: 980, h: 600, title: 'コンテンツ', key: 'U', y: 40 },
@@ -184,12 +184,12 @@ function drawJobOffer(ui, ctx, win) {
     txt(ctx, '◆ ボーナス（永続）', tx, yy, { size: 12, color: COL.teal }); yy += 20;
     statChips(ctx, { ...(J.statBonus || {}) }, tx, yy, tw, { color: col, size: 10.5 });
     // スキル
-    let sy = ry + 226;
+    let sy = ry + 228;
     txt(ctx, '◆ 獲得スキル', r.x + 16, sy, { size: 13, color: COL.pink }); sy += 14;
     (J.skills || []).slice(0, 4).forEach((sid, k) => {
       const sk = skillDef(sid);
       if (!sk) return;
-      const rr = { x: r.x + 12, y: sy + k * 44, w: r.w - 24, h: 40 };
+      const rr = { x: r.x + 12, y: sy + k * 43, w: r.w - 24, h: 39 };
       const sh = ui.hover(win, rr);
       inset(ctx, rr.x, rr.y, rr.w, rr.h, { r: 9, fill: sh ? 'rgba(123,47,247,0.35)' : 'rgba(6,4,24,0.5)' });
       drawSkillIco(ctx, sk, rr.x + 22, rr.y + 20, 32);
@@ -315,7 +315,7 @@ function drawTune(ui, ctx, win) {
   drawGearList(ui, ctx, win, x + 16, y + 46, 250, h - 62, list, (e) => { win.data.ref = e.ref; win.fx = null; });
   const ref = win.data?.ref;
   const info = ref ? call('tune', 'tuneInfo', [st, ref], null) : null;
-  const cx = x + 282, cw = 360;
+  const cx = x + 282, cw = w - 282 - 282;
   if (!info || !info.ok) { txt(ctx, info?.reason || '装備を選んでください', cx + cw / 2, y + 200, { size: 15, align: 'center', color: COL.dim }); drawTuneTable(ui, ctx, win, x + w - 266, y + 46, 250, h - 62, null); return; }
   const it = info.item || getItemDef(info.uid);
   const rinfo = rarityInfo(it?.rarity);
@@ -351,7 +351,8 @@ function drawTune(ui, ctx, win) {
   inset(ctx, cx, by, cw, 168, { r: 12 });
   const rate = info.rate || 0;
   txt(ctx, '成功率', cx + 16, by + 22, { size: 13, color: COL.sub });
-  txt(ctx, info.guaranteed ? '100%（天井確定！）' : `${(rate * 100).toFixed(rate < 0.1 ? 1 : 0)}%`, cx + cw - 16, by + 22, { size: 22, align: 'right', color: info.guaranteed ? COL.gold : rate >= 0.5 ? COL.good : rate >= 0.2 ? '#ffd23f' : COL.bad, glow: info.guaranteed ? COL.gold : null });
+  const isMax = info.star >= info.maxStar;
+  txt(ctx, isMax ? 'MAX ★' : info.guaranteed ? '100%（天井確定！）' : `${(rate * 100).toFixed(rate < 0.1 ? 1 : 0)}%`, cx + cw - 16, by + 22, { size: 22, align: 'right', color: info.guaranteed ? COL.gold : rate >= 0.5 ? COL.good : rate >= 0.2 ? '#ffd23f' : COL.bad, glow: info.guaranteed ? COL.gold : null });
   // 天井ゲージ
   txt(ctx, '天井', cx + 16, by + 54, { size: 13, color: COL.sub });
   const pm = Math.max(1, info.pityMax || 1), pv = clamp((info.pity || 0) / pm, 0, 1);
@@ -360,7 +361,7 @@ function drawTune(ui, ctx, win) {
   ctx.save(); rrPath(ctx, gx, by + 46, Math.max(16, gw * pv), 16, 8);
   const pg = ctx.createLinearGradient(gx, 0, gx + gw, 0); pg.addColorStop(0, COL.teal); pg.addColorStop(1, COL.gold);
   ctx.fillStyle = pg; ctx.fill(); ctx.restore();
-  txt(ctx, `${info.pity || 0} / ${info.pityMax || '-'}   あと ${info.pityLeft ?? Math.max(0, (info.pityMax || 0) - (info.pity || 0))} 回で確定成功`, gx + gw / 2, by + 54.5, { size: 11, align: 'center', sw: 2.5 });
+  txt(ctx, isMax ? '最大★に到達しています' : `${info.pity || 0} / ${info.pityMax || '-'}   あと ${info.pityLeft ?? Math.max(0, (info.pityMax || 0) - (info.pity || 0))} 回で確定成功`, gx + gw / 2, by + 54.5, { size: 11, align: 'center', sw: 2.5 });
   txt(ctx, '費用', cx + 16, by + 86, { size: 13, color: COL.sub });
   txt(ctx, fmtMoney(info.cost || 0) + (info.discount ? `  (−${info.discount}% サンデー・ネオン)` : ''), cx + cw - 16, by + 86, { size: 16, align: 'right', color: (st.money || 0) >= (info.cost || 0) ? COL.money : COL.bad, stroke: COL.moneyShadow, sw: 3 });
   txt(ctx, '期待回数', cx + 16, by + 114, { size: 13, color: COL.sub });
@@ -393,11 +394,16 @@ function drawTune(ui, ctx, win) {
     const k = clamp(win.fx.t / 1.1, 0, 1);
     if (win.fx.success) {
       sparkleBurst(ctx, icx, icy, k, COL.star);
-      txt(ctx, win.fx.guaranteed ? '天井確定 SUCCESS!' : 'SUCCESS!', icx + 120, icy - 4 - k * 14, { size: 26, align: 'center', color: COL.gold, glow: COL.orange, alpha: 1 - clamp((k - 0.75) / 0.25, 0, 1), sw: 5 });
-      txt(ctx, `★${win.fx.star}`, icx + 120, icy + 24 - k * 14, { size: 18, align: 'center', color: '#fff', alpha: 1 - clamp((k - 0.75) / 0.25, 0, 1) });
+      const fa = 1 - clamp((k - 0.75) / 0.25, 0, 1);
+      ctx.save(); ctx.globalAlpha *= fa * 0.85; rrPath(ctx, cx + 110, iy + 30, cw - 120, 70, 14); ctx.fillStyle = 'rgba(40,20,0,0.9)'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = COL.gold; ctx.stroke(); ctx.restore();
+      txt(ctx, win.fx.guaranteed ? '天井確定 SUCCESS!' : 'SUCCESS!', cx + 110 + (cw - 120) / 2, iy + 54 - k * 6, { size: 26, align: 'center', color: COL.gold, glow: COL.orange, alpha: fa, sw: 5 });
+      txt(ctx, `★${win.fx.star} に強化！`, cx + 110 + (cw - 120) / 2, iy + 82 - k * 6, { size: 15, align: 'center', color: '#fff', alpha: fa });
     } else {
-      sadFx(ctx, icx + 120, icy + 4, k);
-      txt(ctx, 'FAIL…', icx + 190, icy - 16, { size: 20, align: 'center', color: '#9fb4ff', alpha: 1 - clamp((k - 0.75) / 0.25, 0, 1), sw: 4 });
+      const fa = 1 - clamp((k - 0.75) / 0.25, 0, 1);
+      ctx.save(); ctx.globalAlpha *= fa * 0.85; rrPath(ctx, cx + 110, iy + 30, cw - 120, 70, 14); ctx.fillStyle = 'rgba(10,14,40,0.92)'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#9fb4ff'; ctx.stroke(); ctx.restore();
+      sadFx(ctx, cx + 150, iy + 70, k);
+      txt(ctx, 'FAIL…', cx + 250, iy + 56, { size: 22, align: 'center', color: '#9fb4ff', alpha: fa, sw: 4 });
+      txt(ctx, '天井ゲージ +1', cx + 250, iy + 82, { size: 12, align: 'center', color: COL.sub, alpha: fa, sw: 3 });
     }
     if (win.fx.t > 1.2) win.fx = null;
   }
@@ -581,6 +587,15 @@ function drawContent(ui, ctx, win) {
   const g = ui.game, st = g.state;
   if (!st) return;
   const { x, y, w, h } = win;
+  // ui.open('content', {npc, tab}) で初期タブ指定（名前 or 番号）
+  if (win.data && win._dataSeen !== win.data) {
+    win._dataSeen = win.data;
+    const tb = win.data.tab;
+    const TABKEY = { tower: 0, arena: 1, boss: 2, bosses: 2, login: 3, daily: 3, preset: 4, presets: 4, storage: 5, shared: 5 };
+    if (typeof tb === 'number') win.tab = clamp(tb, 0, CTABS.length - 1);
+    else if (typeof tb === 'string') win.tab = TABKEY[tb] ?? (CTABS.indexOf(tb) >= 0 ? CTABS.indexOf(tb) : win.tab);
+  }
+  if (win.data?.npc?.name) txt(ctx, `${win.data.npc.name}「どのコンテンツに挑戦する？」`, x + w - 20, y + 62, { size: 12, align: 'right', color: COL.sub, sw: 2.5, maxW: 240 });
   tabBar(ui, ctx, win, x + 16, y + 46, CTABS, 116, () => guard('sfx', () => sfx('tab')));
   const bx = x + 16, by = y + 86, bw = w - 32, bh = h - 102;
   const tab = win.tab || 0;
@@ -596,153 +611,6 @@ function resultNotify(ui, r, okCol) {
   if (r === true || r?.ok) { if (r?.msg) ui.notify(r.msg, okCol || COL.teal); return true; }
   ui.notify(r?.msg || 'できませんでした', COL.bad);
   return false;
-}
-function drawTowerTab(ui, ctx, win, x, y, w, h) {
-  const g = ui.game, st = g.state, t = g.time || 0;
-  if (!V3.tower) { notReady(ctx, x, y, w, h, 'ヴァイス・スパイア（無限タワー）'); return; }
-  const req = val('tower', 'TOWER_REQ_LEVEL') ?? val('tower', 'TOWER_UNLOCK_LEVEL') ?? 40;
-  const bestRaw = call('tower', 'towerBest', [st], 0);
-  const best = typeof bestRaw === 'object' ? (bestRaw?.best ?? bestRaw?.floor ?? 0) : (bestRaw || 0);
-  const locked = (st.level || 1) < req;
-  win.floor = clamp(win.floor ?? best + 1, 1, Math.max(1, best + 1));
-  // 左: 塔のビジュアル
-  const tx = x, tw = 300;
-  const fy = stageBg(ctx, tx, y, tw, h, '#b77bff');
-  ctx.save();
-  rrPath(ctx, tx, y, tw, h, 12); ctx.clip();
-  const towerX = tx + tw / 2;
-  for (let i = 0; i < 14; i++) {
-    const fl = Math.max(1, best - 6 + i);
-    const yy = fy - 20 - i * 30;
-    const ww = 120 - i * 4;
-    const on = fl <= best, cur = fl === win.floor;
-    ctx.fillStyle = cur ? 'rgba(255,212,71,0.85)' : on ? 'rgba(183,123,255,0.75)' : 'rgba(60,40,110,0.75)';
-    ctx.fillRect(towerX - ww / 2, yy - 24, ww, 26);
-    ctx.strokeStyle = fl % 10 === 0 ? '#ff5fa2' : 'rgba(255,255,255,0.4)'; ctx.lineWidth = fl % 10 === 0 ? 2.5 : 1; ctx.strokeRect(towerX - ww / 2, yy - 24, ww, 26);
-    txt(ctx, `${fl}F${fl % 10 === 0 ? ' BOSS' : ''}`, towerX, yy - 11, { size: 11, align: 'center', color: cur ? '#3a2000' : '#fff', sw: cur ? 0 : 2.5, stroke: cur ? false : undefined });
-  }
-  ctx.restore();
-  txt(ctx, 'ヴァイス・スパイア', tx + tw / 2, y + 24, { size: 18, align: 'center', glow: '#b77bff' });
-  txt(ctx, `最高到達 ${best}F`, tx + tw / 2, y + 48, { size: 15, align: 'center', color: COL.gold });
-  // 右: 階の情報
-  const ix = x + tw + 16, iw = w - tw - 16;
-  inset(ctx, ix, y, iw, h, { r: 12 });
-  if (locked) txt(ctx, `Lv.${req} で解放されます`, ix + iw / 2, y + 40, { size: 18, align: 'center', color: COL.bad });
-  txt(ctx, '挑戦する階', ix + 20, y + 80, { size: 14, color: COL.sub });
-  ui.btn(ctx, win, 'fl-10', { x: ix + 130, y: y + 64, w: 46, h: 32 }, '-10', () => { win.floor = Math.max(1, win.floor - 10); }, { color: COL.purple, size: 12 });
-  ui.btn(ctx, win, 'fl-1', { x: ix + 182, y: y + 64, w: 36, h: 32 }, '◀', () => { win.floor = Math.max(1, win.floor - 1); }, { color: COL.purple, size: 13 });
-  txt(ctx, `${win.floor}F`, ix + 260, y + 80, { size: 24, align: 'center', color: '#fff', glow: COL.gold });
-  ui.btn(ctx, win, 'fl+1', { x: ix + 302, y: y + 64, w: 36, h: 32 }, '▶', () => { win.floor = Math.min(best + 1, win.floor + 1); }, { color: COL.purple, size: 13 });
-  ui.btn(ctx, win, 'fl+10', { x: ix + 344, y: y + 64, w: 46, h: 32 }, '+10', () => { win.floor = Math.min(best + 1, win.floor + 10); }, { color: COL.purple, size: 12 });
-  ui.btn(ctx, win, 'flMax', { x: ix + 396, y: y + 64, w: 90, h: 32 }, '最高+1', () => { win.floor = best + 1; }, { color: '#c98a1a', size: 12 });
-  const def = call('tower', 'towerFloorDef', [win.floor], null);
-  let yy = y + 120;
-  if (def) {
-    const en = (def.enemies || def.types || []).map((e) => enemyDef(typeof e === 'string' ? e : e?.id)?.name || (typeof e === 'string' ? e : e?.name)).filter(Boolean);
-    const boss = def.boss ? (enemyDef(typeof def.boss === 'string' ? def.boss : def.boss.id)?.name || def.boss.name || def.boss) : null;
-    const mut = def.mutators || (def.mutator ? [def.mutator] : []);
-    const rows = [
-      ['敵Lv', def.level ?? def.enemyLevel ?? '—'],
-      ['出現', en.length ? en.slice(0, 4).join('・') : '—'],
-      ['ボス', boss || (win.floor % 10 === 0 ? '10階ごとのボス' : 'なし')],
-      ['特性', mut.map((m) => (typeof m === 'string' ? m : m?.name || m?.id)).join(' / ') || 'なし'],
-      ['報酬', def.rewardText || (def.reward ? Object.entries(def.reward).map(([k, v]) => `${k} ${typeof v === 'object' ? JSON.stringify(v) : v}`).join(' ') : '—')],
-    ];
-    for (const [k, v] of rows) {
-      txt(ctx, k, ix + 20, yy, { size: 13, color: COL.sub, sw: 2.5 });
-      txt(ctx, String(v), ix + 100, yy, { size: 13.5, color: k === 'ボス' && boss ? COL.pink : '#fff', maxW: iw - 120, sw: 3 });
-      yy += 28;
-    }
-  }
-  const wk = call('tower', 'towerWeekly', [st], null) || call('tower', 'weeklyMutator', [], null);
-  if (wk) txt(ctx, `週替わり特性: ${typeof wk === 'string' ? wk : wk.name || wk.desc || ''}`, ix + 20, yy + 6, { size: 13, color: COL.gold, maxW: iw - 40 });
-  txt(ctx, '階層が上がるほど敵が強化。10階ごとにボス。最高到達階は記録され、週次報酬に反映されます。', ix + 20, y + h - 96, { size: 11.5, color: COL.dim, maxW: iw - 40, sw: 2.5 });
-  ui.btn(ctx, win, 'towerGo', { x: ix + 20, y: y + h - 70, w: iw - 40, h: 52 }, `▲ ${win.floor}F に入場`, () => {
-    const r = call('tower', 'towerEnter', [g, win.floor], null);
-    if (resultNotify(ui, r, '#b77bff') !== false) ui.closeAll?.();
-  }, { color: '#7b2ff7', size: 18, disabled: locked });
-  void t;
-}
-function drawArenaTab(ui, ctx, win, x, y, w, h) {
-  const g = ui.game, st = g.state;
-  if (!V3.arena) { notReady(ctx, x, y, w, h, 'ネオン・アリーナ'); return; }
-  const info = fn('arena', ['arenaInfo', 'arenaStatus', 'arenaState'])?.(st) || {};
-  const fy = stageBg(ctx, x, y, w, 230, '#ff5fa2');
-  drawChar(ctx, x + w / 2, fy, charLook(st), equipLooks(st), { facing: 1, state: 'attack', t: g.time || 0, attackT: ((g.time || 0) * 1.2) % 1, damage: 0, scale: 1.8 });
-  txt(ctx, 'ネオン・アリーナ', x + w / 2, y + 30, { size: 24, align: 'center', glow: COL.pink, sw: 5 });
-  txt(ctx, '時間制ウェーブ・経験値ボーナス', x + w / 2, y + 58, { size: 13, align: 'center', color: COL.sub });
-  inset(ctx, x, y + 244, w, h - 244, { r: 12 });
-  const rows = [
-    ['本日の残り回数', info.left != null ? `${info.left} / ${info.max ?? info.perDay ?? '?'}` : '—'],
-    ['制限時間', info.time || info.duration ? `${info.time || info.duration}秒` : '—'],
-    ['経験値ボーナス', info.expBonus != null ? `×${info.expBonus}` : '—'],
-    ['自己ベスト', info.best != null ? (typeof info.best === 'object' ? `Wave ${info.best.wave ?? '-'}  撃破 ${info.best.kills ?? '-'}` : `Wave ${info.best}`) : '—'],
-  ];
-  rows.forEach(([k, v], i) => {
-    txt(ctx, k, x + 30, y + 274 + i * 28, { size: 14, color: COL.sub });
-    txt(ctx, String(v), x + w - 30, y + 274 + i * 28, { size: 15, align: 'right' });
-  });
-  ui.btn(ctx, win, 'arenaGo', { x: x + w / 2 - 160, y: y + h - 66, w: 320, h: 50 }, '⚔ アリーナに挑戦', () => {
-    const r = fn('arena', ['arenaEnter', 'enterArena', 'startArena'])?.(g);
-    if (resultNotify(ui, r, COL.pink) !== false) ui.closeAll?.();
-  }, { color: '#d93f86', size: 18, disabled: info.left === 0 });
-}
-function bossList() {
-  const B = val('bosses', 'BOSSES') || val('bosses', 'BOSS_LIST');
-  if (Array.isArray(B)) return B.map((b) => (typeof b === 'string' ? { id: b } : b));
-  if (B && typeof B === 'object') return Object.entries(B).map(([id, b]) => ({ id, ...(typeof b === 'object' ? b : {}) }));
-  return Object.values(allEnemies()).filter((e) => e?.boss).map((e) => ({ id: e.id }));
-}
-function drawBossTab(ui, ctx, win, x, y, w, h) {
-  const g = ui.game, st = g.state, t = g.time || 0;
-  if (!V3.bosses) { notReady(ctx, x, y, w, h, 'デイリー/ウィークリーボス'); return; }
-  const list = bossList();
-  const modes = val('bosses', 'BOSS_MODES') || { normal: { name: 'ノーマル' }, hard: { name: 'ハード' }, chaos: { name: 'カオス' }, practice: { name: '練習' } };
-  const clears = call('bosses', 'bossClears', [st], {}) || {};
-  if (win.sel == null || !list.find((b) => b.id === win.sel)) win.sel = list[0]?.id;
-  // 左: ボス一覧
-  const lw = 280, RH = 52;
-  inset(ctx, x, y, lw, h, { r: 12 });
-  list.slice(0, Math.floor((h - 8) / RH)).forEach((b, i) => {
-    const d = enemyDef(b.enemyId || b.enemy || b.id) || {};
-    const r = { x: x + 6, y: y + 6 + i * RH, w: lw - 12, h: RH - 6 };
-    const on = win.sel === b.id, hov = ui.hover(win, r);
-    inset(ctx, r.x, r.y, r.w, r.h, { r: 9, fill: on ? 'rgba(255,95,162,0.3)' : hov ? 'rgba(123,47,247,0.35)' : 'rgba(6,4,24,0.5)', stroke: on ? '#fff' : undefined });
-    txt(ctx, b.name || d.name || b.id, r.x + 12, r.y + 15, { size: 14, color: '#fff', maxW: r.w - 24 });
-    txt(ctx, `Lv.${b.level ?? d.level ?? '?'}  ${b.kind === 'weekly' || b.weekly ? 'ウィークリー' : 'デイリー'}`, r.x + 12, r.y + 33, { size: 11, color: COL.sub, sw: 2.5 });
-    ui.hit(win, 'boss:' + b.id, r, { onClick: () => { win.sel = b.id; } });
-  });
-  // 右: 詳細
-  const b = list.find((e) => e.id === win.sel);
-  const ix = x + lw + 14, iw = w - lw - 14;
-  if (!b) return;
-  const d = enemyDef(b.enemyId || b.enemy || b.id) || {};
-  const fy = stageBg(ctx, ix, y, iw, 210, '#ff3d7f');
-  ctx.save(); rrPath(ctx, ix, y, iw, 210, 12); ctx.clip();
-  if (d.id) {
-    const dh = Math.max(40, (d.h || 80) * (d.scale || 1));
-    const s = clamp(150 / dh, 0.4, 1.6);
-    ctx.translate(ix + iw / 2, fy); ctx.scale(s, s);
-    drawEnemyArt(ctx, { def: d, x: 0, y: 0, facing: -1, state: 'idle', t, hurtT: 0, hp: 1, maxHp: 1, w: d.w, h: d.h, onGround: true, seed: 3 });
-  }
-  ctx.restore();
-  txt(ctx, b.name || d.name || b.id, ix + 18, y + 26, { size: 20, glow: COL.pink, sw: 5 });
-  const rec = clears[b.id] || {};
-  let yy = y + 226;
-  const MODE_COL = { normal: COL.teal, hard: COL.orange, chaos: COL.pink, practice: COL.dim };
-  Object.entries(modes).forEach(([mid, M], i) => {
-    const r = { x: ix, y: yy + i * 50, w: iw, h: 44 };
-    const mr = rec[mid] || rec.modes?.[mid] || {};
-    inset(ctx, r.x, r.y, r.w, r.h, { r: 10, stroke: rgba(MODE_COL[mid] || COL.teal, 0.7) });
-    txt(ctx, M.name || mid, r.x + 14, r.y + 15, { size: 15, color: MODE_COL[mid] || '#fff' });
-    const lv = M.level ?? (M.levelAdd != null ? (d.level || 0) + M.levelAdd : null);
-    txt(ctx, `${lv != null ? `Lv.${lv}  ` : ''}${mr.left != null ? `残り ${mr.left}回` : ''}${mr.bestTime ? `  最速 ${(mr.bestTime).toFixed?.(1) ?? mr.bestTime}秒` : ''}${mr.bestDmg ? `  最大 ${mr.bestDmg}` : ''}`, r.x + 14, r.y + 33, { size: 11, color: COL.sub, sw: 2.5, maxW: r.w - 150 });
-    ui.btn(ctx, win, 'bossGo:' + mid, { x: r.x + r.w - 124, y: r.y + 6, w: 112, h: 32 }, '挑戦', () => {
-      const res = call('bosses', 'bossEntry', [g, b.id, mid], null);
-      if (resultNotify(ui, res, MODE_COL[mid]) !== false) ui.closeAll?.();
-    }, { color: mid === 'chaos' ? '#c02a52' : mid === 'hard' ? '#c96a1a' : '#109f95', size: 14, disabled: mr.left === 0 });
-  });
-  txt(ctx, '回数は 2 周期まで持ち越し（やり忘れ救済）。記録は自己ベストを更新すると演出あり。', ix, y + h - 10, { size: 11, color: COL.dim, sw: 2.5, maxW: iw });
 }
 function drawLoginTab(ui, ctx, win, x, y, w, h) {
   const g = ui.game, st = g.state, t = g.time || 0;
@@ -783,21 +651,177 @@ function drawLoginTab(ui, ctx, win, x, y, w, h) {
     if (!r?.ok) ui.notify('本日分は受け取り済みです', COL.dim);
   }, { color: '#c98a1a', size: 16, disabled: L.claimedToday });
 }
+function drawTowerTab(ui, ctx, win, x, y, w, h) {
+  const g = ui.game, st = g.state, t = g.time || 0;
+  if (!V3.tower) { notReady(ctx, x, y, w, h, 'ヴァイス・スパイア（無限タワー）'); return; }
+  const req = val('tower', 'TOWER_UNLOCK_LEVEL') ?? 40;
+  const B = call('tower', 'towerBest', [st], null) || {};
+  const best = B.best || 0;
+  const starts = B.startFloors?.length ? B.startFloors : [1];
+  const run = g.towerRun;
+  const nextCont = run && run.cleared ? run.floor + 1 : null;
+  const opts = nextCont ? [...new Set([...starts, nextCont])].sort((a, b) => a - b) : starts;
+  const locked = B.unlocked === false || (st.level || 1) < req;
+  if (!opts.includes(win.floor)) win.floor = nextCont || opts[opts.length - 1];
+  // 左: 塔
+  const tw = 300;
+  const fy = stageBg(ctx, x, y, tw, h, '#b77bff');
+  ctx.save();
+  rrPath(ctx, x, y, tw, h, 12); ctx.clip();
+  const towerX = x + tw / 2;
+  const base = Math.max(1, win.floor - 3);
+  for (let i = 0; i < 13; i++) {
+    const fl = base + i;
+    const yy = fy - 10 - i * 30;
+    const ww = 130 - i * 4;
+    const on = fl <= best, cur = fl === win.floor;
+    ctx.fillStyle = cur ? 'rgba(255,212,71,0.9)' : on ? 'rgba(183,123,255,0.75)' : 'rgba(60,40,110,0.75)';
+    ctx.fillRect(towerX - ww / 2, yy - 24, ww, 26);
+    ctx.strokeStyle = fl % 10 === 0 ? '#ff5fa2' : 'rgba(255,255,255,0.4)'; ctx.lineWidth = fl % 10 === 0 ? 2.5 : 1; ctx.strokeRect(towerX - ww / 2, yy - 24, ww, 26);
+    txt(ctx, `${fl}F${fl % 10 === 0 ? ' BOSS' : fl % 5 === 0 ? ' ELITE' : ''}`, towerX, yy - 11, { size: 11, align: 'center', color: cur ? '#3a2000' : '#fff', sw: 2.5, stroke: cur ? false : undefined });
+  }
+  ctx.restore();
+  txt(ctx, 'ヴァイス・スパイア', x + tw / 2, y + 24, { size: 18, align: 'center', glow: '#b77bff' });
+  txt(ctx, `最高到達 ${best}F  ・  今週 ${B.weekBest || 0}F`, x + tw / 2, y + 48, { size: 13, align: 'center', color: COL.gold });
+  // 右
+  const ix = x + tw + 16, iw = w - tw - 16;
+  inset(ctx, ix, y, iw, h, { r: 12 });
+  if (locked) txt(ctx, `🔒 Lv.${req} で解放されます`, ix + iw / 2, y + 22, { size: 16, align: 'center', color: COL.bad });
+  txt(ctx, '開始する階（10階ごとのチェックポイント）', ix + 16, y + 48, { size: 13, color: COL.sub });
+  opts.slice(-8).forEach((f, i) => {
+    const on = win.floor === f;
+    ui.btn(ctx, win, 'fl' + f, { x: ix + 16 + i * 74, y: y + 62, w: 68, h: 32 }, f === nextCont ? `▶${f}F` : `${f}F`, () => { win.floor = f; }, { color: on ? '#c98a1a' : COL.purple, size: 13, active: on });
+  });
+  const def = call('tower', 'towerFloorDef', [win.floor, g], null);
+  let yy = y + 120;
+  if (def) {
+    const en = (def.enemies || []).map((e) => `${enemyDef(e.id)?.name || e.id}×${e.count}`);
+    const boss = def.boss ? enemyDef(def.boss)?.name || def.boss : def.miniBoss ? `エリート ${enemyDef(def.miniBoss.id)?.name || ''}` : 'なし';
+    const rows = [
+      ['敵Lv', def.displayLevel ?? def.level],
+      ['出現', en.join('・') || '—'],
+      ['ボス', boss],
+      ['特性', (def.mutators || []).map((m) => `${m.name}（${m.desc}）`).join(' / ') || 'なし'],
+      ['制限時間', `${def.timeLimit || '-'}秒  ・ 報酬倍率 ×${(def.rewardMult || 1).toFixed(1)}`],
+    ];
+    for (const [k, v] of rows) {
+      txt(ctx, k, ix + 16, yy, { size: 13, color: COL.sub, sw: 2.5 });
+      for (const [j, ln] of wrap(ctx, String(v), iw - 120, 13, 800).slice(0, 2).entries()) txt(ctx, ln, ix + 100, yy + j * 17, { size: 13, color: k === 'ボス' && def.boss ? COL.pink : '#fff', sw: 3 });
+      yy += 30;
+    }
+  }
+  const wm = B.weekMutator;
+  if (wm) txt(ctx, `今週の特性（11F〜）: ${wm.name} — ${wm.desc}`, ix + 16, yy + 6, { size: 12.5, color: COL.gold, maxW: iw - 32 });
+  txt(ctx, `週次報酬（今週の最高から）: トークン ${B.weeklyPreview || 0} 予定  ・  所持トークン ${B.tokens || 0}`, ix + 16, yy + 30, { size: 12, color: COL.teal, maxW: iw - 32 });
+  txt(ctx, '全滅で次の階へ。10階ごとにボス。最高到達は記録され、週替わりで特性が変わります。', ix + 16, y + h - 84, { size: 11.5, color: COL.dim, maxW: iw - 32, sw: 2.5 });
+  ui.btn(ctx, win, 'towerGo', { x: ix + 16, y: y + h - 64, w: iw - 32, h: 50 }, `▲ ${win.floor}F に入場`, () => {
+    const r = call('tower', 'towerEnter', [g, win.floor], null);
+    if (resultNotify(ui, r, '#b77bff') !== false) ui.closeAll?.();
+  }, { color: '#7b2ff7', size: 18, disabled: locked });
+  void t;
+}
+function drawArenaTab(ui, ctx, win, x, y, w, h) {
+  const g = ui.game, st = g.state;
+  if (!V3.arena) { notReady(ctx, x, y, w, h, 'ネオン・アリーナ'); return; }
+  const info = call('arena', 'arenaInfo', [st], null) || { stages: [] };
+  const stages = info.stages || [];
+  if (!stages.find((s) => s.id === win.sel)) win.sel = ([...stages].reverse().find((s) => s.unlocked) || stages[0])?.id;
+  const fy = stageBg(ctx, x, y, w, 170, '#ff5fa2');
+  drawChar(ctx, x + 120, fy, charLook(st), equipLooks(st), { facing: 1, state: 'attack', t: g.time || 0, attackT: ((g.time || 0) * 1.2) % 1, damage: 0, scale: 1.5 });
+  txt(ctx, 'ネオン・アリーナ', x + w / 2, y + 34, { size: 26, align: 'center', glow: COL.pink, sw: 5 });
+  txt(ctx, `${info.waves || 4}ウェーブ・制限 ${Math.round((info.timeLimit || 360) / 60)}分・撃破経験値 ×1.5`, x + w / 2, y + 66, { size: 13, align: 'center', color: COL.sub });
+  txt(ctx, `挑戦チケット ${info.stock ?? '-'} / ${info.cap ?? '-'}（1日 +${info.perDay ?? '-'}・翌日5時回復）`, x + w / 2, y + 96, { size: 15, align: 'center', color: (info.stock || 0) > 0 ? COL.gold : COL.bad });
+  txt(ctx, `通算クリア ${info.clears || 0} 回`, x + w / 2, y + 122, { size: 12, align: 'center', color: COL.dim });
+  const RH = 52, cw = (w - 12) / 2;
+  stages.forEach((s, i) => {
+    const r = { x: x + (i % 2) * (cw + 12), y: y + 182 + Math.floor(i / 2) * (RH + 6), w: cw, h: RH };
+    const on = win.sel === s.id, hov = ui.hover(win, r);
+    inset(ctx, r.x, r.y, r.w, r.h, { r: 10, fill: on ? 'rgba(255,95,162,0.3)' : hov ? 'rgba(123,47,247,0.35)' : 'rgba(6,4,24,0.55)', stroke: on ? '#fff' : undefined });
+    txt(ctx, (s.unlocked ? '' : '🔒 ') + s.name, r.x + 12, r.y + 16, { size: 14, color: s.unlocked ? '#fff' : COL.dim, maxW: r.w - 120 });
+    txt(ctx, `推奨Lv${s.level}（Lv${s.minLevel}〜）`, r.x + r.w - 12, r.y + 16, { size: 11, align: 'right', color: COL.gold, sw: 2.5 });
+    const b = s.best;
+    txt(ctx, b ? `自己ベスト: ${typeof b === 'object' ? `${b.time ? b.time.toFixed?.(1) + '秒' : ''} ${b.kills != null ? '撃破' + b.kills : ''}` : b}` : (s.desc || ''), r.x + 12, r.y + 36, { size: 11, color: COL.sub, maxW: r.w - 24, sw: 2.5, weight: 700 });
+    ui.hit(win, 'ar:' + s.id, r, { onClick: () => { win.sel = s.id; } });
+  });
+  const sel = stages.find((s) => s.id === win.sel);
+  ui.btn(ctx, win, 'arenaGo', { x: x + w / 2 - 170, y: y + h - 56, w: 340, h: 48 }, `⚔ ${sel?.name || ''} に挑戦`, () => {
+    const r = call('arena', 'arenaEnter', [g, win.sel], null);
+    if (resultNotify(ui, r, COL.pink) !== false) ui.closeAll?.();
+  }, { color: '#d93f86', size: 17, disabled: !sel?.unlocked || (info.stock ?? 1) <= 0 });
+}
+function drawBossTab(ui, ctx, win, x, y, w, h) {
+  const g = ui.game, st = g.state, t = g.time || 0;
+  if (!V3.bosses) { notReady(ctx, x, y, w, h, 'デイリー/ウィークリーボス'); return; }
+  const list = call('bosses', 'bossClears', [st], null) || [];
+  if (!list.find((b) => b.bossId === win.sel)) win.sel = list[0]?.bossId;
+  const lw = 270, RH = 50;
+  inset(ctx, x, y, lw, h, { r: 12 });
+  list.slice(0, Math.floor((h - 8) / RH)).forEach((b, i) => {
+    const r = { x: x + 6, y: y + 6 + i * RH, w: lw - 12, h: RH - 6 };
+    const on = win.sel === b.bossId, hov = ui.hover(win, r);
+    const anyU = Object.values(b.modes || {}).some((m) => m.unlocked);
+    inset(ctx, r.x, r.y, r.w, r.h, { r: 9, fill: on ? 'rgba(255,95,162,0.3)' : hov ? 'rgba(123,47,247,0.35)' : 'rgba(6,4,24,0.5)', stroke: on ? '#fff' : undefined });
+    txt(ctx, (anyU ? '' : '🔒 ') + b.name, r.x + 12, r.y + 14, { size: 13.5, color: anyU ? '#fff' : COL.dim, maxW: r.w - 70 });
+    txt(ctx, `Lv.${b.level}  ${mapInfo(b.fieldId).name}`, r.x + 12, r.y + 31, { size: 10.5, color: COL.sub, sw: 2.5, maxW: r.w - 24 });
+    const cl = Object.values(b.modes || {}).reduce((a, m) => a + (m.clears || 0), 0);
+    if (cl) txt(ctx, `撃破${cl}`, r.x + r.w - 10, r.y + 14, { size: 10.5, align: 'right', color: COL.gold, sw: 2.5 });
+    ui.hit(win, 'boss:' + b.bossId, r, { onClick: () => { win.sel = b.bossId; } });
+  });
+  const b = list.find((e) => e.bossId === win.sel);
+  if (!b) return;
+  const ix = x + lw + 14, iw = w - lw - 14;
+  const d = enemyDef(b.bossId) || {};
+  const fy = stageBg(ctx, ix, y, iw, 170, '#ff3d7f');
+  ctx.save(); rrPath(ctx, ix, y, iw, 170, 12); ctx.clip();
+  if (d.id) {
+    const dh = Math.max(40, (d.h || 80) * (d.scale || 1));
+    const s = clamp(120 / dh, 0.3, 1.5);
+    ctx.translate(ix + iw - 120, fy); ctx.scale(s, s);
+    drawEnemyArt(ctx, { def: { ...d, boss: false }, x: 0, y: 0, facing: -1, state: 'idle', t, hurtT: 0, hp: 1, maxHp: 1, w: d.w, h: d.h, onGround: true, seed: 3 });
+  }
+  ctx.restore();
+  txt(ctx, b.name, ix + 18, y + 28, { size: 22, glow: COL.pink, sw: 5, maxW: iw - 220 });
+  if (b.title) txt(ctx, b.title, ix + 18, y + 54, { size: 12, color: COL.sub, maxW: iw - 220 });
+  txt(ctx, `出現: ${mapInfo(b.fieldId).name}`, ix + 18, y + 78, { size: 12, color: COL.sub });
+  const MODE_COL = { normal: COL.teal, hard: COL.orange, chaos: COL.pink, practice: '#cfc8ff' };
+  let yy = y + 180;
+  const RH2 = Math.min(78, (h - 196) / 4);
+  Object.entries(b.modes || {}).forEach(([mid, M], i) => {
+    const r = { x: ix, y: yy + i * RH2, w: iw, h: RH2 - 6 };
+    const mc = MODE_COL[mid] || COL.teal;
+    inset(ctx, r.x, r.y, r.w, r.h, { r: 10, stroke: rgba(mc, M.unlocked ? 0.8 : 0.3), fill: M.unlocked ? undefined : 'rgba(0,0,0,0.4)' });
+    txt(ctx, (M.unlocked ? '' : '🔒 ') + M.name, r.x + 14, r.y + 16, { size: 15, color: M.unlocked ? mc : COL.dim });
+    const stock = Number.isFinite(M.stock) ? `残り ${M.stock}/${M.cap}（${M.period === 'weekly' ? '週' : '日'}・2周期まで持ち越し）` : '何度でも（報酬なし）';
+    txt(ctx, `推奨Lv${M.recLevel}  HP×${M.hpMult}  ${stock}`, r.x + 110, r.y + 16, { size: 11, color: COL.sub, sw: 2.5, maxW: r.w - 250 });
+    const bt = M.best || {};
+    const rec = M.unlocked ? `撃破 ${M.clears || 0}回  最速 ${bt.time ? bt.time.toFixed(1) + '秒' : '—'}  最大ダメージ ${bt.maxHit ? bt.maxHit.toLocaleString() : '—'}${M.money ? `  報酬 ${fmtMoney(M.money)}` : ''}` : M.reason;
+    txt(ctx, rec, r.x + 14, r.y + 38, { size: 11, color: M.unlocked ? '#fff' : COL.bad, sw: 2.5, maxW: r.w - 150, weight: 700 });
+    ui.btn(ctx, win, 'bossGo:' + mid, { x: r.x + r.w - 122, y: r.y + r.h / 2 - 17, w: 110, h: 34 }, '挑戦', () => {
+      const res = call('bosses', 'bossEntry', [g, b.bossId, mid], null);
+      if (resultNotify(ui, res, mc) !== false) ui.closeAll?.();
+    }, { color: mid === 'chaos' ? '#c02a52' : mid === 'hard' ? '#c96a1a' : mid === 'practice' ? COL.purple : '#109f95', size: 14, disabled: !M.unlocked || M.stock <= 0 });
+  });
+}
 function drawPresetTab(ui, ctx, win, x, y, w, h) {
   const g = ui.game, st = g.state;
   if (!V3.presets) { notReady(ctx, x, y, w, h, 'プリセット切替'); return; }
-  const list = fn('presets', ['presetList', 'getPresets', 'listPresets'])?.(st) || st.presets?.list || st.presets?.slots || [];
-  const active = call('presets', 'activePreset', [st], null) ?? st.presets?.active ?? 0;
-  const names = ['狩り', 'ボス'];
-  txt(ctx, 'スキルバー＆装備セットを 2 つ保存して、ワンクリックで切り替え', x + 6, y + 14, { size: 14, color: COL.sub });
+  const list = call('presets', 'presetList', [st], null) || [];
+  txt(ctx, 'スキルバー＆装備セットを 2 つ保存して、ワンクリックで切り替え（狩り / ボス）', x + 6, y + 14, { size: 14, color: COL.sub });
   const cw = (w - 16) / 2;
+  const findInst = (uid) => {
+    if (!uid) return null;
+    for (const s of st.inventory || []) if (s?.uid === uid) return s;
+    for (const e of Object.values(st.equippedInst || {})) if (e?.uid === uid) return e;
+    return null;
+  };
   for (let i = 0; i < 2; i++) {
-    const P = list[i] || null;
+    const P = list[i] || { name: ['狩り', 'ボス'][i] };
     const cx = x + i * (cw + 16), cy = y + 36, chh = h - 36;
-    const on = active === i;
+    const on = !!P.active;
     panel(ctx, cx, cy, cw, chh, { r: 14, glow: on ? 'rgba(25,211,197,0.7)' : null, inner: on ? 'rgba(25,211,197,0.8)' : undefined });
-    txt(ctx, `${i === 0 ? '🗡' : '👑'} ${P?.name || names[i]}セット${on ? '  （使用中）' : ''}`, cx + 18, cy + 26, { size: 18, color: on ? COL.teal : '#fff' });
-    if (!P) txt(ctx, 'まだ保存されていません', cx + cw / 2, cy + 120, { size: 14, align: 'center', color: COL.dim });
+    txt(ctx, `${i === 0 ? '🗡' : '👑'} ${P.name}セット${on ? '  （使用中）' : ''}`, cx + 18, cy + 26, { size: 18, color: on ? COL.teal : '#fff' });
+    if (P.savedAt) txt(ctx, new Date(P.savedAt).toLocaleString('ja-JP'), cx + cw - 18, cy + 26, { size: 10.5, align: 'right', color: COL.dim, sw: 2.5 });
+    if (!P.saved) txt(ctx, 'まだ保存されていません', cx + cw / 2, cy + 130, { size: 14, align: 'center', color: COL.dim });
     else {
       txt(ctx, 'スキルバー', cx + 18, cy + 58, { size: 12, color: COL.sub });
       (P.skillBar || []).slice(0, 8).forEach((sid, k) => {
@@ -807,33 +831,35 @@ function drawPresetTab(ui, ctx, win, x, y, w, h) {
         txt(ctx, BAR_KEYS[k], r.x + 6, r.y + 8, { size: 9.5, color: COL.teal, sw: 2 });
       });
       txt(ctx, '装備', cx + 18, cy + 134, { size: 12, color: COL.sub });
-      Object.entries(P.equipped || P.equip || {}).filter(([, v]) => v).slice(0, 7).forEach(([slot, v], k) => {
-        const id = typeof v === 'object' ? v.id : v;
+      Object.entries(P.equip || {}).filter(([, v]) => v).slice(0, 7).forEach(([slot, uid], k) => {
+        const inst = findInst(uid);
         const r = { x: cx + 18 + k * 50, y: cy + 146, w: 44, h: 44 };
         inset(ctx, r.x, r.y, r.w, r.h, { r: 8 });
-        const it = getItemDef(id); if (it) drawItemIco(ctx, it, r.x + 22, r.y + 22, 34);
+        const it = inst && getItemDef(inst.id);
+        if (it) drawItemIco(ctx, it, r.x + 22, r.y + 22, 34); else txt(ctx, '?', r.x + 22, r.y + 22, { size: 14, align: 'center', color: COL.bad });
+        if (inst?.star) txt(ctx, '★' + inst.star, r.x + r.w - 2, r.y + r.h - 7, { size: 9.5, align: 'right', color: COL.star, sw: 2 });
         void slot;
       });
     }
     ui.btn(ctx, win, 'psave' + i, { x: cx + 18, y: cy + chh - 60, w: cw / 2 - 26, h: 44 }, '現在の構成を保存', () => {
-      resultNotify(ui, fn('presets', ['savePreset', 'storePreset'])?.(g, i), COL.teal);
+      const ok = call('presets', 'savePreset', [st, i], false);
+      ui.notify(ok ? `「${P.name}」セットに保存した` : '保存できませんでした', ok ? COL.teal : COL.bad);
     }, { color: COL.purple, size: 14 });
     ui.btn(ctx, win, 'pload' + i, { x: cx + cw / 2 + 8, y: cy + chh - 60, w: cw / 2 - 26, h: 44 }, on ? '使用中' : 'このセットに切替', () => {
-      resultNotify(ui, fn('presets', ['loadPreset', 'switchPreset', 'applyPreset'])?.(g, i), COL.teal);
-    }, { color: '#109f95', size: 14, disabled: !P || on });
+      resultNotify(ui, call('presets', 'applyPreset', [g, i], null), COL.teal);
+    }, { color: '#109f95', size: 14, disabled: !P.saved || on });
   }
 }
 function drawStorageTab(ui, ctx, win, x, y, w, h) {
   const g = ui.game, st = g.state;
   if (!V3.shared) { notReady(ctx, x, y, w, h, '共有倉庫'); return; }
-  const sto = fn('shared', ['sharedStorage', 'getStorage', 'storageItems'])?.() || {};
-  const items = Array.isArray(sto) ? sto : (sto.items || []);
-  const cap = sto.cap || sto.max || val('shared', 'STORAGE_MAX') || 48;
+  const items = call('shared', 'sharedStorage', [], null) || [];
+  const cap = val('shared', 'SHARED_STORAGE_SLOTS') || 48;
   const half = (w - 16) / 2;
-  const grid = (gx, list, title, onPick, n) => {
+  const grid = (gx, list, title, onPick, n, key) => {
     inset(ctx, gx, y + 26, half, h - 26, { r: 12 });
     txt(ctx, title, gx + 6, y + 10, { size: 14, color: COL.gold });
-    const C = 50, cols = Math.floor((half - 12) / C);
+    const C = 52, cols = Math.floor((half - 12) / C);
     for (let k = 0; k < Math.min(n, cols * Math.floor((h - 40) / C)); k++) {
       const r = { x: gx + 8 + (k % cols) * C, y: y + 34 + Math.floor(k / cols) * C, w: C - 4, h: C - 4 };
       const e = list[k];
@@ -843,13 +869,14 @@ function drawStorageTab(ui, ctx, win, x, y, w, h) {
       if (!it) continue;
       drawItemIco(ctx, it, r.x + r.w / 2, r.y + r.h / 2, 34);
       if ((e.qty || 1) > 1) txt(ctx, e.qty, r.x + r.w - 3, r.y + r.h - 8, { size: 10.5, align: 'right', sw: 2.5 });
-      if (hov) ui.setTip({ lines: [{ t: it.name, c: rarityInfo(it.rarity).color, size: 15 }, { t: 'クリックで移動', c: COL.dim, size: 11 }], border: rarityInfo(it.rarity).color });
-      ui.hit(win, title + k, r, { onClick: () => onPick(e, k) });
+      if (e.star) txt(ctx, '★' + e.star, r.x + 3, r.y + r.h - 8, { size: 9.5, color: COL.star, sw: 2 });
+      if (hov) ui.setTip({ lines: [{ t: it.name + (e.star ? ` ★${e.star}` : ''), c: rarityInfo(it.rarity).color, size: 15 }, { t: 'クリックで移動（スロット間で共有）', c: COL.dim, size: 11 }], border: rarityInfo(it.rarity).color });
+      ui.hit(win, key + k, r, { onClick: () => onPick(e, k) });
     }
   };
   const inv = (st.inventory || []).map((s, i) => (s ? { ...s, _i: i } : null)).filter(Boolean);
-  grid(x, inv, `インベントリ（${inv.length}/48）→ 預ける`, (e) => resultNotify(ui, fn('shared', ['depositItem', 'deposit', 'storeItem'])?.(g, e.uid ? { uid: e.uid } : e._i, e.qty || 1), COL.teal), 48);
-  grid(x + half + 16, items, `共有倉庫（${items.length}/${cap}）→ 引き出す`, (e, k) => resultNotify(ui, fn('shared', ['withdrawItem', 'withdraw', 'takeItem'])?.(g, k, e.qty || 1), COL.teal), cap);
+  grid(x, inv, `インベントリ（${inv.length}/48）→ 預ける`, (e) => resultNotify(ui, call('shared', 'depositItem', [g, e.uid ? { uid: e.uid } : e._i, e.qty || 1], null), COL.teal), 48, 'inv');
+  grid(x + half + 16, items, `共有倉庫（${items.length}/${cap}）→ 引き出す`, (e, k) => resultNotify(ui, call('shared', 'withdrawItem', [g, k, e.qty || 1], null), COL.teal), cap, 'sto');
 }
 
 // ======================= 実績（O） =======================
@@ -858,69 +885,74 @@ function drawAchieve(ui, ctx, win) {
   if (!st) return;
   const { x, y, w, h } = win;
   if (!V3.achievements) { notReady(ctx, x, y, w, h, '実績'); return; }
-  const list = (call('achievements', 'achievementList', [st], null) || []).map((a) => ({
-    ...a, cat: a.category || a.cat || 'その他', prog: a.progress ?? a.value ?? 0, goal: a.goal ?? a.target ?? a.count ?? 1, done: !!(a.done || a.unlocked || a.completed),
-  }));
-  const cats = ['すべて', ...Array.from(new Set(list.map((a) => a.cat)))];
-  const CAT_NAME = val('achievements', 'ACH_CATEGORIES') || {};
-  const catLabel = (c) => (typeof CAT_NAME[c] === 'string' ? CAT_NAME[c] : CAT_NAME[c]?.name) || c;
-  const done = list.filter((a) => a.done).length;
-  txt(ctx, `達成 ${done} / ${list.length}`, x + w - 20, y + 60, { size: 16, align: 'right', color: COL.gold });
-  // カテゴリ
-  const cx0 = x + 16, cy0 = y + 46;
+  const list = call('achievements', 'achievementList', [st], null) || [];
+  const CN = val('achievements', 'ACH_CATEGORIES') || {};
+  const cats = ['all', ...Object.keys(CN).filter((c) => list.some((a) => a.cat === c))];
+  const S = call('achievements', 'achievementSummary', [st], null);
+  // サマリー
+  if (S) {
+    txt(ctx, `ランク ${S.rank}`, x + w - 20, y + 54, { size: 20, align: 'right', color: COL.gold, glow: COL.orange });
+    txt(ctx, `${S.points} pt${S.nextPoints ? ` / 次 ${S.nextPoints}` : ''}  ・  全ステ +${S.allStat}`, x + w - 20, y + 76, { size: 11, align: 'right', color: COL.sub, sw: 2.5 });
+  }
   win.cat = clamp(win.cat || 0, 0, cats.length - 1);
-  cats.slice(0, 8).forEach((c, i) => {
-    const r = { x: cx0 + i * 96, y: cy0, w: 90, h: 28 };
+  cats.forEach((c, i) => {
+    const r = { x: x + 16 + i * 92, y: y + 44, w: 86, h: 46 };
     const on = win.cat === i;
-    ui.btn(ctx, win, 'cat' + i, r, catLabel(c), () => { win.cat = i; win.page = 0; }, { color: on ? '#d93f86' : COL.purple, size: 12, active: on });
+    const sub = c === 'all' ? list : list.filter((a) => a.cat === c);
+    const dn = sub.filter((a) => a.done).length;
+    const hov = ui.hover(win, r);
+    inset(ctx, r.x, r.y, r.w, r.h, { r: 9, fill: on ? 'rgba(255,95,162,0.45)' : hov ? 'rgba(123,47,247,0.4)' : 'rgba(6,4,24,0.55)', stroke: on ? '#fff' : undefined });
+    txt(ctx, c === 'all' ? 'すべて' : CN[c], r.x + r.w / 2, r.y + 12, { size: 12.5, align: 'center', color: on ? '#fff' : COL.sub, maxW: r.w - 8 });
+    const k = sub.length ? dn / sub.length : 0;
+    ctx.save(); rrPath(ctx, r.x + 8, r.y + 23, r.w - 16, 7, 3.5); ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fill(); ctx.restore();
+    if (k > 0) { ctx.save(); rrPath(ctx, r.x + 8, r.y + 23, Math.max(7, (r.w - 16) * k), 7, 3.5); ctx.fillStyle = k >= 1 ? COL.gold : COL.teal; ctx.fill(); ctx.restore(); }
+    txt(ctx, `${dn} / ${sub.length}`, r.x + r.w / 2, r.y + 38, { size: 9.5, align: 'center', color: k >= 1 ? COL.gold : COL.dim, sw: 2 });
+    ui.hit(win, 'cat' + i, r, { onClick: () => { win.cat = i; win.page = 0; } });
   });
-  const shown = list.filter((a) => win.cat === 0 || a.cat === cats[win.cat]).sort((a, b) => (a.done - b.done) || ((b.prog / b.goal) - (a.prog / a.goal)));
-  // 一覧
-  const lx = x + 16, ly = y + 84, lw = w - 32 - 290, RH = 54, PER = Math.floor((h - 100 - 30) / RH);
+  const shown = list.filter((a) => cats[win.cat] === 'all' || a.cat === cats[win.cat]).sort((a, b) => (b.done - a.done) || ((b.doneAt || 0) - (a.doneAt || 0)));
+  const lx = x + 16, ly = y + 100, lw = w - 32 - 290, RH = 52, PER = Math.floor((h - 116 - 34) / RH);
   const pages = Math.max(1, Math.ceil(shown.length / PER));
   pager(ui, ctx, win, lx + lw / 2 - 56, y + h - 40, pages);
   shown.slice((win.page || 0) * PER, (win.page || 0) * PER + PER).forEach((a, i) => {
     const r = { x: lx, y: ly + i * RH, w: lw, h: RH - 6 };
     inset(ctx, r.x, r.y, r.w, r.h, { r: 10, fill: a.done ? 'rgba(255,212,71,0.14)' : 'rgba(6,4,24,0.55)', stroke: a.done ? rgba(COL.gold, 0.8) : undefined });
-    // トロフィー
-    ctx.save();
-    ctx.beginPath(); ctx.arc(r.x + 24, r.y + r.h / 2, 16, 0, Math.PI * 2);
-    ctx.fillStyle = a.done ? COL.gold : 'rgba(255,255,255,0.1)'; ctx.fill();
-    ctx.restore();
-    txt(ctx, a.done ? '🏆' : '？', r.x + 24, r.y + r.h / 2 + 1, { size: 15, align: 'center', color: a.done ? '#fff' : COL.dim, stroke: false });
-    txt(ctx, a.name || a.id, r.x + 50, r.y + 14, { size: 14, color: a.done ? COL.gold : '#fff', maxW: lw - 200 });
-    txt(ctx, a.desc || '', r.x + 50, r.y + 33, { size: 11, color: COL.sub, maxW: lw - 200, sw: 2.5, weight: 700 });
-    const bw = 130, bx = r.x + r.w - bw - 12;
-    const k = clamp(a.prog / Math.max(1, a.goal), 0, 1);
-    ctx.save(); rrPath(ctx, bx, r.y + 26, bw, 12, 6); ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fill(); ctx.restore();
-    if (k > 0) { ctx.save(); rrPath(ctx, bx, r.y + 26, Math.max(12, bw * k), 12, 6); ctx.fillStyle = a.done ? COL.gold : COL.teal; ctx.fill(); ctx.restore(); }
-    txt(ctx, `${Math.min(a.prog, a.goal)} / ${a.goal}`, bx + bw / 2, r.y + 14, { size: 11, align: 'center', color: a.done ? COL.gold : '#fff', sw: 2.5 });
-    if (a.title || a.reward?.title) txt(ctx, `称号「${a.title?.name || a.title || a.reward.title}」`, bx - 10, r.y + 14, { size: 10.5, align: 'right', color: COL.pink, sw: 2.5, maxW: 140 });
+    ctx.save(); ctx.beginPath(); ctx.arc(r.x + 24, r.y + r.h / 2, 16, 0, Math.PI * 2); ctx.fillStyle = a.done ? COL.gold : 'rgba(255,255,255,0.1)'; ctx.fill(); ctx.restore();
+    txt(ctx, a.done ? '🏆' : a.hidden ? '？' : '・', r.x + 24, r.y + r.h / 2 + 1, { size: 15, align: 'center', color: a.done ? '#fff' : COL.dim, stroke: false });
+    txt(ctx, a.name, r.x + 50, r.y + 14, { size: 14, color: a.done ? COL.gold : '#fff', maxW: lw - 200 });
+    txt(ctx, a.desc || '', r.x + 50, r.y + 32, { size: 11, color: COL.sub, maxW: lw - 160, sw: 2.5, weight: 700 });
+    txt(ctx, `${a.points || 0}pt`, r.x + r.w - 12, r.y + 14, { size: 12, align: 'right', color: a.done ? COL.gold : COL.dim, sw: 2.5 });
+    if (a.progress != null && a.goal) {
+      const k = clamp(a.progress / a.goal, 0, 1), bw = 100, bx = r.x + r.w - bw - 12;
+      ctx.save(); rrPath(ctx, bx, r.y + 28, bw, 9, 4.5); ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fill(); ctx.restore();
+      if (k > 0) { ctx.save(); rrPath(ctx, bx, r.y + 28, Math.max(9, bw * k), 9, 4.5); ctx.fillStyle = COL.teal; ctx.fill(); ctx.restore(); }
+    } else if (a.title) txt(ctx, `称号「${a.title}」`, r.x + r.w - 12, r.y + 32, { size: 10.5, align: 'right', color: COL.pink, sw: 2.5, maxW: 150 });
+    else if (a.done && a.doneAt) txt(ctx, new Date(a.doneAt).toLocaleDateString('ja-JP'), r.x + r.w - 12, r.y + 32, { size: 10, align: 'right', color: COL.dim, sw: 2 });
   });
   if (!shown.length) txt(ctx, '実績がありません', lx + lw / 2, ly + 100, { size: 14, align: 'center', color: COL.dim });
-  // 称号選択
+  // 称号
   const tx = x + w - 290, tw = 274;
-  inset(ctx, tx, ly, tw, h - 100, { r: 12 });
-  txt(ctx, '◆ 称号を選ぶ', tx + 12, ly + 18, { size: 14, color: COL.pink });
-  const titles = (call('achievements', 'titleList', [st], null) || call('achievements', 'unlockedTitles', [st], null) || list.filter((a) => a.done && (a.title || a.reward?.title)).map((a) => ({ id: a.titleId || a.id, name: a.title?.name || a.title || a.reward.title })))
-    .map((tt) => (typeof tt === 'string' ? { id: tt, name: tt } : tt));
-  const cur = st.title?.id || st.titleId || (typeof st.title === 'string' ? st.title : null);
-  const rows = [{ id: null, name: '（なし）' }, ...titles];
-  rows.slice(0, Math.floor((h - 150) / 34)).forEach((tt, i) => {
-    const r = { x: tx + 8, y: ly + 34 + i * 34, w: tw - 16, h: 30 };
-    const on = (cur || null) === tt.id;
+  inset(ctx, tx, ly, tw, h - 112, { r: 12 });
+  txt(ctx, '◆ 称号を選ぶ（HUD に表示）', tx + 12, ly + 18, { size: 13, color: COL.pink });
+  const titles = (call('achievements', 'titleList', [st], null) || []).filter((tt) => tt.owned || !tt.hidden);
+  const cur = st.title || null;
+  const rows = [{ id: null, name: '（なし）', owned: true }, ...titles.sort((a, b) => b.owned - a.owned)];
+  const TR = 32, TPER = Math.floor((h - 160) / TR);
+  const tpages = Math.max(1, Math.ceil(rows.length / TPER));
+  pager(ui, ctx, win, tx + tw / 2 - 56, ly + h - 148, tpages, 'tpage');
+  rows.slice((win.tpage || 0) * TPER, (win.tpage || 0) * TPER + TPER).forEach((tt, i) => {
+    const r = { x: tx + 8, y: ly + 32 + i * TR, w: tw - 16, h: TR - 4 };
+    const on = cur === tt.id;
     const hov = ui.hover(win, r);
-    inset(ctx, r.x, r.y, r.w, r.h, { r: 8, fill: on ? 'rgba(255,95,162,0.35)' : hov ? 'rgba(123,47,247,0.35)' : 'rgba(6,4,24,0.5)', stroke: on ? '#fff' : undefined });
-    txt(ctx, (on ? '✔ ' : '') + tt.name, r.x + 10, r.y + 15.5, { size: 12.5, color: on ? '#fff' : COL.sub, maxW: r.w - 20 });
-    ui.hit(win, 'title:' + (tt.id || 'none'), r, {
+    inset(ctx, r.x, r.y, r.w, r.h, { r: 8, fill: on ? 'rgba(255,95,162,0.35)' : hov && tt.owned ? 'rgba(123,47,247,0.35)' : 'rgba(6,4,24,0.5)', stroke: on ? '#fff' : undefined });
+    txt(ctx, (on ? '✔ ' : tt.owned ? '' : '🔒 ') + tt.name, r.x + 10, r.y + 14.5, { size: 12.5, color: on ? '#fff' : tt.owned ? COL.sub : COL.dim, maxW: r.w - 20 });
+    if (hov && tt.source) ui.setTip({ lines: [{ t: tt.name, c: COL.pink, size: 15 }, { t: '入手: ' + tt.source, c: COL.sub, size: 12 }], border: COL.pink });
+    if (tt.owned) ui.hit(win, 'title:' + (tt.id || 'none'), r, {
       onClick: () => {
-        const res = fn('achievements', ['setTitle', 'equipTitle', 'selectTitle'])?.(g, tt.id);
-        if (res == null) { st.title = tt.id ? { id: tt.id, name: tt.name } : null; }
-        ui.notify(tt.id ? `称号「${tt.name}」をつけた` : '称号を外した', COL.pink);
+        const ok = call('achievements', 'setTitle', [st, tt.id], false);
+        ui.notify(ok ? (tt.id ? `称号「${tt.name}」をつけた` : '称号を外した') : '称号を設定できません', ok ? COL.pink : COL.bad);
       },
     });
   });
-  if (!titles.length) txt(ctx, '実績を達成すると称号が手に入る', tx + tw / 2, ly + 100, { size: 12, align: 'center', color: COL.dim });
 }
 
 // ======================= 設定 =======================

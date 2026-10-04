@@ -187,8 +187,8 @@ export function trackedGuide(game) {
 }
 export function setTracked(game, id) {
   if (!game?.state) return;
-  game.state.trackedMission = id;
-  call('guide', 'setTracked', [game, id], null);
+  if (has('guide', 'setTrackedMission')) call('guide', 'setTrackedMission', [game.state, id], null);
+  else game.state.trackedMission = id;
 }
 
 // ---------------- 設定 ----------------

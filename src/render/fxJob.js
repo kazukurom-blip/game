@@ -466,7 +466,7 @@ export const FX_TYPES = {
   nitroBurst: {
     life: 0.7,
     draw(ctx, e, k) {
-      const r = Math.min(200, e.size || 120) * (0.4 + ease(k) * 0.8);
+      const r = Math.min(170, e.size || 120) * (0.4 + ease(k) * 0.8);
       ctx.globalAlpha = FXA.m * (Math.max(0, 1 - k * 1.8) * 0.85);
       const g = ctx.createRadialGradient(0, 0, 4, 0, 0, r);
       g.addColorStop(0, 'rgba(240,250,255,1)'); g.addColorStop(0.35, rgba('#4fa8ff', 0.85)); g.addColorStop(0.75, rgba(e.color, 0.55)); g.addColorStop(1, rgba(e.color, 0));
@@ -486,7 +486,7 @@ export const FX_TYPES = {
       const r = e.size || 100, hs = Math.max(9, r / (5 + (e.opts.tier || 1)));
       e.parts = [];
       const step = hs * 1.75;
-      const maxN = N(60);
+      const maxN = N(42);
       for (let gy = -r; gy <= r && e.parts.length < maxN; gy += step * 0.866) {
         const row = Math.round(gy / (step * 0.866));
         for (let gx = -r; gx <= r && e.parts.length < maxN; gx += step) {
@@ -895,7 +895,7 @@ export const FX_TYPES = {
       ctx.fillStyle = '#fff6c0'; ctx.fill();
       if (e.t > 0.3) {
         const kt = e.t - 0.3;
-        bigText(ctx, e.opts.title || 'JOB UP!', 0, -200 - Math.min(1, kt * 3) * 14, 34, '#ffe066', e.color, fade, popScale(kt, 0.12));
+        bigText(ctx, e.opts.title || 'JOB UP!', 0, (e.opts.small ? -150 : -200) - Math.min(1, kt * 3) * 14, e.opts.small ? 22 : 34, '#ffe066', e.color, fade, popScale(kt, 0.12));
         if (e.opts.name) bigText(ctx, e.opts.name, 0, -165, 20, '#ffffff', e.color, fade * Math.min(1, kt * 4), 1);
       }
     },
@@ -1011,7 +1011,9 @@ export function themeSpawn(game, e, spawn, impactFn) {
   const f = e.dir;
   const cast = CAST_TYPES[e.type] || near;
   const gy = p ? p.y - e.y : 30; // エフェクト原点から地面までの距離
-  const big = fx > 0.2;          // 最小設定では追加演出を絞る
+  const busy = (game._fxCost || 0) > 6; // 描画が重いときは命中時の追加演出を省く
+  const big = fx > 0.2 && !busy;  // 最小設定では追加演出を絞る
+  if (busy && !CAST_TYPES[e.type] && !near) return;
 
   // ---- 移動スキル: dash → move_<type>
   if (style.kind === 'move' && style.move) {
@@ -1078,7 +1080,7 @@ export function themeSpawn(game, e, spawn, impactFn) {
         if (tnow - lastGhost > 0.05 && fx > 0.2) { lastGhost = tnow; ghostAt(game, c, e.color); }
         if (!e.opts.trail && big) c('ribbon', e.x, e.y, { color: e.color, sub: '#ffffff', size: 50, tier, notes: 2 });
       } else if (cast && (e.type === 'spark' || e.type === 'explosion')) {
-        c('ribbon', e.x, e.y, { color: e.color, sub: '#ff6fb5', size: Math.max(70, W * 0.4), tier: tier + 1, notes: 6 });
+        c('ribbon', e.x, e.y, { color: e.color, sub: '#ff6fb5', size: Math.min(170, Math.max(70, W * 0.4)), tier: tier + 1, notes: 6 });
         if (tier >= 4 && big) c('starBurst', e.x, e.y - 30, { color: e.color, size: 160, tier });
         if (big) ghostAt(game, c, e.color);
       }
@@ -1115,7 +1117,7 @@ export function themeSpawn(game, e, spawn, impactFn) {
         if (p) { c('tireMark', p.x - 30, p.y, { color: e.color, facing: 1, len: 60 }); c('tireMark', p.x + 30, p.y, { color: e.color, facing: -1, len: 60 }); }
       } else if (cast && (e.type === 'explosion' || e.type === 'spark')) {
         e.hide = true;
-        c('nitroBurst', e.x, e.y, { color: e.color, size: W * 0.45, tier });
+        c('nitroBurst', e.x, e.y, { color: e.color, size: Math.min(170, W * 0.4), tier });
         c('flameTrail', e.x, e.y + gy * 0.6, { color: e.color, tier, radial: true, count: 12, blue: true });
         if (tier >= 4 && big) c('orbitalBeam', e.x, e.y, { color: e.color, w: 120, tier, meteor: true, facing: f, gy });
       }
@@ -1134,7 +1136,7 @@ export function themeSpawn(game, e, spawn, impactFn) {
         if (tnow - lastGlitch > 0.04) { lastGlitch = tnow; c('glitch', e.x, e.y, { color: e.color, w: 46, h: 40, tier: 1 }); }
       } else if (cast && (e.type === 'explosion' || e.type === 'spark' || e.type === 'smoke')) {
         if (e.type === 'explosion') e.hide = true;
-        c('hexBurst', e.x, e.y, { color: e.color, size: W * 0.48, tier, core: tier >= 4 });
+        c('hexBurst', e.x, e.y, { color: e.color, size: Math.min(190, W * 0.48), tier, core: tier >= 4 });
         if (big) c('codeRain', e.x, e.y, { color: e.color, w: W, h: Hh * 1.4, tier });
         c('glitch', e.x, e.y, { color: e.color, w: W * 0.6, h: Hh * 0.8, tier });
       }
@@ -1164,7 +1166,7 @@ export function themeSpawn(game, e, spawn, impactFn) {
       case 'netrunner': c('hexBurst', e.x, e.y - 36, { color: col, size: 54, tier }); break;
       case 'dronemaster': c('droneSwarm', e.x, e.y - 30, { color: col, facing: f, n: 2 + (tier >= 4 ? 2 : 0), tx: 0, ty: -10, spread: 80 }); break;
     }
-    if (tier >= 4) c('jobUp', e.x, e.y, { color: col, title: sk.name || 'HYPER', life: 1.6 });
+    if (tier >= 4) c('jobUp', e.x, e.y, { color: col, title: sk.name || 'HYPER', life: 1.6, small: true });
   }
 }
 

@@ -819,24 +819,25 @@ function npcMissions(ui, npc) {
 // ストーリー分岐: m.choices = [{id, text, reward, flag, dialog?}] を会話窓の選択肢に出し MissionManager.choose で確定
 function chosenOf(g, id) {
   const ms = g.state?.missions;
-  return guard('chosen', () => g.missions?.chosen?.(id), null) ?? ms?.choices?.[id] ?? ms?.choice?.[id] ?? null;
+  if (typeof g.missions?.needsChoice === 'function') return guard('needsChoice', () => !g.missions.needsChoice(id), true) ? (g.state?.storyChoices?.[id] || true) : null;
+  return g.state?.storyChoices?.[id] ?? ms?.choices?.[id] ?? null;
 }
 function askChoice(ui, win, m) {
   const g = ui.game;
   say(win, m.dialog?.choice?.length ? m.dialog.choice : (m.choicePrompt ? [m.choicePrompt] : ['……で、どうする？ ここが分かれ道だぜ。']), () => {
-    win.brief = { ...m, desc: '選んだ道でセリフ・報酬・称号が変わる。', objectives: [] };
+    win.brief = { ...m, desc: '選んだ道でセリフ・追加報酬・称号が変わる。', objectives: m.choices.map((c) => ({ text: `${c.text}  →  ${rewardText(c.reward || {})}` })) };
     win.opts = m.choices.map((c) => ({
-      label: '▷ ' + c.text, color: COL.gold, fn: () => {
+      label: c.text, color: COL.gold, fn: () => {
         win.brief = null;
         const r = guard('choose', () => g.missions?.choose?.(m.id, c.id), null);
         if (r === false || r?.ok === false) { ui.notify(r?.msg || '選べませんでした', COL.bad); menu(ui, win); return; }
-        const ms = g.state?.missions;
-        if (ms && r == null) (ms.choices ||= {})[m.id] = c.id; // choose 未実装時の保険
+        if (r == null && g.state) (g.state.storyChoices ||= {})[m.id] = c.id; // choose 未実装時の保険
         const stillActive = (g.state?.missions?.active || []).includes(m.id);
         let rw = r?.reward || null;
         if (stillActive && guard('isComplete', () => g.missions?.isComplete?.(m.id), false)) rw = guard('turnIn', () => g.missions?.turnIn?.(m.id), null) || rw;
         say(win, c.dialog?.length ? c.dialog : (m.dialog?.done?.length ? m.dialog.done : ['……そうか。それがお前の答えか。']), () => {
-          win.reward = { ...m, reward: c.reward || m.reward };
+          const R = m.reward || {}, C = c.reward || {};
+          win.reward = { ...m, reward: { ...R, money: (R.money || 0) + (C.money || 0), items: [...(R.items || []), ...(C.items || [])] } };
           win.opts = [{ label: 'OK', fn: () => { win.reward = null; say(win, ['また頼むぜ。'], null); } }];
         });
         void rw;
@@ -854,7 +855,8 @@ function menu(ui, win) {
         if (m.choices?.length && !chosenOf(g, m.id)) { askChoice(ui, win, m); return; }
         const res = guard('turnIn', () => g.missions?.turnIn?.(m.id), null);
         if (res === false) { ui.notify('まだ報告できません', COL.bad); return; } // 成功通知は MissionManager 側
-        say(win, m.dialog?.done?.length ? m.dialog.done : ['よくやってくれた！'], () => {
+        const doneLines = guard('mdialog', () => g.missions?.dialog?.(m.id, 'done'), null);
+        say(win, doneLines?.length ? doneLines : m.dialog?.done?.length ? m.dialog.done : ['よくやってくれた！'], () => {
           win.reward = m;
           win.opts = [{ label: 'OK', fn: () => { win.reward = null; say(win, ['また頼むぜ。'], null); } }];
         });
