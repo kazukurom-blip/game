@@ -19,7 +19,8 @@ import { updateSkills, resetCooldowns } from './systems/skills.js';
 import { setPlayerInvuln } from './systems/combat.js';
 
 import { drawBackground, drawMapTiles, drawNightOverlay } from './render/background.js';
-import { spawnEffect, updateEffects, drawEffects } from './render/effects.js';
+import * as FX from './render/effects.js';
+const { spawnEffect, updateEffects, drawEffects } = FX;
 
 import { UIManager } from './ui/ui.js';
 import { drawHUD } from './ui/hud.js';
@@ -28,6 +29,10 @@ import { drawTitle, titleInput } from './ui/title.js';
 import { DebugPanel } from './debug/debug.js';
 
 const W = 1280, H = 720;
+function loadSettings() {
+  const def = { fx: 1, dmgCompact: false, bgm: 0.8, se: 0.9 };
+  try { return { ...def, ...(JSON.parse(localStorage.getItem('nvs_settings') || '{}')) }; } catch { return def; }
+}
 // カメラ下端: 地面が画面 y≈560 に来るまで下げる（HUD 下部 ~120px に足元や NPC 名が隠れないように）
 const HUD_BOTTOM = 160;
 const camMaxY = (map) => Math.max(0, Math.max(map.height || 0, (map.groundY || 0) + HUD_BOTTOM) - H);
@@ -60,6 +65,8 @@ const game = {
   spawner: null, missions: null, ui: null, debug: null,
   wanted: 0, wantedHeat: 0,
   paused: false,
+  hitstop: 0, camZoom: 1, flash: null,
+  settings: loadSettings(),
   hasSave,
   lastError: null,
 
@@ -96,6 +103,7 @@ window.game = game; // デバッグ/テスト用
 
 game.ui = new UIManager(game);
 game.debug = new DebugPanel(game);
+game.saveSettings = () => { try { localStorage.setItem('nvs_settings', JSON.stringify(game.settings)); } catch { /* ignore */ } };
 // 永続的なイベント購読（各 attach は game.state を都度参照する）
 safe('attachAudio', () => attachAudio(game));
 audio.notifyRadio = false; // HUD がラジオ局名を表示する
@@ -240,6 +248,12 @@ function updatePlay(dt) {
   // ワールドマップ表示中はワールドを一時停止
   if (game.paused || safe('ui.isOpen', () => game.ui.isOpen?.('worldmap'))) return;
 
+  // ヒットストップ中はワールドを止める（UI・カメラは動かす）
+  if (game.hitstop > 0) {
+    game.hitstop = Math.max(0, game.hitstop - dt);
+    updateCamera(dt);
+    return;
+  }
   safe('clock', () => updateClock(dt));
   safe('player', () => game.player.update(dt));
   updateList(game.enemies, dt, 'enemy');
@@ -266,7 +280,10 @@ function drawPlay() {
 
   const skip = game.debug.skip || {}; // デバッグ: 描画レイヤーを個別に止めて負荷を調べる
   if (!skip.bg) safe('bg', () => drawBackground(ctx, map, cam, W, H, game.time));
+  game.camZoom += (1 - game.camZoom) * Math.min(1, game.dt * 8);
+  const z = game.camZoom || 1;
   ctx.save();
+  if (z !== 1) { ctx.translate(W / 2, H * 0.6); ctx.scale(z, z); ctx.translate(-W / 2, -H * 0.6); }
   ctx.translate(-cam.x, -cam.y);
   if (!skip.tiles) safe('tiles', () => drawMapTiles(ctx, map, game.time));
   const visible = (e) => e.x > cam.x - 300 && e.x < cam.x + W + 300;
@@ -290,6 +307,14 @@ function drawPlay() {
     ctx.restore();
   }
 
+  // 色フラッシュ（大技）
+  if (game.flash && game.flash.a > 0) {
+    ctx.save(); ctx.globalAlpha = Math.min(0.6, game.flash.a) * (game.settings.fx ?? 1);
+    ctx.fillStyle = game.flash.color || '#fff'; ctx.fillRect(0, 0, W, H); ctx.restore();
+    game.flash.a -= game.dt * 3;
+  }
+  if (!skip.hud) safe('cutin', () => FX.drawCutins?.(ctx, game));
+  if (!skip.hud) safe('combo', () => FX.drawCombo?.(ctx, game));
   if (!skip.hud) safe('hud', () => drawHUD(ctx, game));
   if (!skip.hud) safe('ui.draw', () => game.ui.draw(ctx));
   safe('debug.draw', () => game.debug.draw(ctx));
