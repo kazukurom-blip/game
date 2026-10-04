@@ -4,6 +4,7 @@ import { ENEMIES } from '../data/enemies.js';
 import { ITEMS } from '../data/items.js';
 import { countItem, removeItem, addItem } from './inventory.js';
 import { gainExp } from './progression.js';
+import { canTakeJobMission, advanceJob } from './jobs.js';
 
 export { MISSIONS, MISSION_NPCS };
 
@@ -98,9 +99,9 @@ export class MissionManager {
   _onReach(mapId) { if (mapId) this._bump((o) => o.type === 'reach' && o.target === mapId); }
   _onWanted(level) { if (level != null) this._bump((o) => o.type === 'wanted' && level >= o.target); }
 
-  /** NPC が今オファーできるミッション */
+  /** NPC が今オファーできるミッション（転職ミッション type:'job' は吹き出しからのみ受注するので含めない） */
   available(npcId) {
-    return Object.values(MISSIONS).filter((m) => m.giver === npcId && this.canAccept(m.id));
+    return Object.values(MISSIONS).filter((m) => m.giver === npcId && m.type !== 'job' && this.canAccept(m.id));
   }
 
   /** NPC に報告できる（完了済み）ミッション */
@@ -130,6 +131,7 @@ export class MissionManager {
       if (ms.daily[id] === todayKey()) return false;
     } else if (ms.completed.includes(id)) return false;
     if (st.level < (m.reqLevel || 1)) return false;
+    if (m.type === 'job' && !canTakeJobMission(st, m.jobId)) return false;
     return (m.prereq || []).every((p) => ms.completed.includes(p));
   }
 
@@ -196,6 +198,7 @@ export class MissionManager {
     }
     g.notify?.(`ミッション完了: ${m.name}  EXP+${r.exp || 0} $${r.money || 0}`, '#5cff9a');
     if (r.exp) gainExp(g, r.exp);
+    if (m.type === 'job') advanceJob(g, m.jobId);
     g.events?.emit('missionComplete', { id });
     return r;
   }
@@ -219,7 +222,7 @@ export class MissionManager {
         return `${ok ? '✔' : '・'}${t}`;
       }).filter(Boolean);
       if (done) lines.push(`→ ${MISSION_NPCS[turnInNpc]?.name || turnInNpc} に報告`);
-      out.push({ id, name: m.name, lines, complete: done, category: m.category });
+      out.push({ id, name: m.name, lines, complete: done, category: m.category, ...(m.type === 'job' ? { type: 'job', jobId: m.jobId } : {}) });
     }
     return out;
   }

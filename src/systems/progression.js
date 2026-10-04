@@ -4,6 +4,7 @@ import { SKILLS, STARTER_SKILLS } from '../data/skills.js';
 import { spawnEffect } from '../render/effects.js';
 import { expToNext, MAX_LEVEL } from '../data/balance.js';
 import { bookBonus } from './book.js';
+import { jobBonusOf, newJobState, jobStateOf } from '../data/jobs.js';
 
 
 // ヒーロー別の基礎値
@@ -53,6 +54,8 @@ export function newState(heroId = 'luna') {
     sns: newSnsState(),
     itemsFound: {},
     clock: 9,
+    // v3 転職
+    job: newJobState(),
     version: STATE_VERSION,
   };
   const s = computeStats(state, []);
@@ -61,7 +64,7 @@ export function newState(heroId = 'luna') {
   return state;
 }
 
-export const STATE_VERSION = 2;
+export const STATE_VERSION = 3; // v3: state.job
 export function newSnsState() { return { followers: 0, posts: [], milestones: [], totalLikes: 0 }; }
 
 /**
@@ -127,6 +130,17 @@ export function migrateState(state) {
     for (const id of state.rareFound) state.itemsFound[id] = true;
   }
   state.clock = num(state.clock, 9);
+  // v3 転職: 旧セーブは見習い（Lv10以上でも自動転職しない。吹き出しから転職する）
+  const js = jobStateOf(state);
+  state.job = { id: js.id, tier: js.tier, history: js.history.filter((h) => h && typeof h === 'object') };
+  // v3: 共通移動スキル「ストリートダッシュ」を補完
+  for (const [sid, lv] of Object.entries(STARTER_SKILLS[state.heroId].skills)) {
+    if (!(state.skills[sid] > 0)) {
+      state.skills[sid] = lv;
+      const i = state.skillBar.indexOf(null);
+      if (i >= 0 && SKILLS[sid]?.kind !== 'passive' && !state.skillBar.includes(sid)) state.skillBar[i] = sid;
+    }
+  }
   const s = computeStats(state, []);
   state.hp = Math.max(0, Math.min(num(state.hp, s.maxHp), s.maxHp));
   state.mp = Math.max(0, Math.min(num(state.mp, s.maxMp), s.maxMp));
@@ -161,7 +175,7 @@ export function computeStats(state, buffs) {
   }
 
   // パッシブ
-  const pas = { critAdd: 0, critDmgAdd: 0, maxHpPct: 0, defAdd: 0, dmgReduce: 0, speedAdd: 0, atkAdd: 0 };
+  const pas = { critAdd: 0, critDmgAdd: 0, maxHpPct: 0, defAdd: 0, dmgReduce: 0, speedAdd: 0, atkAdd: 0, attackSpeedPct: 0 };
   for (const [sid, lv] of Object.entries(state.skills || {})) {
     const sk = SKILLS[sid];
     if (!sk || sk.kind !== 'passive' || !lv || !sk.passive) continue;
@@ -170,17 +184,19 @@ export function computeStats(state, buffs) {
   }
 
   // バフ
-  const bf = { atkPct: 0, speedPct: 0, defPct: 0, critAdd: 0, luckAdd: 0 };
+  const bf = { atkPct: 0, speedPct: 0, defPct: 0, critAdd: 0, luckAdd: 0, attackSpeedPct: 0 };
   for (const b of buffs || []) for (const k in bf) bf[k] += b[k] || 0;
 
   // 図鑑ボーナス（永続）
   const bk = bookBonus(state);
+  // 転職ボーナス（永続。系譜の合計）
+  const jb = jobBonusOf(state);
 
   const s = state.stats || {};
-  const str = (s.str || 0) + eq.str;
-  const dex = (s.dex || 0) + eq.dex;
-  const int = (s.int || 0) + eq.int;
-  const luk = (s.luk || 0) + eq.luk + bk.luk;
+  const str = (s.str || 0) + eq.str + jb.str;
+  const dex = (s.dex || 0) + eq.dex + jb.dex;
+  const int = (s.int || 0) + eq.int + jb.int;
+  const luk = (s.luk || 0) + eq.luk + bk.luk + jb.luk;
 
   const weaponType = weapon ? weapon.weaponType : 'melee';
   let statAtk;
@@ -188,15 +204,16 @@ export function computeStats(state, buffs) {
   else if (weaponType === 'magic') statAtk = int * 0.6 + luk * 0.15;
   else statAtk = str * 0.5 + dex * 0.2;
 
-  const maxHp = Math.round((base.hp + base.hpPerLv * (L - 1) + str * 2 + eq.maxHp + bk.maxHp) * (1 + pas.maxHpPct));
-  const maxMp = Math.round(base.mp + base.mpPerLv * (L - 1) + int * 3 + eq.maxMp + bk.maxMp);
-  const atk = Math.max(1, Math.round((5 + 1.5 * L + eq.atk + statAtk + pas.atkAdd + bk.atk) * (1 + bf.atkPct)));
-  const def = Math.round((base.def + eq.def + str * 0.2 + L * 0.5 + pas.defAdd + bk.def) * (1 + bf.defPct));
-  const speed = Math.min(450, Math.round((base.speed + eq.speed + dex * 0.3 + pas.speedAdd) * (1 + bf.speedPct)));
+  const maxHp = Math.round((base.hp + base.hpPerLv * (L - 1) + str * 2 + eq.maxHp + bk.maxHp + jb.maxHp) * (1 + pas.maxHpPct));
+  const maxMp = Math.round(base.mp + base.mpPerLv * (L - 1) + int * 3 + eq.maxMp + bk.maxMp + jb.maxMp);
+  const atk = Math.max(1, Math.round((5 + 1.5 * L + eq.atk + statAtk + pas.atkAdd + bk.atk + jb.atk) * (1 + bf.atkPct)));
+  const def = Math.round((base.def + eq.def + str * 0.2 + L * 0.5 + pas.defAdd + bk.def + jb.def) * (1 + bf.defPct));
+  const speed = Math.min(450, Math.round((base.speed + eq.speed + dex * 0.3 + pas.speedAdd + jb.speed) * (1 + bf.speedPct)));
   const jump = Math.min(1000, base.jump + Math.min(60, eq.speed * 0.5));
-  const crit = Math.min(0.8, base.crit + luk * 0.002 + dex * 0.0005 + eq.crit / 100 + pas.critAdd + bf.critAdd + bk.crit);
-  const critDmg = base.critDmg + luk * 0.002 + pas.critDmgAdd;
-  const attackSpeed = weapon ? weapon.attackSpeed : 2.5;
+  const crit = Math.min(0.8, base.crit + luk * 0.002 + dex * 0.0005 + eq.crit / 100 + pas.critAdd + bf.critAdd + bk.crit + jb.crit);
+  const critDmg = base.critDmg + luk * 0.002 + pas.critDmgAdd + jb.critDmg;
+  // ブースター（攻撃速度アップ）: 最大 +60%
+  const attackSpeed = (weapon ? weapon.attackSpeed : 2.5) * (1 + Math.min(0.6, pas.attackSpeedPct + bf.attackSpeedPct));
   const range = weapon ? weapon.range : 60;
 
   return {
@@ -204,9 +221,10 @@ export function computeStats(state, buffs) {
     attackSpeed, attackCooldown: 1 / attackSpeed,
     range, weaponType, weaponStyle: weapon ? weapon.look.style : null,
     luck: luk + bf.luckAdd,
-    dmgReduce: Math.min(0.5, pas.dmgReduce),
+    dmgReduce: Math.min(0.5, pas.dmgReduce + jb.dmgReduce),
     pet: petItem ? { id: petItem.id, ...petItem.pet } : null,   // {id, pickRange, pickRate, name}
     book: bk,
+    job: jb,
     str, dex, int, luk,
   };
 }

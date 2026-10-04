@@ -520,7 +520,7 @@ function drawToasts(ctx, game, s, dt) {
 // ---------- レアドロップバナー ----------
 function drawBanner(ctx, game) {
   const b = game.ui?.banners?.[0];
-  if (!b) return;
+  if (!b || game.ui?.petFx) return;
   const item = b.item || {};
   const info = rarityInfo(item.rarity);
   const t = b.t, life = b.life;
@@ -602,7 +602,7 @@ function drawBanner(ctx, game) {
 // ---------- レベルアップ演出 ----------
 function drawLevelUp(ctx, game) {
   const fx = game.ui?.levelFx;
-  if (!fx) return;
+  if (!fx || game.ui?.petFx) return; // PET 入手演出中は待たせる（重ねない）
   const t = fx.t, life = fx.life || 3;
   if (t > life) return;
   const a = clamp(t / 0.15, 0, 1) * (1 - clamp((t - life + 0.6) / 0.6, 0, 1));

@@ -1,5 +1,6 @@
 // スキル使用・クールダウン・バフ・習得
-import { SKILLS } from '../data/skills.js';
+import { SKILLS, jobSkillUnlocked } from '../data/skills.js';
+import { JOBS, hasJob } from '../data/jobs.js';
 import { Projectile } from '../entities/projectile.js';
 import { rectOverlap, entRect } from '../world/physics.js';
 import { spawnEffect } from '../render/effects.js';
@@ -48,7 +49,7 @@ export function useSkill(game, skillId) {
   const st = game.state;
   const p = game.player;
   if (!sk || !p) return false;
-  if (skillsBlockedHere(game)) {
+  if (skillsBlockedHere(game) && !sk.townOk) {
     const t = typeof game.time === 'number' ? game.time : performance.now() / 1000;
     if (t - _lastTownWarn >= TOWN_SKILL_WARN_INTERVAL || t < _lastTownWarn) {
       _lastTownWarn = t;
@@ -67,8 +68,11 @@ export function useSkill(game, skillId) {
   const mp = sk.mp(lv);
   if (st.mp < mp) { warn(game, 'MPが足りない！'); return false; }
 
+  const mv = sk.kind === 'move' ? moveParams(st, skillId, lv) : null;
+  if (mv && mv.airOnly && p.onGround === true && !p.climbing) return false; // フラッシュジャンプは空中のみ（MP/CDは消費しない）
+
   st.mp -= mp;
-  const total = sk.cooldown(lv);
+  const total = mv ? mv.cooldown : sk.cooldown(lv);
   cds[skillId] = { left: total, total };
   const stats = computeStats(st);
   const f = p.facing || 1;
@@ -125,6 +129,14 @@ export function useSkill(game, skillId) {
       game.notify?.(`${sk.name}！`, sk.color);
       break;
     }
+    case 'move': {
+      // 実際の動き（物理）は entities/player.js の doMoveSkill(skill, lv, params) が担当（無ければ何もしない）
+      p.doMoveSkill?.(sk, lv, mv);
+      if (mv.invuln > 0) setPlayerInvuln(game, mv.invuln);
+      if (sk.effect) spawnEffect(game, sk.effect, p.x, p.y - p.h / 2, { color: sk.color, facing: f });
+      if (mv.afterBuff) addBuff(game, { id: sk.id + '_after', name: sk.name, color: sk.color, ...mv.afterBuff });
+      break;
+    }
     default:
       return false;
   }
@@ -169,12 +181,41 @@ export function updateSkills(game, dt) {
 
 export function isDashing() { return !!_dash; }
 
+/**
+ * moveParams(state, skillId, lv?) → 移動スキル（kind:'move'）の実効パラメータ（3次の強化パッシブ込み）
+ *  {type, power, distance, cooldown, invuln, afterBuff|null, enhancedBy:[skillId], ...move の追加キー(lift/time/gravityScale/airOnly)}
+ */
+export function moveParams(state, skillId, lv) {
+  const sk = SKILLS[skillId];
+  if (!sk || sk.kind !== 'move' || !sk.move) return null;
+  lv = lv ?? Math.max(1, skillLevel(state, skillId));
+  const m = sk.move;
+  const out = { ...m, distance: (m.distance || 0) + (m.perLv || 0) * (lv - 1), power: m.power || 0, invuln: m.invuln || 0, cooldown: sk.cooldown(lv), afterBuff: null, enhancedBy: [] };
+  delete out.perLv;
+  for (const [eid, elv] of Object.entries(state?.skills || {})) {
+    const e = SKILLS[eid];
+    if (!e || e.enhances !== skillId || !elv || typeof e.enhance !== 'function') continue;
+    const b = e.enhance(elv);
+    out.enhancedBy.push(eid);
+    if (b.distancePct) out.distance *= 1 + b.distancePct;
+    if (b.powerPct) out.power *= 1 + b.powerPct;
+    if (b.cooldownCut) out.cooldown *= Math.max(0.2, 1 - b.cooldownCut);
+    if (b.invulnAdd) out.invuln += b.invulnAdd;
+    if (b.afterBuff) out.afterBuff = { ...(out.afterBuff || {}), ...b.afterBuff };
+  }
+  out.distance = Math.round(out.distance);
+  out.power = Math.round(out.power);
+  out.cooldown = Math.round(out.cooldown * 100) / 100;
+  return out;
+}
+
 /** learnSkill(game, skillId) → bool（SP を1消費してレベル+1） */
 export function learnSkill(game, skillId) {
   const sk = SKILLS[skillId];
   const st = game.state;
   if (!sk) return false;
   if (sk.hero !== 'both' && sk.hero !== st.heroId) { game.notify?.('このキャラは習得できません', '#ff8a8a'); return false; }
+  if (!jobSkillUnlocked(st, sk)) { game.notify?.(`「${JOBS[sk.reqJob]?.name || sk.reqJob}」に転職すると習得可能`, '#ff8a8a'); return false; }
   if (st.level < sk.reqLevel) { game.notify?.(`Lv.${sk.reqLevel} で習得可能`, '#ff8a8a'); return false; }
   const lv = skillLevel(st, skillId);
   if (lv >= sk.maxLevel) { game.notify?.(`${sk.name} はMAXレベルです`, '#ffd23f'); return false; }
@@ -191,10 +232,17 @@ export function learnSkill(game, skillId) {
   return true;
 }
 
+/** 転職スキルのロック理由（UI用）: null（習得条件OK）| {reqJob, jobName} */
+export function jobLockOf(state, skillId) {
+  const sk = SKILLS[skillId];
+  if (!sk?.reqJob || hasJob(state, sk.reqJob)) return null;
+  return { reqJob: sk.reqJob, jobName: JOBS[sk.reqJob]?.name || sk.reqJob };
+}
+
 /** スキル習得可能か（UI用） */
 export function canLearn(state, skillId) {
   const sk = SKILLS[skillId];
   if (!sk) return false;
-  return (sk.hero === 'both' || sk.hero === state.heroId) && state.level >= sk.reqLevel &&
+  return (sk.hero === 'both' || sk.hero === state.heroId) && state.level >= sk.reqLevel && jobSkillUnlocked(state, sk) &&
     skillLevel(state, skillId) < sk.maxLevel && (state.sp || 0) > 0;
 }

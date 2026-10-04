@@ -150,7 +150,7 @@ const STYLE_DECOR = {
 };
 
 // decor の半幅（概算, px）。ポータル前や大物同士の重なりを避けるのに使う
-const DECOR_HALF_W = { billboard: 120, container: 100, rocket: 70, car: 80, slotMachine: 34, neonSign: 75, mangrove: 70, palm: 40, satelliteDish: 45, antenna: 25, graffiti: 60, bench: 40 };
+const DECOR_HALF_W = { billboard: 120, container: 100, rocket: 70, car: 80, slotMachine: 34, neonSign: 75, mangrove: 70, palm: 40, satelliteDish: 45, antenna: 25, graffiti: 98, bench: 40 };
 const halfW = (t) => DECOR_HALF_W[t] ?? 24;
 const BIG_DECOR = new Set(['billboard', 'container', 'rocket', 'car', 'slotMachine', 'neonSign', 'graffiti']);
 // 地面の decor を並べる（ポータルの前・大物同士の重なりを避ける）
@@ -162,7 +162,7 @@ function clearAbove(type, x, baseY, platforms, self) {
   const hw = halfW(type);
   return !platforms.some((q) => q !== self && !q.ceiling && q.y < baseY - 8 && q.y > baseY - ht && q.x < x + hw && q.x + q.w > x - hw);
 }
-function placeGroundDecor(R, set, portals, groundY, x0, x1, step, portalAll, existing = [], platforms = null) {
+function placeGroundDecor(R, set, portals, groundY, x0, x1, step, portalAll, existing = [], platforms = null, walls = null) {
   const out = [];
   let lastBigR = -1e9;
   const fixed = existing.filter((d) => BIG_DECOR.has(d.type) && (d.y == null || d.y === groundY));
@@ -173,6 +173,8 @@ function placeGroundDecor(R, set, portals, groundY, x0, x1, step, portalAll, exi
     const hw = halfW(type);
     // p.y は finish() 前は未設定（= 地面）
     if (portals.some((p) => (portalAll || p.y == null || p.y === groundY) && Math.abs(p.x - x) < hw + 70)) continue;
+    // 地形の壁（障害物）と重ねない（壁の前にグラフィティ壁などが重なって見えていた）
+    if (walls && walls.some((wl) => x + hw > wl.x - 12 && x - hw < wl.x + wl.w + 12) && (BIG_DECOR.has(type) || DECOR_TALL[type])) continue;
     if (BIG_DECOR.has(type)) {
       if (x - hw < lastBigR + 16) continue;
       if (fixed.some((d) => Math.abs(d.x - x) < hw + halfW(d.type) + 16)) continue;
@@ -298,7 +300,7 @@ function field(cfg) {
 
   // decor
   const set = STYLE_ONLY[cfg.style] ? [...STYLE_DECOR[cfg.style], 'crate'] : [...DECOR_SETS[cfg.region], ...(STYLE_DECOR[cfg.style] || [])];
-  const decor = placeGroundDecor(R, set, portals, groundY, 160 + R.range(0, 120), width - 120, [170, 320], false, [], platforms);
+  const decor = placeGroundDecor(R, set, portals, groundY, 160 + R.range(0, 120), width - 120, [170, 320], false, [], platforms, map.walls);
   const pset = PLAT_DECOR[cfg.region];
   for (const p of platforms) {
     if (p.ceiling || p.w <= 260 || !R.chance(0.3)) continue;

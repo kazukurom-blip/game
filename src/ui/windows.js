@@ -517,7 +517,6 @@ function drawMissions(ui, ctx, win) {
   const pages = Math.max(1, Math.ceil(ids.length / PER));
   win.page = clamp(win.page || 0, 0, pages - 1);
   pager(ui, ctx, win, x + w - 130, y + 48, pages);
-  if (!ids.length) txt(ctx, ['進行中のミッションはありません', '受注できるミッションはありません', 'まだ完了したミッションはありません'][win.tab], x + w / 2, y + h / 2, { size: 15, align: 'center', color: COL.dim });
   if (win.sel == null || !ids.includes(win.sel)) win.sel = ids[0] ?? null;
   ids.slice(win.page * PER, win.page * PER + PER).forEach((id, k) => {
     const m = missionDef(id);
@@ -533,6 +532,8 @@ function drawMissions(ui, ctx, win) {
   // 詳細
   const dx = x + 16 + lw + 12, dw = x + w - 16 - dx, dy = y + 86, dh = y + h - 16 - dy;
   inset(ctx, dx, dy, dw, dh, { r: 12 });
+  // 空の時の案内は詳細パネルの中央に（以前は窓の中央に描いて詳細パネルの枠に隠れていた）
+  if (!ids.length) txt(ctx, ['進行中のミッションはありません', '受注できるミッションはありません', 'まだ完了したミッションはありません'][win.tab], dx + dw / 2, dy + dh / 2, { size: 15, align: 'center', color: COL.dim, maxW: dw - 24 });
   const m = missionDef(win.sel);
   if (!m) return;
   let yy = dy + 22;

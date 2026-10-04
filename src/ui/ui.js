@@ -13,7 +13,7 @@ Object.assign(WINDOW_DRAW, { worldmap: drawWorldMap, book: drawBook, phone: draw
 const W = 1280, H = 720;
 const MODAL = new Set(['dialog', 'shop', 'death', 'worldmap']);
 const LAYOUT = {
-  inventory: { w: 800, h: 520, title: 'インベントリ', key: 'I' },
+  inventory: { w: 800, h: 520, title: 'インベントリ', key: 'I', y: 70 }, // 下端が左下の HUD に重ならない高さ
   skills: { w: 520, h: 610, title: 'スキル', key: 'K', y: 14 },
   stats: { w: 420, h: 510, title: 'ステータス', key: 'T' },
   missions: { w: 640, h: 480, title: 'ミッション', key: 'J' },
@@ -94,7 +94,8 @@ export class UIManager {
     if (!text) return;
     text = String(text);
     const pri = opts.priority ?? toastPriority(text);
-    const life = pri >= 2 ? 3.2 : pri === 1 ? 2.6 : 2.1;
+    // 表示時間は短め。長い文（操作説明など）は読める分だけ少し延ばす
+    const life = (pri >= 2 ? 3.2 : pri === 1 ? 2.6 : 2.1) + Math.min(1.6, Math.max(0, text.length - 24) / 25);
     const same = this.toasts.find((t) => t.text === text);
     if (same) {
       same.count = (same.count || 1) + 1;
@@ -336,11 +337,13 @@ export class UIManager {
     dt = Math.min(0.1, dt || 0);
     for (const t of this.toasts) t.t += dt;
     this.toasts = this.toasts.filter((t) => t.t < t.life);
-    if (this.banners.length) {
+    // PET 入手演出の間はレアバナー・レベルアップ演出を止めておき、終わってから順に出す
+    const hold = !!this.petFx;
+    if (this.banners.length && !hold) {
       this.banners[0].t += dt;
       if (this.banners[0].t > this.banners[0].life) this.banners.shift();
     }
-    if (this.levelFx) { this.levelFx.t += dt; if (this.levelFx.t > this.levelFx.life) this.levelFx = null; }
+    if (this.levelFx && !hold) { this.levelFx.t += dt; if (this.levelFx.t > this.levelFx.life) this.levelFx = null; }
     if (this.petFx) { this.petFx.t += dt; if (this.petFx.t > this.petFx.life) this.petFx = null; }
     for (const b of this.bookToasts) b.t += dt;
     this.bookToasts = this.bookToasts.filter((b) => b.t < b.life);

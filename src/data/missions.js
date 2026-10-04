@@ -28,6 +28,15 @@ export const MISSION_NPCS = {
   // v2: ルミナ宇宙港
   dr_stella:   { name: 'ステラ博士',    mapId: 'spaceport', role: 'ルミナ宇宙港の主任研究者。謎の宇宙船を追っている。' },
   ace_jet:     { name: 'エース・ジェット', mapId: 'spaceport', role: '元テストパイロット。月面シミュ区画の管理人。' },
+  // v3: 転職教官（転職ミッションの報告先。受注はプレイヤー頭上の吹き出しから）
+  job_velvet:  { name: 'マダム・ヴェルヴェット', mapId: 'downtown', role: '[1次転職教官/ルナ] ダンススタジオ兼射撃場「ヴェルヴェット・ルーム」の女主人。', jobInstructor: true },
+  job_bull:    { name: 'ブル・ガードナー', mapId: 'downtown', role: '[1次転職教官/ジン] 裏路地のボクシングジム兼ガレージの親父。', jobInstructor: true },
+  job_lily:    { name: 'ゴースト・リリィ', mapId: 'slums', role: '[2次転職教官/ルナ] 港の倉庫に住む伝説のスナイパー兼レイブダンサー。', jobInstructor: true },
+  job_croc:    { name: 'クロック・ジョー', mapId: 'swamp', role: '[2次転職教官/ジン] 沼の地下闘技場とエアボートレースの胴元。', jobInstructor: true },
+  job_diamond: { name: 'クイーン・ダイヤ', mapId: 'casino', role: '[3次転職教官/ルナ] ネオン・パレスの看板スター。元・凄腕ガンマン。', jobInstructor: true },
+  job_tiger:   { name: 'タイガー・ゴウ', mapId: 'casino', role: '[3次転職教官/ジン] カジノ街の用心棒頭にして元ストリートレース王者。', jobInstructor: true },
+  job_celes:   { name: 'セレス', mapId: 'spaceport', role: '[4次転職教官/ルナ] 宇宙港のホログラム歌姫。正体は銀河の賞金稼ぎ。', jobInstructor: true },
+  job_kaiser:  { name: 'カイザー・マグナ', mapId: 'spaceport', role: '[4次転職教官/ジン] 宇宙港の警備隊長。かつて「覇王」と呼ばれた男。', jobInstructor: true },
 };
 
 // SPEC_V2 の全マップID（町7＋フィールド27）
@@ -416,7 +425,119 @@ const list = [
   },
 ];
 
-const REWARD_EXP_FACTOR = { main: 0.8, sub: 0.5, daily: 0.3 };
+
+// ======================= v3: 転職ミッション（type:'job'） =======================
+// 受注はプレイヤー頭上の吹き出し → systems/jobs.js acceptJobMission のみ（NPC の available() には出さない）。
+// 報告は教官 NPC（giver = turnIn = 教官）。報告時に MissionManager.turnIn が advanceJob を呼ぶ。
+// 目的: ①教官に会う（talk。報告と同時に満たされる）②試練（その段階の適正Lvフィールドの敵 or ミニボス / ドライブ）
+const T = (target, text, extra = {}) => ({ type: 'talk', target, count: 1, text, ...extra });
+const K = (target, count, mapId, text) => ({ type: 'kill', target, count, mapId, text });
+const B = (target, mapId, text) => ({ type: 'boss', target, count: 1, mapId, text });
+const D = (count, text) => ({ type: 'drive', target: 'any', count, text });
+const JOB_TIER_LEVEL = [0, 10, 30, 60, 100];
+const JOB_TOWN = { job_velvet: 'downtown', job_bull: 'downtown', job_lily: 'slums', job_croc: 'swamp', job_diamond: 'casino', job_tiger: 'casino', job_celes: 'spaceport', job_kaiser: 'spaceport' };
+function jobMission(jobId, tier, instructor, name, desc, offer, done, trials, reward = {}) {
+  const npc = MISSION_NPCS[instructor];
+  return {
+    id: 'job_' + jobId, type: 'job', jobId, tier, name: `[転職] ${name}`, category: 'job', giver: instructor, turnIn: instructor,
+    reqLevel: JOB_TIER_LEVEL[tier], prereq: [], desc, dialog: { offer, done },
+    objectives: [T(instructor, `${npc.name}（${JOB_TOWN[instructor]}）に会う`, { mapId: JOB_TOWN[instructor] }), ...trials],
+    reward: { money: [0, 3000, 20000, 120000, 500000][tier], items: [], ...reward },
+  };
+}
+const jobMissions = [
+  // ---- ルナ 1次（ダウンタウン / マダム・ヴェルヴェット） ----
+  jobMission('luna_gunner', 1, 'job_velvet', 'ネオン・ガンナーへの道',
+    'ヴェルヴェット・ルームの射撃場で、銃の才能を試される。',
+    ['あら、いい目をしてるじゃない。撃つ側の目よ。', 'ハイウェイ入口のカモメを撃ち落として、ピア桟橋のキングスライムを仕留めてきなさい。'],
+    ['ふふ、合格よ。今日からあなたは「ネオン・ガンナー」。', 'その銃、もうあなたの体の一部ね。'],
+    [K('seagull_highway', 12, 'beach_f4', 'ハイウェイ入口でハイウェイカモメを撃ち落とす'), B('boss_king_slime', 'beach_f3', 'ピア桟橋でキングゼリーを倒す')]),
+  jobMission('luna_dancer', 1, 'job_velvet', 'ネオン・ダンサーへの道',
+    'ヴェルヴェット・ルームのダンスフロアで、リズムと速さを試される。',
+    ['踊れる子は戦える。それがこの街のルールよ。', 'ハイウェイのコーンマッシュと裏通りのドブネズミ、ステップを踏みながら片付けて。'],
+    ['ブラボー！ 今日からあなたは「ネオン・ダンサー」。', '街全部があなたのステージよ。'],
+    [K('mushroom_cone', 12, 'beach_f4', 'ハイウェイ入口でコーンマッシュを倒す'), K('rat_alley', 10, 'down_f1', 'ネオン裏通りでドブネズミを倒す')]),
+  // ---- ジン 1次（ダウンタウン / ブル・ガードナー） ----
+  jobMission('jin_brawler', 1, 'job_bull', 'ストリート・ブロウラーへの道',
+    'ブルのジムで、拳ひとつの覚悟を試される。',
+    ['ほう、いい拳だ。だが本物かどうかは殴り合いで決まる。', 'ハイウェイのアイアンクラブの甲羅を割って、キングゼリーをぶっ飛ばしてこい。'],
+    ['ガハハ！ 合格だ。今日からお前は「ストリート・ブロウラー」！', 'グローブは要らねえ。その拳が名刺だ。'],
+    [K('crab_iron', 12, 'beach_f4', 'ハイウェイ入口でアイアンクラブを倒す'), B('boss_king_slime', 'beach_f3', 'ピア桟橋でキングゼリーを倒す')]),
+  jobMission('jin_racer', 1, 'job_bull', 'ナイト・レーサーへの道',
+    'ブルのガレージで、走り屋の素質を試される。',
+    ['お前、ハンドル握ると目つきが変わるな。', '車で街を走り込んで、裏通りのチンピラどもを蹴散らしてこい。'],
+    ['いい走りだった。今日からお前は「ナイト・レーサー」だ。', '夜の道路は全部お前のサーキットだぜ。'],
+    [D(300, '車で走る（m）'), K('thug_punk', 12, 'down_f1', 'ネオン裏通りでストリートチンピラを倒す')]),
+  // ---- ルナ 2次（スラム / ゴースト・リリィ） ----
+  jobMission('luna_sharpshooter', 2, 'job_lily', 'ピンク・シャープシューターへの道',
+    '港の霧の中、伝説の狙撃手リリィが試練を課す。',
+    ['…一発で決めな。二発目を撃つやつは三発目で死ぬ。', '造船所の鉄砲玉を黙らせて、密輸船のキャプテン・ハーケンの帽子を撃ち抜いてきて。'],
+    ['…いい腕。今日からあなたは「ピンク・シャープシューター」。', '霧の向こうでも、もう外さない。'],
+    [K('thug_gunner', 20, 'slums_f2', '造船所でギャングの鉄砲玉を倒す'), B('boss_captain', 'slums_f3', '密輸船でキャプテン・ハーケンを倒す')]),
+  jobMission('luna_rave_star', 2, 'job_lily', 'レイヴ・スターへの道',
+    '倉庫の地下レイブ。フロアの主リリィが、本物のスターかを見極める。',
+    ['フロアを沸かせられないダンサーは、ここじゃ置き物よ。', '密輸船の船員とふなネズミ、まとめて踊らせてきて。'],
+    ['最高のショーだった！ 今日からあなたは「レイヴ・スター」。', '低音が鳴る場所なら、どこでもあなたが主役よ。'],
+    [K('thug_smuggler', 20, 'slums_f3', '密輸船で密輸船の船員を倒す'), K('rat_ship', 15, 'slums_f3', '密輸船でふなネズミを倒す')]),
+  // ---- ジン 2次（スワンプ / クロック・ジョー） ----
+  jobMission('jin_knuckle_king', 2, 'job_croc', 'ナックル・キングへの道',
+    '沼の地下闘技場。胴元クロック・ジョーが新たな王者候補を値踏みする。',
+    ['ヘッヘ、闘技場の王座が空いてるんだ。座りてえか？', 'マングローブのボアを絞め返して、密輸船のキャプテン・ハーケンをリングに沈めてきな。'],
+    ['新チャンピオンの誕生だ！ 今日からお前は「ナックル・キング」！', '沼じゅうの賭け札がお前に乗ってるぜ。'],
+    [K('snake_mangrove', 20, 'swamp_f2', 'マングローブ迷路でマングローブ・ボアを倒す'), B('boss_captain', 'slums_f3', '密輸船でキャプテン・ハーケンを倒す')]),
+  jobMission('jin_drifter', 2, 'job_croc', 'ストリート・ドリフターへの道',
+    'エアボートレースの胴元が、泥道でも滑れる走り屋を探している。',
+    ['泥の上でドリフトできりゃ、どこでも走れる。', 'たっぷり走り込んで、廃線路のスクラップ屋どもを跳ね飛ばしてこい。'],
+    ['見事なドリフトだ！ 今日からお前は「ストリート・ドリフター」。', 'マフラーの炎、俺にも分けてほしいくらいだぜ。'],
+    [D(600, '車で走る（m）'), K('thug_scrapper', 20, 'slums_f4', '廃線路でスクラップ屋を倒す')]),
+  // ---- ルナ 3次（カジノ / クイーン・ダイヤ） ----
+  jobMission('luna_trigger_queen', 3, 'job_diamond', 'トリガー・クイーンへの道',
+    'ネオン・パレスの看板スター、ダイヤが女王の座を賭けた勝負を挑む。',
+    ['女王の座が欲しい？ いいわ、チップは命よ。', 'VIPフロアのディーラーロボを撃ち抜いて、メカ・ハイローラーを止めてきなさい。'],
+    ['ブラボー。今日からあなたが「トリガー・クイーン」。', 'この街の引き金は、全部あなたのものよ。'],
+    [K('robot_dealer', 25, 'casino_f3', 'VIPフロアでディーラーロボを倒す'), B('boss_mecha', 'casino_f3', 'VIPフロアでメカ・ハイローラーを倒す')]),
+  jobMission('luna_prism_idol', 3, 'job_diamond', 'プリズム・アイドルへの道',
+    'カジノの大舞台に立つための最終オーディション。',
+    ['大舞台に立つ子は、どんな客も魅了しなきゃ。幽霊でも、殺し屋でもね。', 'VIPフロアのジャックポット・ゴーストと、工事現場の殺し屋を虜にしてきて。'],
+    ['満員御礼！ 今日からあなたは「プリズム・アイドル」。', '七色のスポットライトはあなただけのものよ。'],
+    [K('ghost_jackpot', 25, 'casino_f3', 'VIPフロアでジャックポット・ゴーストを倒す'), K('thug_hitman', 20, 'tower_f1', '工事現場の足場でドンの殺し屋を倒す')]),
+  // ---- ジン 3次（カジノ / タイガー・ゴウ） ----
+  jobMission('jin_dragon_fist', 3, 'job_tiger', 'ドラゴンフィストへの道',
+    '用心棒頭タイガー・ゴウが、龍を宿す拳かを見定める。',
+    ['拳に龍を宿すには、鋼を砕く覚悟がいる。', '工事現場のスチールゴーレムを砕いて、メカ・ハイローラーをスクラップにしてこい。'],
+    ['…見えたぞ、お前の拳の龍が。今日からお前は「ネオン・ドラゴンフィスト」。', '摩天楼が震えてやがる。'],
+    [K('golem_steel', 25, 'tower_f1', '工事現場の足場でスチールゴーレムを倒す'), B('boss_mecha', 'casino_f3', 'VIPフロアでメカ・ハイローラーを倒す')]),
+  jobMission('jin_nitro_baron', 3, 'job_tiger', 'ニトロ・バロンへの道',
+    '元ストリートレース王者タイガーが、カジノ街の夜を支配する走りを求める。',
+    ['ストリップの夜は速いやつのものだ。', 'とことん走り込んで、工事現場の建設ロボをなぎ倒してこい。'],
+    ['ハッハー！ 今日からお前は「ニトロ・バロン」！', 'この街の信号は、もうお前には関係ねえ。'],
+    [D(1000, '車で走る（m）'), K('robot_worker', 25, 'tower_f1', '工事現場の足場で建設ロボを倒す')]),
+  // ---- ルナ 4次（宇宙港 / セレス） ----
+  jobMission('luna_galaxy_outlaw', 4, 'job_celes', 'ギャラクシー・アウトローへの道',
+    '宇宙港の歌姫セレスの正体は銀河の賞金稼ぎ。最後の賞金首を追う。',
+    ['あなたのウワサ、銀河の果てまで届いてるわ。', '謎の宇宙船のゼノメカを撃ち落として、オーバーロード・ゾグの首を取ってきて。'],
+    ['銀河一の賞金首、誕生ね。今日からあなたは「ギャラクシー・アウトロー」。', '星の数だけ、あなたの伝説が増えていく。'],
+    [K('robot_xeno', 30, 'space_f4', '謎の宇宙船でゼノメカを倒す'), B('boss_alien', 'space_f4', '謎の宇宙船でオーバーロード・ゾグを倒す')]),
+  jobMission('luna_cosmo_diva', 4, 'job_celes', 'コズミック・ディーヴァへの道',
+    '全銀河配信のホログラム・ステージ。最後のステージは宇宙船の中。',
+    ['最後のステージは宇宙よ。観客は…ちょっと怖いけど。', '宇宙船のアストラル体とヴォイドクラゲ、全員ファンにしてきて。'],
+    ['銀河じゅうがアンコールしてる！ 今日からあなたは「コズミック・ディーヴァ」。', '踊るたび、星が降るわ。'],
+    [K('ghost_astral', 30, 'space_f4', '謎の宇宙船でアストラル体を倒す'), K('jelly_void', 25, 'space_f4', '謎の宇宙船でヴォイドクラゲを倒す')]),
+  // ---- ジン 4次（宇宙港 / カイザー・マグナ） ----
+  jobMission('jin_vice_legend', 4, 'job_kaiser', 'ネオン覇王への道',
+    'かつて「覇王」と呼ばれた男、カイザー・マグナが最後の試練を課す。',
+    ['覇王の名を継ぐか。ならば宇宙人だろうと膝をつかせろ。', '宇宙船のエイリアン戦士どもを叩き伏せ、オーバーロード・ゾグを拳で沈めてこい。'],
+    ['…継いだな、覇王の名を。今日からお前が「ネオン覇王」だ。', 'もう誰も、お前の前には立てん。'],
+    [K('alien_warrior', 30, 'space_f4', '謎の宇宙船でエイリアン戦士を倒す'), B('boss_alien', 'space_f4', '謎の宇宙船でオーバーロード・ゾグを倒す')]),
+  jobMission('jin_warp_rider', 4, 'job_kaiser', 'ワープ・ライダーへの道',
+    '光速を超える走りを求め、宇宙港の滑走路と宇宙船を駆け抜ける。',
+    ['光より速く走れる男を、俺は一人しか知らん。…昔の俺だ。', '限界まで走り込み、宇宙船のゼノメカを轢き飛ばしてこい。'],
+    ['光を置き去りにしたな。今日からお前は「ワープ・ライダー」！', '次に走るのは…銀河の高速道路だ。'],
+    [D(1500, '車で走る（m）'), K('robot_xeno', 30, 'space_f4', '謎の宇宙船でゼノメカを倒す')]),
+];
+list.push(...jobMissions);
+
+const REWARD_EXP_FACTOR = { main: 0.8, sub: 0.5, daily: 0.3, job: 0.5 };
 for (const m of list) {
   m.reward ||= {};
   if (!m.reward.expFixed) m.reward.exp = Math.round(expToNext((m.reqLevel || 1) + 2) * (REWARD_EXP_FACTOR[m.category] ?? 0.5));
@@ -427,3 +548,6 @@ export const MISSIONS = Object.fromEntries(list.map((m) => [m.id, m]));
 export function getMission(id) { return MISSIONS[id] || null; }
 export function turnInNpcOf(m) { return m.turnIn || m.giver; }
 export const MAIN_STORY = list.filter((m) => m.category === 'main').map((m) => m.id);
+/** v3: 転職ミッション（jobId → missionId） */
+export const JOB_MISSIONS = Object.fromEntries(list.filter((m) => m.type === 'job').map((m) => [m.jobId, m.id]));
+export function isJobMission(m) { return !!m && (typeof m === 'string' ? MISSIONS[m]?.type === 'job' : m.type === 'job'); }
