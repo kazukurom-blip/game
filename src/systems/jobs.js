@@ -5,14 +5,14 @@
 //  advanceJob(game, jobId)       → {ok, msg, job?}（転職ミッション報告時に MissionManager.turnIn から呼ばれる）
 //  currentJob(state)             → Job（data/jobs.js）
 //  jobBonus(state)               → 系譜の statBonus 合計（computeStats が加算済み）
-import { JOBS, JOB_TIERS, BEGINNER_ID, jobsFor, jobStateOf, currentJobOf, jobBonusOf, jobLineage, hasJob } from '../data/jobs.js';
+import { JOBS, JOB_TIERS, BEGINNER_ID, jobsFor, jobStateOf, currentJobOf, jobBonusOf, jobLineage, hasJob, addSp, getSp, totalSp, skillSpTier } from '../data/jobs.js';
 import { MISSIONS, MISSION_NPCS, JOB_MISSIONS } from '../data/missions.js';
 import { SKILLS } from '../data/skills.js';
 import { computeStats } from './progression.js';
 import { snsPost } from './sns.js';
 import { spawnEffect } from '../render/effects.js';
 
-export { JOBS, JOB_TIERS, jobsFor, jobLineage, hasJob };
+export { JOBS, JOB_TIERS, jobsFor, jobLineage, hasJob, getSp, totalSp, skillSpTier };
 
 export function currentJob(state) { return currentJobOf(state); }
 export function jobBonus(state) { return jobBonusOf(state); }
@@ -86,7 +86,7 @@ export function advanceJob(game, jobId) {
   if (cur.id !== j.from) return { ok: false, msg: `${JOBS[j.from]?.name || j.from} からのみ転職できる` };
   const prev = cur.id;
   st.job = { id: j.id, tier: j.tier, history: [...cur.history, { id: j.id, tier: j.tier, from: prev, level: st.level || 1, t: Date.now() }] };
-  st.sp = (st.sp || 0) + (j.sp || 0);
+  addSp(st, j.sp || 0, Math.max(1, j.tier)); // 転職ボーナス SP はその段階のプールへ
   // 新スキルを Lv1 で自動習得（アクティブは空きスキルバーへ）
   st.skills ||= {};
   const learned = [];
@@ -118,7 +118,7 @@ export function advanceJob(game, jobId) {
 }
 
 function pickPost(st, j) {
-  const name = st.heroId === 'jin' ? 'ジン' : 'ルナ';
+  const name = st.name || (st.heroId === 'jin' ? 'ジン' : 'ルナ');
   const a = [
     `【ご報告】${name}、本日より「${j.name}」になりました！ #転職 #${j.title}`,
     `${j.tier}次転職、完了。今日から${j.title}としてヴァイス・ベイを駆け抜ける🔥 #転職 #ヴァイスベイ`,

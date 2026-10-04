@@ -5,6 +5,7 @@ import { ITEMS } from '../data/items.js';
 import { countItem, removeItem, addItem } from './inventory.js';
 import { gainExp } from './progression.js';
 import { canTakeJobMission, advanceJob } from './jobs.js';
+import { addSp } from '../data/jobs.js';
 
 export { MISSIONS, MISSION_NPCS };
 
@@ -191,7 +192,7 @@ export class MissionManager {
 
     const r = m.reward || {};
     if (r.money) st.money += r.money;
-    if (r.sp) st.sp += r.sp;
+    if (r.sp) addSp(st, r.sp); // v3: 現職の段階の SP プールへ
     if (r.flag) st.flags[r.flag] = true;
     for (const itemId of r.items || []) {
       if (!addItem(g, itemId, 1)) g.notify?.(`${ITEMS[itemId]?.name} を受け取れなかった（満杯）`, '#ff5555');

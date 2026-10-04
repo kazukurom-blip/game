@@ -35,7 +35,7 @@ export function snsNextTitle(state) {
 }
 
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
-const heroName = (st) => (st?.heroId === 'jin' ? 'ジン' : 'ルナ');
+const heroName = (st) => st?.name || (st?.heroId === 'jin' ? 'ジン' : 'ルナ');
 let _seq = 0;
 
 function ensure(st) {

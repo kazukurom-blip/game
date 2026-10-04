@@ -59,7 +59,7 @@ export const JOB_SKILL_LIST = [
     desc: '銃口を払うように5発を扇状にばらまく。群れ狩り向き。', range: { w: 520, h: 220 }, effect: 'muzzle', color: '#ff7fae',
     proj: { speed: 1100, life: 0.5, count: 5, spread: 380, pierce: 0, kind: 'bullet', w: 20, h: 8 } }),
   Mastery('luna_gunner', 'lj_gun_mastery', 'ガン・マスタリー', '#ff3d7f', '抜き撃ちの極意。', (lv) => ({ critAdd: R(0.006 * lv) })),
-  A('luna_sharpshooter', { id: 'lj_gun_rail_snipe', name: 'レールスナイプ', kind: 'projectile', m: 4.4, mp: 26, cd: 1.6,
+  A('luna_sharpshooter', { id: 'lj_gun_rail_snipe', name: 'レールスナイプ', kind: 'projectile', m: 4.8, mp: 26, cd: 1.6,
     desc: '電磁加速の一閃。画面の端まで全ての敵を撃ち抜く。', range: { w: 1100, h: 24 }, effect: 'muzzle', color: '#ff5fa2',
     proj: { speed: 2200, life: 0.55, count: 1, spread: 0, pierce: 99, kind: 'beam', w: 70, h: 12 } }),
   Bf('luna_sharpshooter', { id: 'lj_gun_hot_cartridge', name: 'ホット・カートリッジ', mp: 35, cd: 50, color: '#ff5fa2',

@@ -1,6 +1,6 @@
 // スキル使用・クールダウン・バフ・習得
 import { SKILLS, jobSkillUnlocked } from '../data/skills.js';
-import { JOBS, hasJob } from '../data/jobs.js';
+import { JOBS, hasJob, skillSpTier, getSp, addSp } from '../data/jobs.js';
 import { Projectile } from '../entities/projectile.js';
 import { rectOverlap, entRect } from '../world/physics.js';
 import { spawnEffect } from '../render/effects.js';
@@ -70,6 +70,7 @@ export function useSkill(game, skillId) {
 
   const mv = sk.kind === 'move' ? moveParams(st, skillId, lv) : null;
   if (mv && mv.airOnly && p.onGround === true && !p.climbing) return false; // フラッシュジャンプは空中のみ（MP/CDは消費しない）
+  if (mv && mv.groundOnly && p.onGround === false) return false;             // ホイール・ダッシュは地上のみ
 
   st.mp -= mp;
   const total = mv ? mv.cooldown : sk.cooldown(lv);
@@ -83,7 +84,8 @@ export function useSkill(game, skillId) {
       p.startAttack?.('melee');
       const rect = frontRect(p, sk.range.w, sk.range.h);
       spawnEffect(game, 'slash', p.x + f * sk.range.w * 0.45, p.y - p.h / 2, { color: sk.color, facing: f, w: sk.range.w, h: sk.range.h, hits: sk.hits });
-      playerAttackArea(game, rect, mult, { hits: sk.hits, knock: sk.knock ?? 200, launch: sk.launch, effect: sk.effect, color: sk.color, maxTargets: sk.maxTargets ?? 6, knockDir: f });
+      const hit = playerAttackArea(game, rect, mult, { hits: sk.hits, knock: sk.knock ?? 200, launch: sk.launch, effect: sk.effect, color: sk.color, maxTargets: sk.maxTargets ?? 6, knockDir: f });
+      tryFinalAttack(game, hit);
       break;
     }
     case 'projectile': {
@@ -108,14 +110,15 @@ export function useSkill(game, skillId) {
       p.startAttack?.('melee');
       const rect = { x: p.x - sk.range.w / 2, y: p.y - p.h / 2 - sk.range.h / 2, w: sk.range.w, h: sk.range.h };
       spawnEffect(game, sk.effect || 'explosion', p.x, p.y - p.h / 2, { color: sk.color, radius: sk.range.w / 2, w: sk.range.w, h: sk.range.h });
-      playerAttackArea(game, rect, mult, { hits: sk.hits, knock: sk.knock ?? 300, launch: sk.launch, effect: 'hit', color: sk.color, maxTargets: sk.maxTargets ?? 10 });
+      const hit = playerAttackArea(game, rect, mult, { hits: sk.hits, knock: sk.knock ?? 300, launch: sk.launch, effect: 'hit', color: sk.color, maxTargets: sk.maxTargets ?? 10 });
+      tryFinalAttack(game, hit);
       break;
     }
     case 'dash': {
       p.startAttack?.('melee');
       const d = sk.dash;
       const dist = typeof d.dist === 'function' ? d.dist(lv) : d.dist;
-      _dash = { skill: sk, dir: f, speed: dist / d.time, t: d.time, mult, attackId: newAttackId() };
+      _dash = { skill: sk, dir: f, speed: dist / d.time, t: d.time, mult, attackId: newAttackId(), faDone: false };
       setPlayerInvuln(game, d.invuln ?? d.time + 0.15);
       p.dashing = true;
       spawnEffect(game, 'dash', p.x, p.y - p.h / 2, { color: sk.color, facing: f });
@@ -133,6 +136,13 @@ export function useSkill(game, skillId) {
       // 実際の動き（物理）は entities/player.js の doMoveSkill(skill, lv, params) が担当（無ければ何もしない）
       p.doMoveSkill?.(sk, lv, mv);
       if (mv.invuln > 0) setPlayerInvuln(game, mv.invuln);
+      // 3次強化: 移動先の小爆発（doMoveSkill が同期的に位置を変える前提。非同期なら player 側で arrivalBlast を使う）
+      if (mv.arrivalBlast) {
+        const b = mv.arrivalBlast;
+        const rect = { x: p.x - b.w / 2, y: p.y - p.h / 2 - b.h / 2, w: b.w, h: b.h };
+        spawnEffect(game, 'explosion', p.x, p.y - p.h / 2, { color: b.color || sk.color, radius: b.w / 2, w: b.w, h: b.h });
+        playerAttackArea(game, rect, b.mult, { hits: 1, knock: 220, effect: 'hit', color: b.color || sk.color, maxTargets: 8 });
+      }
       if (sk.effect) spawnEffect(game, sk.effect, p.x, p.y - p.h / 2, { color: sk.color, facing: f });
       if (mv.afterBuff) addBuff(game, { id: sk.id + '_after', name: sk.name, color: sk.color, ...mv.afterBuff });
       break;
@@ -169,10 +179,11 @@ export function updateSkills(game, dt) {
     // 通過した範囲にダメージ
     const minX = Math.min(oldX, p.x) - _dash.skill.range.w / 2;
     const rect = { x: minX, y: p.y - p.h / 2 - _dash.skill.range.h / 2, w: Math.abs(p.x - oldX) + _dash.skill.range.w, h: _dash.skill.range.h };
-    playerAttackArea(game, rect, _dash.mult, {
+    const dhit = playerAttackArea(game, rect, _dash.mult, {
       hits: _dash.skill.hits, knock: _dash.skill.knock ?? 260, attackId: _dash.attackId,
       effect: 'hit', color: _dash.skill.color, knockDir: _dash.dir, maxTargets: 12,
     });
+    if (!_dash.faDone && dhit && dhit.length) { _dash.faDone = true; tryFinalAttack(game, dhit); }
     if (Math.random() < 0.6) spawnEffect(game, 'dash', p.x, p.y - p.h / 2, { color: _dash.skill.color, facing: _dash.dir, trail: true });
     _dash.t -= step;
     if (_dash.t <= 0) { _dash = null; p.dashing = false; }
@@ -180,6 +191,34 @@ export function updateSkills(game, dt) {
 }
 
 export function isDashing() { return !!_dash; }
+
+/** ファイナルアタック: 習得済みスキルの finalAttack(lv) のうち最大の {chance, mult, color, skillId} | null */
+export function finalAttackOf(state) {
+  let best = null;
+  for (const [sid, lv] of Object.entries(state?.skills || {})) {
+    const sk = SKILLS[sid];
+    if (!sk || !lv || typeof sk.finalAttack !== 'function') continue;
+    const fa = sk.finalAttack(lv);
+    if (!best || fa.chance * fa.mult > best.chance * best.mult) best = { ...fa, color: sk.color, skillId: sid };
+  }
+  return best;
+}
+
+/**
+ * tryFinalAttack(game, targets, rnd?) — 攻撃が命中した敵 targets に確率で追撃（ファイナルアタック）。発動したら true
+ * skills.js の melee/aoe/dash は自動で呼ぶ。通常攻撃・弾の命中時は player.js / projectile.js から呼んでよい。
+ */
+export function tryFinalAttack(game, targets, rnd = Math.random()) {
+  const fa = finalAttackOf(game?.state);
+  const list = (targets || []).filter((e) => e && !e.dead);
+  if (!fa || !list.length || rnd >= fa.chance) return false;
+  const pick = list.slice(0, 3);
+  const x0 = Math.min(...pick.map((e) => e.x - (e.w || 40) / 2)), x1 = Math.max(...pick.map((e) => e.x + (e.w || 40) / 2));
+  const y0 = Math.min(...pick.map((e) => e.y - (e.h || 40))), y1 = Math.max(...pick.map((e) => e.y));
+  const rect = { x: x0 - 4, y: y0 - 4, w: x1 - x0 + 8, h: y1 - y0 + 8 };
+  playerAttackArea(game, rect, fa.mult, { hits: 1, knock: 120, effect: 'spark', color: fa.color, maxTargets: pick.length });
+  return true;
+}
 
 /**
  * moveParams(state, skillId, lv?) → 移動スキル（kind:'move'）の実効パラメータ（3次の強化パッシブ込み）
@@ -202,6 +241,9 @@ export function moveParams(state, skillId, lv) {
     if (b.cooldownCut) out.cooldown *= Math.max(0.2, 1 - b.cooldownCut);
     if (b.invulnAdd) out.invuln += b.invulnAdd;
     if (b.afterBuff) out.afterBuff = { ...(out.afterBuff || {}), ...b.afterBuff };
+    if (b.arrivalBlast) out.arrivalBlast = { ...b.arrivalBlast };
+    if (b.backShotMult && out.backShot) out.backShot = { ...out.backShot, mult: Math.round(out.backShot.mult * b.backShotMult * 100) / 100 };
+    if (b.pushMult && out.push) out.push = { ...out.push, mult: Math.round(out.push.mult * b.pushMult * 100) / 100 };
   }
   out.distance = Math.round(out.distance);
   out.power = Math.round(out.power);
@@ -219,8 +261,9 @@ export function learnSkill(game, skillId) {
   if (st.level < sk.reqLevel) { game.notify?.(`Lv.${sk.reqLevel} で習得可能`, '#ff8a8a'); return false; }
   const lv = skillLevel(st, skillId);
   if (lv >= sk.maxLevel) { game.notify?.(`${sk.name} はMAXレベルです`, '#ffd23f'); return false; }
-  if ((st.sp || 0) <= 0) { game.notify?.('SPが足りません', '#ff8a8a'); return false; }
-  st.sp -= 1;
+  const pool = skillSpTier(sk);
+  if (getSp(st, pool) <= 0) { game.notify?.(pool <= 1 ? 'SPが足りません' : `${pool}次スキル用のSPが足りません`, '#ff8a8a'); return false; }
+  addSp(st, -1, pool);
   st.skills[skillId] = lv + 1;
   if (lv === 0 && sk.kind !== 'passive' && Array.isArray(st.skillBar)) {
     const i = st.skillBar.indexOf(null);
@@ -244,5 +287,5 @@ export function canLearn(state, skillId) {
   const sk = SKILLS[skillId];
   if (!sk) return false;
   return (sk.hero === 'both' || sk.hero === state.heroId) && state.level >= sk.reqLevel && jobSkillUnlocked(state, sk) &&
-    skillLevel(state, skillId) < sk.maxLevel && (state.sp || 0) > 0;
+    skillLevel(state, skillId) < sk.maxLevel && getSp(state, skillSpTier(sk)) > 0;
 }
