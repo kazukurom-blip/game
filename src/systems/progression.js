@@ -1,48 +1,47 @@
 // レベル・経験値・ステータス計算
-import { ITEMS, STARTER_EQUIP } from '../data/items.js';
-import { SKILLS, STARTER_SKILLS } from '../data/skills.js';
+import { ITEMS, STARTER_EQUIP, starterEquipFor } from '../data/items.js';
+import { SKILLS, STARTER_SKILLS, SKILL_BAR_SIZE } from '../data/skills.js';
 import { spawnEffect } from '../render/effects.js';
 import { expToNext, MAX_LEVEL } from '../data/balance.js';
 import { bookBonus } from './book.js';
-import { jobBonusOf, newJobState, jobStateOf } from '../data/jobs.js';
+import { jobBonusOf, newJobState, jobStateOf, newSpByTier, addSp } from '../data/jobs.js';
+import { CLASSES, LEGACY_GENDER, GENDERS, defaultLook, defaultName } from '../data/classes.js';
 
 
-// ヒーロー別の基礎値
-export const HERO_BASE = {
-  luna: {
-    name: 'ルナ',
-    stats: { str: 4, dex: 7, int: 4, luk: 6 },
-    hp: 55, hpPerLv: 18, mp: 30, mpPerLv: 10,
-    speed: 250, jump: 820, crit: 0.08, critDmg: 1.5, def: 0,
-  },
-  jin: {
-    name: 'ジン',
-    stats: { str: 8, dex: 4, int: 4, luk: 4 },
-    hp: 75, hpPerLv: 26, mp: 20, mpPerLv: 7,
-    speed: 225, jump: 790, crit: 0.05, critDmg: 1.6, def: 4,
-  },
-};
+// クラス別の基礎値（v3: data/classes.js の CLASSES から生成。heroId = クラスID。name は旧来の既定名）
+export const HERO_BASE = Object.fromEntries(Object.values(CLASSES).map((c) => [c.id, {
+  name: c.defaultNames[LEGACY_GENDER[c.id] || 'f'], className: c.name, stats: { ...c.baseStats }, ...c.base,
+}]));
 
 // 経験値曲線は data/balance.js（敵の経験値と共有）。序盤は少なめ・地域が進むほど効率UP
 export { expToNext, MAX_LEVEL };
 
-export function newState(heroId = 'luna') {
+/**
+ * newState(classId, opts?) — opts = {name, gender:'f'|'m', look}
+ *  未指定: gender はクラスの旧既定（luna=f, jin=m, hacker=f）、look は DEFAULT_LOOKS[class][gender]、name は既定名
+ */
+export function newState(heroId = 'luna', opts = {}) {
   if (!HERO_BASE[heroId]) heroId = 'luna';
+  const gender = GENDERS.includes(opts?.gender) ? opts.gender : (LEGACY_GENDER[heroId] || 'f');
+  const name = typeof opts?.name === 'string' && opts.name.trim() ? opts.name.trim().slice(0, 12) : defaultName(heroId, gender);
+  const look = opts?.look && typeof opts.look === 'object' ? { ...defaultLook(heroId, gender), ...opts.look } : defaultLook(heroId, gender);
   const base = HERO_BASE[heroId];
   const st = STARTER_SKILLS[heroId];
   const state = {
     heroId,
+    name, gender, look,
     level: 1, exp: 0, money: 500,
     hp: 0, mp: 0,
     sp: 0, ap: 0,
+    spByTier: newSpByTier(), // v3: 2次/3次/4次スキル用の SP プール（state.sp は基本＋1次用）
     stats: { ...base.stats },
     inventory: [
       { id: 'potion_red', qty: 15 },
       { id: 'potion_blue', qty: 8 },
     ],
-    equipped: { hat: null, top: null, bottom: null, shoes: null, weapon: null, accessory: null, pet: null, ...STARTER_EQUIP[heroId] },
+    equipped: { hat: null, top: null, bottom: null, shoes: null, weapon: null, accessory: null, pet: null, ...starterEquipFor(heroId, gender) },
     skills: { ...st.skills },
-    skillBar: [...st.skillBar],
+    skillBar: padBar(st.skillBar),
     potionBar: ['potion_red', 'potion_blue'],
     missions: { active: [], completed: [], progress: {}, objProgress: {}, daily: {} },
     mapId: 'beach',
@@ -62,6 +61,12 @@ export function newState(heroId = 'luna') {
   state.hp = s.maxHp;
   state.mp = s.maxMp;
   return state;
+}
+
+function padBar(bar) {
+  const b = Array.isArray(bar) ? bar.slice(0, SKILL_BAR_SIZE) : [];
+  while (b.length < SKILL_BAR_SIZE) b.push(null);
+  return b;
 }
 
 export const STATE_VERSION = 3; // v3: state.job
@@ -104,7 +109,7 @@ export function migrateState(state) {
   }
   if (!state.skills || typeof state.skills !== 'object') state.skills = { ...STARTER_SKILLS[state.heroId].skills };
   if (!Array.isArray(state.skillBar)) state.skillBar = [...STARTER_SKILLS[state.heroId].skillBar];
-  while (state.skillBar.length < 4) state.skillBar.push(null);
+  state.skillBar = padBar(state.skillBar.map((id) => (id && SKILLS[id] ? id : null)));
   if (!Array.isArray(state.potionBar)) state.potionBar = ['potion_red', 'potion_blue'];
   const ms = state.missions && typeof state.missions === 'object' ? state.missions : {};
   state.missions = { active: [], completed: [], progress: {}, objProgress: {}, daily: {}, ...ms };
@@ -130,6 +135,14 @@ export function migrateState(state) {
     for (const id of state.rareFound) state.itemsFound[id] = true;
   }
   state.clock = num(state.clock, 9);
+  // v3 クラス/性別/見た目/名前: 旧セーブは luna=♀ルナ, jin=♂ジン
+  if (!GENDERS.includes(state.gender)) state.gender = LEGACY_GENDER[state.heroId] || 'f';
+  state.look = state.look && typeof state.look === 'object' ? { ...defaultLook(state.heroId, state.gender), ...state.look } : defaultLook(state.heroId, state.gender);
+  if (typeof state.name !== 'string' || !state.name.trim()) state.name = defaultName(state.heroId, state.gender);
+  // v3 SP プール
+  const sbt = state.spByTier && typeof state.spByTier === 'object' ? state.spByTier : {};
+  state.spByTier = { ...newSpByTier() };
+  for (const t of [2, 3, 4]) state.spByTier[t] = Math.max(0, num(sbt[t], 0));
   // v3 転職: 旧セーブは見習い（Lv10以上でも自動転職しない。吹き出しから転職する）
   const js = jobStateOf(state);
   state.job = { id: js.id, tier: js.tier, history: js.history.filter((h) => h && typeof h === 'object') };
@@ -237,7 +250,7 @@ export function gainExp(game, amount) {
   while (st.level < MAX_LEVEL && st.exp >= expToNext(st.level)) {
     st.exp -= expToNext(st.level);
     st.level++;
-    st.sp += 3;
+    addSp(st, 3); // v3: 現職の段階のプールへ（見習い/1次は state.sp）
     st.ap += 5;
     leveled = true;
     const s = computeStats(st);

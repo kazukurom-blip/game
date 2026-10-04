@@ -39,6 +39,7 @@ function etc(id, name, rarity, icon, price, desc) {
 
 // ============ 帽子 hat ============
 equip('cat_ears_pink', 'ピンクのネコミミ', 'hat', 'common', 0, { def: 2, luk: 1 }, ['catEars', '#ff8ac8', '#ffe0f0'], { desc: 'ルナのお気に入り。ぴこぴこ動く。' });
+equip('headphones_cyber', 'ジャンク・ヘッドセット', 'hat', 'common', 0, { def: 2, int: 1 }, ['headphones', '#2b2b38', '#3dff8a'], { desc: '片耳だけ鳴る。それで十分。' });
 equip('cap_street', 'ストリートキャップ', 'hat', 'common', 0, { def: 3 }, ['cap', '#2b2b38', '#ff3d7f'], { desc: 'ツバを後ろに回すのが流儀。' });
 equip('beanie_gray', 'グレーのビーニー', 'hat', 'common', 5, { def: 4, maxHp: 10 }, ['beanie', '#7a7f8c', '#c9ccd6']);
 equip('bandana_red', 'レッドバンダナ', 'hat', 'common', 10, { def: 5, str: 1 }, ['bandana', '#d8283c', '#ffffff']);
@@ -50,6 +51,7 @@ equip('crown_gold', 'ベイの王冠', 'hat', 'legendary', 45, { def: 25, str: 4
 equip('crown_neon', 'ネオン・エンペラー', 'hat', 'mythic', 55, { def: 40, atk: 10, str: 7, dex: 7, int: 7, luk: 7 }, ['crown', '#19f0ff', '#ff3dd2'], { desc: '夜の街そのものが頭上で輝く。' });
 
 // ============ 上着 top ============
+equip('hoodie_cyber', 'サイバーパーカー', 'top', 'common', 0, { def: 4, maxMp: 10 }, ['hoodie', '#1d2b24', '#3dff8a'], { desc: '袖にLEDテープを縫い込んだ自作パーカー。' });
 equip('hoodie_pink', 'ピンクのパーカー', 'top', 'common', 0, { def: 4, maxHp: 10 }, ['hoodie', '#ff6fb5', '#ffffff'], { desc: 'もこもこ。フードにネコ耳つき。' });
 equip('leather_jacket', 'ブラックレザージャケット', 'top', 'common', 0, { def: 6, maxHp: 15 }, ['leatherJacket', '#1d1d24', '#c0c0c8'], { desc: 'ジンの一張羅。肩に傷あり。' });
 equip('tshirt_white', 'ホワイトTシャツ', 'top', 'common', 3, { def: 5 }, ['tshirt', '#f4f4f4', '#ff3d7f']);
@@ -65,6 +67,7 @@ equip('idol_dress_mythic', 'ギャラクシー・アイドル', 'top', 'mythic',
 
 // ============ 下 bottom ============
 equip('skirt_pink', 'プリーツスカート', 'bottom', 'common', 0, { def: 3, dex: 1 }, ['skirt', '#ff8ac8', '#ffffff'], { desc: '下にはしっかりスパッツ。' });
+equip('pants_cyber', 'カーゴ・ジョガー', 'bottom', 'common', 0, { def: 3, int: 1 }, ['trackPants', '#2a2f38', '#3dff8a']);
 equip('jeans_blue', 'ダメージジーンズ', 'bottom', 'common', 0, { def: 4 }, ['jeans', '#3a5a8c', '#c9d6ea']);
 equip('shorts_beach', 'ビーチショーツ', 'bottom', 'common', 5, { def: 4, speed: 5 }, ['shorts', '#19d3a0', '#ffffff']);
 equip('cargo_khaki', 'カーゴパンツ', 'bottom', 'common', 12, { def: 7, maxHp: 20 }, ['cargo', '#8a7a52', '#4a4232']);
@@ -96,6 +99,7 @@ equip('wings_neon', 'ネオン・セラフ', 'accessory', 'mythic', 58, { def: 2
 
 // ============ 武器 weapon ============
 weapon('knife_basic', 'ポケットナイフ', 'common', 0, { atk: 12 }, ['knife', '#c9ccd6', '#ff6fb5'], 'melee', 70, 3.0, { desc: '軽くて素早い。' });
+weapon('staff_glitch', 'グリッチ・ワンド', 'common', 0, { atk: 10, int: 2, maxMp: 15 }, ['staff', '#3dff8a', '#1d1d24'], 'magic', 380, 1.8, { desc: 'ジャンク基板を巻きつけた自作の杖。たまにバグる。' });
 weapon('bat_wood', 'ウッドバット', 'common', 0, { atk: 15 }, ['bat', '#b98a52', '#5a3a22'], 'melee', 90, 2.0, { desc: 'ジンの相棒。ホームランしか狙わない。' });
 weapon('pistol_9mm', '9mmピストル', 'common', 5, { atk: 14 }, ['pistol', '#2a2a30', '#8a8a8a'], 'gun', 520, 2.6);
 weapon('katana_steel', 'スチールカタナ', 'common', 10, { atk: 26 }, ['katana', '#dfe4ee', '#d8283c'], 'melee', 110, 2.0);
@@ -208,7 +212,15 @@ export function isPet(item) { const it = typeof item === 'string' ? ITEMS[item] 
 export const STARTER_EQUIP = {
   luna: { hat: 'cat_ears_pink', top: 'hoodie_pink', bottom: 'skirt_pink', shoes: 'sneakers_white', accessory: null, weapon: 'knife_basic', pet: null },
   jin: { hat: null, top: 'leather_jacket', bottom: 'jeans_blue', shoes: 'boots_black', accessory: null, weapon: 'bat_wood', pet: null },
+  hacker: { hat: 'headphones_cyber', top: 'hoodie_cyber', bottom: 'pants_cyber', shoes: 'sneakers_white', accessory: null, weapon: 'staff_glitch', pet: null },
 };
+// v3: 性別ごとの初期装備の差し替え（STARTER_EQUIP に上書き）。newState(classId, {gender}) が使う
+export const STARTER_EQUIP_GENDER = {
+  luna: { m: { hat: 'cap_street', bottom: 'jeans_blue' } },
+};
+export function starterEquipFor(classId, gender) {
+  return { ...(STARTER_EQUIP[classId] || STARTER_EQUIP.luna), ...(STARTER_EQUIP_GENDER[classId]?.[gender] || {}) };
+}
 
 // 装備IDのテーブル {slot: itemId} から look テーブルを作る（敵の equip 等で使用）
 export function looksFromIds(ids) {
