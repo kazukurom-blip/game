@@ -8,6 +8,8 @@ import {
   guard, stats, expNeed, HERO_NAMES, skillDef, getItemDef, cooldown, skillMp, countItem,
   drawSkillIco, drawItemIco, rarityInfo, snsTitleOf, drawPetArt, drawEnemyArt, mapInfo, regionColor,
 } from './deps.js';
+import { charName, currentJob, classOf, BAR_KEYS, SKILL_BAR_SIZE } from './v3deps.js';
+import { drawJobBubble, drawNavArrow, drawJobFx, trackerHit } from './hud3.js';
 
 const W = 1280, H = 720;
 const hudState = new WeakMap();
@@ -22,17 +24,21 @@ function hs(game) {
 }
 
 // スキルバー/ポーションスロットの画面矩形（UI のドラッグ&ドロップでも使う）
-export const SLOT = 50;
+export const SLOT = 46;
+let _slots = null;
 export function hudSlots() {
-  const gap = 8, sep = 22;
-  const total = SLOT * 6 + gap * 4 + sep;
-  const x0 = Math.round(W / 2 - total / 2);
+  if (_slots) return _slots;
+  const gap = 6, sep = 20, n = SKILL_BAR_SIZE || 8;
+  const total = SLOT * (n + 2) + gap * n + sep;
+  // 左下ステータス（右端 x=384）に重ならないよう中央より少し右へ
+  const x0 = Math.max(400, Math.round(W / 2 - total / 2));
   const y = H - SLOT - 22;
   const out = [];
   let x = x0;
-  for (let i = 0; i < 4; i++) { out.push({ kind: 'skill', i, x, y, w: SLOT, h: SLOT, key: 'ASDF'[i] }); x += SLOT + gap; }
+  for (let i = 0; i < n; i++) { out.push({ kind: 'skill', i, x, y, w: SLOT, h: SLOT, key: BAR_KEYS[i] || String(i + 1) }); x += SLOT + gap; }
   x += sep - gap;
   for (let i = 0; i < 2; i++) { out.push({ kind: 'potion', i, x, y, w: SLOT, h: SLOT, key: String(i + 1) }); x += SLOT + gap; }
+  _slots = out;
   return out;
 }
 
@@ -46,16 +52,17 @@ export function drawHUD(ctx, game, _internal = false) {
     const fr = game.frameNo ?? ui.frame;
     if (ui._hudFrame === fr) return; // このフレームは描画済み
     ui._hudFrame = fr;
+    ui._hudHits = []; ui._hudFrameHits = fr;
     if (_internal) ui._hudByUi = true; else ui._hudByUi = false;
   }
   const s = hs(game);
   const dt = clamp((game.time || 0) - s.lastT, 0, 0.1);
   s.lastT = game.time || 0;
   const parts = [
-    ['vignette', drawVignette], ['copFlash', drawCopFlash], ['minimap', drawMinimap], ['status', drawStatus],
+    ['vignette', drawVignette], ['copFlash', drawCopFlash], ['jobBubble', drawJobBubble], ['navArrow', drawNavArrow], ['minimap', drawMinimap], ['status', drawStatus],
     ['skillbar', drawSkillBar], ['money', drawMoney], ['tracker', drawTracker], ['clock', drawClockBadge],
     ['radio', drawRadio], ['bookNew', drawBookToasts],
-    ['levelUp', drawLevelUp], ['banner', drawBanner], ['toasts', drawToasts], ['petFx', drawPetFx],
+    ['levelUp', drawLevelUp], ['jobFx', drawJobFx], ['banner', drawBanner], ['toasts', drawToasts], ['petFx', drawPetFx],
   ];
   const prof = game.debug?.profile ? (game.debug.hudProf ||= {}) : null; // デバッグ: 部位ごとの描画時間(ms, EMA)
   for (const [tag, fn] of parts) {
@@ -231,21 +238,40 @@ function drawStatus(ctx, game, s, dt) {
   txt(ctx, 'Lv.', bx, by - 15, { size: 13, align: 'center', color: '#fff7d0' });
   txt(ctx, st.level ?? 1, bx, by + 8, { size: 28, align: 'center', sw: 5, stroke: '#5a1030' });
   // 名前
-  const name = HERO_NAMES[st.heroId] || st.heroId || 'HERO';
-  txt(ctx, name, x + 92, y + 20, { size: 17, color: '#fff' });
-  const sub = st.heroId === 'jin' ? 'ストリートブロウラー' : st.heroId === 'luna' ? 'ストリートアイドル' : '';
-  const title = snsTitleOf(st);
-  const nx = x + 92 + measure(ctx, name, 17) + 10;
-  if (title.name) {
-    const tw = Math.min(w - (nx - x) - 14, measure(ctx, title.name, 11) + 34);
+  const name = charName(st) || HERO_NAMES[st.heroId] || 'HERO';
+  const nmW = Math.min(150, measure(ctx, name, 17));
+  txt(ctx, name, x + 92, y + 20, { size: 17, color: '#fff', maxW: 150 });
+  // 職名（currentJob(state).title）
+  const job = currentJob(st);
+  const jt = job?.title || job?.name || '';
+  const nx = x + 92 + nmW + 8;
+  if (jt) {
+    const tw = Math.min(w - (nx - x) - 12, measure(ctx, jt, 11) + 18);
+    const jc = job.aura || COL.teal;
     ctx.save();
-    rrPath(ctx, nx, y + 12, tw, 18, 9);
-    ctx.fillStyle = 'rgba(10,4,30,0.75)'; ctx.fill();
-    ctx.lineWidth = 1.5; ctx.strokeStyle = rainbowGrad(ctx, nx, 0, nx + tw, 0, (game.time || 0) * 0.15); ctx.stroke();
+    rrPath(ctx, nx, y + 11, tw, 19, 9.5);
+    const jg = ctx.createLinearGradient(nx, 0, nx + tw, 0);
+    jg.addColorStop(0, rgba(jc, 0.85)); jg.addColorStop(1, 'rgba(60,20,110,0.85)');
+    ctx.fillStyle = jg; ctx.fill();
+    ctx.lineWidth = 1.2; ctx.strokeStyle = '#fff'; ctx.stroke();
     ctx.restore();
-    txt(ctx, 'NG', nx + 12, y + 21.5, { size: 8.5, align: 'center', color: COL.pink, sw: 2 });
-    txt(ctx, title.name, nx + 22, y + 21.5, { size: 11, color: title.color || '#ffe3f7', sw: 2.5, maxW: tw - 28 });
-  } else if (sub) txt(ctx, sub, nx, y + 21, { size: 11, color: COL.sub, sw: 3 });
+    txt(ctx, jt, nx + tw / 2, y + 21, { size: 11, align: 'center', color: '#fff', sw: 2.5, maxW: tw - 10 });
+  }
+  // パネル上: クラス名 ＋ SNS 称号
+  const cls = classOf(st.heroId)?.name || '';
+  const title = snsTitleOf(st);
+  const ttl = st.title?.name || (typeof st.title === 'string' ? st.title : null);
+  const tagParts = [cls, ttl || title.name].filter(Boolean);
+  if (tagParts.length) {
+    const label = tagParts.join('  ・  ');
+    const tw = Math.min(w, measure(ctx, label, 11) + 26);
+    ctx.save();
+    rrPath(ctx, x + 8, y - 22, tw, 20, 10);
+    ctx.fillStyle = 'rgba(10,4,30,0.72)'; ctx.fill();
+    ctx.lineWidth = 1.3; ctx.strokeStyle = rainbowGrad(ctx, x, 0, x + tw, 0, (game.time || 0) * 0.15); ctx.stroke();
+    ctx.restore();
+    txt(ctx, label, x + 21, y - 11.5, { size: 11, color: title.color || '#ffe3f7', sw: 2.5, maxW: tw - 24 });
+  }
   // バー
   const maxHp = Math.max(1, cs.maxHp || 1), maxMp = Math.max(1, cs.maxMp || 1);
   const hp = clamp(st.hp ?? maxHp, 0, maxHp), mp = clamp(st.mp ?? maxMp, 0, maxMp);
@@ -293,7 +319,7 @@ function drawSkillBar(ctx, game) {
       const sk = skillDef(id);
       if (sk) {
         const lv = st.skills?.[id] || 0;
-        drawSkillIco(ctx, sk, cx, cy, 42);
+        drawSkillIco(ctx, sk, cx, cy, 39);
         const needMp = skillMp(sk, lv);
         const dark = lv <= 0 || (st.mp ?? 0) < needMp;
         if (dark) {
@@ -319,7 +345,7 @@ function drawSkillBar(ctx, game) {
       const it = getItemDef(id);
       if (it) {
         const n = countItem(st, id);
-        drawItemIco(ctx, it, cx, cy, 40);
+        drawItemIco(ctx, it, cx, cy, 37);
         if (n <= 0) { rrPath(ctx, sl.x, sl.y, sl.w, sl.h, 10); ctx.fillStyle = 'rgba(10,10,40,0.6)'; ctx.fill(); }
         txt(ctx, n, sl.x + sl.w - 5, sl.y + sl.h - 9, { size: 13, align: 'right', color: n > 0 ? '#fff' : COL.bad });
       }
@@ -458,7 +484,8 @@ function drawTracker(ctx, game) {
   const w = 290, x = W - w - 12;
   let y = 140;
   // 高さを計算
-  const items = list.slice(0, 4).map((m) => ({ name: m.name || '', lines: (m.lines || []).slice(0, 4), done: !!(m.done || m.complete) }));
+  const trackedId = game.state?.trackedMission;
+  const items = list.slice(0, 4).map((m, i) => ({ id: m.id, name: m.name || '', lines: (m.lines || []).slice(0, 4), done: !!(m.done || m.complete), tracked: trackedId ? m.id === trackedId : i === 0 }));
   const hgt = 34 + items.reduce((a, m) => a + 22 + m.lines.length * 19 + 6, 0);
   ctx.save();
   rrPath(ctx, x, y, w, hgt, 12);
@@ -472,10 +499,11 @@ function drawTracker(ctx, game) {
   ctx.fillStyle = COL.pink; ctx.fill();
   ctx.restore();
   txt(ctx, 'MISSION', x + 54, y + 17.5, { size: 12, align: 'center', sw: 3 });
-  txt(ctx, '[J]', x + w - 12, y + 17.5, { size: 11, align: 'right', color: COL.dim, sw: 2.5 });
+  txt(ctx, 'クリックで詳細 [J]', x + w - 12, y + 17.5, { size: 10.5, align: 'right', color: COL.dim, sw: 2.5 });
   y += 36;
   for (const m of items) {
-    txt(ctx, (m.done ? '★ ' : '◆ ') + m.name, x + 12, y + 8, { size: 14, color: m.done ? '#c6ff6a' : COL.gold, maxW: w - 24 });
+    const top = y;
+    txt(ctx, (m.tracked ? '⌖ ' : m.done ? '★ ' : '◆ ') + m.name, x + 12, y + 8, { size: 14, color: m.done ? '#c6ff6a' : m.tracked ? '#7fe9ff' : COL.gold, maxW: w - 24 });
     y += 22;
     for (const l of m.lines) {
       const s0 = String(l);
@@ -485,6 +513,7 @@ function drawTracker(ctx, game) {
       txt(ctx, (arrow ? '' : done ? '✔ ' : '・') + body, x + 20, y + 8, { size: 12.5, color: arrow ? COL.gold : done ? '#c6ff6a' : '#f2efff', maxW: w - 32, sw: 3 });
       y += 19;
     }
+    trackerHit(ctx, game, m, { x: x + 4, y: top - 2, w: w - 8, h: y - top + 4 });
     y += 6;
   }
 }

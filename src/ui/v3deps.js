@@ -204,3 +204,12 @@ export function loadSettings(game) {
 export function saveSettings(game) {
   try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(game.settings || {})); } catch { /* ignore */ }
 }
+
+import { audio } from '../audio/audio.js';
+/** 設定を各所へ反映（音量は audio.setVolumes、エフェクト濃さ等は game.settings を各担当が参照） */
+export function applySettings(game) {
+  const s = game?.settings;
+  if (!s) return;
+  guard('audio.setVolumes', () => audio?.setVolumes?.({ bgm: s.bgm, se: s.se, master: s.master }));
+  s.fxLevel = s.fx >= 1 ? 'full' : s.fx >= 0.5 ? 'half' : 'min';
+}
