@@ -111,6 +111,7 @@ game.debug = new DebugPanel(game);
 game.saveSettings = () => { try { localStorage.setItem('nvs_settings', JSON.stringify(game.settings)); } catch { /* ignore */ } };
 // 永続的なイベント購読（各 attach は game.state を都度参照する）
 safe('attachAudio', () => attachAudio(game));
+safe('attachFx', () => FX.attachFx?.(game));
 audio.notifyRadio = false; // HUD がラジオ局名を表示する
 let systemsAttached = false;
 
@@ -335,6 +336,7 @@ function drawPlay() {
   if (!skip.hud) safe('combo', () => FX.drawCombo?.(ctx, game));
   if (!skip.hud) safe('hud', () => drawHUD(ctx, game));
   if (!skip.hud) safe('ui.draw', () => game.ui.draw(ctx));
+  if (!skip.hud) safe('screenFx', () => FX.drawScreenFx?.(ctx, game));
   safe('debug.draw', () => game.debug.draw(ctx));
 }
 
