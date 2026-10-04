@@ -1719,7 +1719,7 @@ function drawHead(ctx, K) {
   // 頬の赤み（ぼかし2層＋斜線）
   const cute = !K.cool;
   const hurt = P.eyes === 'hurt' || P.mouth === 'shout';
-  const bA = cute ? 0.42 : 0.24;
+  const bA = K.vil ? 0.1 : cute ? 0.42 : 0.24;
   ctx.fillStyle = C(ra('#ff6e96', bA * 0.55));
   ctx.beginPath(); ctx.ellipse(FO - 10.4, 8.4, 4.4, 2.3, 0, 0, TAU); ctx.ellipse(FO + 10.8, 8.4, 3.8, 2.1, 0, 0, TAU); ctx.fill();
   ctx.fillStyle = C(ra('#ff5a8a', bA * (hurt ? 1.2 : 0.9)));
@@ -1849,7 +1849,8 @@ function drawEyes(ctx, K) {
     ctx.fillStyle = C('#ffffff'); ctx.fill();
     ctx.save(); ctx.clip();
     const icx = cx + side * 0.3, icy = ey + h * 0.12;
-    const irx = ew * 0.8, iry = h * 0.9;
+    const ik = L[4] || 1;
+    const irx = ew * 0.8 * ik, iry = h * 0.9 * (0.5 + ik * 0.5);
     // 虹彩（多層グラデ）
     ctx.beginPath(); ctx.ellipse(icx, icy, irx, iry, 0, 0, TAU);
     if (FL) ctx.fillStyle = '#ffffff';
@@ -1865,7 +1866,7 @@ function drawEyes(ctx, K) {
       ctx.strokeStyle = ra(sh(ec, 0.45), 0.55); ctx.lineWidth = 0.55;
       ctx.beginPath(); ctx.ellipse(icx, icy + 0.4, irx * 0.62, iry * 0.62, 0, 0.3, PI - 0.3); ctx.stroke();
       // 瞳孔
-      const pk = m === 'fierce' ? 0.3 : 0.38;
+      const pk = m === 'fierce' || m === 'vil' ? 0.3 : 0.38;
       ctx.fillStyle = sh(ec, -0.78);
       ctx.beginPath(); ctx.ellipse(icx + side * 0.15, icy - iry * 0.05, irx * pk * 1.15, iry * pk * 1.1, 0, 0, TAU); ctx.fill();
       // 上部の影（まぶたの影）
@@ -2038,6 +2039,14 @@ function drawMouth(ctx, K) {
     case 'smirk': {
       ctx.beginPath(); ctx.moveTo(mxp - 2, my + 0.7); ctx.quadraticCurveTo(mxp + 0.4, my + 1.3, mxp + 2.4, my - 0.4); ctx.stroke();
       ctx.lineWidth = 0.7; ctx.beginPath(); ctx.moveTo(mxp + 2.4, my - 0.4); ctx.lineTo(mxp + 2.9, my - 0.1); ctx.stroke();
+      return;
+    }
+    case 'grin': {
+      // 悪役のニヤリ（歯を見せる片側上がり）
+      ctx.beginPath(); ctx.moveTo(mxp - 2.8, my); ctx.quadraticCurveTo(mxp + 0.2, my + 0.6, mxp + 3.2, my - 1.2);
+      ctx.quadraticCurveTo(mxp + 1.4, my + 2.6, mxp - 0.6, my + 2); ctx.quadraticCurveTo(mxp - 2, my + 1.6, mxp - 2.8, my); ctx.closePath();
+      ctx.fillStyle = C('#ffffff'); ctx.fill(); ctx.stroke();
+      ctx.lineWidth = 0.5; ctx.beginPath(); ctx.moveTo(mxp - 0.6, my + 0.4); ctx.lineTo(mxp - 0.4, my + 1.9); ctx.moveTo(mxp + 1.2, my + 0.2); ctx.lineTo(mxp + 1.3, my + 1.6); ctx.stroke();
       return;
     }
     case 'smile': {
