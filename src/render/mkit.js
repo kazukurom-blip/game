@@ -191,16 +191,19 @@ function celGrad(ctx, col) {
 
 // グラデーションのキャッシュ（CanvasGradient は描画時の変換で解釈されるため、ローカル座標が同じなら再利用できる）
 const gradCache = new Map();
-const GRAD_MAX = 3000;
-function q2(v) { return Math.round(v * 2); }
+let gradN = 0;
+function q2(v) { return Math.round(v * 2) + 4096; }
+/** key(色＋種別の文字列)ごとに座標を数値キーで引く（文字列連結なし） */
 export function linGrad(ctx, x0, y0, x1, y1, stops, key) {
-  const k = key + '|' + q2(x0) + ',' + q2(y0) + ',' + q2(x1) + ',' + q2(y1);
-  let g = gradCache.get(k);
+  let m = gradCache.get(key);
+  if (!m) { m = new Map(); gradCache.set(key, m); }
+  const k = ((q2(x0) * 8192 + q2(y0)) * 8192 + q2(x1)) * 8192 + q2(y1);
+  let g = m.get(k);
   if (g) return g;
   g = ctx.createLinearGradient(x0, y0, x1, y1);
   for (let i = 0; i < stops.length; i += 2) g.addColorStop(stops[i], stops[i + 1]);
-  if (gradCache.size >= GRAD_MAX) gradCache.clear();
-  gradCache.set(k, g);
+  if (++gradN > 4000) { gradCache.clear(); gradN = 0; m = new Map(); gradCache.set(key, m); }
+  m.set(k, g);
   return g;
 }
 
@@ -219,16 +222,35 @@ export function partK(ctx, key, col, x, y, w, h, pathFn, lw = 1.6) {
 /** body の軽量版（小パーツ用）: 単色＋下側影1段＋線 */
 export function part(ctx, col, x, y, w, h, lw = 1.6) {
   if (FL) { ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.strokeStyle = OC(); ctx.lineWidth = lw; ctx.stroke(); return; }
-  ctx.fillStyle = linGrad(ctx, 0, y, 0, y + h, [0, light(col, 0.12), 0.5, col, 0.62, shadow(col, 0.16), 1, shadow(col, 0.26)], 'p' + col);
+  ctx.fillStyle = partGrad(ctx, col, y, h);
   ctx.fill();
   ctx.strokeStyle = OC(); ctx.lineWidth = lw; ctx.stroke();
 }
 
+const pgCache = new Map(), mgCache = new Map();
+function gradFor(cache, ctx, col, a, len, vertical, mk) {
+  let m = cache.get(col);
+  if (!m) { if (cache.size > 300) cache.clear(); m = new Map(); cache.set(col, m); }
+  const k = (q2(a) * 8192 + q2(len)) * 2 + (vertical ? 1 : 0);
+  let g = m.get(k);
+  if (!g) {
+    if (m.size > 400) m.clear();
+    g = vertical ? ctx.createLinearGradient(0, a, 0, a + len) : ctx.createLinearGradient(a, 0, a + len, 0);
+    const st = mk(col);
+    for (let i = 0; i < st.length; i += 2) g.addColorStop(st[i], st[i + 1]);
+    m.set(k, g);
+  }
+  return g;
+}
+const PART_ST = (col) => [0, light(col, 0.12), 0.5, col, 0.62, shadow(col, 0.16), 1, shadow(col, 0.26)];
+const METAL_ST = (col) => [0, light(col, 0.5), 0.18, light(col, 0.2), 0.42, col, 0.5, shadow(col, 0.22), 0.62, col, 0.85, shadow(col, 0.3), 1, shadow(col, 0.45)];
+function partGrad(ctx, col, y, h) { return gradFor(pgCache, ctx, col, y, h, true, PART_ST); }
+function metalGrad(ctx, col, v, a, len) { return gradFor(mgCache, ctx, col, a, len, v, METAL_ST); }
+
 /** 金属（クローム）グラデ: 帯状のスペキュラ */
 export function metal(ctx, col, x, y, w, h, lw = 2, vertical = true) {
   if (FL) { ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.strokeStyle = OC(); ctx.lineWidth = lw; ctx.stroke(); return; }
-  const st = [0, light(col, 0.5), 0.18, light(col, 0.2), 0.42, col, 0.5, shadow(col, 0.22), 0.62, col, 0.85, shadow(col, 0.3), 1, shadow(col, 0.45)];
-  ctx.fillStyle = vertical ? linGrad(ctx, 0, y, 0, y + h, st, 'm' + col) : linGrad(ctx, x, 0, x + w, 0, st, 'm' + col);
+  ctx.fillStyle = metalGrad(ctx, col, vertical, vertical ? y : x, vertical ? h : w);
   ctx.fill();
   ctx.strokeStyle = OC(); ctx.lineWidth = lw; ctx.stroke();
 }
