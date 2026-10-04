@@ -1,5 +1,5 @@
 // インベントリ・装備・アイテム使用
-import { ITEMS, EQUIP_SLOTS } from '../data/items.js';
+import { ITEMS, EQUIP_SLOTS, WEAR_SLOTS } from '../data/items.js';
 import { computeStats, clampVitals, addBuff } from './progression.js';
 import { spawnEffect, spawnDamageNumber } from '../render/effects.js';
 
@@ -23,6 +23,12 @@ export function addItemToState(state, id, qty = 1) {
   const it = ITEMS[id];
   if (!it || qty <= 0) return false;
   const inv = state.inventory || (state.inventory = []);
+  const ok = _addRaw(state, inv, it, id, qty);
+  if (ok) (state.itemsFound ||= {})[id] = true; // 図鑑のドロップ表示用（入手したことがある）
+  return ok;
+}
+
+function _addRaw(state, inv, it, id, qty) {
   if (isStackable(it)) {
     let left = qty;
     // 必要スロット数を先に確認
@@ -48,7 +54,7 @@ export function addItemToState(state, id, qty = 1) {
   return true;
 }
 
-/** addItem(game, id, qty=1, opts={silent}) → bool。レア以上の装備は rareDrop を emit（silent で抑制） */
+/** addItem(game, id, qty=1, opts={silent}) → bool。レア以上の装備は rareDrop、PET はさらに petDrop を emit（silent で抑制） */
 export function addItem(game, id, qty = 1, opts = {}) {
   const st = game.state;
   const it = ITEMS[id];
@@ -61,6 +67,10 @@ export function addItem(game, id, qty = 1, opts = {}) {
     if (!st.rareFound) st.rareFound = [];
     if (!st.rareFound.includes(id)) st.rareFound.push(id);
     if (!opts.silent) game.events?.emit('rareDrop', { item: it });
+    if (it.slot === 'pet' && !opts.silent) {
+      game.notify?.(`★PET★ ${it.name} を手に入れた！`, '#ff6fd8');
+      game.events?.emit('petDrop', { item: it });
+    }
   }
   return true;
 }
@@ -109,10 +119,10 @@ export function unequip(game, slot) {
   return { ok: true, msg: `${ITEMS[id].name} を外した` };
 }
 
-/** getEquipLooks(state) → {slot: look|null} */
-export function getEquipLooks(state) {
+/** getEquipLooks(state, {includePet}) → {slot: look|null}（pet は includePet 時のみ。drawCharacter には不要） */
+export function getEquipLooks(state, opts = {}) {
   const o = {};
-  for (const slot of EQUIP_SLOTS) {
+  for (const slot of opts.includePet ? EQUIP_SLOTS : WEAR_SLOTS) {
     const id = state.equipped?.[slot];
     o[slot] = id && ITEMS[id] ? ITEMS[id].look : null;
   }
@@ -154,6 +164,12 @@ export function useItem(game, id) {
     game.notify?.(`${it.name}！ ${it.desc}`, e.buff.color || '#19f0ff');
   }
   return true;
+}
+
+/** 装備中の PET のアイテム定義（なければ null） */
+export function equippedPet(state) {
+  const id = state?.equipped?.pet;
+  return id && ITEMS[id] ? ITEMS[id] : null;
 }
 
 // ---- ショップ補助 ----

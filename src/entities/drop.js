@@ -47,10 +47,10 @@ export class Drop {
     this.t += dt;
     const g = this.game;
     if (this.flyT >= 0) {
-      // プレイヤーへ吸い込まれる
+      // プレイヤー（または PET）へ吸い込まれる
       this.flyT += dt;
-      const p = g.player;
-      const tx = p.x, ty = p.y - 40;
+      const c = this.collector && !this.collector.remove ? this.collector : g.player;
+      const tx = c.x, ty = c.y - (c === g.player ? 40 : 14);
       const k = Math.min(1, dt * 14);
       this.x += (tx - this.x) * k; this.y += (ty - this.y) * k;
       if (this.flyT > 0.18) this.remove = true;
@@ -74,9 +74,10 @@ export class Drop {
 
   canPick() { return this.flyT < 0 && !this.remove && this.t >= this.pickDelay; }
 
-  // 拾う。成功で true
-  pickup() {
+  // 拾う。成功で true。by = 拾った主体（PET など。省略時プレイヤー）
+  pickup(by = null) {
     if (!this.canPick()) return false;
+    this.collector = by;
     const g = this.game, s = g.state;
     if (this.money != null) {
       s.money = (s.money || 0) + this.money;

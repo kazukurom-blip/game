@@ -7,6 +7,9 @@ export const RARITY = {
   epic:      { name: 'エピック',     color: '#b04dff', glow: '#b04dff', order: 2 },
   legendary: { name: 'レジェンダリ', color: '#ffb800', glow: '#ffd23f', order: 3 },
   mythic:    { name: 'ミシック',     color: '#ff3d7f', glow: '#ff3dd2', order: 4 },
+  // PET 専用レア度（虹色。UI は gradient があれば虹グラデーション、なければ color）
+  pet:       { name: 'PET',          color: '#ff6fd8', glow: '#fff06a', order: 5,
+               gradient: ['#ff3d7f', '#ffb800', '#fff06a', '#5cff9a', '#19f0ff', '#7a3dff'], rainbow: true },
 };
 
 export function rarityOf(id) {
@@ -44,7 +47,8 @@ export function rollDrops(enemyDef, luck = 0, rng = Math.random) {
   for (const d of enemyDef.drops || []) {
     const it = ITEMS[d.id];
     if (!it) continue;
-    const mult = it.type === 'equip' ? lm : 1 + (lm - 1) * 0.3;
+    // PET は LUK で微増（効果半分）、装備は強め、その他は弱め
+    const mult = it.slot === 'pet' ? 1 + (lm - 1) * 0.5 : it.type === 'equip' ? lm : 1 + (lm - 1) * 0.3;
     if (rng() < Math.min(1, d.chance * mult)) out.push({ id: d.id });
   }
   return out;

@@ -1,11 +1,11 @@
 // 各ウィンドウの中身（UIManager から呼ばれる即時モード描画）
 import {
-  COL, txt, inset, panel, rrPath, wrap, fmtMoney, rgba, clamp, measure, SLOT_LABELS, STAT_LABELS, rarityFill, font,
+  COL, txt, inset, panel, rrPath, wrap, fmtMoney, rgba, clamp, measure, SLOT_LABELS, STAT_LABELS, rarityFill, font, rainbowGrad,
 } from './theme.js';
 import {
   guard, getItemDef, rarityInfo, stats, computeStatsRaw, drawChar, drawItemIco, drawSkillIco, heroLook, equipLooks,
   looksFrom, doEquip, doUnequip, doUseItem, doAddItem, doRemoveItem, allSkills, skillDef, skillMp, skillCd, doLearn,
-  allMissions, missionDef, HERO_NAMES, expNeed, missionNpcName, turnInNpc, sellPriceOf,
+  allMissions, missionDef, HERO_NAMES, expNeed, missionNpcName, turnInNpc, sellPriceOf, drawPetArt,
 } from './deps.js';
 
 const W = 1280, H = 720;
@@ -37,6 +37,14 @@ export function itemTip(game, it, o = {}) {
   const cat = it.slot ? (SLOT_LABELS[it.slot] || it.slot) : it.type === 'consumable' ? '消費アイテム' : 'その他';
   L.push({ t: `${info.name}  ・  ${cat}`, c: COL.sub, size: 12 });
   if (it.reqLevel) L.push({ t: `必要Lv ${it.reqLevel}`, c: (st.level || 1) >= it.reqLevel ? '#ffffff' : COL.bad, size: 13 });
+  if (it.slot === 'pet' || it.pet) {
+    const pt = it.pet || {};
+    L.push({ sep: true });
+    if (pt.name) L.push({ t: `PET「${pt.name}」`, c: '#ffd6f5', size: 14 });
+    L.push({ t: `自動取得範囲  ${pt.pickRange ?? '?'}px`, c: '#d8f6ff', size: 13 });
+    if (pt.pickRate != null) L.push({ t: `取得速度  ${pt.pickRate}個/秒`, c: '#d8f6ff', size: 13 });
+    L.push({ t: '装備すると追従してアイテム・お金を自動で拾う', c: COL.good, size: 12, wrap: true });
+  }
   if (it.slot === 'weapon') {
     const parts = [];
     if (it.weaponType) parts.push(`タイプ: ${WT[it.weaponType] || it.weaponType}`);
@@ -181,6 +189,13 @@ function slotBox(ctx, r, it, o = {}) {
     stroke: o.sel ? '#ffffff' : it && it.rarity && it.rarity !== 'common' ? rgba(info.color, 0.9) : 'rgba(190,170,255,0.35)',
     lw: o.sel ? 2.5 : 1.5,
   });
+  if (info?.rainbow && !o.sel) {
+    ctx.save();
+    rrPath(ctx, r.x, r.y, r.w, r.h, 9);
+    ctx.lineWidth = 2.5; ctx.strokeStyle = rainbowGrad(ctx, r.x, r.y, r.x + r.w, r.y + r.h, (typeof performance !== 'undefined' ? performance.now() : 0) / 2000);
+    ctx.stroke();
+    ctx.restore();
+  }
   if (it && it.rarity && it.rarity !== 'common') {
     ctx.save();
     rrPath(ctx, r.x + 2, r.y + 2, r.w - 4, r.h - 4, 8);
@@ -218,11 +233,18 @@ function drawInventory(ui, ctx, win) {
   for (let i = -6; i <= 6; i++) { ctx.beginPath(); ctx.moveTo(px + pw / 2 + i * 14, fy); ctx.lineTo(px + pw / 2 + i * 60, py + ph); ctx.stroke(); }
   ctx.fillStyle = 'rgba(0,0,0,0.35)';
   ctx.beginPath(); ctx.ellipse(px + pw / 2, fy + 8, 52, 10, 0, 0, Math.PI * 2); ctx.fill();
-  drawChar(ctx, px + pw / 2, fy + 8, heroLook(st.heroId), equipLooks(st), { facing: 1, state: 'idle', t, attackT: 0, damage: 0, scale: 2 });
+  const petIt = getItemDef(st.equipped?.pet);
+  const cxC = petIt ? px + pw / 2 - 22 : px + pw / 2;
+  drawChar(ctx, cxC, fy + 8, heroLook(st.heroId), equipLooks(st), { facing: 1, state: 'idle', t, attackT: 0, damage: 0, scale: 2 });
+  if (petIt) {
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath(); ctx.ellipse(px + pw / 2 + 62, fy + 10, 22, 5, 0, 0, Math.PI * 2); ctx.fill();
+    drawPetArt(ctx, px + pw / 2 + 62, fy + 8, petIt.look, { facing: -1, state: 'idle', t, scale: 1.3 });
+  }
   ctx.restore();
   txt(ctx, `${HERO_NAMES[st.heroId] || ''}  Lv.${st.level || 1}`, px + pw / 2, py + ph - 18, { size: 15, align: 'center', color: '#fff', glow: COL.pink });
 
-  const SL = [['hat', 0, 0], ['top', 0, 1], ['bottom', 0, 2], ['shoes', 0, 3], ['weapon', 1, 0], ['accessory', 1, 1]];
+  const SL = [['hat', 0, 0], ['top', 0, 1], ['bottom', 0, 2], ['shoes', 0, 3], ['weapon', 1, 0], ['accessory', 1, 1], ['pet', 1, 2]];
   for (const [slot, col, row] of SL) {
     const r = { x: col ? px + pw - 10 - 54 : px + 10, y: py + 10 + row * 66, w: 54, h: 54 };
     const id = st.equipped?.[slot];
@@ -233,6 +255,7 @@ function drawInventory(ui, ctx, win) {
     else txt(ctx, SLOT_LABELS[slot], r.x + r.w / 2, r.y + r.h / 2, { size: 11, align: 'center', color: COL.dim, sw: 2.5 });
     if (it) txt(ctx, SLOT_LABELS[slot], r.x + 3, r.y + 7, { size: 9, color: '#ffe3f0', sw: 2.5 });
     if (hov && it) ui.setTip(itemTip(g, it, { equipped: true }));
+    else if (hov && slot === 'pet') ui.setTip({ lines: [{ t: 'PET スロット', c: '#ffd6f5', size: 15 }, { t: '超低確率でドロップする PET を装備すると', c: COL.sub, size: 12 }, { t: 'アイテムとお金を自動で拾ってくれる', c: COL.sub, size: 12 }], border: '#ff6ad5' });
     ui.hit(win, 'eq:' + slot, r, {
       onClick: () => {
         if (!st.equipped?.[slot]) return;

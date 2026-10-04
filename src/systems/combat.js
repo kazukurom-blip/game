@@ -4,6 +4,9 @@ import { Drop } from '../entities/drop.js';
 import { rectOverlap, entRect } from '../world/physics.js';
 import { computeStats, gainExp } from './progression.js';
 import { rollDrops } from './loot.js';
+import { bookRecord } from './book.js';
+import { isFieldMap } from './travel.js';
+import { isNight, NIGHT_EXP_BONUS } from '../data/balance.js';
 
 const now = (game) => (typeof game.time === 'number' ? game.time : performance.now() / 1000);
 
@@ -14,6 +17,18 @@ export const TEAR_THRESHOLDS = [0.75, 0.5, 0.25, 0.1];
 // 手配度: wantedHeat がこの値以上で ★n
 export const WANTED_HEAT = [0, 1, 5, 12, 22, 35];
 export const WANTED_MAX_HEAT = 45;
+// 市民への攻撃（GTA風）: 殴る=小, 倒す=中
+export const CIVILIAN_HIT_HEAT = 0.8;
+export const CIVILIAN_KILL_HEAT = 4;
+// フィールド（警察がいない）での手配度減衰倍率
+export const FIELD_WANTED_DECAY = 5;
+
+/** 敵撃破時の経験値（夜 20〜5 時は +10%。game.clock 未定義なら補正なし。市民は 0） */
+export function killExp(game, def) {
+  if (!def || def.civilian) return 0;
+  const base = def.exp || 0;
+  return isNight(game?.clock) ? Math.round(base * (1 + NIGHT_EXP_BONUS)) : base;
+}
 
 /** calcDamage(atk, mult, def, crit, critDmg) → {dmg, crit} 乱数幅±10% */
 export function calcDamage(atk, mult = 1, def = 0, crit = 0, critDmg = 1.5) {
@@ -78,6 +93,14 @@ export function damageEnemy(game, enemy, dmg, crit = false, knockDir = 0, opts =
   if (crit && stack === 0) spawnEffect(game, 'critHit', enemy.x, enemy.y - enemy.h / 2);
 
   const def = enemy.def || {};
+  if (def.civilian) {
+    // 市民を殴った → 手配度（小）・逃げる
+    enemy.scared = true;
+    enemy.fleeT = 4;
+    enemy.fleeDir = knockDir || (game.player ? (enemy.x >= game.player.x ? 1 : -1) : 1);
+    if (enemy.hp > 0) addWanted(game, CIVILIAN_HIT_HEAT);
+    game.events?.emit('civilianHit', { enemy });
+  }
   const resist = def.boss ? 0.15 : 1;
   const knock = opts.knock ?? 180;
   if (knockDir && knock > 0) {
@@ -96,8 +119,11 @@ function killEnemy(game, enemy) {
   enemy.state = 'dead';
   const def = enemy.def || {};
   const st = game.state;
-  st.kills = (st.kills || 0) + 1;
-  gainExp(game, def.exp || 0);
+  if (!def.civilian) {
+    st.kills = (st.kills || 0) + 1;
+    gainExp(game, killExp(game, def));
+    bookRecord(game, def.id || enemy.defId);
+  }
   const stats = computeStats(st);
   const drops = rollDrops(def, stats.luck);
   drops.forEach((payload, i) => {
@@ -107,6 +133,10 @@ function killEnemy(game, enemy) {
   });
   spawnEffect(game, def.art === 'drone' ? 'explosion' : 'smoke', enemy.x, enemy.y - enemy.h / 2);
   if (def.isCop) addWanted(game, def.heat ?? 3);
+  if (def.civilian) {
+    addWanted(game, CIVILIAN_KILL_HEAT);
+    game.events?.emit('civilianKilled', { enemy });
+  }
   if (def.boss) game.notify?.(`${def.name} を倒した！`, '#ffd23f');
   game.events?.emit('enemyKilled', { enemy });
 }
@@ -199,9 +229,19 @@ export function setWantedLevel(game, level) {
   refreshWanted(game);
 }
 
-/** 警官に見られていない時に減衰（main/spawner から毎フレーム呼ぶ）。opts: {seen?:bool, sight, grace, rate} */
+/** 警官に見られていない時に減衰（main/spawner から毎フレーム呼ぶ）。opts: {seen?:bool, sight, grace, rate}
+ *  フィールド（map.town === false。警察がいない）では素早く減衰する（grace 1 秒・速度 ×FIELD_WANTED_DECAY） */
 export function updateWanted(game, dt, opts = {}) {
   if (!(game.wantedHeat > 0)) return;
+  if (isFieldMap(game.map)) {
+    const since = now(game) - (game._wantedLastAdd || 0);
+    if (since > (opts.grace ?? 1)) {
+      const rate = (opts.rate ?? (0.6 + game.wantedHeat * 0.03)) * FIELD_WANTED_DECAY;
+      game.wantedHeat = Math.max(0, game.wantedHeat - rate * dt);
+      refreshWanted(game);
+    }
+    return;
+  }
   const p = game.player;
   const sight = opts.sight ?? 650;
   let seen = typeof opts.seen === 'boolean' ? opts.seen : false;

@@ -9,6 +9,11 @@ import { playerAttackArea, calcDamage, newAttackId, setPlayerInvuln } from './co
 const cds = {};       // skillId → {left, total}
 let _dash = null;     // 進行中のダッシュ
 let _lastWarn = 0;
+let _lastTownWarn = -1e9;
+export const TOWN_SKILL_WARN_INTERVAL = 1.5; // 秒
+
+/** 町（map.town === true）ではスキル使用不可 */
+export function skillsBlockedHere(game) { return !!game.map?.town; }
 
 function warn(game, text) {
   const t = performance.now();
@@ -43,6 +48,14 @@ export function useSkill(game, skillId) {
   const st = game.state;
   const p = game.player;
   if (!sk || !p) return false;
+  if (skillsBlockedHere(game)) {
+    const t = typeof game.time === 'number' ? game.time : performance.now() / 1000;
+    if (t - _lastTownWarn >= TOWN_SKILL_WARN_INTERVAL || t < _lastTownWarn) {
+      _lastTownWarn = t;
+      game.notify?.('町ではスキルは使えない！', '#ff8a8a');
+    }
+    return false;
+  }
   const lv = skillLevel(st, skillId);
   if (lv <= 0) { warn(game, `${sk.name} は未習得です`); return false; }
   if (sk.kind === 'passive') { warn(game, `${sk.name} はパッシブスキルです`); return false; }

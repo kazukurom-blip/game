@@ -188,6 +188,12 @@ export function drawChar(ctx, x, y, look, equip, anim) {
 
 export function drawItemIco(ctx, item, x, y, size) {
   if (!item) return;
+  if (item.slot === 'pet' && typeof OPT.pets?.drawPet === 'function') {
+    ctx.save();
+    const ok = guard('drawPet.icon', () => { OPT.pets.drawPet(ctx, x, y + size * 0.36, item.look || {}, { t: 0, facing: 1, state: 'idle', scale: size / 52 }); return true; }, false);
+    ctx.restore();
+    if (ok) return;
+  }
   if (typeof IconM.drawItemIcon === 'function') {
     ctx.save();
     const ok = guard('drawItemIcon', () => { IconM.drawItemIcon(ctx, item, x, y, size); return true; }, false);
@@ -285,6 +291,7 @@ export const REGIONS = [
   { id: 'casino', name: 'カジノ', color: '#ffd447' },
   { id: 'rooftop', name: 'ヴァイス・タワー', color: '#b77bff' },
   { id: 'spaceport', name: 'ルミナ宇宙港', color: '#5ee8ff' },
+  { id: 'police', name: '警察', color: '#5f8cff', noMap: true },
 ];
 export const REGION_BY_ID = Object.fromEntries(REGIONS.map((r) => [r.id, r]));
 const PREFIX_REGION = { beach: 'beach', down: 'downtown', downtown: 'downtown', slums: 'slums', swamp: 'swamp', casino: 'casino', tower: 'rooftop', rooftop: 'rooftop', space: 'spaceport', spaceport: 'spaceport' };
@@ -379,6 +386,17 @@ export function taxiFareOf(game, id) {
   const d = hopDistance(adj, game.state?.mapId || game.map?.id, id);
   return Math.round(50 + d * 12 * Math.max(1, game.state?.level || 1));
 }
+// タクシー可否 → {ok, msg}
+export function taxiCheck(game, id) {
+  const f = OPT.travel?.canTaxi;
+  if (typeof f === 'function') {
+    const r = guard('canTaxi', () => f(game, id), null);
+    if (r && typeof r === 'object') return { ok: r.ok !== false, msg: r.msg || '' };
+  }
+  const fare = taxiFareOf(game, id);
+  if ((game.state?.money || 0) < fare) return { ok: false, msg: '所持金が足りません' };
+  return { ok: true, msg: '' };
+}
 // → {ok, msg}
 export function doTaxi(game, id) {
   const f = OPT.travel?.taxiTravel;
@@ -406,10 +424,10 @@ export function visitedSet(game) {
 
 // ---- 図鑑 ----
 export function bookKills(state, id) { const v = state?.book?.[id]; return typeof v === 'number' ? v : (v?.kills || 0); }
-export function bookList() {
+export function bookList(state) {
   const f = OPT.book?.bookEntries;
   let raw = null;
-  if (typeof f === 'function') raw = guard('bookEntries', () => f(), null);
+  if (typeof f === 'function') raw = guard('bookEntries', () => f(state), null);
   if (raw && !Array.isArray(raw)) raw = Object.values(raw);
   if (!raw || !raw.length) raw = Object.values(allEnemies()).filter((d) => d && !d.civilian && d.ai !== 'civilian' && d.art !== 'civilian');
   const out = [];
@@ -420,7 +438,7 @@ export function bookList() {
     if (!id) continue;
     const habitats = e.habitats || def?.habitats || [];
     const region = e.region || def?.region || (habitats[0] ? regionOfMap(habitats[0]) : null) || 'beach';
-    out.push({ id, def: def || { id, name: e.name || id }, name: e.name || def?.name || id, level: e.level ?? def?.level, region, habitats, drops: e.drops || def?.drops || [], boss: !!(e.boss || def?.boss), no: e.no ?? out.length + 1 });
+    out.push({ id, def: def || { id, name: e.name || id }, name: e.name || def?.name || id, level: e.level ?? def?.level, region, habitats, drops: e.drops || def?.drops || [], boss: !!(e.boss || def?.boss), no: e.no ?? out.length + 1, rankName: e.rankName, nextRank: e.nextRank });
   }
   return out;
 }
@@ -437,7 +455,7 @@ export function bookBonusOf(state) {
 // 図鑑・ドロップ表示用: そのアイテムを入手したことがあるか
 export function itemKnown(state, id) {
   if (!state || !id) return false;
-  for (const k of ['obtained', 'itemsSeen', 'seenItems', 'itemLog', 'bookItems', 'rareFound']) {
+  for (const k of ['itemsFound', 'obtained', 'itemsSeen', 'seenItems', 'itemLog', 'bookItems', 'rareFound']) {
     const v = state[k];
     if (Array.isArray(v) && v.includes(id)) return true;
     if (v && typeof v === 'object' && !Array.isArray(v) && v[id]) return true;

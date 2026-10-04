@@ -323,7 +323,7 @@ function drawMenu(ctx, t, hasSave) {
     txt(ctx, f ? '↑ で主人公選択へ' : '↓ でつづきから', W / 2, cr.y + cr.h + 13, { size: 11, align: 'center', color: COL.sub, sw: 2.5 });
   } else T.regions.cont = null;
   // 操作説明
-  const help = '操作:  ←→ 移動   Space ジャンプ   X 攻撃   A/S/D/F スキル   1/2 ポーション   Z 拾う   E 会話・乗車   ↑ ポータル   I/K/J/T ウィンドウ';
+  const help = '←→ 移動  Space ジャンプ  X 攻撃  ASDF スキル  1/2 薬  Z 拾う  E 会話・乗車  ↑ ポータル  I/K/J/T ウィンドウ  M マップ  B 図鑑  P スマホ  R ラジオ  N ミュート';
   ctx.save();
   rrPath(ctx, 40, H - 40, W - 80, 28, 14);
   ctx.fillStyle = 'rgba(10,4,30,0.7)'; ctx.fill();

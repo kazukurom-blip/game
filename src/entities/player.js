@@ -8,6 +8,7 @@ import { playerAttackArea } from '../systems/combat.js';
 import { getItem } from '../data/items.js';
 import { moveAndCollide, findRope, entRect } from '../world/physics.js';
 import { Projectile } from './projectile.js';
+import { syncPet } from './pet.js';
 
 const CLIMB_SPEED = 190;
 const BASE_SPEED = 240;
@@ -50,10 +51,20 @@ export class Player {
     const ev = game.events;
     if (ev) {
       this._unsub.push(ev.on('playerDamaged', () => { this.hurtT = 0.35; this.lastHitT = this.t; }));
+      this._unsub.push(ev.on('equipChanged', () => syncPet(game)));
+      this._unsub.push(ev.on('mapChanged', () => {
+        // changeMap が車を直接外した場合も降車イベントを出す（ラジオ停止など）
+        if (this._lastVehicle && !this.inVehicle) { this._lastVehicle = null; ev.emit('vehicleExit'); }
+        syncPet(game, true);
+      }));
     }
   }
 
-  destroy() { for (const u of this._unsub) u && u(); this._unsub = []; }
+  destroy() {
+    for (const u of this._unsub) u && u();
+    this._unsub = [];
+    if (this.game.pet) { this.game.pet.remove = true; this.game.pet = null; }
+  }
 
   get state() { return this.game.state; }
   get hp() { return this.game.state?.hp ?? 0; }
@@ -124,16 +135,19 @@ export class Player {
     const ctrl = this.canControl();
 
     // --- 乗車中 ---
+    this.updatePet(dt);
     if (this.inVehicle) {
       const v = this.inVehicle;
-      if (v.remove || !g.vehicles.includes(v)) { this.inVehicle = null; }
+      if (v.remove || !g.vehicles.includes(v)) { this.inVehicle = null; this._lastVehicle = null; g.events?.emit('vehicleExit'); }
       else {
-        if (ctrl && inp.pressed('interact')) { v.exit(this); }
+        this._lastVehicle = v;
+        if (ctrl && inp.pressed('interact')) { v.exit(this); this._lastVehicle = null; }
         else if (ctrl && inp.pressed('up')) { if (this.tryPortal()) return; }
         this.updateAnim(dt);
         return;
       }
     }
+    this._lastVehicle = null;
 
     if (ctrl) this.handleActions(dt, st);
     if (this.climbing) this.updateClimb(dt, ctrl);
@@ -170,9 +184,9 @@ export class Player {
     const g = this.game;
     for (const p of g.map.portals || []) {
       if (Math.abs(this.x - p.x) < 44 && Math.abs(this.y - p.y) < 90) {
-        if (this.inVehicle) this.inVehicle.exit(this);
+        if (this.inVehicle) { this.inVehicle.exit(this); this._lastVehicle = null; }
         spawnEffect(g, 'portal', this.x, this.y - 40);
-        g.changeMap(p.to, p.toX);
+        g.changeMap(p.to, p.toX, p.toY);
         return true;
       }
     }
@@ -204,7 +218,9 @@ export class Player {
 
   updateMove(dt, ctrl, st) {
     const g = this.game, inp = g.input;
-    const speed = normSpeed(st.speed);
+    // 水辺（桟橋・沼）の地面＝浅瀬では足が遅くなる
+    const inWater = g.map.water && this.onGround && !this.groundPlat && this.y >= g.map.groundY - 1;
+    const speed = normSpeed(st.speed) * (inWater ? 0.6 : 1);
     const L = ctrl && inp.down('left'), R = ctrl && inp.down('right');
     const dir = (R ? 1 : 0) - (L ? 1 : 0);
     const attacking = this.attackLeft > 0 && this.attackKind !== 'shootMove';
@@ -373,7 +389,16 @@ export class Player {
     a.scale = 1;
   }
 
+  // PET（装備中のみ）: 装備との同期 + 更新
+  updatePet(dt) {
+    const g = this.game;
+    const want = g.state?.equipped?.pet || null;
+    if ((g.pet?.itemId || null) !== want) syncPet(g);
+    if (g.pet) g.pet.update(dt);
+  }
+
   draw(ctx) {
+    if (this.game.pet) this.game.pet.draw(ctx);
     if (this.inVehicle) return; // 車側で描画（driver=true）
     const s = this.game.state;
     if (!s) return;

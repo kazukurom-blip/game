@@ -251,6 +251,12 @@ function makePose(state, t, at, wk, ws, anim) {
       P.bob = br * 0.7; P.ab[0] += br * 0.03; P.af[0] -= br * 0.03;
       P.hairSway = br * 0.3;
   }
+  // 慌て顔（市民が逃げる時など）: anim.panic=true
+  if (anim.panic && state !== 'dead') {
+    P.eyes = 'panic'; P.mouth = 'panic'; P.panic = true; P.showWeapon = false;
+    const s = Math.sin(t * 16);
+    if (state !== 'hurt') { P.ab = [2.7 + 0.35 * s, 0.5]; P.af = [2.5 - 0.35 * s, 0.5]; P.tilt = state === 'walk' ? 0.14 : 0.04; }
+  }
   return P;
 }
 
@@ -1062,7 +1068,25 @@ function drawHead(ctx, K) {
   drawBrows(ctx, K, fo, cool);
   if (eq.accessory && eq.accessory.style === 'sunglasses') drawGlasses(ctx, K, fo);
   drawHat(ctx, K, false);
+  if (P.panic) drawSweat(ctx, K);
   if (eq.accessory && eq.accessory.style === 'halo') drawHalo(ctx, K);
+}
+
+function drawSweat(ctx, K) {
+  const t = K.t;
+  for (let i = 0; i < 2; i++) {
+    const k = (t * 1.6 + i * 0.5) % 1;
+    const x = i ? -19 - k * 4 : 19 + k * 3, y = -8 + k * 10 - (i ? 4 : 0);
+    ctx.globalAlpha = 1 - k * 0.6;
+    ctx.beginPath(); ctx.moveTo(x, y - 4.5); ctx.quadraticCurveTo(x + 3.2, y + 0.5, x, y + 2); ctx.quadraticCurveTo(x - 3.2, y + 0.5, x, y - 4.5);
+    ctx.fillStyle = C('#9fe8ff'); ctx.fill(); ctx.strokeStyle = OC(); ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(x - 0.8, y - 0.5, 0.7, 0, PI * 2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  // 慌て線
+  ctx.strokeStyle = OC(); ctx.lineWidth = 1.3; ctx.beginPath();
+  ctx.moveTo(14, -24); ctx.lineTo(17, -29); ctx.moveTo(19, -21); ctx.lineTo(23, -24); ctx.moveTo(9, -26); ctx.lineTo(10, -31);
+  ctx.stroke();
 }
 
 const BLINK_SEED = 0.37;
@@ -1088,6 +1112,14 @@ function drawEyes(ctx, K, fo, cool) {
     ctx.moveTo(lx - 3, ey - 3); ctx.lineTo(lx + 2.5, ey); ctx.lineTo(lx - 3, ey + 3);
     ctx.moveTo(rx2 + 3, ey - 3); ctx.lineTo(rx2 - 2.5, ey); ctx.lineTo(rx2 + 3, ey + 3);
     ctx.stroke(); return;
+  }
+  if (mode === 'panic') {
+    for (const cx of [lx, rx2]) {
+      ctx.beginPath(); ctx.ellipse(cx, ey, 4.2, 5, 0, 0, PI * 2); ctx.fillStyle = C('#ffffff'); ctx.fill();
+      ctx.strokeStyle = OC(); ctx.lineWidth = 1.6; ctx.stroke();
+      ctx.fillStyle = C('#2a1430'); ctx.beginPath(); ctx.arc(cx + 0.6 + Math.sin(K.t * 20) * 0.6, ey + 0.3, 1.4, 0, PI * 2); ctx.fill();
+    }
+    return;
   }
   if (mode === 'x') {
     ctx.strokeStyle = OC(); ctx.lineWidth = 1.8; ctx.beginPath();
@@ -1158,6 +1190,12 @@ function drawMouth(ctx, K, fo, cool) {
     ctx.fillStyle = C('#c2304a'); ctx.fill(); ctx.stroke();
     ctx.fillStyle = C('#ff8fa8'); ctx.beginPath(); ctx.arc(mx, my + 1.4, 0.9, 0, PI * 2); ctx.fill();
     if (!cool) { ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.moveTo(mx + 0.8, my - 0.5); ctx.lineTo(mx + 2, my - 0.5); ctx.lineTo(mx + 1.4, my + 0.8); ctx.closePath(); ctx.fill(); }
+    return;
+  }
+  if (P.mouth === 'panic') {
+    const o = 1 + Math.abs(Math.sin(K.t * 14)) * 0.6;
+    ctx.beginPath(); ctx.ellipse(mx, my + 1, 2.2, 2.2 * o, 0, 0, PI * 2);
+    ctx.fillStyle = C('#c2304a'); ctx.fill(); ctx.stroke();
     return;
   }
   if (P.mouth === 'hurt') {
@@ -1241,6 +1279,11 @@ function drawHairBack(ctx, K, backView) {
   } else if (st === 'bob') {
     ctx.beginPath(); ctx.moveTo(-19, -4); ctx.bezierCurveTo(-21, 8, -18, 15, -10, 15); ctx.lineTo(12, 15);
     ctx.bezierCurveTo(19, 14, 21, 8, 19, -4); ctx.closePath(); fillStroke(ctx, H.dark);
+  } else if (st === 'bun') {
+    ctx.beginPath(); ctx.arc(-6, -19, 7.5, 0, PI * 2); fillStroke(ctx, H.base);
+    ctx.strokeStyle = C(H.hi); ctx.lineWidth = 1.4; ctx.beginPath(); ctx.arc(-6, -19, 4.5, -2.6, -1.2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-18, -4); ctx.bezierCurveTo(-20, 4, -16, 8, -12, 8); ctx.lineTo(12, 8);
+    ctx.bezierCurveTo(16, 8, 20, 4, 18, -4); ctx.closePath(); fillStroke(ctx, H.dark);
   } else if (st === 'wolf') {
     ctx.beginPath();
     ctx.moveTo(-17, -6); ctx.lineTo(-21, 8); ctx.lineTo(-17.5, 6); ctx.lineTo(-19 - sway, 18); ctx.lineTo(-14, 11);

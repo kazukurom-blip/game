@@ -1,4 +1,4 @@
-// 敵。AI: walker / jumper / charger / shooter / flyer / cop / boss
+// 敵。AI: walker / jumper / charger / shooter / flyer / cop / boss / civilian
 import { ENEMIES } from '../data/enemies.js';
 import { damagePlayer } from '../systems/combat.js';
 import { drawEnemy } from '../render/enemyArt.js';
@@ -82,6 +82,11 @@ export class Enemy {
     if (this.flying) this.y = this.homeY;
     this.phase = 'walk'; this.phaseT = 2;   // boss / charger
     this.spawnT = 0.35;                      // 出現フェードイン
+    this.seed = opts.seed ?? Math.floor(Math.random() * 1e9); // 見た目ランダム用（市民の服装など）
+    this.civilian = !!(opts.civilian || d.civilian || this.ai === 'civilian');
+    if (this.civilian) { this.ai = 'civilian'; this.aggro = false; }
+    this.fleeT = 0;                          // 市民: 逃走残り時間
+    this.shout = null; this.shoutT = 0;      // 市民: 叫び吹き出し
   }
 
   get player() { return this.game.player; }
@@ -109,16 +114,18 @@ export class Enemy {
 
     // 被弾検出（combat 側が hurtT を設定しなくても反応する）
     if (this.hp < this.lastHp) {
-      this.aggro = true;
+      if (this.civilian) this.onCivilianHurt();
+      else this.aggro = true;
       if (!(this.hurtT > 0)) this.hurtT = 0.3;
     }
+    if (this.shoutT > 0) { this.shoutT -= dt; if (this.shoutT <= 0) this.shout = null; }
     this.lastHp = this.hp;
 
     const p = this.player;
     const pdx = p ? p.x - this.x : 0;
     const pdy = p ? p.y - this.y : 0;
     const pdist = Math.hypot(pdx, pdy);
-    if (p && !p.dead && !p.inVehicle && this.ai !== 'cop' && (this.def.aggro > 0 || this.boss) && pdist < this.aggroRange && Math.abs(pdy) < 140) this.aggro = true;
+    if (p && !p.dead && !p.inVehicle && this.ai !== 'cop' && !this.civilian && (this.def.aggro > 0 || this.boss) && pdist < this.aggroRange && Math.abs(pdy) < 140) this.aggro = true;
     if (pdist > 1100 && !this.boss) this.aggro = false;
 
     if (this.boss && this.hurtT > 0) this.hurtT = Math.max(0, this.hurtT - dt * 3); // ボスはひるまない
@@ -140,6 +147,7 @@ export class Enemy {
       case 'flyer': this.aiFlyer(dt, pdx, pdy, pdist); break;
       case 'cop': this.aiCop(dt, pdx, pdy, pdist); break;
       case 'boss': this.aiBoss(dt, pdx, pdy, pdist); break;
+      case 'civilian': this.aiCivilian(dt, pdx); break;
       default: this.aiWalker(dt, pdx); break;
     }
 
@@ -147,9 +155,9 @@ export class Enemy {
       const prevPlat = this.groundPlat;
       const wasGround = this.onGround;
       const res = moveAndCollide(this, g.map, dt);
-      if (res.hitWall && this.onGround && this.ai !== 'boss') { this.dir = -this.dir; }
+      if (res.hitWall && this.onGround && this.ai !== 'boss') { this.dir = -this.dir; if (this.civilian && this.fleeT > 0 && this.onGround) { this.vy = -620; this.onGround = false; } }
       // 足場の端で引き返す（追跡中/突進中以外）
-      if (wasGround && !this.onGround && prevPlat && !this.aggro && this.ai !== 'jumper') {
+      if (wasGround && !this.onGround && prevPlat && !this.aggro && this.ai !== 'jumper' && !(this.civilian && this.fleeT > 0)) {
         // 落ちかけたら戻す
         this.x = Math.max(prevPlat.x + 4, Math.min(prevPlat.x + prevPlat.w - 4, this.x));
         this.y = prevPlat.y; this.vy = 0; this.onGround = true; this.groundPlat = prevPlat;
@@ -166,7 +174,49 @@ export class Enemy {
   clampFly() {
     const m = this.game.map;
     this.x = Math.max(this.w / 2, Math.min(m.width - this.w / 2, this.x));
-    this.y = Math.max(this.h + 20, Math.min(m.groundY - 10, this.y));
+    const top = (m.ceilingY != null ? m.ceilingY + 16 : 0) + this.h + 20;
+    this.y = Math.max(top, Math.min(m.groundY - 10, this.y));
+  }
+
+  // ---------------- 市民 ----------------
+  onCivilianHurt() {
+    const p = this.player;
+    this.fleeT = rand(4, 6);
+    this.fleeDir = p ? (this.x >= p.x ? 1 : -1) : -this.facing;
+    this.say(pick(['キャー！', 'ひぃっ！', '助けて！', '警察呼ぶわよ！', 'やめてくれ！', 'イタッ！']));
+  }
+
+  say(text, t = 1.6) { this.shout = text; this.shoutT = t; }
+
+  aiCivilian(dt, pdx) {
+    const p = this.player;
+    if (this.fleeT > 0) {
+      this.fleeT -= dt;
+      // プレイヤーから離れる方向へ全力疾走（端に着いたら反対へ）
+      if (p && Math.abs(pdx) < 160) this.fleeDir = pdx > 0 ? -1 : 1;
+      const m = this.game.map;
+      if (this.x < 60) this.fleeDir = 1;
+      if (this.x > m.width - 60) this.fleeDir = -1;
+      this.vx = this.fleeDir * Math.max(170, this.speed * 2.4);
+      this.state = 'walk';
+      this.facing = this.fleeDir;
+      if (Math.random() < dt * 0.6 && !(this.shoutT > 0)) this.say(pick(['キャー！', '誰かー！', 'ひぇぇ！']), 1.2);
+      return;
+    }
+    // のんびり歩く・たまに立ち止まる
+    this.aiT -= dt;
+    if (this.aiT <= 0) {
+      this.aiT = rand(1.5, 4.5);
+      const r = Math.random();
+      this.dir = r < 0.35 ? 0 : (r < 0.68 ? -1 : 1);
+      // 近くで手配中の騒ぎがあると小走り
+      this.hurry = (this.game.wanted || 0) >= 2 ? 1.8 : 1;
+    }
+    if (this.x < this.homeX1) this.dir = 1;
+    if (this.x > this.homeX2) this.dir = -1;
+    if (this.dir && this.edgeAhead(this.dir)) this.dir = -this.dir;
+    this.vx = this.dir * Math.min(this.speed, 90) * (this.hurry || 1);
+    this.state = this.dir ? 'walk' : 'idle';
   }
 
   // 足場端チェック: 次の位置が足場外なら true
@@ -261,9 +311,10 @@ export class Enemy {
       const ty = this.player.y - 110;
       this.vx += (Math.sign(pdx) * this.speed * 1.1 - this.vx) * Math.min(1, dt * 2);
       this.vy += ((ty - this.y) * 1.5 - this.vy) * Math.min(1, dt * 2);
-      if (Math.abs(pdx) < 160 && art !== 'drone') this.vy += 300 * dt * 3; // 急降下
+      const shoots = art === 'drone' || !!this.shootDef;
+      if (Math.abs(pdx) < 160 && !shoots) this.vy += 300 * dt * 3; // 急降下（カモメ・蚊・ゴースト等）
       this.state = 'walk';
-      if (art === 'drone') {
+      if (shoots) {
         this.shootT -= dt;
         const sd = this.shootDef || {};
         if (this.shootT <= 0 && pdist < (sd.range || 420) + 60) {
@@ -373,7 +424,8 @@ export class Enemy {
       case 'summon':
         this.state = 'attack'; this.vx = 0;
         if (this.phaseT <= 0) {
-          const types = this.def.summon || (g.map.spawns || []).flatMap((s) => s.types).filter((t) => ENEMIES[t] && !ENEMIES[t].boss && ENEMIES[t].ai !== 'boss');
+          const areas = g.spawner?.areas || g.map.spawns || [];
+          const types = (this.def.summon || areas.flatMap((s) => s.types || [])).filter((t) => ENEMIES[t] && !ENEMIES[t].boss && ENEMIES[t].ai !== 'boss' && !ENEMIES[t].isCop && !ENEMIES[t].civilian);
           const n = enraged ? 3 : 2;
           if (types.length && g.enemies.filter((e) => !e.dead && e.summoned).length < 6) {
             for (let i = 0; i < n; i++) {
@@ -428,7 +480,7 @@ export class Enemy {
     const g = this.game, p = this.player;
     if (!p || p.dead || p.inVehicle || !(g.state && g.state.hp > 0)) return;
     if (this.contactCd > 0 || p.invulnT > 0 || this.spawnT > 0) return;
-    if (this.def.contact === false) return;
+    if (this.def.contact === false || this.civilian) return;
     if (rectOverlap(entRect(this), entRect(p))) {
       this.contactCd = 0.5;
       damagePlayer(g, this.def.atk, this.x);
@@ -441,5 +493,23 @@ export class Enemy {
     ctx.globalAlpha = Math.max(0, Math.min(1, this.alpha));
     drawEnemy(ctx, this);
     ctx.restore();
+    if (this.shout && !this.dead) drawBubble(ctx, this.x, this.y - this.h - 26, this.shout, Math.min(1, this.shoutT * 4));
   }
+}
+
+// 叫び吹き出し（市民）
+function drawBubble(ctx, x, y, text, alpha = 1) {
+  ctx.save();
+  ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+  ctx.font = 'bold 14px sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const w = (ctx.measureText(text).width || 40) + 16, h = 24;
+  ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#222'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(x - w / 2, y - h, w, h, 8); else ctx.rect(x - w / 2, y - h, w, h);
+  ctx.moveTo(x - 6, y); ctx.lineTo(x, y + 8); ctx.lineTo(x + 6, y);
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#e0245e';
+  ctx.fillText(text, x, y - h / 2);
+  ctx.restore();
 }

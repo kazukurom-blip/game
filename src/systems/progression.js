@@ -2,8 +2,9 @@
 import { ITEMS, STARTER_EQUIP } from '../data/items.js';
 import { SKILLS, STARTER_SKILLS } from '../data/skills.js';
 import { spawnEffect } from '../render/effects.js';
+import { expToNext, MAX_LEVEL } from '../data/balance.js';
+import { bookBonus } from './book.js';
 
-export const MAX_LEVEL = 200;
 
 // ヒーロー別の基礎値
 export const HERO_BASE = {
@@ -21,12 +22,8 @@ export const HERO_BASE = {
   },
 };
 
-// メイプル風：序盤は緩やか → 指数的に重くなる
-export function expToNext(level) {
-  if (level >= MAX_LEVEL) return Infinity;
-  const L = Math.max(1, level);
-  return Math.round(15 + 12 * Math.pow(L, 1.5) * Math.pow(1.02, L));
-}
+// 経験値曲線は data/balance.js（敵の経験値と共有）。序盤は少なめ・地域が進むほど効率UP
+export { expToNext, MAX_LEVEL };
 
 export function newState(heroId = 'luna') {
   if (!HERO_BASE[heroId]) heroId = 'luna';
@@ -42,7 +39,7 @@ export function newState(heroId = 'luna') {
       { id: 'potion_red', qty: 15 },
       { id: 'potion_blue', qty: 8 },
     ],
-    equipped: { hat: null, top: null, bottom: null, shoes: null, weapon: null, accessory: null, ...STARTER_EQUIP[heroId] },
+    equipped: { hat: null, top: null, bottom: null, shoes: null, weapon: null, accessory: null, pet: null, ...STARTER_EQUIP[heroId] },
     skills: { ...st.skills },
     skillBar: [...st.skillBar],
     potionBar: ['potion_red', 'potion_blue'],
@@ -50,10 +47,81 @@ export function newState(heroId = 'luna') {
     mapId: 'beach',
     flags: {},
     kills: 0, rareFound: [],
+    // v2
+    visited: ['beach'],
+    book: {},
+    sns: newSnsState(),
+    itemsFound: {},
+    clock: 9,
+    version: STATE_VERSION,
   };
   const s = computeStats(state, []);
   state.hp = s.maxHp;
   state.mp = s.maxMp;
+  return state;
+}
+
+export const STATE_VERSION = 2;
+export function newSnsState() { return { followers: 0, posts: [], milestones: [], totalLikes: 0 }; }
+
+/**
+ * migrateState(state) — 旧セーブ（v1）や欠けたフィールドを補完して返す（破壊的に修正）。
+ * main が loadState 後に呼ぶ。旧マップIDは町としてそのまま有効。
+ */
+export function migrateState(state) {
+  if (!state || typeof state !== 'object') return newState('luna');
+  if (!HERO_BASE[state.heroId]) state.heroId = 'luna';
+  const base = HERO_BASE[state.heroId];
+  const num = (v, d) => (typeof v === 'number' && Number.isFinite(v) ? v : d);
+  state.level = Math.max(1, Math.min(MAX_LEVEL, Math.floor(num(state.level, 1))));
+  state.exp = Math.max(0, num(state.exp, 0));
+  // 経験値曲線の変更で溢れた分は次のレベル直前で止める（勝手にレベルアップさせない）
+  const need = expToNext(state.level);
+  if (Number.isFinite(need) && state.exp >= need) state.exp = need - 1;
+  state.money = Math.max(0, num(state.money, 0));
+  state.sp = Math.max(0, num(state.sp, 0));
+  state.ap = Math.max(0, num(state.ap, 0));
+  state.stats = { ...base.stats, ...(state.stats || {}) };
+  if (!Array.isArray(state.inventory)) state.inventory = [];
+  state.inventory = state.inventory.filter((s) => s && ITEMS[s.id] && s.qty > 0);
+  const eq = state.equipped && typeof state.equipped === 'object' ? state.equipped : {};
+  state.equipped = { hat: null, top: null, bottom: null, shoes: null, weapon: null, accessory: null, pet: null, ...eq };
+  for (const [slot, id] of Object.entries(state.equipped)) {
+    if (id && (!ITEMS[id] || ITEMS[id].slot !== slot)) state.equipped[slot] = null;
+  }
+  if (!state.skills || typeof state.skills !== 'object') state.skills = { ...STARTER_SKILLS[state.heroId].skills };
+  if (!Array.isArray(state.skillBar)) state.skillBar = [...STARTER_SKILLS[state.heroId].skillBar];
+  while (state.skillBar.length < 4) state.skillBar.push(null);
+  if (!Array.isArray(state.potionBar)) state.potionBar = ['potion_red', 'potion_blue'];
+  const ms = state.missions && typeof state.missions === 'object' ? state.missions : {};
+  state.missions = { active: [], completed: [], progress: {}, objProgress: {}, daily: {}, ...ms };
+  for (const k of ['active', 'completed']) if (!Array.isArray(state.missions[k])) state.missions[k] = [];
+  for (const k of ['progress', 'objProgress', 'daily']) if (!state.missions[k] || typeof state.missions[k] !== 'object') state.missions[k] = {};
+  if (typeof state.mapId !== 'string' || !state.mapId) state.mapId = 'beach';
+  if (!state.flags || typeof state.flags !== 'object') state.flags = {};
+  state.kills = Math.max(0, num(state.kills, 0));
+  if (!Array.isArray(state.rareFound)) state.rareFound = [];
+  // v2 フィールド
+  if (!Array.isArray(state.visited)) state.visited = [];
+  for (const id of ['beach', state.mapId]) if (!state.visited.includes(id)) state.visited.push(id);
+  if (!state.book || typeof state.book !== 'object') state.book = {};
+  const sns = state.sns && typeof state.sns === 'object' ? state.sns : {};
+  state.sns = { ...newSnsState(), ...sns };
+  if (!Array.isArray(state.sns.posts)) state.sns.posts = [];
+  if (!Array.isArray(state.sns.milestones)) state.sns.milestones = [];
+  state.sns.followers = Math.max(0, num(state.sns.followers, 0));
+  if (!state.itemsFound || typeof state.itemsFound !== 'object') {
+    state.itemsFound = {};
+    for (const s of state.inventory) state.itemsFound[s.id] = true;
+    for (const id of Object.values(state.equipped)) if (id) state.itemsFound[id] = true;
+    for (const id of state.rareFound) state.itemsFound[id] = true;
+  }
+  state.clock = num(state.clock, 9);
+  const s = computeStats(state, []);
+  state.hp = Math.max(0, Math.min(num(state.hp, s.maxHp), s.maxHp));
+  state.mp = Math.max(0, Math.min(num(state.mp, s.maxMp), s.maxMp));
+  if (state.hp <= 0) state.hp = s.maxHp;
+  state.version = STATE_VERSION;
   return state;
 }
 
@@ -73,12 +141,13 @@ export function computeStats(state, buffs) {
 
   // 装備合計
   const eq = { atk: 0, def: 0, maxHp: 0, maxMp: 0, speed: 0, crit: 0, str: 0, dex: 0, int: 0, luk: 0 };
-  let weapon = null;
+  let weapon = null, petItem = null;
   for (const id of Object.values(state.equipped || {})) {
     const it = id && ITEMS[id];
     if (!it || !it.stats) continue;
     for (const k in eq) eq[k] += it.stats[k] || 0;
     if (it.slot === 'weapon') weapon = it;
+    if (it.slot === 'pet') petItem = it;
   }
 
   // パッシブ
@@ -94,11 +163,14 @@ export function computeStats(state, buffs) {
   const bf = { atkPct: 0, speedPct: 0, defPct: 0, critAdd: 0, luckAdd: 0 };
   for (const b of buffs || []) for (const k in bf) bf[k] += b[k] || 0;
 
+  // 図鑑ボーナス（永続）
+  const bk = bookBonus(state);
+
   const s = state.stats || {};
   const str = (s.str || 0) + eq.str;
   const dex = (s.dex || 0) + eq.dex;
   const int = (s.int || 0) + eq.int;
-  const luk = (s.luk || 0) + eq.luk;
+  const luk = (s.luk || 0) + eq.luk + bk.luk;
 
   const weaponType = weapon ? weapon.weaponType : 'melee';
   let statAtk;
@@ -106,13 +178,13 @@ export function computeStats(state, buffs) {
   else if (weaponType === 'magic') statAtk = int * 0.6 + luk * 0.15;
   else statAtk = str * 0.5 + dex * 0.2;
 
-  const maxHp = Math.round((base.hp + base.hpPerLv * (L - 1) + str * 2 + eq.maxHp) * (1 + pas.maxHpPct));
-  const maxMp = Math.round(base.mp + base.mpPerLv * (L - 1) + int * 3 + eq.maxMp);
-  const atk = Math.max(1, Math.round((5 + 1.5 * L + eq.atk + statAtk + pas.atkAdd) * (1 + bf.atkPct)));
-  const def = Math.round((base.def + eq.def + str * 0.2 + L * 0.5 + pas.defAdd) * (1 + bf.defPct));
+  const maxHp = Math.round((base.hp + base.hpPerLv * (L - 1) + str * 2 + eq.maxHp + bk.maxHp) * (1 + pas.maxHpPct));
+  const maxMp = Math.round(base.mp + base.mpPerLv * (L - 1) + int * 3 + eq.maxMp + bk.maxMp);
+  const atk = Math.max(1, Math.round((5 + 1.5 * L + eq.atk + statAtk + pas.atkAdd + bk.atk) * (1 + bf.atkPct)));
+  const def = Math.round((base.def + eq.def + str * 0.2 + L * 0.5 + pas.defAdd + bk.def) * (1 + bf.defPct));
   const speed = Math.min(450, Math.round((base.speed + eq.speed + dex * 0.3 + pas.speedAdd) * (1 + bf.speedPct)));
   const jump = Math.min(1000, base.jump + Math.min(60, eq.speed * 0.5));
-  const crit = Math.min(0.8, base.crit + luk * 0.002 + dex * 0.0005 + eq.crit / 100 + pas.critAdd + bf.critAdd);
+  const crit = Math.min(0.8, base.crit + luk * 0.002 + dex * 0.0005 + eq.crit / 100 + pas.critAdd + bf.critAdd + bk.crit);
   const critDmg = base.critDmg + luk * 0.002 + pas.critDmgAdd;
   const attackSpeed = weapon ? weapon.attackSpeed : 2.5;
   const range = weapon ? weapon.range : 60;
@@ -123,6 +195,8 @@ export function computeStats(state, buffs) {
     range, weaponType, weaponStyle: weapon ? weapon.look.style : null,
     luck: luk + bf.luckAdd,
     dmgReduce: Math.min(0.5, pas.dmgReduce),
+    pet: petItem ? { id: petItem.id, ...petItem.pet } : null,   // {id, pickRange, pickRate, name}
+    book: bk,
     str, dex, int, luk,
   };
 }

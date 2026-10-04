@@ -20,7 +20,7 @@ export function killsPerLevel(level) {
 
 /** 地域ごとの経験値倍率（先の地域ほど効率が良い） */
 export const REGION_EXP_MULT = {
-  beach: 1.0, downtown: 1.1, slums: 1.2, swamp: 1.25, casino: 1.35, rooftop: 1.45, spaceport: 1.5,
+  beach: 0.85, downtown: 1.1, slums: 1.2, swamp: 1.25, casino: 1.35, rooftop: 1.45, spaceport: 1.5,
 };
 
 /** expToNext(level) — 単調増加。Lv100 以降はさらに 5%/Lv ずつ重くなる */

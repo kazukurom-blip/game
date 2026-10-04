@@ -6,7 +6,7 @@ import { ITEMS, STARTER_EQUIP, EQUIP_SLOTS, getItem } from '../src/data/items.js
 import { SKILLS, STARTER_SKILLS, skillsForHero } from '../src/data/skills.js';
 import { ENEMIES, ENEMIES_BY_MAP, COP_UNITS_BY_WANTED } from '../src/data/enemies.js';
 import { MISSIONS, MISSION_NPCS, MAP_IDS, turnInNpcOf } from '../src/data/missions.js';
-import { MAPS, MAP_ORDER } from '../src/world/maps.js';
+import { MAPS, MAP_ORDER, CONNECTIONS, TOWN_IDS, FIELD_IDS, reachability } from '../src/world/maps.js';
 import { moveAndCollide, findRope, rectOverlap, entRect } from '../src/world/physics.js';
 import { newState, computeStats, expToNext, gainExp, setActiveBuffs, addStat, HERO_BASE } from '../src/systems/progression.js';
 import { addItem, addItemToState, removeItem, countItem, equip, unequip, useItem, getEquipLooks, MAX_SLOTS, buyItem, sellItem } from '../src/systems/inventory.js';
@@ -17,7 +17,7 @@ import { MissionManager } from '../src/systems/missions.js';
 import { EventBus } from '../src/core/events.js';
 import { Player } from '../src/entities/player.js';
 import { Enemy } from '../src/entities/enemy.js';
-import { Spawner } from '../src/entities/spawner.js';
+import { Spawner, resolveSpawns } from '../src/entities/spawner.js';
 import { NPC } from '../src/entities/npc.js';
 import { Vehicle } from '../src/entities/vehicle.js';
 import { Drop } from '../src/entities/drop.js';
@@ -43,7 +43,15 @@ const STYLES = {
 const HAIRS = ['twin', 'bob', 'long', 'spiky', 'short', 'ponytail', 'wolf'];
 const ARTS = ['slime', 'mushroom', 'flamingo', 'gator', 'thug', 'cop', 'drone', 'swat', 'bossGator', 'bossDon'];
 const AIS = ['walker', 'jumper', 'charger', 'shooter', 'flyer', 'cop', 'boss'];
-const THEMES = ['beach', 'downtown', 'slums', 'swamp', 'casino', 'rooftop'];
+const THEMES = ['beach', 'downtown', 'slums', 'swamp', 'casino', 'rooftop', 'spaceport'];
+// v2: spawns の types は省略可（spawner が habitats から解決）。解決済みの出現表で判定する
+const spawnTypesOf = (m) => resolveSpawns(m).flatMap((s) => s.types);
+const spawnsAt = (mapId, enemyId) => spawnTypesOf(MAPS[mapId]).includes(enemyId);
+const mapOfEnemy = (id) => {
+  const d = ENEMIES[id];
+  if (d.civilian || d.isCop) return 'downtown';
+  return Object.keys(MAPS).find((m) => spawnsAt(m, id));
+};
 const ICONS = ['potionRed', 'potionBlue', 'elixir', 'cash', 'gem', 'chip'];
 const SKILL_KINDS = ['melee', 'projectile', 'aoe', 'buff', 'dash', 'passive'];
 const OBJ_TYPES = ['kill', 'collect', 'reach', 'wanted', 'drive', 'boss', 'talk'];
@@ -211,7 +219,8 @@ test('enemies: 定義・ドロップ・見た目', () => {
 });
 
 test('maps: 構造・ポータル・出現', () => {
-  assert.deepEqual([...MAP_ORDER].sort(), [...MAP_IDS].sort());
+  assert.deepEqual([...MAP_ORDER].sort(), Object.keys(MAPS).sort());
+  for (const id of MAP_IDS) assert.ok(MAPS[id], 'MAP_IDS ' + id);
   for (const [id, m] of Object.entries(MAPS)) {
     assert.equal(m.id, id);
     assert.ok(THEMES.includes(m.theme), id + ' theme');
@@ -233,7 +242,7 @@ test('maps: 構造・ポータル・出現', () => {
     }
     for (const s of m.spawns) {
       assert.ok(s.x1 < s.x2 && s.x1 >= 0 && s.x2 <= m.width, `${id} spawn range`);
-      for (const t of s.types) assert.ok(ENEMIES[t], `${id} spawn ${t}`);
+      for (const t of s.types || []) assert.ok(ENEMIES[t], `${id} spawn ${t}`);
       assert.ok(s.max > 0 && s.interval > 0, id);
     }
     for (const n of m.npcs) {
@@ -256,10 +265,88 @@ test('maps: 構造・ポータル・出現', () => {
     assert.ok(s2.has('beach'), `${id} から beach へ戻れない`);
   }
   // ボスが各担当マップに出現
-  for (const [boss, mapId] of [['boss_king_slime', 'beach'], ['boss_gator', 'swamp'], ['boss_mecha', 'casino'], ['boss_don', 'rooftop']]) {
-    assert.ok(MAPS[mapId].spawns.some((s) => s.types.includes(boss)), `${boss} @ ${mapId}`);
+  // 行き止まりフィールドにはボス枠があり、ボスが解決される
+  for (const m of Object.values(MAPS)) {
+    if (!m.deadEnd) continue;
+    const b = resolveSpawns(m).find((s) => s.boss);
+    assert.ok(b && b.types.length && b.types.every((t) => ENEMIES[t].boss || ENEMIES[t].ai === 'boss'), `${m.id} boss`);
   }
 });
+
+test('world v2: 34マップ・接続表・到達可能性・町/フィールドの出現ルール', () => {
+  assert.equal(Object.keys(MAPS).length, 34, 'マップ数');
+  assert.equal(TOWN_IDS.length, 7); assert.equal(FIELD_IDS.length, 27);
+  for (const id of TOWN_IDS) assert.ok(MAPS[id]?.town === true && MAPS[id].copSpawns === true, id + ' town');
+  for (const id of FIELD_IDS) {
+    const m = MAPS[id];
+    assert.ok(m && m.town === false && m.copSpawns === false, id + ' field');
+    assert.ok(Array.isArray(m.levelRange) && m.levelRange[0] <= m.levelRange[1], id + ' levelRange');
+    assert.ok(m.width >= 3000 && m.width <= 4500, id + ' width');
+  }
+  for (const m of Object.values(MAPS)) {
+    assert.ok(THEMES.includes(m.region) && m.variant >= 0 && m.variant <= 3, m.id + ' region/variant');
+    if (m.town) assert.ok(m.width >= 2400 && m.width <= 3200, m.id + ' town width');
+  }
+  // 接続表どおり双方向（表に無いポータルもなし）
+  const edges = new Set(CONNECTIONS.flatMap(([a, b]) => [a + '>' + b, b + '>' + a]));
+  for (const [a, b] of CONNECTIONS) {
+    assert.ok(MAPS[a].portals.some((p) => p.to === b), `${a}→${b}`);
+    assert.ok(MAPS[b].portals.some((p) => p.to === a), `${b}→${a}`);
+  }
+  for (const m of Object.values(MAPS)) for (const p of m.portals) {
+    assert.ok(edges.has(m.id + '>' + p.to), `${m.id}→${p.to} は接続表に無い`);
+    assert.equal(p.label, MAPS[p.to].name, `${m.id}→${p.to} label`);
+  }
+  // 全足場に届く・全ポータルに届く（ポータルは地面か到達可能な足場の上）・到着点も同様
+  for (const m of Object.values(MAPS)) {
+    const { unreachable, reach, plats } = reachability(m);
+    assert.deepEqual(unreachable, [], `${m.id}: 届かない足場`);
+    const onReachable = (x, y) => y === m.groundY || plats.some((q, i) => reach.has(i) && q.y === y && x >= q.x && x <= q.x + q.w);
+    for (const p of m.portals) {
+      assert.ok(onReachable(p.x, p.y), `${m.id}: ポータル ${p.to} に届かない`);
+      const d = MAPS[p.to];
+      const ay = p.toY != null ? p.toY + 2 : d.groundY;
+      const dr = reachability(d);
+      assert.ok(ay === d.groundY || dr.plats.some((q) => q.y === ay && p.toX >= q.x && p.toX <= q.x + q.w), `${m.id}→${p.to}: 到着点が足場上にない`);
+    }
+    for (const r of m.ropes) {
+      assert.ok(m.platforms.some((q) => q.y === r.top && r.x >= q.x && r.x <= q.x + q.w), `${m.id} rope top`);
+      assert.ok(r.bottom === m.groundY || m.platforms.some((q) => q.y === r.bottom && r.x >= q.x && r.x <= q.x + q.w), `${m.id} rope bottom`);
+    }
+  }
+  // 出現表: フィールドは habitats から 3 種以上・警官/市民なし、町はモンスター枠なし
+  for (const id of FIELD_IDS) {
+    const areas = resolveSpawns(MAPS[id]);
+    const normal = [...new Set(areas.filter((s) => !s.boss).flatMap((s) => s.types))];
+    const hab = Object.values(ENEMIES).filter((e) => (e.habitats || []).includes(id) && !e.boss && !e.isCop && !e.civilian);
+    assert.ok(hab.length >= 3, `${id}: habitats の敵が ${hab.length} 種`);
+    assert.ok(normal.length >= 3, `${id}: 出現 ${normal.length} 種`);
+    for (const t of areas.flatMap((s) => s.types)) assert.ok(!ENEMIES[t].isCop && !ENEMIES[t].civilian, `${id}: ${t} は出せない`);
+  }
+  for (const id of TOWN_IDS) {
+    for (const t of spawnTypesOf(MAPS[id])) assert.ok(ENEMIES[t].civilian, `${id}: 町に ${t}`);
+  }
+});
+
+test('world v2: 町は市民のみ・フィールドに警察なし（シミュレーション）', () => {
+  for (const id of [...TOWN_IDS, ...FIELD_IDS]) {
+    const g = makeGame('jin', id);
+    g.debug.god = true; g.state.level = 99; g.changeMap(id);
+    setWantedLevel(g, 4);
+    for (let i = 0; i < 30 * 8; i++) { step(g, 1 / 30); if (g.wanted < 4 && g.map.town) setWantedLevel(g, 4); }
+    const m = g.map;
+    for (const e of g.enemies) {
+      if (m.town) assert.ok(e.civilian || e.def.isCop, `${id}: 町に ${e.defId}`);
+      else assert.ok(!e.def.isCop && !e.civilian, `${id}: フィールドに ${e.defId}`);
+    }
+    assert.ok(!g.vehicles.some((v) => v.policeSpawned) || m.town, `${id}: フィールドにパトカー`);
+    if (m.town) {
+      const civ = g.enemies.filter((e) => e.civilian && !e.dead).length;
+      assert.ok(civ >= 6 && civ <= 10, `${id}: 市民 ${civ}`);
+      assert.ok(g.enemies.some((e) => e.def.isCop), `${id}: 手配★4で警察が来ない`);
+    } else assert.equal(g.wanted, 0, `${id}: フィールドで手配度が減衰しない`);
+  }
+}, { random: true });
 
 test('missions: 参照整合性・到達可能性', () => {
   const all = Object.values(MISSIONS);
@@ -271,7 +358,7 @@ test('missions: 参照整合性・到達可能性', () => {
     assert.equal(npcOnMap[nid], info.mapId, `NPC ${nid} は ${info.mapId} に配置`);
   }
   const spawnable = new Set();
-  for (const m of Object.values(MAPS)) for (const s of m.spawns) for (const t of s.types) spawnable.add(t);
+  for (const m of Object.values(MAPS)) for (const t of spawnTypesOf(m)) spawnable.add(t);
   // 手配度で出現する警察ユニット（spawner は art が cop/swat/drone(isCop) の敵を使う）
   const lawUnits = Object.values(ENEMIES).filter((e) => !e.boss && (e.art === 'cop' || e.art === 'swat' || (e.art === 'drone' && e.isCop))).map((e) => e.id);
   if (Object.values(MAPS).some((m) => m.copSpawns)) for (const id of lawUnits) spawnable.add(id);
@@ -288,7 +375,7 @@ test('missions: 参照整合性・到達可能性', () => {
       if (o.type === 'kill' || o.type === 'boss') {
         assert.ok(ENEMIES[o.target], `${m.id} target ${o.target}`);
         assert.ok(spawnable.has(o.target), `${m.id}: ${o.target} はどのマップにも出現しない`);
-        if (o.mapId) assert.ok(MAPS[o.mapId].spawns.some((s) => s.types.includes(o.target)), `${m.id}: ${o.target} は ${o.mapId} に出現しない`);
+        if (o.mapId) assert.ok(spawnsAt(o.mapId, o.target) || (ENEMIES[o.target].isCop && MAPS[o.mapId].town), `${m.id}: ${o.target} は ${o.mapId} に出現しない`);
       }
       if (o.type === 'boss') assert.ok(ENEMIES[o.target].boss, `${m.id} boss`);
       if (o.type === 'collect') {
@@ -483,7 +570,7 @@ test('combat: 手配度', () => {
 
 test('skills: 初期スキル使用・クールダウン・習得', () => {
   for (const hero of ['luna', 'jin']) {
-    const g = makeGame(hero);
+    const g = makeGame(hero, 'beach_f1'); // 町ではスキル不可（v2）なのでフィールドで
     const sid = STARTER_SKILLS[hero].skillBar[0];
     const mp0 = g.state.mp;
     assert.ok(useSkill(g, sid), hero + ' skill');
@@ -645,7 +732,7 @@ test('player: 移動・ジャンプ・攻撃・ポータル・会話・乗車', 
 
 test('enemies: 全種類を数秒シミュレーション（NaN/例外/マップ外なし）', () => {
   for (const id of Object.keys(ENEMIES)) {
-    const mapId = Object.keys(MAPS).find((m) => MAPS[m].spawns.some((s) => s.types.includes(id))) || 'downtown';
+    const mapId = mapOfEnemy(id) || 'downtown';
     const g = makeGame('jin', mapId);
     g.enemies.length = 0;
     g.debug.god = true;
@@ -690,7 +777,7 @@ test('spawner: 手配度で警察が出現', () => {
   g.debug.god = true;
   g.state.level = 40;
   g.enemies.length = 0;
-  g.map.spawns.forEach((_, i) => { g.spawner.timers[i] = -1e9; });
+  g.spawner.areas.forEach((_, i) => { g.spawner.timers[i] = -1e9; });
   setWantedLevel(g, 5);
   for (let i = 0; i < 60 * 15; i++) { step(g); if (g.wanted < 5) setWantedLevel(g, 5); }
   const law = g.enemies.filter((e) => e.fromWanted);
@@ -701,7 +788,8 @@ test('spawner: 手配度で警察が出現', () => {
 test('boss: 攻撃パターンが偏りすぎない', () => {
   const bosses = Object.values(ENEMIES).filter((e) => e.ai === 'boss');
   for (const def of bosses) {
-    const mapId = Object.keys(MAPS).find((m) => MAPS[m].spawns.some((s) => s.types.includes(def.id)));
+    const mapId = mapOfEnemy(def.id);
+    if (!mapId) continue;
     const g = makeGame('jin', mapId);
     g.debug.god = true;
     g.enemies.length = 0;

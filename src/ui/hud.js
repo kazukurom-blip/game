@@ -2,10 +2,11 @@
 //      トースト / レアドロップバナー / レベルアップ演出 / 低HPビネット / 警官接近フラッシュ
 import {
   COL, FONT, font, panel, inset, txt, bar, rrPath, starPath, fmtMoney, rgba, clamp, ease, rarityFill, measure,
+  getClock, clockStr, clockPhase, drawPhaseIcon, PHASE_INFO, rainbowGrad, RAINBOW,
 } from './theme.js';
 import {
   guard, stats, expNeed, HERO_NAMES, skillDef, getItemDef, cooldown, skillMp, countItem,
-  drawSkillIco, drawItemIco, rarityInfo,
+  drawSkillIco, drawItemIco, rarityInfo, snsTitleOf, drawPetArt, drawEnemyArt, mapInfo, regionColor,
 } from './deps.js';
 
 const W = 1280, H = 720;
@@ -52,8 +53,9 @@ export function drawHUD(ctx, game, _internal = false) {
   s.lastT = game.time || 0;
   const parts = [
     ['vignette', drawVignette], ['copFlash', drawCopFlash], ['minimap', drawMinimap], ['status', drawStatus],
-    ['skillbar', drawSkillBar], ['money', drawMoney], ['tracker', drawTracker],
-    ['levelUp', drawLevelUp], ['banner', drawBanner], ['toasts', drawToasts],
+    ['skillbar', drawSkillBar], ['money', drawMoney], ['tracker', drawTracker], ['clock', drawClockBadge],
+    ['radio', drawRadio], ['bookNew', drawBookToasts],
+    ['levelUp', drawLevelUp], ['banner', drawBanner], ['toasts', drawToasts], ['petFx', drawPetFx],
   ];
   for (const [tag, fn] of parts) {
     ctx.save();
@@ -189,6 +191,13 @@ function drawMinimap(ctx, game) {
     if (d.isCop || d.ai === 'cop') continue;
     dot(e.x, e.y, d.boss ? '#ff2ea6' : '#ff4d4d', d.boss ? 4 : 2.3);
   }
+  const pet = game.pet;
+  if (pet && Number.isFinite(pet.x) && Number.isFinite(pet.y)) {
+    const [a, b] = P(pet.x, pet.y - 20);
+    ctx.fillStyle = '#ff6ad5';
+    ctx.beginPath(); ctx.arc(a, b, 2.8, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.stroke();
+  }
   const p = game.player;
   if (p) {
     const [a, b] = P(p.x, p.y - 20);
@@ -222,7 +231,18 @@ function drawStatus(ctx, game, s, dt) {
   const name = HERO_NAMES[st.heroId] || st.heroId || 'HERO';
   txt(ctx, name, x + 92, y + 20, { size: 17, color: '#fff' });
   const sub = st.heroId === 'jin' ? 'ストリートブロウラー' : st.heroId === 'luna' ? 'ストリートアイドル' : '';
-  if (sub) txt(ctx, sub, x + 92 + measure(ctx, name, 17) + 10, y + 21, { size: 11, color: COL.sub, sw: 3 });
+  const title = snsTitleOf(st);
+  const nx = x + 92 + measure(ctx, name, 17) + 10;
+  if (title.name) {
+    const tw = Math.min(w - (nx - x) - 14, measure(ctx, title.name, 11) + 34);
+    ctx.save();
+    rrPath(ctx, nx, y + 12, tw, 18, 9);
+    ctx.fillStyle = 'rgba(10,4,30,0.75)'; ctx.fill();
+    ctx.lineWidth = 1.5; ctx.strokeStyle = rainbowGrad(ctx, nx, 0, nx + tw, 0, (game.time || 0) * 0.15); ctx.stroke();
+    ctx.restore();
+    txt(ctx, 'NG', nx + 12, y + 21.5, { size: 8.5, align: 'center', color: COL.pink, sw: 2 });
+    txt(ctx, title.name, nx + 22, y + 21.5, { size: 11, color: title.color || '#ffe3f7', sw: 2.5, maxW: tw - 28 });
+  } else if (sub) txt(ctx, sub, nx, y + 21, { size: 11, color: COL.sub, sw: 3 });
   // バー
   const maxHp = Math.max(1, cs.maxHp || 1), maxMp = Math.max(1, cs.maxMp || 1);
   const hp = clamp(st.hp ?? maxHp, 0, maxHp), mp = clamp(st.mp ?? maxMp, 0, maxMp);
@@ -308,6 +328,22 @@ function drawSkillBar(ctx, game) {
     ctx.restore();
     txt(ctx, sl.key, sl.x + 6, sl.y + 3.5, { size: 11, align: 'center', sw: 2.5 });
   }
+  if (game.map?.town) {
+    const sk = slots.filter((s0) => s0.kind === 'skill');
+    const a0 = sk[0], a1 = sk[sk.length - 1];
+    ctx.save();
+    rrPath(ctx, a0.x - 4, a0.y - 4, a1.x + a1.w - a0.x + 8, a0.h + 8, 12);
+    ctx.fillStyle = 'rgba(8,6,24,0.66)'; ctx.fill();
+    ctx.restore();
+    // 斜線
+    ctx.save();
+    rrPath(ctx, a0.x - 4, a0.y - 4, a1.x + a1.w - a0.x + 8, a0.h + 8, 12); ctx.clip();
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 6;
+    for (let i = -10; i < 30; i++) { ctx.beginPath(); ctx.moveTo(a0.x + i * 16, a0.y + 60); ctx.lineTo(a0.x + i * 16 + 60, a0.y - 10); ctx.stroke(); }
+    ctx.restore();
+    const mx = (a0.x + a1.x + a1.w) / 2;
+    txt(ctx, '町ではスキル不可', mx, a0.y + a0.h / 2, { size: 14, align: 'center', color: '#ffd6e8', sw: 4, stroke: '#2a0b3d' });
+  }
   void t;
 }
 
@@ -355,6 +391,8 @@ function drawMoney(ctx, game, s, dt) {
   const wanted = clamp(Math.round(game.wanted || 0), 0, 5);
   if (wanted !== s.wanted) { s.wanted = wanted; s.wantedT = game.time || 0; }
   const seen = wanted > 0 && copsNear(game);
+  const town = !!game.map?.town;
+  const decaying = wanted > 0 && game.map && !town;
   const t = game.time || 0;
   const since = t - s.wantedT;
   const sy = 80;
@@ -363,7 +401,20 @@ function drawMoney(ctx, game, s, dt) {
   ctx.save();
   rrPath(ctx, sx0 - 22, sy - 19, gap * 4 + 50, 38, 19);
   ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.fill();
+  if (wanted > 0 && town) {
+    const pulse = 0.5 + 0.5 * Math.sin(t * 8);
+    ctx.lineWidth = 2.5; ctx.strokeStyle = Math.floor(t * 3) % 2 ? COL.copRed : COL.copBlue;
+    ctx.shadowColor = ctx.strokeStyle; ctx.shadowBlur = 8 + pulse * 10; ctx.stroke();
+  }
   ctx.restore();
+  if (wanted > 0 && town) {
+    txt(ctx, 'WANTED', sx0 - 32, sy, { size: 15, align: 'right', color: '#fff', glow: COL.copRed, sw: 4, stroke: '#3d0010', weight: 900 });
+  }
+  if (decaying) {
+    txt(ctx, '手配度 減衰中…（フィールド）', rx, sy + 28, { size: 11.5, align: 'right', color: '#cfd8ff', sw: 3, alpha: 0.6 + 0.4 * Math.sin(t * 3) });
+  }
+  ctx.save();
+  if (decaying) ctx.globalAlpha *= 0.5;
   for (let i = 0; i < 5; i++) {
     const cx = sx0 + i * gap, cy = sy;
     const on = i < wanted;
@@ -394,6 +445,7 @@ function drawMoney(ctx, game, s, dt) {
     }
     ctx.restore();
   }
+  ctx.restore();
 }
 
 // ---------- 右側 クエストトラッカー ----------
@@ -590,4 +642,234 @@ function drawLevelUp(ctx, game) {
     ctx.restore();
     txt(ctx, `♥ ${likes}K  #ViceBay`, px, cy - 70 - k * 10 + 1, { size: 14, align: 'center', color: COL.pink, stroke: false, alpha: a * k });
   }
+}
+
+// ---------- 時計＋エリアバッジ（ミニマップ右） ----------
+function drawClockBadge(ctx, game) {
+  const x = 284, y = 12;
+  const c = getClock(game);
+  const t = game.time || 0;
+  let bx = x, by = y;
+  if (c != null) {
+    const ph = clockPhase(c), info = PHASE_INFO[ph];
+    const w = 168, h = 36;
+    ctx.save();
+    rrPath(ctx, bx, by, w, h, 18);
+    const g = ctx.createLinearGradient(bx, 0, bx + w, 0);
+    g.addColorStop(0, ph === 'night' ? 'rgba(20,24,80,0.88)' : ph === 'dusk' ? 'rgba(110,40,80,0.85)' : ph === 'dawn' ? 'rgba(110,60,110,0.85)' : 'rgba(40,70,140,0.82)');
+    g.addColorStop(1, 'rgba(14,9,40,0.85)');
+    ctx.fillStyle = g; ctx.fill();
+    ctx.lineWidth = 1.5; ctx.strokeStyle = rgba(info.color, 0.8); ctx.stroke();
+    ctx.restore();
+    drawPhaseIcon(ctx, ph, bx + 20, by + h / 2, 8, t);
+    ctx.save();
+    ctx.font = `italic 900 18px ${FONT}`;
+    ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+    ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(5,3,20,0.9)';
+    const s0 = clockStr(c);
+    ctx.strokeText(s0, bx + 38, by + h / 2 + 1);
+    ctx.fillStyle = '#fff'; ctx.fillText(s0, bx + 38, by + h / 2 + 1);
+    ctx.restore();
+    txt(ctx, info.name, bx + w - 12, by + h / 2 + 1, { size: 10, align: 'right', color: info.color, sw: 2.5 });
+    by += h + 6;
+  }
+  const map = game.map;
+  if (!map) return;
+  if (map.town) {
+    const w = 168, h = 26;
+    const pulse = 0.5 + 0.5 * Math.sin(t * 2.5);
+    ctx.save();
+    rrPath(ctx, bx, by, w, h, 13);
+    const g = ctx.createLinearGradient(bx, 0, bx + w, 0);
+    g.addColorStop(0, 'rgba(25,211,197,0.9)'); g.addColorStop(1, 'rgba(60,140,255,0.85)');
+    ctx.fillStyle = g; ctx.shadowColor = COL.teal; ctx.shadowBlur = 6 + pulse * 8; ctx.fill();
+    ctx.shadowBlur = 0; ctx.lineWidth = 1.5; ctx.strokeStyle = '#fff'; ctx.stroke();
+    ctx.restore();
+    // 盾
+    ctx.save();
+    ctx.translate(bx + 16, by + h / 2);
+    ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(7, -5); ctx.lineTo(6, 3); ctx.lineTo(0, 8); ctx.lineTo(-6, 3); ctx.lineTo(-7, -5); ctx.closePath();
+    ctx.fillStyle = '#fff'; ctx.fill();
+    ctx.restore();
+    txt(ctx, 'SAFE ZONE / TOWN', bx + 30, by + h / 2 + 1, { size: 12, color: '#fff', sw: 3, stroke: '#063a4a', weight: 900 });
+  } else if (map.levelRange || map.region) {
+    const w = 168, h = 26;
+    const col = regionColor(mapInfo(map.id).region);
+    ctx.save();
+    rrPath(ctx, bx, by, w, h, 13);
+    ctx.fillStyle = 'rgba(14,9,40,0.82)'; ctx.fill();
+    ctx.lineWidth = 1.5; ctx.strokeStyle = rgba(col, 0.9); ctx.stroke();
+    ctx.restore();
+    txt(ctx, 'FIELD', bx + 12, by + h / 2 + 1, { size: 11, color: col, sw: 3, weight: 900 });
+    const lr = map.levelRange;
+    if (lr) txt(ctx, `推奨 Lv${lr[0]}-${lr[1]}`, bx + w - 12, by + h / 2 + 1, { size: 12, align: 'right', color: (game.state.level || 1) < lr[0] ? COL.bad : '#fff', sw: 3 });
+  }
+}
+
+// ---------- ラジオ局テロップ（上中央） ----------
+function drawRadio(ctx, game) {
+  const r = game.ui?.radio;
+  if (!r || r.t > r.life) return;
+  const a = clamp(r.t / 0.25, 0, 1) * (1 - clamp((r.t - r.life + 0.6) / 0.6, 0, 1));
+  if (a <= 0) return;
+  const cx = W / 2, cy = 50;
+  const name = r.name || 'RADIO OFF';
+  const slide = (1 - ease(r.t / 0.35)) * 30;
+  ctx.save();
+  ctx.globalAlpha = a;
+  ctx.font = `italic 900 30px ${FONT}`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+  ctx.lineWidth = 7; ctx.strokeStyle = 'rgba(10,4,30,0.9)';
+  ctx.strokeText(name, cx + slide, cy);
+  const tw = ctx.measureText(name).width;
+  ctx.fillStyle = r.off ? '#cfc8ff' : rainbowGrad(ctx, cx - tw / 2, 0, cx + tw / 2, 0, (game.time || 0) * 0.3);
+  ctx.shadowColor = COL.pink; ctx.shadowBlur = r.off ? 0 : 14;
+  ctx.fillText(name, cx + slide, cy);
+  ctx.restore();
+  // 小さなラベル＋イコライザ
+  const t = game.time || 0;
+  ctx.save(); ctx.globalAlpha = a;
+  for (let i = 0; i < 5; i++) {
+    const hh = r.off ? 2 : 3 + 9 * Math.abs(Math.sin(t * 7 + i * 1.3));
+    ctx.fillStyle = RAINBOW[i];
+    ctx.fillRect(cx - 52 + i * 6, cy + 32 - hh, 4, hh);
+  }
+  ctx.restore();
+  txt(ctx, r.off ? 'RADIO' : 'NOW PLAYING · RADIO', cx - 18, cy + 27, { size: 11, color: '#ffe3f7', alpha: a, sw: 3 });
+}
+
+// ---------- 図鑑 NEW トースト（右下） ----------
+function drawBookToasts(ctx, game) {
+  const list = game.ui?.bookToasts;
+  if (!list?.length) return;
+  const t0 = game.time || 0;
+  let y = H - 150;
+  for (let i = list.length - 1; i >= 0; i--) {
+    const b = list[i];
+    const a = clamp(b.t / 0.2, 0, 1) * (1 - clamp((b.t - b.life + 0.5) / 0.5, 0, 1));
+    if (a <= 0) continue;
+    const w = 250, h = 58, x = W - w - 14 + (1 - ease(b.t / 0.3)) * 120;
+    ctx.save();
+    ctx.globalAlpha = a;
+    panel(ctx, x, y, w, h, { r: 14, top: 'rgba(60,20,90,0.92)', bottom: 'rgba(20,10,44,0.92)', stroke: COL.gold, inner: 'rgba(255,95,162,0.5)', glow: 'rgba(255,212,71,0.5)' });
+    // 敵の絵
+    ctx.save();
+    rrPath(ctx, x + 6, y + 6, 50, h - 12, 9); ctx.clip();
+    ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.fillRect(x + 6, y + 6, 50, h - 12);
+    if (b.def) {
+      const dh = Math.max(30, (b.def.h || 40) * (b.def.scale || 1));
+      const s = clamp(40 / dh, 0.25, 1);
+      ctx.translate(x + 31, y + h - 10); ctx.scale(s, s);
+      drawEnemyArt(ctx, { def: { ...b.def, boss: false }, x: 0, y: 0, facing: 1, state: 'idle', t: t0, hurtT: 0, hp: 1, maxHp: 1, w: b.def.w, h: b.def.h, onGround: true, seed: 1 });
+    }
+    ctx.restore();
+    ctx.restore();
+    const pop = b.t < 0.3 ? 1 + (1 - b.t / 0.3) * 0.5 : 1 + Math.sin(t0 * 8) * 0.04;
+    ctx.save(); ctx.globalAlpha = a; ctx.translate(x + 92, y + 18); ctx.scale(pop, pop);
+    rrPath(ctx, -26, -9, 52, 18, 9); ctx.fillStyle = COL.pink; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#fff'; ctx.stroke();
+    ctx.restore();
+    txt(ctx, 'NEW!', x + 92, y + 18.5, { size: 11, align: 'center', alpha: a, sw: 2.5 });
+    txt(ctx, '図鑑に登録', x + 126, y + 18.5, { size: 11, color: COL.gold, alpha: a, sw: 2.5 });
+    txt(ctx, b.name || '???', x + 66, y + 40, { size: 15, color: '#fff', alpha: a, maxW: w - 80 });
+    txt(ctx, '[B]', x + w - 12, y + 18.5, { size: 10, align: 'right', color: COL.dim, alpha: a, sw: 2 });
+    y -= h + 8;
+  }
+}
+
+// ---------- PET 入手 超豪華演出 ----------
+function drawPetFx(ctx, game) {
+  const fx = game.ui?.petFx;
+  if (!fx) return;
+  const t = fx.t, life = fx.life || 6;
+  const time = game.time || 0;
+  const a = clamp(t / 0.25, 0, 1) * (1 - clamp((t - life + 0.7) / 0.7, 0, 1));
+  if (a <= 0) return;
+  const item = fx.item || {};
+  const cx = W / 2, cy = 300;
+  // 画面暗転＋白フラッシュ
+  ctx.save();
+  ctx.fillStyle = `rgba(6,2,22,${0.55 * a})`;
+  ctx.fillRect(0, 0, W, H);
+  if (t < 0.35) { ctx.fillStyle = `rgba(255,255,255,${0.8 * (1 - t / 0.35)})`; ctx.fillRect(0, 0, W, H); }
+  ctx.restore();
+  // 虹の放射光
+  ctx.save();
+  ctx.globalAlpha = a;
+  ctx.translate(cx, cy);
+  ctx.rotate(time * 0.35);
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 14; i++) {
+    ctx.rotate(Math.PI * 2 / 14);
+    const gg = ctx.createLinearGradient(0, 0, 720, 0);
+    gg.addColorStop(0, rgba(RAINBOW[i % RAINBOW.length], 0.55)); gg.addColorStop(1, rgba(RAINBOW[i % RAINBOW.length], 0));
+    ctx.fillStyle = gg;
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(720, -46); ctx.lineTo(720, 46); ctx.closePath(); ctx.fill();
+  }
+  ctx.restore();
+  // リング
+  ctx.save();
+  ctx.globalAlpha = a;
+  for (let k = 0; k < 3; k++) {
+    const rr = ((t * 260 + k * 140) % 420);
+    ctx.lineWidth = 4 * (1 - rr / 420);
+    ctx.strokeStyle = rgba(RAINBOW[(k * 2) % RAINBOW.length], 0.8 * (1 - rr / 420));
+    ctx.beginPath(); ctx.arc(cx, cy, rr, 0, Math.PI * 2); ctx.stroke();
+  }
+  ctx.restore();
+  // 台座の光
+  ctx.save(); ctx.globalAlpha = a;
+  const pg = ctx.createRadialGradient(cx, cy + 40, 4, cx, cy + 40, 160);
+  pg.addColorStop(0, 'rgba(255,255,255,0.75)'); pg.addColorStop(0.4, 'rgba(255,150,240,0.35)'); pg.addColorStop(1, 'rgba(255,150,240,0)');
+  ctx.fillStyle = pg; ctx.beginPath(); ctx.ellipse(cx, cy + 40, 160, 46, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  // PET 本体
+  const pop = t < 0.5 ? ease(t / 0.5) : 1;
+  ctx.save(); ctx.globalAlpha = a;
+  drawPetArt(ctx, cx, cy + 40 - Math.abs(Math.sin(time * 3)) * 16, item.look, { facing: 1, state: 'idle', t: time, scale: 3.4 * pop });
+  ctx.restore();
+  // タイトル
+  ctx.save();
+  ctx.globalAlpha = a;
+  const sc = t < 0.45 ? 0.3 + ease(t / 0.45) * 0.9 : 1.2 - Math.min(0.2, (t - 0.45) * 0.4);
+  ctx.translate(cx, 120); ctx.scale(sc, sc);
+  ctx.font = `italic 900 76px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+  ctx.lineWidth = 14; ctx.strokeStyle = '#1a0630'; ctx.strokeText('PET GET!!', 0, 0);
+  ctx.lineWidth = 5; ctx.strokeStyle = '#fff'; ctx.strokeText('PET GET!!', 0, 0);
+  ctx.fillStyle = rainbowGrad(ctx, -220, 0, 220, 0, time * 0.6);
+  ctx.shadowColor = '#ff6ad5'; ctx.shadowBlur = 30;
+  ctx.fillText('PET GET!!', 0, 0);
+  ctx.restore();
+  // 名前帯
+  const by = cy + 120;
+  ctx.save(); ctx.globalAlpha = a;
+  const bw = 560;
+  const bg = ctx.createLinearGradient(cx - bw / 2, 0, cx + bw / 2, 0);
+  bg.addColorStop(0, 'rgba(20,6,50,0)'); bg.addColorStop(0.2, 'rgba(20,6,50,0.9)'); bg.addColorStop(0.8, 'rgba(20,6,50,0.9)'); bg.addColorStop(1, 'rgba(20,6,50,0)');
+  ctx.fillStyle = bg; ctx.fillRect(cx - bw / 2, by - 34, bw, 86);
+  ctx.fillStyle = rainbowGrad(ctx, cx - bw / 2, 0, cx + bw / 2, 0, time * 0.4);
+  ctx.fillRect(cx - bw / 2 + 40, by - 34, bw - 80, 3); ctx.fillRect(cx - bw / 2 + 40, by + 49, bw - 80, 3);
+  ctx.restore();
+  ctx.save(); ctx.globalAlpha = a;
+  ctx.font = font(30, 900); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+  ctx.lineWidth = 7; ctx.strokeStyle = 'rgba(10,4,30,0.95)';
+  ctx.strokeText(item.name || 'PET', cx, by - 8);
+  ctx.fillStyle = rainbowGrad(ctx, cx - 160, 0, cx + 160, 0, -time * 0.4);
+  ctx.fillText(item.name || 'PET', cx, by - 8);
+  ctx.restore();
+  const pr = item.pet?.pickRange;
+  txt(ctx, `${pr ? `取得範囲 ${pr}px  ・  ` : ''}装備すると自動でアイテムを拾ってくれる！`, cx, by + 26, { size: 15, align: 'center', color: '#ffe3f7', alpha: a, sw: 4 });
+  txt(ctx, 'インベントリ [I] の PET スロットに装備しよう', cx, by + 70, { size: 13, align: 'center', color: COL.gold, alpha: a * (0.6 + 0.4 * Math.sin(time * 4)), sw: 3 });
+  // 紙吹雪
+  ctx.save(); ctx.globalAlpha = a;
+  for (let i = 0; i < 70; i++) {
+    const seed = i * 97.13;
+    const px = (Math.sin(seed) * 0.5 + 0.5) * W + Math.sin(time * 2 + i) * 20;
+    const py = ((seed * 7.7 + t * (120 + (i % 7) * 30)) % (H + 40)) - 20;
+    ctx.save();
+    ctx.translate(px, py); ctx.rotate(time * 3 + i);
+    ctx.fillStyle = RAINBOW[i % RAINBOW.length];
+    if (i % 3 === 0) { starPath(ctx, 0, 0, 7, 3, 5); ctx.fill(); } else ctx.fillRect(-4, -2, 8, 4);
+    ctx.restore();
+  }
+  ctx.restore();
 }

@@ -4,9 +4,13 @@ import { COL, panel, txt, drawButton, inRect, rrPath, font, clamp } from './them
 import { drawHUD, hudSlots } from './hud.js';
 import { guard, getItemDef, skillDef, drawItemIco, drawSkillIco } from './deps.js';
 import { WINDOW_DRAW, drawTooltipBox, initDialog, dialogKey } from './windows.js';
+import { drawWorldMap, drawBook, drawPhone, rideTaxi } from './v2windows.js';
+import { enemyDef } from './deps.js';
+
+Object.assign(WINDOW_DRAW, { worldmap: drawWorldMap, book: drawBook, phone: drawPhone });
 
 const W = 1280, H = 720;
-const MODAL = new Set(['dialog', 'shop', 'death']);
+const MODAL = new Set(['dialog', 'shop', 'death', 'worldmap']);
 const LAYOUT = {
   inventory: { w: 800, h: 520, title: 'インベントリ', key: 'I' },
   skills: { w: 520, h: 610, title: 'スキル', key: 'K', y: 14 },
@@ -15,6 +19,9 @@ const LAYOUT = {
   dialog: { w: 940, h: 260, title: null, x: (W - 940) / 2, y: H - 290 },
   shop: { w: 780, h: 520, title: 'ショップ' },
   death: { w: 460, h: 250, title: null },
+  worldmap: { w: 1240, h: 690, title: 'ワールドマップ  —  ネオリダ州 ヴァイス・ベイ', key: 'M' },
+  book: { w: 1000, h: 620, title: 'モンスター図鑑', key: 'B', y: 40 },
+  phone: { w: 360, h: 660, title: null, key: 'P', x: W - 360 - 36, y: 30 },
 };
 const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now()) / 1000;
 
@@ -35,13 +42,35 @@ export class UIManager {
     this.lastClick = { id: null, t: -9 };
     this.pos = {};      // ウィンドウ位置の記憶
     this._hudAt = 0; this._hudExtAt = 0;
+    this.petFx = null;
+    this.bookToasts = [];
+    this.bookNewIds = new Set();
+    this.radio = null;
     const ev = game?.events;
     if (ev?.on) {
       ev.on('rareDrop', (d) => {
         const item = getItemDef(d?.item?.id || d?.item || d?.id) || d?.item;
+        if (item && (item.slot === 'pet' || item.rarity === 'pet')) return; // PET は専用演出
         if (item) this.banners.push({ item, t: 0, life: 3.6 });
         if (this.banners.length > 4) this.banners.splice(1, 1);
       });
+      ev.on('petDrop', (d) => {
+        const item = getItemDef(d?.item?.id || d?.item || d?.id) || d?.item;
+        if (item) { this.petFx = { item, t: 0, life: 6.5 }; this.banners = this.banners.filter((b) => b.item?.id !== item.id); }
+      });
+      ev.on('bookNew', (d) => {
+        const id = d?.id || d?.enemyId || d?.enemy?.def?.id || d?.enemy?.id || d?.def?.id;
+        const def = enemyDef(id) || d?.def || d?.enemy?.def || null;
+        if (!id && !def) return;
+        this.bookNewIds.add(id || def?.id);
+        this.bookToasts.push({ id: id || def?.id, def, name: d?.name || def?.name || id, t: 0, life: 3.8 });
+        while (this.bookToasts.length > 3) this.bookToasts.shift();
+      });
+      ev.on('radioChanged', (d) => {
+        const name = typeof d === 'string' ? d : (d?.name ?? d?.station ?? null);
+        this.radio = { name: name || null, t: 0, life: name ? 3.2 : 1.6, off: !name };
+      });
+      ev.on('vehicleExit', () => { if (this.radio) this.radio.name = null; });
       ev.on('levelUp', (d) => { this.levelFx = { level: d?.level ?? game.state?.level ?? 1, t: 0, life: 3.2 }; });
     }
   }
@@ -123,11 +152,17 @@ export class UIManager {
     try {
       // トグル
       if (!this.isModal()) {
-        const tg = [['inventory', 'inventory'], ['skillWin', 'skills'], ['missionWin', 'missions'], ['statWin', 'stats']];
+        const tg = [['inventory', 'inventory'], ['skillWin', 'skills'], ['missionWin', 'missions'], ['statWin', 'stats'],
+          ['mapWin', 'worldmap'], ['bookWin', 'book'], ['phoneWin', 'phone']];
         for (const [act, nm] of tg) if (P(act)) { this.toggle(nm); eat(act); consumed = true; }
+      } else if (this.wins.worldmap && this.order[this.order.length - 1] === 'worldmap' && P('mapWin')) {
+        this.close('worldmap'); eat('mapWin'); consumed = true;
       }
       if (P('escape') && this.order.length) {
-        if (this.dnd) this.dnd = null; else this.close();
+        const topW = this.wins[this.order[this.order.length - 1]];
+        if (this.dnd) this.dnd = null;
+        else if (topW?.confirm) topW.confirm = null;
+        else this.close();
         eat('escape'); consumed = true;
       }
 
@@ -190,6 +225,10 @@ export class UIManager {
       // キーボード（モーダル / インベントリ）
       const topName = this.order[this.order.length - 1];
       if (topName === 'dialog') dialogKey(this, this.wins.dialog, P, eat);
+      else if (topName === 'worldmap' && this.wins.worldmap?.confirm && P('confirm')) {
+        if (this.wins.worldmap.confirm.t > 0.15) rideTaxi(this, this.wins.worldmap);
+        eat('confirm'); eat('interact'); consumed = true;
+      }
       else if (topName === 'death') {
         if ((P('confirm') || P('interact')) && this.wins.death.t > 0.4) { this.revive(); eat('confirm'); eat('interact'); }
       } else if (topName === 'inventory' && P('confirm') && P('interact') && !P('jump')) {
@@ -273,6 +312,11 @@ export class UIManager {
       if (this.banners[0].t > this.banners[0].life) this.banners.shift();
     }
     if (this.levelFx) { this.levelFx.t += dt; if (this.levelFx.t > this.levelFx.life) this.levelFx = null; }
+    if (this.petFx) { this.petFx.t += dt; if (this.petFx.t > this.petFx.life) this.petFx = null; }
+    for (const b of this.bookToasts) b.t += dt;
+    this.bookToasts = this.bookToasts.filter((b) => b.t < b.life);
+    if (this.radio) this.radio.t += dt;
+    if (this.wins.worldmap?.confirm) this.wins.worldmap.confirm.t += dt;
     for (const n of this.order) {
       const w = this.wins[n];
       if (!w) continue;
@@ -302,6 +346,7 @@ export class UIManager {
 
   frameWin(ctx, win) {
     const { x, y, w, h } = win;
+    if (win.name === 'phone') return; // スマホは自前のフレーム
     if (win.name === 'death' || win.name === 'dialog') {
       panel(ctx, x, y, w, h, { r: 18, glow: win.name === 'death' ? 'rgba(255,95,162,0.6)' : 'rgba(25,211,197,0.45)', inner: win.name === 'death' ? 'rgba(255,95,162,0.6)' : 'rgba(25,211,197,0.55)' });
       return;
@@ -355,6 +400,12 @@ export class UIManager {
     for (const n of this.order) {
       const win = this.wins[n];
       if (!win) continue;
+      if (n === 'worldmap') {
+        ctx.save();
+        ctx.fillStyle = `rgba(4,2,16,${0.6 * Math.min(1, win.t / 0.2)})`;
+        ctx.fillRect(0, 0, W, H);
+        ctx.restore();
+      }
       ctx.save();
       try {
         // 開く時のポップ

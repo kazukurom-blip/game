@@ -41,7 +41,7 @@ export function moveAndCollide(ent, map, dt) {
   if (ent.dropThrough > 0) ent.dropThrough = Math.max(0, ent.dropThrough - dt);
 
   if (!ent.noGravity) {
-    ent.vy = Math.min(MAX_FALL, (ent.vy || 0) + GRAVITY * (ent.gravityScale ?? 1) * dt);
+    ent.vy = Math.min(MAX_FALL, (ent.vy || 0) + GRAVITY * (ent.gravityScale ?? 1) * (map.gravity ?? 1) * dt);
   }
   const hw = ent.w / 2;
 
