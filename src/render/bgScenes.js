@@ -86,10 +86,10 @@ function houses(P, seed, o) {
 /** 町の店並び（前景ファサード） */
 function shopRow(P, seed, st) {
   const R = rng(seed);
-  let x = 0;
+  let x = 0, i = (R() * st.names.length) | 0;
   while (x < LW - 20) {
     const w = Math.round(150 + R() * 90), bh = 180 + R() * 80, bs = (R() * 1e9) | 0;
-    const name = pick(R, st.names), wall = pick(R, st.walls), awn = pick(R, st.awn), neon = pick(R, st.neon);
+    const name = st.names[i++ % st.names.length], wall = pick(R, st.walls), awn = pick(R, st.awn), neon = pick(R, st.neon);
     const ww = Math.min(w, LW - x - 4);
     wrap(x, ww, (xx) => shopFront(P, xx, ww, bh, rng(bs), name, wall, awn, neon, st));
     x += ww + (R() < 0.3 ? 20 + R() * 30 : 3);
@@ -381,13 +381,13 @@ function dtSkyline(ctx, S, mid = true) {
   const { H, gS, horizon } = S;
   const hg = ctx.createLinearGradient(0, horizon - 200, 0, horizon + 40);
   hg.addColorStop(0, 'rgba(255,46,136,0)'); hg.addColorStop(1, rgba('#ff2e88', 0.12 + 0.25 * S.lights));
-  S.post(() => { ctx.fillStyle = hg; ctx.fillRect(0, horizon - 200, S.W, 240); });
+  ctx.fillStyle = hg; ctx.fillRect(0, horizon - 200, S.W, 240);
   const far = S.layer('far', 420, (P) => city(P, 301, { minW: 40, maxW: 90, minH: 140, maxH: 400, col: '#24113f', win: ['#ffd86e', '#7fe9ff'], lit: 0.2, wx: 9, wy: 12, ww: 3, wh: 5, gap: 10, beacon: true }));
   S.tile(far, 0.1, horizon + 40, '#24113f');
   if (!mid) return;
   const m = S.layer('mid', 460, (P) => city(P, 302, { minW: 70, maxW: 140, minH: 160, maxH: 420, col: '#341a57', edge: '#4a2a75', win: ['#ffd86e', '#7fe9ff', '#ff9ad5'], lit: 0.32, wx: 12, wy: 14, ww: 5, wh: 7, gap: 26, neon: ['#ff2e88', '#00f0ff', '#b45cff', '#ffc93c'], neonP: 0.55 }));
   S.tile(m, 0.3, bottomAt(gS, H, 0.3, 0.92) + 40, '#341a57');
-  S.post(() => searchlights(ctx, S, ['#7fe9ff', '#ff9ad5'], bottomAt(gS, H, 0.3, 0.92)));
+  if (!S.town) S.post(() => searchlights(ctx, S, ['#7fe9ff', '#ff9ad5'], bottomAt(gS, H, 0.3, 0.92)));
 }
 
 function bgDowntown(ctx, S) {
@@ -489,7 +489,7 @@ function bgTunnel(ctx, S) {
   // 柱（手前・ライブ）
   ctx.fillStyle = '#2a2232';
   const off = -(((cam.x * 0.8) % 300) + 300) % 300;
-  for (let x = off; x < W + 300; x += 300) { ctx.fillRect(x, 0, 36, H); ctx.fillStyle = '#3a3044'; ctx.fillRect(x + 4, 0, 6, H); ctx.fillStyle = '#2a2232'; }
+  for (let x = off; x < W + 300; x += 300) { ctx.fillRect(x, 0, 36, H); S.occlude(x, 0, 36, H); ctx.fillStyle = '#3a3044'; ctx.fillRect(x + 4, 0, 6, H); ctx.fillStyle = '#2a2232'; }
   // 通過する電車の光
   S.post(() => {
     const k = (time % 9) / 9;
@@ -803,11 +803,11 @@ function bgCasino(ctx, S) {
     S.tile(des, 0.3, bottomAt(gS, H, 0.3, 0.92) + 30, '#c8804a');
     return;
   }
-  S.post(() => searchlights(ctx, S, ['#ffd23f', '#ff2e88'], horizon));
+  if (!town) S.post(() => searchlights(ctx, S, ['#ffd23f', '#ff2e88'], horizon));
   const far = S.layer('far', 420, (P) => city(P, 601, { minW: 50, maxW: 110, minH: 160, maxH: 400, col: '#1f0e33', win: ['#ffd23f', '#ff9ad5'], lit: 0.2, wx: 10, wy: 12, ww: 4, wh: 5, gap: 14, trim: '#a8862c', beacon: true }));
   S.tile(far, 0.1, horizon + 40, '#1f0e33');
+  if (town) return townFront(S, 'casino', CA_SHOP);
   casinoFacades(ctx, S);
-  if (town) townFront(S, 'casino', CA_SHOP);
 }
 
 function bgVault(ctx, S) {
@@ -926,13 +926,13 @@ function bgRooftop(ctx, S) {
       g.fillStyle = 'rgba(150,180,255,0.08)'; g.fillRect(0, 60, LW, 380);
       g.fillStyle = '#2a2848'; for (let x = 0; x < LW; x += 170) g.fillRect(x, 60, 10, 380); g.fillRect(0, 250, LW, 6);
       g.fillStyle = 'rgba(255,255,255,0.07)'; for (let x = 20; x < LW; x += 170) { g.beginPath(); g.moveTo(x + 20, 60); g.lineTo(x + 60, 60); g.lineTo(x + 10, 440); g.lineTo(x - 30, 440); g.closePath(); g.fill(); }
-      g.fillStyle = '#e8e0d0'; g.fillRect(0, 440, LW, h - 440); g.fillStyle = '#c8b890'; g.fillRect(0, 440, LW, 5);
+      g.fillStyle = '#6a5a7a'; g.fillRect(0, 440, LW, h - 440); g.fillStyle = '#c8a050'; g.fillRect(0, 440, LW, 5); g.fillStyle = '#7a6a8a'; for (let x = 0; x < LW; x += 96) g.fillRect(x, 445, 2, h - 445);
       // ソファ・ランプ・グランドピアノのシルエット
       for (let x = 80; x < LW; x += 340) { g.fillStyle = '#5a3a6a'; g.beginPath(); rr(g, x, 380, 180, 60, 18); g.fill(); g.fillStyle = '#7a4a8a'; g.beginPath(); rr(g, x + 10, 395, 160, 30, 10); g.fill(); g.fillStyle = '#c8a050'; g.fillRect(x + 210, 330, 4, 110); g.fillStyle = '#f0e0b0'; g.beginPath(); g.moveTo(x + 196, 330); g.lineTo(x + 228, 330); g.lineTo(x + 222, 310); g.lineTo(x + 202, 310); g.closePath(); g.fill(); P.gl.fillStyle = 'rgba(255,230,170,0.4)'; P.gl.beginPath(); P.gl.arc(x + 212, 322, 30, 0, PI * 2); P.gl.fill(); }
       g.fillStyle = '#c8a050'; g.fillRect(0, 50, LW, 10);
     });
     const rb = bottomAt(gS, H, 0.55, 0.98) + 30;
-    S.tile(room, 0.55, rb, '#e8e0d0');
+    S.tile(room, 0.55, rb, '#6a5a7a');
     if (rb - 620 > 0) { ctx.fillStyle = '#1a1830'; ctx.fillRect(0, 0, W, rb - 620); }
     return;
   }

@@ -32,7 +32,8 @@ export function sceneOf(map) {
   const town = !!map.town;
   let v = ID_VARIANT[map.id];
   if (v == null) v = ((map.variant | 0) % 4 + 4) % 4;
-  if (region === 'rooftop' && !town && map.variant == null && ID_VARIANT[map.id] == null) v = 3;
+  // v1 互換（region/variant 未設定の旧マップ）: カジノ・屋上は従来の見た目
+  if (!map.region && map.variant == null && ID_VARIANT[map.id] == null && (region === 'rooftop' || region === 'casino')) v = 3;
   s = { region, v, town, id: map.id || '', indoor: !town && !!INDOOR[region + ':' + v], r0: map.region, t0: map.theme, v0: map.variant, w0: map.town };
   sceneMemo.set(map, s);
   return s;
@@ -112,7 +113,7 @@ function weighted(table, w) {
   return [mixW(cols, ws), a];
 }
 
-const frameGlows = [];
+let glowBuf = null, glowCtx = null;
 const framePost = [];
 
 // ================================================================ drawBackground
@@ -142,7 +143,14 @@ export function drawBackground(ctx, map, cam, W, H, time) {
   const moonY = horizon - Math.sin(clamp(moonP, 0, 1) * PI) * (horizon - skyTop - 80) - 20;
   const sunAlt = Math.sin(clamp(sunP, 0, 1) * PI);
   const sunCol = mix('#ff8a4a', '#fff4d0', clamp(sunAlt * 1.6, 0, 1));
-  frameGlows.length = 0; framePost.length = 0;
+  framePost.length = 0;
+  // 光バッファ（画面サイズ1枚を使い回し）
+  let gb = null, hasGlow = false;
+  if (lights > 0.02) {
+    if (!glowBuf || glowBuf.width !== W || glowBuf.height !== H) { glowBuf = makeCanvas(W, H); glowCtx = glowBuf.getContext('2d'); }
+    gb = glowCtx;
+    gb.setTransform(1, 0, 0, 1, 0, 0); gb.globalCompositeOperation = 'source-over'; gb.clearRect(0, 0, W, H); gb.fillStyle = '#000';
+  }
   const S = {
     ctx, cam, W, H, time, gS, horizon, v: sc.v, town: sc.town, region: sc.region, id: sc.id, w, lights, indoor: sc.indoor,
     sunX, sunY, sunUp, sunCol, moonX, moonY, moonUp,
@@ -157,8 +165,20 @@ export function drawBackground(ctx, map, cam, W, H, time) {
       const y = Math.round(bottomY - lh);
       for (let x = off; x < W; x += LW) ctx.drawImage(L.img, Math.round(x), y);
       if (fillBelow && bottomY < H) { ctx.fillStyle = fillBelow; ctx.fillRect(0, bottomY - 1, W, H - bottomY + 1); }
-      if (L.glow) frameGlows.push(L.glow, off, y);
+      // 光バッファ: 手前のレイヤーで奥の光を隠し、自分の光を足す
+      if (gb) {
+        gb.globalCompositeOperation = 'destination-out';
+        for (let x = off; x < W; x += LW) gb.drawImage(L.img, Math.round(x), y);
+        if (fillBelow && bottomY < H) gb.fillRect(0, bottomY - 1, W, H - bottomY + 1);
+        if (L.glow) {
+          gb.globalCompositeOperation = 'lighter';
+          for (let x = off; x < W; x += LW) gb.drawImage(L.glow, Math.round(x), y);
+          hasGlow = true;
+        }
+      }
     },
+    /** ライブで描いた不透明物（柱など）で奥の光を隠す */
+    occlude(x, y, w, h) { if (gb) { gb.globalCompositeOperation = 'destination-out'; gb.fillRect(x, y, w, h); } },
     post(fn) { framePost.push(fn); },
   };
   ctx.save();
@@ -171,13 +191,10 @@ export function drawBackground(ctx, map, cam, W, H, time) {
   if (ta > 0.01) { ctx.globalCompositeOperation = 'source-atop'; ctx.globalAlpha = Math.min(0.85, ta); ctx.fillStyle = tc; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
   ctx.globalCompositeOperation = 'source-over';
   // 窓明かり・ネオン（夜ほど強い）
-  if (lights > 0.02 && frameGlows.length) {
+  if (gb && hasGlow) {
     ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = Math.min(1, lights);
-    for (let i = 0; i < frameGlows.length; i += 3) {
-      const img = frameGlows[i], off = frameGlows[i + 1], y = frameGlows[i + 2];
-      for (let x = off; x < W; x += LW) ctx.drawImage(img, Math.round(x), y);
-    }
+    ctx.drawImage(glowBuf, 0, 0, W, H);
     ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
   }
   for (const fn of framePost) { ctx.save(); try { fn(); } catch (e) { console.warn('[background] post failed', e); } ctx.restore(); }
@@ -194,7 +211,7 @@ export function drawBackground(ctx, map, cam, W, H, time) {
   const ws = keys.map((k) => w[k]);
   for (let i = 0; i < 4; i++) {
     const c = mixW(keys.map((k) => TOD_SKY[k][i]), ws);
-    sky.addColorStop([0, 0.45, 0.82, 1][i], mix(c, rs[i], 0.25 + w.night * 0.1));
+    sky.addColorStop([0, 0.45, 0.82, 1][i], mix(c, rs[i], 0.32 + w.night * 0.12));
   }
   ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
   ctx.restore();

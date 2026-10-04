@@ -17,7 +17,7 @@ import { MissionManager } from './systems/missions.js';
 import { updateSkills, resetCooldowns } from './systems/skills.js';
 import { setPlayerInvuln } from './systems/combat.js';
 
-import { drawBackground, drawMapTiles } from './render/background.js';
+import { drawBackground, drawMapTiles, drawNightOverlay } from './render/background.js';
 import { spawnEffect, updateEffects, drawEffects } from './render/effects.js';
 
 import { UIManager } from './ui/ui.js';
@@ -239,6 +239,10 @@ function drawPlay() {
   safe('draw.fx', () => drawEffects(ctx, game));
   safe('debug.world', () => game.debug.drawWorld?.(ctx));
   ctx.restore();
+  safe('night', () => {
+    const p = game.player;
+    drawNightOverlay(ctx, map, W, H, p ? { x: p.x - cam.x, y: p.y - 40 - cam.y } : undefined);
+  });
 
   safe('hud', () => drawHUD(ctx, game));
   safe('ui.draw', () => game.ui.draw(ctx));
