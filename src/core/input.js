@@ -9,6 +9,9 @@ const KEYMAP = {
   KeyE: 'interact', Enter: 'interact',
   KeyI: 'inventory', KeyK: 'skillWin', KeyJ: 'missionWin', KeyT: 'statWin',
   KeyM: 'mapWin', KeyB: 'bookWin', KeyP: 'phoneWin', KeyR: 'radio', KeyN: 'mute',
+  KeyV: 'talk',
+  KeyQ: 'skill5', KeyW: 'skill6', KeyG: 'skill7', KeyH: 'skill8',
+  KeyU: 'contentWin', KeyO: 'achieveWin',
   F2: 'debug', Backquote: 'debug',
   Escape: 'escape',
 };

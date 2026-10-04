@@ -183,10 +183,18 @@ export class Enemy {
     const p = this.player;
     this.fleeT = rand(4, 6);
     this.fleeDir = p ? (this.x >= p.x ? 1 : -1) : -this.facing;
-    this.say(pick(['キャー！', 'ひぃっ！', '助けて！', '警察呼ぶわよ！', 'やめてくれ！', 'イタッ！']));
+    this.say(pick(['キャー！', 'ひぃっ！', '助けて！', '警察呼ぶわよ！', 'やめてくれ！', 'イタッ！']), 1.6, true);
   }
 
-  say(text, t = 1.6) { this.shout = text; this.shoutT = t; }
+  say(text, t = 1.6, force = false) {
+    // 近く（180px 以内）で別の市民が叫んでいる間は、自発的な叫びは控える（ふきだしの重なり防止）
+    if (!force) {
+      const busy = (this.game.enemies || []).some((e) => e !== this && !e.dead && e.shoutT > 0.2 && Math.abs(e.x - this.x) < 180 && Math.abs(e.y - this.y) < 120);
+      if (busy) return false;
+    }
+    this.shout = text; this.shoutT = t;
+    return true;
+  }
 
   aiCivilian(dt, pdx) {
     const p = this.player;
@@ -493,17 +501,31 @@ export class Enemy {
     ctx.globalAlpha = Math.max(0, Math.min(1, this.alpha));
     drawEnemy(ctx, this);
     ctx.restore();
-    if (this.shout && !this.dead) drawBubble(ctx, this.x, this.y - this.h - 26, this.shout, Math.min(1, this.shoutT * 4));
+    if (this.shout && !this.dead) drawBubble(ctx, this.game, this.x, this.y - this.h - 26, this.shout, Math.min(1, this.shoutT * 4));
   }
 }
 
 // 叫び吹き出し（市民）
-function drawBubble(ctx, x, y, text, alpha = 1) {
+// 同じフレームで先に描いたふきだしと重なる時は上にずらす（しっぽは元の位置を指したまま）
+function drawBubble(ctx, game, x, y, text, alpha = 1) {
   ctx.save();
   ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
   ctx.font = 'bold 14px sans-serif';
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   const w = (ctx.measureText(text).width || 40) + 16, h = 24;
+  const fr = game?.frameNo ?? game?.time ?? 0;
+  const reg = game ? (game._bubbles && game._bubbles.fr === fr ? game._bubbles : (game._bubbles = { fr, rects: [] })) : { rects: [] };
+  const tipY = y;
+  for (let k = 0; k < 6; k++) {
+    const r = { x: x - w / 2 - 2, y: y - h - 2, w: w + 4, h: h + 4 };
+    if (!reg.rects.some((o) => r.x < o.x + o.w && r.x + r.w > o.x && r.y < o.y + o.h && r.y + r.h > o.y)) break;
+    y -= h + 6;
+  }
+  reg.rects.push({ x: x - w / 2 - 2, y: y - h - 2, w: w + 4, h: h + 4 });
+  if (tipY !== y) { // ずらした分はしっぽを細い線で伸ばす
+    ctx.strokeStyle = '#222'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(x, y + 6); ctx.lineTo(x, tipY + 6); ctx.stroke();
+  }
   ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#222'; ctx.lineWidth = 2;
   ctx.beginPath();
   if (ctx.roundRect) ctx.roundRect(x - w / 2, y - h, w, h, 8); else ctx.rect(x - w / 2, y - h, w, h);

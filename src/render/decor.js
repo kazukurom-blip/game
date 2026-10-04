@@ -17,7 +17,6 @@ const SIGN_WORDS_STYLE = {
   moon: ['MOON BASE', 'ORBIT BAR', 'ASTRO MART'],
   alienShip: ['◇◆◇', 'ZORG', 'XX-7', 'ΩMEGA'],
   tunnel: ['VICE LINE', 'EXIT', 'METRO'],
-  hall: ['LUCKY 7', 'CASINO', 'JACKPOT'],
 };
 export function signWordsFor(region, style) {
   return SIGN_WORDS_STYLE[style] || SIGN_WORDS[region] || SIGN_WORDS.downtown;

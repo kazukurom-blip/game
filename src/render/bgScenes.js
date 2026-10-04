@@ -490,7 +490,8 @@ function bgTunnel(ctx, S) {
     for (let x = 0; x < LW; x += 20) { g.beginPath(); g.moveTo(x, 120); g.lineTo(x, 420); g.stroke(); }
     g.fillStyle = '#2e7bff'; g.fillRect(0, 300, LW, 12); g.fillStyle = '#ffc93c'; g.fillRect(0, 314, LW, 5);
     // 駅名板・ポスター
-    for (let x = 80; x < LW; x += 340) {
+    for (let k = 0; k < 3; k++) { // タイル幅に3組ぴったり（ポスターが継ぎ目で切れないように）
+      const x = Math.round(50 + k * LW / 3);
       g.fillStyle = '#1a1a2a'; g.fillRect(x, 200, 160, 40); g.fillStyle = '#ffffff'; g.font = '900 20px "Arial Black", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('VICE LINE', x + 80, 221);
       g.fillStyle = '#8a3a6a'; g.fillRect(x + 200, 170, 70, 100); g.fillStyle = '#ff9ad5'; g.fillRect(x + 206, 176, 58, 60); g.fillStyle = '#ffe066'; g.font = 'bold 12px sans-serif'; g.fillText('NEON', x + 235, 252);
     }

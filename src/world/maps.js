@@ -154,12 +154,22 @@ const DECOR_HALF_W = { billboard: 120, container: 100, rocket: 70, car: 80, slot
 const halfW = (t) => DECOR_HALF_W[t] ?? 24;
 const BIG_DECOR = new Set(['billboard', 'container', 'rocket', 'car', 'slotMachine', 'neonSign', 'graffiti']);
 // 地面の decor を並べる（ポータルの前・大物同士の重なりを避ける）
-function placeGroundDecor(R, set, portals, groundY, x0, x1, step, portalAll, existing = []) {
+// 背の高い看板類の高さ（px）。上の足場が看板の文字を横切らないようにする
+const DECOR_TALL = { neonSign: 165, billboard: 195, slotMachine: 135, graffiti: 112 };
+function clearAbove(type, x, baseY, platforms, self) {
+  const ht = DECOR_TALL[type];
+  if (!ht || !platforms) return true;
+  const hw = halfW(type);
+  return !platforms.some((q) => q !== self && !q.ceiling && q.y < baseY - 8 && q.y > baseY - ht && q.x < x + hw && q.x + q.w > x - hw);
+}
+function placeGroundDecor(R, set, portals, groundY, x0, x1, step, portalAll, existing = [], platforms = null) {
   const out = [];
   let lastBigR = -1e9;
   const fixed = existing.filter((d) => BIG_DECOR.has(d.type) && (d.y == null || d.y === groundY));
+  const low = set.filter((t) => !DECOR_TALL[t]);
   for (let x = x0; x < x1; x += R.range(step[0], step[1])) {
-    const type = R.pick(set);
+    let type = R.pick(set);
+    if (!clearAbove(type, x, groundY, platforms)) { if (!low.length) continue; type = R.pick(low); }
     const hw = halfW(type);
     // p.y は finish() 前は未設定（= 地面）
     if (portals.some((p) => (portalAll || p.y == null || p.y === groundY) && Math.abs(p.x - x) < hw + 70)) continue;
@@ -288,12 +298,13 @@ function field(cfg) {
 
   // decor
   const set = STYLE_ONLY[cfg.style] ? [...STYLE_DECOR[cfg.style], 'crate'] : [...DECOR_SETS[cfg.region], ...(STYLE_DECOR[cfg.style] || [])];
-  const decor = placeGroundDecor(R, set, portals, groundY, 160 + R.range(0, 120), width - 120, [170, 320], false);
+  const decor = placeGroundDecor(R, set, portals, groundY, 160 + R.range(0, 120), width - 120, [170, 320], false, [], platforms);
   const pset = PLAT_DECOR[cfg.region];
   for (const p of platforms) {
     if (p.ceiling || p.w <= 260 || !R.chance(0.3)) continue;
     const type = R.pick(pset), x = Math.round(p.x + p.w * R.range(0.2, 0.8)), hw = halfW(type);
     if (x - hw < p.x - 10 || x + hw > p.x + p.w + 10) continue;
+    if (!clearAbove(type, x, p.y, platforms, p) || p.y - (DECOR_TALL[type] || 0) < 120) continue;
     if (portals.some((q) => q.y === p.y && Math.abs(q.x - x) < hw + 70)) continue;
     decor.push({ type, x, y: p.y });
   }
@@ -364,9 +375,14 @@ function town(cfg) {
 
   // 建物・小物の decor（多め）
   const set = DECOR_SETS[cfg.region];
-  const decor = [...(cfg.decor || []), ...placeGroundDecor(R, set, portals, groundY, 140 + R.range(0, 60), width - 100, [110, 190], true, cfg.decor || [])];
+  const decor = [...(cfg.decor || []), ...placeGroundDecor(R, set, portals, groundY, 140 + R.range(0, 60), width - 100, [110, 190], true, cfg.decor || [], platforms)];
   const pset = PLAT_DECOR[cfg.region];
-  for (const p of platforms) decor.push({ type: R.pick(pset), x: Math.round(p.x + p.w * R.range(0.3, 0.7)), y: p.y });
+  for (const p of platforms) {
+    const type = R.pick(pset), x = Math.round(p.x + p.w * R.range(0.3, 0.7));
+    // 上の足場に看板が刺さる／画面上端（HUD の裏）に看板が出る配置は避ける
+    if (!clearAbove(type, x, p.y, platforms, p) || p.y - (DECOR_TALL[type] || 0) < 120) continue;
+    decor.push({ type, x, y: p.y });
+  }
 
   // NPC がポータルに重ならないよう補正
   const npcs = (cfg.npcs || []).map((n) => {
