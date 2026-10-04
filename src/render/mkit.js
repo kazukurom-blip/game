@@ -23,8 +23,13 @@ export function setEnv(night, accent) {
   ENV.rim2 = accent || '#7af7ff';
 }
 /** windup: 攻撃予備動作（0..1 の溜め）, rage: 第2形態（HP半分以下）, boss */
-export const POSE = { windup: 0, rage: 0, boss: false };
-export function setPose(windup, rage, boss) { POSE.windup = windup || 0; POSE.rage = rage || 0; POSE.boss = !!boss; }
+export const POSE = { windup: 0, rage: 0, boss: false, face: 1 };
+export function setPose(windup, rage, boss, face) { POSE.windup = windup || 0; POSE.rage = rage || 0; POSE.boss = !!boss; POSE.face = face || 1; }
+/** 左右反転中でも文字が鏡文字にならないように描く */
+export function textUp(ctx, txt, x, y) {
+  if (POSE.face < 0) { ctx.save(); ctx.translate(x, y); ctx.scale(-1, 1); ctx.fillText(txt, 0, 0); ctx.restore(); }
+  else ctx.fillText(txt, x, y);
+}
 
 // ---------------------------------------------------------------- パーツ単位のスプライトキャッシュ
 // 形が時間で変わらない重いパーツ（開いた目・甲羅・胴など）を 2x のオフスクリーンへ一度だけ描き、
@@ -102,7 +107,10 @@ export function tone(col) {
   return memo(0, col, 0, () => {
     const p = toHsl(col); if (!p) return col;
     let [h, s, l] = p;
-    if (s < 0.12) return fromHsl(h || 250, Math.max(s, 0.08), Math.min(0.86, Math.max(0.3, l)));
+    // 無彩色（白・銀・灰）はそのまま（アルビノ等の意図を保つ）。暗すぎる灰だけ持ち上げる
+    if (s < 0.15) return l < 0.26 ? fromHsl(h || 250, Math.max(s, 0.06), 0.26) : col;
+    // ごく明るいパステルは明度を保つ
+    if (l > 0.82) return fromHsl(h, Math.min(0.92, s), Math.min(0.9, l));
     s = Math.min(0.92, Math.max(0.42, s));
     l = Math.min(0.74, Math.max(0.34, l));
     // 黄緑〜黄土の「くすみ」帯は少し明るく
@@ -500,12 +508,15 @@ export function sparkle(ctx, x, y, s, col = '#ffffff', a = 1) {
 /** 王冠（共通・宝石つき） */
 export function crownHQ(ctx, x, y, s, gem = '#ff3d7f', t = 0, tilt = 0) {
   ctx.save(); ctx.translate(x, y); ctx.rotate(tilt);
+  s = Math.round(s * 4) / 4;
+  cpart(ctx, 'crown', -s * 1.3, -s * 1.4, s * 2.6, s * 1.5, 2, (ctx) => {
   ctx.beginPath(); ctx.moveTo(-s, 0); ctx.lineTo(-s * 1.15, -s * 0.95); ctx.lineTo(-s * 0.55, -s * 0.45); ctx.lineTo(0, -s * 1.25); ctx.lineTo(s * 0.55, -s * 0.45); ctx.lineTo(s * 1.15, -s * 0.95); ctx.lineTo(s, 0); ctx.closePath();
   metal(ctx, '#ffc21a', -s, -s * 1.25, s * 2, s * 1.25, Math.max(1.2, s * 0.14));
   ctx.beginPath(); ctx.rect(-s, -s * 0.22, s * 2, s * 0.26); part(ctx, '#e89a00', -s, -s * 0.22, s * 2, s * 0.26, Math.max(1, s * 0.1));
   for (const [gx, gy, gr] of [[0, -s * 0.5, 0.2], [-s * 1.15, -s * 0.95, 0.12], [s * 1.15, -s * 0.95, 0.12], [0, -s * 1.25, 0.12]]) {
     ctx.beginPath(); ctx.arc(gx, gy, s * gr, 0, PI * 2); fs(ctx, gem, Math.max(0.8, s * 0.07));
   }
+  }, gem + s);
   sparkle(ctx, s * 0.5, -s * 0.9, s * 0.35 * (0.6 + 0.4 * Math.sin(t * 4)), '#fff8d0', 0.9);
   ctx.restore();
 }
