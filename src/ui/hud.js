@@ -40,12 +40,13 @@ export function hudSlots() {
 export function drawHUD(ctx, game, _internal = false) {
   if (!game || !game.state) return;
   const ui = game.ui;
-  const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+  // 二重描画防止はフレーム番号（ui.frame）で判定する。時間窓だと HUD 描画が遅い端末で二重に描いてしまう
   if (ui) {
-    if (_internal) ui._hudAt = now;
+    const fr = ui.frame || 0;
+    if (_internal) ui._hudIntFrame = fr;
     else {
-      if (ui._hudAt && now - ui._hudAt < 6) return; // ui.draw が今描いたばかり
-      ui._hudExtAt = now;
+      if (ui._hudIntFrame === fr) return; // このフレームは ui.draw が描いた
+      ui._hudExtFrame = fr;
     }
   }
   const s = hs(game);
@@ -57,10 +58,13 @@ export function drawHUD(ctx, game, _internal = false) {
     ['radio', drawRadio], ['bookNew', drawBookToasts],
     ['levelUp', drawLevelUp], ['banner', drawBanner], ['toasts', drawToasts], ['petFx', drawPetFx],
   ];
+  const prof = game.debug?.profile ? (game.debug.hudProf ||= {}) : null; // デバッグ: 部位ごとの描画時間(ms, EMA)
   for (const [tag, fn] of parts) {
+    const t0 = prof ? performance.now() : 0;
     ctx.save();
     try { fn(ctx, game, s, dt); } catch (e) { guard('hud.' + tag, () => { throw e; }); }
     ctx.restore();
+    if (prof) prof[tag] = (prof[tag] ?? 0) * 0.9 + (performance.now() - t0) * 0.1;
   }
 }
 

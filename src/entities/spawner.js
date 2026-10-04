@@ -1,5 +1,5 @@
 // 自動出現 + 手配度（GTA風）による警官 / SWAT / ドローン / パトカー出現
-import { ENEMIES } from '../data/enemies.js';
+import { ENEMIES, COP_UNITS_BY_WANTED } from '../data/enemies.js';
 import * as combat from '../systems/combat.js';
 import { spawnEffect } from '../render/effects.js';
 import { Enemy } from './enemy.js';
@@ -249,13 +249,17 @@ export class Spawner {
     this.wantedT = g.wanted >= 5 ? 1.2 : 2.5;
     const lv = Math.min(5, Math.max(0, Math.floor(g.wanted)));
     const tab = WANTED_TABLE[lv];
-    const ids = this.ids;
+    const all = this.ids;
+    // ★ごとの出現ユニット表（enemies.js の COP_UNITS_BY_WANTED）に絞る。表に無い種別は出さない
+    const allow = COP_UNITS_BY_WANTED?.[lv];
+    const only = (list) => (allow ? list.filter((id) => allow.includes(id)) : list);
+    const ids = { cop: only(all.cop), swat: only(all.swat), drone: only(all.drone) };
     const count = (list) => g.enemies.filter((e) => !e.dead && !e.remove && e.fromWanted && list.includes(e.defId)).length;
     if (ids.cop.length && count(ids.cop) < tab.cop) return this.spawnLaw(this.leveled(ids.cop));
     if (ids.swat.length && count(ids.swat) < tab.swat) return this.spawnLaw(this.leveled(ids.swat));
     if (ids.drone.length && count(ids.drone) < tab.drone) return this.spawnLaw(this.leveled(ids.drone), true);
     const cars = g.vehicles.filter((v) => v.policeSpawned && v.driverType === 'cop').length;
-    if (ids.cop.length && cars < tab.car && !p.inVehicle) this.spawnPoliceCar();
+    if (all.cop.length && cars < tab.car && !p.inVehicle) this.spawnPoliceCar();
   }
 
   // プレイヤーLvに見合った（Lv+6 以下で最も強い）ユニットを選ぶ。一定確率で弱い方も混ぜる

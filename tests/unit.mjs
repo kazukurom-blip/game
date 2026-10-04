@@ -798,6 +798,35 @@ test('spawner: 手配度で警察が出現', () => {
   assert.ok(law.some((e) => e.def.art === 'swat'), 'SWAT');
 }, { random: true });
 
+test('spawner: 手配度★ごとの警察ユニットは COP_UNITS_BY_WANTED に従う（m13 の swat_trooper が出る）', async () => {
+  for (const lv of [1, 2, 3, 4, 5]) {
+    const g = makeGame('jin', 'downtown');
+    g.debug.god = true;
+    g.state.level = 60;
+    g.enemies.length = 0;
+    g.spawner.areas.forEach((_, i) => { g.spawner.timers[i] = -1e9; });
+    setWantedLevel(g, lv);
+    for (let i = 0; i < 60 * 12; i++) { step(g); if (g.wanted !== lv) setWantedLevel(g, lv); }
+    const law = g.enemies.filter((e) => e.fromWanted && !e.dead);
+    assert.ok(law.length > 0, `★${lv} 警察なし`);
+    // パトカーから降りてくる警官（cop_*）は表の外でも可
+    const bad = law.filter((e) => !COP_UNITS_BY_WANTED[lv].includes(e.defId) && !(e.def.art === 'cop'));
+    assert.deepEqual(bad.map((e) => e.defId), [], `★${lv} 表外のユニット`);
+    if (lv === 4) assert.ok(law.some((e) => e.defId === 'swat_trooper'), '★4 で swat_trooper が出る');
+  }
+}, { random: true });
+
+test('maps: 地面の大きな decor がポータルや互いに重ならない', () => {
+  const HW = { billboard: 120, container: 100, rocket: 70, car: 80, slotMachine: 34, neonSign: 55, graffiti: 60 };
+  const bad = [];
+  for (const m of Object.values(MAPS)) {
+    const big = m.decor.filter((d) => HW[d.type] && d.y === m.groundY && !d.w).sort((a, b) => a.x - b.x);
+    for (const d of big) for (const p of m.portals) if (p.y === m.groundY && Math.abs(p.x - d.x) < HW[d.type] + 60) bad.push(`${m.id}:${d.type}@${d.x}~portal@${p.x}`);
+    for (let i = 1; i < big.length; i++) if (big[i].x - HW[big[i].type] < big[i - 1].x + HW[big[i - 1].type]) bad.push(`${m.id}:${big[i - 1].type}@${big[i - 1].x}+${big[i].type}@${big[i].x}`);
+  }
+  assert.deepEqual(bad, []);
+});
+
 test('boss: 攻撃パターンが偏りすぎない', () => {
   const bosses = Object.values(ENEMIES).filter((e) => e.ai === 'boss');
   for (const def of bosses) {

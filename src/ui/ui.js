@@ -41,7 +41,7 @@ export class UIManager {
     this.dnd = null;    // スキル/アイテムのドラッグ&ドロップ
     this.lastClick = { id: null, t: -9 };
     this.pos = {};      // ウィンドウ位置の記憶
-    this._hudAt = 0; this._hudExtAt = 0;
+    this._hudIntFrame = -1; this._hudExtFrame = -9;
     this.petFx = null;
     this.bookToasts = [];
     this.bookNewIds = new Set();
@@ -381,8 +381,8 @@ export class UIManager {
     this._hits = [];
     this.tip = null;
     const g = this.game;
-    const t0 = (typeof performance !== 'undefined' ? performance.now() : Date.now());
-    if (g && g.state && (g.scene == null || g.scene === 'play') && !(this._hudExtAt && t0 - this._hudExtAt < 12)) {
+    // main が直前（同じフレーム、frame++ 前）に drawHUD を呼んでいれば描かない
+    if (g && g.state && (g.scene == null || g.scene === 'play') && this._hudExtFrame !== this.frame - 1) {
       ctx.save();
       try { drawHUD(ctx, g, true); } catch (e) { guard('hud', () => { throw e; }); }
       ctx.restore();

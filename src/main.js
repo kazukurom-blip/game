@@ -228,32 +228,42 @@ function drawPlay() {
   const sy = game.shake ? (Math.random() - 0.5) * game.shake : 0;
   const cam = { x: Math.round(game.cam.x + sx), y: Math.round(game.cam.y + sy) };
 
-  safe('bg', () => drawBackground(ctx, map, cam, W, H, game.time));
+  const skip = game.debug.skip || {}; // デバッグ: 描画レイヤーを個別に止めて負荷を調べる
+  if (!skip.bg) safe('bg', () => drawBackground(ctx, map, cam, W, H, game.time));
   ctx.save();
   ctx.translate(-cam.x, -cam.y);
-  safe('tiles', () => drawMapTiles(ctx, map, game.time));
+  if (!skip.tiles) safe('tiles', () => drawMapTiles(ctx, map, game.time));
   const visible = (e) => e.x > cam.x - 300 && e.x < cam.x + W + 300;
-  for (const v of game.vehicles) if (visible(v)) safe('draw.vehicle', () => v.draw(ctx));
-  for (const n of game.npcs) if (visible(n)) safe('draw.npc', () => n.draw(ctx));
+  for (const v of game.vehicles) if (!skip.ents && visible(v)) safe('draw.vehicle', () => v.draw(ctx));
+  for (const n of game.npcs) if (!skip.ents && visible(n)) safe('draw.npc', () => n.draw(ctx));
   for (const d of game.drops) if (visible(d)) safe('draw.drop', () => d.draw(ctx));
-  for (const e of game.enemies) if (visible(e)) safe('draw.enemy', () => e.draw(ctx));
+  for (const e of game.enemies) if (!skip.ents && visible(e)) safe('draw.enemy', () => e.draw(ctx));
   safe('draw.player', () => game.player.draw(ctx));
   for (const p of game.projectiles) safe('draw.proj', () => p.draw(ctx));
   safe('draw.fx', () => drawEffects(ctx, game));
-  safe('debug.world', () => game.debug.drawWorld?.(ctx));
   ctx.restore();
-  safe('night', () => {
+  if (!skip.night) safe('night', () => {
     const p = game.player;
     drawNightOverlay(ctx, map, W, H, p ? { x: p.x - cam.x, y: p.y - 40 - cam.y } : undefined);
   });
+  // 当たり判定表示は夜の色調オーバーレイの上に描く（暗くならないように）
+  if (game.debug.enabled && game.debug.showHitboxes) {
+    ctx.save();
+    ctx.translate(-cam.x, -cam.y);
+    safe('debug.world', () => game.debug.drawWorld?.(ctx));
+    ctx.restore();
+  }
 
-  safe('hud', () => drawHUD(ctx, game));
-  safe('ui.draw', () => game.ui.draw(ctx));
+  if (!skip.hud) safe('hud', () => drawHUD(ctx, game));
+  if (!skip.hud) safe('ui.draw', () => game.ui.draw(ctx));
   safe('debug.draw', () => game.debug.draw(ctx));
 }
 
+// 1フレームの処理時間（update+draw, ms）。デバッグパネル / テストが参照
+game.perf = { ms: 0, avg: 0, max: 0, n: 0, sum: 0, reset() { this.max = 0; this.n = 0; this.sum = 0; } };
 let last = performance.now();
 function frame(now) {
+  const t0 = performance.now();
   const dt = Math.min(1 / 30, Math.max(0, (now - last) / 1000));
   last = now;
   game.dt = dt;
@@ -273,6 +283,8 @@ function frame(now) {
     updatePlay(dt);
     drawPlay();
   }
+  const pf = game.perf, ms = performance.now() - t0;
+  pf.ms = ms; pf.avg = pf.avg ? pf.avg * 0.95 + ms * 0.05 : ms; pf.n++; pf.sum += ms; if (ms > pf.max) pf.max = ms;
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);

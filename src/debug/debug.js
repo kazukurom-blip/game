@@ -5,16 +5,20 @@ import { ITEMS } from '../data/items.js';
 import { MISSIONS } from '../data/missions.js';
 import { ENEMIES } from '../data/enemies.js';
 import { MAPS, MAP_ORDER } from '../world/maps.js';
+import { resolveSpawns, civilianTypes } from '../entities/spawner.js';
 import { entRect } from '../world/physics.js';
 import { Enemy } from '../entities/enemy.js';
 import { computeStats, gainExp, expToNext } from '../systems/progression.js';
-import { addItem, countItem, freeSlots } from '../systems/inventory.js';
+import { addItem, countItem, freeSlots, equip } from '../systems/inventory.js';
 import { damageEnemy, setWantedLevel, TEAR_THRESHOLDS } from '../systems/combat.js';
 import { spawnEffect } from '../render/effects.js';
 
 const PANEL_W = 300;
 const BTN_H = 24;
 const KEEP_ITEMS = new Set(['potion_red', 'potion_blue']);
+export const PET_IDS = Object.keys(ITEMS).filter((id) => ITEMS[id].slot === 'pet');
+export const CLOCK_PRESETS = { morning: 7, noon: 12, evening: 18, night: 22 };
+const CLOCK_LABEL = { morning: '朝', noon: '昼', evening: '夕', night: '夜' };
 
 export class DebugPanel {
   constructor(game) {
@@ -37,17 +41,21 @@ export class DebugPanel {
       { id: 'hpDown', label: () => 'HP-10%', key: 'F6', fn: () => this.hpDown() },
       { id: 'spawn', label: () => '敵スポーン', key: 'F7', fn: () => this.spawnEnemy() },
       { id: 'killAll', label: () => '全敵撃破', key: 'F8', fn: () => this.killAll() },
-      { id: 'warp', label: () => 'マップワープ', key: 'F9', fn: () => this.warp() },
+      { id: 'warp', label: () => `ワープ ${Math.max(0, MAP_ORDER.indexOf(this.game.map?.id)) + 1}/${MAP_ORDER.length}`, key: 'F9', fn: () => this.warp() },
       { id: 'mission', label: () => 'ミッション即完了', key: 'F10', fn: () => this.completeMission() },
       { id: 'items', label: () => '全アイテム付与', key: '⇧F3', fn: () => this.giveAllItems() },
       { id: 'money', label: () => 'お金+10000', key: '⇧F4', fn: () => { this.game.state.money += 10000; return '+$10000'; } },
-      { id: 'wantedUp', label: () => '手配度+1', key: '⇧F5', fn: () => { setWantedLevel(this.game, (this.game.wanted || 0) + 1); return `★${this.game.wanted}`; } },
-      { id: 'wantedDown', label: () => '手配度-1', key: '⇧F6', fn: () => { setWantedLevel(this.game, (this.game.wanted || 0) - 1); return `★${this.game.wanted}`; } },
+      { id: 'wantedUp', label: () => '手配度+1', key: '⇧F5', fn: () => this.wanted(+1) },
+      { id: 'wantedDown', label: () => '手配度-1', key: '⇧F6', fn: () => this.wanted(-1) },
       { id: 'hpFull', label: () => 'HP/MP全快', key: '⇧F7', fn: () => this.heal() },
       { id: 'clearInv', label: () => 'インベントリ整理', key: '⇧F8', fn: () => this.clearInventory() },
+      { id: 'pet', label: () => `PET付与 ${this.game.state?.equipped?.pet ? '(次)' : ''}`, key: '⇧F9', fn: () => this.givePet() },
+      { id: 'visitAll', label: () => '全マップ訪問済み', key: '⇧F10', fn: () => this.visitAll() },
+      ...Object.keys(CLOCK_PRESETS).map((k) => ({ id: 'clock_' + k, label: () => `時刻: ${CLOCK_LABEL[k]} ${CLOCK_PRESETS[k]}時`, key: '', fn: () => this.setClock(CLOCK_PRESETS[k]) })),
     ];
     this._keyMap = {};
     for (const a of this.actions) {
+      if (!a.key) continue;
       const shift = a.key.startsWith('⇧');
       this._keyMap[(shift ? 'S+' : '') + a.key.replace('⇧', '')] = a.id;
     }
@@ -134,11 +142,66 @@ export class DebugPanel {
     return `${n - st.inventory.length}枠削除`;
   }
 
+  // 現在マップで実際に出る敵（spawner の解決済み出現表。町なら市民。フィールドで表が空なら habitats）
   spawnTypes() {
-    const map = this.game.map;
+    const g = this.game, map = g.map;
+    if (!map) return [];
+    if (map.town) return civilianTypes();
+    const areas = g.spawner?.map === map && g.spawner.areas?.length ? g.spawner.areas : resolveSpawns(map);
     const types = [];
-    for (const s of map?.spawns || []) for (const t of s.types || []) if (ENEMIES[t] && !types.includes(t)) types.push(t);
+    for (const s of areas) for (const t of s.types || []) if (ENEMIES[t] && !types.includes(t)) types.push(t);
+    if (!types.length) {
+      for (const e of Object.values(ENEMIES)) if ((e.habitats || []).includes(map.id) && !types.includes(e.id)) types.push(e.id);
+    }
     return types;
+  }
+
+  wanted(d) {
+    const g = this.game;
+    setWantedLevel(g, (g.wanted || 0) + d);
+    const note = d > 0 && !g.map?.town ? '（フィールドでは警察は出ない。町で確認）' : '';
+    return `★${g.wanted}${note}`;
+  }
+
+  // PET を順番に付与して装備（インベントリが満杯なら直接装備スロットへ）
+  givePet() {
+    const g = this.game, st = g.state;
+    if (!PET_IDS.length) return 'PET 定義なし';
+    const cur = PET_IDS.indexOf(st.equipped?.pet);
+    const id = PET_IDS[(cur + 1) % PET_IDS.length];
+    if (countItem(st, id) <= 0 && !addItem(g, id, 1, { silent: true })) {
+      st.equipped.pet = id;
+      g.events.emit('equipChanged', { slot: 'pet' });
+      return `${ITEMS[id].name}（直接装備）`;
+    }
+    const r = equip(g, id);
+    if (r?.ok === false) { // Lv 不足などは無視して直接装備（デバッグ用）
+        st.equipped.pet = id;
+        g.events.emit('equipChanged', { slot: 'pet' });
+        return `${ITEMS[id].name}（${r.msg} → 直接装備）`;
+    }
+    return ITEMS[id].name;
+  }
+
+  visitAll() {
+    const st = this.game.state;
+    st.visited = [...new Set([...(st.visited || []), ...Object.keys(MAPS)])];
+    this.game.events.emit('visitedChanged', {});
+    return `${st.visited.length} マップ`;
+  }
+
+  setClock(h) {
+    const g = this.game;
+    g.state.clock = h; g.clock = h;
+    if (g.map) g.map._clock = h;
+    return `${h}:00`;
+  }
+
+  // Lv を n まで上げる（gainExp 経由。SP/AP も通常どおり）
+  setLevel(n) {
+    const st = this.game.state;
+    for (let i = 0; i < 200 && st.level < n; i++) this.levelUp();
+    return `Lv.${st.level}`;
   }
 
   spawnEnemy(type) {
@@ -228,7 +291,7 @@ export class DebugPanel {
     const g = this.game, p = g.player, st = g.state;
     const r = this.rect;
     const lines = [];
-    lines.push(`FPS ${this.fps.toFixed(0)}   time ${g.time.toFixed(1)}s`);
+    lines.push(`FPS ${this.fps.toFixed(0)}  frame ${(g.perf?.avg ?? 0).toFixed(1)}ms  t ${g.time.toFixed(0)}s`);
     lines.push(`enemies ${g.enemies.length}  drops ${g.drops.length}  proj ${g.projectiles.length}  fx ${g.effects.length}`);
     lines.push(`npcs ${g.npcs.length}  vehicles ${g.vehicles.length}`);
     if (p && st) {
@@ -237,6 +300,8 @@ export class DebugPanel {
       lines.push(`${p.anim?.state || '?'} ${p.onGround ? 'ground' : 'air'}${p.climbing ? ' rope' : ''}${p.inVehicle ? ' car' : ''}${p.dead ? ' DEAD' : ''}`);
       lines.push(`Lv${st.level} HP ${st.hp} MP ${st.mp} $${st.money} ★${g.wanted} heat ${(g.wantedHeat || 0).toFixed(1)}`);
       lines.push(`damage ${(p.anim?.damage ?? 0).toFixed(2)}  inv ${st.inventory.length}/48  missions ${st.missions.active.length}`);
+      const ck = g.clock ?? st.clock ?? 0;
+      lines.push(`${g.map?.town ? 'TOWN' : 'FIELD'} ${g.map?.region || '-'}  clock ${String(Math.floor(ck)).padStart(2, '0')}:${String(Math.floor((ck % 1) * 60)).padStart(2, '0')}  pet ${st.equipped?.pet || '-'}`);
     }
     const errLine = g.lastError ? `ERR: ${String(g.lastError).slice(0, 44)}` : 'ERR: なし';
 

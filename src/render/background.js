@@ -113,7 +113,8 @@ function weighted(table, w) {
   return [mixW(cols, ws), a];
 }
 
-let glowBuf = null, glowCtx = null;
+let glowBuf = null, glowCtx = null, glowKey = '', glowHad = false;
+const GLOW_SCALE = 0.5;
 const framePost = [];
 
 // ================================================================ drawBackground
@@ -145,11 +146,21 @@ export function drawBackground(ctx, map, cam, W, H, time) {
   const sunCol = mix('#ff8a4a', '#fff4d0', clamp(sunAlt * 1.6, 0, 1));
   framePost.length = 0;
   // 光バッファ（画面サイズ1枚を使い回し）
-  let gb = null, hasGlow = false;
-  if (lights > 0.02) {
-    if (!glowBuf || glowBuf.width !== W || glowBuf.height !== H) { glowBuf = makeCanvas(W, H); glowCtx = glowBuf.getContext('2d'); }
+  // 性能: 光バッファは半解像度（柔らかい光なので見た目はほぼ同じで塗り面積 1/4）。
+  //       昼間（lights が小さい）は寄与がほぼ無いので省略する
+  let gb = null, hasGlow = false, reuse = false;
+  if (lights > 0.1) {
+    // カメラ・シーンが前フレームと同じなら光バッファを作り直さない（静止中の負荷を削減）
+    const gk = key + '|' + cam.x + '|' + cam.y + '|' + W + 'x' + H;
+    reuse = !!glowBuf && glowKey === gk;
+    glowKey = gk;
+  } else glowKey = '';
+  if (lights > 0.1 && reuse) { gb = null; hasGlow = glowHad; } else if (lights > 0.1) {
+    const gw = Math.ceil(W * GLOW_SCALE), gh = Math.ceil(H * GLOW_SCALE);
+    if (!glowBuf || glowBuf.width !== gw || glowBuf.height !== gh) { glowBuf = makeCanvas(gw, gh); glowCtx = glowBuf.getContext('2d'); }
     gb = glowCtx;
-    gb.setTransform(1, 0, 0, 1, 0, 0); gb.globalCompositeOperation = 'source-over'; gb.clearRect(0, 0, W, H); gb.fillStyle = '#000';
+    gb.setTransform(1, 0, 0, 1, 0, 0); gb.globalCompositeOperation = 'source-over'; gb.clearRect(0, 0, gw, gh); gb.fillStyle = '#000';
+    gb.setTransform(GLOW_SCALE, 0, 0, GLOW_SCALE, 0, 0);
   }
   const S = {
     ctx, cam, W, H, time, gS, horizon, v: sc.v, town: sc.town, region: sc.region, id: sc.id, w, lights, indoor: sc.indoor,
@@ -191,7 +202,8 @@ export function drawBackground(ctx, map, cam, W, H, time) {
   if (ta > 0.01) { ctx.globalCompositeOperation = 'source-atop'; ctx.globalAlpha = Math.min(0.85, ta); ctx.fillStyle = tc; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
   ctx.globalCompositeOperation = 'source-over';
   // 窓明かり・ネオン（夜ほど強い）
-  if (gb && hasGlow) {
+  if (gb) glowHad = hasGlow;
+  if ((gb || reuse) && hasGlow) {
     ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = Math.min(1, lights);
     ctx.drawImage(glowBuf, 0, 0, W, H);
@@ -714,4 +726,4 @@ function drawSidewalk(ctx, map, S, region, V) {
 }
 
 // 内部用（テストページ等）
-export function _clearBackgroundCache() { sceneCache.clear(); }
+export function _clearBackgroundCache() { sceneCache.clear(); glowKey = ''; }
