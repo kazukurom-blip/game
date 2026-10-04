@@ -993,6 +993,7 @@ test('v2 exp: 序盤少なめ・単調増加・夜ボーナス', () => {
   assert.ok(min >= 18 && min <= 32, `Lv10 まで ${min.toFixed(1)} 分`);
   assert.ok(isNight(22) && isNight(3) && !isNight(12) && !isNight(undefined));
   const g = makeGame('luna', 'beach_f1');
+  g.nowMs = () => new Date(2026, 9, 4, 12).getTime(); // v3: 曜日イベント（月曜 EXP+10%）の影響を受けない日曜に固定
   g.state.level = 50; g.state.exp = 0;
   const e1 = new Enemy(g, 'crab_iron', 900, g.map.groundY); g.enemies.push(e1); damageEnemy(g, e1, 1e9);
   const day = g.state.exp;
@@ -1430,6 +1431,9 @@ test('v3 classes: newState(classId, {name, gender, look}) と性別別の初期�
   g.state.mp = 1e5;
   for (const s of skillsForHero('hacker')) { if (s.kind === 'passive') continue; g.time += 100; resetCooldowns(); assert.ok(useSkill(g, s.id), 'use ' + s.id); for (let i = 0; i < 20; i++) step(g); }
 });
+
+// v3 ワールド＆エンティティ（tests/world_v3.mjs）
+(await import('./world_v3.mjs')).default({ test, makeGame, step, fin });
 
 // ------------------------------------------------------------ 実行
 const t0 = Date.now();

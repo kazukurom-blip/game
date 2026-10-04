@@ -243,6 +243,17 @@ export function drawEffects(ctx, game) {
 /** drawCutins(ctx, game) — 画面空間: カットイン＋画面空間エフェクト（opts.screen）。main が HUD の前に呼ぶ */
 export function drawCutins(ctx, game) {
   if (!game) return;
+  if (!game._screenFxSeparate) drawScreenFx(ctx, game, true);
+  drawCutinLayer(ctx, game);
+}
+
+/**
+ * drawScreenFx(ctx, game) — 画面空間エフェクト（spawnEffect(..., {screen:true}): 強化・潜在の演出など）。
+ * UI 窓の上に出したい場合は ui.draw の後に呼ぶ（一度呼ぶと drawCutins 側では描かなくなる）。
+ */
+export function drawScreenFx(ctx, game, _fromCutins) {
+  if (!game) return;
+  if (!_fromCutins) game._screenFxSeparate = true;
   const sl = game.screenFx;
   if (sl && sl.length) {
     // ワールドが止まっている間（UI窓・ヒットストップ）も進める
@@ -252,7 +263,6 @@ export function drawCutins(ctx, game) {
     FXA.m = 1;
     ctx.restore();
   }
-  drawCutinLayer(ctx, game);
 }
 
 // ---------------------------------------------------------------- 各エフェクト
@@ -358,8 +368,9 @@ function drawFx(ctx, e) {
       const s = (e.size || 16) * (1 + k);
       ctx.fillStyle = 'rgba(255,240,180,0.95)';
       ctx.beginPath(); ctx.moveTo(0, -s * 0.4); ctx.lineTo(s * 1.4, 0); ctx.lineTo(0, s * 0.4); ctx.lineTo(s * 0.3, 0); ctx.closePath(); ctx.fill();
-      ctx.fillStyle = rgba('#ff9a3c', 0.7);
+      ctx.fillStyle = rgba(e.opts.color ? c : '#ff9a3c', 0.7);
       ctx.beginPath(); starPath(ctx, s * 0.3, 0, s * 0.8, s * 0.3, 6); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.beginPath(); ctx.arc(s * 0.2, 0, s * 0.32 * (1 - k), 0, PI * 2); ctx.fill();
       break;
     }
     case 'dash': {

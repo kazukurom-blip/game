@@ -1,6 +1,6 @@
 // 弾・魔法弾。owner: 'player' | 'enemy'
 import { calcDamage, damageEnemy, damagePlayer } from '../systems/combat.js';
-import { sysFn, reportHits } from '../world/sys.js';
+import { sysFn } from '../world/sys.js';
 import { spawnEffect } from '../render/effects.js';
 import { rectOverlap, entRect } from '../world/physics.js';
 
@@ -81,9 +81,8 @@ export class Projectile {
         damageEnemy(g, e, dmg, crit, Math.sign(this.vx) || 1);
         spawnEffect(g, crit ? 'critHit' : this.hitEffect, this.x, this.y, { color: this.color });
         if (this.onHit) this.onHit(e);
-        // ファイナルアタック（通常攻撃・スキルの弾。市民には出さない）＋コンボ
+        // ファイナルアタック（通常攻撃・スキルの弾。市民には出さない）。コンボは damageEnemy 側で加算
         if (!e.civilian) { const fa = sysFn('tryFinalAttack', g); if (fa) { try { fa(g, [e]); } catch (err) { /* noop */ } } }
-        reportHits(g, [e]);
         if (this.pierce-- <= 0) return this.kill();
       }
     } else {

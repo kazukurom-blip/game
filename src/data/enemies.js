@@ -547,7 +547,7 @@ const list = [
   // v3: 夜限定の敵（night:true。20〜5時のみ。spawner が isNightNow / enemyAvailableNow で判定）
   // =====================================================================
   mk('jelly_moonlit', 'ムーンライト・クラゲ', 8, 'jellyfish', 'flyer', 'beach', ['beach_f3'], {
-    night: true, speed: 70, w: 44, h: 50, aggro: 260, color: '#fff6c8', accent: '#19f0ff', hpM: 1.3, expM: 1.6, moneyM: 2, mat: 'jelly_tentacle',
+    night: true, speed: 70, w: 44, h: 50, aggro: 260, color: '#fff6c8', accent: '#19f0ff', hpM: 1.3, expM: 1.3, moneyM: 2, mat: 'jelly_tentacle',
     extra: [{ id: 'chip_reroll', chance: 0.02 }],
   }),
   mk('thug_night_racer', 'ナイト・ゴーストレーサー', 21, 'thug', 'charger', 'downtown', ['down_f3'], {

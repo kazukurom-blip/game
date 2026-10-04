@@ -7,10 +7,16 @@ import {
   looksFrom, doEquip, doUnequip, doUseItem, doAddItem, doRemoveItem, allSkills, skillDef, skillMp, skillCd, doLearn,
   allMissions, missionDef, HERO_NAMES, expNeed, missionNpcName, turnInNpc, sellPriceOf, drawPetArt,
 } from './deps.js';
+import {
+  charLook, charName, currentJob, JOBS, skillsForHero, hasJob, jobLineage, jobLockOf, getSp, skillSpTier, moveParams, SKILL_BAR_SIZE, BAR_KEYS,
+  missionGuide, trackedMissionId, setTracked, routeTo, MISSION_NPCS, classOf, V3, call,
+} from './v3deps.js';
+import { drawSkillPreview, kindLabel } from './v3windows.js';
+import { mapInfo } from './deps.js';
 
 const W = 1280, H = 720;
 const WT = { melee: '近接', gun: '銃', magic: '魔法' };
-const KIND = { melee: '近接', projectile: '遠距離', aoe: '範囲', buff: 'バフ', dash: 'ダッシュ', passive: 'パッシブ' };
+const KIND = { melee: '近接', projectile: '遠距離', aoe: '範囲', buff: 'バフ', dash: 'ダッシュ', passive: 'パッシブ', move: '移動' };
 
 function itemCat(it) {
   if (!it) return 2;
@@ -68,6 +74,17 @@ export function itemTip(game, it, o = {}) {
     L.push(line);
   }
   if (cur) L.push({ t: `▲▼ 装備中「${cur.name}」と比較`, c: COL.dim, size: 11.5 });
+  const inst = o.inst;
+  if (inst && (inst.star || inst.pot)) {
+    L.push({ sep: true });
+    if (inst.star) L.push({ t: `★${inst.star}  ネオン・チューン`, c: COL.star, size: 13.5 });
+    if (inst.pot?.grade) {
+      const PG = V3.potential?.POT_GRADE_INFO?.[inst.pot.grade];
+      L.push({ t: `潜在: ${PG?.name || inst.pot.grade}`, c: PG?.color || '#b04dff', size: 13 });
+      for (const ln of inst.pot.lines || []) L.push({ t: '  ' + (call('potential', 'potLineText', [ln], null) || `${ln.stat} +${ln.value}`), c: PG?.color || '#d8c8ff', size: 12.5 });
+    }
+  }
+  if (it.slot && it.slot !== 'pet' && o.menuHint !== false) L.push({ t: '右クリック: 装備 / ネオン・チューン / ハックチップ', c: COL.dim, size: 11 });
   if (o.equipped) L.push({ t: '装備中', c: COL.teal, size: 12 });
   const ef = it.effect;
   if (ef) {
@@ -87,7 +104,9 @@ function skillTip(game, sk) {
   const st = game.state || {};
   const lv = st.skills?.[sk.id] || 0, max = sk.maxLevel || 10;
   const L = [{ t: sk.name, c: sk.color || COL.teal, size: 18 }];
-  L.push({ t: `${KIND[sk.kind] || sk.kind || ''}  ・  Lv ${lv}/${max}  ・  習得Lv ${sk.reqLevel || 1}`, c: COL.sub, size: 12 });
+  L.push({ t: `${kindLabel(sk)}  ・  Lv ${lv}/${max}  ・  習得Lv ${sk.reqLevel || 1}`, c: COL.sub, size: 12 });
+  const jl = jobLockOf(st, sk.id);
+  if (jl) L.push({ t: `🔒 「${jl.jobName}」に転職で習得`, c: COL.bad, size: 12 });
   L.push({ sep: true });
   if (sk.desc) L.push({ t: sk.desc, c: '#ffffff', size: 13, wrap: true });
   if (sk.kind !== 'passive') {
@@ -101,7 +120,7 @@ function skillTip(game, sk) {
       const m2 = guard('skill.mult', () => (typeof sk.mult === 'function' ? sk.mult(lv + 1) : sk.mult), null);
       if (m2) L.push({ t: `次Lv: 威力 ${Math.round(m2 * 100)}%  MP ${skillMp(sk, lv + 1)}`, c: COL.good, size: 12.5 });
     }
-    L.push({ t: 'ドラッグでスキルバーへ / 下のA〜Fに登録', c: COL.dim, size: 11.5 });
+    L.push({ t: 'ドラッグでスキルバーへ / ダブルクリックで空き枠に登録', c: COL.dim, size: 11.5 });
   }
   return { lines: L, border: sk.color || COL.teal };
 }
@@ -235,14 +254,14 @@ function drawInventory(ui, ctx, win) {
   ctx.beginPath(); ctx.ellipse(px + pw / 2, fy + 8, 52, 10, 0, 0, Math.PI * 2); ctx.fill();
   const petIt = getItemDef(st.equipped?.pet);
   const cxC = petIt ? px + pw / 2 - 22 : px + pw / 2;
-  drawChar(ctx, cxC, fy + 8, heroLook(st.heroId), equipLooks(st), { facing: 1, state: 'idle', t, attackT: 0, damage: 0, scale: 2 });
+  drawChar(ctx, cxC, fy + 8, charLook(st), equipLooks(st), { facing: 1, state: 'idle', t, attackT: 0, damage: 0, scale: 2 });
   if (petIt) {
     ctx.fillStyle = 'rgba(0,0,0,0.3)';
     ctx.beginPath(); ctx.ellipse(px + pw / 2 + 62, fy + 10, 22, 5, 0, 0, Math.PI * 2); ctx.fill();
     drawPetArt(ctx, px + pw / 2 + 62, fy + 8, petIt.look, { facing: -1, state: 'idle', t, scale: 1.3 });
   }
   ctx.restore();
-  txt(ctx, `${HERO_NAMES[st.heroId] || ''}  Lv.${st.level || 1}`, px + pw / 2, py + ph - 18, { size: 15, align: 'center', color: '#fff', glow: COL.pink });
+  txt(ctx, `${charName(st)}  Lv.${st.level || 1}`, px + pw / 2, py + ph - 18, { size: 15, align: 'center', color: '#fff', glow: COL.pink });
 
   const SL = [['hat', 0, 0], ['top', 0, 1], ['bottom', 0, 2], ['shoes', 0, 3], ['weapon', 1, 0], ['accessory', 1, 1], ['pet', 1, 2]];
   for (const [slot, col, row] of SL) {
@@ -254,9 +273,21 @@ function drawInventory(ui, ctx, win) {
     if (it) drawItemIco(ctx, it, r.x + r.w / 2, r.y + r.h / 2, 42);
     else txt(ctx, SLOT_LABELS[slot], r.x + r.w / 2, r.y + r.h / 2, { size: 11, align: 'center', color: COL.dim, sw: 2.5 });
     if (it) txt(ctx, SLOT_LABELS[slot], r.x + 3, r.y + 7, { size: 9, color: '#ffe3f0', sw: 2.5 });
-    if (hov && it) ui.setTip(itemTip(g, it, { equipped: true }));
+    const einst = st.equippedInst?.[slot] || null;
+    if (hov && it) ui.setTip(itemTip(g, it, { equipped: true, inst: einst }));
+    if (it && einst?.star) txt(ctx, '★' + einst.star, r.x + r.w - 3, r.y + r.h - 8, { size: 10, align: 'right', color: COL.star, sw: 2.5 });
     else if (hov && slot === 'pet') ui.setTip({ lines: [{ t: 'PET スロット', c: '#ffd6f5', size: 15 }, { t: '超低確率でドロップする PET を装備すると', c: COL.sub, size: 12 }, { t: 'アイテムとお金を自動で拾ってくれる', c: COL.sub, size: 12 }], border: '#ff6ad5' });
     ui.hit(win, 'eq:' + slot, r, {
+      onRight: () => {
+        if (!it || slot === 'pet') return;
+        const m = ui.mouse();
+        const ref = einst?.uid ? { uid: einst.uid } : { slot };
+        ui.openPopup(m.x, m.y, [
+          { label: '外す', fn: () => { const rr = doUnequip(g, slot); if (rr === false || rr?.ok === false) ui.notify(rr?.msg || '外せませんでした', COL.bad); } },
+          { label: '★ ネオン・チューン', color: COL.star, fn: () => ui.open('tune', { ref }) },
+          { label: '◆ ハックチップ（潜在）', color: '#c9a2ff', fn: () => ui.open('potential', { ref }) },
+        ]);
+      },
       onClick: () => {
         if (!st.equipped?.[slot]) return;
         const r = doUnequip(g, slot);
@@ -310,12 +341,28 @@ function drawInventory(ui, ctx, win) {
     }
     if ((e.s.qty || 1) > 1) txt(ctx, e.s.qty, r.x + r.w - 4, r.y + r.h - 9, { size: 12, align: 'right', sw: 3 });
     if (st.potionBar?.includes(e.s.id)) txt(ctx, '[' + (st.potionBar.indexOf(e.s.id) + 1) + ']', r.x + 4, r.y + 9, { size: 10, color: COL.pink, sw: 2.5 });
-    if (hov) ui.setTip(itemTip(g, e.it));
+    if (e.s.star) txt(ctx, '★' + e.s.star, r.x + 4, r.y + r.h - 9, { size: 10.5, color: COL.star, sw: 2.5 });
+    if (e.s.pot?.grade) {
+      const pc = V3.potential?.POT_GRADE_INFO?.[e.s.pot.grade]?.color || '#b04dff';
+      ctx.save(); ctx.beginPath(); ctx.arc(r.x + r.w - 8, r.y + 8, 4.5, 0, Math.PI * 2); ctx.fillStyle = pc; ctx.fill(); ctx.lineWidth = 1.2; ctx.strokeStyle = '#fff'; ctx.stroke(); ctx.restore();
+    }
+    if (hov) ui.setTip(itemTip(g, e.it, { inst: e.s }));
     const cons = e.it.type === 'consumable';
     ui.hit(win, 'it:' + k, r, {
       onClick: () => { win.sel = { i: e.i, id: e.s.id }; },
       onDbl: () => activate(ui, win, e),
-      onRight: () => { if (cons) togglePotion(ui, e.s.id); else win.sel = { i: e.i, id: e.s.id }; },
+      onRight: () => {
+        if (cons) { togglePotion(ui, e.s.id); return; }
+        win.sel = { i: e.i, id: e.s.id };
+        if (!e.it.slot || e.it.slot === 'pet') return;
+        const m = ui.mouse();
+        const ref = e.s.uid ? { uid: e.s.uid } : { index: e.i };
+        ui.openPopup(m.x, m.y, [
+          { label: '装備する', fn: () => activate(ui, win, e) },
+          { label: '★ ネオン・チューン', color: COL.star, fn: () => ui.open('tune', { ref }) },
+          { label: '◆ ハックチップ（潜在）', color: '#c9a2ff', fn: () => ui.open('potential', { ref }) },
+        ]);
+      },
       drag: cons ? { kind: 'potion', id: e.s.id } : null,
     });
   }
@@ -326,7 +373,7 @@ function drawInventory(ui, ctx, win) {
   if (selE) {
     const it = selE.it, info = rarityInfo(it.rarity);
     drawItemIco(ctx, it, gx + 34, dy + dh / 2, 44);
-    txt(ctx, it.name, gx + 64, dy + 22, { size: 16, color: info.color, maxW: 180 });
+    txt(ctx, it.name + (selE.s.star ? ` ★${selE.s.star}` : ''), gx + 64, dy + 22, { size: 16, color: info.color, maxW: it.slot ? 120 : 180 });
     txt(ctx, it.slot ? `${SLOT_LABELS[it.slot]}  必要Lv ${it.reqLevel || 1}` : it.type === 'consumable' ? `所持 ${selE.s.qty || 1}` : (it.desc || '').slice(0, 14), gx + 64, dy + 46, { size: 12, color: COL.sub, maxW: 180 });
     let bx = gx + 8 * CELL - 4 - 12;
     const bh = 34, by = dy + dh / 2 - bh / 2;
@@ -337,13 +384,21 @@ function drawInventory(ui, ctx, win) {
         bx -= 6;
       }
     }
+    if (it.slot && it.slot !== 'pet') {
+      const ref = selE.s.uid ? { uid: selE.s.uid } : { index: selE.i };
+      bx -= 60;
+      ui.btn(ctx, win, 'potW', { x: bx, y: by, w: 56, h: bh }, '潜在', () => ui.open('potential', { ref }), { size: 12, color: '#7b4dc9' });
+      bx -= 62;
+      ui.btn(ctx, win, 'tuneW', { x: bx, y: by, w: 56, h: bh }, '★強化', () => ui.open('tune', { ref }), { size: 12, color: '#c98a1a' });
+      bx -= 6;
+    }
     if (itemCat(it) !== 2 || it.type === 'consumable') {
       bx -= 88;
       ui.btn(ctx, win, 'act', { x: bx, y: by, w: 88, h: bh }, it.type === 'consumable' ? '使う' : '装備する', () => activate(ui, win, selE), { color: COL.teal });
     }
   } else {
     txt(ctx, 'ダブルクリック / Enter: 装備・使用', gx + 16, dy + 22, { size: 12.5, color: COL.sub });
-    txt(ctx, '右クリック or ドラッグ: 消費アイテムを [1][2] に登録', gx + 16, dy + 44, { size: 12.5, color: COL.sub });
+    txt(ctx, '右クリック: 装備は強化・潜在メニュー / 消費は [1][2] に登録', gx + 16, dy + 44, { size: 12.5, color: COL.sub });
   }
 }
 
@@ -370,73 +425,164 @@ function togglePotion(ui, id) {
 }
 
 // ======================= スキル =======================
+const TIER_TABS = ['基本', '1次', '2次', '3次', '4次'];
+function skillTierOf(sk) { return sk?.reqJob ? (JOBS[sk.reqJob]?.tier || 1) : 0; }
+function skillListFor(st, tier) {
+  const cur = currentJob(st);
+  const curId = cur?.id || 'beginner';
+  const all = skillsForHero(st.heroId, st, { allJobs: true });
+  return all.filter((s) => s && skillTierOf(s) === tier && (!s.reqJob || hasJob(st, s.reqJob) || jobLineage(s.reqJob).some((j) => j.id === curId)))
+    .sort((a, b) => (a.reqJob || '').localeCompare(b.reqJob || '') || (a.reqLevel || 0) - (b.reqLevel || 0));
+}
 function drawSkills(ui, ctx, win) {
   const g = ui.game, st = g.state;
   if (!st) return;
   const { x, y, w, h } = win;
-  const list = Object.values(allSkills()).filter((s) => s && (!s.hero || s.hero === st.heroId || s.hero === 'both'))
-    .sort((a, b) => (a.reqLevel || 0) - (b.reqLevel || 0));
+  const t = g.time || 0;
+  const job = currentJob(st);
+  if (win.tab == null || win._tabInit !== true) { win.tab = Math.max(0, Math.min(4, job?.tier || 0)); win._tabInit = true; }
   // ヘッダー
-  txt(ctx, `${HERO_NAMES[st.heroId] || ''} のスキル`, x + 20, y + 60, { size: 15, color: COL.sub });
-  ctx.save();
-  rrPath(ctx, x + w - 150, y + 46, 132, 28, 14);
-  ctx.fillStyle = (st.sp || 0) > 0 ? 'rgba(255,212,71,0.25)' : 'rgba(0,0,0,0.4)'; ctx.fill();
-  ctx.lineWidth = 1.5; ctx.strokeStyle = COL.gold; ctx.stroke();
-  ctx.restore();
-  txt(ctx, `SP  ${st.sp || 0}`, x + w - 84, y + 61, { size: 16, align: 'center', color: COL.gold, glow: (st.sp || 0) > 0 ? COL.gold : null });
-  const PER = 8, RH = 54;
+  txt(ctx, `${charName(st)}  ・  ${job?.name || '見習い'}`, x + 20, y + 58, { size: 15, color: COL.sub, maxW: 300 });
+  // SP（段階別プール）
+  const pools = [1, 2, 3, 4];
+  pools.forEach((tier, i) => {
+    const sp = getSp(st, tier);
+    const r = { x: x + w - 4 * 92 - 14 + i * 92, y: y + 44, w: 86, h: 28 };
+    const on = (win.tab <= 1 ? 1 : win.tab) === tier;
+    ctx.save();
+    rrPath(ctx, r.x, r.y, r.w, r.h, 14);
+    ctx.fillStyle = sp > 0 ? 'rgba(255,212,71,0.25)' : 'rgba(0,0,0,0.4)'; ctx.fill();
+    ctx.lineWidth = on ? 2.5 : 1.2; ctx.strokeStyle = on ? COL.gold : 'rgba(255,212,71,0.4)'; ctx.stroke();
+    ctx.restore();
+    txt(ctx, `${tier === 1 ? '基本+1次' : tier + '次'} SP ${sp}`, r.x + r.w / 2, r.y + 15, { size: 11.5, align: 'center', color: sp > 0 ? COL.gold : COL.sub, glow: sp > 0 && on ? COL.gold : null, sw: 2.5 });
+  });
+  // タブ
+  TIER_TABS.forEach((lab, i) => {
+    const r = { x: x + 16 + i * 84, y: y + 80, w: 78, h: 30 };
+    const on = win.tab === i, hov = ui.hover(win, r);
+    const lockedTab = i > 0 && (job?.tier || 0) < i && !skillListFor(st, i).length;
+    ctx.save();
+    rrPath(ctx, r.x, r.y, r.w, r.h, 10);
+    if (on) { const gg = ctx.createLinearGradient(0, r.y, 0, r.y + r.h); gg.addColorStop(0, COL.pink); gg.addColorStop(1, COL.purple); ctx.fillStyle = gg; } else ctx.fillStyle = hov ? 'rgba(123,47,247,0.55)' : 'rgba(10,6,30,0.55)';
+    ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = on ? '#fff' : 'rgba(200,180,255,0.5)'; ctx.stroke();
+    ctx.restore();
+    txt(ctx, lab + (lockedTab ? ' 🔒' : ''), r.x + r.w / 2, r.y + 16, { size: 14, align: 'center', color: on ? '#fff' : lockedTab ? COL.dim : COL.sub });
+    ui.hit(win, 'stab' + i, r, { onClick: () => { win.tab = i; win.page = 0; win.sel = null; } });
+  });
+  const list = skillListFor(st, win.tab);
+  const lx = x + 16, ly = y + 118, lw = 440, RH = 50, PER = 8;
   const pages = Math.max(1, Math.ceil(list.length / PER));
-  pager(ui, ctx, win, x + w - 280, y + 47, pages);
-  if (!list.length) txt(ctx, 'スキルデータがありません', x + w / 2, y + 200, { size: 15, align: 'center', color: COL.dim });
-  const page = list.slice((win.page || 0) * PER, (win.page || 0) * PER + PER);
-  page.forEach((sk, k) => {
-    const r = { x: x + 16, y: y + 84 + k * RH, w: w - 32, h: RH - 6 };
+  pager(ui, ctx, win, lx + lw - 112, y + 82, pages);
+  if (!list.length) {
+    txt(ctx, win.tab === 0 ? 'スキルがありません' : `${win.tab}次転職（Lv.${[0, 10, 30, 60, 100][win.tab]}）で解放`, lx + lw / 2, ly + 140, { size: 15, align: 'center', color: COL.dim });
+    txt(ctx, '頭上の「⬆ 転職できる！」吹き出しから転職ミッションを受注しよう', lx + lw / 2, ly + 168, { size: 12, align: 'center', color: COL.dim, maxW: lw - 20 });
+  }
+  if (!win.sel || !list.some((s) => s.id === win.sel)) win.sel = list[0]?.id || null;
+  list.slice((win.page || 0) * PER, (win.page || 0) * PER + PER).forEach((sk, k) => {
+    const r = { x: lx, y: ly + k * RH, w: lw, h: RH - 5 };
     const lv = st.skills?.[sk.id] || 0, max = sk.maxLevel || 10;
-    const locked = (st.level || 1) < (sk.reqLevel || 0);
-    const hov = ui.hover(win, r);
-    inset(ctx, r.x, r.y, r.w, r.h, { r: 10, fill: win.sel === sk.id ? 'rgba(25,211,197,0.25)' : hov ? 'rgba(123,47,247,0.35)' : 'rgba(6,4,24,0.55)', stroke: win.sel === sk.id ? COL.teal : undefined, lw: win.sel === sk.id ? 2 : 1.5 });
-    drawSkillIco(ctx, sk, r.x + 26, r.y + r.h / 2, 38);
-    if (lv <= 0) { ctx.save(); ctx.globalAlpha = 0.5; ctx.fillStyle = '#000'; rrPath(ctx, r.x + 7, r.y + 5, 38, 38, 8); ctx.fill(); ctx.restore(); }
-    txt(ctx, sk.name, r.x + 54, r.y + 15, { size: 15, color: locked ? COL.dim : '#fff', maxW: 190 });
-    const nameW = Math.min(190, measure(ctx, sk.name, 15));
-    txt(ctx, sk.kind === 'passive' ? 'PASSIVE' : (KIND[sk.kind] || ''), r.x + 62 + nameW, r.y + 15, { size: 10.5, color: sk.kind === 'passive' ? COL.gold : COL.teal, sw: 2.5 });
-    txt(ctx, locked ? `Lv.${sk.reqLevel} で習得可能` : (sk.desc || ''), r.x + 54, r.y + 34, { size: 11.5, color: locked ? COL.bad : COL.sub, maxW: r.w - 54 - 150, sw: 2.5, weight: 700 });
-    // レベル表示
-    txt(ctx, `Lv ${lv}/${max}`, r.x + r.w - 56, r.y + r.h / 2, { size: 14, align: 'right', color: lv >= max ? COL.gold : '#fff' });
-    const can = !locked && (st.sp || 0) > 0 && lv < max;
-    ui.btn(ctx, win, 'learn:' + sk.id, { x: r.x + r.w - 44, y: r.y + 8, w: 34, h: 32 }, '+', () => {
-      const ok = doLearn(g, sk.id); // 失敗理由の通知は learnSkill 側
+    const lock = jobLockOf(st, sk.id);
+    const lvLocked = (st.level || 1) < (sk.reqLevel || 0);
+    const locked = !!lock || lvLocked;
+    const hov = ui.hover(win, r), on = win.sel === sk.id;
+    inset(ctx, r.x, r.y, r.w, r.h, { r: 10, fill: on ? 'rgba(25,211,197,0.25)' : hov ? 'rgba(123,47,247,0.35)' : 'rgba(6,4,24,0.55)', stroke: on ? COL.teal : undefined, lw: on ? 2 : 1.5 });
+    ctx.save(); if (locked) ctx.globalAlpha = 0.45;
+    drawSkillIco(ctx, sk, r.x + 25, r.y + r.h / 2, 36);
+    ctx.restore();
+    if (lv <= 0 && !locked) { ctx.save(); ctx.globalAlpha = 0.4; ctx.fillStyle = '#000'; rrPath(ctx, r.x + 7, r.y + 4, 36, 36, 8); ctx.fill(); ctx.restore(); }
+    if (lock) txt(ctx, '🔒', r.x + 36, r.y + 34, { size: 12, align: 'center', stroke: false });
+    txt(ctx, sk.name, r.x + 52, r.y + 14, { size: 14.5, color: locked ? COL.dim : '#fff', maxW: 190 });
+    const nameW = Math.min(190, measure(ctx, sk.name, 14.5));
+    const kl = kindLabel(sk);
+    txt(ctx, kl, r.x + 60 + nameW, r.y + 14, { size: 10.5, color: sk.kind === 'passive' ? COL.gold : sk.kind === 'move' ? '#7fe9ff' : COL.teal, sw: 2.5 });
+    const sub = lock ? `「${lock.jobName}」に転職で習得` : lvLocked ? `Lv.${sk.reqLevel} で習得可能` : (sk.desc || '');
+    txt(ctx, sub, r.x + 52, r.y + 32, { size: 11, color: lock || lvLocked ? COL.bad : COL.sub, maxW: r.w - 52 - 120, sw: 2.5, weight: 700 });
+    txt(ctx, `Lv ${lv}/${max}`, r.x + r.w - 52, r.y + r.h / 2, { size: 13.5, align: 'right', color: lv >= max ? COL.gold : '#fff' });
+    const pool = skillSpTier(sk);
+    const can = !locked && getSp(st, pool) > 0 && lv < max;
+    ui.btn(ctx, win, 'learn:' + sk.id, { x: r.x + r.w - 42, y: r.y + 7, w: 34, h: 31 }, '+', () => {
+      const ok = doLearn(g, sk.id);
       if (ok) ui.notify(`${sk.name} が Lv${(st.skills?.[sk.id] || 0)} になった！`, COL.gold);
     }, { disabled: !can, color: COL.orange, size: 20 });
     if (hov) ui.setTip(skillTip(g, sk));
-    ui.hit(win, 'sk:' + sk.id, { x: r.x, y: r.y, w: r.w - 50, h: r.h }, {
-      onClick: () => { win.sel = sk.id; },
+    ui.hit(win, 'sk:' + sk.id, { x: r.x, y: r.y, w: r.w - 48, h: r.h }, {
+      onClick: () => { win.sel = sk.id; win.pvT = t; },
       onDbl: () => {
         const bar = st.skillBar || [];
-        const e = [0, 1, 2, 3].find((i) => !bar[i]);
+        const e = Array.from({ length: SKILL_BAR_SIZE }, (_, i) => i).find((i) => !bar[i]);
         ui.assignSkill(sk.id, e ?? 0);
       },
       drag: lv > 0 && sk.kind !== 'passive' ? { kind: 'skill', id: sk.id } : null,
     });
   });
-  // スキルバー登録
-  const by = y + h - 82;
-  inset(ctx, x + 16, by, w - 32, 68, { r: 12, fill: 'rgba(25,211,197,0.10)', stroke: 'rgba(25,211,197,0.5)' });
+  // 右: プレビュー＋詳細
+  const px = x + 472, pw = w - 472 - 16, py = y + 118;
   const sel = skillDef(win.sel);
+  drawSkillPreview(ctx, sel, { x: px, y: py, w: pw, h: 196 }, t - (win.pvT || 0), charLook(st), equipLooks(st), {
+    mult: guard('pv.mult', () => (typeof sel?.mult === 'function' ? sel.mult(Math.max(1, st.skills?.[sel?.id] || 1)) : sel?.mult), 1) || 1,
+    arrival: !!(sel?.kind === 'move' && moveParams(st, sel.id, Math.max(1, st.skills?.[sel.id] || 1))?.arrivalBlast),
+  });
+  txt(ctx, '▶ 動きのプレビュー', px + 10, py + 14, { size: 11, color: '#ffe3f0', sw: 2.5 });
+  const dy = py + 206, dh = y + h - 96 - dy;
+  inset(ctx, px, dy, pw, dh, { r: 12 });
+  if (sel) {
+    const lv = st.skills?.[sel.id] || 0, l = Math.max(1, lv), max = sel.maxLevel || 10;
+    let yy = dy + 20;
+    txt(ctx, sel.name, px + 14, yy, { size: 17, color: sel.color || COL.teal, maxW: pw - 120 });
+    txt(ctx, `Lv ${lv}/${max}`, px + pw - 14, yy, { size: 14, align: 'right', color: lv >= max ? COL.gold : '#fff' });
+    yy += 22;
+    const reqJ = sel.reqJob ? JOBS[sel.reqJob] : null;
+    txt(ctx, `${kindLabel(sel)}  ・  ${reqJ ? reqJ.name : '基本スキル'}  ・  SP: ${skillSpTier(sel) <= 1 ? '基本+1次' : skillSpTier(sel) + '次'}`, px + 14, yy, { size: 11.5, color: COL.sub, sw: 2.5, maxW: pw - 28 });
+    yy += 20;
+    for (const ln of wrap(ctx, sel.desc || '', pw - 28, 12.5, 700).slice(0, 3)) { txt(ctx, ln, px + 14, yy, { size: 12.5, weight: 700, sw: 2.5 }); yy += 18; }
+    yy += 4;
+    const parts = [];
+    if (sel.kind !== 'passive') {
+      parts.push(`MP ${skillMp(sel, l)}`, `CT ${fmtVal('cd', skillCd(sel, l))}秒`);
+      const mult = guard('skill.mult', () => (typeof sel.mult === 'function' ? sel.mult(l) : sel.mult), null);
+      if (mult) parts.push(`威力 ${Math.round(mult * 100)}%`);
+      if (sel.hits > 1) parts.push(`${sel.hits}ヒット`);
+    }
+    if (sel.kind === 'move') {
+      const mp = moveParams(st, sel.id, l);
+      if (mp) {
+        if (mp.distance) parts.push(`距離 ${Math.round(mp.distance)}px`);
+        if (mp.invuln) parts.push(`無敵 ${mp.invuln}秒`);
+        if (mp.enhancedBy?.length) parts.push(`強化: ${mp.enhancedBy.map((id) => skillDef(id)?.name || id).join('・')}`);
+      }
+    }
+    if (sel.enhances) parts.push(`強化対象: ${skillDef(sel.enhances)?.name || sel.enhances}`);
+    const buf = guard('skill.buff', () => (typeof sel.buff === 'function' ? sel.buff(l) : sel.buff), null);
+    if (buf && typeof buf === 'object') {
+      if (buf.duration) parts.push(`${buf.duration}秒`);
+      for (const [k, v] of Object.entries(buf)) if (k !== 'duration' && typeof v === 'number' && v) parts.push(`${STAT_LABELS[k] || ({ speedPct: '移動速度', atkPct: '攻撃力', attackSpeedPct: '攻撃速度', defPct: '防御', critPct: 'クリ率' }[k]) || k} ${Math.abs(v) < 1 ? '+' + Math.round(v * 100) + '%' : '+' + v}`);
+    }
+    for (const ln of wrap(ctx, (lv ? '現在: ' : 'Lv1: ') + (parts.join('  ') || '—'), pw - 28, 12, 800).slice(0, 3)) { txt(ctx, ln, px + 14, yy, { size: 12, color: '#d8f6ff', sw: 2.5 }); yy += 17; }
+    if (lv > 0 && lv < max && sel.kind !== 'passive') {
+      const m2 = guard('skill.mult', () => (typeof sel.mult === 'function' ? sel.mult(lv + 1) : sel.mult), null);
+      if (m2) txt(ctx, `次Lv: 威力 ${Math.round(m2 * 100)}%  MP ${skillMp(sel, lv + 1)}`, px + 14, yy, { size: 12, color: COL.good, sw: 2.5 });
+    }
+    if (sel.townOk) txt(ctx, '町でも使用可', px + pw - 14, dy + dh - 14, { size: 11, align: 'right', color: COL.good, sw: 2.5 });
+  } else txt(ctx, 'スキルを選ぶと動きを再生します', px + pw / 2, dy + dh / 2, { size: 13, align: 'center', color: COL.dim });
+  // スキルバー登録（8枠）
+  const by = y + h - 84;
+  inset(ctx, x + 16, by, w - 32, 70, { r: 12, fill: 'rgba(25,211,197,0.10)', stroke: 'rgba(25,211,197,0.5)' });
   txt(ctx, 'スキルバー', x + 30, by + 20, { size: 13, color: COL.teal });
-  txt(ctx, sel ? `「${sel.name}」をクリックした枠へ` : 'スキルを選んで枠をクリック', x + 30, by + 46, { size: 11.5, color: COL.sub, maxW: 190, weight: 700 });
-  for (let i = 0; i < 4; i++) {
-    const r = { x: x + w - 32 - 4 * 58 + i * 58 + 6, y: by + 10, w: 48, h: 48 };
+  txt(ctx, sel && sel.kind !== 'passive' ? `「${sel.name}」をクリックした枠へ` : 'ドラッグ or 選んで枠をクリック', x + 30, by + 46, { size: 11, color: COL.sub, maxW: 190, weight: 700 });
+  const n = SKILL_BAR_SIZE, sw = 56;
+  for (let i = 0; i < n; i++) {
+    const r = { x: x + w - 32 - n * sw + i * sw + 8, y: by + 11, w: 48, h: 48 };
     const hov = ui.hover(win, r);
     slotBox(ctx, r, null, { hover: hov });
     const sk = skillDef(st.skillBar?.[i]);
     if (sk) drawSkillIco(ctx, sk, r.x + 24, r.y + 24, 38);
-    txt(ctx, 'ASDF'[i], r.x + 6, r.y + 8, { size: 11, color: COL.teal, sw: 2.5 });
+    ctx.save(); rrPath(ctx, r.x - 3, r.y - 5, 18, 16, 5); ctx.fillStyle = COL.teal; ctx.fill(); ctx.restore();
+    txt(ctx, BAR_KEYS[i], r.x + 6, r.y + 3.5, { size: 11, align: 'center', sw: 2.5 });
     if (hov && sk) ui.setTip(skillTip(g, sk));
     ui.hit(win, 'bar' + i, r, {
       onClick: () => { if (win.sel) ui.assignSkill(win.sel, i); },
       onRight: () => { if (st.skillBar) st.skillBar[i] = null; },
-      onDrop: (p) => { if (p.kind === 'skill') ui.assignSkill(p.id, i); },
+      onDrop: (pl) => { if (pl.kind === 'skill') ui.assignSkill(pl.id, i); },
     });
   }
 }
@@ -447,7 +593,7 @@ function drawStats(ui, ctx, win) {
   const g = ui.game, st = g.state;
   if (!st) return;
   const { x, y, w } = win;
-  txt(ctx, `${HERO_NAMES[st.heroId] || ''}   Lv.${st.level || 1}`, x + 20, y + 60, { size: 15 });
+  txt(ctx, `${charName(st)}   Lv.${st.level || 1}`, x + 20, y + 60, { size: 15 });
   ctx.save();
   rrPath(ctx, x + w - 140, y + 46, 122, 28, 14);
   ctx.fillStyle = (st.ap || 0) > 0 ? 'rgba(255,212,71,0.25)' : 'rgba(0,0,0,0.4)'; ctx.fill();
@@ -487,6 +633,16 @@ function drawStats(ui, ctx, win) {
     v = k === 'weaponType' ? (WT[v] || v || '素手') : fmtVal(k, v ?? 0);
     txt(ctx, v, cx + cw - 16, cy, { size: 13.5, align: 'right' });
   });
+  // 職業と転職履歴
+  const jy = dy + 32 + 6 * 25 + 4;
+  const job = currentJob(st);
+  inset(ctx, x + 16, jy, w - 32, 84, { r: 10 });
+  txt(ctx, '◆ 職業', x + 28, jy + 16, { size: 13, color: COL.pink });
+  txt(ctx, `${job?.name || '見習い'}（${job?.title || ''}）`, x + 88, jy + 16, { size: 13.5, color: job?.aura || '#fff', maxW: w - 120 });
+  txt(ctx, `クラス: ${classOf(st.heroId)?.name || ''}`, x + w - 28, jy + 16, { size: 11, align: 'right', color: COL.sub, sw: 2.5 });
+  const hist = Array.isArray(st.job?.history) ? st.job.history : [];
+  const chain = ['見習い', ...hist.map((e) => `${JOBS[e.id]?.name || e.id}${e.level ? `(Lv${e.level})` : ''}`)].join(' → ');
+  for (const [i, ln] of wrap(ctx, '転職履歴: ' + chain, w - 56, 11.5, 700).slice(0, 3).entries()) txt(ctx, ln, x + 28, jy + 38 + i * 16, { size: 11.5, color: COL.sub, weight: 700, sw: 2.5 });
 }
 function refreshPlayerStats(g) {
   const v = computeStatsRaw(g.state);
@@ -498,11 +654,12 @@ function refreshPlayerStats(g) {
   guard('emit', () => g.events?.emit?.('statsChanged', {}));
 }
 
-// ======================= ミッション =======================
+// ======================= ミッション（クエストナビ） =======================
 function drawMissions(ui, ctx, win) {
   const g = ui.game, st = g.state;
   if (!st) return;
   const { x, y, w, h } = win;
+  const t = g.time || 0;
   const M = st.missions || { active: [], completed: [] };
   tabs(ui, ctx, win, x + 16, y + 46, ['進行中', '受注可能', '完了']);
   const all = Object.values(allMissions()).filter(Boolean);
@@ -510,46 +667,98 @@ function drawMissions(ui, ctx, win) {
   if (win.tab === 0) ids = (M.active || []).slice();
   else if (win.tab === 2) ids = (M.completed || []).slice();
   else {
-    ids = all.filter((m) => !(M.active || []).includes(m.id) && !(M.completed || []).includes(m.id) &&
+    ids = all.filter((m) => m.type !== 'job' && !(M.active || []).includes(m.id) && !(M.completed || []).includes(m.id) &&
       guard('canAccept', () => g.missions?.canAccept?.(m.id), (st.level || 1) >= (m.reqLevel || 0)) !== false).map((m) => m.id);
   }
-  const lx = x + 16, ly = y + 86, lw = 232, RH = 40, PER = 9;
+  const lx = x + 16, ly = y + 86, lw = 260, RH = 40, PER = Math.floor((h - 102) / RH);
   const pages = Math.max(1, Math.ceil(ids.length / PER));
   win.page = clamp(win.page || 0, 0, pages - 1);
-  pager(ui, ctx, win, x + w - 130, y + 48, pages);
+  pager(ui, ctx, win, x + 16 + 3 * 106, y + 48, pages);
   if (win.sel == null || !ids.includes(win.sel)) win.sel = ids[0] ?? null;
+  const tracked = trackedMissionId(g);
   ids.slice(win.page * PER, win.page * PER + PER).forEach((id, k) => {
     const m = missionDef(id);
     const r = { x: lx, y: ly + k * RH, w: lw, h: RH - 5 };
     const on = win.sel === id, hov = ui.hover(win, r);
     inset(ctx, r.x, r.y, r.w, r.h, { r: 9, fill: on ? 'rgba(255,95,162,0.3)' : hov ? 'rgba(123,47,247,0.35)' : 'rgba(6,4,24,0.55)', stroke: on ? '#fff' : undefined });
     const done = win.tab === 0 && guard('isComplete', () => g.missions?.isComplete?.(id), false);
-    txt(ctx, (win.tab === 2 ? '✔ ' : done ? '？ ' : win.tab === 1 ? '！ ' : '◆ ') + (m?.name || id), r.x + 10, r.y + r.h / 2, {
-      size: 13.5, color: win.tab === 2 ? COL.dim : done ? '#c6ff6a' : win.tab === 1 ? COL.gold : '#fff', maxW: lw - 20,
+    const cat = m?.type === 'job' ? '#ff6ad5' : m?.category === 'main' ? COL.gold : m?.daily ? COL.good : '#7fe9ff';
+    ctx.save(); rrPath(ctx, r.x + 4, r.y + 6, 4, r.h - 12, 2); ctx.fillStyle = cat; ctx.fill(); ctx.restore();
+    const mark = win.tab === 2 ? '✔ ' : done ? '？ ' : win.tab === 1 ? '！ ' : (tracked === id ? '⌖ ' : '◆ ');
+    txt(ctx, mark + (m?.name || id), r.x + 14, r.y + r.h / 2, {
+      size: 13.5, color: win.tab === 2 ? COL.dim : done ? '#c6ff6a' : win.tab === 1 ? COL.gold : tracked === id ? '#7fe9ff' : '#fff', maxW: lw - 24,
     });
     ui.hit(win, 'm:' + id, r, { onClick: () => { win.sel = id; } });
   });
   // 詳細
-  const dx = x + 16 + lw + 12, dw = x + w - 16 - dx, dy = y + 86, dh = y + h - 16 - dy;
+  const dx = lx + lw + 12, dw = x + w - 16 - dx, dy = ly, dh = y + h - 16 - dy;
   inset(ctx, dx, dy, dw, dh, { r: 12 });
-  // 空の時の案内は詳細パネルの中央に（以前は窓の中央に描いて詳細パネルの枠に隠れていた）
   if (!ids.length) txt(ctx, ['進行中のミッションはありません', '受注できるミッションはありません', 'まだ完了したミッションはありません'][win.tab], dx + dw / 2, dy + dh / 2, { size: 15, align: 'center', color: COL.dim, maxW: dw - 24 });
   const m = missionDef(win.sel);
   if (!m) return;
   let yy = dy + 22;
-  txt(ctx, m.name, dx + 16, yy, { size: 18, color: COL.gold, maxW: dw - 32 }); yy += 24;
+  txt(ctx, m.name, dx + 16, yy, { size: 18, color: m.type === 'job' ? '#ff9ad5' : COL.gold, maxW: dw - 32 }); yy += 24;
   const giver = findNpcName(g, m.giver);
-  txt(ctx, `依頼人: ${giver}   推奨Lv ${m.reqLevel || 1}`, dx + 16, yy, { size: 12, color: COL.sub, sw: 2.5 }); yy += 22;
-  for (const l of wrap(ctx, m.desc || '', dw - 32, 13, 700).slice(0, 5)) { txt(ctx, l, dx + 16, yy, { size: 13, weight: 700, sw: 2.5 }); yy += 19; }
-  yy += 8;
-  txt(ctx, '◆ 目標', dx + 16, yy, { size: 14, color: COL.teal }); yy += 22;
-  const tr = win.tab === 0 ? (guard('tracked', () => g.missions?.tracked?.(), []) || []).find((e) => e.name === m.name) : null;
-  const objLines = tr?.lines?.length ? tr.lines : (m.objectives || []).map((o) => o.text || `${o.type} ${o.target || ''} ×${o.count || 1}`);
-  for (const l of objLines.slice(0, 5)) { txt(ctx, (/^[✔→]/.test(l) ? '' : '・') + stripMark(l), dx + 22, yy, { size: 13, maxW: dw - 40, weight: 700, sw: 2.5, color: win.tab === 2 ? COL.dim : '#fff' }); yy += 20; }
-  yy += 8;
-  const rw = m.reward || {};
-  txt(ctx, '◆ 報酬', dx + 16, yy, { size: 14, color: COL.pink }); yy += 22;
-  txt(ctx, rewardText(rw), dx + 22, yy, { size: 13, color: COL.gold, maxW: dw - 40, sw: 2.5 });
+  const tn = turnInNpc(m);
+  const giverMap = MISSION_NPCS[m.giver]?.mapId;
+  txt(ctx, `依頼人: ${giver}${giverMap ? `（${mapInfo(giverMap).name}）` : ''}   報告: ${findNpcName(g, tn)}   推奨Lv ${m.reqLevel || 1}`, dx + 16, yy, { size: 11.5, color: COL.sub, sw: 2.5, maxW: dw - 32 }); yy += 20;
+  for (const l of wrap(ctx, m.desc || '', dw - 32, 12.5, 700).slice(0, 2)) { txt(ctx, l, dx + 16, yy, { size: 12.5, weight: 700, sw: 2.5 }); yy += 18; }
+  yy += 6;
+  txt(ctx, '◆ 目標とナビ', dx + 16, yy, { size: 14, color: COL.teal }); yy += 12;
+  const active = (M.active || []).includes(m.id);
+  const guide = missionGuide(g, m.id);
+  const vals = active ? (guard('objValues', () => g.missions?.objectiveValues?.(m.id), null) || []) : [];
+  const complete = active && guard('isComplete', () => g.missions?.isComplete?.(m.id), false);
+  const rowsMax = Math.min(guide.length || (m.objectives || []).length, 4);
+  const objs = m.objectives || [];
+  for (let i = 0; i < rowsMax; i++) {
+    const gd = guide[i] || {};
+    const o = objs[gd.objIndex ?? i] || {};
+    const v = Math.min(vals[gd.objIndex ?? i] ?? gd.value ?? 0, o.count || 1);
+    const dn = win.tab === 2 || gd.done || (active && v >= (o.count || 1)) || (complete && o.type === 'talk');
+    const r = { x: dx + 10, y: yy, w: dw - 20, h: 50 };
+    inset(ctx, r.x, r.y, r.w, r.h, { r: 9, fill: dn ? 'rgba(124,255,155,0.08)' : 'rgba(6,4,24,0.5)', stroke: dn ? 'rgba(124,255,155,0.45)' : undefined });
+    txt(ctx, (dn ? '✔ ' : '・') + (gd.text || o.text || o.type), r.x + 10, r.y + 15, { size: 13, color: dn ? '#c6ff6a' : '#fff', maxW: r.w - 90, sw: 2.5 });
+    if ((o.count || 1) > 1 || o.type === 'drive') txt(ctx, `${Math.floor(v)} / ${o.count}`, r.x + r.w - 10, r.y + 15, { size: 13, align: 'right', color: dn ? '#c6ff6a' : COL.gold });
+    const info = [];
+    if (gd.mapName || gd.mapId) { const mi = mapInfo(gd.mapId); info.push(`📍 ${gd.mapName || mi.name}${mi.levelRange ? ` Lv${mi.levelRange[0]}-${mi.levelRange[1]}` : mi.town ? '（町）' : ''}`); }
+    if (gd.npcName) info.push(`💬 ${gd.npcName}${gd.npcMapId ? `（${mapInfo(gd.npcMapId).name}）` : ''}`);
+    else if (gd.targetName && o.type !== 'reach') info.push(`${o.type === 'collect' ? '🎁' : '⚔'} ${gd.targetName}`);
+    if (gd.route?.length > 1 && !dn) info.push(`🧭 ${gd.route.length - 1}マップ先`);
+    txt(ctx, info.join('   '), r.x + 18, r.y + 35, { size: 11, color: COL.sub, maxW: r.w - 28, sw: 2.5, weight: 700 });
+    yy += 54;
+  }
+  if (complete) { txt(ctx, `→ ${findNpcName(g, tn)} に報告しよう${MISSION_NPCS[tn]?.mapId ? `（${mapInfo(MISSION_NPCS[tn].mapId).name}）` : ''}`, dx + 16, yy + 8, { size: 13, color: COL.gold, maxW: dw - 32 }); yy += 22; }
+  // 報酬
+  yy = Math.max(yy + 6, dy + dh - 104);
+  txt(ctx, '◆ 報酬', dx + 16, yy, { size: 14, color: COL.pink });
+  txt(ctx, rewardText(m.reward || {}), dx + 80, yy, { size: 12.5, color: COL.gold, maxW: dw - 96, sw: 2.5 });
+  if (m.choices?.length) txt(ctx, `※ 選択肢で結末が変わる（${m.choices.map((c) => c.text).join(' / ')}）`, dx + 16, yy + 20, { size: 11, color: '#ffd6e8', maxW: dw - 32, sw: 2.5 });
+  // ボタン
+  const by = dy + dh - 58;
+  const targets = guide.filter((e) => !e.done).map((e) => e.mapId || e.npcMapId).filter(Boolean);
+  const dest = complete ? MISSION_NPCS[tn]?.mapId : targets[0];
+  const route = complete ? routeTo(g, dest) : (guide.find((e) => !e.done && e.route?.length)?.route || (dest ? routeTo(g, dest) : []));
+  ui.btn(ctx, win, 'wmShow', { x: dx + 12, y: by, w: 220, h: 44 }, '🗺 ワールドマップで表示', () => {
+    ui.open('worldmap', { focus: { missionId: m.id, name: m.name, maps: complete ? [dest].filter(Boolean) : Array.from(new Set(targets.length ? targets : guide.map((e) => e.mapId).filter(Boolean))), route, dest } });
+  }, { color: '#109f95', size: 14, disabled: !(targets.length || dest || guide.some((e) => e.mapId)) });
+  if (active) {
+    const isT = tracked === m.id;
+    ui.btn(ctx, win, 'track', { x: dx + 242, y: by, w: 170, h: 44 }, isT ? '⌖ ナビ追跡中' : '⌖ ナビで追跡', () => { setTracked(g, m.id); ui.notify(`ナビ: 「${m.name}」を追跡`, '#7fe9ff'); }, { color: isT ? '#c98a1a' : COL.purple, size: 14, active: isT });
+    if (m.type !== 'job' && m.category !== 'main') {
+      ui.btn(ctx, win, 'abandon', { x: dx + dw - 112, y: by, w: 100, h: 44 }, '破棄', () => {
+        win.confirm = { id: m.id };
+      }, { color: '#8a2a4a', size: 13 });
+    }
+  }
+  if (win.confirm) {
+    ctx.save(); rrPath(ctx, dx, dy, dw, dh, 12); ctx.fillStyle = 'rgba(6,2,20,0.85)'; ctx.fill(); ctx.restore();
+    txt(ctx, `「${missionDef(win.confirm.id)?.name}」を破棄しますか？`, dx + dw / 2, dy + dh / 2 - 30, { size: 15, align: 'center', maxW: dw - 30 });
+    txt(ctx, '進捗はリセットされます（あとで受け直せます）', dx + dw / 2, dy + dh / 2 - 4, { size: 12, align: 'center', color: COL.sub });
+    ui.btn(ctx, win, 'abYes', { x: dx + dw / 2 - 170, y: dy + dh / 2 + 20, w: 160, h: 40 }, '破棄する', () => { guard('abandon', () => g.missions?.abandon?.(win.confirm.id)); win.confirm = null; }, { color: '#c02a52', size: 14 });
+    ui.btn(ctx, win, 'abNo', { x: dx + dw / 2 + 10, y: dy + dh / 2 + 20, w: 160, h: 40 }, 'やめる', () => { win.confirm = null; }, { color: COL.purple, size: 14 });
+  }
+  void t;
 }
 function findNpcName(g, id) {
   if (!id) return '???';
@@ -607,12 +816,42 @@ function npcMissions(ui, npc) {
   const order = { report: 0, offer: 1, active: 2 };
   return out.sort((a, b) => order[a.status] - order[b.status]);
 }
+// ストーリー分岐: m.choices = [{id, text, reward, flag, dialog?}] を会話窓の選択肢に出し MissionManager.choose で確定
+function chosenOf(g, id) {
+  const ms = g.state?.missions;
+  return guard('chosen', () => g.missions?.chosen?.(id), null) ?? ms?.choices?.[id] ?? ms?.choice?.[id] ?? null;
+}
+function askChoice(ui, win, m) {
+  const g = ui.game;
+  say(win, m.dialog?.choice?.length ? m.dialog.choice : (m.choicePrompt ? [m.choicePrompt] : ['……で、どうする？ ここが分かれ道だぜ。']), () => {
+    win.brief = { ...m, desc: '選んだ道でセリフ・報酬・称号が変わる。', objectives: [] };
+    win.opts = m.choices.map((c) => ({
+      label: '▷ ' + c.text, color: COL.gold, fn: () => {
+        win.brief = null;
+        const r = guard('choose', () => g.missions?.choose?.(m.id, c.id), null);
+        if (r === false || r?.ok === false) { ui.notify(r?.msg || '選べませんでした', COL.bad); menu(ui, win); return; }
+        const ms = g.state?.missions;
+        if (ms && r == null) (ms.choices ||= {})[m.id] = c.id; // choose 未実装時の保険
+        const stillActive = (g.state?.missions?.active || []).includes(m.id);
+        let rw = r?.reward || null;
+        if (stillActive && guard('isComplete', () => g.missions?.isComplete?.(m.id), false)) rw = guard('turnIn', () => g.missions?.turnIn?.(m.id), null) || rw;
+        say(win, c.dialog?.length ? c.dialog : (m.dialog?.done?.length ? m.dialog.done : ['……そうか。それがお前の答えか。']), () => {
+          win.reward = { ...m, reward: c.reward || m.reward };
+          win.opts = [{ label: 'OK', fn: () => { win.reward = null; say(win, ['また頼むぜ。'], null); } }];
+        });
+        void rw;
+      },
+    }));
+    win.opts.push({ label: 'もう少し考える', color: COL.dim, fn: () => { win.brief = null; menu(ui, win); } });
+  });
+}
 function menu(ui, win) {
   const g = ui.game, npc = npcOf(win);
   const opts = [];
   for (const { m, status } of npcMissions(ui, npc)) {
     if (status === 'report') {
       opts.push({ label: '？ 報告: ' + m.name, color: '#c6ff6a', fn: () => {
+        if (m.choices?.length && !chosenOf(g, m.id)) { askChoice(ui, win, m); return; }
         const res = guard('turnIn', () => g.missions?.turnIn?.(m.id), null);
         if (res === false) { ui.notify('まだ報告できません', COL.bad); return; } // 成功通知は MissionManager 側
         say(win, m.dialog?.done?.length ? m.dialog.done : ['よくやってくれた！'], () => {
@@ -655,8 +894,8 @@ export function dialogKey(ui, win, P, eat) {
     if (P('up')) win.optSel = (win.optSel - 1 + win.opts.length) % win.opts.length;
     if (P('down')) win.optSel = (win.optSel + 1) % win.opts.length;
     if (P('confirm') || P('interact')) { eat('confirm'); eat('interact'); win.opts[win.optSel]?.fn(); }
-  } else if (P('confirm') || P('interact') || P('jump')) {
-    eat('confirm'); eat('interact');
+  } else if (P('confirm') || P('interact') || P('jump') || P('talk')) {
+    eat('confirm'); eat('interact'); eat('talk');
     advance(ui, win);
   }
 }

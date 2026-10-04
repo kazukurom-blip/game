@@ -8,6 +8,7 @@ import {
   mapInfo, worldGraph, visitedSet, regionColor, REGIONS, REGION_BY_ID, taxiFareOf, doTaxi, OPT, bookList, bookKills,
   bookRankOf, bookBonusOf, itemKnown, drawEnemyArt, snsTitleOf, taxiCheck,
 } from './deps.js';
+import { charLook, charName } from './v3deps.js';
 import { audio } from '../audio/audio.js';
 
 const W = 1280, H = 720;
@@ -157,6 +158,12 @@ export function drawWorldMap(ui, ctx, win) {
     else if ([...adj[id]].some((n) => visited.has(n))) state[id] = 'near';
     else state[id] = 'hidden';
   }
+  // v3: クエスト目的地のフォーカス（点滅・ルート強調。未訪問でも名前を出す）
+  const F = win.data?.focus || null;
+  const fset = new Set((F?.maps || []).filter((id) => pos[id]));
+  const route = (F?.route || []).filter((id) => pos[id]);
+  const rset = new Set(route);
+  for (const id of [...fset, ...route]) if (state[id] === 'hidden') state[id] = 'near';
   // マップ領域
   const ax = x + 16, ay = y + 44, aw = w - 32, ah = h - 44 - 62;
   const pad = 46;
@@ -224,6 +231,27 @@ export function drawWorldMap(ui, ctx, win) {
     }
     ctx.restore();
   }
+  // v3: ルート強調
+  if (route.length > 1) {
+    ctx.save();
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.beginPath();
+    route.forEach((id, i) => { const p = P(id); if (i) ctx.lineTo(p.x, p.y); else ctx.moveTo(p.x, p.y); });
+    ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.lineWidth = 12; ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,212,71,0.95)'; ctx.lineWidth = 6; ctx.shadowColor = '#ffd447'; ctx.shadowBlur = 16; ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.setLineDash([4, 16]); ctx.lineDashOffset = -t * 40; ctx.strokeStyle = '#fff'; ctx.lineWidth = 3.5; ctx.stroke();
+    ctx.restore();
+    // 矢印（各区間の中点）
+    for (let i = 1; i < route.length; i++) {
+      const a = P(route[i - 1]), b = P(route[i]);
+      const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, ang = Math.atan2(b.y - a.y, b.x - a.x);
+      ctx.save(); ctx.translate(mx, my); ctx.rotate(ang);
+      ctx.fillStyle = '#ffd447'; ctx.strokeStyle = '#3a2000'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(9, 0); ctx.lineTo(-6, -7); ctx.lineTo(-6, 7); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.restore();
+    }
+  }
   // ノード
   let hovId = null;
   const confirmOpen = !!win.confirm;
@@ -242,7 +270,25 @@ export function drawWorldMap(ui, ctx, win) {
     const hov = !confirmOpen && ui.hover(win, hr);
     if (hov) hovId = id;
     ctx.save();
-    if (s === 'near') {
+    const focused = fset.has(id);
+    if (focused || rset.has(id)) {
+      const blink = 0.5 + 0.5 * Math.sin(t * 7);
+      ctx.save();
+      ctx.lineWidth = focused ? 4 : 2; ctx.strokeStyle = focused ? `rgba(255,95,162,${0.4 + blink * 0.6})` : 'rgba(255,212,71,0.6)';
+      ctx.shadowColor = focused ? '#ff5fa2' : '#ffd447'; ctx.shadowBlur = focused ? 22 : 8;
+      ctx.beginPath(); ctx.arc(p.x, p.y, r + (focused ? 10 + blink * 8 : 5), 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+    }
+    if (s === 'near' && focused) {
+      ctx.fillStyle = 'rgba(80,20,60,0.95)';
+      ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2); ctx.fill();
+      ctx.lineWidth = 2.5; ctx.strokeStyle = '#ff5fa2'; ctx.stroke();
+      ctx.restore();
+      txt(ctx, '!', p.x, p.y + 1, { size: 14, align: 'center', color: '#fff', sw: 2 });
+      txt(ctx, mi.name, p.x, p.y + r + 12, { size: 12, align: 'center', color: '#ffd6e8', sw: 3 });
+      const lr0 = mi.levelRange;
+      if (lr0) txt(ctx, `Lv${lr0[0]}-${lr0[1]}`, p.x, p.y + r + 26, { size: 10, align: 'center', color: COL.pink, sw: 2.5 });
+    } else if (s === 'near') {
       ctx.fillStyle = 'rgba(20,16,50,0.9)';
       ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2); ctx.fill();
       ctx.setLineDash([3, 3]); ctx.lineWidth = 2; ctx.strokeStyle = hov ? '#fff' : 'rgba(255,255,255,0.55)'; ctx.stroke();
@@ -292,9 +338,17 @@ export function drawWorldMap(ui, ctx, win) {
       ctx.fillStyle = '#ffe14d'; ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = '#fff'; ctx.stroke();
       ctx.beginPath(); ctx.moveTo(p.x - 7, p.y - r - 10 + bob); ctx.lineTo(p.x + 7, p.y - r - 10 + bob); ctx.lineTo(p.x, p.y - r - 1 + bob); ctx.closePath(); ctx.fill();
       ctx.beginPath(); ctx.arc(p.x, p.y - r - 26 + bob, 17, 0, Math.PI * 2); ctx.clip();
-      drawChar(ctx, p.x, p.y - r - 26 + bob + 34, heroLook(st.heroId), equipLooks(st), { facing: 1, state: 'idle', t, attackT: 0, damage: 0, scale: 0.62 });
+      drawChar(ctx, p.x, p.y - r - 26 + bob + 34, charLook(st), equipLooks(st), { facing: 1, state: 'idle', t, attackT: 0, damage: 0, scale: 0.62 });
       ctx.restore();
       txt(ctx, 'YOU', p.x + 24, p.y - r - 40 + bob, { size: 10, color: '#ffe14d', sw: 3 });
+    }
+    if (focused) {
+      const bob2 = Math.sin(t * 5) * 4;
+      ctx.save();
+      ctx.translate(p.x, p.y - r - (id === cur ? 62 : 20) + bob2);
+      ctx.fillStyle = '#ff5fa2'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-9, -14); ctx.lineTo(9, -14); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.restore();
     }
     if (!confirmOpen) {
       ui.hit(win, 'node:' + id, hr, {
@@ -341,7 +395,12 @@ export function drawWorldMap(ui, ctx, win) {
   const nSeen = ids.filter((i) => state[i] === 'seen').length;
   txt(ctx, `訪問 ${nSeen} / ${ids.length}`, lx + 10, lc, { size: 14, color: COL.gold });
   txt(ctx, `${fmtMoney(st.money || 0)}`, ax + aw - 16, lc, { size: 15, align: 'right', color: COL.money, stroke: COL.moneyShadow, sw: 4 });
-  txt(ctx, '町をクリックでタクシー移動  /  M・Esc で閉じる', ax + aw - 130, lc, { size: 11.5, align: 'right', color: COL.dim, sw: 2.5 });
+  if (F) {
+    const fr = { x: ax + aw - 560, y: ly + 5, w: 420, h: 28 };
+    ctx.save(); rrPath(ctx, fr.x, fr.y, fr.w, fr.h, 14); ctx.fillStyle = 'rgba(255,95,162,0.3)'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = COL.pink; ctx.stroke(); ctx.restore();
+    const dn = F.dest ? mapInfo(F.dest).name : (F.maps || []).map((id) => mapInfo(id).name).join('・');
+    txt(ctx, `⌖ ${F.name || 'クエスト'} → ${dn}${route.length > 1 ? `（${route.length - 1}マップ先）` : ''}`, fr.x + 12, fr.y + 14.5, { size: 12, color: '#fff', sw: 2.5, maxW: fr.w - 24 });
+  } else txt(ctx, '町をクリックでタクシー移動  /  M・Esc で閉じる', ax + aw - 130, lc, { size: 11.5, align: 'right', color: COL.dim, sw: 2.5 });
 
   // ホバー詳細
   if (hovId && !confirmOpen) ui.setTip(nodeTip(g, hovId, state[hovId], cur));
@@ -806,10 +865,10 @@ export function drawPhone(ui, ctx, win) {
   ctx.fillStyle = 'rgba(255,95,162,0.25)'; ctx.fill();
   ctx.lineWidth = 3; ctx.strokeStyle = rainbowGrad(ctx, sx + 20, py0, sx + 80, py0 + 68, t * 0.3); ctx.stroke();
   ctx.beginPath(); ctx.arc(sx + 50, py0 + 34, 27, 0, Math.PI * 2); ctx.clip();
-  drawChar(ctx, sx + 50, py0 + 34 + 72, heroLook(st.heroId), equipLooks(st), { facing: 1, state: 'idle', t, attackT: 0, damage: 0, scale: 1.05 });
+  drawChar(ctx, sx + 50, py0 + 34 + 72, charLook(st), equipLooks(st), { facing: 1, state: 'idle', t, attackT: 0, damage: 0, scale: 1.05 });
   ctx.restore();
   const handle = '@' + (st.heroId || 'hero') + '_vicebay';
-  txt(ctx, HERO_NAMES[st.heroId] || 'HERO', sx + 92, py0 + 14, { size: 16 });
+  txt(ctx, charName(st) || 'HERO', sx + 92, py0 + 14, { size: 16 });
   txt(ctx, handle, sx + 92, py0 + 33, { size: 11, color: COL.sub, sw: 2 });
   const title = snsTitleOf(st);
   if (title.name) {

@@ -77,6 +77,7 @@ const game = {
     if (!map) { console.warn('unknown map', mapId); return; }
     this.map = map;
     this.state.mapId = mapId;
+    if (map.town && !map.instance) this.state.lastTownId = mapId;
     this.enemies.length = 0; this.projectiles.length = 0; this.drops.length = 0; this.effects.length = 0;
     this.npcs = (map.npcs || []).map((n) => new NPC(this, n));
     this.vehicles = (map.vehicles || []).map((v) => new Vehicle(this, v));
@@ -164,7 +165,10 @@ function startGame(choice) {
   if (!(state.hp > 0)) state.hp = st.maxHp;
   if (!(state.mp >= 0)) state.mp = st.maxMp;
   game.scene = 'play';
-  game.changeMap(MAPS[state.mapId] ? state.mapId : Object.keys(MAPS)[0]);
+  // タワー/アリーナ/ボス部屋で中断したセーブは最後の町から再開
+  let startMap = MAPS[state.mapId] ? state.mapId : Object.keys(MAPS)[0];
+  if (MAPS[startMap]?.instance) startMap = (state.lastTownId && MAPS[state.lastTownId] && !MAPS[state.lastTownId].instance) ? state.lastTownId : 'beach';
+  game.changeMap(startMap);
   game.notify('←→移動 / Space ジャンプ / X 攻撃 / A S D F Q W G H スキル / V 会話 / E 乗車 / ↑ ポータル', '#ffd166');
 }
 

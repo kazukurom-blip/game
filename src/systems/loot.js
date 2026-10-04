@@ -27,17 +27,20 @@ export function luckMultiplier(luck = 0) {
 }
 
 /**
- * rollDrops(enemyDef, luck) → [{id} | {money:n}]
+ * rollDrops(enemyDef, luck, rng, opts={dropMult, moneyMult}) → [{id} | {money:n}]
  * 装備（equip）にのみルーク補正を強く、それ以外は弱めにかける。
+ * v3: dropMult（潜在ドロップ率・曜日イベント。PET は半分の効果）, moneyMult（潜在所持金・曜日イベント）
  */
-export function rollDrops(enemyDef, luck = 0, rng = Math.random) {
+export function rollDrops(enemyDef, luck = 0, rng = Math.random, opts = {}) {
+  const dm = Number.isFinite(opts.dropMult) && opts.dropMult > 0 ? opts.dropMult : 1;
+  const mm = Number.isFinite(opts.moneyMult) && opts.moneyMult > 0 ? opts.moneyMult : 1;
   const out = [];
   if (!enemyDef) return out;
   const lm = luckMultiplier(luck);
   // お金
   const [mn, mx] = enemyDef.money || [0, 0];
   if (mx > 0 && (enemyDef.boss || rng() < 0.75)) {
-    const amount = Math.round(mn + rng() * (mx - mn));
+    const amount = Math.round((mn + rng() * (mx - mn)) * mm);
     if (enemyDef.boss) {
       // ボスは札束を複数に分けてばらまく
       const n = 5;
@@ -48,7 +51,8 @@ export function rollDrops(enemyDef, luck = 0, rng = Math.random) {
     const it = ITEMS[d.id];
     if (!it) continue;
     // PET は LUK で微増（効果半分）、装備は強め、その他は弱め
-    const mult = it.slot === 'pet' ? 1 + (lm - 1) * 0.5 : it.type === 'equip' ? lm : 1 + (lm - 1) * 0.3;
+    const base = it.slot === 'pet' ? 1 + (lm - 1) * 0.5 : it.type === 'equip' ? lm : 1 + (lm - 1) * 0.3;
+    const mult = base * (it.slot === 'pet' ? 1 + (dm - 1) * 0.5 : dm);
     if (rng() < Math.min(1, d.chance * mult)) out.push({ id: d.id });
   }
   return out;

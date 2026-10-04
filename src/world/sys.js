@@ -11,8 +11,8 @@ import * as balance from '../data/balance.js';
 
 const STATIC = [combat, skills, progression, inventory, jobs, balance];
 const DYN = {};
-// SPEC_V3 §6 で作成が決まっているファイルのみ（存在しない名前は読み込まない）
-const OPTIONAL = ['tower', 'arena', 'bosses', 'daily', 'achievements', 'presets', 'shared', 'guide', 'tune', 'potential'];
+// SPEC_V3 §6 で作成が決まっているファイルのうちワールド側が使うもの（未作成なら 404 になるので増やさない）
+const OPTIONAL = ['tower', 'arena', 'bosses', 'daily', 'petSkills', 'night'];
 
 export const sysReady = Promise.all(OPTIONAL.map((n) =>
   import(`../systems/${n}.js`).then((m) => { DYN[n] = m; }).catch(() => { /* 未作成 */ })));
@@ -57,12 +57,4 @@ export function inHours(hours, clock) {
   const [a, b] = hours;
   const h = ((clock % 24) + 24) % 24;
   return a <= b ? h >= a && h < b : h >= a || h < b;
-}
-
-/** コンボ: systems の comboHit(game, n, enemies) があれば呼ぶ（n = 命中数） */
-export function reportHits(game, hits) {
-  const list = (hits || []).filter(Boolean);
-  if (!list.length) return;
-  const f = sysFn('comboHit', game);
-  if (f) { try { f(game, list.length, list); } catch (e) { /* noop */ } }
 }

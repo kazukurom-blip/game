@@ -17,7 +17,7 @@ const MODAL = new Set(['dialog', 'shop', 'death', 'worldmap', 'menu', 'jobOffer'
 const LAYOUT = {
   inventory: { w: 800, h: 520, title: 'インベントリ', key: 'I', y: 70 }, // 下端が左下の HUD に重ならない高さ
   skills: { w: 860, h: 640, title: 'スキル', key: 'K', y: 8 },
-  stats: { w: 420, h: 510, title: 'ステータス', key: 'T' },
+  stats: { w: 440, h: 610, title: 'ステータス', key: 'T', y: 50 },
   missions: { w: 900, h: 560, title: 'ミッション', key: 'J' },
   dialog: { w: 940, h: 260, title: null, x: (W - 940) / 2, y: H - 290 },
   shop: { w: 780, h: 520, title: 'ショップ' },

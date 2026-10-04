@@ -123,18 +123,38 @@ export function petShouldPick(game, drop) {
   return (RARITY[it.rarity]?.order ?? 0) >= need;
 }
 
-/** 自動売却（inventory.addItem が fromDrop のとき呼ぶ）。売ったら true */
+/**
+ * 自動売却: 拾った（'itemPicked'）common 装備を売値×80%で即 $ 化。売ったら true
+ * （drop.js が addItem 後に emit する itemPicked を attachPetSkills が購読。直前に入った同IDの未強化インスタンスを売る）
+ */
 export function petAutoSellCheck(game, id, qty = 1) {
   const st = game.state;
   const it = ITEMS[id];
   if (!st || !it || it.type !== 'equip' || it.rarity !== 'common' || it.slot === 'pet') return false;
   const ps = petStats(st);
   if (!ps || !ps.skills.includes('autoSell') || !ps.cfg.autoSell) return false;
-  const gain = Math.max(1, Math.floor(sellPrice(id) * 0.8)) * qty;
+  let sold = 0;
+  for (let n = 0; n < qty; n++) {
+    const inv = st.inventory || [];
+    let idx = -1;
+    for (let i = inv.length - 1; i >= 0; i--) if (inv[i] && inv[i].id === id && !inv[i].star && !inv[i].pot) { idx = i; break; }
+    if (idx < 0) break;
+    inv.splice(idx, 1);
+    sold++;
+  }
+  if (!sold) return false;
+  const gain = Math.max(1, Math.floor(sellPrice(id) * 0.8)) * sold;
   st.money = (st.money || 0) + gain;
-  (st.itemsFound ||= {})[id] = true;
-  game.events?.emit('petAutoSell', { id, qty, gain });
+  game.events?.emit('petAutoSell', { id, qty: sold, gain });
   return true;
+}
+
+/** attachPetSkills(game) — itemPicked を購読（petAutoUse が初回に自動で呼ぶので main の呼び出しは任意） */
+export function attachPetSkills(game) {
+  if (game._petSkillsUnsub) return game._petSkillsUnsub;
+  const off = game.events?.on?.('itemPicked', (d) => { if (d?.id) petAutoSellCheck(game, d.id, d.qty || 1); });
+  game._petSkillsUnsub = () => { off?.(); game._petSkillsUnsub = null; };
+  return game._petSkillsUnsub;
 }
 
 function healOf(it, key) { const e = it?.effect || {}; return e.buff ? 0 : (e[key] || 0) + (e[key + 'Pct'] || 0) * 1000; }
@@ -158,6 +178,7 @@ function pickPotion(st, key, prefer) {
 export function petAutoUse(game, dt) {
   const st = game.state;
   const out = { hp: null, mp: null };
+  if (!game._petSkillsUnsub) attachPetSkills(game);
   const petId = st?.equipped?.pet;
   if (!petId || !game.player || game.player.dead || !(st.hp > 0)) return out;
   const a = (game._petAuto ||= { cdHp: 0, cdMp: 0, affT: 0, petId });

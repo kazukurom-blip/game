@@ -6,6 +6,8 @@ import { rectOverlap, entRect } from '../world/physics.js';
 import { spawnEffect } from '../render/effects.js';
 import { computeStats, addBuff, getBuffs, tickBuffs } from './progression.js';
 import { playerAttackArea, calcDamage, newAttackId, setPlayerInvuln } from './combat.js';
+import { updateCombo } from './combo.js';
+import { updateContent } from './content.js';
 
 const cds = {};       // skillId → {left, total}
 let _dash = null;     // 進行中のダッシュ
@@ -73,9 +75,11 @@ export function useSkill(game, skillId) {
   if (mv && mv.groundOnly && p.onGround === false) return false;             // ホイール・ダッシュは地上のみ
 
   st.mp -= mp;
-  const total = mv ? mv.cooldown : sk.cooldown(lv);
-  cds[skillId] = { left: total, total };
   const stats = computeStats(st);
+  // 潜在「スキルCT短縮」（秒。元の CT の半分までしか短縮しない）
+  const base = mv ? mv.cooldown : sk.cooldown(lv);
+  const total = stats.cdr > 0 && base > 0 ? Math.max(base * 0.5, base - stats.cdr) : base;
+  cds[skillId] = { left: total, total };
   const f = p.facing || 1;
   const mult = sk.mult(lv);
 
@@ -160,6 +164,9 @@ export function updateSkills(game, dt) {
     cds[k].left = Math.max(0, cds[k].left - dt);
   }
   tickBuffs(game, dt);
+  // v3: コンボの時間切れ・エンドコンテンツ（ボス/スパイア/アリーナの制限時間）
+  try { updateCombo(game, dt); } catch (e) { /* noop */ }
+  try { updateContent(game, dt); } catch (e) { if (!game._contentErr) { game._contentErr = true; console.warn('[updateContent]', e); } }
 
   if (_dash) {
     const p = game.player;

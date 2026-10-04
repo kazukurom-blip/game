@@ -6,6 +6,10 @@ import { expToNext, MAX_LEVEL } from '../data/balance.js';
 import { bookBonus } from './book.js';
 import { jobBonusOf, newJobState, jobStateOf, newSpByTier, addSp } from '../data/jobs.js';
 import { CLASSES, LEGACY_GENDER, GENDERS, defaultLook, defaultName } from '../data/classes.js';
+import { starBonus, mainStatOf, sumPotLines } from '../data/gear.js';
+import { normalizeInventory } from './inventory.js';
+import { achievementBonus } from './achievements.js';
+import { linkBonus } from './shared.js';
 
 
 // クラス別の基礎値（v3: data/classes.js の CLASSES から生成。heroId = クラスID。name は旧来の既定名）
@@ -55,8 +59,11 @@ export function newState(heroId = 'luna', opts = {}) {
     clock: 9,
     // v3 転職
     job: newJobState(),
+    // v3 エンドコンテンツ（v4 セーブ）
+    ...newV4Fields(),
     version: STATE_VERSION,
   };
+  normalizeInventory(state);
   const s = computeStats(state, []);
   state.hp = s.maxHp;
   state.mp = s.maxMp;
@@ -69,8 +76,30 @@ function padBar(bar) {
   return b;
 }
 
-export const STATE_VERSION = 3; // v3: state.job
+export const STATE_VERSION = 4; // v3: state.job / v4: 装備インスタンス・強化・潜在・エンドコンテンツ
 export function newSnsState() { return { followers: 0, posts: [], milestones: [], totalLikes: 0 }; }
+
+/** v4 で追加したフィールドの初期値（newState / migrateState 共用） */
+export function newV4Fields() {
+  return {
+    equippedInst: {},      // slot → 装備インスタンス {id, uid, star, pot, ...}
+    uidSeq: 0,
+    rngSeed: (Math.random() * 2 ** 32) >>> 0,
+    tuneStats: { tries: 0, success: 0, spent: 0 },
+    potLog: [], potStats: { tries: 0, gradeUps: 0, byGrade: {} },
+    bosses: {},            // bossId → {mode → {ticket, clears, best}}
+    bossTrophies: 0,
+    tower: null,           // systems/tower.js が初期化
+    arena: null,           // systems/arena.js が初期化
+    achv: { done: {}, counters: {}, seen: {} },
+    title: null,           // 選択中の称号ID
+    login: { days: 0, lastDay: null, history: [] },
+    presets: null,         // systems/presets.js が初期化
+    petData: {},
+    storyChoices: {},      // missionId → choiceId
+    trackedMission: null,  // クエストナビで追跡中のミッション
+  };
+}
 
 /**
  * migrateState(state) — 旧セーブ（v1）や欠けたフィールドを補完して返す（破壊的に修正）。
@@ -154,6 +183,17 @@ export function migrateState(state) {
       if (i >= 0 && SKILLS[sid]?.kind !== 'passive' && !state.skillBar.includes(sid)) state.skillBar[i] = sid;
     }
   }
+  // v4: 装備インスタンス（旧セーブの装備エントリに uid/★/潜在を付与し、equippedInst を作る）・エンドコンテンツ
+  const v4 = newV4Fields();
+  for (const [k, v] of Object.entries(v4)) {
+    const cur = state[k];
+    if (cur === undefined || (v !== null && typeof v === 'object' && (typeof cur !== 'object' || cur === null || Array.isArray(v) !== Array.isArray(cur)))) state[k] = v;
+  }
+  if (!Number.isInteger(state.uidSeq) || state.uidSeq < 0) state.uidSeq = 0;
+  if (!Number.isInteger(state.rngSeed)) state.rngSeed = v4.rngSeed;
+  for (const k of ['done', 'counters', 'seen']) if (!state.achv[k] || typeof state.achv[k] !== 'object') state.achv[k] = {};
+  if (state.potLog.length > 50) state.potLog = state.potLog.slice(-50);
+  normalizeInventory(state);
   const s = computeStats(state, []);
   state.hp = Math.max(0, Math.min(num(state.hp, s.maxHp), s.maxHp));
   state.mp = Math.max(0, Math.min(num(state.mp, s.maxMp), s.maxMp));
@@ -179,13 +219,28 @@ export function computeStats(state, buffs) {
   // 装備合計
   const eq = { atk: 0, def: 0, maxHp: 0, maxMp: 0, speed: 0, crit: 0, str: 0, dex: 0, int: 0, luk: 0 };
   let weapon = null, petItem = null;
-  for (const id of Object.values(state.equipped || {})) {
+  const pot = {}; // 潜在の合計（data/gear.js POT_LINES の stat キー）
+  const stars = {};
+  for (const [slot, id] of Object.entries(state.equipped || {})) {
     const it = id && ITEMS[id];
     if (!it || !it.stats) continue;
     for (const k in eq) eq[k] += it.stats[k] || 0;
     if (it.slot === 'weapon') weapon = it;
     if (it.slot === 'pet') petItem = it;
+    // v4: ★強化と潜在（equippedInst が equipped と一致する時のみ）
+    const inst = state.equippedInst?.[slot];
+    if (inst && inst.id === id) {
+      if (inst.star > 0) {
+        stars[slot] = inst.star;
+        const sb = starBonus(it, inst.star, state.heroId);
+        for (const k in sb) eq[k] += sb[k];
+      }
+      if (inst.pot) sumPotLines(inst.pot.lines, pot);
+    }
   }
+  // v4: 実績ランク・キャラ間リンク（全ステ・各種％）
+  const ab = achievementBonus(state);
+  const lb = linkBonus(state);
 
   // パッシブ
   const pas = { critAdd: 0, critDmgAdd: 0, maxHpPct: 0, defAdd: 0, dmgReduce: 0, speedAdd: 0, atkAdd: 0, attackSpeedPct: 0 };
@@ -206,10 +261,12 @@ export function computeStats(state, buffs) {
   const jb = jobBonusOf(state);
 
   const s = state.stats || {};
-  const str = (s.str || 0) + eq.str + jb.str;
-  const dex = (s.dex || 0) + eq.dex + jb.dex;
-  const int = (s.int || 0) + eq.int + jb.int;
-  const luk = (s.luk || 0) + eq.luk + bk.luk + jb.luk;
+  const ms = mainStatOf(state.heroId);
+  const msMult = (k) => (k === ms ? 1 + (pot.mainPct || 0) : 1);
+  const str = Math.round(((s.str || 0) + eq.str + jb.str + ab.allStat) * msMult('str'));
+  const dex = Math.round(((s.dex || 0) + eq.dex + jb.dex + ab.allStat) * msMult('dex'));
+  const int = Math.round(((s.int || 0) + eq.int + jb.int + ab.allStat) * msMult('int'));
+  const luk = Math.round(((s.luk || 0) + eq.luk + bk.luk + jb.luk + ab.allStat) * msMult('luk'));
 
   const weaponType = weapon ? weapon.weaponType : 'melee';
   let statAtk;
@@ -217,13 +274,13 @@ export function computeStats(state, buffs) {
   else if (weaponType === 'magic') statAtk = int * 0.6 + luk * 0.15;
   else statAtk = str * 0.5 + dex * 0.2;
 
-  const maxHp = Math.round((base.hp + base.hpPerLv * (L - 1) + str * 2 + eq.maxHp + bk.maxHp + jb.maxHp) * (1 + pas.maxHpPct));
-  const maxMp = Math.round(base.mp + base.mpPerLv * (L - 1) + int * 3 + eq.maxMp + bk.maxMp + jb.maxMp);
-  const atk = Math.max(1, Math.round((5 + 1.5 * L + eq.atk + statAtk + pas.atkAdd + bk.atk + jb.atk) * (1 + bf.atkPct)));
-  const def = Math.round((base.def + eq.def + str * 0.2 + L * 0.5 + pas.defAdd + bk.def + jb.def) * (1 + bf.defPct));
-  const speed = Math.min(450, Math.round((base.speed + eq.speed + dex * 0.3 + pas.speedAdd + jb.speed) * (1 + bf.speedPct)));
+  const maxHp = Math.round((base.hp + base.hpPerLv * (L - 1) + str * 2 + eq.maxHp + bk.maxHp + jb.maxHp) * (1 + pas.maxHpPct + (pot.maxHpPct || 0) + lb.maxHpPct));
+  const maxMp = Math.round((base.mp + base.mpPerLv * (L - 1) + int * 3 + eq.maxMp + bk.maxMp + jb.maxMp) * (1 + lb.maxMpPct));
+  const atk = Math.max(1, Math.round((5 + 1.5 * L + eq.atk + statAtk + pas.atkAdd + bk.atk + jb.atk) * (1 + bf.atkPct + (pot.atkPct || 0))));
+  const def = Math.round((base.def + eq.def + str * 0.2 + L * 0.5 + pas.defAdd + bk.def + jb.def) * (1 + bf.defPct + (pot.defPct || 0)));
+  const speed = Math.min(450, Math.round((base.speed + eq.speed + (pot.speed || 0) + dex * 0.3 + pas.speedAdd + jb.speed) * (1 + bf.speedPct)));
   const jump = Math.min(1000, base.jump + Math.min(60, eq.speed * 0.5));
-  const crit = Math.min(0.8, base.crit + luk * 0.002 + dex * 0.0005 + eq.crit / 100 + pas.critAdd + bf.critAdd + bk.crit + jb.crit);
+  const crit = Math.min(0.8, base.crit + luk * 0.002 + dex * 0.0005 + eq.crit / 100 + pas.critAdd + bf.critAdd + bk.crit + jb.crit + (pot.crit || 0) + lb.crit);
   const critDmg = base.critDmg + luk * 0.002 + pas.critDmgAdd + jb.critDmg;
   // ブースター（攻撃速度アップ）: 最大 +60%
   const attackSpeed = (weapon ? weapon.attackSpeed : 2.5) * (1 + Math.min(0.6, pas.attackSpeedPct + bf.attackSpeedPct));
@@ -239,6 +296,14 @@ export function computeStats(state, buffs) {
     book: bk,
     job: jb,
     str, dex, int, luk,
+    // v4: 潜在・実績・リンク由来の特殊ステータス
+    bossDmg: pot.bossDmg || 0,          // ボスへの与ダメ +割合
+    dropRate: (pot.dropRate || 0) + lb.dropRate, // ドロップ率 +割合
+    mesoRate: pot.mesoRate || 0,        // 獲得金 +割合
+    cdr: pot.cdr || 0,                  // スキルCT 短縮（秒）
+    hpRecover: pot.hpRecover || 0,      // 被弾時 5% で最大HPのこの割合を回復
+    expRate: lb.expRate,                // 経験値 +割合
+    pot, stars, achievement: ab, link: lb,
   };
 }
 

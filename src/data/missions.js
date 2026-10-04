@@ -122,6 +122,14 @@ const list = [
       { type: 'collect', target: 'cop_badge', count: 3, text: '警官バッジを集める' },
     ],
     reward: { exp: 1100, money: 2500, items: ['sunglasses_aviator'] },
+    // v3 ストーリー分岐（報告時に選ぶ。MissionManager.choose → turnIn で追加報酬・flag・称号）
+    choicePrompt: 'カイが「証拠品」の入ったバッグを差し出した。…どうする？',
+    choices: [
+      { id: 'police', text: '証拠を署の正義派（覆面刑事）に渡す', flag: 'sidePolice', title: 'title_police_ally',
+        reward: { money: 1000, items: ['drink_tough'] }, dialog: ['…お前、正気か？ ハッ、面白え。署にもまだマシな奴はいるさ。'] },
+      { id: 'street', text: '証拠をストリートの情報屋に高値で売る', flag: 'sideStreet', title: 'title_street_face',
+        reward: { money: 4000, items: ['chip_reroll'] }, dialog: ['ハハッ、そう来なくちゃな。俺たちは共犯だ、忘れるなよ。'] },
+    ],
   },
   {
     id: 'm07_wheels', name: '第7話 ネオンの足', category: 'main', giver: 'officer_kai', turnIn: 'tank', reqLevel: 18, prereq: ['m06_dirty_badge'],
@@ -129,6 +137,10 @@ const list = [
     dialog: {
       offer: ['港のタンクに会え。車がなきゃこの街じゃ半人前だ。'],
       done: ['こいつは俺のチューンしたスポーツカーさ。いい走りだったろ？', 'ジン、運転はお前担当だな。ルナは…ナビ席で踊るなよ。'],
+    },
+    dialogByFlag: {
+      sidePolice: { offer: ['お前が渡した証拠のおかげで、署の空気が少し変わった。…礼は言わねえぞ。', '港のタンクに会え。車がなきゃこの街じゃ半人前だ。'] },
+      sideStreet: { offer: ['証拠の売り上げで俺の借金はチャラだ。いい取引だったぜ、相棒。', '港のタンクに会え。裏ルートの車を用意してる。'] },
     },
     objectives: [
       { type: 'reach', target: 'slums', count: 1, text: '港（スラム）へ行く' },
@@ -213,6 +225,17 @@ const list = [
       { type: 'kill', target: 'swat_trooper', count: 6, text: '町でSWAT隊員を倒す' },
     ],
     reward: { exp: 34000, money: 40000, items: ['armor_vest', 'armor_pants'] },
+    dialogByFlag: {
+      sidePolice: { offer: ['ドンが署長を買収した。…だが、お前が前に証拠を渡した刑事たちが動いてくれてる。', '★4の包囲網をぶち破れ！ 正義派が裏で道を開ける。'] },
+      sideStreet: { offer: ['ドンが署長を買収しやがった。街のギャングどもも黙っちゃいねえ。', '★4の包囲網をぶち破れ！ ストリートの連中が陽動してくれる。'] },
+    },
+    choicePrompt: '包囲網を抜けた先で、カイが問う。「最後の決戦、誰と組む？」',
+    choices: [
+      { id: 'police', text: 'カイと署の正義派に付く', flag: 'sidePolice2',
+        reward: { money: 10000, items: ['drink_tough', 'drink_tough'] }, dialog: ['いいだろう。バッジの誇りってやつを、最後に一度だけ信じてみるか。'] },
+      { id: 'street', text: 'ストリートのギャングと共闘する', flag: 'sideStreet2',
+        reward: { money: 20000, items: ['chip_reroll', 'chip_reroll'] }, dialog: ['裏通りの連中が全員お前の味方だ。…俺も、な。'] },
+    ],
   },
   {
     id: 'm14_rooftop', name: '第14話 摩天楼の頂へ', category: 'main', giver: 'officer_kai', turnIn: 'nova', reqLevel: 58, prereq: ['m13_heat'],
@@ -220,6 +243,10 @@ const list = [
     dialog: {
       offer: ['屋上へ行け。ノヴァが待ってる。'],
       done: ['お待たせ、ヒーローさんたち。ドンのドローン網は私がハックしておいたわ。', 'あとは…あなたたちの拳と弾丸次第ね。'],
+    },
+    dialogByFlag: {
+      sidePolice2: { done: ['お待たせ。警察無線は全部こっちで拾ってる。正義派のSWATが下の階を押さえてくれるわ。', 'あとは…あなたたちの拳と弾丸次第ね。'] },
+      sideStreet2: { done: ['お待たせ。ギャングたちが表で暴れてくれてるおかげで、警備はガラ空きよ。', 'あとは…あなたたちの拳と弾丸次第ね。'] },
     },
     objectives: [
       { type: 'reach', target: 'rooftop', count: 1, text: '摩天楼の屋上へ行く' },
@@ -237,6 +264,15 @@ const list = [
     },
     objectives: [{ type: 'boss', target: 'boss_don', count: 1, mapId: 'tower_f3', text: '最上階ペントハウスでドン・カイマンを倒す' }],
     reward: { exp: 120000, money: 200000, items: ['crown_neon', 'neon_sword'], sp: 3, flag: 'storyClear' },
+    choicePrompt: '膝をついたドン・カイマンが笑う。「この街の光は全部、俺が灯した。…お前が継ぐか？」',
+    choices: [
+      { id: 'police', text: 'ドンを警察に引き渡す（街に光を返す）', flag: 'endingHero', title: 'title_bay_hero',
+        reward: { money: 50000, items: ['elixir', 'elixir', 'elixir'] },
+        dialog: ['…やったのね。ドンは正式に逮捕された。明日の新聞の一面はあなたたちよ。', 'この街の夜は、もう誰のものでもない。みんなのものになった。'] },
+      { id: 'street', text: 'ドンの座を奪う（新しいボスになる）', flag: 'endingDon', title: 'title_new_don',
+        reward: { money: 300000, items: ['gold_bar', 'gold_bar', 'chip_lock'] },
+        dialog: ['…ドンの時代は終わった。そして、あなたたちの時代が始まる。', 'ようこそ、新しいボスさん。この街の夜は、あなたたち二人のもの。'] },
+    ],
   },
 
   // ======================= サブ =======================

@@ -37,7 +37,7 @@ export function jobStyleOf(state) {
  * resolveSkillStyle(game, color, wantKinds?) → {skill, branch, tier, kind, move} | null
  * 色が一致し、かつ習得済み（Lv>0）のスキルを優先。同色が複数なら段階の高いもの。
  */
-export function resolveSkillStyle(game, color, wantKinds) {
+export function resolveSkillStyle(game, color, wantKinds, prefer) {
   if (!color || !game || !game.state) return null;
   if (!INDEX) { try { buildIndex(); } catch (e) { INDEX = new Map(); } }
   const st = game.state;
@@ -51,6 +51,7 @@ export function resolveSkillStyle(game, color, wantKinds) {
     if (wantKinds && wantKinds.indexOf(e.kind) < 0) continue;
     let score = e.tier;
     if (lv > 0) score += 10;
+    if (prefer && prefer.indexOf(e.kind) >= 0) score += 20;
     if (e.hero === st.heroId || e.hero === 'both') score += 5;
     if (score > bestScore) { bestScore = score; best = e; }
   }

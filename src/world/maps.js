@@ -7,7 +7,7 @@
 // 足場・ロープ・decor はマップIDをシードにした手続き生成（毎回同じ形）。
 // spawns に types を書かないフィールドは spawner が ENEMIES[].habitats から自動選択する。
 
-import { TOWN_SHOPS } from '../data/shops.js';
+import * as SHOP_DATA from '../data/shops.js';
 import { ENEMIES } from '../data/enemies.js';
 
 const GROUND = 1000;
@@ -678,6 +678,7 @@ const F = [
 ];
 
 // ショップ品揃え: システム担当の提案（data/shops.js TOWN_SHOPS）を優先して適用
+const TOWN_SHOPS = SHOP_DATA.TOWN_SHOPS || {};
 for (const [mapId, shops] of Object.entries(TOWN_SHOPS || {})) {
   const m = T[mapId];
   if (!m) continue;
@@ -685,6 +686,21 @@ for (const [mapId, shops] of Object.entries(TOWN_SHOPS || {})) {
     const n = m.npcs.find((q) => q.id === sh.npcId);
     if (n) { n.shop = [...sh.items]; n.shopName = sh.name; }
   }
+}
+
+// 夜だけ開く店: data/shops.js の NIGHT_SHOPS（[{mapId, npcId?, name, hours, items}]）があれば反映。
+// npcId が町にいればその NPC に、いなければその町の夜 NPC（店持ち優先）に割り当てる
+for (const ns of Array.isArray(SHOP_DATA.NIGHT_SHOPS) ? SHOP_DATA.NIGHT_SHOPS : []) {
+  const m = T[ns?.mapId];
+  if (!m) continue;
+  const items = (ns.items || ns.shop || []).filter(Boolean);
+  let n = ns.npcId && m.npcs.find((q) => q.id === ns.npcId);
+  if (!n) n = m.npcs.find((q) => q.hours && q.shop && !q._nightShop) || m.npcs.find((q) => q.hours && !q._nightShop);
+  if (!n) continue;
+  if (items.length) n.shop = [...items];
+  if (ns.name) n.shopName = ns.name;
+  if (Array.isArray(ns.hours)) n.hours = [...ns.hours];
+  Object.defineProperty(n, '_nightShop', { value: true, enumerable: false });
 }
 
 export const MAPS = { ...T };
@@ -769,17 +785,26 @@ export function buildTowerFloor(map, floor = 1, info = {}) {
   map.bossFloor = !!info.boss || floor % 10 === 0;
   const lv = info.level ?? Math.min(200, 38 + floor * 2);
   map.levelRange = [lv, lv + 4];
-  const next = map.portals.find((p) => p.towerNext);
-  if (next) { next.hidden = true; next.label = `${floor + 1}F へ`; }
+  // 「次の階」ポータルは全滅まで portals から外しておく（描画・ミニマップにも出ない）。openTowerExit で出現
+  const i = map.portals.findIndex((p) => p.towerNext);
+  if (i >= 0) map.nextPortal = map.portals.splice(i, 1)[0];
+  if (map.nextPortal) { map.nextPortal.label = `${floor + 1}F へ`; map.nextPortal.hidden = false; }
   map.cleared = false;
   return map;
+}
+/** タワーの「次の階」ポータルを出す（全滅時に spawner が呼ぶ）。返り値: ポータル */
+export function openTowerExit(map) {
+  const np = map.nextPortal;
+  if (np && !map.portals.includes(np)) map.portals.push(np);
+  map.cleared = true;
+  return np || null;
 }
 
 const TOWER = instanceMap({
   id: 'tower', instance: 'tower', name: 'ヴァイス・スパイア 1F', region: 'rooftop', theme: 'rooftop', variant: 3, bg: 'tower',
   width: INSTANCE_W, groundY: GROUND, desc: '無限に続くネオンの塔。1フロアの敵を全滅させると次の階への扉が開く。',
   world: { x: 12, y: 2 }, levelRange: [40, 44],
-  portals: [exitPortal('rooftop'), { x: INSTANCE_W - 150, to: 'tower', towerNext: true, hidden: true, label: '2F へ' }],
+  portals: [exitPortal('rooftop'), { x: INSTANCE_W - 150, to: 'tower', towerNext: true, label: '2F へ' }],
 });
 buildTowerFloor(TOWER, 1);
 

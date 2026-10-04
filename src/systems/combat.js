@@ -7,6 +7,12 @@ import { rollDrops } from './loot.js';
 import { bookRecord } from './book.js';
 import { isFieldMap } from './travel.js';
 import { isNight, NIGHT_EXP_BONUS } from '../data/balance.js';
+import { comboHit } from './combo.js';
+import { weekdayEvent } from './daily.js';
+import { arenaExpMult } from './arena.js';
+
+/** 実時刻（ms）。テストは game.nowMs を差し替えて曜日イベントを固定できる */
+export function gameNow(game) { return typeof game?.nowMs === 'function' ? game.nowMs() : Date.now(); }
 
 const now = (game) => (typeof game.time === 'number' ? game.time : performance.now() / 1000);
 
@@ -23,11 +29,18 @@ export const CIVILIAN_KILL_HEAT = 4;
 // フィールド（警察がいない）での手配度減衰倍率
 export const FIELD_WANTED_DECAY = 5;
 
-/** 敵撃破時の経験値（夜 20〜5 時は +10%。game.clock 未定義なら補正なし。市民は 0） */
-export function killExp(game, def) {
+/**
+ * 敵撃破時の経験値（市民は 0）
+ *  夜 20〜5 時 +10%（game.clock 未定義なら補正なし）× 曜日イベント（月曜 +10%）× リンク（他キャラ）× アリーナ倍率
+ */
+export function killExp(game, def, enemy = null) {
   if (!def || def.civilian) return 0;
-  const base = def.exp || 0;
-  return isNight(game?.clock) ? Math.round(base * (1 + NIGHT_EXP_BONUS)) : base;
+  let v = def.exp || 0;
+  if (isNight(game?.clock)) v *= 1 + NIGHT_EXP_BONUS;
+  v *= weekdayEvent(gameNow(game)).expMult || 1;
+  if (game?.state) v *= 1 + (computeStats(game.state).expRate || 0);
+  v *= arenaExpMult(game, enemy);
+  return Math.round(v);
 }
 
 /** calcDamage(atk, mult, def, crit, critDmg) → {dmg, crit} 乱数幅±10% */
@@ -69,8 +82,9 @@ export function playerAttackArea(game, rect, mult = 1, opts = {}) {
   for (const e of hit) {
     if (opts.attackId != null) e._hitBy = opts.attackId;
     const dir = opts.knockDir ?? (e.x >= cx ? 1 : -1);
+    const m = e.def?.boss ? mult * (1 + (stats.bossDmg || 0)) : mult; // 潜在「ボスダメージ」
     for (let i = 0; i < hitsN && !e.dead; i++) {
-      const r = calcDamage(stats.atk, mult, e.def?.def || 0, stats.crit, stats.critDmg);
+      const r = calcDamage(stats.atk, m, e.def?.def || 0, stats.crit, stats.critDmg);
       damageEnemy(game, e, r.dmg, r.crit, i === hitsN - 1 ? dir : 0, {
         stack: i, knock: opts.knock ?? 200, launch: opts.launch || 0,
       });
@@ -89,6 +103,12 @@ export function damageEnemy(game, enemy, dmg, crit = false, knockDir = 0, opts =
   enemy._invulnUntil = now(game) + ENEMY_INVULN;
   enemy.provoked = true;
   const stack = opts.stack || 0;
+  // v3: コンボ（同フレーム同一敵は1回）・ボスモードの最大ダメージ記録
+  if (!enemy.def?.civilian) comboHit(game, 1, [enemy]);
+  if (enemy.def?.boss && (game.bossMode || game.bossRun) && dmg > (game.bossMaxHit || 0)) {
+    game.bossMaxHit = dmg;
+    game.events?.emit('bossHit', { dmg, bossId: enemy.def.id });
+  }
   spawnDamageNumber(game, enemy.x, enemy.y - enemy.h - 8 - stack * 30, dmg, { crit });
   if (crit && stack === 0) spawnEffect(game, 'critHit', enemy.x, enemy.y - enemy.h / 2);
 
@@ -119,13 +139,18 @@ function killEnemy(game, enemy) {
   enemy.state = 'dead';
   const def = enemy.def || {};
   const st = game.state;
-  if (!def.civilian) {
+  const practice = enemy.instance === 'boss' && game.bossMode === 'practice'; // 練習モードは報酬なし
+  if (!def.civilian && !practice) {
     st.kills = (st.kills || 0) + 1;
-    gainExp(game, killExp(game, def));
+    gainExp(game, killExp(game, def, enemy));
     bookRecord(game, def.id || enemy.defId);
   }
   const stats = computeStats(st);
-  const drops = rollDrops(def, stats.luck);
+  const wd = weekdayEvent(gameNow(game));
+  const drops = practice ? [] : rollDrops(def, stats.luck, Math.random, {
+    dropMult: (1 + (stats.dropRate || 0)) * (wd.dropMult || 1),
+    moneyMult: (1 + (stats.mesoRate || 0)) * (wd.moneyMult || 1),
+  });
   drops.forEach((payload, i) => {
     const off = (i - (drops.length - 1) / 2) * 22;
     const d = new Drop(game, enemy.x + off, enemy.y - Math.min(enemy.h, 60) / 2, payload);
@@ -178,6 +203,11 @@ export function damagePlayer(game, amount, fromX) {
     p.hurtT = 0.35;
   }
   setPlayerInvuln(game, PLAYER_INVULN);
+  // 潜在「被弾時 5% で HP 回復」
+  if (s.hpRecover > 0 && st.hp > 0 && Math.random() < 0.05) {
+    const heal = Math.min(s.maxHp - st.hp, Math.round(s.maxHp * s.hpRecover));
+    if (heal > 0) { st.hp += heal; spawnDamageNumber(game, p.x + 16, p.y - p.h - 26, heal, { heal: true }); }
+  }
 
   // 服が破れる演出（閾値を下回った瞬間）
   let torn = false;

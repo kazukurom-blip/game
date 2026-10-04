@@ -12,7 +12,7 @@ import { gradeIndex } from '../data/gear.js';
 import { computeStats, clampVitals, addBuff } from './progression.js';
 import { spawnEffect, spawnDamageNumber } from '../render/effects.js';
 import { maybePotential } from './potential.js';
-import { petAutoSellCheck, feedPet } from './petSkills.js';
+import { feedPet } from './petSkills.js';
 
 export const MAX_SLOTS = 48;
 export const MAX_STACK = 999;
@@ -227,18 +227,14 @@ export function addEquipInst(state, inst) {
 }
 
 /**
- * addItem(game, id, qty=1, opts={silent, pot, fromDrop}) → bool。レア以上の装備は rareDrop、PET はさらに petDrop を emit（silent で抑制）
- *  v3: 装備は低確率で潜在付き（opts.pot が undefined のとき maybePotential。null で付けない）。
- *      fromDrop かつ PET の自動売却スキルが有効なら common 装備を即 $ 化（petAutoSellCheck）
+ * addItem(game, id, qty=1, opts={silent, pot, star}) → bool。レア以上の装備は rareDrop、PET はさらに petDrop を emit（silent で抑制）
+ *  v3: 装備は低確率（6%）で潜在付き（opts.pot が undefined のとき maybePotential。null で付けない）。
+ *      PET の自動売却は drop.js の 'itemPicked' イベントで petSkills が処理する
  */
 export function addItem(game, id, qty = 1, opts = {}) {
   const st = game.state;
   const it = ITEMS[id];
   if (!it) return false;
-  if (opts.fromDrop && it.type === 'equip') {
-    const sold = petAutoSellCheck(game, id, qty);
-    if (sold) return true;
-  }
   const addOpts = {};
   if (it.type === 'equip' && it.slot !== 'pet') {
     const pot = opts.pot !== undefined ? opts.pot : maybePotential(it);

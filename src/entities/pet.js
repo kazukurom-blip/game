@@ -85,6 +85,8 @@ export class Pet {
       if (dist > this.pickRange) continue;
       if (d.money == null && !canAccept(g.state, d.item)) continue;
       if (!petWants(g.state, d)) continue;
+      const sp = sysFn('petShouldPick', g); // systems/petSkills.js の取得フィルタ（PET スキル）
+      if (sp) { let ok = true; try { ok = sp(g, d) !== false; } catch (e) { ok = true; } if (!ok) continue; }
       const pd = Math.hypot(d.x - this.x, d.y - this.y);
       if (pd < bd) { bd = pd; best = d; }
     }

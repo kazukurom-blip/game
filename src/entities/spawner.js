@@ -4,7 +4,7 @@ import * as combat from '../systems/combat.js';
 import { spawnEffect } from '../render/effects.js';
 import { Enemy } from './enemy.js';
 import { Vehicle } from './vehicle.js';
-import { MAPS, buildTowerFloor } from '../world/maps.js';
+import { MAPS, buildTowerFloor, openTowerExit } from '../world/maps.js';
 import { sysFn, nightNow } from '../world/sys.js';
 
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -173,8 +173,10 @@ export class Spawner {
     if (!s) return null;
     const types = (s.types || []).filter((t) => ENEMIES[t]);
     if (!types.length) return null;
+    // 昼夜: systems/night.js の enemyAvailableNow（night/day 指定）があれば使う
     const night = nightNow(g);
-    const okTypes = types.filter((t) => timeOk(ENEMIES[t], night));
+    const avail = sysFn('enemyAvailableNow', g, 'night');
+    const okTypes = types.filter((t) => { if (avail) { try { return !!avail(g, ENEMIES[t]); } catch (e) { /* fallthrough */ } } return timeOk(ENEMIES[t], night); });
     if (!okTypes.length) return null;
     const type = pick(okTypes);
     const def = ENEMIES[type];
@@ -317,13 +319,10 @@ export class Spawner {
     if (inst.delay > 0) { inst.delay -= dt; if (inst.delay > 0) return; this.startInstance(); return; }
     if (inst.type === 'tower') {
       if (!inst.cleared && inst.started && this.instanceAlive() === 0) {
-        inst.cleared = true; map.cleared = true;
+        inst.cleared = true;
         const r = callSafe(sysFn('towerClearFloor', g, 'tower'), g);
-        const next = map.portals.find((p) => p.towerNext);
-        if (next) {
-          next.hidden = false;
-          spawnEffect(g, 'portal', next.x, next.y - 40);
-        }
+        const next = openTowerExit(map);
+        if (next) spawnEffect(g, 'portal', next.x, next.y - 40);
         g.notify?.(`🏆 ${inst.floor}F クリア！ 右の扉から ${inst.floor + 1}F へ`, '#ffd23f');
         g.events?.emit('towerFloorCleared', { floor: inst.floor, result: r ?? null, time: inst.t });
       }
@@ -363,6 +362,10 @@ export class Spawner {
       if (d.boss) {
         const b = this.spawnInstanceEnemy(d.boss, map.width - 420, map.groundY, { hp: d.bossHpMult ?? d.hpMult, atk: d.atkMult, level: d.level });
         if (b) g.notify?.(`⚠ ${d.floorLabel || inst.floor + 'F'} ボス ${b.name}！`, '#ff4d6d');
+      }
+      if (d.miniBoss) {
+        const mb = this.spawnInstanceEnemy(d.miniBoss.id, map.width - 520, map.groundY, { hp: d.miniBoss.hpMult, atk: d.atkMult * 1.3, level: d.level });
+        if (mb) { mb.elite = true; mb.scale = (mb.scale || 1) * 1.3; mb.name = `【エリート】${mb.name}`; }
       }
       if (d.mutators?.length) g.notify?.(`特性: ${d.mutators.map((m) => m.name || m.id || m).join(' / ')}`, '#c9b6ff');
     } else if (inst.type === 'arena') {
@@ -562,7 +565,8 @@ export function normalizeFloorDef(raw, floor, game) {
   if (boss === true || (boss == null && floor % 10 === 0)) boss = nearLevel(bosses(), Math.min(lv, 100), 1)[0]?.id || null;
   if (boss && typeof boss === 'object') boss = boss.id;
   if (boss && !ENEMIES[boss]) boss = null;
-  return { level: lv, enemies, boss: boss || null, hpMult, atkMult, bossHpMult: d.bossHpMult, mutators: muts, name: d.name, floorLabel: d.label };
+  const mb = d.miniBoss && ENEMIES[d.miniBoss.id] ? { id: d.miniBoss.id, hpMult: d.miniBoss.hpMult ?? hpMult * 5 } : null;
+  return { level: d.displayLevel ?? lv, enemies, boss: boss || null, hpMult, atkMult, bossHpMult: d.bossHpMult, miniBoss: mb, mutators: muts, name: d.name, floorLabel: d.label };
 }
 
 /** arenaWaveDef(wave) の戻り値を正規化（無ければプレイヤーLv帯の敵でフォールバック） */

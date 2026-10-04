@@ -5,7 +5,21 @@ import { shade, rgba, rng, clamp, lerp, OUTLINE } from './util.js';
 export const HERO_LOOKS = {
   luna: { body: 'f', skin: '#ffe0cc', hair: 'twin', hairColor: '#ff6fb5', eyeColor: '#ff3d8b', expr: 'cute', hairShadow: '#c83c8a', hairHi: '#ffc2e2', hairTip: '#b47cff', tie: '#ffd23f' },
   jin: { body: 'm', skin: '#f6d5be', hair: 'wolf', hairColor: '#d9dee8', eyeColor: '#33c7e6', expr: 'cool', hairShadow: '#8e97ad', hairHi: '#ffffff', mesh: '#3ee6d2' },
+  hacker: { body: 'f', skin: '#e8c4a8', hair: 'bob', hairColor: '#3dff8a', eyeColor: '#19f0ff', expr: 'cool', hairShadow: '#1f9e58', hairHi: '#b6ffd2' },
 };
+
+/** キャラ作成で選べる髪型（♂♀どちらでも可）。id は look.hair */
+export const HAIR_STYLES = [
+  { id: 'short', name: 'ショート' }, { id: 'spiky', name: 'ツンツン' }, { id: 'wolf', name: 'ウルフ' },
+  { id: 'bob', name: 'ボブ' }, { id: 'long', name: 'ロング' }, { id: 'ponytail', name: 'ポニーテール' },
+  { id: 'twin', name: 'ツインテール' }, { id: 'bun', name: 'おだんご' },
+  { id: 'undercut', name: 'アンダーカット' }, { id: 'sidepart', name: 'メカクレ' }, { id: 'messy', name: 'ふわくせ毛' },
+  { id: 'braid', name: '三つ編み' }, { id: 'topknot', name: 'ちょんまげ' }, { id: 'curly', name: 'カーリー' },
+];
+
+// drawCharacter に最後に渡された look/equip（anim オブジェクト単位）。残像・カットインで使う
+const DRAWN = new WeakMap();
+export function lastDrawnArgs(anim) { return anim ? DRAWN.get(anim) || null : null; }
 
 // ---------------------------------------------------------------- 定数
 const OLW = 2.1;                    // アウトライン太さ
@@ -298,6 +312,7 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
   }
   look = look || HERO_LOOKS.luna;
   equip = equip || EMPTY;
+  if (anim && typeof anim === 'object') { const d = DRAWN.get(anim); if (!d || d.look !== look || d.equip !== equip) DRAWN.set(anim, { look, equip }); }
   anim = anim || EMPTY;
   if ((look === HERO_LOOKS.luna || look === HERO_LOOKS.jin) && anim.state !== 'drive') LAST_EQUIP.set(look, equip);
   const facing = anim.facing < 0 ? -1 : 1;
@@ -314,7 +329,7 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
   const P = makePose(state, t, at, wk, ws, anim);
 
   const K = {
-    look, eq: equip, dmg, t, P, ws, wk, state,
+    look, eq: equip, dmg, t, P, ws, wk, state, at,
     f: look.body === 'f',
     skin: look.skin || '#ffe0cc',
     hair: look.hairColor || '#5a3a2a',
@@ -330,6 +345,8 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
   FL = !!anim.flash;
   ctx.save();
   ctx.translate(x, y);
+  const auraT = anim.aura && state !== 'drive' && !P.lie ? clamp(anim.auraTier || 1, 1, 4) | 0 : 0;
+  if (auraT) drawAuraBack(ctx, anim.aura, auraT, t, s);
   // 地面の影
   if (state !== 'drive' && !P.lie) {
     ctx.beginPath(); ctx.ellipse(0, 0, 13 * s, 3.2 * s, 0, 0, PI * 2);
@@ -346,7 +363,102 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
   else drawFrontView(ctx, K);
 
   ctx.restore();
+  if (auraT >= 2) { ctx.save(); ctx.translate(x, y); drawAuraFront(ctx, anim.aura, auraT, t, s); ctx.restore(); }
   FL = false;
+}
+
+// ---------------------------------------------------------------- オーラ（職の色。tier 1〜4 で段階的に）
+function auraFlame(ctx, w, h, t, ph) {
+  // 背後の炎状シルエット（下が広く、上で揺らぐ）
+  ctx.beginPath();
+  ctx.moveTo(-w, 0);
+  const n = 5;
+  for (let i = 0; i <= n; i++) {
+    const u = i / n;
+    const x = -w + u * w * 2;
+    const yy = -h * (0.55 + 0.45 * Math.sin(u * PI)) - Math.sin(t * 9 + i * 1.7 + ph) * h * 0.08;
+    const cx = x - w / n;
+    ctx.quadraticCurveTo(cx, yy * 0.75, x, yy);
+  }
+  ctx.lineTo(w, 0);
+  ctx.quadraticCurveTo(0, h * 0.12, -w, 0);
+  ctx.closePath();
+}
+function drawAuraBack(ctx, col, tier, t, s) {
+  ctx.save();
+  ctx.scale(s, s);
+  ctx.globalCompositeOperation = 'lighter';
+  const pulse = 0.85 + Math.sin(t * 4) * 0.15;
+  // 足元の光
+  const R = (16 + tier * 4) * pulse;
+  const g = ctx.createRadialGradient(0, 0, 2, 0, 0, R * 1.6);
+  g.addColorStop(0, rgba(col, 0.55)); g.addColorStop(0.6, rgba(col, 0.2)); g.addColorStop(1, rgba(col, 0));
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.ellipse(0, 0, R * 1.6, R * 0.45, 0, 0, PI * 2); ctx.fill();
+  ctx.strokeStyle = rgba(col, 0.7); ctx.lineWidth = 1.4;
+  const rk = (t * 0.9) % 1;
+  ctx.globalAlpha = 1 - rk;
+  ctx.beginPath(); ctx.ellipse(0, 0, 10 + rk * 18, 3 + rk * 5, 0, 0, PI * 2); ctx.stroke();
+  ctx.globalAlpha = 1;
+  if (tier >= 4) {
+    // 回転する魔法陣
+    ctx.save(); ctx.scale(1, 0.28); ctx.rotate(t * 0.9);
+    ctx.strokeStyle = rgba(col, 0.75); ctx.lineWidth = 1.6 / 0.6;
+    ctx.beginPath(); ctx.arc(0, 0, 34, 0, PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, 0, 27, 0, PI * 2); ctx.stroke();
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) { const a = i * PI / 3; ctx.moveTo(Math.cos(a) * 27, Math.sin(a) * 27); ctx.lineTo(Math.cos(a + PI * 2 / 3) * 27, Math.sin(a + PI * 2 / 3) * 27); }
+    ctx.stroke();
+    ctx.fillStyle = rgba('#ffffff', 0.8);
+    for (let i = 0; i < 12; i++) { const a = i * PI / 6; ctx.fillRect(Math.cos(a) * 30.5 - 1, Math.sin(a) * 30.5 - 1, 2, 2); }
+    ctx.restore();
+  }
+  if (tier >= 3) {
+    // 背後の炎オーラ
+    ctx.fillStyle = rgba(col, 0.22 + (tier >= 4 ? 0.08 : 0));
+    auraFlame(ctx, 24, 92 + tier * 4, t, 0); ctx.fill();
+    ctx.fillStyle = rgba(col, 0.2);
+    auraFlame(ctx, 16, 76, t * 1.3, 2); ctx.fill();
+    ctx.fillStyle = rgba('#ffffff', 0.08);
+    auraFlame(ctx, 10, 56, t * 1.6, 4); ctx.fill();
+  }
+  if (tier >= 2) {
+    // 立ち上る光の粒（背面側）
+    ctx.fillStyle = rgba(col, 0.9);
+    const n = tier >= 4 ? 7 : 4;
+    for (let i = 0; i < n; i++) {
+      const ph = (t * 0.7 + i / n) % 1;
+      const x = Math.sin(i * 2.4 + t * 0.5) * (12 + (i % 3) * 4);
+      const y = -ph * (60 + tier * 8);
+      const r = (1.4 + (i % 2)) * Math.sin(ph * PI);
+      ctx.beginPath(); ctx.arc(x, y, r + 0.3, 0, PI * 2); ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+function drawAuraFront(ctx, col, tier, t, s) {
+  ctx.save();
+  ctx.scale(s, s);
+  ctx.globalCompositeOperation = 'lighter';
+  const n = tier >= 4 ? 5 : tier >= 3 ? 3 : 2;
+  for (let i = 0; i < n; i++) {
+    const ph = (t * 0.55 + i / n + 0.13) % 1;
+    const x = Math.cos(i * 2.1 + 1) * (14 + (i % 2) * 6);
+    const y = -8 - ph * (64 + tier * 6);
+    const a = Math.sin(ph * PI);
+    ctx.fillStyle = rgba(i % 2 ? '#ffffff' : col, 0.85 * a);
+    ctx.beginPath();
+    const r = 2.6 + (tier >= 4 ? 1 : 0);
+    ctx.moveTo(x, y - r * 1.8); ctx.lineTo(x + r * 0.5, y - r * 0.5); ctx.lineTo(x + r * 1.8, y); ctx.lineTo(x + r * 0.5, y + r * 0.5);
+    ctx.lineTo(x, y + r * 1.8); ctx.lineTo(x - r * 0.5, y + r * 0.5); ctx.lineTo(x - r * 1.8, y); ctx.lineTo(x - r * 0.5, y - r * 0.5); ctx.closePath();
+    ctx.fill();
+  }
+  if (tier >= 4) {
+    // 縦の光線
+    ctx.fillStyle = rgba(col, 0.12 + Math.sin(t * 6) * 0.04);
+    ctx.fillRect(-20, -100, 3, 100); ctx.fillRect(17, -86, 2, 86); ctx.fillRect(-4, -110, 2, 110);
+  }
+  ctx.restore();
 }
 
 // 上半身フレームへ
@@ -393,6 +505,31 @@ function drawFrontView(ctx, K) {
   // ---- 前腕＋武器
   drawArm(ctx, K, true, sx - 0.5, SHOULDER_Y + 0.5, P.af[0], P.af[1]);
   if (P.swoosh) drawSwoosh(ctx, K, sx - 0.5, SHOULDER_Y + 0.5);
+  if (K.wk === 'magic' && !FL) drawHoloPanel(ctx, K);
+  ctx.restore();
+}
+
+// ハッカーのホロ画面（詠唱中は大きく展開、待機中は手首の小さなリング）
+function drawHoloPanel(ctx, K) {
+  const st = K.state, t = K.t;
+  const col = (K.eq.weapon && itemColors(K.eq.weapon)[0]) || '#3dff8a';
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  if (st === 'attack') {
+    const k = clamp((K.at || 0.4) * 3.5, 0, 1);
+    ctx.translate(20, -34);
+    ctx.transform(1, -0.12, 0, 1, 0, 0);
+    const w = 22 * k, h = 15 * k;
+    ctx.fillStyle = rgba(col, 0.18); ctx.fillRect(-w / 2, -h / 2, w, h);
+    ctx.strokeStyle = rgba(col, 0.85); ctx.lineWidth = 1; ctx.strokeRect(-w / 2, -h / 2, w, h);
+    ctx.fillStyle = rgba('#ffffff', 0.75);
+    for (let i = 0; i < 4; i++) { const lw = (6 + ((i * 7 + ((t * 20) | 0)) % 9)) * k; ctx.fillRect(-w / 2 + 2, -h / 2 + 2.5 + i * 3.2 * k, lw, 1.1); }
+    ctx.fillStyle = rgba(col, 0.9); ctx.fillRect(w / 2 - 6 * k, h / 2 - 5 * k, 4 * k, 3 * k);
+  } else {
+    ctx.translate(14, -10);
+    ctx.strokeStyle = rgba(col, 0.55 + Math.sin(t * 5) * 0.2); ctx.lineWidth = 0.9;
+    ctx.beginPath(); ctx.ellipse(0, 0, 4, 1.6, 0.4, 0, PI * 2); ctx.stroke();
+  }
   ctx.restore();
 }
 
@@ -1001,16 +1138,33 @@ export function drawWeapon(ctx, style, color, accent, t = 0, P = null) {
       break;
     }
     case 'staff': {
-      ctx.beginPath(); ctx.moveTo(-12, -1); ctx.lineTo(24, -1.3); ctx.lineTo(24, 1.3); ctx.lineTo(-12, 1); ctx.closePath(); fillStroke(ctx, shade(c, -0.45), 1.2);
-      ctx.fillStyle = C(a); ctx.fillRect(-2, -1.6, 2, 3.2); ctx.fillRect(18, -1.8, 2, 3.6);
-      ctx.save(); ctx.translate(28, 0);
+      // デジタル・ワンド（ハッカー）: 回路の走るシャフト＋浮遊するホロコア
+      ctx.beginPath(); ctx.moveTo(-12, -1.2); ctx.lineTo(22, -1.5); ctx.lineTo(22, 1.5); ctx.lineTo(-12, 1.2); ctx.closePath(); fillStroke(ctx, shade(c, -0.55), 1.2);
+      ctx.fillStyle = C(a); ctx.fillRect(-3, -1.8, 2.2, 3.6); ctx.fillRect(16, -2, 2.4, 4);
+      // 回路パターン
+      ctx.strokeStyle = C(c); ctx.lineWidth = 0.8; ctx.beginPath();
+      ctx.moveTo(-10, 0); ctx.lineTo(-6, 0); ctx.lineTo(-5, -0.8); ctx.lineTo(2, -0.8); ctx.moveTo(4, 0.6); ctx.lineTo(10, 0.6); ctx.lineTo(11, -0.6); ctx.lineTo(15, -0.6); ctx.stroke();
+      // 先端のフォーク
+      ctx.beginPath(); ctx.moveTo(21, -1.5); ctx.lineTo(25, -5.5); ctx.lineTo(26.5, -4.5); ctx.lineTo(23.5, -1); ctx.moveTo(21, 1.5); ctx.lineTo(25, 5.5); ctx.lineTo(26.5, 4.5); ctx.lineTo(23.5, 1);
+      ctx.fillStyle = C(shade(c, -0.4)); ctx.fill(); ctx.strokeStyle = OC(); ctx.lineWidth = 1; ctx.stroke();
+      ctx.save(); ctx.translate(30, Math.sin(t * 3) * 0.8);
       const glow = P && P.magicGlow ? P.magicGlow : 0;
       ctx.save(); ctx.globalCompositeOperation = 'lighter';
-      ctx.fillStyle = FL ? '#ffffff' : rgba(c, 0.25 + glow * 0.3);
-      ctx.beginPath(); ctx.arc(0, 0, 7 + glow * 5 + Math.sin(t * 6) * 0.8, 0, PI * 2); ctx.fill(); ctx.restore();
-      ctx.beginPath(); ctx.moveTo(0, -6); ctx.lineTo(4, 0); ctx.lineTo(0, 6); ctx.lineTo(-4, 0); ctx.closePath(); fillStroke(ctx, c, 1.3);
-      ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.beginPath(); ctx.moveTo(0, -4); ctx.lineTo(1.6, -0.5); ctx.lineTo(-0.5, -0.5); ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = C(a); ctx.lineWidth = 1.3; ctx.beginPath(); ctx.arc(0, 0, 6, PI * 0.7, PI * 1.3); ctx.arc(0, 0, 6, -PI * 0.3, PI * 0.3); ctx.stroke();
+      ctx.fillStyle = FL ? '#ffffff' : rgba(c, 0.22 + glow * 0.3);
+      ctx.beginPath(); ctx.arc(0, 0, 7.5 + glow * 6 + Math.sin(t * 6) * 0.8, 0, PI * 2); ctx.fill();
+      // 回転するリング片
+      ctx.strokeStyle = C(rgba(c, 0.9)); ctx.lineWidth = 1.2;
+      const ra = t * 3;
+      ctx.beginPath(); ctx.arc(0, 0, 7.5 + glow * 2, ra, ra + 1.2); ctx.moveTo(Math.cos(ra + PI) * (7.5 + glow * 2), Math.sin(ra + PI) * (7.5 + glow * 2)); ctx.arc(0, 0, 7.5 + glow * 2, ra + PI, ra + PI + 1.2); ctx.stroke();
+      // 周回するビット
+      ctx.fillStyle = C(a === '#1d1d24' ? '#eafff2' : a);
+      for (let i = 0; i < 3; i++) { const an = -t * 4 + i * 2.1; ctx.fillRect(Math.cos(an) * 10 - 0.8, Math.sin(an) * 5 - 0.8, 1.6, 1.6); }
+      ctx.restore();
+      // ホロコア（六角）
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) { const an = PI / 6 + i * PI / 3; const r = 4.8; if (i === 0) ctx.moveTo(Math.cos(an) * r, Math.sin(an) * r); else ctx.lineTo(Math.cos(an) * r, Math.sin(an) * r); }
+      ctx.closePath(); fillStroke(ctx, c, 1.2);
+      ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fillRect(-1.6, -2.8, 1.4, 3.2); ctx.fillRect(0.6, -0.8, 1.4, 1.4);
       ctx.restore();
       break;
     }
@@ -1293,6 +1447,37 @@ function drawHairBack(ctx, K, backView) {
       ctx.fillStyle = C(K.look.mesh); ctx.beginPath(); ctx.moveTo(-17.5, 6); ctx.lineTo(-19 - sway, 18); ctx.lineTo(-15.5, 10); ctx.closePath(); ctx.fill();
     }
   }
+  else if (st === 'braid') {
+    // 後ろに垂れる三つ編み（揺れる）
+    let bx = -14, by = -6;
+    for (let i = 0; i < 6; i++) {
+      const nx = -18 - i * 1.2 - sway * (i * 0.6), ny = by + 6.2;
+      ctx.beginPath(); ctx.ellipse((bx + nx) / 2, (by + ny) / 2, 4.6 - i * 0.25, 4.0, (i % 2 ? 0.5 : -0.5), 0, PI * 2);
+      fillStroke(ctx, i % 2 ? H.base : H.dark, 1.6);
+      bx = nx; by = ny;
+    }
+    ctx.beginPath(); ctx.arc(bx, by + 1, 2.4, 0, PI * 2); fillStroke(ctx, K.look.tie || '#ff5fa2', 1.2);
+    ctx.beginPath(); ctx.moveTo(bx - 3, by + 3); ctx.lineTo(bx - 1, by + 9); ctx.lineTo(bx + 1.5, by + 8); ctx.lineTo(bx + 2.5, by + 3); ctx.closePath(); fillStroke(ctx, H.base, 1.2);
+  } else if (st === 'curly') {
+    // もこもこのボリューム（円の集まり: 先に縁取り→後で塗りだけ重ねて内側の線を消す）
+    const B = [];
+    for (let i = 0; i < 13; i++) { const a = PI * 0.82 + (i / 12) * PI * 1.36; B.push([Math.cos(a) * 19.5, -3 + Math.sin(a) * 18, 7 + (i % 2) * 1.2]); }
+    B.push([-17, 9, 6.5], [17, 9, 6.5]);
+    ctx.lineWidth = OLW; ctx.strokeStyle = OC();
+    for (const [x, y, r] of B) { ctx.beginPath(); ctx.arc(x, y, r, 0, PI * 2); ctx.stroke(); }
+    ctx.fillStyle = C(H.dark);
+    for (const [x, y, r] of B) { ctx.beginPath(); ctx.arc(x, y, r, 0, PI * 2); ctx.fill(); }
+  } else if (st === 'sidepart') {
+    ctx.beginPath(); ctx.moveTo(-19, -4); ctx.bezierCurveTo(-21, 6, -19, 12, -13, 13); ctx.lineTo(13, 11);
+    ctx.bezierCurveTo(18, 9, 20, 4, 19, -4); ctx.closePath(); fillStroke(ctx, H.dark);
+  } else if (st === 'messy') {
+    ctx.beginPath(); ctx.moveTo(-18, -6); ctx.lineTo(-21, 4); ctx.lineTo(-17, 3); ctx.lineTo(-18.5 - sway, 12); ctx.lineTo(-12, 8);
+    ctx.lineTo(-9, 12); ctx.lineTo(10, 10); ctx.lineTo(17, 3); ctx.lineTo(17, -6); ctx.closePath(); fillStroke(ctx, H.dark);
+  } else if (st === 'topknot') {
+    ctx.beginPath(); ctx.ellipse(-2, -22, 6.5, 6, -0.2, 0, PI * 2); fillStroke(ctx, H.base);
+    ctx.beginPath(); ctx.ellipse(-2, -16.5, 4, 1.8, 0, 0, PI * 2); fillStroke(ctx, K.look.tie || '#ff3d7f', 1.2);
+    ctx.strokeStyle = C(H.hi); ctx.lineWidth = 1.3; ctx.beginPath(); ctx.arc(-2, -22, 3.6, -2.6, -1.2); ctx.stroke();
+  }
   // 後頭部
   ctx.beginPath(); ctx.ellipse(0, -2, 18.6, 17.4, 0, 0, PI * 2);
   fillStroke(ctx, backView ? H.base : H.dark);
@@ -1316,10 +1501,20 @@ const BANGS = {
   ponytail: [[17.4, 6], [14.5, 6], [13, -1], [10.5, -2.6], [7, -9], [4, -2.6], [0, -9.5], [-3.5, -2.5], [-7, -9], [-10.5, -1.6], [-13, 0], [-14.5, 6], [-17.8, 6]],
   spiky: [[17.2, 3], [15, 3], [13, -3], [11, -0.5], [8, -9], [5.5, 0.5], [2, -9], [-1.5, -0.5], [-5, -9], [-8.5, -1.5], [-11, -8], [-13.5, -0.5], [-15, 3], [-17.6, 3]],
   wolf: [[17.6, 9], [15, 8], [14, -1], [12, -3], [9.5, -9], [7, 1], [4, -8], [2.5, 4], [0, -7], [-3, -1], [-6, -9], [-9, -1], [-11, -7], [-13, 1], [-14, 9], [-18.2, 11]],
+  // v3 追加
+  undercut: [[16.8, -2], [14.8, -3], [14, -8], [11, -6], [7, -4], [3, -2.5], [-1, -1], [-5, 1.5], [-9, 4.5], [-11.5, 5.5], [-13, 0], [-14.6, -4], [-17.2, -4]],
+  sidepart: [[17.4, 6], [14.6, 6], [13, -2], [10, -4], [7, -9], [4, -5], [1, -3.5], [-1.5, 3], [-3.5, 8.5], [-6.5, 10.5], [-10, 9], [-13, 6], [-14.6, 10], [-18.4, 12]],
+  messy: [[17.6, 5], [15.2, 4], [14.5, -2], [12.5, -1], [10, -8], [7.5, -1.5], [5, -7.5], [2.5, 0], [-0.5, -8], [-3, -1], [-6.5, -9], [-8.5, 0], [-11.5, -6], [-13.5, 2], [-15, 6], [-18, 6]],
+  braid: [[17.4, 5], [14.5, 5], [13, -1], [10.5, -2.6], [7.5, -9], [4.5, -3], [1, -9], [-2.5, -3], [-6, -9.5], [-9.5, -2], [-12.5, 0], [-14.5, 6], [-17.8, 6]],
+  topknot: [[17.2, 2], [15, 2], [13.5, -4], [10.5, -5], [8, -10], [5, -5], [1.5, -10], [-2, -5], [-5.5, -10], [-9, -4.5], [-12, -6], [-14, -1], [-15.4, 2], [-17.6, 2]],
+  curly: [[19.2, 8], [15.5, 8], [14, -1], [11.5, -2], [10, -7], [7, -2.5], [5, -8], [2, -3], [-1, -8.5], [-4, -3], [-7, -8.5], [-10, -2], [-12.5, -1], [-14.8, 8], [-19.4, 8]],
 };
 const DOMES = {
   spiky: [[-18.2, -4], [-21, -12], [-17, -13], [-19.5, -22], [-11, -19], [-9, -28], [-3, -20.5], [2, -29], [6, -20.5], [13, -26], [13, -17.5], [20.5, -18], [17.5, -10], [18.6, -4]],
   wolf: [[-18.2, -4], [-21.5, -10], [-17.5, -12], [-19.5, -19], [-12, -17.5], [-10, -24], [-4, -19.5], [1, -24.5], [6, -19.5], [12, -21.5], [12.5, -15.5], [18.5, -14], [18.6, -4]],
+  undercut: [[-17.2, -4], [-17.6, -12], [-14, -19], [-8, -24.5], [0, -27], [8, -26.5], [15, -23], [20, -17], [22.5, -11], [19, -10], [17.4, -4]],
+  messy: [[-18.4, -4], [-21, -9], [-18, -11], [-20.5, -16], [-14.5, -17.5], [-14, -23], [-8, -21], [-5, -26], [0, -21.5], [4.5, -26], [8, -21], [14, -23], [13.5, -17], [19.5, -16], [17.5, -11], [20.5, -8], [18.4, -4]],
+  curly: [[-19.4, -4], [-22, -9], [-20.5, -15], [-16.5, -20], [-11, -24.5], [-4.5, -26.5], [2.5, -26.5], [9, -24.5], [14.5, -21], [19, -16], [21.5, -10], [19.4, -4]],
 };
 
 function drawHairFront(ctx, K) {
@@ -1357,6 +1552,23 @@ function drawHairFront(ctx, K) {
   }
   if (K.look.hair === 'ponytail') {
     ctx.beginPath(); ctx.arc(-14, -10, 2.4, 0, PI * 2); fillStroke(ctx, K.look.tie || '#ff5fa2', 1.2);
+  }
+  const hs = K.look.hair;
+  if (hs === 'undercut') {
+    // 刈り上げ（側頭部のライン）
+    ctx.strokeStyle = C(H.dark); ctx.lineWidth = 1.1; ctx.beginPath();
+    for (let i = 0; i < 4; i++) { ctx.moveTo(-16.5 + i * 0.8, -3 + i * 0.2); ctx.lineTo(-15.2 + i * 0.8, 2.5); }
+    ctx.stroke();
+    ctx.strokeStyle = C(H.hi); ctx.lineWidth = 1.8; ctx.beginPath(); ctx.moveTo(-8, -21); ctx.quadraticCurveTo(6, -24, 17, -15); ctx.stroke();
+  } else if (hs === 'sidepart') {
+    ctx.strokeStyle = C(H.dark); ctx.lineWidth = 1; ctx.beginPath();
+    ctx.moveTo(-1, -12); ctx.quadraticCurveTo(-3, -2, -5.5, 8); ctx.moveTo(-6, -11); ctx.quadraticCurveTo(-8, 0, -10, 7); ctx.stroke();
+  } else if (hs === 'curly' || hs === 'messy') {
+    ctx.strokeStyle = C(H.dark); ctx.lineWidth = 1; ctx.beginPath();
+    for (const [x, y] of [[-12, -15], [-3, -19], [7, -18], [13, -12]]) { ctx.moveTo(x + 2.5, y); ctx.arc(x, y, 2.5, 0, PI * 1.4); }
+    ctx.stroke();
+  } else if (hs === 'braid') {
+    ctx.beginPath(); ctx.arc(-15, -6, 2.2, 0, PI * 2); fillStroke(ctx, K.look.tie || '#ff5fa2', 1.1);
   }
 }
 

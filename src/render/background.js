@@ -5,6 +5,7 @@
 import { shade, rgba, rng, hashStr, rr, starPath, makeCanvas, lerp, mix, mixW, clamp, OUTLINE } from './util.js';
 import { drawDecor } from './decor.js';
 import { drawScene } from './bgScenes.js';
+import { drawSpecial, specialOf, specialTile } from './bgSpecial.js';
 
 const PI = Math.PI;
 const LW = 1024;
@@ -26,7 +27,14 @@ const sceneMemo = new WeakMap();
 export function sceneOf(map) {
   if (!map) return { region: 'beach', v: 0, town: false, id: '' };
   let s = sceneMemo.get(map);
-  if (s && s.r0 === map.region && s.t0 === map.theme && s.v0 === map.variant && s.w0 === map.town) return s;
+  if (s && s.r0 === map.region && s.t0 === map.theme && s.v0 === map.variant && s.w0 === map.town && s.i0 === map.instance && s.f0 === map.floor && s.b0 === map.bossId) return s;
+  const sp = specialOf(map);
+  if (sp) {
+    s = { region: sp.kind, v: sp.v, town: false, id: map.id || '', indoor: true, special: sp, r0: map.region, t0: map.theme, v0: map.variant, w0: map.town, i0: map.instance, f0: map.floor, b0: map.bossId };
+    s.tile = specialTile(map);
+    sceneMemo.set(map, s);
+    return s;
+  }
   let region = map.region || map.theme;
   if (REGIONS.indexOf(region) < 0) region = map.theme && REGIONS.indexOf(map.theme) >= 0 ? map.theme : 'beach';
   const town = !!map.town;
@@ -34,7 +42,7 @@ export function sceneOf(map) {
   if (v == null) v = ((map.variant | 0) % 4 + 4) % 4;
   // v1 互換（region/variant 未設定の旧マップ）: カジノ・屋上は従来の見た目
   if (!map.region && map.variant == null && ID_VARIANT[map.id] == null && (region === 'rooftop' || region === 'casino')) v = 3;
-  s = { region, v, town, id: map.id || '', indoor: !town && !!INDOOR[region + ':' + v], r0: map.region, t0: map.theme, v0: map.variant, w0: map.town };
+  s = { region, v, town, id: map.id || '', indoor: !town && !!INDOOR[region + ':' + v], r0: map.region, t0: map.theme, v0: map.variant, w0: map.town, i0: map.instance, f0: map.floor, b0: map.bossId };
   sceneMemo.set(map, s);
   return s;
 }
@@ -128,7 +136,7 @@ export function drawBackground(ctx, map, cam, W, H, time) {
   const groundY = (map && map.groundY) || 1000;
   const gS = groundY - cam.y;
   const horizon = lerp(H * 0.78, gS - 120, 0.25);
-  const key = sc.region + ':' + (sc.town ? 't' : sc.v) + ':' + (sc.town ? sc.v : '');
+  const key = sc.region + ':' + (sc.town ? 't' : sc.v) + ':' + (sc.town ? sc.v : '') + (sc.special && sc.special.kind === 'tower' ? ':' + (sc.special.floor % 10 === 0 ? 'b' : '') : '');
   const layers = sceneLayers(key);
   let lights = 0;
   for (const k in TOD_LIGHTS) lights += w[k] * TOD_LIGHTS[k];
@@ -195,7 +203,7 @@ export function drawBackground(ctx, map, cam, W, H, time) {
   ctx.save();
   ctx.clearRect(0, 0, W, H);
   ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-  try { drawScene(ctx, S); } catch (e) { console.warn('[background] scene failed', e); }
+  try { if (!(sc.special && drawSpecial(ctx, S, map))) drawScene(ctx, S); } catch (e) { console.warn('[background] scene failed', e); }
   // 色調補正（描いた部分だけ）
   let [tc, ta] = weighted(TOD_TINT, w);
   if (S.indoor) ta *= 0.25;
@@ -218,7 +226,7 @@ export function drawBackground(ctx, map, cam, W, H, time) {
   if (starA > 0.02) drawStars(ctx, sc.region, 140, W, H, time, cam, starA);
   const skyB = Math.max(H * 0.4, horizon + 40);
   const sky = ctx.createLinearGradient(0, Math.min(0, skyB - H), 0, skyB);
-  const rs = REGION_SKY[sc.region];
+  const rs = REGION_SKY[sc.region] || REGION_SKY.downtown;
   const keys = ['dawn', 'day', 'dusk', 'night'];
   const ws = keys.map((k) => w[k]);
   for (let i = 0; i < 4; i++) {
@@ -365,8 +373,8 @@ function viewRange(ctx) {
 export function drawMapTiles(ctx, map, time) {
   if (!map) return;
   const sc = sceneOf(map);
-  const theme = tileTheme(sc);
-  const S = TILE[theme];
+  const theme = sc.special ? sc.special.kind : tileTheme(sc);
+  const S = sc.special ? sc.tile : TILE[theme];
   const region = sc.region;
   time = time || 0;
   const V = viewRange(ctx);
@@ -413,6 +421,18 @@ function drawGround(ctx, map, S, theme, V, time) {
   const step = 64;
   const i0 = Math.floor(x0 / step), i1 = Math.ceil(x1 / step);
   switch (S.gk || theme) {
+    case 'tower': case 'arena': case 'boss': {
+      ctx.fillStyle = S.top; ctx.fillRect(x0, gy, x1 - x0, 8);
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = rgba(S.neon, 0.55 + 0.2 * Math.sin(time * 2)); ctx.fillRect(x0, gy + 8, x1 - x0, 2);
+      ctx.restore();
+      ctx.strokeStyle = 'rgba(0,0,0,0.28)'; ctx.lineWidth = 1; ctx.beginPath();
+      for (let i = i0; i <= i1; i++) { ctx.moveTo(i * step, gy + 10); ctx.lineTo(i * step, gy + 200); }
+      for (let y = gy + 40; y < gy + 200; y += 36) { ctx.moveTo(x0, y); ctx.lineTo(x1, y); }
+      ctx.stroke();
+      if (S.gk === 'arena') { ctx.fillStyle = rgba(S.neon, 0.25); for (let i = i0; i <= i1; i++) if (i % 4 === 0) ctx.fillRect(i * step, gy + 10, 3, 30); }
+      break;
+    }
     case 'tunnel': {
       ctx.fillStyle = S.top; ctx.fillRect(x0, gy, x1 - x0, 10);
       ctx.fillStyle = '#ffc93c'; ctx.fillRect(x0, gy + 10, x1 - x0, 4);

@@ -7,7 +7,7 @@ import { useSkill, tryFinalAttack } from '../systems/skills.js';
 import { playerAttackArea, newAttackId } from '../systems/combat.js';
 import { currentJob } from '../systems/jobs.js';
 import { defaultLook } from '../data/classes.js';
-import { sysFn, reportHits } from '../world/sys.js';
+import { sysFn } from '../world/sys.js';
 import { getItem } from '../data/items.js';
 import { moveAndCollide, findRope, entRect, rectOverlap } from '../world/physics.js';
 import { Projectile } from './projectile.js';
@@ -161,6 +161,7 @@ export class Player {
     else if (this.climbing) this.updateClimb(dt, ctrl);
     else this.updateMove(dt, ctrl, st);
 
+    if (this.onGround || this.climbing) this.fjCount = 0;
     // 自動吸引（近くの着地済みドロップ）
     this.autoPickup(ctrl && inp.down('pickup'));
     this.updateAnim(dt);
@@ -235,9 +236,15 @@ export class Player {
     if (this.inVehicle) return false;
     const best = this.nearestNpc();
     if (!best) return false;
-    g.ui?.open?.('dialog', { npc: best, service: best.service || null });
     g.events?.emit('talkNpc', { npcId: best.id });
-    if (best.service) g.events?.emit('serviceNpc', { npcId: best.id, service: best.service, bossId: best.data?.bossId || null });
+    if (best.service) {
+      // コンテンツ受付: UI のコンテンツ窓（U）を開く。未実装なら通常の会話にフォールバック
+      const tab = best.service === 'content' ? null : best.service;
+      g.events?.emit('serviceNpc', { npcId: best.id, service: best.service, tab });
+      g.ui?.open?.('content', { npc: best, tab, from: 'npc' });
+      if (!g.ui?.wins || g.ui.wins.content) return true;
+    }
+    g.ui?.open?.('dialog', { npc: best });
     return true;
   }
 
@@ -373,7 +380,9 @@ export class Player {
       case 'flashJump': {
         // 空中で前方へ2段ジャンプ。リコイル: 後方へ射撃した反動で跳ぶ
         if (this.climbing) { this.climbing = null; this.ropeCd = 0.3; }
-        const lift = mv.lift ?? 380;
+        // 同じ滞空中の2回目以降は上昇量を抑える（無限上昇を防ぐ。横移動はそのまま）
+        const lift = (mv.lift ?? 380) * (this.fjCount > 0 ? 0.35 : 1);
+        this.fjCount = (this.fjCount || 0) + 1;
         this.vx = dir * Math.max(power, 200);
         this.vy = Math.min(this.vy, 0) * 0.25 - lift;
         this.onGround = false;
@@ -382,7 +391,9 @@ export class Player {
         if (mv.backShot && !town) {
           const b = mv.backShot;
           const ox = this.x - dir * 20, oy = this.y - this.h * 0.55;
-          const rect = { x: dir > 0 ? ox - b.w : ox, y: oy - b.h / 2, w: b.w, h: b.h };
+          // 反動弾は後方へ水平に。小ジャンプ中でも地上の敵に当たるよう足元側へ広げる
+          const bh = Math.max(b.h, 60);
+          const rect = { x: dir > 0 ? ox - b.w : ox, y: oy - bh / 2, w: b.w, h: bh + this.h * 0.55 + 50 };
           spawnEffect(g, 'muzzle', ox, oy, { dir: -dir, facing: -dir, color });
           const hits = playerAttackArea(g, rect, b.mult, { hits: 1, knock: 260, effect: 'hit', color, maxTargets: 6, knockDir: -dir });
           this.afterHits(hits);
@@ -425,7 +436,8 @@ export class Player {
       case 'wheelDash': {
         if (this.climbing) this.climbing = null;
         const speed = power || 900;
-        const time = Math.max(0.3, mv.time || (dist > 0 ? dist / speed : 1.6));
+        // 目安距離 distance（Lv・3次強化で伸びる）を power で走り切る時間。データに time しか無ければそれを使う
+        const time = Math.max(0.3, dist > 0 ? dist / speed : (mv.time || 1.6));
         this.move = { type: 'wheelDash', t: time, total: time, dir, speed, skill, color, contact: town ? null : (mv.contact || { mult: 0.8, knock: 360 }), attackId: newAttackId(), hitT: 0, airT: 0, faDone: false };
         this.vx = dir * speed * 0.6;
         spawnEffect(g, 'dash', this.x, this.y - this.h / 2, { color, facing: dir });
@@ -521,12 +533,12 @@ export class Player {
     }
   }
 
-  /** 移動スキル・通常攻撃の命中後処理: ファイナルアタック（1技1回）＋コンボ */
+  /** 移動スキル・通常攻撃の命中後処理: ファイナルアタック（1技1回）。コンボは combat.damageEnemy → systems/combo.js が数える */
   afterHits(hits, m = null) {
     if (!hits || !hits.length) return;
     const g = this.game;
-    if (!m || !m.faDone) { if (m) m.faDone = true; try { tryFinalAttack(g, hits); } catch (e) { /* noop */ } }
-    reportHits(g, hits);
+    const foes = hits.filter((e) => e && !e.civilian); // 市民にはファイナルアタックを出さない
+    if (foes.length && (!m || !m.faDone)) { if (m) m.faDone = true; try { tryFinalAttack(g, foes); } catch (e) { /* noop */ } }
   }
 
   /** 横テレポート: 壁・マップ端の手前で止まる（壁抜け不可） */
