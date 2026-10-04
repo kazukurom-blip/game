@@ -23,6 +23,29 @@ maps.js の `npcs[].id` はこの npcId を使ってください。フィール�
 
 **v2 で追加**: `dr_stella`（ステラ博士）, `ace_jet`（エース・ジェット）を `spaceport` に、ショップ専用 `shop_downtown` を `downtown` に（任意）。全7町に依頼NPCが最低1人います（beach: rico/sunny, downtown: mama_rosa/officer_kai, slums: dj_pulse/tank, swamp: old_boone, casino: vivi, rooftop: nova, spaceport: dr_stella/ace_jet）。
 
+## v3: 転職教官NPC（maps.js の npcs に配置。`MISSION_NPCS[id].jobInstructor === true`）
+
+転職ミッション（`MISSIONS[*].type === 'job'`）の **報告先**。受注はプレイヤー頭上の吹き出し（`jobOffer` → `acceptJobMission`）からのみで、教官の `available()` には転職ミッションは出ない。報告可になると `npcMarker(id) === '?'`。
+look/equip は `L(style, c1, c2)` 形式（maps.js の既存 NPC と同じ）の提案。
+
+| npcId | 名前 | 町 mapId | 担当 | look 提案 | equip 提案 | 会話（dialog） |
+|---|---|---|---|---|---|---|
+| `job_velvet` | マダム・ヴェルヴェット | `downtown` | 1次 / ストリートスター（ガンナー・ダンサー） | `{body:'f', skin:'#f1c7a5', hair:'long', hairColor:'#7a1f5c', eyeColor:'#ff3d7f'}` | hat `L('cowboy','#2b1030','#ff3d7f')`, top `L('suit','#2b1030','#ff3d7f')`, bottom `L('skirt','#2b1030')`, shoes `L('heels','#ff3d7f')`, accessory `L('sunglasses','#ff3d7f')`, weapon `L('pistol','#ff6fb5','#ffd23f')` | 「撃つか、踊るか。どっちの才能もこの街じゃ武器になるわ」 |
+| `job_bull` | ブル・ガードナー | `downtown` | 1次 / ストリートブロウラー（ブロウラー・レーサー） | `{body:'m', skin:'#a86b45', hair:'short', hairColor:'#2a1a10', eyeColor:'#ff8a00'}` | hat `L('bandana','#ff8a00','#1d1d24')`, top `L('tank','#1d1d24','#ff8a00')`, bottom `L('trackPants','#3a3a46','#ff8a00')`, shoes `L('boots','#2a2018')`, accessory `L('goldChain','#ffd166')` | 「拳で行くか、ハンドルで行くか。ガキの頃の俺は両方だったぜ」 |
+| `job_zero` | ゼロ | `downtown` | 1次 / ストリートハッカー（ネットランナー・ドローンパイロット） | `{body:'m', skin:'#e8c4a8', hair:'bob', hairColor:'#1d1d24', eyeColor:'#3dff8a'}` | hat `L('headphones','#1d1d24','#3dff8a')`, top `L('hoodie','#1d2b24','#3dff8a')`, bottom `L('cargo','#2a2f38')`, shoes `L('sneakers','#f4f4f4','#3dff8a')`, accessory `L('sunglasses','#3dff8a')`, weapon `L('staff','#3dff8a','#1d1d24')` | 「ネットの海は広いよ。泳ぎ方、教えてあげる」 |
+| `job_lily` | ゴースト・リリィ | `slums` | 2次 / ストリートスター | `{body:'f', skin:'#f5e6dc', hair:'ponytail', hairColor:'#e8e8ff', eyeColor:'#3dffd0'}` | hat `L('beanie','#1d1d24','#3dffd0')`, top `L('leatherJacket','#1d1d24','#ff5fa2')`, bottom `L('cargo','#2a2a33')`, shoes `L('boots','#1d1d24')`, accessory `L('scarf','#3dffd0')`, weapon `L('smg','#ff5fa2','#1d1d24')` | 「…霧の夜は好き。弾も、ステップも、音がよく響くから」 |
+| `job_byte` | バイト | `slums` | 2次 / ストリートハッカー | `{body:'m', skin:'#8d5a3b', hair:'spiky', hairColor:'#ffc94d', eyeColor:'#ffb000'}` | hat `L('helmet','#3a3a46','#ffb000')`, top `L('armorVest','#3a3a46','#ffb000')`, bottom `L('cargo','#4a4a3a')`, shoes `L('boots','#2a2018')`, accessory `L('goldChain','#c0c0c8')` | 「ジャンクは宝の山だ。使えるやつにはな」 |
+| `job_croc` | クロック・ジョー | `swamp` | 2次 / ストリートブロウラー | `{body:'m', skin:'#c98a5a', hair:'short', hairColor:'#4a6a2a', eyeColor:'#ffd23f'}` | hat `L('cowboy','#4a6a2a','#ffd23f')`, top `L('hawaiian','#4a6a2a','#ffd23f')`, bottom `L('shorts','#3a4a2a')`, shoes `L('sandals','#5a3a22')`, accessory `L('goldChain','#ffd166')` | 「ヘッヘ、沼じゃ強いやつと速いやつに金が集まるのさ」 |
+| `job_diamond` | クイーン・ダイヤ | `casino` | 3次 / ストリートスター | `{body:'f', skin:'#ffe0cc', hair:'long', hairColor:'#ffd23f', eyeColor:'#c77dff'}` | hat `L('crown','#ffd23f','#c77dff')`, top `L('idolDress','#c77dff','#ffd23f')`, bottom `L('skirt','#c77dff')`, shoes `L('heels','#ffd23f')`, accessory `L('goldChain','#ffd23f')`, weapon `L('pistol','#ffd23f','#c77dff')` | 「ステージも賭場も同じ。主役になれるのは一人だけよ」 |
+| `job_tiger` | タイガー・ゴウ | `casino` | 3次 / ストリートブロウラー | `{body:'m', skin:'#f0c8a0', hair:'spiky', hairColor:'#ff8a00', eyeColor:'#ff3b3b'}` | top `L('suit','#1d1d24','#ff3b3b')`, bottom `L('suitPants','#1d1d24')`, shoes `L('loafers','#3a2a1a')`, accessory `L('sunglasses','#ff3b3b')` | 「ストリップの夜は長い。龍になるか、風になるか決めてこい」 |
+| `job_cipher` | サイファー | `rooftop` | 3次 / ストリートハッカー | `{body:'f', skin:'#d9a07a', hair:'bob', hairColor:'#00ffa3', eyeColor:'#ffffff'}` | hat `L('catEars','#1d1d24','#00ffa3')`, top `L('hoodie','#101418','#00ffa3')`, bottom `L('trackPants','#101418','#00ffa3')`, shoes `L('sneakers','#101418','#00ffa3')`, accessory `L('mask','#00ffa3')`, weapon `L('staff','#00ffa3','#ff8a3d')` | 「ノヴァ？ ああ、私の弟子。腕はまあまあね」 |
+| `job_celes` | セレス | `spaceport` | 4次 / ストリートスター | `{body:'f', skin:'#f5d0b0', hair:'twin', hairColor:'#7df9ff', eyeColor:'#ffd23f'}` | hat `L('helmet','#ffffff','#7df9ff')`, top `L('idolDress','#7df9ff','#ffd23f')`, bottom `L('skirt','#ffffff')`, shoes `L('heels','#7df9ff')`, accessory `L('halo','#ffd23f')`, weapon `L('pistol','#ffd23f','#7df9ff')` | 「歌もお尋ね者も、銀河じゃ名前が売れてナンボよ」 |
+| `job_kaiser` | カイザー・マグナ | `spaceport` | 4次 / ストリートブロウラー | `{body:'m', skin:'#b07a50', hair:'wolf', hairColor:'#ffffff', eyeColor:'#ffd23f'}` | hat `L('helmet','#3a3a46','#ffd23f')`, top `L('armorVest','#3a3a46','#ffd23f')`, bottom `L('armorPants','#3a3a46')`, shoes `L('boots','#1d1d24')`, accessory `L('wings','#ffd23f')` | 「覇王の拳と光速の走り。どちらも頂点は孤独だぞ」 |
+| `job_quasar` | クェーサー | `spaceport` | 4次 / ストリートハッカー | `{body:'f', skin:'#bff6ff', hair:'long', hairColor:'#b6ff3d', eyeColor:'#ffffff'}`（半透明ホログラム推奨 `anim.alpha:0.8`） | top `L('suit','#e8ffff','#b6ff3d')`, bottom `L('suitPants','#e8ffff')`, shoes `L('loafers','#e8ffff')`, accessory `L('halo','#b6ff3d')` | 「……接続者を確認。演算を開始する」 |
+
+転職段階と町: 1次=`downtown`（3人）, 2次=`slums`（リリィ・バイト）/`swamp`（クロック）, 3次=`casino`（ダイヤ・タイガー）/`rooftop`（サイファー）, 4次=`spaceport`（3人）。
+転職ミッションの試練の敵/ボスは `docs/SPEC_JOB.md`「転職ミッション一覧」を参照（全て habitats で出現確認済み）。
+
 ## 町ごとのショップ品揃え（提案。`src/data/shops.js` の `TOWN_SHOPS` を import して `npcs[].shop` に使えます）
 
 | 町 | npcId | 店名 | itemId |

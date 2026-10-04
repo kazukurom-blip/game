@@ -58,3 +58,41 @@
 - **NPCの日常**: 時間帯でNPCが移動・セリフが変化。
 - **選択肢のあるストーリー**: 一部ミッションで選択（警察に協力 / ギャングに付く）→ セリフ・報酬・称号が変わる。
 - **フレーバーの作り込み**: 全モンスター・全装備に説明文、町ごとの歴史、新聞（スマホ）で世界のニュースが進行に合わせて更新。
+
+## 6. v3 実装ウェーブの担当とAPI契約（全担当このとおりに）
+
+### 所有ファイル
+- システム担当: `src/data/*`, `src/systems/*`（新規: `guide.js`, `tune.js`, `potential.js`, `tower.js`, `arena.js`, `bosses.js`, `achievements.js`, `daily.js`, `presets.js`, `shared.js`）
+- ワールド担当: `src/world/*`, `src/entities/*`
+- UI担当: `src/ui/*`
+- アート担当: `src/render/*`
+- サウンド担当: `src/audio/*`
+- メイン: `src/main.js`, `src/core/*`
+
+### システム API（システム担当が実装、UI/ワールドが呼ぶ）
+- `guide.js`: `missionGuide(game, missionId)` → `[{objIndex, text, done, mapId, mapName, npcId, npcName, npcMapId, targetName, route:[mapId], nextPortal:{x,y,to,label}|null}]`、`trackedGuide(game)`（追跡中1件の次の目的地）。
+- `tune.js`（ネオン・チューン＝★強化）: `tuneInfo(state, itemRef)` → `{star, maxStar, rate, cost, pity, pityMax, nextStats}`、`tuneItem(game, itemRef)` → `{ok, success, star, msg}`。装備はインスタンス化が必要: inventory のエントリに `uid` と `star`, `pot` を持たせる（`{id, qty:1, uid, star, pot:{grade, lines:[{stat,value}]}}`）。装備中も `state.equippedInst[slot]` でインスタンスを保持（互換のため `equipped[slot]` は itemId のまま）。computeStats に★と潜在を反映。
+- `potential.js`（チップ潜在＝キューブ）: `POT_GRADES`, `rollPotential(item, grade, rng)`, `useChip(game, itemRef, chipId)` → `{before, after, gradeUp}`（結果を見てから `applyChipResult(game, itemRef, keep:boolean)`）、`lockLine`。ドロップ時に低確率で潜在付き（`drop` 生成時に `maybePotential(item)`）。確率表 `POT_RATES` を公開。チップは敵ドロップ・ショップ・ボス報酬。
+- `bosses.js`: `BOSS_MODES = {normal, hard, chaos, practice}`、`bossEntry(game, bossId, mode)`（ボス部屋マップへ移動）、`bossClears(state)`、日次/週次の回数管理（2周期まで持ち越し）、記録（最大ダメージ・タイム）。
+- `tower.js`（ヴァイス・スパイア）: `towerEnter(game, floor)`、`towerFloorDef(floor)`（敵・ボス・ミューテーター）、`towerClearFloor(game)`、`towerBest(state)`、週次報酬。Lv40 解放。
+- `arena.js`（ネオン・アリーナ）: 時間制ウェーブ、1日回数、経験値ボーナス。
+- `achievements.js`: `ACHIEVEMENTS`（100件程度）、`attachAchievements(game)`、`achievementList(state)`、称号。
+- `daily.js`: ログインボーナス（カレンダー）、日次/週次リセット（ローカル時刻）。
+- `presets.js`: スキルバー＆装備セット2つの保存/切替。
+- `shared.js`: キャラ間共有（倉庫・図鑑・実績）を `localStorage` の別キーで（try/catch）。
+- ストーリー分岐: 一部ミッションに `choices:[{id, text, reward, flag}]`。
+
+### ワールド API
+- `player.doMoveSkill(skill, lv, params)`（flashJump / teleport / rush / glide / wheelDash）、ファイナルアタック呼び出し、`state.look` で描画、職の `aura` を `anim.aura` に。
+- NPC: 教官12人配置、V で会話（約90px 以内で頭上に「V で話す」）、頭上マークの色分け（メイン金・サブ水色・デイリー緑・転職ピンク）、夜だけ出るNPC/店（`npc.hours:[from,to]`）。
+- タワー/アリーナ/ボス部屋のマップ（手続き生成、`map.instance = 'tower'|'arena'|'boss'`）。
+
+### UI
+- キャラ選択（6スロット）・キャラ作成（クラス→♂♀→見た目→名前）。`titleInput(game)` は `{slot, state}` か `{slot, create:{classId,name,gender,look}}` を返す。ゲーム中メニューに「キャラ選択へ」（`game.returnToTitle()`）。
+- 転職の吹き出し（頭上・クリックで jobOffer 窓）、クエストナビ（詳細・ルート・画面端の矢印・ワールドマップで表示）、スキルバー8枠、スキル窓（skillsForHero, jobLockOf, getSp）、強化窓・潜在窓（確率・天井を常時表示）、コンテンツ窓（U: タワー/アリーナ/ボス難易度/ログインボーナス）、実績窓（O）、設定（エフェクト濃さ・ダメージ数字まとめ）、スキルのプレビュー再生。
+
+### アート
+- ヒットストップ/ズーム/色フラッシュ（`game.hitstop`, `game.camZoom` を main が反映）、4次奥義と転職のカットイン（`spawnEffect('cutin', ...)`）、★強化・レア度でスキル軌跡が変化、コンボカウンター表示、移動スキル5種のエフェクト、オーラ、エフェクト濃さ設定（`game.settings.fx`）、タワー/アリーナ/ボス部屋の背景、ハッカー用の武器・魔法エフェクト、キャラ作成用の髪型追加。
+
+### サウンド
+- 強化成功/失敗、チップ、等級アップ、カットイン、移動スキル、コンボ、タワー階クリア、実績解除のSE。手配度で緊迫度が上がるBGMレイヤー。

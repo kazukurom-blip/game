@@ -1,7 +1,7 @@
 // NEON VICE STORY — エントリーポイント / ゲームループ / 統合
 import { EventBus } from './core/events.js';
 import { Input } from './core/input.js';
-import { hasSave, loadState, saveState } from './core/save.js';
+import { hasSave, loadState, saveState, loadSlot, setActiveSlot, firstEmptySlot, saveSlot } from './core/save.js';
 
 import { MAPS } from './world/maps.js';
 import { Player } from './entities/player.js';
@@ -12,6 +12,7 @@ import { Spawner } from './entities/spawner.js';
 import { newState, computeStats, expToNext, setActiveBuffs, migrateState } from './systems/progression.js';
 import { attachSNS } from './systems/sns.js';
 import { attachTravel } from './systems/travel.js';
+import { attachJobs } from './systems/jobs.js';
 import { audio, attachAudio } from './audio/audio.js';
 import { MissionManager } from './systems/missions.js';
 import { updateSkills, resetCooldowns } from './systems/skills.js';
@@ -110,17 +111,37 @@ function updateClock(dt) {
   if (game.map) game.map._clock = s.clock;
 }
 
+/**
+ * choice:
+ *  - { slot, state }                 … キャラ選択画面から既存キャラで開始
+ *  - { slot, create: {classId, name, gender, look} } … 新規作成して開始
+ *  - 'continue' / 'luna' / 'jin' / 'hacker' … 旧形式（互換）
+ */
 function startGame(choice) {
   let state = null;
-  if (choice === 'continue') state = loadState();
-  if (!state) state = newState(choice === 'continue' ? 'luna' : choice);
+  let slot = -1;
+  if (choice && typeof choice === 'object') {
+    slot = Number.isInteger(choice.slot) ? choice.slot : firstEmptySlot();
+    if (choice.state) state = choice.state;
+    else if (Number.isInteger(choice.slot) && !choice.create) state = loadSlot(choice.slot);
+    if (!state && choice.create) {
+      const c = choice.create;
+      state = newState(c.classId || 'luna', { name: c.name, gender: c.gender, look: c.look });
+    }
+  } else if (choice === 'continue') {
+    state = loadState();
+  }
+  if (!state) state = newState(typeof choice === 'string' && choice !== 'continue' ? choice : 'luna');
   state = migrateState(state) || state;
+  if (slot < 0 && choice !== 'continue') slot = firstEmptySlot();
+  if (slot >= 0) { setActiveSlot(slot); saveSlot(slot, state); }
   game.state = state;
   game.clock = state.clock ?? 17;
   if (!systemsAttached) {
     systemsAttached = true;
     safe('attachSNS', () => attachSNS(game));
     safe('attachTravel', () => attachTravel(game));
+    safe('attachJobs', () => attachJobs(game));
   }
   game.wanted = 0; game.wantedHeat = 0;
   // 2回目以降の開始に備えて旧インスタンスのイベント購読・モジュール内状態を破棄
@@ -136,8 +157,23 @@ function startGame(choice) {
   if (!(state.mp >= 0)) state.mp = st.maxMp;
   game.scene = 'play';
   game.changeMap(MAPS[state.mapId] ? state.mapId : Object.keys(MAPS)[0]);
-  game.notify('←→移動 / Space ジャンプ / X 攻撃 / A S D F スキル / E 会話・乗車 / ↑ ポータル', '#ffd166');
+  game.notify('←→移動 / Space ジャンプ / X 攻撃 / A S D F Q W G H スキル / V 会話 / E 乗車 / ↑ ポータル', '#ffd166');
 }
+
+/** セーブしてタイトル（キャラ選択）へ戻る */
+game.returnToTitle = function () {
+  if (game.scene !== 'play') return;
+  game.save();
+  safe('ui.closeAll', () => game.ui.closeAll?.() ?? game.ui.close?.());
+  game.missions?.destroy?.();
+  game.player?.destroy?.();
+  if (game.pet) { game.pet.remove = true; game.pet = null; }
+  game.enemies.length = 0; game.projectiles.length = 0; game.drops.length = 0;
+  game.effects.length = 0; game.npcs = []; game.vehicles = [];
+  game.wanted = 0; game.wantedHeat = 0;
+  game.scene = 'title';
+  game.events.emit('returnedToTitle');
+};
 
 // --- グローバルイベント ---
 game.events.on('playerDied', () => {
