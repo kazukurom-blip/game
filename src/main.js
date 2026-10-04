@@ -1,7 +1,7 @@
 // NEON VICE STORY — エントリーポイント / ゲームループ / 統合
 import { EventBus } from './core/events.js';
 import { Input } from './core/input.js';
-import { hasSave, loadState, saveState, loadSlot, setActiveSlot, firstEmptySlot, saveSlot } from './core/save.js';
+import { hasSave, loadState, saveState, loadSlot, setActiveSlot, firstEmptySlot, saveSlot, onSlotDeleted } from './core/save.js';
 
 import { MAPS } from './world/maps.js';
 import { Player } from './entities/player.js';
@@ -13,6 +13,9 @@ import { newState, computeStats, expToNext, setActiveBuffs, migrateState } from 
 import { attachSNS } from './systems/sns.js';
 import { attachTravel } from './systems/travel.js';
 import { attachJobs } from './systems/jobs.js';
+import { attachAchievements } from './systems/achievements.js';
+import { attachDaily } from './systems/daily.js';
+import { attachShared, removeSharedChar } from './systems/shared.js';
 import { audio, attachAudio } from './audio/audio.js';
 import { MissionManager } from './systems/missions.js';
 import { updateSkills, resetCooldowns } from './systems/skills.js';
@@ -102,6 +105,7 @@ const game = {
 };
 window.game = game; // デバッグ/テスト用
 
+onSlotDeleted((slot) => safe('removeSharedChar', () => removeSharedChar(slot)));
 game.ui = new UIManager(game);
 game.debug = new DebugPanel(game);
 game.saveSettings = () => { try { localStorage.setItem('nvs_settings', JSON.stringify(game.settings)); } catch { /* ignore */ } };
@@ -151,6 +155,9 @@ function startGame(choice) {
     safe('attachSNS', () => attachSNS(game));
     safe('attachTravel', () => attachTravel(game));
     safe('attachJobs', () => attachJobs(game));
+    safe('attachAchievements', () => attachAchievements(game));
+    safe('attachDaily', () => attachDaily(game));
+    safe('attachShared', () => attachShared(game));
   }
   game.wanted = 0; game.wantedHeat = 0;
   // 2回目以降の開始に備えて旧インスタンスのイベント購読・モジュール内状態を破棄
@@ -198,6 +205,13 @@ game.events.on('playerDied', () => {
       s.mp = Math.ceil(st.maxMp * 0.5);
       game.wanted = 0; game.wantedHeat = 0;
       game.player.dead = false;
+      // ボス戦中でデスカウントが残っていれば、その場で復活して戦闘続行
+      if (game.bossRun && !game.bossRun.failed && !game.bossRun.cleared && game.map?.id === game.bossRun.roomId) {
+        s.hp = st.maxHp; s.mp = st.maxMp;
+        setPlayerInvuln(game, 3);
+        game.save();
+        return;
+      }
       // 今いる地域の町で復活（その町が未訪問なら最初の町）
       const reg = game.map?.region;
       const visited = game.state.visited || [];

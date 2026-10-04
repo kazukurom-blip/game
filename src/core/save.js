@@ -50,7 +50,14 @@ export function saveSlot(i, state) {
   return store.set(SLOT_PREFIX + i, JSON.stringify(state));
 }
 
-export function deleteSlot(i) { store.del(SLOT_PREFIX + i); if (activeSlot() === i) store.del(ACTIVE_KEY); }
+const deleteHooks = [];
+/** キャラ削除時に呼ばれる処理を登録（共有倉庫の整理など） */
+export function onSlotDeleted(fn) { deleteHooks.push(fn); }
+export function deleteSlot(i) {
+  store.del(SLOT_PREFIX + i);
+  if (activeSlot() === i) store.del(ACTIVE_KEY);
+  for (const fn of deleteHooks) { try { fn(i); } catch (e) { console.error('[onSlotDeleted]', e); } }
+}
 
 export function firstEmptySlot() {
   const l = listSlots();
