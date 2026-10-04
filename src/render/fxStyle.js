@@ -103,3 +103,6 @@ export const BRANCH_STYLE = {
   netrunner: { col: '#3dff8a', sub: '#b6ff3d', line: 'システム掌握――実行(Run)！' },
   dronemaster: { col: '#ffb000', sub: '#ffe14d', line: '全機発進、制圧開始！' },
 };
+
+/** 描画中エフェクトのアルファ倍率（エフェクト濃さ設定）。effects.js が描画前に設定する */
+export const FXA = { m: 1 };

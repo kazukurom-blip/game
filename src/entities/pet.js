@@ -5,6 +5,8 @@ import { drawPet } from '../render/pets.js';
 import { getItem } from '../data/items.js';
 import { MAX_SLOTS } from '../systems/inventory.js';
 import { spawnEffect } from '../render/effects.js';
+import { RARITY } from '../systems/loot.js';
+import { sysFn } from '../world/sys.js';
 
 const FLYING = new Set(['dronePet', 'ghostPet', 'alienPet', 'dragonPet', 'dolphinPet', 'flamingoPet']);
 const WARP_DIST = 640;
@@ -15,6 +17,28 @@ function canAccept(state, item) {
   if (inv.length < MAX_SLOTS) return true;
   if (!item || item.type === 'equip') return false;
   return inv.some((s) => s.id === item.id);
+}
+
+/**
+ * 拾うフィルタ（UI が state.petFilter を書き換える）。既定は全部拾う。
+ * {money:bool, consumable:bool, equip:bool, etc:bool, minRarity:'common'|'rare'|'epic'|'legendary'|'mythic'}
+ */
+export const DEFAULT_PET_FILTER = { money: true, consumable: true, equip: true, etc: true, minRarity: 'common' };
+export function petFilterOf(state) {
+  const f = state?.petFilter || state?.pet?.filter || state?.settings?.petFilter || null;
+  return f && typeof f === 'object' ? { ...DEFAULT_PET_FILTER, ...f } : DEFAULT_PET_FILTER;
+}
+/** PET がこのドロップを拾うか（フィルタ判定） */
+export function petWants(state, d) {
+  const f = petFilterOf(state);
+  if (d.money != null) return f.money !== false;
+  const it = d.item || {};
+  const type = it.type === 'equip' ? 'equip' : it.type === 'consumable' ? 'consumable' : 'etc';
+  if (f[type] === false) return false;
+  const ord = (r) => RARITY?.[r]?.order ?? 0;
+  // PET アイテム（rarity 'pet'）は常に拾う（取り逃がし防止）
+  if (it.rarity === 'pet') return true;
+  return ord(it.rarity || 'common') >= ord(f.minRarity || 'common');
 }
 
 export class Pet {
@@ -60,6 +84,7 @@ export class Pet {
       const dist = Math.hypot(d.x - p.x, d.y - p.y);
       if (dist > this.pickRange) continue;
       if (d.money == null && !canAccept(g.state, d.item)) continue;
+      if (!petWants(g.state, d)) continue;
       const pd = Math.hypot(d.x - this.x, d.y - this.y);
       if (pd < bd) { bd = pd; best = d; }
     }
@@ -73,6 +98,9 @@ export class Pet {
     this.t += dt;
     if (this.pickCd > 0) this.pickCd -= dt;
     if (this.pickAnim > 0) this.pickAnim -= dt;
+    // PET の自動ポーション等（systems の petAutoUse があれば）
+    const au = sysFn('petAutoUse', g);
+    if (au) { try { au(g, dt); } catch (e) { if (!this._auErr) { this._auErr = true; console.warn('[petAutoUse]', e); } } }
 
     // 離れすぎたらワープ
     if (Math.hypot(p.x - this.x, p.y - this.y) > WARP_DIST) {

@@ -8,6 +8,7 @@
 // spawns に types を書かないフィールドは spawner が ENEMIES[].habitats から自動選択する。
 
 import { TOWN_SHOPS } from '../data/shops.js';
+import { ENEMIES } from '../data/enemies.js';
 
 const GROUND = 1000;
 export const ROW = 130;          // 段の高さ（ジャンプ最高点 ≈168px）
@@ -482,7 +483,105 @@ const NPC = {
     look: { body: 'm', skin: '#8d5a3b', hair: 'short', hairColor: '#19f0ff', eyeColor: '#222' },
     equip: { hat: L('helmet', '#ffffff', '#ff7a00'), top: L('armorVest', '#ff7a00', '#ffffff'), bottom: L('armorPants', '#ffffff'), shoes: L('boots', '#ff7a00') },
     dialog: ['元テストパイロットのエースだ。月面区画は重力0.6G、跳びすぎ注意だぜ。', '宇宙食とドリンクならうちで揃う。'] },
+  // ---------------- v3: 転職教官（docs/NPCS.md。転職ミッションの報告先） ----------------
+  job_velvet: { id: 'job_velvet', name: 'マダム・ヴェルヴェット', title: '1次転職教官 / ストリートスター', jobInstructor: true,
+    look: { body: 'f', skin: '#f1c7a5', hair: 'long', hairColor: '#7a1f5c', eyeColor: '#ff3d7f' },
+    equip: { hat: L('cowboy', '#2b1030', '#ff3d7f'), top: L('suit', '#2b1030', '#ff3d7f'), bottom: L('skirt', '#2b1030'), shoes: L('heels', '#ff3d7f'), accessory: L('sunglasses', '#ff3d7f'), weapon: L('pistol', '#ff6fb5', '#ffd23f') },
+    dialog: ['撃つか、踊るか。どっちの才能もこの街じゃ武器になるわ。', 'Lv10 になったら頭の上の吹き出しを押してごらん。転職の試練を用意してあげる。'] },
+  job_bull: { id: 'job_bull', name: 'ブル・ガードナー', title: '1次転職教官 / ストリートブロウラー', jobInstructor: true,
+    look: { body: 'm', skin: '#a86b45', hair: 'short', hairColor: '#2a1a10', eyeColor: '#ff8a00' },
+    equip: { hat: L('bandana', '#ff8a00', '#1d1d24'), top: L('tank', '#1d1d24', '#ff8a00'), bottom: L('trackPants', '#3a3a46', '#ff8a00'), shoes: L('boots', '#2a2018'), accessory: L('goldChain', '#ffd166') },
+    dialog: ['拳で行くか、ハンドルで行くか。ガキの頃の俺は両方だったぜ。'] },
+  job_zero: { id: 'job_zero', name: 'ゼロ', title: '1次転職教官 / ストリートハッカー', jobInstructor: true,
+    look: { body: 'm', skin: '#e8c4a8', hair: 'bob', hairColor: '#1d1d24', eyeColor: '#3dff8a' },
+    equip: { hat: L('headphones', '#1d1d24', '#3dff8a'), top: L('hoodie', '#1d2b24', '#3dff8a'), bottom: L('cargo', '#2a2f38'), shoes: L('sneakers', '#f4f4f4', '#3dff8a'), accessory: L('sunglasses', '#3dff8a'), weapon: L('staff', '#3dff8a', '#1d1d24') },
+    dialog: ['ネットの海は広いよ。泳ぎ方、教えてあげる。'] },
+  job_lily: { id: 'job_lily', name: 'ゴースト・リリィ', title: '2次転職教官 / ストリートスター', jobInstructor: true,
+    look: { body: 'f', skin: '#f5e6dc', hair: 'ponytail', hairColor: '#e8e8ff', eyeColor: '#3dffd0' },
+    equip: { hat: L('beanie', '#1d1d24', '#3dffd0'), top: L('leatherJacket', '#1d1d24', '#ff5fa2'), bottom: L('cargo', '#2a2a33'), shoes: L('boots', '#1d1d24'), accessory: L('scarf', '#3dffd0'), weapon: L('smg', '#ff5fa2', '#1d1d24') },
+    dialog: ['…霧の夜は好き。弾も、ステップも、音がよく響くから。'] },
+  job_byte: { id: 'job_byte', name: 'バイト', title: '2次転職教官 / ストリートハッカー', jobInstructor: true,
+    look: { body: 'm', skin: '#8d5a3b', hair: 'spiky', hairColor: '#ffc94d', eyeColor: '#ffb000' },
+    equip: { hat: L('helmet', '#3a3a46', '#ffb000'), top: L('armorVest', '#3a3a46', '#ffb000'), bottom: L('cargo', '#4a4a3a'), shoes: L('boots', '#2a2018'), accessory: L('goldChain', '#c0c0c8') },
+    dialog: ['ジャンクは宝の山だ。使えるやつにはな。'] },
+  job_croc: { id: 'job_croc', name: 'クロック・ジョー', title: '2次転職教官 / ストリートブロウラー', jobInstructor: true,
+    look: { body: 'm', skin: '#c98a5a', hair: 'short', hairColor: '#4a6a2a', eyeColor: '#ffd23f' },
+    equip: { hat: L('cowboy', '#4a6a2a', '#ffd23f'), top: L('hawaiian', '#4a6a2a', '#ffd23f'), bottom: L('shorts', '#3a4a2a'), shoes: L('sandals', '#5a3a22'), accessory: L('goldChain', '#ffd166') },
+    dialog: ['ヘッヘ、沼じゃ強いやつと速いやつに金が集まるのさ。'] },
+  job_diamond: { id: 'job_diamond', name: 'クイーン・ダイヤ', title: '3次転職教官 / ストリートスター', jobInstructor: true,
+    look: { body: 'f', skin: '#ffe0cc', hair: 'long', hairColor: '#ffd23f', eyeColor: '#c77dff' },
+    equip: { hat: L('crown', '#ffd23f', '#c77dff'), top: L('idolDress', '#c77dff', '#ffd23f'), bottom: L('skirt', '#c77dff'), shoes: L('heels', '#ffd23f'), accessory: L('goldChain', '#ffd23f'), weapon: L('pistol', '#ffd23f', '#c77dff') },
+    dialog: ['ステージも賭場も同じ。主役になれるのは一人だけよ。'] },
+  job_tiger: { id: 'job_tiger', name: 'タイガー・ゴウ', title: '3次転職教官 / ストリートブロウラー', jobInstructor: true,
+    look: { body: 'm', skin: '#f0c8a0', hair: 'spiky', hairColor: '#ff8a00', eyeColor: '#ff3b3b' },
+    equip: { top: L('suit', '#1d1d24', '#ff3b3b'), bottom: L('suitPants', '#1d1d24'), shoes: L('loafers', '#3a2a1a'), accessory: L('sunglasses', '#ff3b3b') },
+    dialog: ['ストリップの夜は長い。龍になるか、風になるか決めてこい。'] },
+  job_cipher: { id: 'job_cipher', name: 'サイファー', title: '3次転職教官 / ストリートハッカー', jobInstructor: true,
+    look: { body: 'f', skin: '#d9a07a', hair: 'bob', hairColor: '#00ffa3', eyeColor: '#ffffff' },
+    equip: { hat: L('catEars', '#1d1d24', '#00ffa3'), top: L('hoodie', '#101418', '#00ffa3'), bottom: L('trackPants', '#101418', '#00ffa3'), shoes: L('sneakers', '#101418', '#00ffa3'), accessory: L('mask', '#00ffa3'), weapon: L('staff', '#00ffa3', '#ff8a3d') },
+    dialog: ['ノヴァ？ ああ、私の弟子。腕はまあまあね。'] },
+  job_celes: { id: 'job_celes', name: 'セレス', title: '4次転職教官 / ストリートスター', jobInstructor: true,
+    look: { body: 'f', skin: '#f5d0b0', hair: 'twin', hairColor: '#7df9ff', eyeColor: '#ffd23f' },
+    equip: { hat: L('helmet', '#ffffff', '#7df9ff'), top: L('idolDress', '#7df9ff', '#ffd23f'), bottom: L('skirt', '#ffffff'), shoes: L('heels', '#7df9ff'), accessory: L('halo', '#ffd23f'), weapon: L('pistol', '#ffd23f', '#7df9ff') },
+    dialog: ['歌もお尋ね者も、銀河じゃ名前が売れてナンボよ。'] },
+  job_kaiser: { id: 'job_kaiser', name: 'カイザー・マグナ', title: '4次転職教官 / ストリートブロウラー', jobInstructor: true,
+    look: { body: 'm', skin: '#b07a50', hair: 'wolf', hairColor: '#ffffff', eyeColor: '#ffd23f' },
+    equip: { hat: L('helmet', '#3a3a46', '#ffd23f'), top: L('armorVest', '#3a3a46', '#ffd23f'), bottom: L('armorPants', '#3a3a46'), shoes: L('boots', '#1d1d24'), accessory: L('wings', '#ffd23f') },
+    dialog: ['覇王の拳と光速の走り。どちらも頂点は孤独だぞ。'] },
+  job_quasar: { id: 'job_quasar', name: 'クェーサー', title: '4次転職教官 / ストリートハッカー', jobInstructor: true, alpha: 0.8,
+    look: { body: 'f', skin: '#bff6ff', hair: 'long', hairColor: '#b6ff3d', eyeColor: '#ffffff' },
+    equip: { top: L('suit', '#e8ffff', '#b6ff3d'), bottom: L('suitPants', '#e8ffff'), shoes: L('loafers', '#e8ffff'), accessory: L('halo', '#b6ff3d') },
+    dialog: ['……接続者を確認。演算を開始する。'] },
+
+  // ---------------- v3: 夜だけ現れる NPC / 店（hours:[from, to]、20時〜翌5時 = 夜） ----------------
+  night_marin: { id: 'night_marin', name: 'DJマリン', title: '🌙 焚き火ビーチバー', hours: [20, 5],
+    look: { body: 'f', skin: '#c68e5e', hair: 'ponytail', hairColor: '#19d3c5', eyeColor: '#ffd23f' },
+    equip: { hat: L('headphones', '#19d3c5', '#ff5fa2'), top: L('hawaiian', '#ff5fa2', '#19d3c5'), bottom: L('shorts', '#1a1a2e'), shoes: L('sandals', '#c98b4a') },
+    dialog: ['夜の浜はいいでしょ？ 焚き火と波の音、それとあたしのビート。', '昼間は寝てるから、来るなら夜にね。'],
+    shop: ['drink_energy', 'drink_tough', 'potion_red', 'potion_blue'], shopName: '焚き火ビーチバー' },
+  night_noodle: { id: 'night_noodle', name: 'ラーメン屋台のゲン', title: '🌙 深夜屋台', hours: [21, 5],
+    look: { body: 'm', skin: '#e0b090', hair: 'short', hairColor: '#333333', eyeColor: '#222' },
+    equip: { hat: L('bandana', '#ffffff', '#e63946'), top: L('tshirt', '#ffffff', '#e63946'), bottom: L('cargo', '#3a3a46'), shoes: L('sandals', '#5a3a22') },
+    dialog: ['へいらっしゃい！ 夜のネオン街で一番うまい一杯だ。', '深夜しか開けねぇ。昼は仕込みで忙しいんでな。'],
+    shop: ['potion_orange', 'potion_white', 'drink_energy', 'drink_tough'], shopName: 'ネオン屋台' },
+  night_fortune: { id: 'night_fortune', name: '占い師マダム・ルナ', title: '🌙 路地裏の占い', hours: [20, 4],
+    look: { body: 'f', skin: '#f2c7a5', hair: 'long', hairColor: '#9b5de5', eyeColor: '#ffd23f' },
+    equip: { hat: L('cowboy', '#3c096c', '#ffd23f'), top: L('idolDress', '#3c096c', '#9b5de5'), bottom: L('skirt', '#240046'), shoes: L('heels', '#9b5de5'), accessory: L('goldChain', '#ffd23f') },
+    dialog: ['…星が囁いているわ。あなた、まだ強くなれる。', '夜にしか見えないものがあるの。夜の敵は経験値も多いそうよ。'] },
+  night_smuggler: { id: 'night_smuggler', name: '密輸屋カラス', title: '🌙 闇市', hours: [22, 4],
+    look: { body: 'm', skin: '#8d5a3b', hair: 'wolf', hairColor: '#111111', eyeColor: '#ff3b3b' },
+    equip: { hat: L('beanie', '#111111', '#ff3b3b'), top: L('leatherJacket', '#111111', '#ff3b3b'), bottom: L('cargo', '#2a2a33'), shoes: L('boots', '#111111'), accessory: L('mask', '#111111', '#ff3b3b') },
+    dialog: ['…声を落とせ。サツに聞かれたらおしまいだ。', '夜の港でしか店は開かねぇ。'],
+    shop: ['potion_white', 'potion_mana', 'smg_compact', 'mask_skull', 'drink_lucky'], shopName: 'カラスの闇市' },
+  night_fisher: { id: 'night_fisher', name: '夜釣りのモー', title: '🌙 沼の夜釣り師', hours: [19, 5],
+    look: { body: 'm', skin: '#c08a60', hair: 'long', hairColor: '#777777', eyeColor: '#3b2a1a' },
+    equip: { hat: L('cowboy', '#3a4a2a'), top: L('leatherJacket', '#3a4a2a', '#c9a227'), bottom: L('cargo', '#2a3a2a'), shoes: L('boots', '#3a2a1a') },
+    dialog: ['しーっ。夜の沼は魚も化け物もよく釣れる。', '霧の水路の奥、夜にだけ光るワニを見たって話だ…'] },
+  night_bartender: { id: 'night_bartender', name: 'バーテンダー・ジェイド', title: '🌙 VIPラウンジ', hours: [20, 5],
+    look: { body: 'f', skin: '#f2c7a5', hair: 'bob', hairColor: '#111111', eyeColor: '#3dff8a' },
+    equip: { top: L('suit', '#111111', '#3dff8a'), bottom: L('suitPants', '#111111'), shoes: L('heels', '#3dff8a'), accessory: L('goldChain', '#ffd23f') },
+    dialog: ['いらっしゃいませ。夜のストリップへようこそ。', '勝ち運が欲しいなら、ラッキードリンクをどうぞ。'],
+    shop: ['drink_lucky', 'power_elixir', 'elixir', 'sunglasses_neon'], shopName: 'VIPラウンジ' },
+  night_stargazer: { id: 'night_stargazer', name: '天文マニアのピコ', title: '🌙 屋上の星見', hours: [20, 5],
+    look: { body: 'm', skin: '#f5d0b0', hair: 'spiky', hairColor: '#19f0ff', eyeColor: '#222' },
+    equip: { hat: L('headphones', '#1a1a2e', '#19f0ff'), top: L('hoodie', '#1a1a2e', '#19f0ff'), bottom: L('trackPants', '#1a1a2e'), shoes: L('sneakers', '#19f0ff') },
+    dialog: ['ここから見る星は最高だよ。ネオンが消えた一瞬だけね。', '宇宙港の向こうに、変な光が飛んでたんだ…'] },
+  night_astro: { id: 'night_astro', name: '夜勤のオペレーター・ミラ', title: '🌙 夜間補給所', hours: [20, 5],
+    look: { body: 'f', skin: '#e8c4a8', hair: 'twin', hairColor: '#e0e0ff', eyeColor: '#19f0ff' },
+    equip: { hat: L('helmet', '#ffffff', '#19f0ff'), top: L('armorVest', '#ffffff', '#19f0ff'), bottom: L('armorPants', '#ffffff'), shoes: L('boots', '#e0e0ff') },
+    dialog: ['夜勤は静かでいいわ。打ち上げのない夜は特に。', '夜間限定の補給品、持っていって。'],
+    shop: ['elixir', 'potion_white', 'potion_mana', 'power_elixir'], shopName: '夜間補給所' },
 };
+// 各町の「コンテンツ受付」（タワー/アリーナ/ボスへの入口。service:'content' → UI のコンテンツ窓 U を開く）
+const CONCIERGE_LOOK = { body: 'f', skin: '#f1c9a5', hair: 'ponytail', hairColor: '#ff2e88', eyeColor: '#19f0ff' };
+const CONCIERGE_EQUIP = { hat: L('headphones', '#19f0ff', '#ff2e88'), top: L('suit', '#1a1a2e', '#19f0ff'), bottom: L('skirt', '#1a1a2e'), shoes: L('heels', '#19f0ff'), accessory: L('sunglasses', '#ff2e88', '#19f0ff') };
+function concierge(town, x) {
+  return {
+    id: 'concierge_' + town, name: 'ネオン・コンシェルジュ', title: 'タワー/アリーナ/ボス 受付', service: 'content',
+    services: ['tower', 'arena', 'boss'], x, look: CONCIERGE_LOOK, equip: CONCIERGE_EQUIP,
+    dialog: ['ネオン・コンテンツ受付へようこそ！', '無限の塔「ヴァイス・スパイア」、ウェーブ戦「ネオン・アリーナ」、ボス討伐の受付はこちら。', '（U キーのコンテンツ窓からも挑戦できます）'],
+  };
+}
 const npc = (id, x, extra = {}) => ({ ...NPC[id], x, ...extra });
 
 // ============================================================ マップ一覧
@@ -492,49 +591,50 @@ const T = {
     desc: '旅の始まりの浜辺の町。モンスターは出ない。', bgColor: '#ff9a6b', world: { x: 0, y: 5 },
     right: 'beach_f1', mids: [{ to: 'beach_f3', x: 1750 }],
     plats: [[420, 870, 300], [900, 870, 320, true], [1300, 740, 300, true], [2150, 870, 300], [2250, 740, 260, true]],
-    npcs: [npc('rico', 380), npc('sunny', 620)],
+    npcs: [npc('rico', 380), npc('sunny', 620), npc('night_marin', 1150), concierge('beach', 2400)],
     vehicles: [{ kind: 'bike', x: 1000, color: '#ff5fa2' }, { kind: 'sports', x: 2300, color: '#19d3c5' }],
   }),
   downtown: town({
     id: 'downtown', name: 'ダウンタウン', region: 'downtown', variant: 0, width: 3200, lv: [10, 22], tiers: 3,
     desc: 'ネオン輝く街の中心。4方向へ道が延びる。', bgColor: '#2a1446', world: { x: 4, y: 5 },
     left: 'beach_f4', right: 'down_f3', mids: [{ to: 'down_f1', x: 1150 }, { to: 'down_f4', x: 2250 }],
-    npcs: [npc('mama_rosa', 380), npc('officer_kai', 800), npc('shop_downtown', 1350), npc('ammo_shop', 1700), npc('dash_garage', 2700)],
+    npcs: [npc('mama_rosa', 380), npc('night_noodle', 590), npc('officer_kai', 800), npc('night_fortune', 990), npc('shop_downtown', 1350), npc('ammo_shop', 1700),
+      npc('job_velvet', 1900), npc('job_bull', 2050), npc('job_zero', 2450), npc('dash_garage', 2700), concierge('downtown', 2900)],
     vehicles: [{ kind: 'sports', x: 2900, color: '#ff2e88' }, { kind: 'sports', x: 1400, color: '#19d3c5' }, { kind: 'bike', x: 600, color: '#ffd166' }],
   }),
   slums: town({
     id: 'slums', name: 'ポート・スラム', region: 'slums', variant: 0, width: 3000, lv: [20, 36], tiers: 3,
     desc: 'コンテナが積まれた港町。', bgColor: '#3b2b3a', world: { x: 7, y: 5 },
     left: 'slums_f1', right: 'slums_f4', mids: [{ to: 'slums_f2', x: 1650 }],
-    npcs: [npc('dj_pulse', 380), npc('sal_pawn', 1100), npc('tank', 2300)],
+    npcs: [npc('dj_pulse', 380), npc('night_smuggler', 760), npc('sal_pawn', 1100), npc('job_lily', 1380), npc('job_byte', 1950), npc('tank', 2300), concierge('slums', 2620)],
     vehicles: [{ kind: 'bike', x: 2500, color: '#e76f51' }, { kind: 'sports', x: 800, color: '#2a9d8f' }],
   }),
   swamp: town({
     id: 'swamp', name: 'グレイズ村', region: 'swamp', variant: 0, width: 2600, lv: [22, 45],
     desc: '湿地のほとりの小さな村。', bgColor: '#1f3b2c', world: { x: 5, y: 3 },
     left: 'swamp_f1', right: 'swamp_f4', mids: [{ to: 'swamp_f2', x: 1350 }],
-    npcs: [npc('old_boone', 380), npc('voodoo_betty', 900)],
+    npcs: [npc('old_boone', 380), npc('night_fisher', 640), npc('voodoo_betty', 900), npc('job_croc', 1650), concierge('swamp', 2100)],
     vehicles: [{ kind: 'bike', x: 1900, color: '#6b8f3a' }],
   }),
   casino: town({
     id: 'casino', name: 'ゴールデン・ストリップ', region: 'casino', variant: 0, width: 3200, lv: [42, 60], tiers: 3,
     desc: '黄金のカジノ街。', bgColor: '#3a0a3a', world: { x: 8, y: 3 },
     left: 'casino_f1', right: 'casino_f4', mids: [{ to: 'casino_f2', x: 1650 }],
-    npcs: [npc('vivi', 380), npc('mr_chip', 1100), npc('don_caiman', 2400)],
+    npcs: [npc('vivi', 380), npc('night_bartender', 760), npc('mr_chip', 1100), npc('job_diamond', 1900), npc('job_tiger', 2080), npc('don_caiman', 2400), concierge('casino', 2750)],
     vehicles: [{ kind: 'sports', x: 2700, color: '#ffd166' }, { kind: 'sports', x: 700, color: '#ff2e88' }],
   }),
   rooftop: town({
     id: 'rooftop', name: 'ヴァイス・タワー', region: 'rooftop', variant: 0, width: 2400, lv: [58, 76], tiers: 3,
     desc: '摩天楼の中層ロビー兼屋上テラス。', bgColor: '#0d0b26', world: { x: 11, y: 3 },
     left: 'tower_f1', right: 'tower_f2',
-    npcs: [npc('nova', 380)],
+    npcs: [npc('nova', 380), npc('job_cipher', 800), concierge('rooftop', 1300), npc('night_stargazer', 1800)],
     vehicles: [],
   }),
   spaceport: town({
     id: 'spaceport', name: 'ルミナ宇宙港', region: 'spaceport', variant: 0, width: 2800, lv: [36, 100], tiers: 3,
     desc: 'ロケットが並ぶ近未来の宇宙港。', bgColor: '#0a1030', world: { x: 11, y: 5 },
     left: 'space_f2', right: 'space_f3',
-    npcs: [npc('dr_stella', 400), npc('ace_jet', 1300)],
+    npcs: [npc('dr_stella', 400), npc('night_astro', 850), npc('ace_jet', 1300), npc('job_celes', 1700), npc('job_kaiser', 1880), npc('job_quasar', 2060), concierge('spaceport', 2450)],
     vehicles: [{ kind: 'sports', x: 2000, color: '#e0e0ff' }],
     decor: [{ type: 'rocket', x: 700 }, { type: 'rocket', x: 2300 }, { type: 'satelliteDish', x: 1700 }],
   }),
@@ -614,6 +714,115 @@ for (const m of Object.values(MAPS)) {
     p.toX = Math.round(Math.max(40, Math.min(dest.width - 40, tx)));
   }
 }
+
+// ============================================================ v3: インスタンスマップ（タワー / アリーナ / ボス部屋）
+// MAPS に「列挙されない」プロパティとして追加する（MAPS[id] で引けるが Object.keys(MAPS) は 34 のまま
+// = ワールドグラフ・タクシー・既存の接続表テストに影響しない）。一覧は INSTANCE_IDS / INSTANCE_MAPS。
+// 出口ポータル（exit:true）の行き先は入場前の町（spawner.reset が game.lastTownId で書き換える）。
+const INSTANCE_W = 2200;
+function instanceMap(def) {
+  const m = finish({
+    town: false, copSpawns: false, levelRange: [1, 200], gravity: 1, spawnX: 260, spawns: [], vehicles: [], npcs: [],
+    deadEnd: false, water: false, ...def,
+  });
+  m.instance = def.instance;
+  return m;
+}
+function exitPortal(to = 'downtown') { return { x: 90, to, exit: true, label: '町へ戻る' }; }
+
+/** タワー1フロアの足場（階ごとにシード固定の手続き生成）。到達性はロープで保証 */
+function towerLayout(floor, width, groundY) {
+  const R = makeRng('tower:' + floor);
+  const tiers = 2 + (floor % 3 === 0 ? 1 : 0) + (floor >= 20 ? 1 : 0);
+  const platforms = [];
+  for (let k = 0; k < tiers; k++) {
+    const y = groundY - ROW * (k + 1);
+    let x = Math.round(300 + R.range(0, 200) + (k % 2) * 120);
+    while (x < width - 420) {
+      const w = Math.round(R.range(220, 380));
+      const x2 = Math.min(width - 320, x + w);
+      if (x2 - x >= 160) platforms.push({ x, y, w: x2 - x });
+      x = x2 + Math.round(R.range(150, 300));
+    }
+  }
+  const map = { width, groundY, platforms, ropes: [], gravity: 1 };
+  for (const p of [...platforms].sort((a, b) => b.y - a.y)) {
+    if (!reachability(map).unreachable.includes(p)) continue;
+    const rx = Math.round(p.x + p.w * R.range(0.3, 0.7));
+    map.ropes.push({ x: rx, top: p.y, bottom: ropeBottom(platforms, p, rx, groundY) });
+  }
+  const decor = [];
+  for (let x = 380; x < width - 380; x += R.range(260, 420)) decor.push({ type: R.pick(['lamp', 'crate', 'antenna', 'neonSign']), x: Math.round(x), y: groundY });
+  return { platforms, ropes: map.ropes, decor: decor.filter((d) => clearAbove(d.type, d.x, groundY, platforms)) };
+}
+
+/**
+ * buildTowerFloor(map, floor, info?) — タワーの現在階のレイアウトに作り替える（spawner.reset から呼ぶ）。
+ * 「次の階」ポータル（towerNext:true）は全滅まで hidden。
+ */
+export function buildTowerFloor(map, floor = 1, info = {}) {
+  floor = Math.max(1, Math.floor(floor) || 1);
+  const lay = towerLayout(floor, map.width, map.groundY);
+  map.platforms = lay.platforms; map.ropes = lay.ropes; map.decor = lay.decor;
+  map.floor = floor;
+  map.name = info.name || `ヴァイス・スパイア ${floor}F`;
+  map.bossFloor = !!info.boss || floor % 10 === 0;
+  const lv = info.level ?? Math.min(200, 38 + floor * 2);
+  map.levelRange = [lv, lv + 4];
+  const next = map.portals.find((p) => p.towerNext);
+  if (next) { next.hidden = true; next.label = `${floor + 1}F へ`; }
+  map.cleared = false;
+  return map;
+}
+
+const TOWER = instanceMap({
+  id: 'tower', instance: 'tower', name: 'ヴァイス・スパイア 1F', region: 'rooftop', theme: 'rooftop', variant: 3, bg: 'tower',
+  width: INSTANCE_W, groundY: GROUND, desc: '無限に続くネオンの塔。1フロアの敵を全滅させると次の階への扉が開く。',
+  world: { x: 12, y: 2 }, levelRange: [40, 44],
+  portals: [exitPortal('rooftop'), { x: INSTANCE_W - 150, to: 'tower', towerNext: true, hidden: true, label: '2F へ' }],
+});
+buildTowerFloor(TOWER, 1);
+
+const ARENA = instanceMap({
+  id: 'arena', instance: 'arena', name: 'ネオン・アリーナ', region: 'downtown', theme: 'downtown', variant: 3, bg: 'arena',
+  width: INSTANCE_W, groundY: GROUND, desc: '時間制のウェーブ戦。倒すほど経験値ボーナス。',
+  world: { x: 5, y: 7 },
+  ...platsFrom([[420, 870, 360], [1420, 870, 360], [900, 740, 400, true]], GROUND),
+  portals: [exitPortal('downtown')],
+  decor: [{ type: 'neonSign', x: 700 }, { type: 'lamp', x: 1100 }, { type: 'neonSign', x: 1700 }],
+});
+
+const BOSS_IDS_ALL = Object.values(ENEMIES || {}).filter((e) => e.boss && !e.isCop && !e.civilian).map((e) => e.id);
+const BOSS_HOME = { beach: 'beach', downtown: 'downtown', slums: 'slums', swamp: 'swamp', casino: 'casino', rooftop: 'rooftop', spaceport: 'spaceport' };
+const shortBoss = (id) => String(id).replace(/^boss_/, '');
+/** ボスID（'boss_king_slime' / 'king_slime' どちらでも）→ ボス部屋マップID 'boss_king_slime' */
+export function bossMapId(bossId) { return 'boss_' + shortBoss(bossId); }
+const BOSS_MAPS = {};
+BOSS_IDS_ALL.forEach((bid, i) => {
+  const d = ENEMIES[bid];
+  const region = THEME_OK(d.region) ? d.region : 'downtown';
+  const id = bossMapId(bid);
+  BOSS_MAPS[id] = instanceMap({
+    id, instance: 'boss', bossId: bid, name: `ボス部屋: ${d.name}`, region, theme: region, variant: 3, bg: 'boss',
+    width: 2000, groundY: GROUND, levelRange: [d.level, d.level], desc: `${d.name} との決戦の間。`,
+    world: { x: 1 + i * 1.5, y: 9 },
+    ...platsFrom([[360, 870, 300], [1340, 870, 300]], GROUND),
+    portals: [exitPortal(BOSS_HOME[d.region] || 'downtown')],
+    bossX: 1400,
+  });
+});
+function THEME_OK(r) { return Object.prototype.hasOwnProperty.call(DECOR_SETS, r); }
+
+export const INSTANCE_MAPS = { tower: TOWER, arena: ARENA, ...BOSS_MAPS };
+export const INSTANCE_IDS = Object.keys(INSTANCE_MAPS);
+for (const [id, m] of Object.entries(INSTANCE_MAPS)) {
+  Object.defineProperty(MAPS, id, { value: m, enumerable: false, configurable: true, writable: true });
+  // 'boss_boss_king_slime' のような表記ゆれも引けるように（列挙されない別名）
+  if (m.bossId && !(('boss_' + m.bossId) in MAPS)) Object.defineProperty(MAPS, 'boss_' + m.bossId, { value: m, enumerable: false, configurable: true });
+  for (const p of m.portals) if (!p.toX && MAPS[p.to] && !p.towerNext) p.toX = MAPS[p.to].spawnX;
+}
+/** インスタンス（タワー/アリーナ/ボス部屋）か */
+export function isInstanceMap(m) { return !!(typeof m === 'string' ? MAPS[m]?.instance : m?.instance); }
 
 export const TOWN_IDS = ['beach', 'downtown', 'slums', 'swamp', 'casino', 'rooftop', 'spaceport'];
 export const FIELD_IDS = F.map((f) => f.id);

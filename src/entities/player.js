@@ -3,16 +3,22 @@ import { drawCharacter, HERO_LOOKS } from '../render/character.js';
 import { spawnEffect } from '../render/effects.js';
 import { computeStats } from '../systems/progression.js';
 import { getEquipLooks, useItem } from '../systems/inventory.js';
-import { useSkill } from '../systems/skills.js';
-import { playerAttackArea } from '../systems/combat.js';
+import { useSkill, tryFinalAttack } from '../systems/skills.js';
+import { playerAttackArea, newAttackId } from '../systems/combat.js';
+import { currentJob } from '../systems/jobs.js';
+import { defaultLook } from '../data/classes.js';
+import { sysFn, reportHits } from '../world/sys.js';
 import { getItem } from '../data/items.js';
-import { moveAndCollide, findRope, entRect } from '../world/physics.js';
+import { moveAndCollide, findRope, entRect, rectOverlap } from '../world/physics.js';
 import { Projectile } from './projectile.js';
 import { syncPet } from './pet.js';
 
 const CLIMB_SPEED = 190;
 const BASE_SPEED = 240;
 const BASE_JUMP = 860;
+export const TALK_RANGE = 90;   // NPC 会話距離（px）
+export const SKILL_SLOTS = 8;   // スキルバー A S D F Q W G H
+
 
 // computeStats の単位ゆれ吸収
 function normSpeed(v) { if (!(v > 0)) return BASE_SPEED; return v > 20 ? v : v * BASE_SPEED; }
@@ -53,6 +59,7 @@ export class Player {
       this._unsub.push(ev.on('playerDamaged', () => { this.hurtT = 0.35; this.lastHitT = this.t; }));
       this._unsub.push(ev.on('equipChanged', () => syncPet(game)));
       this._unsub.push(ev.on('mapChanged', () => {
+        this.move = null; this.gravityScale = 1; this.dashing = false;
         // changeMap が車を直接外した場合も降車イベントを出す（ラジオ停止など）
         if (this._lastVehicle && !this.inVehicle) { this._lastVehicle = null; ev.emit('vehicleExit'); }
         syncPet(game, true);
@@ -114,7 +121,7 @@ export class Player {
 
     // --- 死亡 ---
     if (s.hp <= 0 || this.dead) {
-      if (!this.dead) { this.dead = true; this.deadT = 0; if (this.inVehicle) this.inVehicle.exit(this); }
+      if (!this.dead) { this.dead = true; this.deadT = 0; this.move = null; this.gravityScale = 1; if (this.inVehicle) this.inVehicle.exit(this); }
       this.deadT += dt;
       this.climbing = null;
       this.vx *= 0.9;
@@ -150,7 +157,8 @@ export class Player {
     this._lastVehicle = null;
 
     if (ctrl) this.handleActions(dt, st);
-    if (this.climbing) this.updateClimb(dt, ctrl);
+    if (this.move && !this.climbing) this.updateMoveSkill(dt, ctrl, st);
+    else if (this.climbing) this.updateClimb(dt, ctrl);
     else this.updateMove(dt, ctrl, st);
 
     // 自動吸引（近くの着地済みドロップ）
@@ -162,11 +170,12 @@ export class Player {
     const g = this.game, inp = g.input, s = g.state;
     // ポータル（↑）
     if (inp.pressed('up') && this.tryPortal()) return;
-    // 会話 / 乗車
+    // 会話（V = 正式な会話キー。E/Enter は会話 → 乗車の順）
+    if (inp.pressed('talk') && this.talk()) return;
     if (inp.pressed('interact')) this.interact();
-    // スキル
+    // スキル（8枠: skill1..8 → skillBar[0..7]）
     const bar = s.skillBar || [];
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < SKILL_SLOTS; i++) {
       if (inp.pressed('skill' + (i + 1)) && bar[i]) {
         useSkill(g, bar[i]);
       }
@@ -176,16 +185,32 @@ export class Player {
     for (let i = 0; i < 2; i++) {
       if (inp.pressed('potion' + (i + 1)) && pb[i]) useItem(g, pb[i]);
     }
-    // 通常攻撃（押しっぱなしで連続）
-    if (inp.down('attack') && this.attackCd <= 0 && !this.climbing) this.startAttack('basic');
+    // 通常攻撃（押しっぱなしで連続。突進・ホイールダッシュ中は不可）
+    const busy = this.move && (this.move.type === 'rush' || this.move.type === 'wheelDash');
+    if (inp.down('attack') && this.attackCd <= 0 && !this.climbing && !busy) this.startAttack('basic');
   }
 
   tryPortal() {
     const g = this.game;
     for (const p of g.map.portals || []) {
+      if (p.hidden) continue; // タワーの「次の階」ポータルは全滅まで非表示
       if (Math.abs(this.x - p.x) < 44 && Math.abs(this.y - p.y) < 90) {
         if (this.inVehicle) { this.inVehicle.exit(this); this._lastVehicle = null; }
         spawnEffect(g, 'portal', this.x, this.y - 40);
+        if (p.towerNext) {
+          const next = (g.towerFloor || 1) + 1;
+          const enter = sysFn('towerEnter', g);
+          let changed = false;
+          const off = g.events?.on?.('mapChanged', () => { changed = true; });
+          if (enter) {
+            let r = null;
+            try { r = enter(g, next); } catch (e) { r = null; }
+            if (r && r.ok === false) { off?.(); if (r.msg) g.notify?.(r.msg, '#ff8a8a'); return true; }
+          }
+          off?.();
+          if (!changed || g.map?.id !== 'tower') { g.towerFloor = next; g.changeMap('tower'); }
+          return true;
+        }
         g.changeMap(p.to, p.toX, p.toY);
         return true;
       }
@@ -193,19 +218,34 @@ export class Player {
     return false;
   }
 
-  interact() {
-    const g = this.game;
-    // NPC
-    let best = null, bd = 90;
-    for (const n of g.npcs) {
+  /** 会話できる最寄りの NPC（約90px 以内・同じ高さ。夜だけの NPC は時間外なら除外） */
+  nearestNpc(range = TALK_RANGE) {
+    let best = null, bd = range;
+    for (const n of this.game.npcs || []) {
+      if (n.hidden || n.remove) continue;
       const d = Math.abs(n.x - this.x);
       if (d < bd && Math.abs(n.y - this.y) < 70) { best = n; bd = d; }
     }
-    if (best) {
-      g.ui.open('dialog', { npc: best });
-      g.events.emit('talkNpc', { npcId: best.id });
-      return;
-    }
+    return best;
+  }
+
+  /** NPC と会話（V）。話せたら true */
+  talk() {
+    const g = this.game;
+    if (this.inVehicle) return false;
+    const best = this.nearestNpc();
+    if (!best) return false;
+    g.ui?.open?.('dialog', { npc: best, service: best.service || null });
+    g.events?.emit('talkNpc', { npcId: best.id });
+    if (best.service) g.events?.emit('serviceNpc', { npcId: best.id, service: best.service, bossId: best.data?.bossId || null });
+    return true;
+  }
+
+  interact() {
+    const g = this.game;
+    // NPC
+    if (this.talk()) return;
+    let bd;
     // 車
     let car = null; bd = 110;
     for (const v of g.vehicles) {
@@ -232,10 +272,13 @@ export class Player {
       this.vx += (target - this.vx) * Math.min(1, k * dt);
       if (Math.abs(this.vx) < 2) this.vx = 0;
     } else {
-      // 空中制御（弱め）
+      // 空中制御（弱め）。移動スキルの勢い（|vx| > speed）は急に殺さず、空気抵抗でなめらかに戻す
+      const over = Math.abs(this.vx) > speed;
+      if (over) this.vx *= Math.max(0, 1 - 1.6 * dt);
       if (dir) {
+        const lim = Math.max(speed, Math.abs(this.vx));
         this.vx += dir * speed * 3.2 * dt;
-        this.vx = Math.max(-speed, Math.min(speed, this.vx));
+        this.vx = Math.max(-lim, Math.min(lim, this.vx));
       }
     }
     if (dir && !attacking) this.facing = dir;
@@ -307,6 +350,241 @@ export class Player {
     }
   }
 
+  // ------------------------------------------------------------ 移動スキル（SPEC_JOB「移動スキル」）
+  /**
+   * doMoveSkill(skill, lv, params) — systems/skills.js の useSkill から呼ばれる（MP/CD/無敵/afterBuff/arrivalBlast は useSkill 側）。
+   * params = moveParams(state, skillId, lv): {type, power, distance, time?, lift?, gravityScale?, backShot?, push?, contact?, vertical?, ...}
+   * teleport は同期的に x/y を書き換える（useSkill が移動後の位置で arrivalBlast を判定するため）。
+   */
+  doMoveSkill(skill, lv = 1, params = null) {
+    const g = this.game;
+    const mv = params || skill?.move;
+    if (!mv || this.dead || this.inVehicle) return false;
+    const inp = g.input;
+    const L = inp?.down?.('left'), R = inp?.down?.('right');
+    const hdir = (R ? 1 : 0) - (L ? 1 : 0);
+    if (hdir) this.facing = hdir;
+    const dir = this.facing || 1;
+    const color = skill?.color || '#7df9ff';
+    const town = !!g.map?.town; // 町では移動のみ（攻撃判定なし）
+    this.attackLeft = 0; this.attackKind = null;
+    const power = Math.max(0, mv.power || 0), dist = Math.max(0, mv.distance || 0);
+    switch (mv.type) {
+      case 'flashJump': {
+        // 空中で前方へ2段ジャンプ。リコイル: 後方へ射撃した反動で跳ぶ
+        if (this.climbing) { this.climbing = null; this.ropeCd = 0.3; }
+        const lift = mv.lift ?? 380;
+        this.vx = dir * Math.max(power, 200);
+        this.vy = Math.min(this.vy, 0) * 0.25 - lift;
+        this.onGround = false;
+        // 前方速度 power で目安 distance に届くよう、短時間だけ空気抵抗を止める
+        this.move = { type: 'flashJump', t: Math.min(0.5, dist > 0 && power > 0 ? dist / power * 0.55 : 0.3), dir, speed: this.vx, skill, color };
+        if (mv.backShot && !town) {
+          const b = mv.backShot;
+          const ox = this.x - dir * 20, oy = this.y - this.h * 0.55;
+          const rect = { x: dir > 0 ? ox - b.w : ox, y: oy - b.h / 2, w: b.w, h: b.h };
+          spawnEffect(g, 'muzzle', ox, oy, { dir: -dir, facing: -dir, color });
+          const hits = playerAttackArea(g, rect, b.mult, { hits: 1, knock: 260, effect: 'hit', color, maxTargets: 6, knockDir: -dir });
+          this.afterHits(hits);
+        }
+        spawnEffect(g, 'dash', this.x, this.y - this.h / 2, { color, facing: dir, dir });
+        return true;
+      }
+      case 'teleport': {
+        const U = inp?.down?.('up'), D = inp?.down?.('down');
+        const from = { x: this.x, y: this.y };
+        spawnEffect(g, 'spark', this.x, this.y - this.h / 2, { color });
+        if (mv.vertical && (U || D) && !hdir) this.teleportVertical(U ? -1 : 1, dist || 160);
+        else this.teleportHorizontal(dir, dist || 160);
+        if (this.climbing) this.climbing = null;
+        this.move = { type: 'teleport', t: 0.12, dir, skill, color, from };
+        spawnEffect(g, 'portal', this.x, this.y - 40, { color, small: true });
+        return true;
+      }
+      case 'rush': {
+        if (this.climbing) this.climbing = null;
+        const time = Math.max(0.08, mv.time || (power > 0 ? dist / power : 0.24));
+        const speed = dist > 0 ? dist / time : (power || 1000);
+        this.move = { type: 'rush', t: time, dir, speed, skill, color, push: town ? null : (mv.push || { mult: 1, knock: 360 }), attackId: newAttackId(), faDone: false };
+        this.vy = Math.min(this.vy, 0);
+        this.vx = dir * speed;
+        spawnEffect(g, 'dash', this.x, this.y - this.h / 2, { color, facing: dir });
+        return true;
+      }
+      case 'glide': {
+        if (this.climbing) { this.climbing = null; this.ropeCd = 0.3; }
+        const speed = power || 600;
+        const time = Math.max(0.2, dist > 0 && speed > 0 ? dist / speed : (mv.time || 0.65));
+        if (this.onGround) { this.vy = -420; this.onGround = false; } // 地上からは軽く浮いて滑空
+        else this.vy = Math.min(this.vy * 0.2, -60);
+        this.move = { type: 'glide', t: time, dir, speed, skill, color, gravityScale: mv.gravityScale ?? 0.15 };
+        this.vx = dir * speed;
+        spawnEffect(g, 'dash', this.x, this.y - this.h / 2, { color, facing: dir });
+        return true;
+      }
+      case 'wheelDash': {
+        if (this.climbing) this.climbing = null;
+        const speed = power || 900;
+        const time = Math.max(0.3, mv.time || (dist > 0 ? dist / speed : 1.6));
+        this.move = { type: 'wheelDash', t: time, total: time, dir, speed, skill, color, contact: town ? null : (mv.contact || { mult: 0.8, knock: 360 }), attackId: newAttackId(), hitT: 0, airT: 0, faDone: false };
+        this.vx = dir * speed * 0.6;
+        spawnEffect(g, 'dash', this.x, this.y - this.h / 2, { color, facing: dir });
+        return true;
+      }
+      default:
+        return false;
+    }
+  }
+
+  /** 進行中の移動スキル（rush / glide / wheelDash / flashJump の慣性）を進める */
+  updateMoveSkill(dt, ctrl, st) {
+    const g = this.game, inp = g.input, m = this.move;
+    m.t -= dt;
+    const end = () => { this.move = null; this.gravityScale = 1; this.dashing = false; };
+    switch (m.type) {
+      case 'flashJump': {
+        // 空気抵抗なしで前へ。ロープに触れたら掴める（メイプル風）
+        this.vx = m.speed;
+        moveAndCollide(this, g.map, dt);
+        if (ctrl && inp.down('up') && this.ropeCd <= 0) {
+          const r = findRope(g.map, this.x, this.y - 4, 20);
+          if (r && this.y > r.top + 4) { end(); return this.grabRope(r); }
+        }
+        if (this.onGround || m.t <= 0) end();
+        break;
+      }
+      case 'teleport': {
+        // 瞬間移動直後の短い硬直（残像演出用）
+        this.vx *= 0.5;
+        moveAndCollide(this, g.map, dt);
+        if (m.t <= 0) end();
+        break;
+      }
+      case 'rush': {
+        this.dashing = true;
+        const oldX = this.x;
+        this.vx = m.dir * m.speed; this.vy = 0;
+        this.gravityScale = 0;
+        const res = moveAndCollide(this, g.map, dt);
+        this.gravityScale = 1;
+        if (m.push) {
+          const minX = Math.min(oldX, this.x) - 24;
+          const rect = { x: minX, y: this.y - this.h - 6, w: Math.abs(this.x - oldX) + 48 + this.w, h: this.h + 12 };
+          rect.x -= this.w / 2;
+          const hits = playerAttackArea(g, rect, m.push.mult, { hits: 1, knock: m.push.knock ?? 420, attackId: m.attackId, effect: 'hit', color: m.color, knockDir: m.dir, maxTargets: 10 });
+          if (hits.length) this.afterHits(hits, m);
+        }
+        if (Math.random() < 0.7) spawnEffect(g, 'dash', this.x, this.y - this.h / 2, { color: m.color, facing: m.dir, trail: true });
+        if (m.t <= 0 || res.hitWall) { end(); this.vx = m.dir * Math.min(m.speed, 360) * 0.5; }
+        break;
+      }
+      case 'glide': {
+        this.gravityScale = m.gravityScale;
+        this.vx = m.dir * m.speed;
+        if (this.vy > 140) this.vy = 140; // 落下速度を抑える
+        const res = moveAndCollide(this, g.map, dt);
+        this.gravityScale = 1;
+        if (Math.random() < 0.5) spawnEffect(g, 'dash', this.x, this.y - this.h / 2, { color: m.color, facing: m.dir, trail: true });
+        m.el = (m.el || 0) + dt;
+        // 着地（離陸直後を除く）・壁・時間切れで終了。勢いは空中制御の空気抵抗でなめらかに減衰
+        if (m.t <= 0 || res.hitWall || (this.onGround && m.el > 0.15)) end();
+        break;
+      }
+      case 'wheelDash': {
+        this.dashing = true;
+        // 逆方向キーで切り返し
+        const L = ctrl && inp.down('left'), R = ctrl && inp.down('right');
+        const want = (R ? 1 : 0) - (L ? 1 : 0);
+        if (want && want !== m.dir) { m.dir = want; this.vx *= -0.3; }
+        this.facing = m.dir;
+        const target = m.dir * m.speed;
+        this.vx += (target - this.vx) * Math.min(1, 10 * dt);
+        // ジャンプで勢いを保ったまま跳ぶ（ダッシュ終了）
+        if (ctrl && inp.pressed('jump') && this.onGround) {
+          this.vy = -normJump(st.jump); this.onGround = false;
+          end(); moveAndCollide(this, g.map, dt); break;
+        }
+        const res = moveAndCollide(this, g.map, dt);
+        if (!this.onGround) m.airT += dt; else m.airT = 0;
+        if (m.contact) {
+          m.hitT -= dt;
+          if (m.hitT <= 0) { m.hitT = 0.35; m.attackId = newAttackId(); } // 0.35 秒ごとに同じ敵へ再ヒット可
+          const rect = { x: this.x - this.w / 2 - 20, y: this.y - this.h, w: this.w + 40, h: this.h };
+          const hits = playerAttackArea(g, rect, m.contact.mult, { hits: 1, knock: m.contact.knock ?? 360, attackId: m.attackId, effect: 'hit', color: m.color, knockDir: m.dir, maxTargets: 8 });
+          if (hits.length) this.afterHits(hits, m);
+        }
+        if (Math.random() < 0.8) spawnEffect(g, 'dash', this.x - m.dir * 20, this.y - 6, { color: m.color, facing: m.dir, trail: true, small: true });
+        if (m.t <= 0 || res.hitWall || m.airT > 0.12) { end(); if (this.onGround) this.vx = m.dir * Math.min(m.speed, normSpeed(st.speed) * 1.2); }
+        break;
+      }
+      default: end(); moveAndCollide(this, g.map, dt);
+    }
+  }
+
+  /** 移動スキル・通常攻撃の命中後処理: ファイナルアタック（1技1回）＋コンボ */
+  afterHits(hits, m = null) {
+    if (!hits || !hits.length) return;
+    const g = this.game;
+    if (!m || !m.faDone) { if (m) m.faDone = true; try { tryFinalAttack(g, hits); } catch (e) { /* noop */ } }
+    reportHits(g, hits);
+  }
+
+  /** 横テレポート: 壁・マップ端の手前で止まる（壁抜け不可） */
+  teleportHorizontal(dir, dist) {
+    const map = this.game.map;
+    const step = 8;
+    let x = this.x;
+    const hw = this.w / 2;
+    for (let d = 0; d < dist; d += step) {
+      const nx = x + dir * Math.min(step, dist - d);
+      if (nx < hw || nx > map.width - hw) break;
+      const r = { x: nx - hw, y: this.y - this.h, w: this.w, h: this.h - 1 };
+      if ((map.walls || []).some((w) => rectOverlap(r, w))) break;
+      x = nx;
+    }
+    this.x = x;
+    // 足元の足場（同じ高さ）に乗ったまま。無ければ自然に落下
+    const plat = (map.platforms || []).find((p) => !p.ceiling && Math.abs(p.y - this.y) < 1 && x >= p.x && x <= p.x + p.w);
+    if (plat) { this.groundPlat = plat; this.onGround = true; }
+    else if (this.y < map.groundY - 0.5) { this.onGround = false; this.groundPlat = null; }
+  }
+
+  /** 縦テレポート: 上下 dist 以内の足場の上に着地（solid の天井・壁は抜けない） */
+  teleportVertical(sgn, dist) {
+    const map = this.game.map;
+    const x = this.x, y = this.y;
+    const solidBetween = (y1, y2) => (map.platforms || []).some((p) => p.solid === true && x >= p.x && x <= p.x + p.w && p.y > Math.min(y1, y2) && p.y < Math.max(y1, y2));
+    const blockedAt = (ny) => (map.walls || []).some((w) => rectOverlap({ x: x - this.w / 2, y: ny - this.h, w: this.w, h: this.h - 1 }, w));
+    const surfaces = (map.platforms || []).filter((p) => !p.ceiling && x >= p.x + 4 && x <= p.x + p.w - 4).map((p) => ({ y: p.y, p }));
+    surfaces.push({ y: map.groundY, p: null });
+    let best = null;
+    if (sgn < 0) {
+      // 上: 届く範囲で最も高い足場（天井を抜けない）
+      for (const s of surfaces) {
+        if (s.y >= y - 20 || s.y < y - dist - 20 || s.y - this.h < 0) continue;
+        if (solidBetween(y, s.y - 1) || blockedAt(s.y)) continue;
+        if (!best || s.y < best.y) best = s;
+      }
+    } else {
+      // 下: 一つ下の足場（無ければ地面まで dist）
+      for (const s of surfaces) {
+        if (s.y <= y + 20 || s.y > y + dist + 20) continue;
+        if (solidBetween(y + 1, s.y + 1) || blockedAt(s.y)) continue;
+        if (!best || s.y < best.y) best = s;
+      }
+    }
+    if (best) {
+      this.y = best.y; this.vy = 0; this.onGround = true; this.groundPlat = best.p;
+    } else if (sgn < 0) {
+      // 足場が無ければその場で小さく浮く（落下して元の場所へ）
+      const ny = Math.max(this.h + 2, y - Math.min(dist, 120));
+      if (!solidBetween(y, ny) && !blockedAt(ny)) { this.y = ny; this.vy = 0; this.onGround = false; this.groundPlat = null; }
+    } else {
+      const ny = Math.min(map.groundY, y + dist);
+      if (!solidBetween(y, ny) && !blockedAt(ny)) { this.y = ny; this.onGround = ny >= map.groundY; this.groundPlat = null; this.dropThrough = 0.1; }
+    }
+  }
+
   // ------------------------------------------------------------ 攻撃
   /**
    * kind: 'basic'（通常攻撃: 武器種で近接/射撃/魔法弾を自動判定）
@@ -349,7 +627,7 @@ export class Player {
       const rect = this.getAttackRect(wt === 'melee' ? (st.range || 80) : 55);
       const hits = playerAttackArea(g, rect, wt === 'melee' ? 1 : 0.8, { hits: 1, knock: 220, effect: 'hit' });
       spawnEffect(g, 'slash', this.x + this.facing * (rect.w * 0.5), this.y - 40, { dir: this.facing, color: weaponColor(g.state), range: rect.w });
-      void hits;
+      this.afterHits(hits);
     }
     return true;
   }
@@ -387,6 +665,12 @@ export class Player {
     a.flash = this.invulnT > 0 && !this.dead && Math.floor(this.t * 18) % 2 === 0;
     a.alpha = a.flash ? 0.45 : 1; // 被弾無敵中は点滅
     a.scale = 1;
+    // 職のオーラ色（render/character.js が anim.aura を描画）・移動スキル種別（エフェクト用）
+    let aura = null;
+    try { aura = currentJob(s)?.aura || null; } catch (e) { aura = null; }
+    a.aura = aura;
+    a.move = this.move ? this.move.type : null;
+    if (this.move && (this.move.type === 'rush' || this.move.type === 'wheelDash' || this.move.type === 'glide')) a.state = this.move.type === 'glide' ? 'jump' : 'walk';
   }
 
   // PET（装備中のみ）: 装備との同期 + 更新
@@ -402,12 +686,25 @@ export class Player {
     if (this.inVehicle) return; // 車側で描画（driver=true）
     const s = this.game.state;
     if (!s) return;
-    const look = (HERO_LOOKS && HERO_LOOKS[s.heroId]) || (HERO_LOOKS && HERO_LOOKS.luna);
+    const look = heroLookOf(s);
     const equip = getEquipLooks(s);
     drawCharacter(ctx, this.x, this.y, look, equip, this.anim);
   }
 
   rect() { return entRect(this); }
+}
+
+/** プレイヤーの見た目: state.look → classes.defaultLook(class, gender) → HERO_LOOKS の順 */
+const _lookCache = new WeakMap();
+export function heroLookOf(state) {
+  if (!state) return HERO_LOOKS?.luna;
+  if (state.look && typeof state.look === 'object' && state.look.body) return state.look;
+  let lk = _lookCache.get(state);
+  if (lk && lk._k === state.heroId + ':' + state.gender) return lk;
+  try { lk = defaultLook(state.heroId, state.gender); } catch (e) { lk = null; }
+  if (!lk || !lk.body) lk = (HERO_LOOKS && (HERO_LOOKS[state.heroId] || HERO_LOOKS.luna)) || null;
+  if (lk) { lk = { ...lk }; Object.defineProperty(lk, '_k', { value: state.heroId + ':' + state.gender }); _lookCache.set(state, lk); }
+  return lk;
 }
 
 function weaponColor(state) {

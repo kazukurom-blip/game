@@ -7,10 +7,12 @@
 // civilian: 町の市民（殴ると手配度。経験値/図鑑なし）
 import { ITEMS, looksFromIds } from './items.js';
 import { baseEnemyExp, expToNext, REGION_EXP_MULT } from './balance.js';
+import { ENEMY_LORE } from './lore.js';
 
-const hpAt = (lv, m = 1) => Math.round((25 + 8 * lv + 0.35 * lv * lv) * m);
-const atkAt = (lv, m = 1) => Math.round((8 + 2.2 * lv + 0.04 * lv * lv) * m);
-const defAt = (lv, m = 1) => Math.round(lv * 0.7 * m);
+// v3: タワー/アリーナのスケーリングでも使うため export
+export const hpAt = (lv, m = 1) => Math.round((25 + 8 * lv + 0.35 * lv * lv) * m);
+export const atkAt = (lv, m = 1) => Math.round((8 + 2.2 * lv + 0.04 * lv * lv) * m);
+export const defAt = (lv, m = 1) => Math.round(lv * 0.7 * m);
 const moneyAt = (lv, m = 1) => [Math.round((2 + lv * 2.5) * m), Math.round((6 + lv * 5) * m)];
 const expAt = (lv, region, m = 1) => Math.max(1, Math.round(baseEnemyExp(lv) * (REGION_EXP_MULT[region] || 1) * m));
 
@@ -60,6 +62,14 @@ function mk(id, name, level, art, ai, region, habitats, o = {}) {
     drops.push(...potsFor(level), ...equipPool(id, level, o.equipN ?? 3), ...(o.extra || []));
   }
   if (!o.civilian && !o.isCop) for (const pid of REGION_PETS[region] || []) drops = [...drops, { id: pid, chance: PET_CHANCE[tier] }];
+  // v3: ハックチップ・ペットフード（全モンスター共通の低確率ドロップ）
+  if (!o.civilian && !o.isCop) {
+    if (o.boss) drops = [...drops, { id: 'chip_reroll', chance: 0.6 }, { id: 'chip_lock', chance: 0.05 }, { id: 'pet_food', chance: 0.5 }];
+    else {
+      if (level >= 15) drops = [...drops, { id: 'chip_reroll', chance: tier === 'elite' || o.night ? 0.006 : 0.002 }];
+      drops = [...drops, { id: 'pet_food', chance: 0.004 }];
+    }
+  }
   const def = {
     id, name, level, art, ai, region,
     habitats: [...(habitats || [])],
@@ -86,6 +96,8 @@ function mk(id, name, level, art, ai, region, habitats, o = {}) {
   if (o.title) def.title = o.title;
   if (o.summon) def.summon = o.summon;
   if (o.desc) def.desc = o.desc;
+  if (o.night) def.night = true; // v3: 夜（20〜5時）だけ出現。spawner は isNightNow(game) で判定
+  def.lore = ENEMY_LORE[id] || o.desc || `${name}。ヴァイス・ベイの${o.civilian ? '住人' : '夜に潜む何か'}。`;
   return def;
 }
 
@@ -532,6 +544,32 @@ const list = [
   }),
 
   // =====================================================================
+  // v3: 夜限定の敵（night:true。20〜5時のみ。spawner が isNightNow / enemyAvailableNow で判定）
+  // =====================================================================
+  mk('jelly_moonlit', 'ムーンライト・クラゲ', 8, 'jellyfish', 'flyer', 'beach', ['beach_f3'], {
+    night: true, speed: 70, w: 44, h: 50, aggro: 260, color: '#fff6c8', accent: '#19f0ff', hpM: 1.3, expM: 1.6, moneyM: 2, mat: 'jelly_tentacle',
+    extra: [{ id: 'chip_reroll', chance: 0.02 }],
+  }),
+  mk('thug_night_racer', 'ナイト・ゴーストレーサー', 21, 'thug', 'charger', 'downtown', ['down_f3'], {
+    night: true, speed: 170, w: 32, h: 70, aggro: 420, color: '#b04dff', hpM: 1.3, expM: 1.6, moneyM: 2,
+    look: LK('m', '#c9a27a', 'wolf', '#e8e8ff', '#19f0ff'),
+    equip: { hat: 'helmet_moto', top: 'leather_jacket', bottom: 'track_pants', shoes: 'boots_rocket', accessory: 'sunglasses_neon', weapon: 'bat_nail' },
+    drops: [{ id: 'street_tag', chance: 0.5 }, ...POTS_MID, { id: 'helmet_moto', chance: 0.004 }, { id: 'sunglasses_neon', chance: 0.01 }, { id: 'chip_reroll', chance: 0.02 }],
+  }),
+  mk('ghost_bayou', 'バイユーの鬼火', 42, 'ghost', 'flyer', 'swamp', ['swamp_f4'], {
+    night: true, speed: 100, w: 40, h: 48, aggro: 360, color: '#9aff6a', accent: '#ffd23f', hpM: 1.3, expM: 1.6, moneyM: 2, mat: 'ghost_wisp',
+    extra: [{ id: 'chip_reroll', chance: 0.02 }],
+  }),
+  mk('ghost_after_hours', 'アフターアワーズの客', 57, 'ghost', 'flyer', 'casino', ['casino_f4'], {
+    night: true, speed: 115, w: 44, h: 52, aggro: 400, color: '#ffd23f', accent: '#ff3d7f', hpM: 1.3, expM: 1.6, moneyM: 3, mat: 'casino_chip',
+    extra: [{ id: 'chip_reroll', chance: 0.025 }, { id: 'diamond', chance: 0.005 }],
+  }),
+  mk('drone_night_owl', 'ナイトオウル観測機', 48, 'drone', 'flyer', 'spaceport', ['space_f2'], {
+    night: true, speed: 130, w: 46, h: 34, aggro: 420, color: '#7a3dff', accent: '#19f0ff', hpM: 1.3, expM: 1.6, moneyM: 2, mat: 'drone_chip',
+    extra: [{ id: 'chip_reroll', chance: 0.02 }, { id: 'chip_lock', chance: 0.002 }],
+  }),
+
+  // =====================================================================
   // ボス（行き止まりマップ）
   // =====================================================================
   mk('boss_king_slime', 'キングゼリー', 10, 'slime', 'boss', 'beach', ['beach_f3'], {
@@ -588,6 +626,8 @@ export const MONSTER_IDS = list.filter((e) => !e.civilian && !e.isCop).map((e) =
 export const CIVILIAN_IDS = list.filter((e) => e.civilian).map((e) => e.id);
 export const COP_IDS = list.filter((e) => e.isCop).map((e) => e.id);
 export const BOSS_IDS = list.filter((e) => e.boss).map((e) => e.id);
+/** v3: 夜だけ出現する敵 */
+export const NIGHT_ENEMY_IDS = list.filter((e) => e.night).map((e) => e.id);
 export const ENEMY_REGIONS = ['beach', 'downtown', 'slums', 'swamp', 'casino', 'rooftop', 'spaceport'];
 
 /** enemiesForMap(mapId, {boss}) → そのマップを habitats に含む敵ID（spawner の自動選択用） */

@@ -1,5 +1,9 @@
 // エフェクト＆ダメージ数字（ワールド空間）。game.effects に積み、updateEffects / drawEffects で処理。
 import { rgba, shade, rng, starPath } from './util.js';
+import { FX_TYPES, themeSpawn } from './fxJob.js';
+import { drawCutinLayer, pushCutin } from './cutin.js';
+import { RAINBOW as RB, FXA } from './fxStyle.js';
+export { drawCombo } from './cutin.js';
 
 const PI = Math.PI;
 const MAX_EFFECTS = 500;
@@ -22,11 +26,16 @@ function ensure(game) {
 
 export function spawnEffect(game, type, x, y, opts = {}) {
   if (!game) return null;
-  const list = ensure(game);
+  if (type === 'impact') { impact(game, opts.power ?? 0.5, opts.color); type = 'impactLines'; }
+  if (type === 'cutin') { pushCutin(game, opts); return null; }
+  const fxScale = fxLevel(game);
+  // 画面空間（UI窓の上など）に出す演出: opts.screen
+  const list = opts.screen ? (game.screenFx || (game.screenFx = [])) : ensure(game);
   if (list.length >= MAX_EFFECTS) list.splice(0, list.length - MAX_EFFECTS + 1);
+  const def = FX_TYPES[type];
   const e = {
     kind: 'fx', type, x, y, t: 0,
-    life: opts.life || LIFE[type] || 0.5,
+    life: opts.life || LIFE[type] || (def && def.life) || 0.5,
     color: opts.color || DEF_COLOR[type] || '#ffffff',
     dir: opts.dir || opts.facing || 1,
     size: opts.size || opts.radius || 0,
@@ -34,25 +43,80 @@ export function spawnEffect(game, type, x, y, opts = {}) {
     opts,
     parts: null,
     seed: seedCounter++,
+    fx: fxScale,
+    tier: opts.tier || 0,
   };
   initParts(e);
   list.push(e);
+  if (!opts._child && !opts.screen) {
+    try { themeSpawn(game, e, spawnEffect, impact); } catch (err) { if (!spawnEffect._warned) { spawnEffect._warned = 1; console.warn('[fx] theme failed', err); } }
+    // 移動スキルの重複（player.js と skills.js の両方から出た場合）
+    if (e.type.startsWith('move_')) {
+      for (let i = list.length - 2; i >= 0 && i >= list.length - 40; i--) {
+        const o = list[i];
+        if (o !== e && o.type === e.type && o.t < 0.15) { e.life = 0; break; }
+      }
+    }
+  }
   return e;
+}
+
+/** エフェクト濃さ: game.settings.fx（1 / 0.5 / 0.15） */
+function fxLevel(game) {
+  const v = game.settings && game.settings.fx;
+  return v == null || isNaN(v) ? 1 : Math.max(0.05, Math.min(1, +v));
+}
+const alphaOf = (fx) => (fx >= 0.99 ? 1 : fx >= 0.45 ? 0.72 : 0.42);
+
+/**
+ * impact(game, power 0..1, color?) — ヒットストップ・ズーム・色フラッシュ・揺れ（main が反映）
+ *  game.hitstop（秒, 最大0.12）/ game.camZoom（1.0〜1.08）/ game.flash = {color, a} / game.shake
+ */
+export function impact(game, power = 0.5, color) {
+  if (!game) return;
+  const pw = Math.max(0, Math.min(1, +power || 0));
+  const fx = fxLevel(game);
+  game.hitstop = Math.min(0.12, Math.max(game.hitstop || 0, 0.035 + 0.085 * pw));
+  game.camZoom = Math.min(1.08, Math.max(game.camZoom || 1, 1 + 0.08 * pw * (fx < 0.3 ? 0.4 : 1)));
+  if (pw >= 0.3) {
+    const a = (0.12 + 0.4 * pw) * (fx < 0.3 ? 0.3 : 1);
+    if (!game.flash || (game.flash.a || 0) < a) game.flash = { color: color || '#ffffff', a };
+  }
+  game.shake = Math.max(game.shake || 0, 3 + 11 * pw);
 }
 
 // メイプル風ダメージ数字
 export function spawnDamageNumber(game, x, y, value, opts = {}) {
   if (!game) return null;
   const list = ensure(game);
+  const enemyDmg = !opts.toPlayer && !opts.heal && !opts.miss;
+  if (enemyDmg && !game.comboExternal) comboHit(game, 1);
+  const cnt = game.combo ? game.combo.count | 0 : 0;
+  const clv = cnt >= 100 ? 3 : cnt >= 50 ? 2 : cnt >= 20 ? 1 : 0;
+  // まとめ表示: 近くの数字に合算（同じ種類・0.45秒以内）
+  if (game.settings && game.settings.dmgCompact && !opts.miss) {
+    for (let i = list.length - 1; i >= 0 && i >= list.length - 80; i--) {
+      const o = list[i];
+      if (o.type !== 'dmg' || o.miss || o.t > 0.45 || !!o.toPlayer !== !!opts.toPlayer || !!o.heal !== !!opts.heal) continue;
+      if (Math.abs(o.x - x) < 60 && Math.abs(o.baseY - y) < 90) {
+        o.value = (o.value || 0) + Math.max(0, Math.round(Number(value) || 0));
+        o.text = String(o.value); o.hitsN = (o.hitsN || 1) + 1;
+        o.t = Math.min(o.t, 0.12); o.crit = o.crit || !!opts.crit; o.clv = Math.max(o.clv || 0, clv);
+        return o;
+      }
+    }
+  }
   // 同じ場所に短時間で出た数字は縦に積む
   let stack = 0;
   for (const o of list) {
     if (o.type === 'dmg' && o.t < 0.35 && Math.abs(o.x - x) < 50 && Math.abs(o.baseY - y) < 50 && !!o.toPlayer === !!opts.toPlayer) stack = Math.max(stack, o.stack + 1);
   }
-  const text = opts.miss ? 'MISS' : String(Math.max(0, Math.round(Number(value) || 0)));
+  const v = Math.max(0, Math.round(Number(value) || 0));
+  const text = opts.miss ? 'MISS' : String(v);
   const e = {
-    kind: 'dmg', type: 'dmg', x: x + (opts.miss ? 0 : 0), y, baseY: y, t: 0, life: opts.crit ? 1.05 : 0.95,
-    text, stack, crit: !!opts.crit, toPlayer: !!opts.toPlayer, heal: !!opts.heal, miss: !!opts.miss,
+    kind: 'dmg', type: 'dmg', x, y, baseY: y, t: 0, life: opts.crit ? 1.05 : 0.95,
+    text, value: v, stack, crit: !!opts.crit, toPlayer: !!opts.toPlayer, heal: !!opts.heal, miss: !!opts.miss, mp: !!opts.mp,
+    clv: enemyDmg ? clv : 0,
     seed: seedCounter++,
   };
   list.push(e);
@@ -62,8 +126,13 @@ export function spawnDamageNumber(game, x, y, value, opts = {}) {
 
 function initParts(e) {
   const R = rng(e.seed * 9973);
+  const fxs = e.fx == null ? 1 : e.fx;
+  const N = (n) => Math.max(1, Math.round(n * fxs));
+  e.R = R; e.N = N;
   const parts = [];
-  const add = (n, f) => { for (let i = 0; i < n; i++) parts.push(f(i, n)); };
+  const add = (n, f) => { n = N(n); for (let i = 0; i < n; i++) parts.push(f(i, n)); };
+  const def = FX_TYPES[e.type];
+  if (def) { e.parts = parts; if (def.init) def.init(e, R, N); return; }
   switch (e.type) {
     case 'hit': case 'critHit': {
       const n = e.type === 'critHit' ? 12 : 7;
@@ -114,24 +183,45 @@ function initParts(e) {
 }
 
 export function updateEffects(game, dt) {
-  const list = game && game.effects;
-  if (!list) return;
+  if (!game) return;
+  const p = game.player;
+  if (game.screenFx && game.screenFx.length) updateList(game, game.screenFx, dt);
+  const list = game.effects;
+  if (list) updateList(game, list, dt);
+  if (p) { const lp = game._fxPrevPlayer || (game._fxPrevPlayer = { x: 0, y: 0 }); lp.x = p.x; lp.y = p.y; }
+  // コンボ: 一定時間ヒットが無ければリセット
+  const cb = game.combo;
+  if (cb && cb.count > 0 && !game.comboExternal) { cb.t = (cb.t || 0) + dt; if (cb.t > COMBO_WINDOW) { cb.count = 0; cb.t = 0; } }
+}
+export const COMBO_WINDOW = 3.2;
+/** comboHit(game, n=1) — コンボ数を加算（spawnDamageNumber が敵へのダメージで自動で呼ぶ。game.comboExternal=true なら呼ばない） */
+export function comboHit(game, n = 1) {
+  if (!game) return;
+  const cb = game.combo || (game.combo = { count: 0, t: 0, max: 0 });
+  cb.count += n; cb.t = 0; cb.bump = 0;
+  if (cb.count > (cb.max || 0)) cb.max = cb.count;
+}
+
+function updateList(game, list, dt) {
   let w = 0;
   for (let i = 0; i < list.length; i++) {
     const e = list[i];
     e.t += dt;
     if (e.t >= e.life) continue;
-    if (e.target && !e.target.dead) { e.x = e.target.x; e.y = e.target.y + (e.opts && e.opts.offsetY || 0); }
+    if (e.target && !e.target.dead) { e.x = e.target.x; e.y = e.target.y + (e.opts && e.opts.offsetY || 0); if (e.target.facing && e.type.startsWith('move_')) e.dir = e.target.facing; }
+    const def = e.kind === 'fx' ? FX_TYPES[e.type] : null;
+    if (def && def.tick) { try { def.tick(e, dt, game, spawnEffect); } catch (err) { e.life = 0; } }
     if (e.parts) {
-      const grav = e.type === 'tear' ? 500 : e.type === 'spark' || e.type === 'explosion' ? 380 : e.type === 'hit' || e.type === 'critHit' ? 0 : 0;
+      const grav = e.type === 'tear' ? 500 : e.type === 'spark' || e.type === 'explosion' ? 380 : 0;
       const drag = e.type === 'hit' || e.type === 'critHit' ? Math.pow(0.02, dt) : 1;
       for (const p of e.parts) {
-        if (p.vx != null) {
+        if (p.vx != null && p.x != null) {
           p.vx *= drag; p.vy *= drag;
-          if (!p.smoke) p.vy += grav * dt;
+          if (!p.smoke) p.vy += (p.grav || grav) * dt;
           if (e.type === 'tear') { p.vx *= Math.pow(0.4, dt); p.vy = Math.min(p.vy, 90); p.rot += p.vr * dt; }
           p.x += p.vx * dt; p.y += p.vy * dt;
-        } else if (p.a != null) { p.a += p.va * dt; p.r = Math.max(2, p.r + p.vr * dt); }
+          if (p.rock && p.y > 0) { p.y = 0; p.vy *= -0.3; p.vx *= 0.6; }
+        } else if (p.a != null && p.va != null) { p.a += p.va * dt; p.r = Math.max(2, p.r + p.vr * dt); }
       }
     }
     list[w++] = e;
@@ -144,28 +234,57 @@ export function drawEffects(ctx, game) {
   if (!list || !list.length) return;
   // 通常エフェクト（加算）→ ダメージ数字（通常合成・最前面）
   ctx.save();
-  for (const e of list) if (e.kind !== 'dmg') drawFx(ctx, e);
+  for (const e of list) if (e.kind !== 'dmg' && !e.hide) drawFx(ctx, e);
+  FXA.m = 1;
   ctx.restore();
   for (const e of list) if (e.kind === 'dmg') drawDmg(ctx, e);
+}
+
+/** drawCutins(ctx, game) — 画面空間: カットイン＋画面空間エフェクト（opts.screen）。main が HUD の前に呼ぶ */
+export function drawCutins(ctx, game) {
+  if (!game) return;
+  const sl = game.screenFx;
+  if (sl && sl.length) {
+    // ワールドが止まっている間（UI窓・ヒットストップ）も進める
+    if (game.paused || game.hitstop > 0 || game.scene !== 'play' || (game.ui && game.ui.isOpen && game.ui.isOpen('worldmap'))) updateList(game, sl, game.dt || 1 / 60);
+    ctx.save();
+    for (const e of sl) if (!e.hide) drawFx(ctx, e);
+    FXA.m = 1;
+    ctx.restore();
+  }
+  drawCutinLayer(ctx, game);
 }
 
 // ---------------------------------------------------------------- 各エフェクト
 function drawFx(ctx, e) {
   const k = e.t / e.life; // 0..1
   const c = e.color;
+  FXA.m = alphaOf(e.fx == null ? 1 : e.fx);
   ctx.save();
   ctx.translate(e.x, e.y);
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  const add = e.type !== 'smoke' && e.type !== 'tear';
+  ctx.globalAlpha = FXA.m;
+  const def = FX_TYPES[e.type];
+  const add = def ? def.add !== false : e.type !== 'smoke' && e.type !== 'tear';
   if (add) ctx.globalCompositeOperation = 'lighter';
+  if (def) {
+    try { def.draw(ctx, e, k); } catch (err) { e.life = 0; if (!drawFx._w) { drawFx._w = 1; console.warn('[fx] draw failed', e.type, err); } }
+    ctx.restore();
+    return;
+  }
   switch (e.type) {
     case 'slash': {
-      const r = e.size || 46;
+      const r = e.size || (e.opts.w ? Math.min(110, Math.max(40, e.opts.w * 0.42)) : e.opts.range ? Math.min(90, Math.max(40, e.opts.range * 0.5)) : 46);
       ctx.scale(e.dir < 0 ? -1 : 1, 1);
       const a0 = -1.6 + k * 0.6, a1 = -1.6 + Math.min(1, k * 2.2) * 2.8;
-      ctx.globalAlpha = 1 - k * k;
+      ctx.globalAlpha = FXA.m * (1 - k * k);
       ctx.beginPath(); ctx.arc(0, 0, r, a0, a1); ctx.arc(-6, 2, r - 12, a1 - 0.1, a0 + 0.5, true); ctx.closePath();
-      ctx.fillStyle = rgba(c, 0.55); ctx.fill();
+      if (e.opts.rainbow) {
+        const rg = ctx.createLinearGradient(-r, -r, r, r);
+        for (let i = 0; i < RB.length; i++) rg.addColorStop(i / (RB.length - 1), RB[(i + ((e.t * 24) | 0)) % RB.length]);
+        ctx.fillStyle = rg;
+      } else ctx.fillStyle = rgba(c, 0.55);
+      ctx.fill();
       ctx.beginPath(); ctx.arc(0, 0, r - 2, a0 + 0.3, a1); ctx.strokeStyle = 'rgba(255,255,255,0.95)'; ctx.lineWidth = 3; ctx.stroke();
       ctx.beginPath(); ctx.arc(0, 0, r + 6, a0 + 0.6, a1 - 0.2); ctx.strokeStyle = rgba(c, 0.5); ctx.lineWidth = 2; ctx.stroke();
       break;
@@ -173,7 +292,7 @@ function drawFx(ctx, e) {
     case 'hit': case 'critHit': {
       const crit = e.type === 'critHit';
       const R = (crit ? 34 : 22) * (0.5 + k);
-      ctx.globalAlpha = 1 - k;
+      ctx.globalAlpha = FXA.m * (1 - k);
       ctx.fillStyle = rgba(crit ? '#ff4fd8' : c, 0.6);
       ctx.beginPath(); starPath(ctx, 0, 0, R, R * 0.35, crit ? 8 : 6, e.seed); ctx.fill();
       ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.beginPath(); ctx.arc(0, 0, R * 0.35 * (1 - k), 0, PI * 2); ctx.fill();
@@ -184,7 +303,7 @@ function drawFx(ctx, e) {
       break;
     }
     case 'spark': {
-      ctx.globalAlpha = 1 - k;
+      ctx.globalAlpha = FXA.m * (1 - k);
       ctx.strokeStyle = c; ctx.lineWidth = 2;
       ctx.beginPath();
       for (const p of e.parts) { ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * 0.03, p.y - p.vy * 0.03); }
@@ -195,15 +314,15 @@ function drawFx(ctx, e) {
       const R = e.size ? e.size * 0.5 : 80;
       const fk = Math.min(1, k * 3);
       // 閃光
-      ctx.globalAlpha = Math.max(0, 1 - k * 2.2);
+      ctx.globalAlpha = FXA.m * (Math.max(0, 1 - k * 2.2));
       const g = ctx.createRadialGradient(0, -10, 2, 0, -10, R * (0.4 + fk * 0.8));
       g.addColorStop(0, 'rgba(255,255,230,1)'); g.addColorStop(0.35, rgba('#ffd23f', 0.9)); g.addColorStop(0.7, rgba(c, 0.6)); g.addColorStop(1, rgba('#ff3d7f', 0));
       ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, -10, R * (0.4 + fk * 0.8), 0, PI * 2); ctx.fill();
       // 衝撃波リング
-      ctx.globalAlpha = Math.max(0, 1 - k * 1.5);
+      ctx.globalAlpha = FXA.m * (Math.max(0, 1 - k * 1.5));
       ctx.strokeStyle = rgba('#ffffff', 0.8); ctx.lineWidth = 4 * (1 - k);
       ctx.beginPath(); ctx.ellipse(0, -6, R * (0.3 + k * 1.1), R * (0.12 + k * 0.4), 0, 0, PI * 2); ctx.stroke();
-      ctx.globalAlpha = 1 - k;
+      ctx.globalAlpha = FXA.m * (1 - k);
       for (const p of e.parts) {
         if (p.smoke) continue;
         ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y - 10, p.r * (1 - k * 0.7), 0, PI * 2); ctx.fill();
@@ -211,22 +330,22 @@ function drawFx(ctx, e) {
       ctx.globalCompositeOperation = 'source-over';
       for (const p of e.parts) {
         if (!p.smoke) continue;
-        ctx.globalAlpha = Math.max(0, 0.5 * (1 - k)) * Math.min(1, k * 4);
+        ctx.globalAlpha = FXA.m * (Math.max(0, 0.5 * (1 - k)) * Math.min(1, k * 4));
         ctx.fillStyle = '#5a4a66'; ctx.beginPath(); ctx.arc(p.x, p.y - 14, p.r * (0.6 + k), 0, PI * 2); ctx.fill();
       }
       break;
     }
     case 'smoke': {
       for (const p of e.parts) {
-        ctx.globalAlpha = 0.45 * (1 - k);
+        ctx.globalAlpha = FXA.m * (0.45 * (1 - k));
         ctx.fillStyle = c; ctx.beginPath(); ctx.arc(p.x, p.y, p.r * (0.6 + k * 0.9), 0, PI * 2); ctx.fill();
-        ctx.globalAlpha = 0.25 * (1 - k);
+        ctx.globalAlpha = FXA.m * (0.25 * (1 - k));
         ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(p.x - p.r * 0.3, p.y - p.r * 0.3, p.r * 0.4 * (0.6 + k), 0, PI * 2); ctx.fill();
       }
       break;
     }
     case 'pickup': {
-      ctx.globalAlpha = 1 - k;
+      ctx.globalAlpha = FXA.m * (1 - k);
       ctx.strokeStyle = rgba(c, 0.8); ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(0, 0, 6 + k * 22, 0, PI * 2); ctx.stroke();
       ctx.fillStyle = '#ffffff';
@@ -235,7 +354,7 @@ function drawFx(ctx, e) {
     }
     case 'muzzle': {
       ctx.scale(e.dir < 0 ? -1 : 1, 1);
-      ctx.globalAlpha = 1 - k;
+      ctx.globalAlpha = FXA.m * (1 - k);
       const s = (e.size || 16) * (1 + k);
       ctx.fillStyle = 'rgba(255,240,180,0.95)';
       ctx.beginPath(); ctx.moveTo(0, -s * 0.4); ctx.lineTo(s * 1.4, 0); ctx.lineTo(0, s * 0.4); ctx.lineTo(s * 0.3, 0); ctx.closePath(); ctx.fill();
@@ -245,7 +364,7 @@ function drawFx(ctx, e) {
     }
     case 'dash': {
       ctx.scale(e.dir < 0 ? -1 : 1, 1);
-      ctx.globalAlpha = 1 - k;
+      ctx.globalAlpha = FXA.m * (1 - k);
       ctx.strokeStyle = rgba(c, 0.85); ctx.lineWidth = 3;
       ctx.beginPath();
       for (const p of e.parts) { const o = k * 60; ctx.moveTo(p.x - o, p.y + 30); ctx.lineTo(p.x - o - p.l, p.y + 30); }
@@ -260,12 +379,12 @@ function drawFx(ctx, e) {
     case 'petPick': {
       for (const p of e.parts) {
         if (e.t < p.d) continue;
-        ctx.globalAlpha = Math.max(0, 1 - k * 1.1);
+        ctx.globalAlpha = FXA.m * (Math.max(0, 1 - k * 1.1));
         ctx.fillStyle = p.heart ? '#ff6fb5' : '#fff6a0';
         if (p.heart) heartPath(ctx, p.x, p.y, p.r); else { ctx.beginPath(); starPath(ctx, p.x, p.y, p.r * 1.5, p.r * 0.5, 4, e.t * 3); }
         ctx.fill();
       }
-      ctx.globalAlpha = 1;
+      ctx.globalAlpha = FXA.m * (1);
       break;
     }
     case 'petDrop': {
@@ -273,7 +392,7 @@ function drawFx(ctx, e) {
       break;
     }
     case 'portal': {
-      ctx.globalAlpha = 1 - k;
+      ctx.globalAlpha = FXA.m * (1 - k);
       ctx.strokeStyle = rgba(c, 0.9); ctx.lineWidth = 3;
       ctx.beginPath(); ctx.ellipse(0, -40, 30 * (1 - k * 0.5), 44 * (1 - k * 0.5), 0, 0, PI * 2); ctx.stroke();
       ctx.fillStyle = '#ffffff';
@@ -283,7 +402,7 @@ function drawFx(ctx, e) {
     case 'tear': {
       for (const p of e.parts) {
         ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.scale(1, Math.cos(p.rot * 1.7) * 0.6 + 0.4 || 0.1);
-        ctx.globalAlpha = Math.min(1, (1 - k) * 2);
+        ctx.globalAlpha = FXA.m * (Math.min(1, (1 - k) * 2));
         ctx.beginPath(); ctx.moveTo(p.pts[0], p.pts[1]); for (let i = 2; i < p.pts.length; i += 2) ctx.lineTo(p.pts[i], p.pts[i + 1]); ctx.closePath();
         ctx.fillStyle = p.c; ctx.fill(); ctx.strokeStyle = '#2a1430'; ctx.lineWidth = 1; ctx.stroke();
         ctx.restore();
@@ -291,7 +410,7 @@ function drawFx(ctx, e) {
       break;
     }
     default: {
-      ctx.globalAlpha = 1 - k; ctx.fillStyle = c; ctx.beginPath(); ctx.arc(0, 0, 10 * (1 + k), 0, PI * 2); ctx.fill();
+      ctx.globalAlpha = FXA.m * (1 - k); ctx.fillStyle = c; ctx.beginPath(); ctx.arc(0, 0, 10 * (1 + k), 0, PI * 2); ctx.fill();
     }
   }
   ctx.restore();
@@ -321,19 +440,19 @@ function drawRising(ctx, e, k, c) {
   }
   for (const p of e.parts) {
     if (e.t < p.d) continue;
-    ctx.globalAlpha = fade * 0.9;
+    ctx.globalAlpha = FXA.m * (fade * 0.9);
     ctx.fillStyle = type === 'heal' ? '#c8ffd8' : type === 'levelUp' ? (p.r > 3 ? '#ffe066' : '#ffffff') : '#ffffff';
     if (type === 'heal') { ctx.fillRect(p.x - p.r, p.y - p.r * 0.35, p.r * 2, p.r * 0.7); ctx.fillRect(p.x - p.r * 0.35, p.y - p.r, p.r * 0.7, p.r * 2); }
     else { ctx.beginPath(); starPath(ctx, p.x, p.y, p.r * 1.8, p.r * 0.6, 4, e.t * 2); ctx.fill(); }
   }
-  ctx.globalAlpha = 1;
+  ctx.globalAlpha = FXA.m * (1);
   if (type === 'levelUp') {
     // LEVEL UP! テキスト
     ctx.globalCompositeOperation = 'source-over';
     const ty = -110 - Math.min(1, k * 4) * 20;
     const pop = k < 0.08 ? 0.6 + (k / 0.08) * 0.6 : k < 0.14 ? 1.2 - ((k - 0.08) / 0.06) * 0.2 : 1;
     ctx.save(); ctx.translate(0, ty); ctx.scale(pop, pop);
-    ctx.globalAlpha = fade;
+    ctx.globalAlpha = FXA.m * (fade);
     ctx.font = '900 30px "Arial Black", "Arial Rounded MT Bold", sans-serif';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
     ctx.lineWidth = 7; ctx.strokeStyle = '#2a0b3d'; ctx.strokeText('LEVEL UP!', 0, 0);
@@ -394,19 +513,19 @@ function drawPetDrop(ctx, e, k) {
   for (const p of e.parts) {
     if (e.t < p.d) continue;
     const lk = Math.min(1, (e.t - p.d) / 1.4);
-    ctx.globalAlpha = fade * (1 - lk);
+    ctx.globalAlpha = FXA.m * (fade * (1 - lk));
     ctx.fillStyle = RAINBOW[(p.hue / 45) | 0];
     if (p.heart) heartPath(ctx, p.x, p.y, p.r * 1.3); else { ctx.beginPath(); starPath(ctx, p.x, p.y, p.r * 1.9, p.r * 0.6, 4, e.t * 2 + p.hue); }
     ctx.fill();
   }
-  ctx.globalAlpha = 1;
+  ctx.globalAlpha = FXA.m * (1);
   // PET GET! 文字
   if (e.t > 0.25) {
     ctx.globalCompositeOperation = 'source-over';
     const kk = e.t - 0.25;
     const pop = kk < 0.12 ? 0.5 + (kk / 0.12) * 0.8 : kk < 0.2 ? 1.3 - ((kk - 0.12) / 0.08) * 0.3 : 1;
     ctx.save(); ctx.translate(0, -150 - Math.min(1, kk * 3) * 16); ctx.scale(pop, pop);
-    ctx.globalAlpha = fade;
+    ctx.globalAlpha = FXA.m * (fade);
     const label = (e.opts && e.opts.text) || 'PET GET!!';
     ctx.font = '900 32px "Arial Black", "Arial Rounded MT Bold", sans-serif';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
@@ -427,17 +546,21 @@ const DMG_STYLE = {
   toPlayer: { top: '#d9b3ff', bot: '#8a3df0', size: 26 },
   heal: { top: '#b8ff9e', bot: '#2ecc71', size: 26 },
   miss: { top: '#eeeeee', bot: '#aaaaaa', size: 22 },
+  mp: { top: '#a8e0ff', bot: '#2e7bff', size: 26 },
+  combo1: { top: '#fff2a0', bot: '#ff5f3c', size: 29 },
+  combo3: { top: '#fffbe0', bot: '#ff2a6d', size: 30 },
+  critHi: { top: '#ffd6ff', bot: '#8a2be2', size: 36 },
 };
 
 
 function drawDmg(ctx, e) {
-  const st = e.miss ? DMG_STYLE.miss : e.heal ? DMG_STYLE.heal : e.toPlayer ? DMG_STYLE.toPlayer : e.crit ? DMG_STYLE.crit : DMG_STYLE.normal;
+  const st = e.miss ? DMG_STYLE.miss : e.heal ? (e.mp ? DMG_STYLE.mp : DMG_STYLE.heal) : e.toPlayer ? DMG_STYLE.toPlayer : e.crit ? (e.clv >= 2 ? DMG_STYLE.critHi : DMG_STYLE.crit) : e.clv >= 3 ? DMG_STYLE.combo3 : e.clv >= 1 ? DMG_STYLE.combo1 : DMG_STYLE.normal;
   const k = e.t / e.life;
   const rise = Math.min(1, e.t / 0.8) * 40;
   const y = e.baseY - 26 * e.stack - rise - 20;
   const pop = e.t < 0.1 ? 1.4 - (e.t / 0.1) * 0.4 : 1;
   const alpha = k < 0.6 ? 1 : Math.max(0, 1 - (k - 0.6) / 0.4);
-  const size = st.size;
+  const size = st.size + (e.clv || 0) * 2 + (e.hitsN > 1 ? Math.min(8, e.hitsN) : 0);
   ctx.save();
   ctx.translate(e.x, y);
   ctx.scale(pop, pop);
@@ -467,9 +590,15 @@ function drawDmg(ctx, e) {
     const bob = e.t < 0.2 ? Math.sin(Math.min(1, e.t / 0.2) * PI) * -4 * ((i % 2) ? 1 : 0.4) : 0;
     const tx = cx + ws[i] / 2;
     ctx.textAlign = 'center';
+    if (e.clv >= 2) { ctx.lineWidth = 10; ctx.strokeStyle = e.clv >= 3 ? 'rgba(255,60,140,0.55)' : 'rgba(255,170,60,0.5)'; ctx.strokeText(chars[i], tx, bob); }
     ctx.lineWidth = 6; ctx.strokeStyle = '#2a0b3d'; ctx.strokeText(chars[i], tx, bob);
     ctx.fillStyle = g || st.top; ctx.fillText(chars[i], tx, bob);
     cx += ws[i];
+  }
+  if (e.hitsN > 1) {
+    ctx.font = '900 15px "Arial Black", sans-serif'; ctx.textAlign = 'left';
+    ctx.lineWidth = 4; ctx.strokeStyle = '#2a0b3d'; ctx.strokeText('×' + e.hitsN, cx + 4, size * 0.2);
+    ctx.fillStyle = '#ffffff'; ctx.fillText('×' + e.hitsN, cx + 4, size * 0.2);
   }
   ctx.restore();
 }

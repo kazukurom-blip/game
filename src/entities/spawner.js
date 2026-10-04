@@ -4,6 +4,8 @@ import * as combat from '../systems/combat.js';
 import { spawnEffect } from '../render/effects.js';
 import { Enemy } from './enemy.js';
 import { Vehicle } from './vehicle.js';
+import { MAPS, buildTowerFloor } from '../world/maps.js';
+import { sysFn, nightNow } from '../world/sys.js';
 
 const rand = (a, b) => a + Math.random() * (b - a);
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -52,6 +54,9 @@ export function habitatBosses(map) {
   const mid = (map.levelRange[0] + map.levelRange[1]) / 2;
   return [all.sort((x, y) => Math.abs((x.level || 1) - mid) - Math.abs((y.level || 1) - mid))[0].id];
 }
+
+/** 夜限定の敵（def.night）は夜のみ */
+export function timeOk(def, night) { return !def?.night || !!night; }
 
 export function civilianTypes() {
   return Object.values(ENEMIES || {}).filter((e) => e.civilian || e.ai === 'civilian').map((e) => e.id);
@@ -120,6 +125,15 @@ export class Spawner {
 
   reset(map) {
     this.map = map;
+    this.inst = null;
+    const g0 = this.game;
+    if (map && map.town && !map.instance) g0.lastTownId = map.id;
+    if (map && map.instance) {
+      this.areas = []; this.timers = [];
+      this.wantedT = 1.5; this.civT = 0;
+      this.resetInstance(map);
+      return;
+    }
     this.areas = resolveSpawns(map);
     // ボス枠（max<=1）は入場 ~15 秒後に初回出現。他はランダム位相
     this.timers = this.areas.map((s) => (s.max <= 1 ? Math.max(0, (s.interval || 5) - 15) : rand(0, s.interval || 5)));
@@ -159,7 +173,10 @@ export class Spawner {
     if (!s) return null;
     const types = (s.types || []).filter((t) => ENEMIES[t]);
     if (!types.length) return null;
-    const type = pick(types);
+    const night = nightNow(g);
+    const okTypes = types.filter((t) => timeOk(ENEMIES[t], night));
+    if (!okTypes.length) return null;
+    const type = pick(okTypes);
     const def = ENEMIES[type];
     // 安全装置: 町にモンスター、フィールドに警官/市民は出さない
     if (this.map.town ? !(def.civilian || def.ai === 'civilian') : !isMonster(def)) return null;
@@ -200,6 +217,13 @@ export class Spawner {
   update(dt) {
     const g = this.game, map = this.map;
     if (!map || !g.player) return;
+    if (map.instance) { this.updateInstance(dt); return; }
+    // 昼になったら夜限定の敵は画面外で静かに退場
+    this.nightT = (this.nightT || 0) - dt;
+    if (this.nightT <= 0) {
+      this.nightT = 2;
+      if (!nightNow(g)) for (const e of g.enemies) if (e.def?.night && !e.dead && !e.aggro && !this.isOnScreen(e.x, e.y)) e.remove = true;
+    }
     // --- 通常出現 ---
     this.areas.forEach((s, i) => {
       if (s.minLevel && (g.state?.level || 1) < s.minLevel) return;
@@ -222,6 +246,150 @@ export class Spawner {
       }
     }
     this.updateWanted(dt);
+  }
+
+  // ---------------- v3: インスタンス（タワー / アリーナ / ボス部屋） ----------------
+  resetInstance(map) {
+    const g = this.game;
+    // 出口ポータルは入場前の町へ（コンシェルジュの前に出る）
+    const home = g.lastTownId && MAPS[g.lastTownId]?.town ? g.lastTownId : null;
+    for (const p of map.portals) {
+      if (!p.exit) continue;
+      if (home) p.to = home;
+      const dest = MAPS[p.to];
+      const cg = dest?.npcs?.find((n) => n.service);
+      p.toX = Math.round(cg ? Math.max(60, Math.min(dest.width - 60, cg.x - 120)) : dest?.spawnX ?? 260);
+      if (dest && dest.portals.some((q) => Math.abs(q.x - p.toX) < 80)) p.toX = dest.spawnX;
+      p.label = `${dest?.name || '町'}へ戻る`;
+    }
+    const inst = this.inst = { type: map.instance, t: 0, spawned: [], cleared: false, startT: g.time || 0 };
+    if (map.instance === 'tower') {
+      const floor = Math.max(1, Math.floor(g.towerFloor || 1));
+      g.towerFloor = floor;
+      const raw = callSafe(sysFn('towerFloorDef', g, 'tower'), floor, g);
+      inst.def = normalizeFloorDef(raw, floor, g);
+      inst.floor = floor;
+      buildTowerFloor(map, floor, { boss: !!inst.def.boss, level: inst.def.level, name: inst.def.name });
+      inst.delay = 0.8;
+    } else if (map.instance === 'arena') {
+      inst.wave = 0; inst.delay = 1.5; g.arenaWave = 0; g.arenaKills = 0;
+    } else if (map.instance === 'boss') {
+      const mode = g.bossMode || g.state?.bossMode || 'normal';
+      inst.mode = mode;
+      inst.mult = bossMult(sysFn('bossModeMult', g, 'bosses'), mode);
+      inst.bossId = map.bossId; inst.delay = 1.2;
+    }
+  }
+
+  /** インスタンス用の出現（倍率つき）。flag で全滅判定の対象に */
+  spawnInstanceEnemy(id, x, y, opts = {}) {
+    const g = this.game, map = this.map;
+    if (!ENEMIES[id]) return null;
+    const def = ENEMIES[id];
+    let plat = null;
+    if (y == null) {
+      // 地面 or 足場（ボス・地上の敵は地面）
+      const cands = (map.platforms || []).filter((p) => !p.ceiling && p.w > 120);
+      if (!isBossDef(def) && cands.length && Math.random() < 0.45) {
+        plat = pick(cands); x = rand(plat.x + 30, plat.x + plat.w - 30); y = plat.y;
+      } else y = map.groundY;
+    }
+    if (x == null) x = rand(map.width * 0.35, map.width - 200);
+    const e = new Enemy(g, id, x, y, { x1: plat ? plat.x : 40, x2: plat ? plat.x + plat.w : map.width - 40 });
+    if (plat) { e.groundPlat = plat; e.onGround = true; }
+    scaleEnemy(e, opts.hp ?? 1, opts.atk ?? 1, opts.level);
+    e.instance = this.map.instance;
+    e.aggro = opts.aggro ?? true;
+    g.enemies.push(e);
+    this.inst.spawned.push(e);
+    spawnEffect(g, 'smoke', x, y - 20);
+    return e;
+  }
+
+  instanceAlive() {
+    return this.inst.spawned.filter((e) => !e.dead && !e.remove && this.game.enemies.includes(e)).length;
+  }
+
+  updateInstance(dt) {
+    const g = this.game, inst = this.inst, map = this.map;
+    if (!inst) return;
+    inst.t += dt;
+    if (inst.delay > 0) { inst.delay -= dt; if (inst.delay > 0) return; this.startInstance(); return; }
+    if (inst.type === 'tower') {
+      if (!inst.cleared && inst.started && this.instanceAlive() === 0) {
+        inst.cleared = true; map.cleared = true;
+        const r = callSafe(sysFn('towerClearFloor', g, 'tower'), g);
+        const next = map.portals.find((p) => p.towerNext);
+        if (next) {
+          next.hidden = false;
+          spawnEffect(g, 'portal', next.x, next.y - 40);
+        }
+        g.notify?.(`🏆 ${inst.floor}F クリア！ 右の扉から ${inst.floor + 1}F へ`, '#ffd23f');
+        g.events?.emit('towerFloorCleared', { floor: inst.floor, result: r ?? null, time: inst.t });
+      }
+    } else if (inst.type === 'arena') {
+      if (g.arenaEnded || g.arena?.ended) return;
+      if (this.instanceAlive() === 0 && inst.started) {
+        if (!inst.waveDone) {
+          inst.waveDone = true; inst.next = 2.0;
+          callSafe(sysFn('arenaWaveCleared', g, 'arena'), g, inst.wave);
+          g.events?.emit('arenaWaveCleared', { wave: inst.wave });
+          if (inst.wave > 0) g.notify?.(`WAVE ${inst.wave} クリア！`, '#5cff9a');
+        }
+        inst.next -= dt;
+        if (inst.next <= 0) this.startArenaWave();
+      }
+    } else if (inst.type === 'boss') {
+      const b = inst.boss;
+      if (b && !inst.cleared && (b.dead || b.hp <= 0)) {
+        inst.cleared = true;
+        const info = { bossId: inst.bossId, mode: inst.mode, time: inst.t, maxHit: g.bossMaxHit || 0 };
+        callSafe(sysFn('bossCleared', g, 'bosses'), g, inst.bossId, inst.mode, info);
+        g.events?.emit('bossRoomCleared', info);
+        g.notify?.(`👑 ${b.name} 討伐！ 左の出口から町へ戻れます`, '#ffd23f');
+      }
+    }
+  }
+
+  startInstance() {
+    const g = this.game, inst = this.inst, map = this.map;
+    if (inst.started) return;
+    inst.started = true;
+    if (inst.type === 'tower') {
+      const d = inst.def;
+      const list = [];
+      for (const en of d.enemies) for (let i = 0; i < en.count; i++) list.push(en.id);
+      list.forEach((id, i) => this.spawnInstanceEnemy(id, Math.round(map.width * 0.3 + (i / Math.max(1, list.length - 1)) * map.width * 0.6), undefined, { hp: d.hpMult, atk: d.atkMult, level: d.level }));
+      if (d.boss) {
+        const b = this.spawnInstanceEnemy(d.boss, map.width - 420, map.groundY, { hp: d.bossHpMult ?? d.hpMult, atk: d.atkMult, level: d.level });
+        if (b) g.notify?.(`⚠ ${d.floorLabel || inst.floor + 'F'} ボス ${b.name}！`, '#ff4d6d');
+      }
+      if (d.mutators?.length) g.notify?.(`特性: ${d.mutators.map((m) => m.name || m.id || m).join(' / ')}`, '#c9b6ff');
+    } else if (inst.type === 'arena') {
+      this.startArenaWave();
+    } else if (inst.type === 'boss') {
+      const m = inst.mult;
+      const b = this.spawnInstanceEnemy(inst.bossId, map.bossX || map.width * 0.7, map.groundY, { hp: m.hp, atk: m.atk });
+      inst.boss = b;
+      if (b) {
+        b.bossMode = inst.mode;
+        g.notify?.(`⚠ ${b.name}（${MODE_NAMES[inst.mode] || inst.mode}）が現れた！`, '#ff4d6d');
+        g.events?.emit('bossRoomStart', { bossId: inst.bossId, mode: inst.mode });
+      }
+    }
+  }
+
+  startArenaWave() {
+    const g = this.game, inst = this.inst, map = this.map;
+    inst.wave += 1; inst.waveDone = false; g.arenaWave = inst.wave;
+    const raw = callSafe(sysFn('arenaWaveDef', g, 'arena'), inst.wave, g);
+    const d = normalizeWaveDef(raw, inst.wave, g);
+    for (const en of d.enemies) for (let i = 0; i < en.count; i++) {
+      const x = Math.random() < 0.5 ? rand(200, map.width * 0.4) : rand(map.width * 0.6, map.width - 120);
+      this.spawnInstanceEnemy(en.id, x, undefined, { hp: d.hpMult, atk: d.atkMult });
+    }
+    g.notify?.(`⚔ WAVE ${inst.wave}`, '#19f0ff');
+    g.events?.emit('arenaWave', { wave: inst.wave });
   }
 
   // ---------------- 手配度 ----------------
@@ -323,4 +491,86 @@ export function heatToLevel(h) {
   let lv = 0;
   for (let i = 1; i < T.length; i++) if (h >= T[i]) lv = i;
   return lv;
+}
+
+// ---------------------------------------------------------------- v3 インスタンス用ヘルパー
+const MODE_NAMES = { normal: 'ノーマル', hard: 'ハード', chaos: 'カオス', practice: '練習' };
+const DEFAULT_MODE_MULT = { normal: { hp: 1, atk: 1 }, hard: { hp: 3, atk: 1.6 }, chaos: { hp: 8, atk: 2.4 }, practice: { hp: 1, atk: 0.5 } };
+
+function callSafe(fn, ...args) {
+  if (typeof fn !== 'function') return undefined;
+  try { return fn(...args); } catch (e) { console.warn('[spawner sys]', e); return undefined; }
+}
+
+/** bossModeMult(mode) の戻り値（数値 / {hp, atk} / {hpMult, atkMult}）を {hp, atk} に */
+export function bossMult(fn, mode) {
+  let r = typeof fn === 'function' ? callSafe(fn, mode) : undefined;
+  if (typeof r === 'number') return { hp: r, atk: r };
+  if (r && typeof r === 'object') return { hp: r.hp ?? r.hpMult ?? 1, atk: r.atk ?? r.atkMult ?? r.dmg ?? 1 };
+  return DEFAULT_MODE_MULT[mode] || DEFAULT_MODE_MULT.normal;
+}
+
+/** 敵を倍率で強化（def を個体ごとにコピー）。level 指定時は表示Lvも上書き */
+export function scaleEnemy(e, hpMult = 1, atkMult = 1, level) {
+  if (!e) return e;
+  const hm = Number.isFinite(hpMult) && hpMult > 0 ? hpMult : 1;
+  const am = Number.isFinite(atkMult) && atkMult > 0 ? atkMult : 1;
+  if (hm === 1 && am === 1 && level == null) return e;
+  e.def = { ...e.def, hp: Math.round((e.def.hp || 1) * hm), atk: Math.max(1, Math.round((e.def.atk || 1) * am)) };
+  if (level != null && level > (e.level || 0)) { e.level = level; }
+  e.maxHp = e.def.hp; e.hp = e.def.hp; e.lastHp = e.hp;
+  return e;
+}
+
+const monsters = () => Object.values(ENEMIES || {}).filter((e) => isMonster(e) && !isBossDef(e) && !e.night);
+const bosses = () => Object.values(ENEMIES || {}).filter((e) => isBossDef(e) && !e.isCop && !e.civilian);
+function nearLevel(list, lv, n) {
+  return [...list].sort((a, b) => Math.abs((a.level || 1) - lv) - Math.abs((b.level || 1) - lv)).slice(0, n);
+}
+function toEntries(arr, count) {
+  // ['id', ...] | [{id, count|n}] → [{id, count}]
+  const out = [];
+  const list = (arr || []).filter(Boolean);
+  if (!list.length) return out;
+  if (list.every((x) => typeof x === 'string')) {
+    const ids = list.filter((id) => ENEMIES[id]);
+    for (let i = 0; i < count; i++) { const id = ids[i % ids.length]; if (!id) break; const o = out.find((q) => q.id === id); if (o) o.count++; else out.push({ id, count: 1 }); }
+    return out;
+  }
+  for (const x of list) {
+    const id = typeof x === 'string' ? x : x.id || x.type;
+    if (!ENEMIES[id]) continue;
+    out.push({ id, count: Math.max(1, Math.round(typeof x === 'string' ? 1 : x.count ?? x.n ?? 1)) });
+  }
+  return out;
+}
+
+/** towerFloorDef(floor) の戻り値をゆるく正規化（無ければフォールバック生成） */
+export function normalizeFloorDef(raw, floor, game) {
+  const d = raw && typeof raw === 'object' ? raw : {};
+  const lv = d.level ?? d.lv ?? Math.min(200, 38 + floor * 2);
+  const count = Math.max(1, Math.round(d.count ?? d.mobCount ?? d.enemyCount ?? (5 + Math.min(7, Math.floor(floor / 3)))));
+  let enemies = toEntries(d.enemies || d.mobs || d.types, count);
+  if (!enemies.length) enemies = toEntries(nearLevel(monsters(), Math.min(lv, 96), 3).map((e) => e.id), count);
+  const muts = Array.isArray(d.mutators) ? d.mutators : d.mutator ? [d.mutator] : [];
+  const mprod = (k) => muts.reduce((a, m) => a * (m && typeof m === 'object' && Number.isFinite(m[k]) ? m[k] : 1), 1);
+  // コンテンツの最高Lv(~100)を超える階は HP/攻撃を上乗せ
+  const over = Math.max(0, lv - 100);
+  const hpMult = (d.hpMult ?? d.mult?.hp ?? (1 + floor * 0.04 + over * 0.05)) * mprod('hpMult');
+  const atkMult = (d.atkMult ?? d.mult?.atk ?? (1 + floor * 0.02 + over * 0.03)) * mprod('atkMult');
+  let boss = d.boss;
+  if (boss === true || (boss == null && floor % 10 === 0)) boss = nearLevel(bosses(), Math.min(lv, 100), 1)[0]?.id || null;
+  if (boss && typeof boss === 'object') boss = boss.id;
+  if (boss && !ENEMIES[boss]) boss = null;
+  return { level: lv, enemies, boss: boss || null, hpMult, atkMult, bossHpMult: d.bossHpMult, mutators: muts, name: d.name, floorLabel: d.label };
+}
+
+/** arenaWaveDef(wave) の戻り値を正規化（無ければプレイヤーLv帯の敵でフォールバック） */
+export function normalizeWaveDef(raw, wave, game) {
+  const d = raw && typeof raw === 'object' ? raw : {};
+  const lv = d.level ?? Math.max(1, (game?.state?.level || 1));
+  const count = Math.max(1, Math.round(d.count ?? (4 + Math.min(10, wave * 2))));
+  let enemies = toEntries(d.enemies || d.types, count);
+  if (!enemies.length) enemies = toEntries(nearLevel(monsters(), lv, 4).map((e) => e.id), count);
+  return { enemies, hpMult: d.hpMult ?? (1 + (wave - 1) * 0.08), atkMult: d.atkMult ?? (1 + (wave - 1) * 0.04) };
 }

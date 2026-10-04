@@ -5,24 +5,27 @@ import { drawHUD, hudSlots } from './hud.js';
 import { guard, getItemDef, skillDef, drawItemIco, drawSkillIco } from './deps.js';
 import { WINDOW_DRAW, drawTooltipBox, initDialog, dialogKey } from './windows.js';
 import { drawWorldMap, drawBook, drawPhone, rideTaxi } from './v2windows.js';
+import { V3_WINDOWS, V3_LAYOUT, drawPopup } from './v3windows.js';
+import { loadSettings, applySettings, SKILL_BAR_SIZE, BAR_KEYS } from './v3deps.js';
 import { enemyDef } from './deps.js';
 import { audio } from '../audio/audio.js';
 
-Object.assign(WINDOW_DRAW, { worldmap: drawWorldMap, book: drawBook, phone: drawPhone });
+Object.assign(WINDOW_DRAW, { worldmap: drawWorldMap, book: drawBook, phone: drawPhone }, V3_WINDOWS);
 
 const W = 1280, H = 720;
-const MODAL = new Set(['dialog', 'shop', 'death', 'worldmap']);
+const MODAL = new Set(['dialog', 'shop', 'death', 'worldmap', 'menu', 'jobOffer']);
 const LAYOUT = {
   inventory: { w: 800, h: 520, title: 'インベントリ', key: 'I', y: 70 }, // 下端が左下の HUD に重ならない高さ
-  skills: { w: 520, h: 610, title: 'スキル', key: 'K', y: 14 },
+  skills: { w: 860, h: 640, title: 'スキル', key: 'K', y: 8 },
   stats: { w: 420, h: 510, title: 'ステータス', key: 'T' },
-  missions: { w: 640, h: 480, title: 'ミッション', key: 'J' },
+  missions: { w: 900, h: 560, title: 'ミッション', key: 'J' },
   dialog: { w: 940, h: 260, title: null, x: (W - 940) / 2, y: H - 290 },
   shop: { w: 780, h: 520, title: 'ショップ' },
   death: { w: 460, h: 250, title: null },
   worldmap: { w: 1240, h: 690, title: 'ワールドマップ  —  ネオリダ州 ヴァイス・ベイ', key: 'M' },
   book: { w: 1000, h: 620, title: 'モンスター図鑑', key: 'B', y: 40 },
   phone: { w: 360, h: 660, title: null, key: 'P', x: W - 360 - 36, y: 30 },
+  ...V3_LAYOUT,
 };
 const TOAST_MAX = 3;
 // 重要度: 2 = レベルアップ / PET / レア / ボス / ミッション完了、1 = 進行系、0 = その他
@@ -54,6 +57,10 @@ export class UIManager {
     this.bookToasts = [];
     this.bookNewIds = new Set();
     this.radio = null;
+    this.jobFx = null;
+    this.popup = null;   // 右クリックメニュー {x, y, items:[{label, fn, color, disabled}]}
+    this._hudHits = [];
+    guard('settings', () => { loadSettings(game); applySettings(game); });
     const ev = game?.events;
     if (ev?.on) {
       ev.on('rareDrop', (d) => {
@@ -85,6 +92,7 @@ export class UIManager {
       });
       ev.on('vehicleExit', () => { if (this.radio) this.radio.name = null; });
       ev.on('levelUp', (d) => { this.levelFx = { level: d?.level ?? game.state?.level ?? 1, t: 0, life: 3.2 }; });
+      ev.on('jobAdvanced', (d) => { if (d?.job) this.jobFx = { job: d.job, tier: d.tier ?? d.job.tier, t: 0, life: 5 }; this.close('jobOffer'); });
     }
   }
 
@@ -154,6 +162,14 @@ export class UIManager {
   }
 
   toggle(name) { this.isOpen(name) ? this.close(name) : this.open(name); }
+  closeAll() {
+    for (const n of [...this.order]) { delete this.wins[n]; }
+    this.order = []; this.drag = null; this.dnd = null; this.popup = null; this.tip = null;
+    this.jobFx = null; this.levelFx = null; this.banners = []; this.petFx = null; this.toasts = [];
+  }
+  openPopup(x, y, items) { this.popup = { x, y, items: (items || []).filter(Boolean), t: 0 }; }
+  /** HUD 上のクリック領域（main の drawHUD 中に登録。ui.draw で hits にまとめる） */
+  hudHit(id, r, h = {}) { (this._hudHits ||= []).push({ id: 'hud:' + id, win: null, r, ...h }); }
 
   front(name) {
     this.order = this.order.filter((n) => n !== name);
@@ -183,17 +199,32 @@ export class UIManager {
       // トグル
       if (!this.isModal()) {
         const tg = [['inventory', 'inventory'], ['skillWin', 'skills'], ['missionWin', 'missions'], ['statWin', 'stats'],
-          ['mapWin', 'worldmap'], ['bookWin', 'book'], ['phoneWin', 'phone']];
+          ['mapWin', 'worldmap'], ['bookWin', 'book'], ['phoneWin', 'phone'], ['contentWin', 'content'], ['achieveWin', 'achieve']];
         for (const [act, nm] of tg) if (P(act)) { this.toggle(nm); eat(act); consumed = true; }
       } else if (this.wins.worldmap && this.order[this.order.length - 1] === 'worldmap' && P('mapWin')) {
         this.close('worldmap'); eat('mapWin'); consumed = true;
       }
+      if (P('escape') && this.popup) { this.popup = null; eat('escape'); consumed = true; }
       if (P('escape') && this.order.length) {
         const topW = this.wins[this.order[this.order.length - 1]];
         if (this.dnd) this.dnd = null;
         else if (topW?.confirm) topW.confirm = null;
+        else if (topW?.sub) topW.sub = null;
         else this.close();
         eat('escape'); consumed = true;
+      } else if (P('escape') && !this.order.length && g.scene === 'play' && !this.wins.death) {
+        this.open('menu'); guard('emit', () => g.events?.emit?.('menuOpened', { name: 'menu' }));
+        eat('escape'); consumed = true;
+      }
+      // 右クリックメニュー
+      if (this.popup && (m.clicked || m.rightClicked)) {
+        const hit = this.hits.find((h) => h.win === '__popup' && inRect(m.x, m.y, h.r));
+        const pop = this.popup;
+        this.popup = null;
+        if (hit && m.clicked) hit.onClick?.();
+        m.clicked = false; m.rightClicked = false;
+        consumed = true;
+        void pop;
       }
 
       // ウィンドウドラッグ中
@@ -267,7 +298,7 @@ export class UIManager {
         if (w.onEnter) { w.onEnter(); eat('confirm'); eat('interact'); consumed = true; }
       }
       if (this.isModal()) {
-        for (const a of ['attack', 'jump', 'skill1', 'skill2', 'skill3', 'skill4', 'potion1', 'potion2', 'pickup', 'interact', 'up', 'down', 'confirm']) eat(a);
+        for (const a of ['attack', 'jump', 'skill1', 'skill2', 'skill3', 'skill4', 'skill5', 'skill6', 'skill7', 'skill8', 'potion1', 'potion2', 'pickup', 'interact', 'talk', 'up', 'down', 'confirm']) eat(a);
       }
     } catch (e) {
       guard('ui.handleInput', () => { throw e; });
@@ -310,10 +341,11 @@ export class UIManager {
     if (!sk) return;
     if (sk.kind === 'passive') { this.notify('パッシブスキルは登録できません', COL.bad); return; }
     if (!(st.skills?.[id] > 0)) { this.notify('まだ習得していません', COL.bad); return; }
-    st.skillBar = st.skillBar || [null, null, null, null];
-    for (let k = 0; k < 4; k++) if (st.skillBar[k] === id) st.skillBar[k] = null;
+    st.skillBar = Array.isArray(st.skillBar) ? st.skillBar : [];
+    while (st.skillBar.length < SKILL_BAR_SIZE) st.skillBar.push(null);
+    for (let k = 0; k < st.skillBar.length; k++) if (st.skillBar[k] === id) st.skillBar[k] = null;
     st.skillBar[i] = id;
-    this.notify(`${sk.name} を [${'ASDF'[i]}] に登録`, COL.teal);
+    this.notify(`${sk.name} を [${BAR_KEYS[i] || i + 1}] に登録`, COL.teal);
   }
   assignPotion(id, i) {
     const st = this.game.state, it = getItemDef(id);
@@ -344,6 +376,8 @@ export class UIManager {
       if (this.banners[0].t > this.banners[0].life) this.banners.shift();
     }
     if (this.levelFx && !hold) { this.levelFx.t += dt; if (this.levelFx.t > this.levelFx.life) this.levelFx = null; }
+    if (this.jobFx && !hold) { this.jobFx.t += dt; if (this.jobFx.t > this.jobFx.life) this.jobFx = null; }
+    if (this.popup) this.popup.t += dt;
     if (this.petFx) { this.petFx.t += dt; if (this.petFx.t > this.petFx.life) this.petFx = null; }
     for (const b of this.bookToasts) b.t += dt;
     this.bookToasts = this.bookToasts.filter((b) => b.t < b.life);
@@ -454,6 +488,12 @@ export class UIManager {
       }
       ctx.restore();
     }
+    // 右クリックメニュー
+    if (this.popup) {
+      ctx.save();
+      try { drawPopup(this, ctx, this.popup); } catch (e) { guard('popup', () => { throw e; }); }
+      ctx.restore();
+    }
     // ツールチップ
     if (this.tip && !this.dnd?.active) {
       ctx.save();
@@ -478,7 +518,7 @@ export class UIManager {
       }
       ctx.restore();
     }
-    this.hits = this._hits;
+    this.hits = (this._hudFrameHits === (this.game?.frameNo ?? this.frame) ? this._hudHits : []).concat(this._hits);
     void font;
   }
 }

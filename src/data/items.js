@@ -2,6 +2,8 @@
 // stats の単位: atk/def/maxHp/maxMp = 実数, speed = px/s 加算, crit = % (3 → +3%), str/dex/int/luk = 能力値加算
 // 武器: range = px（近接は前方リーチ／銃・魔法は射程）, attackSpeed = 1秒あたりの攻撃回数
 
+import { ITEM_LORE } from './lore.js';
+
 const STAT_KEYS = ['atk', 'def', 'maxHp', 'maxMp', 'speed', 'crit', 'str', 'dex', 'int', 'luk'];
 function fillStats(s = {}) {
   const o = {};
@@ -195,6 +197,42 @@ etc('moon_rock', '月の石（模造）', 'common', 'gem', 150, '月面シミュ
 etc('pirate_map', '密輸船の海図', 'rare', 'chip', 300, 'ドンの密輸ルートが記されている。');
 etc('rat_crown', 'ネズミの王冠', 'rare', 'gem', 250, 'ラットキングが被っていた空き缶の王冠。');
 etc('alien_core', 'オーバーロード・コア', 'mythic', 'gem', 50000, '宇宙船の心臓部。触れると温かい。');
+
+// ============ v3: 強化・潜在・PET 用アイテム（etc。use は inventory.useItem が解釈） ============
+etc('chip_reroll', 'リロール・チップ', 'rare', 'chip', 1500, '装備の潜在能力を再設定する（結果を見てから採用/破棄を選べる）。潜在の無い装備にはレア潜在を付与。');
+etc('chip_lock', 'ロック・チップ', 'epic', 'chip', 6000, '潜在の行を固定したまま再設定する（1行=1個、2行=3個）。');
+etc('tune_ticket', 'チューン・チケット', 'epic', 'chip', 20000, 'ネオン・チューンを1回確定成功にする。');
+etc('pet_food', 'ネオン・ペットフード', 'common', 'gem', 300, 'PET にあげると親密度 +20。');
+list[list.length - 1].use = 'petFood';
+etc('spire_token', 'スパイア・トークン', 'rare', 'chip', 100, 'ヴァイス・スパイアの交換所で使うトークン。');
+etc('boss_trophy', 'ボス・トロフィー', 'epic', 'cash', 5000, 'ボスの周回報酬。交換所でボス固有装備と交換できる。');
+
+// ============ v3: エンドコンテンツ装備（カオスボス・スパイア報酬。★20/25 まで強化可能） ============
+equip('crown_caiman', 'ドンの黒王冠', 'hat', 'legendary', 100, { def: 70, atk: 20, str: 12, dex: 12, int: 12, luk: 12, maxHp: 400 }, ['crown', '#16161e', '#ffd23f'], { desc: 'カオス・ドン・カイマンの固有ドロップ。' });
+equip('suit_vice', 'ヴァイス・キングスーツ', 'top', 'mythic', 110, { def: 95, atk: 24, str: 14, dex: 14, int: 14, luk: 14, maxHp: 600 }, ['suit', '#ff3dd2', '#19f0ff'], { desc: 'ボス・トロフィー交換所の目玉。' });
+weapon('neon_sword_spire', 'スパイア・ブレード', 'mythic', 120, { atk: 260, str: 18, dex: 18, crit: 10 }, ['neonSword', '#fff06a', '#7a3dff'], 'melee', 155, 2.5, { desc: 'ヴァイス・スパイア 100階の報酬。' });
+weapon('pistol_spire', 'スパイア・リボルバー', 'mythic', 120, { atk: 190, dex: 20, luk: 10, crit: 10 }, ['pistol', '#fff06a', '#7a3dff'], 'gun', 660, 3.4, { desc: 'ヴァイス・スパイア 100階の報酬。' });
+weapon('staff_spire', 'スパイア・オラクル', 'mythic', 120, { atk: 175, int: 24, maxMp: 400, crit: 6 }, ['staff', '#fff06a', '#7a3dff'], 'magic', 500, 2.1, { desc: 'ヴァイス・スパイア 100階の報酬。' });
+equip('halo_zog', 'ゾグの灯台', 'accessory', 'mythic', 150, { def: 60, atk: 40, str: 20, dex: 20, int: 20, luk: 20, crit: 6 }, ['halo', '#5cff9a', '#7a3dff'], { desc: 'カオス・オーバーロード・ゾグの極レア固有ドロップ。' });
+
+// ============ v3: PET スキル（petSkills = 初期スキル。親密度 Lv10/20/30 で PET_SKILL_ORDER から1つずつ追加） ============
+export const PET_SKILL_IDS = ['autoHp', 'autoMp', 'range', 'filter', 'autoSell'];
+export const PET_SKILL_INFO = {
+  autoHp: { name: '自動HPポーション', desc: 'HPが設定値以下で所持ポーションを自動使用（間隔1秒）' },
+  autoMp: { name: '自動MPポーション', desc: 'MPが設定値以下で所持ポーションを自動使用（間隔1秒）' },
+  range: { name: '取得範囲拡大', desc: '取得範囲 +40%' },
+  filter: { name: '取得フィルタ', desc: '指定レア度未満の装備を拾わない' },
+  autoSell: { name: '自動売却ボックス', desc: '拾った common 装備を即座に $ 化（売値×80%）' },
+};
+const PET_SKILLS = {
+  pet_slime: ['autoHp'], pet_flamingo: ['autoHp', 'range'], pet_cat: ['autoHp', 'filter'], pet_drone: ['autoMp', 'range'],
+  pet_dolphin: ['autoHp', 'autoMp'], pet_gator: ['autoHp', 'autoSell'], pet_ghost: ['autoMp', 'filter', 'autoSell'],
+  pet_robot: ['autoHp', 'autoMp', 'autoSell'], pet_dragon: ['autoHp', 'autoMp', 'range'], pet_alien: ['autoHp', 'autoMp', 'range', 'filter'],
+};
+for (const it of list) if (it.slot === 'pet') it.petSkills = [...(PET_SKILLS[it.id] || ['autoHp'])];
+
+// ============ v3: フレーバーテキスト（全装備） ============
+for (const it of list) if (it.type === 'equip') it.lore = ITEM_LORE[it.id] || it.desc || `${it.name}。ヴァイス・ベイの夜で手に入れた一品。`;
 
 export const ITEMS = Object.fromEntries(list.map((it) => [it.id, it]));
 
