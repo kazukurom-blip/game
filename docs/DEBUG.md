@@ -43,15 +43,16 @@ v3（転職24職・キャラ作成/6スロット・移動スキル・クエス�
 ```bash
 npm run test:unit    # node tests/unit.mjs     （80件・約5秒）
 node tests/unit.mjs --repeat=40                 # 乱数に依存するテストを40回繰り返す
-npm run test:smoke   # node tests/smoke.mjs    （約25分, Playwright + chromium headless）
+npm run test:smoke   # node tests/smoke.mjs    （約10分, Playwright + chromium headless）
 node tests/smoke.mjs --only=chars,jobs,v3,oldsaves   # 一部だけ（luna,jin,maps,bosses,v1save,story,chars,jobs,v3,oldsaves）
 npm run serve        # http://localhost:8080
+node tests/perf.mjs drone --night             # 性能計測（npm test には含めない。大技連発・部位別の内訳）
 ```
 
 ### `tests/unit.mjs`（80件）
 v1/v2 の40件 ＋ `tests/sys_v3.mjs`（システム v3: 転職・SP・★強化/潜在の10万回統計と天井・旧セーブ v1/v2/v3→v4・ボス/タワー/アリーナ・実績・日次/ログボ・プリセット・共有倉庫・分岐・夜・PETスキル・コンボ・ナビ）＋ `tests/world_v3.mjs`（移動スキル5種の物理・V 会話・教官12人・夜NPC・インスタンスマップ）＋ **`tests/debug_v3.mjs`（今回の回帰テスト5件: E は近い方の車/NPC、PET の範囲は petStats、図鑑キャッシュ、実績判定のまとめ、夜限定の敵）**。
 
-### `tests/smoke.mjs`（v3: 約290チェック・スクリーンショット約200枚 → `tests/screenshots/`）
+### `tests/smoke.mjs`（v3: 209チェック・スクリーンショット171枚 → `tests/screenshots/`）
 `console.error` / `pageerror` / 読み込み失敗 / UI ガード警告 / `game.lastError` を集め、1件でもあれば失敗（Google Fonts の証明書エラー等は除外）。
 
 1. **luna / jin / maps / bosses / v1save / story**（v2 から継続）: 町・フィールド・警察は町のみ・ウィンドウ・会話受注・車とラジオ・PET・昼夜・ワールドマップとタクシー・図鑑/SNS・デバッグパネル・服破れ・装備の見た目・つづきから・34マップ全ワープと性能・ボス7体・死亡と復活・旧v1セーブ・**メインストーリー20本**。v3 で**分岐のあるミッション（m06 / m13 / m15）は会話窓（V）で報告し、既定でない方の選択肢を選ぶ** → `storyChoices`・flag・後のセリフ（dialogByFlag）の変化を確認。
@@ -64,9 +65,9 @@ v1/v2 の40件 ＋ `tests/sys_v3.mjs`（システム v3: 転職・SP・★強化
 ### 現在の結果
 
 - unit: **80 passed / 0 failed**
-- smoke: **(RESULT_CHECKS) / エラー 0 件**、スクリーンショット (RESULT_SHOTS) 枚
-- 1フレーム処理時間（headless, 34マップ平均）: **(RESULT_PERF)**
-- 大技の連発（4次・CT無視で 0.1 秒ごと、敵16〜25体、`/tmp` の計測スクリプト）: 平均 4.5ms → **3.6ms（昼）/ 4.1ms（夜）**、8ms 超のフレーム 46 → 24（昼）。単発スパイクは 16〜22ms が 1500 フレームに 1〜3 回残る（下記「未解決」）。
+- smoke: **209/209 OK / エラー 0 件**（v2 の122チェック＋v3 の87チェック）、スクリーンショット 171 枚（キャラ作成・選択・転職・各窓・タワー/アリーナ/ボス部屋・旧セーブなど主要な画面を目視確認）
+- 1フレーム処理時間（headless, 34マップ平均）: **2.3ms**（最も重い町 3.1〜3.5ms、最大 5〜9ms）
+- 大技の連発（4次の大技を CT 無視で 0.1 秒ごと、敵16〜25体。`node tests/perf.mjs gun|drone|fight [--night]`）: 平均 4.5ms → **3.1〜3.6ms（昼）/ 4.1ms（夜）**、8ms 超のフレーム 46 → 11〜24 / 1500。単発スパイクは 16〜22ms が 1500 フレームに 1〜3 回残る（下記「未解決」）。
 
 ## v3 で見つけて直したバグ（修正試行回数つき）
 
