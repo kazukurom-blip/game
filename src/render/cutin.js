@@ -175,6 +175,8 @@ const COMBO_TIERS = [
 export function drawCombo(ctx, game) {
   const cb = game && game.combo;
   if (!cb) return;
+  const jf = game.ui && game.ui.jobFx;
+  if (jf && jf.t < (jf.life || 5) - 0.7) return; // 転職の全画面演出中は出さない
   const W = game.W || 1280;
   const dt = Math.min(0.05, game.dt || 1 / 60);
   const cnt = cb.count | 0;
@@ -187,7 +189,9 @@ export function drawCombo(ctx, game) {
   const lv = COMBO_TIERS.length - 1 - COMBO_TIERS.indexOf(tier); // 0..4
   const b = cb._bump;
   const pop = b < 0.08 ? 1.35 - (b / 0.08) * 0.35 : 1;
-  const x = W - 34, y = 200;
+  // 右上のミッション・トラッカー（ui._trackerBottom）と重ならないよう、その下に出す
+  const tb = (game.ui && game.ui._trackerBottom) || 0;
+  const x = W - 34, y = Math.min(470, Math.max(200, tb + 74));
   const a = cb._fade;
   const time = game.time || 0;
   ctx.save();

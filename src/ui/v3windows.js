@@ -38,6 +38,15 @@ function fmtStat(k, v) {
   return `${v > 0 ? '+' : ''}${Math.round(v)}`;
 }
 const LBL = { ...STAT_LABELS, dmgReduce: 'ダメージ軽減', allStat: '全ステータス', bossDmg: 'ボスダメージ', ignoreDef: '防御無視' };
+/** 1行に収まらない文は末尾を「…」で切る（縮小しすぎて読めなくなる・枠からはみ出すのを防ぐ） */
+function fitLine(ctx, s, maxW, size, weight = 800) {
+  s = String(s ?? '');
+  if (measure(ctx, s, size, weight) <= maxW) return s;
+  const ch = Array.from(s);
+  let lo = 0, hi = ch.length;
+  while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (measure(ctx, ch.slice(0, mid).join('') + '…', size, weight) <= maxW) lo = mid; else hi = mid - 1; }
+  return ch.slice(0, lo).join('') + '…';
+}
 function statChips(ctx, stats, x, y, maxW, o = {}) {
   let cx = x, cy = y;
   for (const [k, v] of Object.entries(stats || {})) {
@@ -153,7 +162,7 @@ function drawJobOffer(ui, ctx, win) {
   }
   const opts = offer.options || [];
   const n = Math.max(1, opts.length), gap = 16;
-  const cw = Math.min(470, (w - 40 - gap * (n - 1)) / n);
+  const cw = Math.min(n === 1 ? 700 : 470, (w - 40 - gap * (n - 1)) / n); // 1択（2次以降）は広く: ボーナスのチップが収まるように
   const x0 = x + (w - (cw * n + gap * (n - 1))) / 2;
   opts.forEach((jid, i) => {
     const J = JOBS[jid];
@@ -182,20 +191,24 @@ function drawJobOffer(ui, ctx, win) {
     for (const l of wrap(ctx, J.desc || '', tw, 12, 700).slice(0, 4)) { txt(ctx, l, tx, yy, { size: 12, weight: 700, sw: 2.5, color: '#efeaff' }); yy += 17; }
     yy = ry + 176;
     txt(ctx, '◆ ボーナス（永続）', tx, yy, { size: 12, color: COL.teal }); yy += 20;
-    statChips(ctx, { ...(J.statBonus || {}) }, tx, yy, tw, { color: col, size: 10.5 });
-    // スキル
-    let sy = ry + 228;
+    const chipEnd = statChips(ctx, { ...(J.statBonus || {}) }, tx, yy, tw, { color: col, size: 10.5 });
+    // スキル（ボーナスのチップが3行以上になる4次などは、その下から並べる）
+    let sy = Math.max(ry + 228, chipEnd + 8);
     txt(ctx, '◆ 獲得スキル', r.x + 16, sy, { size: 13, color: COL.pink }); sy += 14;
+    const nSk = Math.min(4, (J.skills || []).length);
+    const skBottom = r.y + r.h - 64 - 44 - (hov ? 3 : 0); // 教官・試練の行の上まで
+    const step = nSk ? Math.max(34, Math.min(43, (skBottom - sy) / nSk)) : 43;
     (J.skills || []).slice(0, 4).forEach((sid, k) => {
       const sk = skillDef(sid);
       if (!sk) return;
-      const rr = { x: r.x + 12, y: sy + k * 43, w: r.w - 24, h: 39 };
+      const rr = { x: r.x + 12, y: sy + k * step, w: r.w - 24, h: step - 4 };
       const sh = ui.hover(win, rr);
       inset(ctx, rr.x, rr.y, rr.w, rr.h, { r: 9, fill: sh ? 'rgba(123,47,247,0.35)' : 'rgba(6,4,24,0.5)' });
       drawSkillIco(ctx, sk, rr.x + 22, rr.y + 20, 32);
-      txt(ctx, sk.name, rr.x + 44, rr.y + 13, { size: 13.5, color: '#fff', maxW: rr.w - 140 });
-      txt(ctx, kindLabel(sk), rr.x + rr.w - 10, rr.y + 13, { size: 10.5, align: 'right', color: sk.kind === 'passive' ? COL.gold : COL.teal, sw: 2.5 });
-      txt(ctx, sk.desc || '', rr.x + 44, rr.y + 29, { size: 10.5, color: COL.sub, maxW: rr.w - 54, sw: 2, weight: 700 });
+      const tight = rr.h < 37; // 行が詰まる時は説明を省略（ツールチップで見られる）
+      txt(ctx, sk.name, rr.x + 44, tight ? rr.y + rr.h / 2 : rr.y + 13, { size: 13.5, color: '#fff', maxW: rr.w - 140 });
+      txt(ctx, kindLabel(sk), rr.x + rr.w - 10, tight ? rr.y + rr.h / 2 : rr.y + 13, { size: 10.5, align: 'right', color: sk.kind === 'passive' ? COL.gold : COL.teal, sw: 2.5 });
+      if (!tight) txt(ctx, fitLine(ctx, sk.desc || '', rr.w - 54, 10, 700), rr.x + 44, rr.y + rr.h - 10, { size: 10, color: COL.sub, sw: 2, weight: 700 });
       if (sh) ui.setTip({ lines: [{ t: sk.name, c: sk.color || COL.teal, size: 16 }, { t: kindLabel(sk), c: COL.sub, size: 12 }, { sep: true }, { t: sk.desc || '', c: '#fff', size: 12.5, wrap: true }], border: col });
     });
     // 試練

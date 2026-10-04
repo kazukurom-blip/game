@@ -480,6 +480,7 @@ function drawMoney(ctx, game, s, dt) {
 // ---------- 右側 クエストトラッカー ----------
 function drawTracker(ctx, game) {
   const list = guard('missions.tracked', () => game.missions?.tracked?.(), []) || [];
+  if (game.ui) game.ui._trackerBottom = 0;
   if (!list.length) return;
   const w = 290, x = W - w - 12;
   let y = 140;
@@ -487,6 +488,7 @@ function drawTracker(ctx, game) {
   const trackedId = game.state?.trackedMission;
   const items = list.slice(0, 4).map((m, i) => ({ id: m.id, name: m.name || '', lines: (m.lines || []).slice(0, 4), done: !!(m.done || m.complete), tracked: trackedId ? m.id === trackedId : i === 0 }));
   const hgt = 34 + items.reduce((a, m) => a + 22 + m.lines.length * 19 + 6, 0);
+  if (game.ui) game.ui._trackerBottom = y + hgt; // コンボ表示（render/cutin.js）はこの下に出す
   ctx.save();
   rrPath(ctx, x, y, w, hgt, 12);
   const g = ctx.createLinearGradient(x, 0, x + w, 0);
@@ -523,6 +525,7 @@ function drawToasts(ctx, game, s, dt) {
   const ui = game.ui;
   const list = ui?.toasts;
   if (!list || !list.length) return;
+  if (ui.jobFx && ui.jobFx.t < (ui.jobFx.life || 5) - 0.7) return; // 転職演出中は隠す（ui.update で時間も止めている）
   let y = 96;
   for (const tt of list) {
     const a = clamp(tt.t / 0.2, 0, 1) * (1 - clamp((tt.t - tt.life + 0.5) / 0.5, 0, 1));

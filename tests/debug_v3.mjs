@@ -1,0 +1,108 @@
+// デバッグ担当 v3: 通し検証で見つけて直したバグの回帰テスト
+//  - E（interact）で NPC より近い車に乗れる（m07「乗車できない」）
+//  - PET の取得範囲・速度は petStats（親密度・range スキル込み）を使う
+//  - 図鑑ボーナスのキャッシュ（JSON.stringify をやめた）が正しく更新される
+//  - 実績の判定まとめ（高頻度イベント）でも取りこぼさない
+//  - 夜限定の敵は昼に通常出現しない
+import assert from 'node:assert/strict';
+import { ENEMIES } from '../src/data/enemies.js';
+import { MAPS } from '../src/world/maps.js';
+import { resolveSpawns } from '../src/entities/spawner.js';
+import { petStats, petData } from '../src/systems/petSkills.js';
+import { bookBonus } from '../src/systems/book.js';
+import { attachAchievements, achievementList } from '../src/systems/achievements.js';
+import { syncPet } from '../src/entities/pet.js';
+import { sysReady } from '../src/world/sys.js';
+
+export default function register({ test, makeGame, step }) {
+  test('debug v3: E は近い方（車 > NPC）— NPC の横に停めた車にも乗れる', () => {
+    const g = makeGame('jin', 'beach');
+    const car = g.vehicles.find((v) => !v.driverType);
+    assert.ok(car, 'beach に車');
+    const p = g.player;
+    // 車の真上・NPC を車から 60px に置く（どちらも会話/乗車範囲内）
+    const npc = g.npcs[0];
+    npc.x = car.x + 60; npc.y = car.y;
+    p.x = car.x; p.y = car.y; p.vx = 0; p.vy = 0;
+    p.interact();
+    assert.ok(p.inVehicle === car, '車の方が近いので乗車');
+    car.exit(p); p.inVehicle = null;
+    // NPC の方が近ければ会話
+    p.x = npc.x - 5;
+    g.uiOpened.length = 0;
+    p.interact();
+    assert.ok(!p.inVehicle, 'NPC が近いので乗らない');
+    assert.ok(g.uiOpened.some((o) => o.name === 'dialog' || o.name === 'content'), '会話窓');
+    // V（talk）は車が近くても会話
+    p.x = car.x; g.uiOpened.length = 0;
+    npc.x = car.x + 30;
+    assert.ok(p.talk(), 'V は会話');
+    assert.ok(!p.inVehicle);
+  });
+
+  test('debug v3: PET の取得範囲・速度は petStats を使う（親密度 Lv・range スキル）', async () => {
+    await sysReady;
+    const g = makeGame('luna', 'beach_f1');
+    g.state.equipped.pet = 'pet_cat';
+    const d = petData(g.state, 'pet_cat');
+    d.aff = 99999; // Lv30（スキル枠が増えて range が付く）
+    const ps = petStats(g.state, 'pet_cat');
+    const pet = syncPet(g);
+    for (let i = 0; i < 40; i++) step(g);
+    assert.ok(pet && g.pet === pet);
+    assert.equal(pet.pickRange, ps.pickRange, 'pickRange = petStats');
+    assert.ok(Math.abs(pet.pickRate - ps.pickRate) < 1e-9, 'pickRate = petStats');
+    assert.ok(ps.pickRate > 1, '親密度で速度アップ');
+  });
+
+  test('debug v3: 図鑑ボーナスのキャッシュが登録・ランク変化で更新される', () => {
+    const st = { book: {} };
+    const ids = Object.keys(ENEMIES).filter((id) => !ENEMIES[id].civilian && !ENEMIES[id].isCop).slice(0, 8);
+    const b0 = bookBonus(st);
+    st.book[ids[0]] = 1;
+    const b1 = bookBonus(st);
+    assert.equal(b1.registered, b0.registered + 1);
+    assert.equal(b1.maxHp, b0.maxHp + 3);
+    assert.strictEqual(bookBonus(st), b1, '変化なしならキャッシュ');
+    st.book[ids[0]] = 100; // ランクアップ → crit が変わる
+    const b2 = bookBonus(st);
+    assert.ok(b2.crit > b1.crit);
+    // 別キャラ（別の book オブジェクト）は混ざらない
+    const other = { book: { [ids[1]]: 1, [ids[2]]: 1 } };
+    assert.equal(bookBonus(other).registered, 2);
+    assert.equal(bookBonus(st).registered, 1);
+  });
+
+  test('debug v3: 撃破イベントの実績判定をまとめても取りこぼさない', async () => {
+    const g = makeGame('luna', 'beach_f1');
+    g._achvUnsub?.();
+    const off = attachAchievements(g);
+    const killAch = () => achievementList(g.state).filter((a) => a.done).map((a) => a.id);
+    const before = killAch().length;
+    g.state.kills = 0;
+    for (let i = 0; i < 30; i++) { g.state.kills = (g.state.kills || 0) + 1; g.events.emit('enemyKilled', { enemy: { def: ENEMIES.slime_green, defId: 'slime_green' } }); }
+    await new Promise((r) => setTimeout(r, 320));
+    const after = killAch().length;
+    off();
+    assert.ok(after > before, `撃破系の実績が解除される (${before} → ${after})`);
+  });
+
+  test('debug v3: 夜限定の敵は昼に通常出現しない（spawnInArea）', async () => {
+    await sysReady;
+    const map = Object.values(MAPS).find((m) => !m.town && !m.instance && resolveSpawns(m).some((a) => a.types.some((t) => ENEMIES[t].night)));
+    assert.ok(map, '夜限定の敵がいるフィールド');
+    const g = makeGame('luna', map.id);
+    const count = (clock) => {
+      g.clock = clock; g.state.clock = clock; g.map._clock = clock;
+      let n = 0;
+      for (let k = 0; k < 80; k++) for (let i = 0; i < g.spawner.areas.length; i++) {
+        const e = g.spawner.spawnInArea(i);
+        if (e) { if (ENEMIES[e.defId].night) n++; e.remove = true; }
+      }
+      g.enemies = g.enemies.filter((e) => !e.remove);
+      return n;
+    };
+    assert.equal(count(12), 0, '昼は出ない');
+    assert.ok(count(23) > 0, '夜は出る');
+  });
+}

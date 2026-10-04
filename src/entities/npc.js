@@ -133,7 +133,9 @@ export class NPC {
       ctx.fillStyle = '#c9b6ff';
       ctx.fillText(`🌙 ${this.hours[0]}時〜${this.hours[1]}時`, this.x, this.y + 31);
     }
-    const near = p && !p.inVehicle && this.isNear(p) && (typeof p.nearestNpc !== 'function' || p.nearestNpc() === this);
+    // 会話窓・ショップを開いている間は「V で話す」を出さない（窓の上に重なっていた）
+    const talking = this.game.ui?.isOpen?.('dialog') || this.game.ui?.isOpen?.('shop');
+    const near = p && !p.inVehicle && !talking && this.isNear(p) && (typeof p.nearestNpc !== 'function' || p.nearestNpc() === this);
     if (near) {
       // 頭上に「V で話す」
       const by = top - (this.mark ? 62 : 30) + Math.sin(this.t * 5) * 2;

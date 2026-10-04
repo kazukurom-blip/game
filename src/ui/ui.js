@@ -368,7 +368,9 @@ export class UIManager {
   // ---------- 更新 ----------
   update(dt) {
     dt = Math.min(0.1, dt || 0);
-    for (const t of this.toasts) t.t += dt;
+    // 転職の祝福演出（全画面）の間は通知を止めて隠す（演出の文字と重ならないように。終わってから表示）
+    const jobFxOn = this.jobFx && this.jobFx.t < (this.jobFx.life || 5) - 0.7;
+    if (!jobFxOn) for (const t of this.toasts) t.t += dt;
     this.toasts = this.toasts.filter((t) => t.t < t.life);
     // PET 入手演出の間はレアバナー・レベルアップ演出を止めておき、終わってから順に出す
     const hold = !!this.petFx;

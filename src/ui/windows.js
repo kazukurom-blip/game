@@ -472,7 +472,8 @@ function drawSkills(ui, ctx, win) {
   const list = skillListFor(st, win.tab);
   const lx = x + 16, ly = y + 118, lw = 440, RH = 50, PER = 8;
   const pages = Math.max(1, Math.ceil(list.length / PER));
-  pager(ui, ctx, win, lx + lw - 112, y + 82, pages);
+  // ページ送りはリストの下（タブ行に置くと 5 個目の「4次」タブに重なっていた）
+  pager(ui, ctx, win, lx + lw / 2 - 56, ly + PER * RH + 1, pages);
   if (!list.length) {
     txt(ctx, win.tab === 0 ? 'スキルがありません' : `${win.tab}次転職（Lv.${[0, 10, 30, 60, 100][win.tab]}）で解放`, lx + lw / 2, ly + 140, { size: 15, align: 'center', color: COL.dim });
     txt(ctx, '頭上の「⬆ 転職できる！」吹き出しから転職ミッションを受注しよう', lx + lw / 2, ly + 168, { size: 12, align: 'center', color: COL.dim, maxW: lw - 20 });

@@ -299,6 +299,12 @@ function fmtDate(ms) {
 function slotLook(s) { return s.look || defaultLook(s.heroId || 'luna', s.gender || legacyGender(s.heroId)); }
 function slotEquip(s) { return guard('slotEquip', () => equipLooks(s.state || { equipped: s.equipped }), {}) || {}; }
 function slotJob(s) { return JOBS[s.state?.job?.id || s.job] || JOBS.beginner || { name: '見習い', title: '見習い', tier: 0 }; }
+/** スロットの現在地。タワー/アリーナ/ボス部屋で中断したキャラは再開する町（main.js と同じ規則）を出す */
+function slotMapId(s) {
+  const id = s?.mapId || 'beach';
+  const inst = id === 'tower' || id === 'arena' || /^boss_/.test(id);
+  return inst ? (s.state?.lastTownId || 'beach') : id;
+}
 function genderMark(g) { return g === 'm' ? '♂' : '♀'; }
 function genderCol(g) { return g === 'm' ? '#5cb8ff' : '#ff7ab8'; }
 
@@ -358,8 +364,8 @@ function drawSelect(ctx, game, t) {
   if (s) {
     const job = slotJob(s);
     const fy = stage(ctx, px + 14, py + 14, pw - 28, 250, col, t);
-    aura(ctx, px + pw / 2, fy, job.aura, 2.6, t);
-    drawChar(ctx, px + pw / 2, fy, slotLook(s), slotEquip(s), { facing: 1, state: 'idle', t, attackT: 0, damage: 0, scale: 2.7, aura: job.aura || undefined });
+    aura(ctx, px + pw / 2, fy, job.aura, 2.3, t);
+    drawChar(ctx, px + pw / 2, fy, slotLook(s), slotEquip(s), { facing: 1, state: 'idle', t, attackT: 0, damage: 0, scale: 2.35, aura: job.aura || undefined });
     let yy = py + 290;
     txt(ctx, s.name || '???', px + 24, yy, { size: 28, color: '#fff', glow: col, sw: 5, maxW: 250 });
     txt(ctx, genderMark(s.gender || legacyGender(s.heroId)), px + 30 + Math.min(250, measure(ctx, s.name || '???', 28)), yy + 2, { size: 22, color: genderCol(s.gender || legacyGender(s.heroId)) });
@@ -367,7 +373,7 @@ function drawSelect(ctx, game, t) {
     yy += 32;
     txt(ctx, `${classOf(s.heroId).name}  ・  ${job.name}`, px + 24, yy, { size: 15, color: col, sw: 3, maxW: pw - 48 });
     yy += 26;
-    const mi = mapInfo(s.mapId || 'beach');
+    const mi = mapInfo(slotMapId(s));
     const rows = [
       ['称号', job.title || '—'],
       ['現在地', `${mi.name}${mi.levelRange ? `（Lv${mi.levelRange[0]}-${mi.levelRange[1]}）` : mi.town ? '（町）' : ''}`],
@@ -424,7 +430,8 @@ function drawSlotCard(ctx, r, s, i, sel, hov, t) {
   const job = slotJob(s);
   const fy = stage(ctx, r.x + 8, y + 8, r.w - 16, 150, col, t);
   if (sel) aura(ctx, r.x + r.w / 2, fy, job.aura || col, 1.5, t);
-  drawChar(ctx, r.x + r.w / 2, fy, slotLook(s), slotEquip(s), { facing: 1, state: sel ? 'walk' : 'idle', t: t + i * 0.37, attackT: 0, damage: 0, scale: 1.55 });
+  // scale 1.55 だと猫耳・帽子・ツンツン髪がカードの上にはみ出していたので 1.3 に（ステージ内に収める）
+  drawChar(ctx, r.x + r.w / 2, fy, slotLook(s), slotEquip(s), { facing: 1, state: sel ? 'walk' : 'idle', t: t + i * 0.37, attackT: 0, damage: 0, scale: 1.3 });
   txt(ctx, `SLOT ${i + 1}`, r.x + 16, y + 22, { size: 10.5, color: '#ffe3f0', sw: 2.5 });
   ctx.save(); rrPath(ctx, r.x + r.w - 66, y + 13, 54, 20, 10); ctx.fillStyle = 'rgba(10,4,30,0.75)'; ctx.fill(); ctx.restore();
   txt(ctx, `Lv.${s.level || 1}`, r.x + r.w - 39, y + 23.5, { size: 12.5, align: 'center', color: COL.gold, sw: 2.5 });
@@ -434,7 +441,7 @@ function drawSlotCard(ctx, r, s, i, sel, hov, t) {
   yy += 24;
   txt(ctx, job.name, r.x + 14, yy, { size: 13, color: col, sw: 3, maxW: r.w - 28 });
   yy += 20;
-  const mi = mapInfo(s.mapId || 'beach');
+  const mi = mapInfo(slotMapId(s));
   txt(ctx, '📍 ' + mi.name, r.x + 14, yy, { size: 11.5, color: COL.sub, sw: 2.5, maxW: r.w - 28, weight: 700 });
   yy += 18;
   txt(ctx, fmtDate(s.savedAt), r.x + 14, yy, { size: 10.5, color: COL.dim, sw: 2.5, maxW: r.w - 28, weight: 700 });

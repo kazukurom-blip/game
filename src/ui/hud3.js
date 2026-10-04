@@ -36,6 +36,8 @@ export function drawJobBubble(ctx, game) {
   const label = `⬆ ${offer.tier}次転職できる！`;
   const bw = Math.max(176, measure(ctx, label, 17) + 40), bh = 46;
   let cx = p.x - cam.x, by = p.y - cam.y - ph - 74 + bob;
+  // 近くの NPC の「V で話す」・名前と重ならないよう、会話できる時は少し上へ
+  if (guard('nearestNpc', () => p.nearestNpc?.(), null)) by -= 44;
   cx = clamp(cx, bw / 2 + 8, W - bw / 2 - 8);
   by = clamp(by, 170, H - 200);
   const r = { x: cx - bw / 2, y: by, w: bw, h: bh };
@@ -103,7 +105,7 @@ function navTarget(game) {
     const destMap = g.mapId || g.npcMapId;
     if (destMap && destMap !== cur && g.nextPortal) {
       const to = g.nextPortal.to;
-      v = { x: g.nextPortal.x, y: (g.nextPortal.y ?? game.map?.groundY ?? 0) - 50, label: `${g.nextPortal.label || mapInfo(to).name} へ`, sub: destMap !== to ? `目的地: ${g.mapName || mapInfo(destMap).name}` : (g.text || ''), kind: 'portal', col: '#7fe9ff' };
+      v = { x: g.nextPortal.x, y: (g.nextPortal.y ?? game.map?.groundY ?? 0) - 50, label: (() => { const l = g.nextPortal.label || mapInfo(to).name; return /(へ|戻る)$/.test(l) ? l : `${l} へ`; })(), sub: destMap !== to ? `目的地: ${g.mapName || mapInfo(destMap).name}` : (g.text || ''), kind: 'portal', col: '#7fe9ff' };
     } else if (!destMap || destMap === cur) {
       if (g.npcId) {
         const n = (game.npcs || []).find((e) => e.id === g.npcId || e.data?.id === g.npcId || e.def?.id === g.npcId);

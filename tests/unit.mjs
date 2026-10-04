@@ -1436,6 +1436,8 @@ test('v3 classes: newState(classId, {name, gender, look}) と性別別の初期�
 (await import('./sys_v3.mjs')).default({ test, makeGame, step, fin });
 // v3 ワールド＆エンティティ（tests/world_v3.mjs）
 (await import('./world_v3.mjs')).default({ test, makeGame, step, fin });
+// v3 デバッグ担当の回帰テスト（tests/debug_v3.mjs）
+(await import('./debug_v3.mjs')).default({ test, makeGame, step, fin });
 
 // ------------------------------------------------------------ 実行
 const t0 = Date.now();
