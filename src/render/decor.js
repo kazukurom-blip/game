@@ -3,9 +3,33 @@ import { shade, rgba, hashStr, rr, starPath, lerp, OUTLINE } from './util.js';
 import { drawVehicle } from './vehicles.js';
 import { PI, oFill, NEON_COLS, neonText } from './bgkit.js';
 
-const SIGN_WORDS = ['VICE', 'MOTEL', 'OPEN 24H', 'TACOS', 'BAR', 'DISCO', 'LIQUOR', 'SURF'];
+// ネオン看板の文字は地域（＋フィールドの style）ごとの語彙から選ぶ（宇宙港に LIQUOR などが出ないように）
+const SIGN_WORDS = {
+  beach: ['SURF', 'TACOS', 'MOTEL', 'BEACH BAR', 'SMOOTHIE', 'OPEN 24H'],
+  downtown: ['VICE', 'DISCO', 'ARCADE', 'BAR', 'OPEN 24H', 'KARAOKE', 'CLUB 88'],
+  slums: ['MOTEL', 'LIQUOR', 'PAWN', 'DINER', 'TATTOO', 'OPEN 24H'],
+  swamp: ['BAIT SHOP', 'GATOR BBQ', 'BOAT RENT', 'VOODOO', 'GENERAL'],
+  casino: ['LUCKY 7', 'CASINO', 'JACKPOT', 'PAWN', 'POKER', 'CHAPEL'],
+  rooftop: ['SKY BAR', 'LOUNGE', 'PENTHOUSE', 'SUSHI', 'JEWELRY'],
+  spaceport: ['SPACE CAFE', 'ROCKET SHOP', 'ORBIT BAR', 'ASTRO MART', 'UFO ARCADE'],
+};
+const SIGN_WORDS_STYLE = {
+  moon: ['MOON BASE', 'ORBIT BAR', 'ASTRO MART'],
+  alienShip: ['◇◆◇', 'ZORG', 'XX-7', 'ΩMEGA'],
+  tunnel: ['VICE LINE', 'EXIT', 'METRO'],
+  hall: ['LUCKY 7', 'CASINO', 'JACKPOT'],
+};
+export function signWordsFor(region, style) {
+  return SIGN_WORDS_STYLE[style] || SIGN_WORDS[region] || SIGN_WORDS.downtown;
+}
+const STREET_NAMES = {
+  beach: ['OCEAN DR', 'VICE BLVD', 'SUNSET AVE'], downtown: ['NEON AVE', 'VICE BLVD', '5TH ST'],
+  slums: ['DOCK ST', 'RAIL RD', 'PORT AVE'], swamp: ['GATOR RD', 'BAYOU LN', 'MOSS RD'],
+  casino: ['STRIP BLVD', 'LUCKY AVE', 'GOLD ST'], rooftop: ['TOWER PL', 'SKY AVE', 'VICE BLVD'],
+  spaceport: ['LUMINA WAY', 'ORBIT RD', 'LAUNCH AVE'],
+};
 
-export function drawDecor(ctx, d, theme, time) {
+export function drawDecor(ctx, d, theme, time, style) {
   const x = d.x, y = d.y;
   const h = hashStr(d.type + ':' + x + ':' + y);
   ctx.save();
@@ -13,7 +37,7 @@ export function drawDecor(ctx, d, theme, time) {
   ctx.lineJoin = 'round'; ctx.lineCap = 'round';
   switch (d.type) {
     case 'palm': decoPalm(ctx, h, time); break;
-    case 'neonSign': decoNeonSign(ctx, d, h, time); break;
+    case 'neonSign': decoNeonSign(ctx, d, h, time, theme, style); break;
     case 'lamp': decoLamp(ctx, theme); break;
     case 'car': ctx.restore(); drawVehicle(ctx, { kind: d.kind || 'sports', x, y, color: d.color || ['#ff2e88', '#19d3c5', '#ffc93c', '#7b2ff7'][h % 4], facing: h % 2 ? 1 : -1, speed: 0, t: time }); return;
     case 'billboard': decoBillboard(ctx, d, h, time); break;
@@ -38,7 +62,7 @@ export function drawDecor(ctx, d, theme, time) {
     case 'vendingMachine': decoVending(ctx, d, h, time); break;
     case 'fuelTank': decoFuelTank(ctx, d, h); break;
     case 'goldPile': decoGoldPile(ctx, time); break;
-    case 'streetSign': decoStreetSign(ctx, d, h); break;
+    case 'streetSign': decoStreetSign(ctx, d, h, theme); break;
     default: break;
   }
   ctx.restore();
@@ -70,11 +94,15 @@ function decoPalm(ctx, h, time) {
   }
 }
 
-function decoNeonSign(ctx, d, h, time) {
-  const word = d.text || SIGN_WORDS[h % SIGN_WORDS.length];
+function decoNeonSign(ctx, d, h, time, region, style) {
+  const words = signWordsFor(region, style);
+  const word = d.text || words[h % words.length];
   const col = d.color || NEON_COLS[(h >>> 3) % NEON_COLS.length];
   ctx.font = '900 22px "Arial Black", sans-serif';
-  const tw = ctx.measureText(word).width + 30;
+  // 長い語は縮めて看板の幅を 150px 以内に（maps.js の DECOR_HALF_W.neonSign = 75 と対応）
+  const raw = ctx.measureText(word).width;
+  const fs = raw > 120 ? Math.max(13, Math.floor(22 * 120 / raw)) : 22;
+  const tw = Math.min(150, raw * fs / 22 + 30);
   const sy = -150;
   // 支柱
   ctx.fillStyle = '#2a2738'; ctx.fillRect(-4, sy + 40, 8, -sy - 40);
@@ -87,7 +115,7 @@ function decoNeonSign(ctx, d, h, time) {
   ctx.strokeStyle = rgba(col, 0.35 * flick); ctx.lineWidth = 8; ctx.beginPath(); rr(ctx, -tw / 2 + 4, sy + 4, tw - 8, 36, 6); ctx.stroke();
   ctx.restore();
   ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.beginPath(); rr(ctx, -tw / 2 + 4, sy + 4, tw - 8, 36, 6); ctx.stroke();
-  neonText(ctx, 0, sy + 23, word, col, flick, 22);
+  neonText(ctx, 0, sy + 23, word, col, flick, fs);
   // 矢印ランプ
   for (let k = 0; k < 5; k++) { ctx.fillStyle = ((time * 6 | 0) % 5) === k ? '#fff6c0' : rgba('#ffc93c', 0.4); ctx.beginPath(); ctx.arc(-16 + k * 8, sy + 54, 2.4, 0, PI * 2); ctx.fill(); }
 }
@@ -502,8 +530,9 @@ function decoGoldPile(ctx, time) {
   ctx.beginPath(); starPath(ctx, -20 + s * 30, -40 + s * 4, 6, 1.8, 4); ctx.fill(); ctx.restore();
 }
 
-function decoStreetSign(ctx, d, h) {
-  const text = d.text || ['VICE BLVD', 'OCEAN DR', 'NEON AVE', 'GATOR RD', 'LUMINA WAY'][h % 5];
+function decoStreetSign(ctx, d, h, region) {
+  const names = STREET_NAMES[region] || STREET_NAMES.downtown;
+  const text = d.text || names[h % names.length];
   ctx.beginPath(); ctx.rect(-2.5, -120, 5, 120); oFill(ctx, '#5a6a5a', 1.4);
   ctx.font = '900 12px "Arial Black", sans-serif';
   const w = ctx.measureText(text).width + 16;

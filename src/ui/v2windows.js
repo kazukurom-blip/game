@@ -8,6 +8,7 @@ import {
   mapInfo, worldGraph, visitedSet, regionColor, REGIONS, REGION_BY_ID, taxiFareOf, doTaxi, OPT, bookList, bookKills,
   bookRankOf, bookBonusOf, itemKnown, drawEnemyArt, snsTitleOf, taxiCheck,
 } from './deps.js';
+import { audio } from '../audio/audio.js';
 
 const W = 1280, H = 720;
 
@@ -32,10 +33,58 @@ const LAYOUT = {
   tower_f1: [655, 118], rooftop: [748, 168], tower_f2: [752, 62], tower_f3: [848, 52],
 };
 
-// 地域名ウォーターマークの位置（空いている海域）
-const REGION_LABEL = {
-  beach: [245, 412], swamp: [95, 95], downtown: [310, 330], casino: [330, 12], rooftop: [705, -6], spaceport: [985, 462], slums: [565, 585],
-};
+// 地域名ウォーターマーク: 各地域のノード群の重心から近い順に探し、ノード（名前・Lv 表記込み）と
+// 他の地域名に重ならない最初の位置に置く（決定論的。レイアウトと表示領域が同じならキャッシュ）
+let labelCache = { key: '', pos: null };
+function placeRegionLabels(ctx, ids, P, area, cur) {
+  const key = ids.length + '|' + area.x + ',' + area.y + ',' + area.w + ',' + area.h + '|' + cur + '|' + layoutCache.key;
+  if (labelCache.key === key) return labelCache.pos;
+  // 障害物: ノード＋名前＋Lv 表記、現在地マーカー（YOU）、コンパス、左上の州名
+  const obst = ids.map((id) => {
+    const p = P(id), town = !!mapInfo(id).town;
+    const nw = Math.max(70, String(mapInfo(id).name || '').length * (town ? 14 : 11.5) + 10);
+    return town ? { x: p.x - nw / 2, y: p.y - 24, w: nw, h: 80 } : { x: p.x - nw / 2, y: p.y - 13, w: nw, h: 50 };
+  });
+  if (cur && ids.includes(cur)) { const p = P(cur); obst.push({ x: p.x - 24, y: p.y - 72, w: 70, h: 50 }); }
+  obst.push({ x: area.x + area.w - 80, y: area.y + 10, w: 66, h: 70 });
+  obst.push({ x: area.x + 10, y: area.y + 6, w: 190, h: 26 });
+  const hit = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  const out = {};
+  const placed = [];
+  ctx.save();
+  const find = (cx, cy, name, size, maxR) => {
+    ctx.font = font(size, 900);
+    const lw = ctx.measureText(name).width + 8, lh = size + 4;
+    for (let r = 0; r <= maxR; r += 8) {
+      const n = r === 0 ? 1 : Math.max(8, Math.round(r / 5));
+      for (let k = 0; k < n; k++) {
+        const a = (k / n) * Math.PI * 2 + Math.PI / 2;
+        const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r * 0.75;
+        const box = { x: x - lw / 2, y: y - lh / 2, w: lw, h: lh };
+        if (box.x < area.x + 6 || box.x + box.w > area.x + area.w - 6 || box.y < area.y + 6 || box.y + box.h > area.y + area.h - 6) continue;
+        if (obst.some((o) => hit(o, box)) || placed.some((o) => hit(o, box))) continue;
+        return { x, y, box, size };
+      }
+    }
+    return null;
+  };
+  for (const R of REGIONS) {
+    if (R.noMap) continue;
+    const members = ids.filter((i) => mapInfo(i).region === R.id);
+    if (!members.length) continue;
+    let cx = 0, cy = 0;
+    for (const m of members) { const p = P(m); cx += p.x; cy += p.y; }
+    cx /= members.length; cy /= members.length;
+    // 重心の近く（〜130px）で 28px → 22px → 18px の順に探し、無ければ遠くまで
+    const best = find(cx, cy, R.name, 28, 130) || find(cx, cy, R.name, 22, 130) || find(cx, cy, R.name, 18, 150)
+      || find(cx, cy, R.name, 22, 320) || { x: cx, y: cy, size: 22, box: { x: cx, y: cy, w: 0, h: 0 } };
+    placed.push(best.box);
+    out[R.id] = { x: best.x, y: best.y, size: best.size };
+  }
+  ctx.restore();
+  labelCache = { key, pos: out };
+  return out;
+}
 
 let layoutCache = { key: '', pos: null };
 function computeLayout(adj) {
@@ -135,20 +184,16 @@ export function drawWorldMap(ui, ctx, win) {
     ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2); ctx.fill();
   }
   // 地域名
+  const labelPos = placeRegionLabels(ctx, ids, P, { x: ax, y: ay, w: aw, h: ah }, cur);
   for (const R of REGIONS) {
     if (R.noMap) continue;
     const members = ids.filter((i) => mapInfo(i).region === R.id);
-    if (!members.length) continue;
+    if (!members.length || !labelPos[R.id]) continue;
     const known = members.some((i) => state[i] === 'seen');
     const any = members.some((i) => state[i] !== 'hidden');
     if (!any) continue;
-    let cx = 0, cy = 0;
-    const lp = REGION_LABEL[R.id];
-    if (lp) { cx = ax + pad + lp[0] * sx; cy = ay + pad + lp[1] * sy; } else {
-      for (const m of members) { const p = P(m); cx += p.x; cy += p.y; }
-      cx /= members.length; cy /= members.length; cy -= 40;
-    }
-    txt(ctx, known ? R.name : '???', cx, cy, { size: 28, align: 'center', color: rgba(R.color, 0.2), stroke: false, weight: 900 });
+    const { x: cx, y: cy, size: lsz } = labelPos[R.id];
+    txt(ctx, known ? R.name : '???', cx, cy, { size: lsz || 28, align: 'center', color: rgba(R.color, 0.2), stroke: false, weight: 900 });
   }
   // 接続線
   const drawn = new Set();
@@ -727,7 +772,7 @@ export function drawPhone(ui, ctx, win) {
   ctx.fillStyle = COL.good; ctx.fillRect(sx + sw - 52, sy + 16, 16, 8);
   ctx.fillStyle = '#fff'; ctx.fillRect(sx + sw - 29, sy + 17, 2, 6);
   // ラジオ
-  const radio = ui.radio?.name || null;
+  const radio = ui.radio?.name || (g.player?.inVehicle ? guard('radioName', () => audio?.radioName) : null) || null;
   ctx.save();
   rrPath(ctx, sx + 14, sy + 36, sw - 28, 24, 12);
   ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.fill();

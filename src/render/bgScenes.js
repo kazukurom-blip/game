@@ -85,15 +85,30 @@ function houses(P, seed, o) {
 
 /** 町の店並び（前景ファサード） */
 function shopRow(P, seed, st) {
+  // タイル幅 LW にぴったり収める。最後の店が細く（140px 未満）なる時は手前の店を広げて埋める
+  // （細い店の看板文字が隣の店やタイルの継ぎ目にはみ出して重なっていた）
   const R = rng(seed);
   let x = 0, i = (R() * st.names.length) | 0;
-  while (x < LW - 20) {
+  const row = [];
+  for (;;) {
     const w = Math.round(150 + R() * 90), bh = 180 + R() * 80, bs = (R() * 1e9) | 0;
     const name = st.names[i++ % st.names.length], wall = pick(R, st.walls), awn = pick(R, st.awn), neon = pick(R, st.neon);
-    const ww = Math.min(w, LW - x - 4);
-    wrap(x, ww, (xx) => shopFront(P, xx, ww, bh, rng(bs), name, wall, awn, neon, st));
-    x += ww + (R() < 0.3 ? 20 + R() * 30 : 3);
+    const gap = R() < 0.3 ? Math.round(20 + R() * 30) : 3;
+    if (x + w + gap > LW) {
+      const rest = LW - x - 3;
+      if (rest >= 140 || !row.length) row.push({ x, w: rest, bh, bs, name, wall, awn, neon, gap: 3 });
+      else row[row.length - 1].w += LW - x;
+      break;
+    }
+    row.push({ x, w, bh, bs, name, wall, awn, neon, gap });
+    x += w + gap;
   }
+  // 隣り合う店（タイルの継ぎ目も）が同じ名前にならないように
+  for (let k = 1; k < row.length; k++) {
+    let n = 0;
+    while (n++ < st.names.length && (row[k].name === row[k - 1].name || (k === row.length - 1 && row[k].name === row[0].name))) row[k].name = st.names[(st.names.indexOf(row[k].name) + 1) % st.names.length];
+  }
+  for (const s0 of row) wrap(s0.x, s0.w, (xx) => shopFront(P, xx, s0.w, s0.bh, rng(s0.bs), s0.name, s0.wall, s0.awn, s0.neon, st));
 }
 function shopFront(P, x, w, bh, R, name, wall, awn, neon, st) {
   const g = P.g, gl = P.gl, base = P.h;
@@ -121,6 +136,7 @@ function shopFront(P, x, w, bh, R, name, wall, awn, neon, st) {
   g.fillStyle = st.signBg || '#1a1030'; g.fillRect(x + 12, sy, sw, sh);
   g.strokeStyle = O; g.lineWidth = 2; g.strokeRect(x + 12, sy, sw, sh);
   g.font = '900 17px "Arial Black", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
+  { const tw = g.measureText(name).width; if (tw > sw - 16) g.font = `900 ${Math.max(10, Math.floor(17 * (sw - 16) / tw))}px "Arial Black", sans-serif`; }
   g.fillStyle = shade(neon, -0.35); g.fillText(name, x + w / 2, sy + sh / 2 + 1);
   gl.font = g.font; gl.textAlign = 'center'; gl.textBaseline = 'middle'; gl.lineJoin = 'round';
   gl.strokeStyle = rgba(neon, 0.45); gl.lineWidth = 7; gl.strokeText(name, x + w / 2, sy + sh / 2 + 1);
@@ -279,6 +295,13 @@ function fogBands(ctx, S, y, col, speed = 1) {
     const off = ((time * speed * (10 + i * 6) - cam.x * 0.2) % 700 + 700) % 700;
     for (let x = -700 + off; x < W + 700; x += 700) { ctx.beginPath(); ctx.ellipse(x + i * 300, y + i * 40, 380, 30, 0, 0, PI * 2); ctx.fill(); }
   }
+}
+
+// 文字が maxW に収まるフォントサイズ（Arial Black 900）
+function fitSize(ctx, text, size, maxW) {
+  ctx.save(); ctx.font = `900 ${size}px "Arial Black", sans-serif`;
+  const w = ctx.measureText(text).width; ctx.restore();
+  return w > maxW ? Math.max(10, Math.floor(size * maxW / w)) : size;
 }
 
 // ネオン文字をパララックス付きで繰り返す（post 用）
@@ -738,7 +761,8 @@ const CA_SHOP = { walls: ['#3a1660', '#5a1a4a', '#2a1a4a', '#6a2a3a'], awn: ['#f
 
 function casinoFacades(ctx, S) {
   const { W, H, gS, time, cam } = S;
-  const fac = [[40, 300, 200], [330, 340, 260], [680, 280, 240]];
+  // [x, 幅, 高さ]。屋根の張り出し(±10px)を含めても隣と重ならない間隔にする
+  const fac = [[30, 280, 200], [350, 310, 260], [700, 280, 240]];
   const mid = S.layer('fac', 360, (P) => {
     const g = P.g; const R = rng(602);
     for (const [fx, fw, fh] of fac) {
@@ -763,7 +787,7 @@ function casinoFacades(ctx, S) {
         const x = base + fx, y = midB - fh;
         if (x > W + 20 || x + fw < -20) continue;
         ctx.save(); ctx.globalAlpha = 0.5 + 0.5 * S.lights;
-        neonText(ctx, x + fw / 2, y + 50, names[i], i === 1 ? '#ffd23f' : '#ff2e88', S.lights > 0.2 ? 1 : 0, 26);
+        neonText(ctx, x + fw / 2, y + 50, names[i], i === 1 ? '#ffd23f' : '#ff2e88', S.lights > 0.2 ? 1 : 0, fitSize(ctx, names[i], 26, fw - 50));
         const n = Math.floor(fw / 12);
         for (let k = 0; k < n; k++) {
           const on = ((k + Math.floor(time * 10)) % 3) === 0;

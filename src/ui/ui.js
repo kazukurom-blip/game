@@ -6,6 +6,7 @@ import { guard, getItemDef, skillDef, drawItemIco, drawSkillIco } from './deps.j
 import { WINDOW_DRAW, drawTooltipBox, initDialog, dialogKey } from './windows.js';
 import { drawWorldMap, drawBook, drawPhone, rideTaxi } from './v2windows.js';
 import { enemyDef } from './deps.js';
+import { audio } from '../audio/audio.js';
 
 Object.assign(WINDOW_DRAW, { worldmap: drawWorldMap, book: drawBook, phone: drawPhone });
 
@@ -76,6 +77,11 @@ export class UIManager {
       ev.on('radioChanged', (d) => {
         const name = typeof d === 'string' ? d : (d?.name ?? d?.station ?? null);
         this.radio = { name: name || null, t: 0, life: name ? 3.2 : 1.6, off: !name };
+      });
+      // 乗車した瞬間に現在の局名を出す（audio 側の radioChanged が来なくても表示できるように）
+      ev.on('vehicleEnter', () => {
+        const name = guard('radioName', () => audio?.radioName) || null;
+        if (name && this.radio?.name !== name) this.radio = { name, t: 0, life: 3.2, off: false };
       });
       ev.on('vehicleExit', () => { if (this.radio) this.radio.name = null; });
       ev.on('levelUp', (d) => { this.levelFx = { level: d?.level ?? game.state?.level ?? 1, t: 0, life: 3.2 }; });

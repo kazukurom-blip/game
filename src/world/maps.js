@@ -150,7 +150,7 @@ const STYLE_DECOR = {
 };
 
 // decor の半幅（概算, px）。ポータル前や大物同士の重なりを避けるのに使う
-const DECOR_HALF_W = { billboard: 120, container: 100, rocket: 70, car: 80, slotMachine: 34, neonSign: 55, mangrove: 70, palm: 40, satelliteDish: 45, antenna: 25, graffiti: 60, bench: 40 };
+const DECOR_HALF_W = { billboard: 120, container: 100, rocket: 70, car: 80, slotMachine: 34, neonSign: 75, mangrove: 70, palm: 40, satelliteDish: 45, antenna: 25, graffiti: 60, bench: 40 };
 const halfW = (t) => DECOR_HALF_W[t] ?? 24;
 const BIG_DECOR = new Set(['billboard', 'container', 'rocket', 'car', 'slotMachine', 'neonSign', 'graffiti']);
 // 地面の decor を並べる（ポータルの前・大物同士の重なりを避ける）

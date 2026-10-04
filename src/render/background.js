@@ -375,7 +375,7 @@ export function drawMapTiles(ctx, map, time) {
   // 装飾（足場の後ろ）
   if (map.decor) for (const d of map.decor) {
     if (d.x < V.x0 - 260 || d.x > V.x1 + 260) continue;
-    drawDecor(ctx, d, region, time);
+    drawDecor(ctx, d, region, time, map.style);
   }
   // ロープ
   if (map.ropes) for (const r of map.ropes) {
