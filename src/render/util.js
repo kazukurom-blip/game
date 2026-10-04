@@ -106,3 +106,15 @@ export function makeCanvas(w, h) {
 }
 
 export const OUTLINE = '#2a1430';
+
+/** 重み付き平均色。cols と ws は同じ長さ（ws の合計で正規化） */
+export function mixW(cols, ws) {
+  let r = 0, g = 0, b = 0, s = 0;
+  for (let i = 0; i < cols.length; i++) {
+    const w = ws[i]; if (!w) continue;
+    const c = parseHex(cols[i]); if (!c) continue;
+    r += c[0] * w; g += c[1] * w; b += c[2] * w; s += w;
+  }
+  if (!s) return cols[0];
+  return '#' + hx(r / s) + hx(g / s) + hx(b / s);
+}

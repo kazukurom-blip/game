@@ -32,6 +32,11 @@ const LAYOUT = {
   tower_f1: [655, 118], rooftop: [748, 168], tower_f2: [752, 62], tower_f3: [848, 52],
 };
 
+// 地域名ウォーターマークの位置（空いている海域）
+const REGION_LABEL = {
+  beach: [245, 412], swamp: [95, 95], downtown: [310, 330], casino: [330, 12], rooftop: [705, -6], spaceport: [985, 462], slums: [565, 585],
+};
+
 let layoutCache = { key: '', pos: null };
 function computeLayout(adj) {
   const ids = Object.keys(adj).sort();
@@ -138,9 +143,12 @@ export function drawWorldMap(ui, ctx, win) {
     const any = members.some((i) => state[i] !== 'hidden');
     if (!any) continue;
     let cx = 0, cy = 0;
-    for (const m of members) { const p = P(m); cx += p.x; cy += p.y; }
-    cx /= members.length; cy /= members.length;
-    txt(ctx, known ? R.name.toUpperCase() : '???', cx, cy - 40, { size: 26, align: 'center', color: rgba(R.color, 0.22), stroke: false, weight: 900 });
+    const lp = REGION_LABEL[R.id];
+    if (lp) { cx = ax + pad + lp[0] * sx; cy = ay + pad + lp[1] * sy; } else {
+      for (const m of members) { const p = P(m); cx += p.x; cy += p.y; }
+      cx /= members.length; cy /= members.length; cy -= 40;
+    }
+    txt(ctx, known ? R.name : '???', cx, cy, { size: 28, align: 'center', color: rgba(R.color, 0.2), stroke: false, weight: 900 });
   }
   // 接続線
   const drawn = new Set();
@@ -402,9 +410,9 @@ function dummyEnemy(def, t, st = 'idle') {
   return { def: d, x: 0, y: 0, facing: 1, state: st, t, hurtT: 0, hp: def.hp || 100, maxHp: def.hp || 100, w: def.w, h: def.h, onGround: true, seed: hashId(def.id), dead: false, vx: 0, vy: 0 };
 }
 function hashId(s) { let h = 7; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h % 10000; }
-function drawEnemyFit(ctx, def, cx, footY, boxW, boxH, t, st) {
+function drawEnemyFit(ctx, def, cx, footY, boxW, boxH, t, st, maxS = 1.6) {
   const d = enemyDims(def);
-  const s = clamp(Math.min(boxH / Math.max(20, d.h * 1.12), boxW / Math.max(20, d.w * 1.1)), 0.25, 1.6);
+  const s = clamp(Math.min(boxH / Math.max(20, d.h * 1.12), boxW / Math.max(20, d.w * 1.1)), 0.25, maxS);
   ctx.save();
   ctx.translate(cx, footY);
   ctx.scale(s, s);
@@ -553,7 +561,8 @@ function bonusText(b) {
   for (const [k, v] of Object.entries(src)) {
     if (typeof v !== 'number' || !v || k === 'registered' || k === 'total' || k === 'count') continue;
     const pct = (k === 'crit' || k === 'critDmg' || k === 'exp' || k === 'expRate' || k === 'drop' || k === 'dropRate') && Math.abs(v) < 5;
-    parts.push(`${STAT_LABELS[k] || ({ exp: 'EXP', expRate: 'EXP', drop: 'ドロップ', dropRate: 'ドロップ' }[k]) || k} +${pct ? Math.round(v * 100) + '%' : Math.round(v * 100) / 100}`);
+    const pv = pct ? (v * 100 >= 1 ? Math.round(v * 100) : +(v * 100).toFixed(2)) + '%' : Math.round(v * 100) / 100;
+    parts.push(`${STAT_LABELS[k] || ({ exp: 'EXP', expRate: 'EXP', drop: 'ドロップ', dropRate: 'ドロップ' }[k]) || k} +${pv}`);
   }
   return parts.join('  ') || '—（まだボーナスなし）';
 }
@@ -574,7 +583,7 @@ function drawBookDetail(ui, ctx, win, e, x, y, w, h, t) {
   for (let i = 0; i < 8; i++) { ctx.beginPath(); ctx.moveTo(x, y + 150 + i * i * 2); ctx.lineTo(x + w, y + 150 + i * i * 2); ctx.stroke(); }
   if (reg) {
     const stt = Math.floor(t / 2.5) % 2 ? 'walk' : 'idle';
-    drawEnemyFit(ctx, e.def, x + w / 2, y + 162, w - 60, 140, t, stt);
+    drawEnemyFit(ctx, e.def, x + w / 2, y + 162, w - 60, 140, t, stt, 2.6);
   } else drawSilhouette(ctx, e.def, x + 8 + (w - 16 - 200) / 2, y + 18, 200, 150);
   ctx.restore();
   txt(ctx, 'No.' + String(e.no).padStart(3, '0'), x + 16, y + 22, { size: 11, color: COL.sub, sw: 2.5 });
@@ -668,6 +677,7 @@ function fmtNum(n) {
 const POST_KIND = {
   level: { c: '#ffd447', g: '▲' }, boss: { c: '#ff5fa2', g: '★' }, pet: { c: '#ff6ad5', g: '♥' }, rare: { c: '#4FA8FF', g: '◆' },
   wanted: { c: '#ff2e4d', g: '!' }, milestone: { c: '#7CFF9B', g: '✦' }, post: { c: '#19d3c5', g: '●' },
+  system: { c: '#7b8cff', g: 'N' }, book: { c: '#5cff9a', g: 'B' }, taxi: { c: '#ffd447', g: 'T' },
 };
 function postKind(p) {
   const k = p.kind || p.type || p.icon;
@@ -786,8 +796,10 @@ export function drawPhone(ui, ctx, win) {
   });
   // タイムライン
   const fy = ty + 38, fh = sy + sh - 30 - fy;
-  const list = posts.slice().reverse();
-  const PER = 4;
+  // 新しい順（t があれば t 降順、無ければ配列末尾を新しいとみなす）
+  const list = posts.map((p, i) => ({ p, i, k: typeof p?.t === 'number' ? p.t : null }))
+    .sort((a, b) => (a.k != null && b.k != null && a.k !== b.k ? b.k - a.k : b.i - a.i)).map((e) => e.p);
+  const PER = 5;
   const pages = Math.max(1, Math.ceil(list.length / PER));
   win.page = clamp(win.page || 0, 0, pages - 1);
   if (!list.length) {
@@ -799,7 +811,7 @@ export function drawPhone(ui, ctx, win) {
   for (const p of list.slice(win.page * PER, win.page * PER + PER)) {
     if (!p) continue;
     const lines = wrap(ctx, String(p.text || ''), sw - 80, 12, 700).slice(0, 3);
-    const ch = 38 + lines.length * 16;
+    const ch = 44 + lines.length * 16;
     if (yy + ch > fy + fh) break;
     ctx.save(); rrPath(ctx, sx + 12, yy, sw - 24, ch, 12); ctx.fillStyle = 'rgba(255,255,255,0.07)'; ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.stroke(); ctx.restore();
     const K = postKind(p);

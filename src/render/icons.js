@@ -1,6 +1,7 @@
 // アイテム／スキルアイコン（中心(x,y)、size 四方）。オフスクリーンにキャッシュして drawImage。
 import { shade, rgba, rr, starPath, makeCanvas, hashStr, OUTLINE } from './util.js';
 import { drawWeapon, itemColors } from './character.js';
+import { drawPet, PET_FLYING } from './pets.js';
 
 const PI = Math.PI;
 const cache = new Map();
@@ -42,6 +43,7 @@ export function drawSkillIcon(ctx, skill, x, y, size = 32) {
 // ---------------------------------------------------------------- アイテム
 function paintItem(g, item) {
   const look = item.look;
+  if (look && (item.slot === 'pet' || (look.style && /Pet$/.test(look.style)))) return paintPet(g, look);
   if (look && look.style) {
     const [c, a] = itemColors(look);
     const st = look.style;
@@ -58,6 +60,17 @@ function paintItem(g, item) {
     }
   }
   paintConsumable(g, item.icon || (item.type === 'etc' ? 'etc' : 'potionRed'), item);
+}
+// PET: 虹色リング＋縮小した drawPet
+function paintPet(g, look) {
+  const grd = g.createLinearGradient(4, 4, 44, 44);
+  grd.addColorStop(0, '#ff4fa0'); grd.addColorStop(0.35, '#ffd23f'); grd.addColorStop(0.65, '#3ee6d2'); grd.addColorStop(1, '#b45cff');
+  g.beginPath(); g.arc(24, 24, 21, 0, PI * 2); g.fillStyle = 'rgba(255,255,255,0.14)'; g.fill();
+  g.strokeStyle = grd; g.lineWidth = 2.6; g.stroke();
+  const fly = PET_FLYING[look.style];
+  drawPet(g, 24, fly ? 50 : 42, look, { t: 0.4, state: 'idle', scale: fly ? 0.95 : 0.95, noShadow: true, facing: 1 });
+  g.fillStyle = '#ffffff';
+  g.beginPath(); starPath(g, 39, 10, 4.5, 1.6, 4); g.fill();
 }
 const WEAPONS = new Set(['bat', 'knife', 'katana', 'pistol', 'smg', 'guitar', 'neonSword', 'staff']);
 

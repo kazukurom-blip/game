@@ -8,6 +8,10 @@
 //   wanted : target=手配度★(1〜5) に到達, count=1
 //   drive  : target='any'（車で走る）, count=距離m（10px=1m）
 // 追加フィールド: category 'main'|'sub'|'daily', turnIn?: 報告先NPC（省略時 giver）, daily?: true（1日1回繰り返し）
+// v2: 町にはモンスターが出ないため kill/collect の mapId はフィールドID（SPEC_V2）。
+//     reward.exp は expToNext(reqLevel+2) × 係数（main 0.8 / sub 0.5 / daily 0.3）で自動算出（expFixed で固定可）。
+import { expToNext } from './balance.js';
+import { WORLD_MAP_IDS } from '../systems/travel.js';
 
 // npcId → {name, mapId, role}（ワールド担当が maps.js の npcs に配置する）
 export const MISSION_NPCS = {
@@ -19,11 +23,15 @@ export const MISSION_NPCS = {
   tank:        { name: 'タンク',        mapId: 'slums',    role: '港のメカニック。車の手配屋。' },
   old_boone:   { name: 'ブーンじいさん', mapId: 'swamp',   role: 'スワンプのワニ猟師。' },
   vivi:        { name: 'ヴィヴィ',      mapId: 'casino',   role: 'カジノ「ネオン・パレス」のディーラー。内通者。' },
-  don_caiman:  { name: 'ドン・カイマン', mapId: 'casino',  role: '街を牛耳るカジノ王（黒幕）。ボス戦は rooftop の boss_don。' },
+  don_caiman:  { name: 'ドン・カイマン', mapId: 'casino',  role: '街を牛耳るカジノ王（黒幕）。ボス戦は tower_f3 の boss_don。' },
   nova:        { name: 'ノヴァ',        mapId: 'rooftop',  role: '天才ハッカー。最終決戦の案内役。' },
+  // v2: ルミナ宇宙港
+  dr_stella:   { name: 'ステラ博士',    mapId: 'spaceport', role: 'ルミナ宇宙港の主任研究者。謎の宇宙船を追っている。' },
+  ace_jet:     { name: 'エース・ジェット', mapId: 'spaceport', role: '元テストパイロット。月面シミュ区画の管理人。' },
 };
 
-export const MAP_IDS = ['beach', 'downtown', 'slums', 'swamp', 'casino', 'rooftop'];
+// SPEC_V2 の全マップID（町7＋フィールド27）
+export const MAP_IDS = [...WORLD_MAP_IDS];
 
 const list = [
   // ======================= メインストーリー =======================
@@ -34,7 +42,7 @@ const list = [
       offer: ['よう、新入り。ここはヴァイス・ベイ、夢と札束の街さ。', 'まずは腕試しだ。ビーチのスライムを片付けてくれ。'],
       done: ['悪くない動きだ。この街でやっていけそうだな。'],
     },
-    objectives: [{ type: 'kill', target: 'slime_green', count: 8, mapId: 'beach', text: 'ソーダスライムを倒す' }],
+    objectives: [{ type: 'kill', target: 'slime_green', count: 8, mapId: 'beach_f1', text: 'サンセット海岸道でソーダスライムを倒す' }],
     reward: { exp: 40, money: 300, items: ['potion_red', 'potion_red', 'potion_red'] },
   },
   {
@@ -45,8 +53,8 @@ const list = [
       done: ['上出来だ。ほら、取り分だ。'],
     },
     objectives: [
-      { type: 'collect', target: 'slime_jelly', count: 10, mapId: 'beach', text: 'スライムゼリーを集める' },
-      { type: 'kill', target: 'slime_pink', count: 6, mapId: 'beach', text: 'ストロベリースライムを倒す' },
+      { type: 'collect', target: 'slime_jelly', count: 10, mapId: 'beach_f1', text: 'スライムゼリーを集める' },
+      { type: 'kill', target: 'slime_pink', count: 6, mapId: 'beach_f1', text: 'ストロベリースライムを倒す' },
     ],
     reward: { exp: 90, money: 500, items: ['cap_street'] },
   },
@@ -58,13 +66,13 @@ const list = [
       done: ['スカッとしたぜ！ そろそろダウンタウンに顔を出す頃だな。'],
     },
     objectives: [
-      { type: 'kill', target: 'flamingo', count: 10, mapId: 'beach', text: 'ヤンキーフラミンゴを倒す' },
-      { type: 'kill', target: 'mushroom_orange', count: 8, mapId: 'beach', text: 'ビーチマッシュを倒す' },
+      { type: 'kill', target: 'mushroom_orange', count: 8, mapId: 'beach_f2', text: 'ヤシの並木道でビーチマッシュを倒す' },
+      { type: 'kill', target: 'flamingo', count: 10, mapId: 'beach_f3', text: 'ピア桟橋でヤンキーフラミンゴを倒す' },
     ],
     reward: { exp: 220, money: 800, items: ['pistol_9mm', 'potion_blue', 'potion_blue'] },
   },
   {
-    id: 'm04_rosa', name: '第4話 ママ・ローザの食堂', category: 'main', giver: 'rico', turnIn: 'mama_rosa', reqLevel: 8, prereq: ['m03_flamingo'],
+    id: 'm04_rosa', name: '第4話 ママ・ローザの食堂', category: 'main', giver: 'rico', turnIn: 'mama_rosa', reqLevel: 9, prereq: ['m03_flamingo'],
     desc: 'リコの紹介でダウンタウンの顔役、ママ・ローザに会いに行く。',
     dialog: {
       offer: ['ダウンタウンのママ・ローザを訪ねな。あの人に気に入られりゃ街で生きていける。'],
@@ -77,20 +85,20 @@ const list = [
     reward: { exp: 300, money: 600, items: ['potion_orange', 'potion_orange', 'potion_orange'] },
   },
   {
-    id: 'm05_protection', name: '第5話 みかじめ料はお断り', category: 'main', giver: 'mama_rosa', reqLevel: 10, prereq: ['m04_rosa'],
+    id: 'm05_protection', name: '第5話 みかじめ料はお断り', category: 'main', giver: 'mama_rosa', reqLevel: 11, prereq: ['m04_rosa'],
     desc: '食堂にたかるチンピラたち。ママのために追い払え。',
     dialog: {
       offer: ['最近チンピラどもが「みかじめ料」をせびりに来るんだよ。', 'あんたたちで懲らしめておくれ。'],
       done: ['見直したよ！ これは昔、亭主が使ってた刀さ。持っていきな。'],
     },
     objectives: [
-      { type: 'kill', target: 'thug_punk', count: 15, mapId: 'downtown', text: 'ストリートチンピラを倒す' },
-      { type: 'collect', target: 'street_tag', count: 8, mapId: 'downtown', text: 'ギャングのワッペンを集める' },
+      { type: 'kill', target: 'thug_punk', count: 15, mapId: 'down_f1', text: 'ネオン裏通りでストリートチンピラを倒す' },
+      { type: 'collect', target: 'street_tag', count: 8, mapId: 'down_f1', text: 'ギャングのワッペンを集める' },
     ],
     reward: { exp: 700, money: 1500, items: ['katana_steel'] },
   },
   {
-    id: 'm06_dirty_badge', name: '第6話 汚れたバッジ', category: 'main', giver: 'officer_kai', reqLevel: 13, prereq: ['m05_protection'],
+    id: 'm06_dirty_badge', name: '第6話 汚れたバッジ', category: 'main', giver: 'officer_kai', reqLevel: 14, prereq: ['m05_protection'],
     desc: '汚職警官カイの依頼。署の目を引きつけ、その隙に証拠品を「処分」する。',
     dialog: {
       offer: ['お前らが噂の二人組か。俺はカイ。ちょっとした取引だ。', '街で派手に騒いで手配度★2まで上げろ。俺がその隙に動く。', 'ついでに巡回中の連中のバッジも頂いてこい。'],
@@ -103,7 +111,7 @@ const list = [
     reward: { exp: 1100, money: 2500, items: ['sunglasses_aviator'] },
   },
   {
-    id: 'm07_wheels', name: '第7話 ネオンの足', category: 'main', giver: 'officer_kai', turnIn: 'tank', reqLevel: 16, prereq: ['m06_dirty_badge'],
+    id: 'm07_wheels', name: '第7話 ネオンの足', category: 'main', giver: 'officer_kai', turnIn: 'tank', reqLevel: 18, prereq: ['m06_dirty_badge'],
     desc: '港のメカニック、タンクが「足」を用意してくれるらしい。',
     dialog: {
       offer: ['港のタンクに会え。車がなきゃこの街じゃ半人前だ。'],
@@ -117,15 +125,15 @@ const list = [
     reward: { exp: 1500, money: 3000, items: ['boots_black', 'potion_orange', 'potion_orange'] },
   },
   {
-    id: 'm08_rave', name: '第8話 地下レイブ・ナイト', category: 'main', giver: 'dj_pulse', reqLevel: 18, prereq: ['m07_wheels'],
+    id: 'm08_rave', name: '第8話 地下レイブ・ナイト', category: 'main', giver: 'dj_pulse', reqLevel: 21, prereq: ['m07_wheels'],
     desc: 'DJパルスのレコードが港のゴロツキに盗まれた。今夜のレイブを救え。',
     dialog: {
       offer: ['ヘイ、そこのクールな二人！ 俺のレコードが盗まれたんだ！', 'ゴロツキどもから取り返してくれたら、ゲストリストに載せるぜ。'],
       done: ['最高だ！ 今夜のフロアは君たちのものさ。これ、俺の予備のヘッドホン。'],
     },
     objectives: [
-      { type: 'kill', target: 'thug_dockhand', count: 15, mapId: 'slums', text: '港のゴロツキを倒す' },
-      { type: 'collect', target: 'stolen_vinyl', count: 6, mapId: 'slums', text: '盗まれたレコードを取り返す' },
+      { type: 'kill', target: 'thug_dockhand', count: 15, mapId: 'slums_f1', text: '倉庫街で港のゴロツキを倒す' },
+      { type: 'collect', target: 'stolen_vinyl', count: 6, mapId: 'slums_f1', text: '盗まれたレコードを取り返す' },
     ],
     reward: { exp: 2400, money: 4000, items: ['headphones_neon'], sp: 1 },
   },
@@ -138,23 +146,23 @@ const list = [
     },
     objectives: [
       { type: 'reach', target: 'swamp', count: 1, text: 'スワンプへ行く' },
-      { type: 'kill', target: 'gator_swamp', count: 15, mapId: 'swamp', text: '沼ワニを倒す' },
-      { type: 'collect', target: 'gator_tooth', count: 10, mapId: 'swamp', text: 'ワニの牙を集める' },
+      { type: 'kill', target: 'gator_swamp', count: 15, mapId: 'swamp_f1', text: '湿地の入口で沼ワニを倒す' },
+      { type: 'collect', target: 'gator_tooth', count: 10, mapId: 'swamp_f1', text: 'ワニの牙を集める' },
     ],
     reward: { exp: 4500, money: 6000, items: ['cowboy_hat', 'potion_white', 'potion_white'] },
   },
   {
-    id: 'm10_grandpa', name: '第10話 沼の主', category: 'main', giver: 'old_boone', reqLevel: 28, prereq: ['m09_swamp'],
+    id: 'm10_grandpa', name: '第10話 沼の主', category: 'main', giver: 'old_boone', reqLevel: 40, prereq: ['m09_swamp'],
     desc: '密輸船を守る巨大ワニ「グランパ・ゲイター」。こいつを倒せば道は開ける。',
     dialog: {
       offer: ['奥に「グランパ」がおる。ドンの連中が餌付けして番犬にしとるんじゃ。', 'あれを倒せる人間がいるとすれば、お前さんたちくらいじゃろう。'],
       done: ['信じられん…グランパを倒したのか！ 密輸船の積荷にカジノの名前があったぞ。'],
     },
-    objectives: [{ type: 'boss', target: 'boss_gator', count: 1, mapId: 'swamp', text: 'グランパ・ゲイターを倒す' }],
+    objectives: [{ type: 'boss', target: 'boss_gator', count: 1, mapId: 'swamp_f3', text: 'ワニの巣でグランパ・ゲイターを倒す' }],
     reward: { exp: 9000, money: 12000, items: ['katana_blood', 'elixir'], sp: 2 },
   },
   {
-    id: 'm11_casino', name: '第11話 ハイローラー', category: 'main', giver: 'old_boone', turnIn: 'vivi', reqLevel: 34, prereq: ['m10_grandpa'],
+    id: 'm11_casino', name: '第11話 ハイローラー', category: 'main', giver: 'old_boone', turnIn: 'vivi', reqLevel: 42, prereq: ['m10_grandpa'],
     desc: 'カジノ「ネオン・パレス」に潜入。用心棒をかわし、内通者ヴィヴィと接触する。',
     dialog: {
       offer: ['ネオン・パレスに行け。ディーラーのヴィヴィはドンを憎んどる。'],
@@ -162,26 +170,26 @@ const list = [
     },
     objectives: [
       { type: 'reach', target: 'casino', count: 1, text: 'カジノへ行く' },
-      { type: 'kill', target: 'thug_bouncer', count: 20, mapId: 'casino', text: 'カジノの用心棒を倒す' },
-      { type: 'collect', target: 'casino_chip', count: 15, mapId: 'casino', text: 'カジノチップを集める' },
+      { type: 'kill', target: 'thug_bouncer', count: 20, mapId: 'casino_f2', text: '地下金庫でカジノの用心棒を倒す' },
+      { type: 'collect', target: 'casino_chip', count: 15, mapId: 'casino_f2', text: 'カジノチップを集める' },
     ],
     reward: { exp: 15000, money: 20000, items: ['suit_black', 'idol_dress'] },
   },
   {
-    id: 'm12_mecha', name: '第12話 セキュリティ・ブレイク', category: 'main', giver: 'vivi', reqLevel: 40, prereq: ['m11_casino'],
+    id: 'm12_mecha', name: '第12話 セキュリティ・ブレイク', category: 'main', giver: 'vivi', reqLevel: 52, prereq: ['m11_casino'],
     desc: 'カジノを守る巨大警備ドローン「メカ・ハイローラー」を破壊せよ。',
     dialog: {
       offer: ['警備システムの中枢は「メカ・ハイローラー」。ドローンも全部それに繋がってる。', '壊せば最上階へのエレベーターが動くわ。'],
       done: ['やった！ システムダウン！ …でも、ドンは屋上へ逃げたみたい。'],
     },
     objectives: [
-      { type: 'kill', target: 'drone_casino', count: 15, mapId: 'casino', text: 'セキュリティドローンを倒す' },
-      { type: 'boss', target: 'boss_mecha', count: 1, mapId: 'casino', text: 'メカ・ハイローラーを破壊する' },
+      { type: 'kill', target: 'drone_casino', count: 15, mapId: 'casino_f2', text: 'セキュリティドローンを倒す' },
+      { type: 'boss', target: 'boss_mecha', count: 1, mapId: 'casino_f3', text: 'VIPフロアでメカ・ハイローラーを破壊する' },
     ],
     reward: { exp: 26000, money: 30000, items: ['guitar_thunder', 'sneakers_neon', 'elixir'], sp: 2 },
   },
   {
-    id: 'm13_heat', name: '第13話 ヴァイス・ベイ大炎上', category: 'main', giver: 'officer_kai', reqLevel: 44, prereq: ['m12_mecha'],
+    id: 'm13_heat', name: '第13話 ヴァイス・ベイ大炎上', category: 'main', giver: 'officer_kai', reqLevel: 55, prereq: ['m12_mecha'],
     desc: 'ドンが警察を買収し、二人に全面手配が。カイと共に包囲網を突破しろ。',
     dialog: {
       offer: ['まずいことになった。ドンが署長を買収しやがった。お前らは今や街の最重要指名手配犯だ。', 'どうせなら派手にいけ。★4の包囲網をぶち破れ！'],
@@ -189,12 +197,12 @@ const list = [
     },
     objectives: [
       { type: 'wanted', target: 4, count: 1, text: '手配度★4に到達' },
-      { type: 'kill', target: 'swat_trooper', count: 10, text: 'SWAT隊員を倒す' },
+      { type: 'kill', target: 'swat_trooper', count: 10, text: '町でSWAT隊員を倒す' },
     ],
     reward: { exp: 34000, money: 40000, items: ['armor_vest', 'armor_pants'] },
   },
   {
-    id: 'm14_rooftop', name: '第14話 摩天楼の頂へ', category: 'main', giver: 'officer_kai', turnIn: 'nova', reqLevel: 48, prereq: ['m13_heat'],
+    id: 'm14_rooftop', name: '第14話 摩天楼の頂へ', category: 'main', giver: 'officer_kai', turnIn: 'nova', reqLevel: 58, prereq: ['m13_heat'],
     desc: '屋上へ続く道にはドンの殺し屋とアサルトドローン。ハッカーのノヴァと合流せよ。',
     dialog: {
       offer: ['屋上へ行け。ノヴァが待ってる。'],
@@ -202,19 +210,19 @@ const list = [
     },
     objectives: [
       { type: 'reach', target: 'rooftop', count: 1, text: '摩天楼の屋上へ行く' },
-      { type: 'kill', target: 'thug_hitman', count: 15, mapId: 'rooftop', text: 'ドンの殺し屋を倒す' },
-      { type: 'kill', target: 'drone_attack', count: 10, mapId: 'rooftop', text: 'アサルトドローンを倒す' },
+      { type: 'kill', target: 'thug_hitman', count: 15, mapId: 'tower_f1', text: '工事現場の足場でドンの殺し屋を倒す' },
+      { type: 'kill', target: 'drone_attack', count: 10, mapId: 'tower_f1', text: 'アサルトドローンを倒す' },
     ],
     reward: { exp: 50000, money: 50000, items: ['wings_angel', 'elixir', 'elixir'], sp: 2 },
   },
   {
-    id: 'm15_don', name: '最終話 ネオン・ヴァイス', category: 'main', giver: 'nova', reqLevel: 52, prereq: ['m14_rooftop'],
+    id: 'm15_don', name: '最終話 ネオン・ヴァイス', category: 'main', giver: 'nova', reqLevel: 70, prereq: ['m14_rooftop'],
     desc: 'ヴァイス・ベイの支配者ドン・カイマンとの最終決戦。',
     dialog: {
       offer: ['ドン・カイマンはヘリポートにいる。逃げられる前に決着を。', 'この街の夜明けを、あなたたちの手で。'],
       done: ['…やったのね。ドンの時代は終わった。', '今日からこの街の夜は、あなたたち二人のもの。ようこそ、新しいボスさん。'],
     },
-    objectives: [{ type: 'boss', target: 'boss_don', count: 1, mapId: 'rooftop', text: 'ドン・カイマンを倒す' }],
+    objectives: [{ type: 'boss', target: 'boss_don', count: 1, mapId: 'tower_f3', text: '最上階ペントハウスでドン・カイマンを倒す' }],
     reward: { exp: 120000, money: 200000, items: ['crown_neon', 'neon_sword'], sp: 3, flag: 'storyClear' },
   },
 
@@ -223,14 +231,14 @@ const list = [
     id: 's01_feathers', name: 'サニーのピンク羽', category: 'sub', giver: 'sunny', reqLevel: 6, prereq: [],
     desc: 'ビーチ売店の新作お土産に、フラミンゴの羽が必要。',
     dialog: { offer: ['新作のドリームキャッチャーを作りたいの！ フラミンゴの羽を集めてくれない？'], done: ['わぁ、きれい！ お礼にこのサンダルどうぞ！'] },
-    objectives: [{ type: 'collect', target: 'flamingo_feather', count: 8, mapId: 'beach', text: 'フラミンゴの羽を集める' }],
+    objectives: [{ type: 'collect', target: 'flamingo_feather', count: 8, mapId: 'beach_f3', text: 'フラミンゴの羽を集める' }],
     reward: { exp: 200, money: 600, items: ['sandals_beach', 'potion_red', 'potion_red'] },
   },
   {
-    id: 's02_king_slime', name: 'ビーチの王様', category: 'sub', giver: 'sunny', reqLevel: 10, prereq: ['s01_feathers'],
+    id: 's02_king_slime', name: 'ビーチの王様', category: 'sub', giver: 'sunny', reqLevel: 8, prereq: ['s01_feathers'],
     desc: '夕暮れのビーチに巨大なスライム「キングゼリー」が現れるらしい。',
     dialog: { offer: ['夕方になるとね、すっごく大きいスライムが出るの…海水浴客が怖がってるわ。'], done: ['本当に倒しちゃったの！？ あなたたち、ビーチのヒーローね！'] },
-    objectives: [{ type: 'boss', target: 'boss_king_slime', count: 1, mapId: 'beach', text: 'キングゼリーを倒す' }],
+    objectives: [{ type: 'boss', target: 'boss_king_slime', count: 1, mapId: 'beach_f3', text: 'ピア桟橋でキングゼリーを倒す' }],
     reward: { exp: 900, money: 2000, items: ['gold_chain'], sp: 1 },
   },
   {
@@ -238,57 +246,133 @@ const list = [
     desc: 'ママ・ローザの名物スープにはネオンキノコが欠かせない。',
     dialog: { offer: ['スープの材料が切れちまってね。キノコのかさを集めておくれ。'], done: ['これでまた店を開けられるよ。ほら、まかないのドリンクだ。'] },
     objectives: [
-      { type: 'kill', target: 'mushroom_neon', count: 12, mapId: 'downtown', text: 'ネオンキノコを倒す' },
+      { type: 'kill', target: 'mushroom_neon', count: 12, mapId: 'down_f1', text: 'ネオンキノコを倒す' },
       { type: 'collect', target: 'mushroom_cap', count: 15, text: 'キノコのかさを集める' },
     ],
     reward: { exp: 800, money: 1800, items: ['drink_energy', 'drink_energy', 'potion_orange', 'potion_orange'] },
   },
   {
-    id: 's04_toxic', name: '港の大掃除', category: 'sub', giver: 'tank', reqLevel: 20, prereq: ['m07_wheels'],
+    id: 's04_toxic', name: '港の大掃除', category: 'sub', giver: 'tank', reqLevel: 21, prereq: ['m07_wheels'],
     desc: 'ガレージの排水口がヘドロスライムで詰まった。',
     dialog: { offer: ['排水口からヘドロスライムが湧いてきやがる。エンジンが錆びちまうぜ。'], done: ['助かった！ こいつは客の忘れ物だ、使ってくれ。'] },
-    objectives: [{ type: 'kill', target: 'slime_toxic', count: 20, mapId: 'slums', text: 'ヘドロスライムを倒す' }],
+    objectives: [{ type: 'kill', target: 'slime_toxic', count: 20, mapId: 'slums_f1', text: '倉庫街でヘドロスライムを倒す' }],
     reward: { exp: 2200, money: 3500, items: ['track_pants'] },
   },
   {
-    id: 's05_albino', name: '白い悪魔', category: 'sub', giver: 'old_boone', reqLevel: 30, prereq: ['m09_swamp'],
+    id: 's05_albino', name: '白い悪魔', category: 'sub', giver: 'old_boone', reqLevel: 36, prereq: ['m09_swamp'],
     desc: '幻のアルビノゲイター。その鱗は高値で売れる。',
     dialog: { offer: ['白いワニを見たことがあるか？ あれの鱗は金より価値がある。'], done: ['見事じゃ。わしの若い頃の帽子をやろう。'] },
     objectives: [
-      { type: 'kill', target: 'gator_albino', count: 10, mapId: 'swamp', text: 'アルビノゲイターを倒す' },
-      { type: 'collect', target: 'gator_scale', count: 3, mapId: 'swamp', text: 'アルビノの鱗を集める' },
+      { type: 'kill', target: 'gator_albino', count: 10, mapId: 'swamp_f3', text: 'ワニの巣でアルビノゲイターを倒す' },
+      { type: 'collect', target: 'gator_scale', count: 3, mapId: 'swamp_f3', text: 'アルビノの鱗を集める' },
     ],
     reward: { exp: 6000, money: 8000, items: ['helmet_moto'] },
   },
   {
-    id: 's06_gold_rush', name: 'ゴールドラッシュ', category: 'sub', giver: 'vivi', reqLevel: 42, prereq: ['m11_casino'],
+    id: 's06_gold_rush', name: 'ゴールドラッシュ', category: 'sub', giver: 'vivi', reqLevel: 48, prereq: ['m11_casino'],
     desc: 'カジノの金庫からゴールドスライムが逃げ出した！',
     dialog: { offer: ['内緒よ？ 金庫の中でゴールドスライムを飼ってたの。逃げちゃったけど。'], done: ['ふふ、お礼はたっぷり弾むわ。'] },
     objectives: [
-      { type: 'kill', target: 'slime_gold', count: 15, mapId: 'casino', text: 'ゴールドスライムを倒す' },
+      { type: 'kill', target: 'slime_gold', count: 15, mapId: 'casino_f2', text: '地下金庫でゴールドスライムを倒す' },
       { type: 'collect', target: 'gold_bar', count: 2, text: '金の延べ棒を集める' },
     ],
     reward: { exp: 18000, money: 30000, items: ['drink_lucky', 'gold_chain_heavy'] },
   },
   {
-    id: 's07_rave_drive', name: 'ミッドナイト・ドライブ', category: 'sub', giver: 'dj_pulse', reqLevel: 20, prereq: ['m08_rave'],
+    id: 's07_rave_drive', name: 'ミッドナイト・ドライブ', category: 'sub', giver: 'dj_pulse', reqLevel: 22, prereq: ['m08_rave'],
     desc: 'レイブの宣伝のため、ネオン街を車で流してほしい。',
     dialog: { offer: ['俺の新曲を爆音で流しながら街を走ってくれ！ 最高の宣伝になる！'], done: ['街中で噂になってるぜ！ サンキュー！'] },
     objectives: [{ type: 'drive', target: 'any', count: 800, text: '車で走る（m）' }],
     reward: { exp: 2600, money: 5000, items: ['sunglasses_neon'] },
   },
 
+  {
+    id: 's08_rat_king', name: '地下鉄の王', category: 'sub', giver: 'officer_kai', reqLevel: 16, prereq: ['m05_protection'],
+    desc: '地下鉄トンネルの奥に、巨大なネズミの「王」がいるという通報が相次いでいる。',
+    dialog: { offer: ['地下鉄トンネルからの通報が止まらねえ。でかいネズミが王冠かぶってるんだと。', '署は動かねえ。…お前らが片付けてくれりゃ、借りにしといてやる。'], done: ['マジでいたのかよ…。その王冠、記念に取っとけ。'] },
+    objectives: [
+      { type: 'kill', target: 'rat_subway', count: 12, mapId: 'down_f2', text: '地下鉄トンネルでメトロラットを倒す' },
+      { type: 'boss', target: 'boss_rat_king', count: 1, mapId: 'down_f2', text: 'ラットキングを倒す' },
+    ],
+    reward: { money: 3000, items: ['sunglasses_neon', 'potion_orange', 'potion_orange'], sp: 1 },
+  },
+  {
+    id: 's09_smuggler', name: '密輸船を叩け', category: 'sub', giver: 'dj_pulse', reqLevel: 31, prereq: ['m08_rave'],
+    desc: 'ドンの密輸船が造船所の先に停泊している。船長ハーケンから海図を奪え。',
+    dialog: { offer: ['レイブの機材を運んでた船、実はドンの密輸船だったんだ。', '船長のハーケンが持ってる海図があれば、ドンの尻尾を掴める！'], done: ['これがドンの密輸ルート…！ 最高のネタだぜ。'] },
+    objectives: [
+      { type: 'reach', target: 'slums_f3', count: 1, text: '密輸船に乗り込む' },
+      { type: 'boss', target: 'boss_captain', count: 1, mapId: 'slums_f3', text: 'キャプテン・ハーケンを倒す' },
+      { type: 'collect', target: 'pirate_map', count: 1, mapId: 'slums_f3', text: '密輸船の海図を手に入れる' },
+    ],
+    reward: { money: 9000, items: ['gold_chain_heavy', 'potion_white', 'potion_white'], sp: 1 },
+  },
+
+  // ======================= v2: ルミナ宇宙港 =======================
+  {
+    id: 'sp01_spaceport', name: '星を目指す街', category: 'sub', giver: 'tank', turnIn: 'dr_stella', reqLevel: 36, prereq: ['m08_rave'],
+    desc: '廃線路の先にある「ルミナ宇宙港」。タンクの古い友人、ステラ博士を訪ねる。',
+    dialog: {
+      offer: ['廃線路をずっと行くと海沿いにロケットが見えてくる。ルミナ宇宙港だ。', '昔の仲間のステラ博士が困ってるらしい。顔を出してやってくれ。'],
+      done: ['タンクの紹介ね。ちょうど腕の立つ人を探してたの。', '沿岸のパトロールボットが暴走してて、搬入が止まってるのよ。'],
+    },
+    objectives: [
+      { type: 'kill', target: 'robot_patrol', count: 15, mapId: 'space_f1', text: '沿岸ロケット道でパトロールボットを止める' },
+      { type: 'reach', target: 'spaceport', count: 1, text: 'ルミナ宇宙港へ行く' },
+      { type: 'talk', target: 'dr_stella', count: 1, mapId: 'spaceport', text: 'ステラ博士と話す' },
+    ],
+    reward: { money: 8000, items: ['potion_white', 'potion_white', 'potion_mana'] },
+  },
+  {
+    id: 'sp02_launchpad', name: '発射台の暴走', category: 'sub', giver: 'dr_stella', reqLevel: 42, prereq: ['sp01_spaceport'],
+    desc: '発射台エリアの搬入ロボが言うことを聞かない。部品を回収して制御を取り戻す。',
+    dialog: { offer: ['搬入ロボの制御チップが誰かに書き換えられてる。', '壊して歯車を回収してきて。解析すれば犯人がわかるはず。'], done: ['この歯車…地球の規格じゃない。まさか、本当に…？'] },
+    objectives: [
+      { type: 'kill', target: 'robot_loader', count: 15, mapId: 'space_f2', text: '発射台エリアで搬入ロボを倒す' },
+      { type: 'collect', target: 'robot_gear', count: 10, mapId: 'space_f2', text: 'ロボの歯車を集める' },
+    ],
+    reward: { money: 14000, items: ['helmet_astro'] },
+  },
+  {
+    id: 'sp03_grey', name: 'エイリアンの痕跡', category: 'sub', giver: 'dr_stella', reqLevel: 46, prereq: ['sp02_launchpad'],
+    desc: '発射台に現れた灰色の人影。博士は「グレイ」と呼んでいる。',
+    dialog: { offer: ['監視カメラに映ってたの。灰色の、大きな目の…。', '彼らが持ってるクリスタルを調べたいわ。'], done: ['このクリスタル、脈打ってる…生きてるみたい。', '発信源は海の向こう…月面シミュ区画の先よ。'] },
+    objectives: [
+      { type: 'kill', target: 'alien_grey', count: 12, mapId: 'space_f2', text: 'グレイを倒す' },
+      { type: 'collect', target: 'alien_crystal', count: 3, mapId: 'space_f2', text: 'エイリアン・クリスタルを集める' },
+    ],
+    reward: { money: 20000, items: ['pistol_ray', 'elixir'], sp: 1 },
+  },
+  {
+    id: 'sp04_moon', name: '月面シミュレーション', category: 'sub', giver: 'ace_jet', reqLevel: 76, prereq: ['sp03_grey'],
+    desc: '月面シミュ区画が何者かに乗っ取られた。管理人ジェットと区画を取り戻す。',
+    dialog: { offer: ['俺の区画がめちゃくちゃだ。ゴーレムまで湧いてやがる。', '区画を掃除して月の石を集めてくれ。…模造品のはずなんだがな。'], done: ['この石、本物の月の石だ…。誰が運び込んだ？', '博士が呼んでる。いよいよ「船」に乗り込むらしいぜ。'] },
+    objectives: [
+      { type: 'reach', target: 'space_f3', count: 1, text: '月面シミュ区画へ行く' },
+      { type: 'kill', target: 'golem_moon', count: 10, mapId: 'space_f3', text: 'ムーンゴーレムを倒す' },
+      { type: 'collect', target: 'moon_rock', count: 5, mapId: 'space_f3', text: '月の石を集める' },
+    ],
+    reward: { money: 60000, items: ['armor_astro', 'pants_astro', 'elixir'], sp: 2 },
+  },
+  {
+    id: 'sp05_overlord', name: '未知との遭遇', category: 'sub', giver: 'dr_stella', reqLevel: 90, prereq: ['sp04_moon'],
+    desc: '海上に浮かぶ謎の宇宙船。その主「オーバーロード・ゾグ」がヴァイス・ベイを狙っている。',
+    dialog: { offer: ['宇宙船の主は、この街のネオンをエネルギーにするつもりよ。', 'ドンを倒したあなたたちなら…お願い、街を守って。'], done: ['信じられない…あなたたち、宇宙人まで倒しちゃった。', 'この子、船の中にいたの。あなたたちに懐いてるみたい。連れていってあげて。'] },
+    objectives: [{ type: 'boss', target: 'boss_alien', count: 1, mapId: 'space_f4', text: '謎の宇宙船でオーバーロード・ゾグを倒す' }],
+    reward: { money: 300000, items: ['pet_alien', 'halo_cosmic'], sp: 3, flag: 'alienClear' },
+  },
+
   // ======================= デイリー（1日1回） =======================
   {
     id: 'd01_beach_patrol', name: '[デイリー] ビーチパトロール', category: 'daily', daily: true, giver: 'sunny', reqLevel: 3, prereq: [],
     desc: '毎日のビーチ清掃。', dialog: { offer: ['今日もスライムが大発生！ 手伝って！'], done: ['ありがと！ また明日もよろしくね！'] },
-    objectives: [{ type: 'kill', target: 'slime_pink', count: 20, mapId: 'beach', text: 'ストロベリースライムを倒す' }],
+    objectives: [{ type: 'kill', target: 'slime_pink', count: 20, mapId: 'beach_f2', text: 'ストロベリースライムを倒す' }],
     reward: { exp: 150, money: 800, items: ['potion_red', 'potion_red', 'potion_red', 'potion_red', 'potion_red'] },
   },
   {
     id: 'd02_street_sweep', name: '[デイリー] ストリート・スウィープ', category: 'daily', daily: true, giver: 'mama_rosa', reqLevel: 12, prereq: ['m05_protection'],
     desc: '懲りないチンピラを毎日お掃除。', dialog: { offer: ['またあの連中が来てるよ。頼んだよ！'], done: ['助かるねぇ。今日のまかないだよ。'] },
-    objectives: [{ type: 'kill', target: 'thug_punk', count: 25, mapId: 'downtown', text: 'ストリートチンピラを倒す' }],
+    objectives: [{ type: 'kill', target: 'thug_punk', count: 25, mapId: 'down_f1', text: 'ストリートチンピラを倒す' }],
     reward: { exp: 1200, money: 2500, items: ['potion_orange', 'potion_orange', 'potion_orange', 'potion_blue', 'potion_blue'] },
   },
   {
@@ -298,33 +382,45 @@ const list = [
     reward: { exp: 2000, money: 6000, items: [] },
   },
   {
-    id: 'd04_delivery', name: '[デイリー] デリバリー・ラン', category: 'daily', daily: true, giver: 'tank', reqLevel: 16, prereq: ['m07_wheels'],
+    id: 'd04_delivery', name: '[デイリー] デリバリー・ラン', category: 'daily', daily: true, giver: 'tank', reqLevel: 18, prereq: ['m07_wheels'],
     desc: 'パーツの配達。とにかく走れ。', dialog: { offer: ['今日の配達だ。ぶっ飛ばしてこい！'], done: ['タイム更新だな！'] },
     objectives: [{ type: 'drive', target: 'any', count: 500, text: '車で走る（m）' }],
     reward: { exp: 1800, money: 4000, items: ['drink_energy'] },
   },
   {
-    id: 'd05_swamp_hunt', name: '[デイリー] ワニ狩り', category: 'daily', daily: true, giver: 'old_boone', reqLevel: 26, prereq: ['m09_swamp'],
+    id: 'd05_swamp_hunt', name: '[デイリー] ワニ狩り', category: 'daily', daily: true, giver: 'old_boone', reqLevel: 24, prereq: ['m09_swamp'],
     desc: 'ワニの牙は毎日需要がある。', dialog: { offer: ['今日も牙を頼むぞ。'], done: ['ほい、今日の稼ぎじゃ。'] },
-    objectives: [{ type: 'collect', target: 'gator_tooth', count: 15, mapId: 'swamp', text: 'ワニの牙を集める' }],
+    objectives: [{ type: 'collect', target: 'gator_tooth', count: 15, mapId: 'swamp_f1', text: 'ワニの牙を集める' }],
     reward: { exp: 5000, money: 9000, items: ['potion_white', 'potion_white', 'potion_mana'] },
   },
   {
-    id: 'd06_high_stakes', name: '[デイリー] ハイステークス', category: 'daily', daily: true, giver: 'vivi', reqLevel: 36, prereq: ['m11_casino'],
+    id: 'd06_high_stakes', name: '[デイリー] ハイステークス', category: 'daily', daily: true, giver: 'vivi', reqLevel: 48, prereq: ['m11_casino'],
     desc: 'カジノチップを両替して一儲け。', dialog: { offer: ['チップを集めてきて。いいレートで換金してあげる。'], done: ['今日もあなたの勝ちね。'] },
-    objectives: [{ type: 'collect', target: 'casino_chip', count: 20, mapId: 'casino', text: 'カジノチップを集める' }],
+    objectives: [{ type: 'collect', target: 'casino_chip', count: 20, mapId: 'casino_f2', text: 'カジノチップを集める' }],
     reward: { exp: 12000, money: 25000, items: ['power_elixir'] },
   },
   {
-    id: 'd07_rooftop_contract', name: '[デイリー] 屋上の掃除屋', category: 'daily', daily: true, giver: 'nova', reqLevel: 50, prereq: ['m14_rooftop'],
+    id: 'd07_rooftop_contract', name: '[デイリー] 屋上の掃除屋', category: 'daily', daily: true, giver: 'nova', reqLevel: 62, prereq: ['m14_rooftop'],
     desc: 'ドンの残党狩り。', dialog: { offer: ['残党がまだ屋上にいるわ。片付けて。'], done: ['ナイス。報酬は振り込んでおいたわ。'] },
     objectives: [
-      { type: 'kill', target: 'thug_hitman', count: 20, mapId: 'rooftop', text: 'ドンの殺し屋を倒す' },
-      { type: 'kill', target: 'swat_heavy', count: 5, mapId: 'rooftop', text: 'ヘビーSWATを倒す' },
+      { type: 'kill', target: 'thug_hitman', count: 20, mapId: 'tower_f1', text: 'ドンの殺し屋を倒す' },
+      { type: 'kill', target: 'thug_merc', count: 10, mapId: 'tower_f2', text: '空中庭園で傭兵スナイパーを倒す' },
     ],
     reward: { exp: 40000, money: 60000, items: ['elixir', 'drink_lucky'] },
   },
+  {
+    id: 'd08_space_jelly', name: '[デイリー] クラゲ注意報', category: 'daily', daily: true, giver: 'ace_jet', reqLevel: 38, prereq: ['sp01_spaceport'],
+    desc: '沿岸ロケット道にクラゲが打ち上がって発射に支障が出る。', dialog: { offer: ['今日もクラゲだらけだ。ロケットが飛べねえ！'], done: ['助かった、今日も定刻発射だ！'] },
+    objectives: [{ type: 'kill', target: 'jelly_coast', count: 20, mapId: 'space_f1', text: 'コーストクラゲを倒す' }],
+    reward: { money: 12000, items: ['potion_white', 'potion_white', 'potion_mana'] },
+  },
 ];
+
+const REWARD_EXP_FACTOR = { main: 0.8, sub: 0.5, daily: 0.3 };
+for (const m of list) {
+  m.reward ||= {};
+  if (!m.reward.expFixed) m.reward.exp = Math.round(expToNext((m.reqLevel || 1) + 2) * (REWARD_EXP_FACTOR[m.category] ?? 0.5));
+}
 
 export const MISSIONS = Object.fromEntries(list.map((m) => [m.id, m]));
 

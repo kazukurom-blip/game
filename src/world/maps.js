@@ -7,6 +7,8 @@
 // 足場・ロープ・decor はマップIDをシードにした手続き生成（毎回同じ形）。
 // spawns に types を書かないフィールドは spawner が ENEMIES[].habitats から自動選択する。
 
+import { TOWN_SHOPS } from '../data/shops.js';
+
 const GROUND = 1000;
 export const ROW = 130;          // 段の高さ（ジャンプ最高点 ≈168px）
 const JUMP_V = 860, GRAV = 2200, RUN = 240; // player.js / physics.js と同じ値（到達判定用）
@@ -426,20 +428,18 @@ const NPC = {
     look: { body: 'f', skin: '#f5d0b0', hair: 'twin', hairColor: '#19d3c5', eyeColor: '#ff2e88' },
     equip: { hat: L('catEars', '#19d3c5', '#ff2e88'), top: L('hoodie', '#1a1a2e', '#19d3c5'), bottom: L('shorts', '#1a1a2e'), shoes: L('sneakers', '#19d3c5'), accessory: L('mask', '#111', '#ff2e88') },
     dialog: ['ドンはタワー最上階のペントハウスにいる。準備はいい？'] },
-  sky_vendor: { id: 'sky_vendor', name: 'スカイ', title: 'タワー売店',
-    look: { body: 'm', skin: '#f1c9a5', hair: 'spiky', hairColor: '#ff2e88', eyeColor: '#19f0ff' },
-    equip: { hat: L('headphones', '#ff2e88', '#19f0ff'), top: L('leatherJacket', '#16161e', '#ff2e88'), bottom: L('jeans', '#22223b'), shoes: L('boots', '#111') },
-    dialog: ['ここまで来たなら上物が要るだろ？'],
-    shop: ['potion_white', 'potion_mana', 'elixir', 'power_elixir'] },
-  cosmo: { id: 'cosmo', name: 'コスモ', title: '宇宙港の管制官',
-    look: { body: 'f', skin: '#f5d0b0', hair: 'bob', hairColor: '#e0e0ff', eyeColor: '#19f0ff' },
-    equip: { hat: L('helmet', '#e0e0ff', '#19f0ff'), top: L('armorVest', '#e0e0ff', '#19f0ff'), bottom: L('armorPants', '#c0c0e0'), shoes: L('boots', '#e0e0ff') },
-    dialog: ['ルミナ宇宙港へようこそ。発射台の先は月面シミュレーション区画よ。', 'その先で謎の宇宙船が見つかったって噂…'] },
-  orbit_shop: { id: 'orbit_shop', name: 'オービット', title: '宇宙港ショップ',
+  shop_downtown: { id: 'shop_downtown', name: 'ミミ', title: 'ネオン・ブティック',
+    look: { body: 'f', skin: '#f2c7a5', hair: 'twin', hairColor: '#ff7ad9', eyeColor: '#7a3cff' },
+    equip: { hat: L('beanie', '#ff7ad9', '#ffffff'), top: L('hoodie', '#7a3cff', '#ff7ad9'), bottom: L('skirt', '#22223b'), shoes: L('sneakers', '#ffffff', '#ff7ad9'), accessory: L('sunglasses', '#ff7ad9', '#19f0ff') },
+    dialog: ['いらっしゃ〜い！ ダウンタウンの最新ストリートコーデ、そろってるよ。'] },
+  dr_stella: { id: 'dr_stella', name: 'ステラ博士', title: 'ルミナ宇宙港 主任研究者',
+    look: { body: 'f', skin: '#f5d0b0', hair: 'long', hairColor: '#e0e0ff', eyeColor: '#19f0ff' },
+    equip: { hat: L('headphones', '#e0e0ff', '#19f0ff'), top: L('suit', '#ffffff', '#19f0ff'), bottom: L('suitPants', '#c0c0e0'), shoes: L('boots', '#e0e0ff'), accessory: L('sunglasses', '#19f0ff', '#ffffff') },
+    dialog: ['ルミナ宇宙港へようこそ。私はステラ、ここの主任研究者よ。', '月面シミュ区画の先で、正体不明の宇宙船が見つかったの…'] },
+  ace_jet: { id: 'ace_jet', name: 'エース・ジェット', title: '月面シミュ区画の管理人',
     look: { body: 'm', skin: '#8d5a3b', hair: 'short', hairColor: '#19f0ff', eyeColor: '#222' },
-    equip: { hat: L('headphones', '#19f0ff', '#ffffff'), top: L('tracksuit', '#ffffff', '#19f0ff'), bottom: L('trackPants', '#ffffff'), shoes: L('sneakers', '#19f0ff') },
-    dialog: ['宇宙食からエリクサーまで、何でも揃うよ。'],
-    shop: ['potion_white', 'potion_mana', 'elixir', 'power_elixir'] },
+    equip: { hat: L('helmet', '#ffffff', '#ff7a00'), top: L('armorVest', '#ff7a00', '#ffffff'), bottom: L('armorPants', '#ffffff'), shoes: L('boots', '#ff7a00') },
+    dialog: ['元テストパイロットのエースだ。月面区画は重力0.6G、跳びすぎ注意だぜ。', '宇宙食とドリンクならうちで揃う。'] },
 };
 const npc = (id, x, extra = {}) => ({ ...NPC[id], x, ...extra });
 
@@ -457,7 +457,7 @@ const T = {
     id: 'downtown', name: 'ダウンタウン', region: 'downtown', variant: 0, width: 3200, lv: [10, 22], tiers: 3,
     desc: 'ネオン輝く街の中心。4方向へ道が延びる。', bgColor: '#2a1446', world: { x: 4, y: 5 },
     left: 'beach_f4', right: 'down_f3', mids: [{ to: 'down_f1', x: 1150 }, { to: 'down_f4', x: 2250 }],
-    npcs: [npc('mama_rosa', 380), npc('officer_kai', 800), npc('ammo_shop', 1600), npc('dash_garage', 2700)],
+    npcs: [npc('mama_rosa', 380), npc('officer_kai', 800), npc('shop_downtown', 1350), npc('ammo_shop', 1700), npc('dash_garage', 2700)],
     vehicles: [{ kind: 'sports', x: 2900, color: '#ff2e88' }, { kind: 'sports', x: 1400, color: '#19d3c5' }, { kind: 'bike', x: 600, color: '#ffd166' }],
   }),
   slums: town({
@@ -485,14 +485,14 @@ const T = {
     id: 'rooftop', name: 'ヴァイス・タワー', region: 'rooftop', variant: 0, width: 2400, lv: [58, 76], tiers: 3,
     desc: '摩天楼の中層ロビー兼屋上テラス。', bgColor: '#0d0b26', world: { x: 11, y: 3 },
     left: 'tower_f1', right: 'tower_f2',
-    npcs: [npc('nova', 380), npc('sky_vendor', 1200)],
+    npcs: [npc('nova', 380)],
     vehicles: [],
   }),
   spaceport: town({
     id: 'spaceport', name: 'ルミナ宇宙港', region: 'spaceport', variant: 0, width: 2800, lv: [36, 100], tiers: 3,
     desc: 'ロケットが並ぶ近未来の宇宙港。', bgColor: '#0a1030', world: { x: 11, y: 5 },
     left: 'space_f2', right: 'space_f3',
-    npcs: [npc('cosmo', 400), npc('orbit_shop', 1300)],
+    npcs: [npc('dr_stella', 400), npc('ace_jet', 1300)],
     vehicles: [{ kind: 'sports', x: 2000, color: '#e0e0ff' }],
     decor: [{ type: 'rocket', x: 700 }, { type: 'rocket', x: 2300 }, { type: 'satelliteDish', x: 1700 }],
   }),
@@ -534,6 +534,16 @@ const F = [
   { id: 'space_f3', name: '月面シミュ区画', region: 'spaceport', variant: 3, lv: [75, 85], style: 'moon', left: 'spaceport', right: 'space_f4', world: { x: 11, y: 6 }, desc: '重力 0.6G。ふわりと高く跳べる。' },
   { id: 'space_f4', name: '謎の宇宙船', region: 'spaceport', variant: 0, lv: [85, 100], style: 'alienShip', left: 'space_f3', boss: true, world: { x: 11, y: 7 }, desc: '正体不明の宇宙船。裏ボスが潜む。' },
 ];
+
+// ショップ品揃え: システム担当の提案（data/shops.js TOWN_SHOPS）を優先して適用
+for (const [mapId, shops] of Object.entries(TOWN_SHOPS || {})) {
+  const m = T[mapId];
+  if (!m) continue;
+  for (const sh of shops) {
+    const n = m.npcs.find((q) => q.id === sh.npcId);
+    if (n) { n.shop = [...sh.items]; n.shopName = sh.name; }
+  }
+}
 
 export const MAPS = { ...T };
 for (const cfg of F) MAPS[cfg.id] = field(cfg);

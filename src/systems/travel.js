@@ -217,6 +217,6 @@ export function taxiTravel(game, mapId) {
   game.changeMap(mapId);
   const msg = `タクシーで ${mapName(mapId)} へ（-$${c.fare}）`;
   game.notify?.(msg, '#ffd23f');
-  game.events?.emit('taxiTravel', { mapId, fare: c.fare });
+  game.events?.emit('taxiTravel', { mapId, fare: c.fare, name: mapName(mapId) });
   return { ok: true, msg, fare: c.fare };
 }

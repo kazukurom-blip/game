@@ -9,7 +9,10 @@ import { NPC } from './entities/npc.js';
 import { Vehicle } from './entities/vehicle.js';
 import { Spawner } from './entities/spawner.js';
 
-import { newState, computeStats, expToNext, setActiveBuffs } from './systems/progression.js';
+import { newState, computeStats, expToNext, setActiveBuffs, migrateState } from './systems/progression.js';
+import { attachSNS } from './systems/sns.js';
+import { attachTravel } from './systems/travel.js';
+import { audio, attachAudio } from './audio/audio.js';
 import { MissionManager } from './systems/missions.js';
 import { updateSkills, resetCooldowns } from './systems/skills.js';
 import { setPlayerInvuln } from './systems/combat.js';
@@ -92,12 +95,33 @@ window.game = game; // デバッグ/テスト用
 
 game.ui = new UIManager(game);
 game.debug = new DebugPanel(game);
+// 永続的なイベント購読（各 attach は game.state を都度参照する）
+safe('attachAudio', () => attachAudio(game));
+audio.notifyRadio = false; // HUD がラジオ局名を表示する
+let systemsAttached = false;
+
+// 昼夜: 実時間 12 分で 1 日
+const DAY_SECONDS = 720;
+function updateClock(dt) {
+  const s = game.state;
+  if (typeof s.clock !== 'number' || !isFinite(s.clock)) s.clock = 17;
+  s.clock = (s.clock + dt * 24 / DAY_SECONDS) % 24;
+  game.clock = s.clock;
+  if (game.map) game.map._clock = s.clock;
+}
 
 function startGame(choice) {
   let state = null;
   if (choice === 'continue') state = loadState();
   if (!state) state = newState(choice === 'continue' ? 'luna' : choice);
+  state = migrateState(state) || state;
   game.state = state;
+  game.clock = state.clock ?? 17;
+  if (!systemsAttached) {
+    systemsAttached = true;
+    safe('attachSNS', () => attachSNS(game));
+    safe('attachTravel', () => attachTravel(game));
+  }
   game.wanted = 0; game.wantedHeat = 0;
   // 2回目以降の開始に備えて旧インスタンスのイベント購読・モジュール内状態を破棄
   game.missions?.destroy?.();
@@ -176,6 +200,7 @@ function updatePlay(dt) {
   safe('ui.update', () => game.ui.update(dt));
   if (game.paused) return;
 
+  safe('clock', () => updateClock(dt));
   safe('player', () => game.player.update(dt));
   updateList(game.enemies, dt, 'enemy');
   updateList(game.projectiles, dt, 'projectile');
@@ -226,6 +251,7 @@ function frame(now) {
   game.dt = dt;
   game.time += dt;
   game.input.beginFrame();
+  safe('audio', () => audio.update(game, dt));
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, W, H);

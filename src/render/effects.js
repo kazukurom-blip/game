@@ -6,11 +6,11 @@ const MAX_EFFECTS = 500;
 
 const LIFE = {
   slash: 0.28, hit: 0.3, critHit: 0.45, explosion: 0.9, levelUp: 2.2, pickup: 0.5, muzzle: 0.09, dash: 0.4,
-  buff: 1.0, rareDrop: 1.6, heal: 0.9, smoke: 1.0, portal: 0.8, spark: 0.4, tear: 1.1, dmg: 1.0,
+  buff: 1.0, rareDrop: 1.6, heal: 0.9, smoke: 1.0, portal: 0.8, spark: 0.4, tear: 1.1, dmg: 1.0, petPick: 0.8, petDrop: 3.2,
 };
 const DEF_COLOR = {
   slash: '#ffffff', hit: '#ffe066', critHit: '#ff4fd8', explosion: '#ff9a3c', levelUp: '#ffe066', pickup: '#7cfc00', muzzle: '#ffd27a',
-  dash: '#19f0ff', buff: '#ff6fb5', rareDrop: '#ffc93c', heal: '#5cff9a', smoke: '#9a8fa8', portal: '#b47cff', spark: '#ffe066', tear: '#f4f4f4',
+  dash: '#19f0ff', buff: '#ff6fb5', rareDrop: '#ffc93c', heal: '#5cff9a', smoke: '#9a8fa8', portal: '#b47cff', spark: '#ffe066', tear: '#f4f4f4', petPick: '#ff6fb5', petDrop: '#ffffff',
 };
 
 let seedCounter = 1;
@@ -97,6 +97,12 @@ function initParts(e) {
       });
       break;
     }
+    case 'petPick':
+      add(4, (i) => ({ x: (R() - 0.5) * 18, y: -R() * 8, vx: (R() - 0.5) * 40, vy: -50 - R() * 50, r: 3 + R() * 2, heart: i % 2 === 0, d: i * 0.06 }));
+      break;
+    case 'petDrop':
+      add(46, (i) => ({ x: (R() - 0.5) * 60, y: -R() * 40, vx: (R() - 0.5) * 50, vy: -60 - R() * 160, r: 2 + R() * 3.5, hue: (i * 37) % 360, d: R() * 1.6, heart: R() < 0.2 }));
+      break;
     case 'portal':
       add(14, () => { const a = R() * PI * 2; return { a, r: 30 + R() * 20, vr: -40 - R() * 30, va: 4 + R() * 3, s: 2 + R() * 2 }; });
       break;
@@ -251,6 +257,21 @@ function drawFx(ctx, e) {
       drawRising(ctx, e, k, c);
       break;
     }
+    case 'petPick': {
+      for (const p of e.parts) {
+        if (e.t < p.d) continue;
+        ctx.globalAlpha = Math.max(0, 1 - k * 1.1);
+        ctx.fillStyle = p.heart ? '#ff6fb5' : '#fff6a0';
+        if (p.heart) heartPath(ctx, p.x, p.y, p.r); else { ctx.beginPath(); starPath(ctx, p.x, p.y, p.r * 1.5, p.r * 0.5, 4, e.t * 3); }
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      break;
+    }
+    case 'petDrop': {
+      drawPetDrop(ctx, e, k);
+      break;
+    }
     case 'portal': {
       ctx.globalAlpha = 1 - k;
       ctx.strokeStyle = rgba(c, 0.9); ctx.lineWidth = 3;
@@ -319,6 +340,82 @@ function drawRising(ctx, e, k, c) {
     const g = ctx.createLinearGradient(0, -14, 0, 14);
     g.addColorStop(0, '#fffbd0'); g.addColorStop(0.5, '#ffd23f'); g.addColorStop(1, '#ff7a3c');
     ctx.fillStyle = g; ctx.fillText('LEVEL UP!', 0, 0);
+    ctx.restore();
+  }
+}
+
+function heartPath(ctx, x, y, r) {
+  ctx.beginPath();
+  ctx.moveTo(x, y + r * 0.9);
+  ctx.bezierCurveTo(x - r * 1.6, y - r * 0.2, x - r * 0.7, y - r * 1.4, x, y - r * 0.45);
+  ctx.bezierCurveTo(x + r * 0.7, y - r * 1.4, x + r * 1.6, y - r * 0.2, x, y + r * 0.9);
+  ctx.closePath();
+}
+const RAINBOW = ['#ff4f6d', '#ff9a3c', '#ffe066', '#5cff9a', '#3ee6d2', '#4fa8ff', '#b45cff', '#ff4fd8'];
+// PET 入手: 超豪華な虹色の柱
+function drawPetDrop(ctx, e, k) {
+  const fade = k < 0.85 ? 1 : (1 - k) / 0.15;
+  const grow = Math.min(1, e.t * 3);
+  const H = 320 * grow, W = 70;
+  // 虹の柱（縦ストライプを流す）
+  ctx.save();
+  ctx.beginPath(); ctx.moveTo(-W / 2, 0); ctx.lineTo(-W * 0.32, -H); ctx.lineTo(W * 0.32, -H); ctx.lineTo(W / 2, 0); ctx.closePath();
+  ctx.clip();
+  const n = RAINBOW.length;
+  const off = (e.t * 60) % (W * 2 / n * n);
+  for (let i = -1; i < n * 2 + 1; i++) {
+    const x = -W + i * (W * 2 / n) - off * 0.5;
+    ctx.fillStyle = rgba(RAINBOW[((i % n) + n) % n], 0.42 * fade);
+    ctx.fillRect(x, -H, W * 2 / n + 1, H);
+  }
+  const vg = ctx.createLinearGradient(0, -H, 0, 0);
+  vg.addColorStop(0, 'rgba(255,255,255,0)'); vg.addColorStop(0.7, rgba('#ffffff', 0.25 * fade)); vg.addColorStop(1, rgba('#ffffff', 0.85 * fade));
+  ctx.fillStyle = vg; ctx.fillRect(-W, -H, W * 2, H);
+  ctx.restore();
+  // 中心の白い芯
+  const cg = ctx.createLinearGradient(0, -H, 0, 0);
+  cg.addColorStop(0, 'rgba(255,255,255,0)'); cg.addColorStop(1, rgba('#ffffff', 0.9 * fade));
+  ctx.fillStyle = cg; ctx.fillRect(-5 - Math.sin(e.t * 20) * 1.5, -H, 10 + Math.sin(e.t * 20) * 3, H);
+  // 足元の多重リング
+  for (let i = 0; i < 3; i++) {
+    const rk = (e.t * 0.9 + i / 3) % 1;
+    ctx.strokeStyle = rgba(RAINBOW[(i * 3) % n], 0.9 * (1 - rk) * fade); ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.ellipse(0, 0, 24 + rk * 80, 7 + rk * 20, 0, 0, PI * 2); ctx.stroke();
+  }
+  // 放射光線
+  ctx.save(); ctx.translate(0, -60); ctx.rotate(e.t * 0.8);
+  for (let i = 0; i < 12; i++) {
+    ctx.rotate(PI / 6);
+    ctx.fillStyle = rgba(RAINBOW[i % n], 0.18 * fade * grow);
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-10, -140); ctx.lineTo(10, -140); ctx.closePath(); ctx.fill();
+  }
+  ctx.restore();
+  // 粒（虹の星・ハート）
+  for (const p of e.parts) {
+    if (e.t < p.d) continue;
+    const lk = Math.min(1, (e.t - p.d) / 1.4);
+    ctx.globalAlpha = fade * (1 - lk);
+    ctx.fillStyle = RAINBOW[(p.hue / 45) | 0];
+    if (p.heart) heartPath(ctx, p.x, p.y, p.r * 1.3); else { ctx.beginPath(); starPath(ctx, p.x, p.y, p.r * 1.9, p.r * 0.6, 4, e.t * 2 + p.hue); }
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  // PET GET! 文字
+  if (e.t > 0.25) {
+    ctx.globalCompositeOperation = 'source-over';
+    const kk = e.t - 0.25;
+    const pop = kk < 0.12 ? 0.5 + (kk / 0.12) * 0.8 : kk < 0.2 ? 1.3 - ((kk - 0.12) / 0.08) * 0.3 : 1;
+    ctx.save(); ctx.translate(0, -150 - Math.min(1, kk * 3) * 16); ctx.scale(pop, pop);
+    ctx.globalAlpha = fade;
+    const label = (e.opts && e.opts.text) || 'PET GET!!';
+    ctx.font = '900 32px "Arial Black", "Arial Rounded MT Bold", sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+    ctx.lineWidth = 8; ctx.strokeStyle = '#2a0b3d'; ctx.strokeText(label, 0, 0);
+    const g = ctx.createLinearGradient(-90, 0, 90, 0);
+    const sh = (e.t * 0.5) % 1;
+    for (let i = 0; i < n; i++) g.addColorStop((i / n + sh) % 1, RAINBOW[i]);
+    ctx.fillStyle = g; ctx.fillText(label, 0, 0);
+    ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.fillText(label, 0, -2);
     ctx.restore();
   }
 }
