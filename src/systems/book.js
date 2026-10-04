@@ -118,7 +118,7 @@ export function bookRecord(game, enemyId) {
   st.book[enemyId] = after;
   if (before === 0) {
     const n = Object.keys(st.book).filter((k) => st.book[k] > 0 && ENEMIES[k] && isBookTarget(ENEMIES[k])).length;
-    game.notify?.(`図鑑に登録: ${def.name}  NEW!（${n}/${BOOK_IDS.length}）`, '#5cff9a');
+    // NEW の通知は UI の右下カード（bookNew）だけで出す（トーストとの二重通知を避ける）
     game.events?.emit('bookNew', { id: enemyId, count: n, total: BOOK_IDS.length });
     const prog = bookProgress(st)[def.region];
     if (prog?.complete) {

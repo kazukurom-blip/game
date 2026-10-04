@@ -23,6 +23,13 @@ const LAYOUT = {
   book: { w: 1000, h: 620, title: 'モンスター図鑑', key: 'B', y: 40 },
   phone: { w: 360, h: 660, title: null, key: 'P', x: W - 360 - 36, y: 30 },
 };
+const TOAST_MAX = 3;
+// 重要度: 2 = レベルアップ / PET / レア / ボス / ミッション完了、1 = 進行系、0 = その他
+function toastPriority(text) {
+  if (/LEVEL UP|PET|レア|レジェンダリ|ミシック|コンプリート|ミッション完了|倒した|現れた/.test(text)) return 2;
+  if (/ミッション|達成|手配度|警察|称号|訪れた|到着|図鑑/.test(text)) return 1;
+  return 0;
+}
 const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now()) / 1000;
 
 export class UIManager {
@@ -76,10 +83,26 @@ export class UIManager {
   }
 
   // ---------- 公開API ----------
-  notify(text, color) {
+  // 同時表示は最大 TOAST_MAX 件。同じ文言は1件にまとめて「×n」。重要度の低い・古いものから押し出す。
+  notify(text, color, opts = {}) {
     if (!text) return;
-    this.toasts.push({ text: String(text), color: color || COL.teal, t: 0, life: 3.2 });
-    while (this.toasts.length > 5) this.toasts.shift();
+    text = String(text);
+    const pri = opts.priority ?? toastPriority(text);
+    const life = pri >= 2 ? 3.2 : pri === 1 ? 2.6 : 2.1;
+    const same = this.toasts.find((t) => t.text === text);
+    if (same) {
+      same.count = (same.count || 1) + 1;
+      same.t = Math.min(same.t, 0.25); // 表示し直す（フェードインはしない）
+      same.life = Math.max(same.life, life);
+      return;
+    }
+    this.toasts.push({ text, color: color || COL.teal, t: 0, life, pri, count: 1 });
+    while (this.toasts.length > TOAST_MAX) {
+      // 最も重要度の低いもののうち一番古いものを外す（新しい通知も対象）
+      let k = 0;
+      for (let i = 1; i < this.toasts.length; i++) if (this.toasts[i].pri < this.toasts[k].pri) k = i;
+      this.toasts.splice(k, 1);
+    }
   }
   isOpen(name) { return !!this.wins[name]; }
   isModal() { return this.order.some((n) => MODAL.has(n)); }

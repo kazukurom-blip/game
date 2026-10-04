@@ -498,7 +498,8 @@ function drawToasts(ctx, game, s, dt) {
   for (const tt of list) {
     const a = clamp(tt.t / 0.2, 0, 1) * (1 - clamp((tt.t - tt.life + 0.5) / 0.5, 0, 1));
     if (a <= 0) continue;
-    const tw = measure(ctx, tt.text, 16) + 44;
+    const label = tt.count > 1 ? `${tt.text}  ×${tt.count}` : tt.text;
+    const tw = Math.min(W - 40, measure(ctx, label, 16) + 44);
     const x = W / 2 - tw / 2;
     const yy = y - (1 - ease(tt.t / 0.25)) * 14;
     ctx.save();
@@ -511,7 +512,7 @@ function drawToasts(ctx, game, s, dt) {
     ctx.fillStyle = tt.color || COL.teal;
     ctx.beginPath(); ctx.arc(x + 17, yy + 16, 4.5, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
-    txt(ctx, tt.text, x + 30, yy + 16.5, { size: 16, color: '#fff', alpha: a });
+    txt(ctx, label, x + 30, yy + 16.5, { size: 16, color: '#fff', alpha: a, maxW: tw - 44 });
     y += 38;
   }
 }
