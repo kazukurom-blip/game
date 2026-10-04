@@ -184,7 +184,7 @@ export class Pet {
     this._drawT = g.time;
     // 親密度Lv（1〜30）: 10/20/30 で小物が付く
     let affection = 0;
-    try { const d = petData(g.state, this.itemId); if (d) affection = petLevelFromAff(d.aff); } catch { /* ignore */ }
+    try { const d = petData(g.state, this.itemId); if (d) affection = petLevelFromAff(d.aff)?.lv || 0; } catch { /* ignore */ }
     const anim = { facing: this.facing, t: this.t, state: this.pickAnim > 0 ? 'pick' : this.state, moving: this.state === 'move', flying: this.flying, affection };
     drawPet(ctx, this.x, this.y, this.look, anim);
     // 名前（足元に小さく）

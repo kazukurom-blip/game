@@ -30,7 +30,7 @@ export function setPose(windup, rage, boss) { POSE.windup = windup || 0; POSE.ra
 // 形が時間で変わらない重いパーツ（開いた目・甲羅・胴など）を 2x のオフスクリーンへ一度だけ描き、
 // 以後は現在の変換（移動・回転・伸縮・左右反転）のまま drawImage する。フレーム単位ではないのでアニメは滑らか。
 // キーには フラッシュ/夜/解像度 を含む。件数上限つき（古い順に破棄）。
-export const PC = { on: true, res: 2, max: 360, hits: 0, misses: 0 };
+export const PC = { on: true, res: 2, max: 600, count: 0, misses: 0 };
 const partCache = new Map();
 function mkCanvas(w, h) {
   if (typeof document !== 'undefined') { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
@@ -38,11 +38,17 @@ function mkCanvas(w, h) {
   return null;
 }
 /** key: パーツ識別子, (x,y,w,h): ローカル座標の範囲, pad: 余白, fn(c): c に描く関数（ローカル座標） */
-export function cpart(ctx, key, x, y, w, h, pad, fn) {
+export function cpart(ctx, key, x, y, w, h, pad, fn, key2) {
   if (!PC.on) { fn(ctx); return; }
   const R = PC.res;
-  const k = key + (FL ? '|F' : '') + (ENV.night > 0.5 ? '|N' : '') + '|' + R;
-  let sp = partCache.get(k);
+  // 3段 Map（キー文字列の連結を避ける）: key → key2(色など) → フラグ番号
+  let m1 = partCache.get(key);
+  if (!m1) { m1 = new Map(); partCache.set(key, m1); }
+  const k2 = key2 === undefined ? '' : key2;
+  let m2 = m1.get(k2);
+  if (!m2) { m2 = new Map(); m1.set(k2, m2); }
+  const k3 = (FL ? 1 : 0) + (ENV.night > 0.5 ? 2 : 0) + R * 4;
+  let sp = m2.get(k3);
   if (!sp) {
     const cw = Math.ceil((w + pad * 2) * R), ch = Math.ceil((h + pad * 2) * R);
     const cv = cw > 0 && ch > 0 && cw * ch < 4e6 ? mkCanvas(cw, ch) : null;
@@ -52,10 +58,10 @@ export function cpart(ctx, key, x, y, w, h, pad, fn) {
     c.lineJoin = 'round'; c.lineCap = 'round';
     fn(c);
     sp = { cv, x: x - pad, y: y - pad, w: cw / R, h: ch / R };
-    if (partCache.size >= PC.max) partCache.delete(partCache.keys().next().value);
-    partCache.set(k, sp);
+    if (++PC.count > PC.max) { partCache.clear(); PC.count = 1; m1 = new Map(); partCache.set(key, m1); m2 = new Map(); m1.set(k2, m2); }
+    m2.set(k3, sp);
     PC.misses++;
-  } else PC.hits++;
+  }
   ctx.drawImage(sp.cv, sp.x, sp.y, sp.w, sp.h);
 }
 const r4 = (v) => Math.round(v * 4) / 4;
@@ -86,7 +92,7 @@ let toneN = 0;
 function memo(kind, col, amt, fn) {
   let m = toneCache.get(col);
   if (!m) { if (toneN > 2500) { toneCache.clear(); toneN = 0; } m = new Map(); toneCache.set(col, m); }
-  const k = kind + amt;
+  const k = kind * 100000 + Math.round(amt * 1000);
   let r = m.get(k);
   if (r === undefined) { r = fn(); m.set(k, r); toneN++; }
   return r;
@@ -201,13 +207,13 @@ export function linGrad(ctx, x0, y0, x1, y1, stops, key) {
 /** 形が一定のパーツを body() で塗ってキャッシュ（pathFn(c) はローカル座標でパスを作る関数） */
 export function bodyK(ctx, key, col, x, y, w, h, pathFn, o) {
   const lw = (o && o.lw) || 2;
-  cpart(ctx, key + col, x, y, w, h, lw + 2 + Math.min(w, h) * 0.05, (c) => { c.beginPath(); pathFn(c); body(c, col, x, y, w, h, o); });
+  cpart(ctx, key, x, y, w, h, lw + 2 + Math.min(w, h) * 0.05, (c) => { c.beginPath(); pathFn(c); body(c, col, x, y, w, h, o); }, col);
 }
 export function metalK(ctx, key, col, x, y, w, h, pathFn, lw = 2, vertical = true) {
-  cpart(ctx, key + col, x, y, w, h, lw + 1.5, (c) => { c.beginPath(); pathFn(c); metal(c, col, x, y, w, h, lw, vertical); });
+  cpart(ctx, key, x, y, w, h, lw + 1.5, (c) => { c.beginPath(); pathFn(c); metal(c, col, x, y, w, h, lw, vertical); }, col);
 }
 export function partK(ctx, key, col, x, y, w, h, pathFn, lw = 1.6) {
-  cpart(ctx, key + col, x, y, w, h, lw + 1.5, (c) => { c.beginPath(); pathFn(c); part(c, col, x, y, w, h, lw); });
+  cpart(ctx, key, x, y, w, h, lw + 1.5, (c) => { c.beginPath(); pathFn(c); part(c, col, x, y, w, h, lw); }, col);
 }
 
 /** body の軽量版（小パーツ用）: 単色＋下側影1段＋線 */
@@ -228,14 +234,23 @@ export function metal(ctx, col, x, y, w, h, lw = 2, vertical = true) {
 }
 
 /** 接地影（二重楕円） */
-const shCache = new Map();
+let shSpr = null;
 export function groundShadow(ctx, x, y, rx, a = 0.3) {
-  let c = shCache.get(a);
-  if (!c) { c = [`rgba(20,0,30,${a * 0.55})`, `rgba(20,0,30,${a})`]; shCache.set(a, c); }
-  ctx.fillStyle = c[0];
-  ctx.beginPath(); ctx.ellipse(x, y, rx * 1.15, 3 + rx * 0.09, 0, 0, PI * 2); ctx.fill();
-  ctx.fillStyle = c[1];
-  ctx.beginPath(); ctx.ellipse(x, y, rx * 0.72, 2 + rx * 0.06, 0, 0, PI * 2); ctx.fill();
+  if (!shSpr) {
+    shSpr = mkCanvas(128, 32);
+    if (shSpr) {
+      const c = shSpr.getContext('2d');
+      c.fillStyle = 'rgba(20,0,30,0.55)'; c.beginPath(); c.ellipse(64, 16, 62, 14, 0, 0, PI * 2); c.fill();
+      c.fillStyle = 'rgba(20,0,30,1)'; c.beginPath(); c.ellipse(64, 16, 39, 9.5, 0, 0, PI * 2); c.fill();
+    }
+  }
+  const ry = 3 + rx * 0.09, w = rx * 1.15;
+  if (shSpr) {
+    const pa = ctx.globalAlpha; ctx.globalAlpha = pa * a;
+    ctx.drawImage(shSpr, x - w * 64 / 62, y - ry * 16 / 14, w * 128 / 62, ry * 32 / 14);
+    ctx.globalAlpha = pa; return;
+  }
+  ctx.fillStyle = 'rgba(20,0,30,0.2)'; ctx.beginPath(); ctx.ellipse(x, y, w, ry, 0, 0, PI * 2); ctx.fill();
 }
 
 // ---------------------------------------------------------------- 目・表情
@@ -268,11 +283,11 @@ export function cuteEyes(ctx, x, y, r, gap, col, st, t, sleepy) {
   if (!blink) {
     // 開いた目はスプライト化（形は状態ごとに一定）。目の中心を原点に描いて平行移動
     const rr_ = r4(r), gg = r4(gap), ang = POSE.rage > 0 ? 1 : 0;
-    const key = 'eye' + col + rr_ + '|' + gg + (wind ? 'w' : '') + (ang ? 'r' : '') + (sleepy ? 's' : '');
+    const k2 = rr_ * 1000 + gg * 4 + (wind ? 0.1 : 0) + (ang ? 0.2 : 0) + (sleepy ? 0.4 : 0);
     const ex = gg + rr_ * 1.9, top = rr_ * 2.4;
-    ctx.save(); ctx.translate(x, y);
-    cpart(ctx, key, -ex, -top, ex * 2, top + rr_ * 1.7, 1, (c) => openEyes(c, 0, 0, rr_, gg, col, wind, ang, sleepy));
-    ctx.restore();
+    ctx.translate(x, y);
+    cpart(ctx, col, -ex, -top, ex * 2, top + rr_ * 1.7, 1, (c) => openEyes(c, 0, 0, rr_, gg, col, wind, ang, sleepy), k2);
+    ctx.translate(-x, -y);
   } else openEyes(ctx, x, y, r, gap, col, wind, POSE.rage > 0, sleepy, true);
   // ため中の汗
   if (POSE.windup > 0 && !FL) {
@@ -377,12 +392,21 @@ export function fierceEye(ctx, x, y, r, col, st, t, slit = true, ang = 0) {
   ctx.restore();
 }
 
+let blushSpr = null;
 export function blush(ctx, x, y, rx) {
   if (FL) return;
+  if (!blushSpr) {
+    blushSpr = mkCanvas(64, 32);
+    if (blushSpr) {
+      const c = blushSpr.getContext('2d'); c.translate(32, 16); c.scale(28, 28);
+      c.fillStyle = 'rgba(255,110,150,0.5)'; c.beginPath(); c.ellipse(0, 0, 1, 0.5, 0, 0, PI * 2); c.fill();
+      c.strokeStyle = 'rgba(255,255,255,0.55)'; c.lineWidth = 0.2; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(-0.45, 0.15); c.lineTo(-0.2, -0.25); c.moveTo(0.05, 0.15); c.lineTo(0.3, -0.25); c.stroke();
+    }
+  }
+  if (blushSpr) { ctx.drawImage(blushSpr, x - rx * 32 / 28, y - rx * 16 / 28, rx * 64 / 28, rx * 32 / 28); return; }
   ctx.fillStyle = 'rgba(255,110,150,0.5)';
   ctx.beginPath(); ctx.ellipse(x, y, rx, rx * 0.5, 0, 0, PI * 2); ctx.fill();
-  ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = Math.max(0.6, rx * 0.22);
-  ctx.beginPath(); ctx.moveTo(x - rx * 0.45, y + rx * 0.15); ctx.lineTo(x - rx * 0.2, y - rx * 0.25); ctx.moveTo(x + rx * 0.05, y + rx * 0.15); ctx.lineTo(x + rx * 0.3, y - rx * 0.25); ctx.stroke();
 }
 
 /** 小さな口: 'smile' | 'open' | 'cat' | 'flat' | 'grit'（食いしばり） | 'wave'（波線） */
@@ -421,7 +445,7 @@ const glowCache = new Map();
 const GLOW_MAX = 48;
 function glowSprite(col) {
   let c = glowCache.get(col);
-  if (c) { glowCache.delete(col); glowCache.set(col, c); return c; }
+  if (c) return c;
   if (typeof document === 'undefined' && typeof OffscreenCanvas === 'undefined') return null;
   c = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(64, 64) : document.createElement('canvas');
   c.width = 64; c.height = 64;
@@ -436,14 +460,11 @@ function glowSprite(col) {
 export function glow(ctx, x, y, r, col, a) {
   if (FL || r <= 0 || a <= 0) return;
   const spr = glowSprite(col);
-  ctx.save(); ctx.globalCompositeOperation = 'lighter';
-  if (spr) { ctx.globalAlpha *= Math.min(1, a); ctx.drawImage(spr, x - r, y - r, r * 2, r * 2); }
-  else {
-    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-    g.addColorStop(0, rgba(col, a)); g.addColorStop(1, rgba(col, 0));
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, PI * 2); ctx.fill();
-  }
-  ctx.restore();
+  if (!spr) return;
+  const pa = ctx.globalAlpha, pc = ctx.globalCompositeOperation;
+  ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = pa * Math.min(1, a);
+  ctx.drawImage(spr, x - r, y - r, r * 2, r * 2);
+  ctx.globalAlpha = pa; ctx.globalCompositeOperation = pc;
 }
 
 /** キラッ（4方向の星） */
