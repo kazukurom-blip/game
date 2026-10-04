@@ -7,6 +7,7 @@ import { MAX_SLOTS } from '../systems/inventory.js';
 import { spawnEffect } from '../render/effects.js';
 import { RARITY } from '../systems/loot.js';
 import { sysFn } from '../world/sys.js';
+import { petData, petLevelFromAff } from '../systems/petSkills.js';
 
 const FLYING = new Set(['dronePet', 'ghostPet', 'alienPet', 'dragonPet', 'dolphinPet', 'flamingoPet']);
 const WARP_DIST = 640;
@@ -181,7 +182,10 @@ export class Pet {
     const g = this.game;
     if (this._drawT === g.time) return;
     this._drawT = g.time;
-    const anim = { facing: this.facing, t: this.t, state: this.pickAnim > 0 ? 'pick' : this.state, moving: this.state === 'move', flying: this.flying };
+    // 親密度Lv（1〜30）: 10/20/30 で小物が付く
+    let affection = 0;
+    try { const d = petData(g.state, this.itemId); if (d) affection = petLevelFromAff(d.aff); } catch { /* ignore */ }
+    const anim = { facing: this.facing, t: this.t, state: this.pickAnim > 0 ? 'pick' : this.state, moving: this.state === 'move', flying: this.flying, affection };
     drawPet(ctx, this.x, this.y, this.look, anim);
     // 名前（足元に小さく）
     ctx.save();

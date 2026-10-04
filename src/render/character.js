@@ -322,7 +322,7 @@ function om(w, rate) { return Math.max(1, Math.round(rate / w)) * w; }
 
 // 状態ごとのループ（秒, キャッシュのフレーム数）。null はキャッシュしない（その場で描画）
 const LOOPS = {
-  idle: [LOOP, 40], walk: [0.6, 10], jump: [1.2, 8], climb: [0.9, 8], sit: [LOOP, 24], drive: [LOOP, 24], cheer: [1.2, 12],
+  idle: [LOOP, 24], walk: [0.6, 10], jump: [1.2, 8], climb: [0.9, 8], sit: [LOOP, 24], drive: [LOOP, 24], cheer: [1.2, 12],
 };
 
 function makePose(state, t, at, wk, ws, anim, w, f) {
@@ -497,14 +497,19 @@ export function lastHeroEquip(look) { return LAST_EQUIP.get(look) || null; }
 let OFF = null, OFFCTX = null;
 
 // ---- フレームキャッシュ（2x のオフスクリーン、LRU、総画素数で上限）
+//  キー: 状態＋フレーム番号（時間/攻撃進捗を量子化）＋ダメージ段階＋解像度＋flash/panic/表情＋look/装備の中身。
+//  向き（facing）は描画時に左右反転するのでキーに含めない。半透明（alpha）は drawImage 時に掛けるので重なりも透けない。
+//  加算合成のエフェクト（斬撃の軌跡・ホロ画面）はキャッシュに入れず、毎フレーム上から描く。
 const SS = 2;                               // スーパーサンプリング倍率
 const CACHE = new Map();
 let cachePx = 0;
-const CACHE_BUDGET = 9e6;                   // 総画素数の上限（約36MB）
+const CACHE_BUDGET = 16e6;                  // 総画素数の上限（約64MB）
 const POOL = [];
 let buildWin = 0, builds = 0;
-const BOX_L = 62, BOX_R = 66, BOX_T = 116, BOX_B = 14; // ローカル座標のキャッシュ範囲
+const MAX_BUILDS = 8;                       // 1フレームあたりの新規キャッシュ作成数（超えたらその場で描く）
 const HAS_CANVAS = typeof OffscreenCanvas !== 'undefined' || typeof document !== 'undefined';
+// 攻撃系の量子化（attackT を n 段）、被弾（t を 0.05s 刻みで 6 段）
+const QUANT = { attack: 16, shoot: 12, hurt: 6 };
 function newCanvas(w, h) {
   for (let i = 0; i < POOL.length; i++) {
     const c = POOL[i];
@@ -514,20 +519,44 @@ function newCanvas(w, h) {
   const c = document.createElement('canvas'); c.width = w; c.height = h; return c;
 }
 function lookSig(l) {
-  return (l.body || '') + (l.skin || '') + (l.hair || '') + (l.hairColor || '') + (l.eyeColor || '') + (l.expr || '') + (l.hairShadow || '') + (l.hairHi || '') + (l.hairTip || '') + (l.tie || '') + (l.mesh || '') + (l.rim || '');
+  return (l.body || '') + (l.skin || '') + (l.hair || '') + (l.hairColor || '') + (l.eyeColor || '') + (l.expr || '') + (l.hairShadow || '') + (l.hairHi || '') + (l.hairTip || '') + (l.tie || '') + (l.mesh || '') + (l.rim || '') + (l.villain ? 'V' : '');
 }
+const EQK = ['hat', 'top', 'bottom', 'shoes', 'weapon', 'accessory'];
 function eqSig(e) {
   let s = '';
-  for (const k of ['hat', 'top', 'bottom', 'shoes', 'weapon', 'accessory']) {
-    const v = e[k];
+  for (let i = 0; i < 6; i++) {
+    const v = e[EQK[i]];
     s += v ? (v.style || '') + (v.color || '') + (v.accent || '') + (v.rarity != null ? v.rarity : rarityOf(v)) + ',' : ',';
   }
   return s;
 }
+/** 装備からキャッシュ範囲（ローカル座標, scale 1）を見積もる */
+function boxOf(equip, look, state) {
+  let L = 34, R = 36, T = 98, Bm = 8;
+  const hs = look.hair;
+  if (hs === 'twin' || hs === 'ponytail' || hs === 'braid' || hs === 'long' || hs === 'wolf' || hs === 'curly') L = 40;
+  const acc = equip.accessory && equip.accessory.style;
+  if (acc === 'wings') L = 46;
+  if (acc === 'halo' || acc === 'wings') T = 104;
+  if (acc === 'scarf') L = Math.max(L, 40);
+  const hat = equip.hat && equip.hat.style;
+  if (hat === 'crown' || hat === 'cowboy' || hat === 'catEars') T = Math.max(T, 104);
+  if (hat === 'cowboy') { L = Math.max(L, 36); R = Math.max(R, 38); }
+  const ws = equip.weapon && equip.weapon.style;
+  if (ws) {
+    const long = ws === 'staff' || ws === 'neonSword' || ws === 'katana' || ws === 'guitar';
+    R = long ? 64 : ws === 'bat' ? 56 : 46;
+    if (state === 'attack' || state === 'hurt') { T = Math.max(T, long ? 112 : 104); L = Math.max(L, long ? 46 : 40); }
+  }
+  if (state === 'hurt') L = Math.max(L, 42);
+  if (state === 'climb') T = Math.max(T, 104);
+  return [L, R, T, Bm];
+}
 function dmgStage(d) { return d >= 0.9 ? 7 : d >= 0.85 ? 6 : d >= 0.75 ? 5 : d >= 0.7 ? 4 : d >= 0.6 ? 3 : d >= 0.5 ? 2 : d >= 0.25 ? 1 : 0; }
 const DMG_REP = [0, 0.3, 0.55, 0.65, 0.72, 0.8, 0.87, 0.95];
 /** テスト・デバッグ用: キャッシュの状態 */
-export function characterCacheStats() { return { entries: CACHE.size, px: cachePx, budget: CACHE_BUDGET }; }
+const CSTAT = { hit: 0, build: 0, direct: 0 };
+export function characterCacheStats() { return { entries: CACHE.size, px: cachePx, budget: CACHE_BUDGET, ...CSTAT }; }
 export function clearCharacterCache() { CACHE.clear(); cachePx = 0; POOL.length = 0; }
 
 export function drawCharacter(ctx, x, y, look, equip, anim) {
@@ -546,41 +575,53 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
   const s = A.scale || 1;
   const facing = A.facing < 0 ? -1 : 1;
   const auraT = A.aura && state !== 'drive' && state !== 'dead' ? clamp(A.auraTier || 1, 1, 4) | 0 : 0;
-  const lp = LOOPS[state];
+  const vil = !!(look.villain || A.villain || (A.deadT !== undefined && !look.expr));
+  const lp = LOOPS[state], qn = QUANT[state];
   // ---- キャッシュ経路
-  if (lp && HAS_CANVAS && !A.noCache && ctx.getTransform) {
+  if ((lp || qn) && HAS_CANVAS && !A.noCache && ctx.getTransform) {
     const m = ctx.getTransform();
     const k = Math.hypot(m.a, m.b);
     const kq = Math.max(0.5, Math.round(k * s * 8) / 8);
     const ss = kq <= 1.6 ? SS : kq <= 3.2 ? 1 : 0;
     if (ss) {
       const R = kq * ss;
-      const tq = (((A.t || 0) % lp[0]) + lp[0]) % lp[0];
-      const fi = Math.floor(tq / lp[0] * lp[1]) % lp[1];
+      let fi, repT, repAT = 0;
+      if (lp) {
+        const tq = (((A.t || 0) % lp[0]) + lp[0]) % lp[0];
+        fi = Math.floor(tq / lp[0] * lp[1]) % lp[1];
+        repT = (fi + 0.5) / lp[1] * lp[0];
+      } else if (state === 'hurt') {
+        fi = Math.min(qn - 1, Math.floor(Math.max(0, A.t || 0) / 0.05));
+        repT = (fi + 0.5) * 0.05;
+      } else {
+        fi = Math.min(qn - 1, Math.floor(clamp(A.attackT || 0, 0, 1) * qn));
+        repAT = (fi + 0.5) / qn; repT = 0;
+      }
       const dmg = clamp(A.damage || 0, 0, 1);
       const ds = dmgStage(dmg);
-      const key = state + fi + '|' + ds + '|' + R + '|' + (A.flash ? 1 : 0) + (A.panic ? 1 : 0) + (A.face || '') + (A.rim || '') + '|' + lookSig(look) + '|' + eqSig(equip);
+      const key = state + fi + '|' + ds + '|' + R + '|' + (A.flash ? 1 : 0) + (A.panic ? 1 : 0) + (vil ? 1 : 0) + (A.face || '') + (A.rim || '') + '|' + lookSig(look) + '|' + eqSig(equip);
       let ent = CACHE.get(key);
-      if (ent) { CACHE.delete(key); CACHE.set(key, ent); }
+      if (ent) { CACHE.delete(key); CACHE.set(key, ent); CSTAT.hit++; }
       else {
         const now = typeof performance !== 'undefined' ? performance.now() : 0;
         if (now - buildWin > 12) { buildWin = now; builds = 0; }
-        if (builds < 14) {
-          builds++;
-          const w = Math.ceil((BOX_L + BOX_R) * R), h = Math.ceil((BOX_T + BOX_B) * R);
+        if (builds < MAX_BUILDS) {
+          builds++; CSTAT.build++;
+          const bx = boxOf(equip, look, state);
+          const w = Math.ceil((bx[0] + bx[1]) * R), h = Math.ceil((bx[2] + bx[3]) * R);
           const cv = newCanvas(w, h);
           const oc = cv.getContext('2d');
           if (oc) {
             oc.setTransform(1, 0, 0, 1, 0, 0); oc.clearRect(0, 0, w, h);
-            oc.setTransform(R, 0, 0, R, BOX_L * R, BOX_T * R);
-            const a2 = { state: A.state, t: (fi + 0.5) / lp[1] * lp[0], attackT: A.attackT, damage: DMG_REP[ds], flash: A.flash, panic: A.panic, face: A.face, rim: A.rim, facing: 1, scale: 1 };
-            renderChar(oc, look, equip, a2, state, ws, wk, 0);
-            ent = { cv, w, h, R };
+            oc.setTransform(R, 0, 0, R, bx[0] * R, bx[2] * R);
+            const a2 = { state: A.state, t: repT, attackT: repAT, damage: DMG_REP[ds], flash: A.flash, panic: A.panic, face: A.face, rim: A.rim, villain: vil, facing: 1, scale: 1, noFx: true };
+            renderChar(oc, look, equip, a2, state, ws, wk);
+            ent = { cv, w, h, R, ox: bx[0] * R, oy: bx[2] * R, repT, repAT };
             CACHE.set(key, ent); cachePx += w * h;
             while (cachePx > CACHE_BUDGET && CACHE.size > 1) {
               const [k0, e0] = CACHE.entries().next().value;
               CACHE.delete(k0); cachePx -= e0.w * e0.h;
-              if (POOL.length < 12) POOL.push(e0.cv);
+              if (POOL.length < 16) POOL.push(e0.cv);
             }
           }
         }
@@ -590,15 +631,24 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
         ctx.save();
         ctx.translate(x, y);
         if (alpha < 1) ctx.globalAlpha *= alpha;
-        const inv = 1 / (ent.R / s);
+        const inv = s / ent.R;
         ctx.scale(facing * inv, inv);
-        ctx.drawImage(ent.cv, -BOX_L * ent.R, -BOX_T * ent.R);
+        ctx.drawImage(ent.cv, -ent.ox, -ent.oy);
         ctx.restore();
+        // 加算合成のエフェクトはライブで重ねる
+        if ((state === 'attack' && wk !== 'none') || wk === 'magic') {
+          ctx.save(); ctx.translate(x, y); ctx.scale(facing * s, s);
+          if (alpha < 1) ctx.globalAlpha *= alpha;
+          liveFx(ctx, look, equip, A, state, ws, wk, ent.repT, ent.repAT);
+          ctx.restore();
+        }
         if (auraT >= 2) { ctx.save(); ctx.translate(x, y); drawAuraFront(ctx, A.aura, auraT, A.t || 0, s); ctx.restore(); }
         return;
       }
     }
   }
+  CSTAT.direct++;
+  const A2 = vil && !A.villain ? Object.assign({}, A, { villain: true }) : A;
   // ---- 直接描画（半透明時は一度オフスクリーンに描いて合成）
   if (alpha < 0.999 && HAS_CANVAS && ctx.getTransform) {
     const m = ctx.getTransform();
@@ -615,7 +665,7 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
     oc.setTransform(k, 0, 0, k, w / 2, h * 0.72);
     if (auraT) drawAuraBack(oc, A.aura, auraT, A.t || 0, s);
     oc.scale(facing * s, s);
-    renderChar(oc, look, equip, A, state, ws, wk, 1);
+    renderChar(oc, look, equip, A2, state, ws, wk);
     oc.setTransform(k, 0, 0, k, w / 2, h * 0.72);
     if (auraT >= 2) drawAuraFront(oc, A.aura, auraT, A.t || 0, s);
     ctx.save();
@@ -630,13 +680,33 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
   ctx.translate(x, y);
   if (auraT) drawAuraBack(ctx, A.aura, auraT, A.t || 0, s);
   ctx.scale(facing * s, s);
-  renderChar(ctx, look, equip, A, state, ws, wk, 1);
+  renderChar(ctx, look, equip, A2, state, ws, wk);
   ctx.restore();
   if (auraT >= 2) { ctx.save(); ctx.translate(x, y); drawAuraFront(ctx, A.aura, auraT, A.t || 0, s); ctx.restore(); }
 }
 
+/** キャッシュ描画時の加算エフェクト（斬撃の軌跡・ホロ画面）だけを描く */
+function liveFx(ctx, look, equip, anim, state, ws, wk, repT, repAT) {
+  const f = look.body === 'f';
+  const B = f ? BODY.f : BODY.m;
+  const lp = LOOPS[state];
+  const w = TAU / (lp ? lp[0] : LOOP);
+  const at = state === 'attack' || state === 'shoot' ? repAT : clamp(anim.attackT || 0, 0, 1);
+  const P = makePose(state, repT, at, wk, ws, anim, w, f);
+  if (P.back || (!P.swoosh && wk !== 'magic')) return;
+  P.hipY += B.hipY;
+  const K = { P, B, eq: equip, ws, wk, state, at, t: anim.t || 0, w, f };
+  FL = !!anim.flash;
+  ctx.translate(P.hx, P.hipY + P.bob);
+  ctx.rotate(P.tilt);
+  const sxF = B.sx - 0.4 + P.twist * 0.5;
+  if (P.swoosh) drawSwoosh(ctx, K, sxF, SHOULDER_Y + 0.5);
+  if (wk === 'magic' && !FL) drawHoloPanel(ctx, K);
+  FL = false;
+}
+
 /** 原点=足元・向き=右・scale 1 の座標系で描く */
-function renderChar(ctx, look, equip, anim, state, ws, wk, liveT) {
+function renderChar(ctx, look, equip, anim, state, ws, wk) {
   const lp = LOOPS[state];
   const w = TAU / (lp ? lp[0] : LOOP);
   const t = anim.t || 0;
@@ -647,7 +717,7 @@ function renderChar(ctx, look, equip, anim, state, ws, wk, liveT) {
   const dmg = clamp(anim.damage || 0, 0, 1);
   const cool = look.expr === 'cool' || (!look.expr && look.body === 'm');
   // 悪役（敵の人型: enemyArt は deadT を渡し、look.expr を持たない）→ 目つき鋭く
-  const vil = !!(look.villain || anim.villain || (anim.deadT !== undefined && !look.expr));
+  const vil = !!anim.villain;
   const K = {
     look, eq: equip, dmg, t, P, ws, wk, state, at, f, B, cool, w, anim, vil,
     skin: look.skin || '#ffe0cc',
@@ -819,8 +889,10 @@ function drawFrontView(ctx, K) {
   ctx.restore();
   // ---- 前腕＋武器
   drawArm(ctx, K, true, sxF, SHOULDER_Y + 0.6, P.af[0], P.af[1]);
-  if (P.swoosh) drawSwoosh(ctx, K, sxF, SHOULDER_Y + 0.5);
-  if (K.wk === 'magic' && !FL) drawHoloPanel(ctx, K);
+  if (!K.anim.noFx) {
+    if (P.swoosh) drawSwoosh(ctx, K, sxF, SHOULDER_Y + 0.5);
+    if (K.wk === 'magic' && !FL) drawHoloPanel(ctx, K);
+  }
   ctx.restore();
 }
 
@@ -1808,7 +1880,7 @@ function drawEyes(ctx, K) {
   let mode = P.eyes;
   if ((mode === 'n' || mode === 'tired') && (K.state === 'idle' || K.state === 'sit')) {
     const ph = ((K.t % LOOP) + LOOP) % LOOP;
-    if (ph > 3.9 && ph < 4.02 + 0.02) mode = 'blink';
+    if (ph >= 3.82 && ph < 4.0) mode = 'blink';
   }
   const f = K.f;
   const w = 4.6, h = K.cool ? (f ? 5.7 : 5.1) : (f ? 6.3 : 5.7);

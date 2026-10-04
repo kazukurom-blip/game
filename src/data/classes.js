@@ -41,16 +41,16 @@ export const GENDERS = ['f', 'm'];
 
 export const DEFAULT_LOOKS = {
   luna: {
-    f: { body: 'f', skin: '#ffe0cc', hair: 'twin', hairColor: '#ff6fb5', eyeColor: '#ff3d8b', expr: 'cute', hairShadow: '#c83c8a', hairHi: '#ffc2e2', hairTip: '#b47cff', tie: '#ffd23f' },
-    m: { body: 'm', skin: '#ffe0cc', hair: 'short', hairColor: '#ff6fb5', eyeColor: '#ff3d8b', expr: 'cute', hairShadow: '#c83c8a', hairHi: '#ffc2e2' },
+    f: { body: 'f', skin: '#ffe3d3', hair: 'twin', hairColor: '#ff6fb5', eyeColor: '#ff3d8b', expr: 'cute', hairShadow: '#c8458f', hairHi: '#ffd0ea', hairTip: '#b47cff', tie: '#ffd23f', rim: '#8ff4ff' },
+    m: { body: 'm', skin: '#fbdcc6', hair: 'short', hairColor: '#ff5fa8', eyeColor: '#ff3d8b', expr: 'cute', hairShadow: '#b8337e', hairHi: '#ffc6e4', rim: '#8ff4ff' },
   },
   jin: {
-    f: { body: 'f', skin: '#f6d5be', hair: 'ponytail', hairColor: '#d9dee8', eyeColor: '#33c7e6', expr: 'cool', hairShadow: '#8e97ad', hairHi: '#ffffff', mesh: '#3ee6d2' },
-    m: { body: 'm', skin: '#f6d5be', hair: 'wolf', hairColor: '#d9dee8', eyeColor: '#33c7e6', expr: 'cool', hairShadow: '#8e97ad', hairHi: '#ffffff', mesh: '#3ee6d2' },
+    f: { body: 'f', skin: '#f8dac6', hair: 'ponytail', hairColor: '#e2e7f2', eyeColor: '#33c7e6', expr: 'cool', hairShadow: '#8790ab', hairHi: '#ffffff', mesh: '#3ee6d2', tie: '#ff4f8b', rim: '#d0a8ff' },
+    m: { body: 'm', skin: '#f2cfb6', hair: 'wolf', hairColor: '#dde3ee', eyeColor: '#2fb8e8', expr: 'cool', hairShadow: '#7d86a3', hairHi: '#ffffff', mesh: '#3ee6d2', rim: '#d0a8ff' },
   },
   hacker: {
-    f: { body: 'f', skin: '#e8c4a8', hair: 'bob', hairColor: '#3dff8a', eyeColor: '#19f0ff', expr: 'cool', hairShadow: '#1f9e58', hairHi: '#b6ffd2' },
-    m: { body: 'm', skin: '#e8c4a8', hair: 'spiky', hairColor: '#3dff8a', eyeColor: '#19f0ff', expr: 'cool', hairShadow: '#1f9e58', hairHi: '#b6ffd2' },
+    f: { body: 'f', skin: '#f0d2bc', hair: 'bob', hairColor: '#3dff8a', eyeColor: '#19f0ff', expr: 'cool', hairShadow: '#14a06a', hairHi: '#d4ffe6', rim: '#ff8ae0' },
+    m: { body: 'm', skin: '#e8c6aa', hair: 'spiky', hairColor: '#36f08a', eyeColor: '#19f0ff', expr: 'cool', hairShadow: '#12925e', hairHi: '#c8ffdf', rim: '#ff8ae0' },
   },
 };
 

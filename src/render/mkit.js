@@ -26,6 +26,40 @@ export function setEnv(night, accent) {
 export const POSE = { windup: 0, rage: 0, boss: false };
 export function setPose(windup, rage, boss) { POSE.windup = windup || 0; POSE.rage = rage || 0; POSE.boss = !!boss; }
 
+// ---------------------------------------------------------------- パーツ単位のスプライトキャッシュ
+// 形が時間で変わらない重いパーツ（開いた目・甲羅・胴など）を 2x のオフスクリーンへ一度だけ描き、
+// 以後は現在の変換（移動・回転・伸縮・左右反転）のまま drawImage する。フレーム単位ではないのでアニメは滑らか。
+// キーには フラッシュ/夜/解像度 を含む。件数上限つき（古い順に破棄）。
+export const PC = { on: true, res: 2, max: 360, hits: 0, misses: 0 };
+const partCache = new Map();
+function mkCanvas(w, h) {
+  if (typeof document !== 'undefined') { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+  if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(w, h);
+  return null;
+}
+/** key: パーツ識別子, (x,y,w,h): ローカル座標の範囲, pad: 余白, fn(c): c に描く関数（ローカル座標） */
+export function cpart(ctx, key, x, y, w, h, pad, fn) {
+  if (!PC.on) { fn(ctx); return; }
+  const R = PC.res;
+  const k = key + (FL ? '|F' : '') + (ENV.night > 0.5 ? '|N' : '') + '|' + R;
+  let sp = partCache.get(k);
+  if (!sp) {
+    const cw = Math.ceil((w + pad * 2) * R), ch = Math.ceil((h + pad * 2) * R);
+    const cv = cw > 0 && ch > 0 && cw * ch < 4e6 ? mkCanvas(cw, ch) : null;
+    if (!cv) { fn(ctx); return; }
+    const c = cv.getContext('2d');
+    c.setTransform(R, 0, 0, R, (pad - x) * R, (pad - y) * R);
+    c.lineJoin = 'round'; c.lineCap = 'round';
+    fn(c);
+    sp = { cv, x: x - pad, y: y - pad, w: cw / R, h: ch / R };
+    if (partCache.size >= PC.max) partCache.delete(partCache.keys().next().value);
+    partCache.set(k, sp);
+    PC.misses++;
+  } else PC.hits++;
+  ctx.drawImage(sp.cv, sp.x, sp.y, sp.w, sp.h);
+}
+const r4 = (v) => Math.round(v * 4) / 4;
+
 // ---------------------------------------------------------------- 色補正
 const hexRe = /^#([0-9a-f]{6})$/i;
 function toHsl(col) {
@@ -47,14 +81,19 @@ function fromHsl(h, s, l) {
   return '#' + hx(r) + hx(g) + hx(b);
 }
 const toneCache = new Map();
-function cached(key, fn) {
-  let r = toneCache.get(key);
-  if (r === undefined) { r = fn(); if (toneCache.size > 3000) toneCache.clear(); toneCache.set(key, r); }
+let toneN = 0;
+/** 2段 Map のメモ（文字列連結なし）: kind → col → amt */
+function memo(kind, col, amt, fn) {
+  let m = toneCache.get(col);
+  if (!m) { if (toneN > 2500) { toneCache.clear(); toneN = 0; } m = new Map(); toneCache.set(col, m); }
+  const k = kind + amt;
+  let r = m.get(k);
+  if (r === undefined) { r = fn(); m.set(k, r); toneN++; }
   return r;
 }
 /** 体色の補正: 彩度/明度を「濁らない」範囲へ（グレー系はそのまま少しだけ寒色へ） */
 export function tone(col) {
-  return cached('t' + col, () => {
+  return memo(0, col, 0, () => {
     const p = toHsl(col); if (!p) return col;
     let [h, s, l] = p;
     if (s < 0.12) return fromHsl(h || 250, Math.max(s, 0.08), Math.min(0.86, Math.max(0.3, l)));
@@ -67,7 +106,7 @@ export function tone(col) {
 }
 /** 影色: 黒を混ぜず「明度↓＋色相を紫へ寄せる＋彩度↑」で濁りを防ぐ。amt 0..1 */
 export function shadow(col, amt = 0.2) {
-  return cached('s' + col + amt, () => {
+  return memo(1, col, amt, () => {
     const p = toHsl(col); if (!p) return col;
     let [h, s, l] = p;
     const tgt = 275; let dh = tgt - h; if (dh > 180) dh -= 360; if (dh < -180) dh += 360;
@@ -77,7 +116,7 @@ export function shadow(col, amt = 0.2) {
 }
 /** ハイライト色: 明度↑＋色相を黄へ少し寄せる */
 export function light(col, amt = 0.25) {
-  return cached('l' + col + amt, () => {
+  return memo(3, col, amt, () => {
     const p = toHsl(col); if (!p) return col;
     let [h, s, l] = p;
     const tgt = 55; let dh = tgt - h; if (dh > 180) dh -= 360; if (dh < -180) dh += 360;
@@ -87,7 +126,7 @@ export function light(col, amt = 0.25) {
 }
 /** 色相回転（第2形態の色変化など） */
 export function hue(col, deg, ds = 0, dl = 0) {
-  return cached('h' + col + deg + ds + dl, () => {
+  return memo(5, col, deg * 7 + ds * 13 + dl * 17, () => {
     const p = toHsl(col); if (!p) return col;
     return fromHsl(p[0] + deg, p[1] + ds, p[2] + dl);
   });
@@ -159,6 +198,18 @@ export function linGrad(ctx, x0, y0, x1, y1, stops, key) {
   return g;
 }
 
+/** 形が一定のパーツを body() で塗ってキャッシュ（pathFn(c) はローカル座標でパスを作る関数） */
+export function bodyK(ctx, key, col, x, y, w, h, pathFn, o) {
+  const lw = (o && o.lw) || 2;
+  cpart(ctx, key + col, x, y, w, h, lw + 2 + Math.min(w, h) * 0.05, (c) => { c.beginPath(); pathFn(c); body(c, col, x, y, w, h, o); });
+}
+export function metalK(ctx, key, col, x, y, w, h, pathFn, lw = 2, vertical = true) {
+  cpart(ctx, key + col, x, y, w, h, lw + 1.5, (c) => { c.beginPath(); pathFn(c); metal(c, col, x, y, w, h, lw, vertical); });
+}
+export function partK(ctx, key, col, x, y, w, h, pathFn, lw = 1.6) {
+  cpart(ctx, key + col, x, y, w, h, lw + 1.5, (c) => { c.beginPath(); pathFn(c); part(c, col, x, y, w, h, lw); });
+}
+
 /** body の軽量版（小パーツ用）: 単色＋下側影1段＋線 */
 export function part(ctx, col, x, y, w, h, lw = 1.6) {
   if (FL) { ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.strokeStyle = OC(); ctx.lineWidth = lw; ctx.stroke(); return; }
@@ -177,10 +228,13 @@ export function metal(ctx, col, x, y, w, h, lw = 2, vertical = true) {
 }
 
 /** 接地影（二重楕円） */
+const shCache = new Map();
 export function groundShadow(ctx, x, y, rx, a = 0.3) {
-  ctx.fillStyle = `rgba(20,0,30,${a * 0.55})`;
+  let c = shCache.get(a);
+  if (!c) { c = [`rgba(20,0,30,${a * 0.55})`, `rgba(20,0,30,${a})`]; shCache.set(a, c); }
+  ctx.fillStyle = c[0];
   ctx.beginPath(); ctx.ellipse(x, y, rx * 1.15, 3 + rx * 0.09, 0, 0, PI * 2); ctx.fill();
-  ctx.fillStyle = `rgba(20,0,30,${a})`;
+  ctx.fillStyle = c[1];
   ctx.beginPath(); ctx.ellipse(x, y, rx * 0.72, 2 + rx * 0.06, 0, 0, PI * 2); ctx.fill();
 }
 
@@ -211,53 +265,95 @@ export function cuteEyes(ctx, x, y, r, gap, col, st, t, sleepy) {
   }
   const wind = POSE.windup > 0 || st === 'attack';
   const blink = !wind && ((t * 0.97 + x * 0.013) % 4.2) < 0.13;
-  const eyes = gap > 0.5 ? [x - gap, x + gap] : [x];
-  for (let i = 0; i < eyes.length; i++) {
-    const cx = eyes[i];
-    if (blink) {
-      ctx.strokeStyle = OC(); ctx.lineWidth = Math.max(1.4, r * 0.4); ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(cx - r, y); ctx.quadraticCurveTo(cx, y + r * 0.7, cx + r, y); ctx.stroke();
-      continue;
-    }
-    const ry = wind ? r * 0.85 : r * 1.2;
-    const rx = r * 0.92;
-    const ey = wind ? y + r * 0.15 : y;
-    // 外形（濃い縁＝線の強弱の代わり）
-    ctx.beginPath(); ctx.ellipse(cx, ey, rx + r * 0.16, ry + r * 0.16, 0, 0, PI * 2); ctx.fillStyle = OC(); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(cx, ey, rx, ry, 0, 0, PI * 2);
-    if (FL) ctx.fillStyle = '#fff';
-    else { const g = ctx.createLinearGradient(0, ey - ry, 0, ey + ry); g.addColorStop(0, '#1a0f24'); g.addColorStop(0.45, shadow(col, 0.2)); g.addColorStop(1, light(col, 0.45)); ctx.fillStyle = g; }
-    ctx.fill();
-    if (!FL) {
-      // 瞳孔
-      ctx.fillStyle = 'rgba(16,6,26,0.75)'; ctx.beginPath(); ctx.ellipse(cx + r * 0.05, ey - ry * 0.05, rx * 0.5, ry * 0.55, 0, 0, PI * 2); ctx.fill();
-      // 虹彩リング下の反射
-      ctx.fillStyle = rgba(light(col, 0.6), 0.55); ctx.beginPath(); ctx.ellipse(cx, ey + ry * 0.55, rx * 0.6, ry * 0.25, 0, 0, PI * 2); ctx.fill();
-    }
-    // ハイライト3つ（大・小・きらめき）
-    const tw = 0.85 + Math.sin(t * 3.1 + i) * 0.15;
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath(); ctx.ellipse(cx + r * 0.3, ey - ry * 0.38, r * 0.4 * tw, r * 0.34 * tw, -0.4, 0, PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(cx - r * 0.34, ey + ry * 0.4, r * 0.17, 0, PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(cx - r * 0.1, ey - ry * 0.62, r * 0.09, 0, PI * 2); ctx.fill();
-    // 上まぶた（外端を跳ね上げ）
-    const side = eyes.length > 1 ? (i === 0 ? -1 : 1) : 1;
-    ctx.strokeStyle = OC(); ctx.lineWidth = Math.max(1.2, r * 0.42); ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.ellipse(cx, ey, rx + r * 0.1, ry + r * 0.1, 0, PI * 1.12, PI * 1.88); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(cx + side * (rx * 0.95), ey - ry * 0.5); ctx.lineTo(cx + side * (rx * 1.35), ey - ry * 0.75); ctx.stroke();
-    if (sleepy) { ctx.fillStyle = C(OC()); ctx.beginPath(); ctx.ellipse(cx, ey - ry * 0.55, rx * 1.1, ry * 0.5, 0, PI, 0); ctx.fill(); }
-    // ため目・怒り眉（内側が下がる）
-    if (wind || POSE.rage > 0) {
-      ctx.lineWidth = Math.max(1.4, r * 0.48);
-      const inner = eyes.length > 1 ? -side : -1;
-      ctx.beginPath(); ctx.moveTo(cx - inner * rx * 1.1, ey - ry - r * 0.75); ctx.lineTo(cx + inner * rx * 0.9, ey - ry - r * 0.05); ctx.stroke();
-    }
-  }
-  // ため中の汗（または「!」の代わりのキラッ）
+  if (!blink) {
+    // 開いた目はスプライト化（形は状態ごとに一定）。目の中心を原点に描いて平行移動
+    const rr_ = r4(r), gg = r4(gap), ang = POSE.rage > 0 ? 1 : 0;
+    const key = 'eye' + col + rr_ + '|' + gg + (wind ? 'w' : '') + (ang ? 'r' : '') + (sleepy ? 's' : '');
+    const ex = gg + rr_ * 1.9, top = rr_ * 2.4;
+    ctx.save(); ctx.translate(x, y);
+    cpart(ctx, key, -ex, -top, ex * 2, top + rr_ * 1.7, 1, (c) => openEyes(c, 0, 0, rr_, gg, col, wind, ang, sleepy));
+    ctx.restore();
+  } else openEyes(ctx, x, y, r, gap, col, wind, POSE.rage > 0, sleepy, true);
+  // ため中の汗
   if (POSE.windup > 0 && !FL) {
     ctx.fillStyle = 'rgba(150,225,255,0.9)';
     const sx = x + gap + r * 2, sy = y - r * 1.6;
     ctx.beginPath(); ctx.moveTo(sx, sy - r * 0.7); ctx.quadraticCurveTo(sx + r * 0.5, sy, sx, sy + r * 0.3); ctx.quadraticCurveTo(sx - r * 0.5, sy, sx, sy - r * 0.7); ctx.fill();
   }
+}
+function openEyes(ctx, x, y, r, gap, col, wind, rage, sleepy, blink) {
+  const two = gap > 0.5;
+  const x0 = two ? x - gap : x, x1 = x + gap;
+  if (blink) {
+    ctx.strokeStyle = OC(); ctx.lineWidth = Math.max(1.4, r * 0.4); ctx.lineCap = 'round'; ctx.beginPath();
+    ctx.moveTo(x0 - r, y); ctx.quadraticCurveTo(x0, y + r * 0.7, x0 + r, y);
+    if (two) { ctx.moveTo(x1 - r, y); ctx.quadraticCurveTo(x1, y + r * 0.7, x1 + r, y); }
+    ctx.stroke();
+  } else {
+    const ry = wind ? r * 0.85 : r * 1.2, rx = r * 0.92, ey = wind ? y + r * 0.15 : y;
+    // 外形（濃い縁）
+    ctx.fillStyle = OC(); ctx.beginPath();
+    ctx.ellipse(x0, ey, rx + r * 0.16, ry + r * 0.16, 0, 0, PI * 2);
+    if (two) { ctx.moveTo(x1 + rx + r * 0.16, ey); ctx.ellipse(x1, ey, rx + r * 0.16, ry + r * 0.16, 0, 0, PI * 2); }
+    ctx.fill();
+    // 虹彩（縦グラデ: 単位グラデを縦に拡大して両目まとめて1回で塗る）
+    ctx.beginPath(); ctx.ellipse(x0, ey, rx, ry, 0, 0, PI * 2);
+    if (two) { ctx.moveTo(x1 + rx, ey); ctx.ellipse(x1, ey, rx, ry, 0, 0, PI * 2); }
+    if (FL) { ctx.fillStyle = '#fff'; ctx.fill(); }
+    else {
+      const ep = eyePal(ctx, col);
+      ctx.save(); ctx.translate(0, ey); ctx.scale(1, ry); ctx.fillStyle = ep.grad; ctx.fill(); ctx.restore();
+      // 瞳孔＋下の反射
+      ctx.fillStyle = 'rgba(16,6,26,0.75)'; ctx.beginPath();
+      ctx.ellipse(x0 + r * 0.05, ey - ry * 0.05, rx * 0.5, ry * 0.55, 0, 0, PI * 2);
+      if (two) { ctx.moveTo(x1 + r * 0.05 + rx * 0.5, ey - ry * 0.05); ctx.ellipse(x1 + r * 0.05, ey - ry * 0.05, rx * 0.5, ry * 0.55, 0, 0, PI * 2); }
+      ctx.fill();
+      ctx.fillStyle = ep.refl; ctx.beginPath();
+      ctx.ellipse(x0, ey + ry * 0.55, rx * 0.6, ry * 0.25, 0, 0, PI * 2);
+      if (two) { ctx.moveTo(x1 + rx * 0.6, ey + ry * 0.55); ctx.ellipse(x1, ey + ry * 0.55, rx * 0.6, ry * 0.25, 0, 0, PI * 2); }
+      ctx.fill();
+    }
+    // ハイライト3つ（大・小・きらめき）— 1パス
+    const tw = 1;
+    ctx.fillStyle = '#ffffff'; ctx.beginPath();
+    for (const cx of two ? [x0, x1] : [x0]) {
+      ctx.moveTo(cx + r * 0.3 + r * 0.4 * tw, ey - ry * 0.38); ctx.ellipse(cx + r * 0.3, ey - ry * 0.38, r * 0.4 * tw, r * 0.34 * tw, -0.4, 0, PI * 2);
+      ctx.moveTo(cx - r * 0.34 + r * 0.17, ey + ry * 0.4); ctx.arc(cx - r * 0.34, ey + ry * 0.4, r * 0.17, 0, PI * 2);
+      ctx.moveTo(cx - r * 0.1 + r * 0.09, ey - ry * 0.62); ctx.arc(cx - r * 0.1, ey - ry * 0.62, r * 0.09, 0, PI * 2);
+    }
+    ctx.fill();
+    // 上まぶた（外端を跳ね上げ）＋ため/怒り眉 — 1パス
+    ctx.strokeStyle = OC(); ctx.lineWidth = Math.max(1.2, r * 0.42); ctx.lineCap = 'round'; ctx.beginPath();
+    const list = two ? [[x0, -1], [x1, 1]] : [[x0, 1]];
+    for (const [cx, side] of list) {
+      ctx.moveTo(cx + Math.cos(PI * 1.12) * (rx + r * 0.1), ey + Math.sin(PI * 1.12) * (ry + r * 0.1));
+      ctx.ellipse(cx, ey, rx + r * 0.1, ry + r * 0.1, 0, PI * 1.12, PI * 1.88);
+      ctx.moveTo(cx + side * (rx * 0.95), ey - ry * 0.5); ctx.lineTo(cx + side * (rx * 1.35), ey - ry * 0.75);
+    }
+    ctx.stroke();
+    if (wind || rage) {
+      ctx.lineWidth = Math.max(1.4, r * 0.48); ctx.beginPath();
+      for (const [cx, side] of list) { const inner = two ? -side : -1; ctx.moveTo(cx - inner * rx * 1.1, ey - ry - r * 0.75); ctx.lineTo(cx + inner * rx * 0.9, ey - ry - r * 0.05); }
+      ctx.stroke();
+    }
+    if (sleepy) {
+      ctx.fillStyle = C(OC()); ctx.beginPath();
+      for (const [cx] of list) { ctx.moveTo(cx + rx * 1.1, ey - ry * 0.55); ctx.ellipse(cx, ey - ry * 0.55, rx * 1.1, ry * 0.5, 0, 0, PI, true); }
+      ctx.fill();
+    }
+  }
+}
+
+const eyeCache = new Map();
+function eyePal(ctx, col) {
+  let p = eyeCache.get(col);
+  if (p) return p;
+  const g = ctx.createLinearGradient(0, -1, 0, 1);
+  g.addColorStop(0, '#1a0f24'); g.addColorStop(0.45, shadow(col, 0.2)); g.addColorStop(1, light(col, 0.45));
+  p = { grad: g, refl: rgba(light(col, 0.6), 0.55) };
+  if (eyeCache.size > 300) eyeCache.clear();
+  eyeCache.set(col, p);
+  return p;
 }
 
 /** 鋭い発光目（かっこいい系）。x,y 中心, r 半径, slit=縦長瞳孔 */
