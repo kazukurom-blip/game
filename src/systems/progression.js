@@ -75,7 +75,17 @@ export function migrateState(state) {
   const num = (v, d) => (typeof v === 'number' && Number.isFinite(v) ? v : d);
   state.level = Math.max(1, Math.min(MAX_LEVEL, Math.floor(num(state.level, 1))));
   state.exp = Math.max(0, num(state.exp, 0));
-  // 経験値曲線の変更で溢れた分は次のレベル直前で止める（勝手にレベルアップさせない）
+  // v1 セーブ: 旧経験値曲線での「進み具合（%）」を保ったまま新曲線に換算する
+  if (!(state.version >= 2)) {
+    const L = state.level;
+    const oldNeed = Math.round(15 + 12 * Math.pow(L, 1.5) * Math.pow(1.02, L));
+    const newNeed = expToNext(L);
+    if (Number.isFinite(newNeed) && oldNeed > 0) {
+      const ratio = Math.min(0.999, state.exp / oldNeed);
+      state.exp = Math.round(ratio * newNeed);
+    }
+  }
+  // それでも溢れた分は次のレベル直前で止める（勝手にレベルアップさせない）
   const need = expToNext(state.level);
   if (Number.isFinite(need) && state.exp >= need) state.exp = need - 1;
   state.money = Math.max(0, num(state.money, 0));

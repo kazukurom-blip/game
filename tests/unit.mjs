@@ -1124,6 +1124,22 @@ test('v2 タクシー/訪問記録/ワールドグラフ', () => {
   assert.equal(taxiTravel(g, 'slums').ok, false, 'お金不足');
 });
 
+test('v2 migrateState: 旧セーブの経験値は進み具合(%)を保って換算', () => {
+  for (const L of [1, 5, 12, 30, 60]) {
+    const oldNeed = Math.round(15 + 12 * Math.pow(L, 1.5) * Math.pow(1.02, L));
+    for (const pct of [0, 0.25, 0.5, 0.9]) {
+      const oldExp = Math.floor(oldNeed * pct);
+      const st = migrateState({ heroId: 'luna', level: L, exp: oldExp, mapId: 'beach' });
+      const got = st.exp / expToNext(L), want = oldExp / oldNeed;
+      assert.ok(Math.abs(got - want) <= 0.5 / expToNext(L) + 1e-9, `Lv${L} ${(want * 100).toFixed(1)}% → ${(got * 100).toFixed(1)}%`);
+      assert.equal(st.level, L);
+    }
+  }
+  // v2 セーブは換算しない
+  const v2 = migrateState({ heroId: 'luna', level: 5, exp: 10, mapId: 'beach', version: 2 });
+  assert.equal(v2.exp, 10);
+});
+
 test('v2 migrateState: 旧セーブを補完', () => {
   const old = { heroId: 'jin', level: 12, exp: 999999, money: 1234, hp: 50, mp: 10, sp: 2, ap: 0,
     stats: { str: 20, dex: 4, int: 4, luk: 4 }, inventory: [{ id: 'potion_red', qty: 3 }, { id: 'no_such_item', qty: 1 }],
