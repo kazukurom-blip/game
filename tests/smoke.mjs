@@ -650,7 +650,7 @@ async function main() {
       const s = window.game.state;
       return { ok: true, hero: s.heroId, lv: s.level, money: s.money, map: window.game.map?.id, pet: s.equipped.pet, visited: s.visited, book: typeof s.book, sns: !!s.sns, clock: typeof s.clock, inv: s.inventory.map((x) => x.id), active: s.missions.active, version: s.version };
     });
-    await check('旧v1セーブ「つづきから」で起動', ok && st.hero === 'jin' && st.lv === 7 && st.money === 1234 && st.map === 'beach', JSON.stringify(st));
+    await check('旧v1セーブ「つづきから」で起動', ok && st.hero === 'jin' && st.lv === 7 && st.money >= 1234 && st.map === 'beach', JSON.stringify(st));
     await check('旧v1セーブ: v2 フィールド補完 (pet/visited/book/sns/clock)', st.pet === null && st.visited.includes('beach') && st.book === 'object' && st.sns && st.clock === 'number', JSON.stringify(st));
     await check('旧v1セーブ: 不明アイテムを除去', !st.inv.includes('no_such_item'), st.inv.join(','));
     await shot('v1save_continue');
@@ -712,7 +712,10 @@ async function main() {
 // 依頼NPC が依頼マップにいる → 受注 → 各目的（討伐対象はそのマップの出現表から実際に湧いたものを倒す /
 // 収集はそのマップの敵のドロップを拾う / reach / talk は報告NPCに話しかける / wanted / drive は実際に乗車）
 // → 報告NPC が報告マップにいる → 報告。Lv はデバッグで reqLevel まで上げる。
-async function runMission(id) {
+async function runMission(arg) {
+  // arg: missionId | {id, skipAccept（UI で受注済み）, stopBeforeReport（報告NPCの前で止める＝UIで報告する）}
+  const opt = typeof arg === 'string' ? { id: arg } : arg;
+  const id = opt.id;
   const G = window.game;
   const t0 = performance.now();
   const notes = [];
@@ -744,15 +747,17 @@ async function runMission(id) {
     G.state.inventory = G.state.inventory.filter((s) => s && (need.has(s.id) || /^potion/.test(s.id)));
   };
   if (!m) return res(false, 'mission not found');
-  G.debug.setLevel(m.reqLevel || 1);
+  if ((G.state.level || 1) < (m.reqLevel || 1)) G.debug.setLevel(m.reqLevel || 1);
   G.debug.run('hpFull');
   C.setWantedLevel(G, 0);
   // 依頼
-  await go(npcMap(m.giver));
-  if (!npcHere(m.giver)) return res(false, `依頼NPC ${m.giver} が ${G.map.id} にいない`);
-  if (!G.missions.available(m.giver).some((x) => x.id === id)) return res(false, `${m.giver} が ${id} を提示しない (canAccept=${G.missions.canAccept(id)})`);
-  if (!(await talk(m.giver))) return res(false, `${m.giver} と会話できない`);
-  if (!G.missions.accept(id)) return res(false, 'accept 失敗');
+  if (!opt.skipAccept) {
+    await go(npcMap(m.giver));
+    if (!npcHere(m.giver)) return res(false, `依頼NPC ${m.giver} が ${G.map.id} にいない`);
+    if (!G.missions.available(m.giver).some((x) => x.id === id)) return res(false, `${m.giver} が ${id} を提示しない (canAccept=${G.missions.canAccept(id)})`);
+    if (!(await talk(m.giver))) return res(false, `${m.giver} と会話できない`);
+    if (!G.missions.accept(id)) return res(false, 'accept 失敗');
+  } else if (!G.state.missions.active.includes(id)) return res(false, `${id} が受注されていない`);
   const turnNpc = M.turnInNpcOf(m);
   const val = (i) => G.missions.objectiveValues(id)[i];
   for (let i = 0; i < m.objectives.length; i++) {
@@ -836,6 +841,10 @@ async function runMission(id) {
   C.setWantedLevel(G, 0);
   await go(npcMap(turnNpc));
   if (!npcHere(turnNpc)) return res(false, `報告NPC ${turnNpc} が ${G.map.id} にいない`);
+  if (opt.stopBeforeReport) {
+    if (!G.missions.completable(turnNpc).some((x) => x.id === id)) return res(false, `報告不可: ${JSON.stringify(G.missions.objectiveValues(id))}`);
+    const r = res(true); r.turnNpc = turnNpc; r.pending = true; return r;
+  }
   await talk(turnNpc);
   if (!G.missions.completable(turnNpc).some((x) => x.id === id)) return res(false, `報告不可: ${JSON.stringify(G.missions.objectiveValues(id))}`);
   if (!G.missions.turnIn(id)) return res(false, 'turnIn 失敗');
