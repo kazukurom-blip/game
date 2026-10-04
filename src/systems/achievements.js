@@ -226,7 +226,17 @@ export function attachAchievements(game) {
   if (!ev) return () => {};
   const offs = [];
   const st = () => game.state;
-  const on = (n, fn) => offs.push(ev.on(n, (d) => { if (!st()) return; try { fn(d || {}); } finally { evaluateAchievements(game); } }));
+  // 高頻度イベント（撃破・スキル・ヒット・コンボ）は判定を 0.25 秒に1回へまとめる（大技で多数撃破した時の1フレームの負荷対策）。
+  // まとめた分は最後に必ず1回判定する（取りこぼしなし）。それ以外のイベントは即時判定。
+  const FREQ = new Set(['enemyKilled', 'skillUsed', 'bossHit', 'comboTier', 'civilianHit']);
+  let lastEval = -1e9, pending = null;
+  const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
+  const evalNow = () => { lastEval = now(); if (pending) { clearTimeout(pending); pending = null; } evaluateAchievements(game); };
+  const evalSoon = () => {
+    if (now() - lastEval >= 250) { evalNow(); return; }
+    if (!pending) pending = setTimeout(() => { pending = null; if (st()) evalNow(); }, 250);
+  };
+  const on = (n, fn) => offs.push(ev.on(n, (d) => { if (!st()) return; try { fn(d || {}); } finally { if (FREQ.has(n)) evalSoon(); else evalNow(); } }));
   on('enemyKilled', (d) => {
     const def = d.enemy?.def || ENEMIES[d.enemy?.defId];
     if (!def) return;
@@ -265,6 +275,6 @@ export function attachAchievements(game) {
   on('mapChanged', () => setCounterMax(st(), 'moneyMax', st().money || 0));
   on('itemSold', () => setCounterMax(st(), 'moneyMax', st().money || 0));
   evaluateAchievements(game);
-  game._achvUnsub = () => { offs.forEach((f) => f?.()); game._achvUnsub = null; };
+  game._achvUnsub = () => { offs.forEach((f) => f?.()); if (pending) { clearTimeout(pending); pending = null; } game._achvUnsub = null; };
   return game._achvUnsub;
 }

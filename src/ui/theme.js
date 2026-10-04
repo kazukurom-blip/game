@@ -93,6 +93,20 @@ export function inset(ctx, x, y, w, h, o = {}) {
   ctx.restore();
 }
 
+// measureText のキャッシュ（HUD/通知は毎フレーム同じ文字列を測るので重い。フォント読み込み完了で破棄）
+const _mw = new Map();
+try { globalThis.document?.fonts?.addEventListener?.('loadingdone', () => _mw.clear()); } catch { /* ignore */ }
+function mw(ctx, s) {
+  const k = ctx.font + '|' + s;
+  let v = _mw.get(k);
+  if (v === undefined) {
+    v = ctx.measureText(s).width;
+    if (_mw.size > 4000) _mw.clear();
+    _mw.set(k, v);
+  }
+  return v;
+}
+
 // テキスト（縁取り・グロー対応）
 export function txt(ctx, s, x, y, o = {}) {
   s = String(s ?? '');
@@ -103,7 +117,7 @@ export function txt(ctx, s, x, y, o = {}) {
   if (o.alpha != null) ctx.globalAlpha *= o.alpha;
   if (o.maxW) {
     // 長すぎる時は縮める
-    const w = ctx.measureText(s).width;
+    const w = mw(ctx, s);
     if (w > o.maxW) {
       ctx.font = font(Math.max(8, Math.floor((o.size ?? 16) * o.maxW / w)), o.weight ?? 800);
     }
@@ -123,7 +137,7 @@ export function txt(ctx, s, x, y, o = {}) {
 export function measure(ctx, s, size = 16, weight = 800) {
   ctx.save();
   ctx.font = font(size, weight);
-  const w = ctx.measureText(String(s)).width;
+  const w = mw(ctx, String(s));
   ctx.restore();
   return w;
 }

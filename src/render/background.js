@@ -121,7 +121,7 @@ function weighted(table, w) {
   return [mixW(cols, ws), a];
 }
 
-let glowBuf = null, glowCtx = null, glowKey = '', glowHad = false;
+let glowBuf = null, glowCtx = null, glowKey = '', glowHad = false, glowCamX = 0, glowCamY = 0;
 const GLOW_SCALE = 0.5;
 const framePost = [];
 
@@ -159,7 +159,9 @@ export function drawBackground(ctx, map, cam, W, H, time) {
   let gb = null, hasGlow = false, reuse = false;
   if (lights > 0.1) {
     // カメラ・シーンが前フレームと同じなら光バッファを作り直さない（静止中の負荷を削減）
-    const gk = key + '|' + cam.x + '|' + cam.y + '|' + W + 'x' + H;
+    // 画面揺れ（cam.x - cam.bx）は無視して比較し、描くときに揺れの分だけずらす（大技の揺れ中に毎フレーム作り直さない）
+    const bx = cam.bx ?? cam.x, by = cam.by ?? cam.y;
+    const gk = key + '|' + bx + '|' + by + '|' + W + 'x' + H;
     reuse = !!glowBuf && glowKey === gk;
     glowKey = gk;
   } else glowKey = '';
@@ -167,6 +169,7 @@ export function drawBackground(ctx, map, cam, W, H, time) {
     const gw = Math.ceil(W * GLOW_SCALE), gh = Math.ceil(H * GLOW_SCALE);
     if (!glowBuf || glowBuf.width !== gw || glowBuf.height !== gh) { glowBuf = makeCanvas(gw, gh); glowCtx = glowBuf.getContext('2d'); }
     gb = glowCtx;
+    glowCamX = cam.x; glowCamY = cam.y;
     gb.setTransform(1, 0, 0, 1, 0, 0); gb.globalCompositeOperation = 'source-over'; gb.clearRect(0, 0, gw, gh); gb.fillStyle = '#000';
     gb.setTransform(GLOW_SCALE, 0, 0, GLOW_SCALE, 0, 0);
   }
@@ -214,7 +217,7 @@ export function drawBackground(ctx, map, cam, W, H, time) {
   if ((gb || reuse) && hasGlow) {
     ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = Math.min(1, lights);
-    ctx.drawImage(glowBuf, 0, 0, W, H);
+    ctx.drawImage(glowBuf, reuse ? glowCamX - cam.x : 0, reuse ? glowCamY - cam.y : 0, W, H);
     ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
   }
   for (const fn of framePost) { ctx.save(); try { fn(); } catch (e) { console.warn('[background] post failed', e); } ctx.restore(); }

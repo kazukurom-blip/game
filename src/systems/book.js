@@ -72,7 +72,9 @@ export function bookProgress(state) {
 }
 
 const ZERO = () => ({ atk: 0, def: 0, maxHp: 0, maxMp: 0, crit: 0, luk: 0 });
-let _cacheKey = null, _cacheVal = null;
+// キャッシュ: 図鑑オブジェクトごとに「登録数・ランク合計」が同じなら再計算しない
+// （以前は毎回 JSON.stringify(book) をキーにしていて、computeStats のたび＝撃破のたびに重かった）
+const _cache = new WeakMap();
 
 /**
  * bookBonus(state) → {atk, def, maxHp, maxMp, crit(0〜1), luk, registered, total, completeRegions:[...]}
@@ -83,15 +85,15 @@ let _cacheKey = null, _cacheVal = null;
 export function bookBonus(state) {
   const book = state?.book;
   if (!book) return { ...ZERO(), registered: 0, total: BOOK_IDS.length, completeRegions: [] };
-  const key = JSON.stringify(book);
-  if (key === _cacheKey) return _cacheVal;
-  const b = ZERO();
   let registered = 0, rankSum = 0;
   for (const id of BOOK_IDS) {
     const k = book[id] || 0;
-    if (k > 0) registered++;
-    rankSum += bookRank(k);
+    if (k > 0) { registered++; rankSum += bookRank(k); }
   }
+  const key = registered + ':' + rankSum;
+  const hit = _cache.get(book);
+  if (hit && hit.key === key) return hit.val;
+  const b = ZERO();
   b.maxHp += registered * 3;
   b.atk += Math.floor(registered / 4);
   b.def += Math.floor(registered / 5);
@@ -102,9 +104,9 @@ export function bookBonus(state) {
     completeRegions.push(r);
     for (const [k, v] of Object.entries(REGION_COMPLETE_BONUS[r] || {})) b[k] = (b[k] || 0) + v;
   }
-  _cacheKey = key;
-  _cacheVal = { ...b, registered, total: BOOK_IDS.length, completeRegions };
-  return _cacheVal;
+  const val = { ...b, registered, total: BOOK_IDS.length, completeRegions };
+  _cache.set(book, { key, val });
+  return val;
 }
 
 /** 撃破を記録（combat.killEnemy から呼ぶ）。初回は bookNew、ランクアップは bookRank を emit */

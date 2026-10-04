@@ -229,9 +229,11 @@ game.events.on('playerDied', () => {
     },
   });
 });
-game.events.on('levelUp', () => game.save());
+// セーブはフレームの終わりにまとめて1回（大技で一度に何体も倒して何度もレベルアップした時に、その都度 localStorage へ書かない）
+game.requestSave = () => { game._saveReq = true; };
+game.events.on('levelUp', () => game.requestSave());
 game.events.on('mapChanged', () => game.save());
-game.events.on('missionComplete', () => game.save());
+game.events.on('missionComplete', () => game.requestSave());
 
 // --- タッチボタン ---
 for (const b of document.querySelectorAll('#touch button')) {
@@ -279,17 +281,24 @@ function updatePlay(dt) {
     updateCamera(dt);
     return;
   }
+  phase('u.ui');
   safe('clock', () => updateClock(dt));
   safe('player', () => game.player.update(dt));
+  phase('u.player');
   updateList(game.enemies, dt, 'enemy');
+  phase('u.enemies');
   updateList(game.projectiles, dt, 'projectile');
+  phase('u.proj');
   updateList(game.drops, dt, 'drop');
   updateList(game.npcs, dt, 'npc');
   updateList(game.vehicles, dt, 'vehicle');
   safe('spawner', () => game.spawner.update(dt));
+  phase('u.misc');
   safe('skills', () => updateSkills(game, dt));
   safe('missions', () => game.missions.update(dt));
+  phase('u.skills');
   safe('effects', () => updateEffects(game, dt));
+  phase('u.fx');
   updateCamera(dt);
 
   autosaveT += dt;
@@ -301,29 +310,36 @@ function drawPlay() {
   const map = game.map;
   const sx = game.shake ? (Math.random() - 0.5) * game.shake : 0;
   const sy = game.shake ? (Math.random() - 0.5) * game.shake : 0;
-  const cam = { x: Math.round(game.cam.x + sx), y: Math.round(game.cam.y + sy) };
+  // bx/by = 揺れを除いたカメラ（背景の光バッファを揺れの間も作り直さずに使い回すため）
+  const cam = { x: Math.round(game.cam.x + sx), y: Math.round(game.cam.y + sy), bx: Math.round(game.cam.x), by: Math.round(game.cam.y) };
 
   const skip = game.debug.skip || {}; // デバッグ: 描画レイヤーを個別に止めて負荷を調べる
   if (!skip.bg) safe('bg', () => drawBackground(ctx, map, cam, W, H, game.time));
+  phase('bg');
   game.camZoom += (1 - game.camZoom) * Math.min(1, game.dt * 8);
   const z = game.camZoom || 1;
   ctx.save();
   if (z !== 1) { ctx.translate(W / 2, H * 0.6); ctx.scale(z, z); ctx.translate(-W / 2, -H * 0.6); }
   ctx.translate(-cam.x, -cam.y);
   if (!skip.tiles) safe('tiles', () => drawMapTiles(ctx, map, game.time));
+  phase('tiles');
   const visible = (e) => e.x > cam.x - 300 && e.x < cam.x + W + 300;
   for (const v of game.vehicles) if (!skip.ents && visible(v)) safe('draw.vehicle', () => v.draw(ctx));
   for (const n of game.npcs) if (!skip.ents && visible(n)) safe('draw.npc', () => n.draw(ctx));
   for (const d of game.drops) if (visible(d)) safe('draw.drop', () => d.draw(ctx));
   for (const e of game.enemies) if (!skip.ents && visible(e)) safe('draw.enemy', () => e.draw(ctx));
+  phase('ents');
   safe('draw.player', () => game.player.draw(ctx));
+  phase('player');
   for (const p of game.projectiles) safe('draw.proj', () => p.draw(ctx));
   safe('draw.fx', () => drawEffects(ctx, game));
   ctx.restore();
+  phase('fx');
   if (!skip.night) safe('night', () => {
     const p = game.player;
     drawNightOverlay(ctx, map, W, H, p ? { x: p.x - cam.x, y: p.y - 40 - cam.y } : undefined);
   });
+  phase('night');
   // 当たり判定表示は夜の色調オーバーレイの上に描く（暗くならないように）
   if (game.debug.enabled && game.debug.showHitboxes) {
     ctx.save();
@@ -340,10 +356,23 @@ function drawPlay() {
   }
   if (!skip.hud) safe('cutin', () => FX.drawCutins?.(ctx, game));
   if (!skip.hud) safe('combo', () => FX.drawCombo?.(ctx, game));
+  phase('flash');
   if (!skip.hud) safe('hud', () => drawHUD(ctx, game));
+  phase('hud');
   if (!skip.hud) safe('ui.draw', () => game.ui.draw(ctx));
+  phase('ui');
   if (!skip.hud) safe('screenFx', () => FX.drawScreenFx?.(ctx, game));
+  phase('screenFx');
   safe('debug.draw', () => game.debug.draw(ctx));
+}
+
+// デバッグ: game.debug.profile = true の間、フレーム内の部位別処理時間(ms)を game.perf.phases に入れる（スパイク調査用）
+let _ph = null, _phT = 0;
+function phase(name) {
+  if (!_ph) return;
+  const t = performance.now();
+  _ph[name] = (_ph[name] || 0) + (t - _phT);
+  _phT = t;
 }
 
 // 1フレームの処理時間（update+draw, ms）。デバッグパネル / テストが参照
@@ -357,7 +386,9 @@ function frame(now) {
   game.time += dt;
   game.frameNo = (game.frameNo || 0) + 1;
   game.input.beginFrame();
+  if (game.debug?.profile) { _ph = {}; _phT = t0; } else _ph = null;
   safe('audio', () => audio.update(game, dt));
+  phase('audio');
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, W, H);
@@ -369,9 +400,13 @@ function frame(now) {
     safe('ui.notify', () => game.ui.draw(ctx));
   } else {
     updatePlay(dt);
+    phase('update');
     drawPlay();
   }
+  if (game._saveReq) { game._saveReq = false; if (game.scene === 'play') safe('save', () => game.save()); }
+  phase('save');
   const pf = game.perf, ms = performance.now() - t0;
+  if (_ph) pf.phases = _ph;
   pf.ms = ms; pf.avg = pf.avg ? pf.avg * 0.95 + ms * 0.05 : ms; pf.n++; pf.sum += ms; if (ms > pf.max) pf.max = ms;
   requestAnimationFrame(frame);
 }

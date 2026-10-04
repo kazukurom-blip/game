@@ -44,6 +44,22 @@ export function drawCutinLayer(ctx, game) {
   list.length = w;
 }
 
+// カットインの顔アップのキャッシュ（cutin ごとに1枚。画面の帯に見える範囲＋余白）
+const PORTRAIT_S = 5.3, PORTRAIT_W = 760, PORTRAIT_H = 460;
+function portraitOf(c, fx, fy) {
+  if (c.por !== undefined) return c.por;
+  c.por = null;
+  if (typeof document === 'undefined' && typeof OffscreenCanvas === 'undefined') return null;
+  const cv = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(PORTRAIT_W, PORTRAIT_H) : document.createElement('canvas');
+  cv.width = PORTRAIT_W; cv.height = PORTRAIT_H;
+  const oc = cv.getContext('2d');
+  if (!oc) return null;
+  oc.translate(PORTRAIT_W / 2 - fx, PORTRAIT_H / 2 - fy);
+  drawCharacter(oc, fx - 6 * PORTRAIT_S, fy + 58 * PORTRAIT_S, c.look, c.equip, { facing: 1, state: 'idle', t: 0.4, attackT: 0, damage: 0, scale: PORTRAIT_S, aura: null });
+  c.por = cv;
+  return cv;
+}
+
 function drawOne(ctx, c, W, H) {
   const t = c.t, L = c.life;
   const inK = clamp(t / 0.13, 0, 1), outK = clamp((t - (L - 0.16)) / 0.16, 0, 1);
@@ -85,8 +101,16 @@ function drawOne(ctx, c, W, H) {
   // キャラの顔アップ
   const s = 5.0 + t * 0.6;
   const fx = W * 0.3, fy = cy + 8;
+  // 性能: 顔アップ（scale 5 の大きなベクター描画）は最初の1回だけオフスクリーンに描き、以降は拡大して貼る
   try {
-    drawCharacter(ctx, fx - 6 * s, fy + 58 * s, c.look, c.equip, { facing: 1, state: 'idle', t: 0.4, attackT: 0, damage: 0, scale: s, aura: null });
+    const por = portraitOf(c, fx, fy);
+    if (por) {
+      const k = s / PORTRAIT_S;
+      ctx.save();
+      ctx.translate(fx - 6 * s, fy + 58 * s); ctx.scale(k, k); ctx.translate(-(fx - 6 * PORTRAIT_S), -(fy + 58 * PORTRAIT_S));
+      ctx.drawImage(por, fx - PORTRAIT_W / 2, fy - PORTRAIT_H / 2);
+      ctx.restore();
+    } else drawCharacter(ctx, fx - 6 * s, fy + 58 * s, c.look, c.equip, { facing: 1, state: 'idle', t: 0.4, attackT: 0, damage: 0, scale: s, aura: null });
   } catch (e) { /* ignore */ }
   // 目のキラッ
   if (t > 0.15 && t < 0.45) {
