@@ -47,14 +47,23 @@ const E = {
   loops: {}, game: null, offs: [], listening: false,
   radio: 0, inRadio: false,
   muted: false, volume: 0.8,
+  bgm: 1, se: 1,               // v3: 設定画面の BGM / SE 音量（0..1）
+  tension: 0, tensionG: null,  // v3: 手配度レイヤー（0..5）
+  titleScreen: null,           // v3: 'title' | 'select'（UI が明示する場合）
   prev: {}, seenFx: (typeof WeakSet !== 'undefined') ? new WeakSet() : null,
-  skillKinds: null, errors: 0,
+  skillKinds: null, skillDefs: null, errors: 0, combo: 0,
 };
 try {
   const s = HAS_WIN && window.localStorage && JSON.parse(window.localStorage.getItem(STORE_KEY) || 'null');
-  if (s) { E.muted = !!s.muted; if (typeof s.volume === 'number') E.volume = clamp(s.volume, 0, 1); }
+  if (s) {
+    E.muted = !!s.muted; if (typeof s.volume === 'number') E.volume = clamp(s.volume, 0, 1);
+    if (typeof s.bgm === 'number') E.bgm = clamp(s.bgm, 0, 1);
+    if (typeof s.se === 'number') E.se = clamp(s.se, 0, 1);
+  }
 } catch (e) { /* storage 不可 */ }
-function persist() { try { HAS_WIN && window.localStorage?.setItem(STORE_KEY, JSON.stringify({ muted: E.muted, volume: E.volume })); } catch (e) { /* noop */ } }
+function persist() { try { HAS_WIN && window.localStorage?.setItem(STORE_KEY, JSON.stringify({ muted: E.muted, volume: E.volume, bgm: E.bgm, se: E.se })); } catch (e) { /* noop */ } }
+const musicLevel = () => MUSIC_LEVEL * E.bgm;
+const sfxLevel = () => SFX_LEVEL * E.se;
 
 function guard(fn, fb) {
   return function (...a) {
@@ -71,14 +80,15 @@ function makeChain(ac) {
   comp.threshold.value = -10; comp.knee.value = 6; comp.ratio.value = 10;
   comp.attack.value = 0.003; comp.release.value = 0.18;
   const master = ac.createGain(); master.gain.value = 0.85;
-  const music = ac.createGain(); music.gain.value = MUSIC_LEVEL;
-  const sfx = ac.createGain(); sfx.gain.value = SFX_LEVEL;
+  const music = ac.createGain(); music.gain.value = musicLevel();
+  const sfx = ac.createGain(); sfx.gain.value = sfxLevel();
+  const tensionG = ac.createGain(); tensionG.gain.value = 0.0001; tensionG.connect(music); // 手配度レイヤー
   music.connect(comp); sfx.connect(comp); comp.connect(master); master.connect(ac.destination);
   const len = Math.floor(ac.sampleRate * 1.0);
   const noise = ac.createBuffer(1, len, ac.sampleRate);
   const d = noise.getChannelData(0); const r = rng(12345);
   for (let i = 0; i < len; i++) d[i] = r() * 2 - 1;
-  return { comp, master, music, sfx, noise };
+  return { comp, master, music, sfx, noise, tensionG };
 }
 
 // ---------------------------------------------------------------------------
