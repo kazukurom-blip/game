@@ -16,7 +16,7 @@ const T = { sel: 0, focus: 'hero', regions: {}, saveChecked: -1, hasSave: false,
 function checkSave(t) {
   if (t - T.saveChecked < 1 && T.saveChecked >= 0) return T.hasSave;
   T.saveChecked = t;
-  T.hasSave = guard('localStorage', () => !!localStorage.getItem('nvs_save'), false);
+  T.hasSave = guard('localStorage', () => !!(globalThis.game?.hasSave?.() ?? localStorage.getItem('nvs_save')), false);
   return T.hasSave;
 }
 
