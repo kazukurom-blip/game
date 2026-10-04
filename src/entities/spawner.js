@@ -215,8 +215,8 @@ export class Spawner {
     if (map.town) {
       this.civT -= dt;
       if (this.civT <= 0) {
-        this.civT = 2.5;
         const alive = g.enemies.filter((e) => e.civilian && !e.dead && !e.remove).length;
+        this.civT = alive < 6 ? 0.8 : 2.5;
         if (alive < this.civTarget) this.spawnCivilian();
         if (Math.random() < 0.05) this.civTarget = 6 + Math.floor(Math.random() * 5);
       }

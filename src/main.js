@@ -150,7 +150,10 @@ game.events.on('playerDied', () => {
       s.mp = Math.ceil(st.maxMp * 0.5);
       game.wanted = 0; game.wantedHeat = 0;
       game.player.dead = false;
-      const town = MAPS.beach ? 'beach' : game.state.mapId;
+      // 今いる地域の町で復活（その町が未訪問なら最初の町）
+      const reg = game.map?.region;
+      const visited = game.state.visited || [];
+      const town = (reg && MAPS[reg]?.town && (visited.includes(reg) || reg === 'beach')) ? reg : 'beach';
       game.changeMap(town);
       setPlayerInvuln(game, 3);
       game.save();
