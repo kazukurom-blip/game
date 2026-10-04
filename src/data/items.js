@@ -9,7 +9,7 @@ function fillStats(s = {}) {
   return o;
 }
 
-const RARITY_PRICE = { common: 1, rare: 4, epic: 12, legendary: 40, mythic: 120 };
+const RARITY_PRICE = { common: 1, rare: 4, epic: 12, legendary: 40, mythic: 120, pet: 150 };
 
 const list = [];
 
@@ -113,6 +113,37 @@ weapon('staff_moon', 'ムーンライト・ワンド', 'legendary', 45, { atk: 7
 weapon('neon_sword_mythic', '覇王ネオンブレード', 'mythic', 55, { atk: 130, str: 10, dex: 10, crit: 8 }, ['neonSword', '#ff3dd2', '#fff06a'], 'melee', 145, 2.4, { desc: '街の夜明けを告げる、伝説の刃。' });
 weapon('pistol_mythic', 'ラスト・サンセット', 'mythic', 55, { atk: 95, dex: 12, luk: 8, crit: 8 }, ['pistol', '#ff8a00', '#ff3dd2'], 'gun', 640, 3.2, { desc: '夕陽色の銃身。撃つたびに空が燃える。' });
 
+
+// ============ v2: 後半〜エンドコンテンツ装備（Lv60〜90, 宇宙港・タワー地域ドロップ） ============
+equip('helmet_astro', 'アストロヘルメット', 'hat', 'epic', 62, { def: 34, maxHp: 180, int: 4 }, ['helmet', '#e8eef8', '#19f0ff'], { desc: 'ルミナ宇宙港の船外活動用。' });
+equip('cat_ears_cosmic', 'コズミック・ネコミミ', 'hat', 'legendary', 78, { def: 46, luk: 9, dex: 9, crit: 3 }, ['catEars', '#7a3dff', '#fff06a'], { desc: '耳の先で小さな星が瞬く。' });
+equip('armor_astro', 'アストロアーマー', 'top', 'epic', 64, { def: 58, maxHp: 260 }, ['armorVest', '#dfe6f2', '#ff8a00'], { desc: '月面シミュ区画の試作スーツ。' });
+equip('jacket_nebula', 'ネビュラ・レザー', 'top', 'legendary', 80, { def: 66, atk: 14, str: 8, dex: 8 }, ['leatherJacket', '#2a1a5c', '#ff3dd2'] , { desc: '星雲を染め込んだ革ジャン。' });
+equip('pants_astro', 'アストロパンツ', 'bottom', 'epic', 64, { def: 40, maxHp: 160 }, ['armorPants', '#dfe6f2', '#19f0ff']);
+equip('boots_moon', 'ムーンウォーカー', 'shoes', 'legendary', 76, { def: 30, speed: 40, dex: 7 }, ['boots', '#e8eef8', '#7a3dff'], { desc: '重力を半分くらい無視できる。' });
+equip('halo_cosmic', 'コズミック・ヘイロー', 'accessory', 'mythic', 90, { def: 34, atk: 22, int: 12, luk: 12, crit: 5 }, ['halo', '#19f0ff', '#ff3dd2'], { desc: '宇宙の果てから来た光輪。' });
+weapon('katana_plasma', 'プラズマ太刀', 'epic', 62, { atk: 105, str: 7, crit: 4 }, ['katana', '#19f0ff', '#ffffff'], 'melee', 125, 2.1);
+weapon('pistol_ray', 'レイガン Mk-II', 'epic', 64, { atk: 82, dex: 8, crit: 4 }, ['pistol', '#e8eef8', '#5cff9a'], 'gun', 600, 3.0, { desc: '発射音は「ピュン」。' });
+weapon('staff_star', 'スターゲイザー', 'legendary', 74, { atk: 112, int: 16, maxMp: 260 }, ['staff', '#fff06a', '#7a3dff'], 'magic', 480, 2.0);
+weapon('neon_sword_void', 'ヴォイド・ネオンブレード', 'mythic', 88, { atk: 185, str: 14, dex: 14, crit: 9 }, ['neonSword', '#7a3dff', '#19f0ff'], 'melee', 150, 2.4, { desc: '謎の宇宙船の動力炉から削り出した刃。' });
+weapon('smg_galaxy', 'ギャラクシー・ストーム', 'mythic', 88, { atk: 120, dex: 16, luk: 8, crit: 7 }, ['smg', '#ff3dd2', '#fff06a'], 'gun', 560, 7.5, { desc: '一秒間に星を七つ撃ち落とす。' });
+
+// ============ v2: PET（専用スロット pet・超低確率ドロップ） ============
+// pet: {pickRange(px), pickRate(秒あたり取得数), name}。装備すると追従し、アイテム・お金を自動で拾う。
+function pet(id, name, style, color, accent, stats, pickRange, pickRate, desc) {
+  equip(id, name, 'pet', 'pet', 0, stats, [style, color, accent], { pet: { pickRange, pickRate, name }, desc });
+}
+pet('pet_slime', 'ペット: プルプル', 'slimePet', '#5cff9a', '#ffffff', { maxHp: 20, luk: 1 }, 160, 1.0, 'ソーダ味のちびスライム。のんびり屋。');
+pet('pet_flamingo', 'ペット: フラミー', 'flamingoPet', '#ff7fb0', '#ffd23f', { speed: 5, dex: 1 }, 190, 1.2, '片足立ちが得意なひなフラミンゴ。');
+pet('pet_cat', 'ペット: ネオンにゃん', 'catPet', '#b04dff', '#19f0ff', { crit: 1, luk: 2 }, 220, 1.4, '路地裏生まれ。光るものが大好き。');
+pet('pet_drone', 'ペット: ピコドローン', 'dronePet', '#19f0ff', '#ff3dd2', { dex: 2, maxMp: 30 }, 260, 1.6, '回収アームつきの小型ドローン。');
+pet('pet_dolphin', 'ペット: ドルフィ', 'dolphinPet', '#4da6ff', '#bff6ff', { maxHp: 60, maxMp: 30 }, 240, 1.5, '空中をすいすい泳ぐ不思議なイルカ。');
+pet('pet_gator', 'ペット: ワニ太郎', 'gatorPet', '#3f8f3a', '#ffd23f', { def: 6, str: 2 }, 230, 1.3, 'グランパの孫…らしい。噛まない。');
+pet('pet_ghost', 'ペット: チップくん', 'ghostPet', '#e8f0ff', '#ffd23f', { luk: 4, crit: 1 }, 300, 2.0, 'カジノで負け続けた亡霊。今は幸運の味方。');
+pet('pet_robot', 'ペット: ボルトくん', 'robotPet', '#c9ccd6', '#ff8a00', { def: 8, maxHp: 80 }, 330, 2.2, '宇宙港の整備ロボ。几帳面に全部拾う。');
+pet('pet_dragon', 'ペット: ネオンドラゴン', 'dragonPet', '#ff3d7f', '#fff06a', { atk: 6, str: 3, dex: 3 }, 380, 2.6, '摩天楼の頂に棲む小竜。');
+pet('pet_alien', 'ペット: ピポ', 'alienPet', '#5cff9a', '#7a3dff', { atk: 8, int: 4, luk: 4, crit: 2 }, 420, 3.0, '謎の宇宙船から付いてきた。テレパシーで拾う。');
+
 // ============ 消費アイテム ============
 consumable('potion_red', '赤ポーション', 'common', { hp: 50 }, 'potionRed', 25, 'HPを50回復。');
 consumable('potion_orange', 'オレンジポーション', 'common', { hp: 150 }, 'potionRed', 80, 'HPを150回復。');
@@ -142,22 +173,47 @@ etc('diamond', 'ブルーダイヤ', 'epic', 'gem', 5000, 'とても高く売れ
 etc('neon_core', 'ネオンコア', 'epic', 'chip', 2500, 'メカ・ドローンの動力源。');
 etc('king_crown_shard', '王冠のかけら', 'rare', 'gem', 400, 'キングゼリーの王冠の破片。');
 
+
+// v2: 地域素材
+etc('crab_shell', 'カニの甲羅', 'common', 'gem', 6, 'ビーチのカニの硬い甲羅。');
+etc('seagull_feather', 'カモメの羽', 'common', 'gem', 6, 'ポテトの匂いがする。');
+etc('jelly_tentacle', 'クラゲの触手', 'common', 'gem', 10, 'ぴりぴり痺れる。');
+etc('rat_tail', 'ネズミのしっぽ', 'common', 'chip', 14, '地下鉄のネズミの尾。');
+etc('neon_bulb', '割れたネオン管', 'common', 'chip', 20, 'ダウンタウンの看板の破片。');
+etc('rusty_bolt', 'サビたボルト', 'common', 'chip', 24, '港の機械から外れた部品。');
+etc('snake_skin', 'ヘビの抜け殻', 'common', 'gem', 28, 'スワンプのヘビの抜け殻。');
+etc('mosquito_wing', 'ヌマカの羽', 'common', 'gem', 26, '透き通った虫の羽。');
+etc('ghost_wisp', '亡霊のゆらめき', 'rare', 'gem', 60, 'カジノで負けた者の未練。');
+etc('robot_gear', 'ロボの歯車', 'common', 'chip', 45, '精密な金色の歯車。');
+etc('golem_core', 'ゴーレムの核', 'rare', 'gem', 120, '鉄骨を動かす謎の結晶。');
+etc('alien_crystal', 'エイリアン・クリスタル', 'rare', 'gem', 200, '脈打つように光る。');
+etc('moon_rock', '月の石（模造）', 'common', 'gem', 150, '月面シミュ区画の小道具…のはず。');
+etc('pirate_map', '密輸船の海図', 'rare', 'chip', 300, 'ドンの密輸ルートが記されている。');
+etc('rat_crown', 'ネズミの王冠', 'rare', 'gem', 250, 'ラットキングが被っていた空き缶の王冠。');
+etc('alien_core', 'オーバーロード・コア', 'mythic', 'gem', 50000, '宇宙船の心臓部。触れると温かい。');
+
 export const ITEMS = Object.fromEntries(list.map((it) => [it.id, it]));
 
 export function getItem(id) {
   return ITEMS[id] || null;
 }
 
-export const EQUIP_SLOTS = ['hat', 'top', 'bottom', 'shoes', 'accessory', 'weapon'];
+export const EQUIP_SLOTS = ['hat', 'top', 'bottom', 'shoes', 'accessory', 'weapon', 'pet'];
+// キャラクター描画に使う（drawCharacter に渡す）スロット。pet は Pet エンティティが描画する
+export const WEAR_SLOTS = ['hat', 'top', 'bottom', 'shoes', 'accessory', 'weapon'];
+export const PET_STYLES = ['slimePet', 'flamingoPet', 'gatorPet', 'catPet', 'dronePet', 'ghostPet', 'alienPet', 'dragonPet', 'dolphinPet', 'robotPet'];
+export const PET_IDS = list.filter((it) => it.slot === 'pet').map((it) => it.id);
+export function isPet(item) { const it = typeof item === 'string' ? ITEMS[item] : item; return !!it && it.slot === 'pet'; }
 
 export const STARTER_EQUIP = {
-  luna: { hat: 'cat_ears_pink', top: 'hoodie_pink', bottom: 'skirt_pink', shoes: 'sneakers_white', accessory: null, weapon: 'knife_basic' },
-  jin: { hat: null, top: 'leather_jacket', bottom: 'jeans_blue', shoes: 'boots_black', accessory: null, weapon: 'bat_wood' },
+  luna: { hat: 'cat_ears_pink', top: 'hoodie_pink', bottom: 'skirt_pink', shoes: 'sneakers_white', accessory: null, weapon: 'knife_basic', pet: null },
+  jin: { hat: null, top: 'leather_jacket', bottom: 'jeans_blue', shoes: 'boots_black', accessory: null, weapon: 'bat_wood', pet: null },
 };
 
 // 装備IDのテーブル {slot: itemId} から look テーブルを作る（敵の equip 等で使用）
 export function looksFromIds(ids) {
   const o = { hat: null, top: null, bottom: null, shoes: null, weapon: null, accessory: null };
+  // pet は敵の見た目には不要
   for (const [slot, id] of Object.entries(ids || {})) o[slot] = id && ITEMS[id] ? ITEMS[id].look : null;
   return o;
 }

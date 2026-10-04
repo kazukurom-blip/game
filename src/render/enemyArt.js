@@ -1,12 +1,10 @@
 // 敵の描画: メイプル的かわいいモンスター（独自デザイン）＋GTA的な人型ギャング/警官
 import { drawCharacter } from './character.js';
-import { shade, rgba, clamp, rr, OUTLINE } from './util.js';
+import { shade, rgba, clamp, rr, mix } from './util.js';
+import { FL, setFL, C, OC, fs, cuteEyes, blush, pickCol } from './mkit.js';
+import { drawMonster2, ART2_SIZE, drawCivilian } from './monsters2.js';
 
 const PI = Math.PI;
-let FL = false;
-const C = (c) => (FL ? '#ffffff' : c);
-const OC = () => (FL ? '#ffd8ea' : OUTLINE);
-function fs(ctx, col, lw = 2) { ctx.fillStyle = C(col); ctx.fill(); ctx.strokeStyle = OC(); ctx.lineWidth = lw; ctx.stroke(); }
 
 const L = (style, color, accent) => ({ style, color, accent: accent || '#ffffff' });
 // def.look/equip が無い場合のデフォルト
@@ -39,6 +37,36 @@ function animState(e) {
   return 'idle';
 }
 
+// 非人型 art の基準サイズ（def.scale 指定時は 基準×scale で描く。未指定なら e.w/e.h）
+const ART_SIZE = Object.assign({
+  slime: [40, 32], mushroom: [44, 48], flamingo: [40, 70], gator: [92, 40], bossGator: [180, 80], drone: [44, 30],
+}, ART2_SIZE);
+const DEF_COLORS = {
+  slime: ['#5cff9a', '#ff4fa0'], mushroom: ['#ff8a00', null], flamingo: ['#ff7fb0', null], gator: ['#4e9a3a', '#ffd23f'],
+  bossGator: ['#2f6f2a', '#ffd23f'], drone: ['#19f0ff', null],
+};
+const HUMAN_ARTS = { thug: 1, cop: 1, swat: 1, bossDon: 1 };
+
+// def.color/accent で人型の既定装備を色替え（def.equip 明示時はそのまま）
+const tintCache = new Map();
+function tintedEquip(art, base, col, acc) {
+  if ((!col || col === '#ffffff') && !acc) return base;
+  const key = art + col + acc;
+  let r = tintCache.get(key);
+  if (r) return r;
+  r = {};
+  for (const k in base) {
+    const v = base[k];
+    if (!v) { r[k] = v; continue; }
+    if (k === 'top' || k === 'hat' || (k === 'bottom' && art === 'swat')) r[k] = { style: v.style, color: (col && col !== '#ffffff') ? col : v.color, accent: acc || v.accent };
+    else if (k === 'weapon' && acc) r[k] = { style: v.style, color: v.color, accent: acc };
+    else r[k] = v;
+  }
+  if (tintCache.size > 200) tintCache.clear();
+  tintCache.set(key, r);
+  return r;
+}
+
 export function drawEnemy(ctx, e) {
   const def = e.def || {};
   const art = def.art || 'slime';
@@ -49,42 +77,46 @@ export function drawEnemy(ctx, e) {
   if (st === 'dead' && e.alpha == null) ctx.globalAlpha *= clamp(1 - (e.deadT || 0), 0, 1);
   const boss = !!(def.boss || e.boss);
   let topY = e.y - (e.h || def.h || 40);
-  switch (art) {
-    case 'thug': case 'cop': case 'swat': case 'bossDon': {
-      const dflt = DEFAULT_HUMANS[art];
-      const look = def.look || dflt.look;
-      const equip = def.equip || dflt.equip;
-      const sc = def.scale || clamp((e.h || 70) / 72, 0.8, 2.2);
-      if (art === 'bossDon') drawAura(ctx, e.x, e.y - 45 * sc, 55 * sc, t, '#ffc93c', '#ff4fa0');
-      let as = st;
-      let attackT = 0;
-      if (st === 'attack') { attackT = ((t * 2.2) % 1); }
-      drawCharacter(ctx, e.x, e.y, look, equip, {
-        facing: e.facing || 1, state: as, t, attackT, damage: art === 'bossDon' ? clamp(1 - e.hp / e.maxHp, 0, 1) * 0.8 : 0,
-        scale: sc, flash, deadT: clamp((e.deadT || 0) * 3, 0, 1),
-      });
-      topY = e.y - 82 * sc;
-      break;
-    }
-    default: {
-      FL = flash;
-      ctx.translate(e.x, e.y);
-      ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-      const w = e.w || def.w || 40, h = e.h || def.h || 40;
-      // 影
-      if (!e.flying && art !== 'drone') { ctx.beginPath(); ctx.ellipse(0, 0, w * 0.45, 4 + w * 0.03, 0, 0, PI * 2); ctx.fillStyle = 'rgba(20,0,30,0.28)'; ctx.fill(); }
-      ctx.scale(e.facing < 0 ? -1 : 1, 1);
-      const col = def.color || '#5cff9a';
-      if (boss && art !== 'bossGator') drawAura(ctx, 0, -h * 0.5, Math.max(w, h) * 0.65, t, '#ffc93c', '#ff4fa0');
-      if (art === 'slime') drawSlime(ctx, w, h, col, t, st, boss);
-      else if (art === 'mushroom') drawMushroom(ctx, w, h, col, t, st);
-      else if (art === 'flamingo') drawFlamingo(ctx, w, h, col, t, st);
-      else if (art === 'gator') drawGator(ctx, w, h, col, t, st, false);
-      else if (art === 'bossGator') { drawAura(ctx, 0, -h * 0.45, w * 0.55, t, '#c8ff5a', '#ffc93c'); drawGator(ctx, w, h, col, t, st, true); }
-      else if (art === 'drone') drawDrone(ctx, w, h, col, t, st, boss);
-      else drawSlime(ctx, w, h, col, t, st, boss);
-      FL = false;
-    }
+  if (HUMAN_ARTS[art]) {
+    const dflt = DEFAULT_HUMANS[art];
+    const look = def.look || dflt.look;
+    const equip = def.equip || tintedEquip(art, dflt.equip, def.color, def.accent);
+    const sc = def.scale || clamp((e.h || 70) / 72, 0.8, 2.2);
+    if (art === 'bossDon') drawAura(ctx, e.x, e.y - 45 * sc, 55 * sc, t, '#ffc93c', '#ff4fa0');
+    let attackT = 0;
+    if (st === 'attack') { attackT = ((t * 2.2) % 1); }
+    drawCharacter(ctx, e.x, e.y, look, equip, {
+      facing: e.facing || 1, state: st, t, attackT, damage: art === 'bossDon' ? clamp(1 - e.hp / e.maxHp, 0, 1) * 0.8 : 0,
+      scale: sc, flash, deadT: clamp((e.deadT || 0) * 3, 0, 1),
+    });
+    topY = e.y - 82 * sc;
+  } else if (art === 'civilian') {
+    topY = drawCivilian(ctx, e, st, t, flash);
+  } else {
+    setFL(flash);
+    ctx.translate(e.x, e.y);
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    let w = e.w || def.w || 40, h = e.h || def.h || 40;
+    const base = ART_SIZE[art];
+    if (def.scale && base) { w = base[0] * def.scale; h = base[1] * def.scale; }
+    topY = e.y - h;
+    const fly = e.flying || art === 'drone' || art === 'jellyfish' || art === 'seagull' || art === 'mosquito' || art === 'ghost' || art === 'bossAlien';
+    // 影
+    if (!fly) { ctx.beginPath(); ctx.ellipse(0, 0, w * 0.45, 4 + w * 0.03, 0, 0, PI * 2); ctx.fillStyle = 'rgba(20,0,30,0.28)'; ctx.fill(); }
+    else if (st !== 'dead') { ctx.beginPath(); ctx.ellipse(0, 0, w * 0.3, 3 + w * 0.02, 0, 0, PI * 2); ctx.fillStyle = 'rgba(20,0,30,0.14)'; ctx.fill(); }
+    ctx.scale(e.facing < 0 ? -1 : 1, 1);
+    const dc = DEF_COLORS[art];
+    const col = dc ? pickCol(def.color, dc[0]) : def.color;
+    const acc = def.accent || (dc && dc[1]) || null;
+    if (boss && art !== 'bossGator' && art !== 'bossAlien') drawAura(ctx, 0, -h * 0.5, Math.max(w, h) * 0.65, t, '#ffc93c', '#ff4fa0');
+    if (art === 'slime') drawSlime(ctx, w, h, col, t, st, boss, acc);
+    else if (art === 'mushroom') drawMushroom(ctx, w, h, col, t, st, acc);
+    else if (art === 'flamingo') drawFlamingo(ctx, w, h, col, t, st, acc);
+    else if (art === 'gator') drawGator(ctx, w, h, col, t, st, false, acc);
+    else if (art === 'bossGator') { drawAura(ctx, 0, -h * 0.45, w * 0.55, t, '#c8ff5a', '#ffc93c'); drawGator(ctx, w, h, col, t, st, true, acc); }
+    else if (art === 'drone') drawDrone(ctx, w, h, col, t, st, boss, acc);
+    else if (!drawMonster2(ctx, art, w, h, def.color, def.accent, t, st, boss, e)) drawSlime(ctx, w, h, pickCol(def.color, '#5cff9a'), t, st, boss, acc || '#ff4fa0');
+    setFL(false);
   }
   ctx.restore();
   // HPバー・名前
@@ -139,42 +171,9 @@ function drawBossTag(ctx, e, topY) {
   drawHpBar(ctx, e.x, y + 6, 110, 8, e.hp / e.maxHp);
 }
 
-// ---------------------------------------------------------------- 顔パーツ（モンスター用）
-function cuteEyes(ctx, x, y, r, gap, col, st, t, sleepy) {
-  if (st === 'hurt') {
-    ctx.strokeStyle = OC(); ctx.lineWidth = Math.max(1.6, r * 0.45); ctx.beginPath();
-    ctx.moveTo(x - gap - r, y - r); ctx.lineTo(x - gap + r * 0.6, y); ctx.lineTo(x - gap - r, y + r);
-    ctx.moveTo(x + gap + r, y - r); ctx.lineTo(x + gap - r * 0.6, y); ctx.lineTo(x + gap + r, y + r);
-    ctx.stroke(); return;
-  }
-  if (st === 'dead') {
-    ctx.strokeStyle = OC(); ctx.lineWidth = Math.max(1.5, r * 0.4); ctx.beginPath();
-    for (const cx of [x - gap, x + gap]) { ctx.moveTo(cx - r * 0.8, y - r * 0.8); ctx.lineTo(cx + r * 0.8, y + r * 0.8); ctx.moveTo(cx + r * 0.8, y - r * 0.8); ctx.lineTo(cx - r * 0.8, y + r * 0.8); }
-    ctx.stroke(); return;
-  }
-  const blink = ((t + x * 0.01) % 4.2) < 0.12;
-  for (const cx of [x - gap, x + gap]) {
-    if (blink) {
-      ctx.strokeStyle = OC(); ctx.lineWidth = Math.max(1.4, r * 0.35); ctx.beginPath(); ctx.moveTo(cx - r, y); ctx.quadraticCurveTo(cx, y + r * 0.6, cx + r, y); ctx.stroke();
-      continue;
-    }
-    ctx.beginPath(); ctx.ellipse(cx, y, r * 0.85, r * 1.15, 0, 0, PI * 2);
-    if (FL) ctx.fillStyle = '#fff';
-    else { const g = ctx.createLinearGradient(0, y - r, 0, y + r); g.addColorStop(0, '#1a0f24'); g.addColorStop(1, col); ctx.fillStyle = g; }
-    ctx.fill();
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath(); ctx.arc(cx + r * 0.25, y - r * 0.4, r * 0.38, 0, PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(cx - r * 0.3, y + r * 0.45, r * 0.18, 0, PI * 2); ctx.fill();
-    if (sleepy) { ctx.strokeStyle = OC(); ctx.lineWidth = r * 0.4; ctx.beginPath(); ctx.moveTo(cx - r, y - r * 0.5); ctx.lineTo(cx + r, y - r * 0.7); ctx.stroke(); }
-  }
-}
-function blush(ctx, x, y, rx) {
-  ctx.fillStyle = C('rgba(255,110,150,0.5)');
-  ctx.beginPath(); ctx.ellipse(x, y, rx, rx * 0.5, 0, 0, PI * 2); ctx.fill();
-}
-
 // ---------------------------------------------------------------- スライム（ソーダゼリー＋サングラス）
-function drawSlime(ctx, w, h, col, t, st, boss) {
+function drawSlime(ctx, w, h, col, t, st, boss, acc) {
+  acc = acc || '#ff4fa0';
   let sq = Math.sin(t * 5) * 0.06;
   if (st === 'jump') sq = -0.14;
   if (st === 'attack') sq = Math.sin(t * 14) * 0.12;
@@ -222,7 +221,7 @@ function drawSlime(ctx, w, h, col, t, st, boss) {
   ctx.save(); ctx.translate(W * 0.1, gy); ctx.rotate(-0.08);
   ctx.beginPath(); rr(ctx, -W * 0.42, -W * 0.08, W * 0.36, W * 0.2, W * 0.07); rr(ctx, W * 0.04, -W * 0.08, W * 0.36, W * 0.2, W * 0.07);
   fs(ctx, '#1a1a2a', 1.5);
-  ctx.strokeStyle = C('#ff4fa0'); ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(-W * 0.06, -W * 0.02); ctx.lineTo(W * 0.04, -W * 0.02); ctx.stroke();
+  ctx.strokeStyle = C(acc); ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(-W * 0.06, -W * 0.02); ctx.lineTo(W * 0.04, -W * 0.02); ctx.stroke();
   ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.fillRect(-W * 0.36, -W * 0.05, W * 0.08, W * 0.04);
   ctx.restore();
   if (boss) { // 王冠
@@ -230,14 +229,14 @@ function drawSlime(ctx, w, h, col, t, st, boss) {
     const s = W * 0.35;
     ctx.beginPath(); ctx.moveTo(-s, 0); ctx.lineTo(-s * 1.1, -s * 0.9); ctx.lineTo(-s * 0.5, -s * 0.4); ctx.lineTo(0, -s * 1.15); ctx.lineTo(s * 0.5, -s * 0.4); ctx.lineTo(s * 1.1, -s * 0.9); ctx.lineTo(s, 0); ctx.closePath();
     fs(ctx, '#ffd23f', 2);
-    ctx.fillStyle = C('#ff3d7f'); ctx.beginPath(); ctx.arc(0, -s * 0.3, s * 0.15, 0, PI * 2); ctx.fill();
+    ctx.fillStyle = C(acc); ctx.beginPath(); ctx.arc(0, -s * 0.3, s * 0.15, 0, PI * 2); ctx.fill();
     ctx.restore();
   }
   ctx.restore();
 }
 
 // ---------------------------------------------------------------- キノコ（パラソル傘のビーチキノコ）
-function drawMushroom(ctx, w, h, col, t, st) {
+function drawMushroom(ctx, w, h, col, t, st, acc) {
   const walk = st === 'walk' || st === 'attack';
   const step = walk ? Math.sin(t * 10) : 0;
   const bob = walk ? Math.abs(Math.cos(t * 10)) * 2 : Math.sin(t * 2.5) * 0.8;
@@ -277,7 +276,7 @@ function drawMushroom(ctx, w, h, col, t, st) {
   ctx.closePath();
   fs(ctx, col, 2.2);
   ctx.save(); ctx.clip();
-  ctx.fillStyle = C(shade(col, 0.75));
+  ctx.fillStyle = C(acc || shade(col, 0.75));
   for (let i = 0; i < n; i += 2) {
     const x0 = R - (2 * R * i) / n, x1 = R - (2 * R * (i + 1)) / n;
     ctx.beginPath(); ctx.moveTo(0, -14); ctx.lineTo(x0, 4); ctx.lineTo(x1, 4); ctx.closePath(); ctx.fill();
@@ -288,13 +287,13 @@ function drawMushroom(ctx, w, h, col, t, st) {
   ctx.moveTo(-R, 2); ctx.bezierCurveTo(-R, -18, R, -18, R, 2); ctx.stroke();
   // てっぺんの飾り（カクテルピック）
   ctx.strokeStyle = OC(); ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(0, -13); ctx.lineTo(2, -19); ctx.stroke();
-  ctx.beginPath(); ctx.arc(2.4, -20, 2.4, 0, PI * 2); fs(ctx, '#ffd23f', 1.4);
+  ctx.beginPath(); ctx.arc(2.4, -20, 2.4, 0, PI * 2); fs(ctx, acc || '#ffd23f', 1.4);
   ctx.restore();
   ctx.restore();
 }
 
 // ---------------------------------------------------------------- フラミンゴ（ヤンキー）
-function drawFlamingo(ctx, w, h, col, t, st) {
+function drawFlamingo(ctx, w, h, col, t, st, acc) {
   const S = h / 70;
   const walk = st === 'walk' || st === 'attack';
   const sp = st === 'attack' ? 18 : 10;
@@ -330,7 +329,7 @@ function drawFlamingo(ctx, w, h, col, t, st) {
   ctx.beginPath(); ctx.arc(hx, hy, 7, 0, PI * 2); fs(ctx, col, 2);
   // モヒカン
   ctx.beginPath(); ctx.moveTo(hx - 6, hy - 3); ctx.lineTo(hx - 7, hy - 11); ctx.lineTo(hx - 3, hy - 7); ctx.lineTo(hx - 2, hy - 14); ctx.lineTo(hx + 1, hy - 7); ctx.lineTo(hx + 4, hy - 11); ctx.lineTo(hx + 4, hy - 5); ctx.closePath();
-  fs(ctx, col === '#b04dff' ? '#19f0ff' : '#ff3d7f', 1.6);
+  fs(ctx, acc || (col === '#b04dff' ? '#19f0ff' : '#ff3d7f'), 1.6);
   // くちばし
   ctx.beginPath(); ctx.moveTo(hx + 5, hy - 2); ctx.quadraticCurveTo(hx + 14, hy - 2, hx + 15, hy + 4); ctx.quadraticCurveTo(hx + 10, hy + 2, hx + 5, hy + 3); ctx.closePath(); fs(ctx, '#fff2dc', 1.6);
   ctx.beginPath(); ctx.moveTo(hx + 11, hy - 1.6); ctx.quadraticCurveTo(hx + 15, hy - 1, hx + 15, hy + 4); ctx.lineTo(hx + 11.5, hy + 2); ctx.closePath(); fs(ctx, '#2a1430', 1);
@@ -346,7 +345,8 @@ function drawFlamingo(ctx, w, h, col, t, st) {
 }
 
 // ---------------------------------------------------------------- ワニ（ちょいワル・金チェーン）
-function drawGator(ctx, w, h, col, t, st, boss) {
+function drawGator(ctx, w, h, col, t, st, boss, acc) {
+  acc = acc || '#ffd23f';
   const S = w / 92;
   const walk = st === 'walk' || st === 'attack';
   const sp = st === 'attack' ? 14 : 8;
@@ -414,8 +414,8 @@ function drawGator(ctx, w, h, col, t, st, boss) {
   ctx.restore();
   // 金チェーン
   ctx.strokeStyle = OC(); ctx.lineWidth = 3.6; ctx.beginPath(); ctx.moveTo(16, -28); ctx.quadraticCurveTo(22, -12, 17, -6); ctx.stroke();
-  ctx.strokeStyle = C('#ffd23f'); ctx.lineWidth = 2; ctx.setLineDash([2, 1]); ctx.stroke(); ctx.setLineDash([]);
-  ctx.beginPath(); ctx.arc(17, -6, 2.6, 0, PI * 2); fs(ctx, '#ffd23f', 1.2);
+  ctx.strokeStyle = C(acc); ctx.lineWidth = 2; ctx.setLineDash([2, 1]); ctx.stroke(); ctx.setLineDash([]);
+  ctx.beginPath(); ctx.arc(17, -6, 2.6, 0, PI * 2); fs(ctx, acc, 1.2);
   // 手前の脚
   for (const [lx, ph] of [[-12, 1], [18, -1]]) {
     ctx.beginPath(); rr(ctx, lx - 4.5 + s * 3 * ph, -10, 9, 10, 3.8); fs(ctx, col, 1.8);
@@ -425,7 +425,7 @@ function drawGator(ctx, w, h, col, t, st, boss) {
 }
 
 // ---------------------------------------------------------------- ドローン
-function drawDrone(ctx, w, h, col, t, st, boss) {
+function drawDrone(ctx, w, h, col, t, st, boss, acc) {
   const S = w / 44;
   const hov = Math.sin(t * 4) * 2;
   ctx.save();
@@ -434,7 +434,7 @@ function drawDrone(ctx, w, h, col, t, st, boss) {
   if (st === 'dead') ctx.rotate(0.5);
   else if (st === 'hurt') ctx.rotate(Math.sin(t * 40) * 0.12);
   else ctx.rotate(st === 'walk' ? 0.12 : 0);
-  const body = boss ? '#2a2236' : '#2e3148';
+  const body = acc || (boss ? '#2a2236' : mix('#2e3148', col, 0.22));
   // アーム
   ctx.strokeStyle = OC(); ctx.lineWidth = 4.4; ctx.beginPath(); ctx.moveTo(-18, -6); ctx.lineTo(18, -6); ctx.stroke();
   ctx.strokeStyle = C('#5a5f7a'); ctx.lineWidth = 2.2; ctx.stroke();

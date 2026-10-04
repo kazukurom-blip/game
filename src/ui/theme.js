@@ -15,7 +15,10 @@ export const RARITY_FALLBACK = {
   epic: { name: 'エピック', color: '#B45CFF' },
   legendary: { name: 'レジェンダリー', color: '#FFC93C' },
   mythic: { name: 'ミシック', color: '#FF4FA0', color2: '#3EE6D2' },
+  pet: { name: 'PET', color: '#FF6AD5', color2: '#6AF0FF', rainbow: true },
 };
+// 虹グラデ（PET レア度）
+export const RAINBOW = ['#ff5f6d', '#ffb347', '#ffe66d', '#7cff9b', '#3ee6ff', '#7b8cff', '#d16bff'];
 
 export const STAT_LABELS = {
   atk: '攻撃力', def: '防御力', maxHp: '最大HP', maxMp: '最大MP', speed: '移動速度', crit: 'クリティカル率',
@@ -24,7 +27,7 @@ export const STAT_LABELS = {
 };
 
 export const SLOT_LABELS = {
-  hat: '帽子', top: '上着', bottom: '下衣', shoes: '靴', weapon: '武器', accessory: 'アクセ',
+  hat: '帽子', top: '上着', bottom: '下衣', shoes: '靴', weapon: '武器', accessory: 'アクセ', pet: 'PET',
 };
 
 export function font(size, weight = 800) { return `${weight} ${size}px ${FONT}`; }
@@ -243,9 +246,80 @@ export const ease = (t) => 1 - Math.pow(1 - clamp(t, 0, 1), 3);
 
 // レア色の塗り（mythic はピンク→ティールのグラデ）。x0..x1 に沿ったグラデを返す
 export function rarityFill(ctx, info, x0, y0, x1, y1) {
+  if (info?.rainbow) return rainbowGrad(ctx, x0, y0, x1, y1);
   if (!info?.color2) return info?.color || '#fff';
   const g = ctx.createLinearGradient(x0, y0, x1, y1);
   g.addColorStop(0, info.color);
   g.addColorStop(1, info.color2);
   return g;
+}
+
+// 虹色グラデ。shift で色を流す（アニメ用）
+export function rainbowGrad(ctx, x0, y0, x1, y1, shift = 0) {
+  const g = ctx.createLinearGradient(x0, y0, x1, y1);
+  const n = RAINBOW.length;
+  const k = Math.floor(((shift % 1) + 1) * n) % n;
+  for (let i = 0; i < n; i++) g.addColorStop(i / (n - 1), RAINBOW[(i + k) % n]);
+  return g;
+}
+
+// ---- 時計（game.clock 0〜24）----
+export function getClock(game) {
+  const c = game?.clock ?? game?.state?.clock ?? game?.map?._clock;
+  return typeof c === 'number' && Number.isFinite(c) ? ((c % 24) + 24) % 24 : null;
+}
+export function clockStr(c) {
+  if (c == null) return '--:--';
+  const h = Math.floor(c) % 24, m = Math.floor((c - Math.floor(c)) * 60);
+  const ap = h < 12 ? 'AM' : 'PM';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${ap} ${h12}:${String(m).padStart(2, '0')}`;
+}
+// 'dawn' | 'day' | 'dusk' | 'night'
+export function clockPhase(c) {
+  if (c == null) return 'day';
+  if (c >= 5 && c < 7) return 'dawn';
+  if (c >= 7 && c < 17) return 'day';
+  if (c >= 17 && c < 19.5) return 'dusk';
+  return 'night';
+}
+export const PHASE_INFO = {
+  dawn: { name: 'DAWN', color: '#ffb3d1' },
+  day: { name: 'DAY', color: '#ffd447' },
+  dusk: { name: 'DUSK', color: '#ff8a3d' },
+  night: { name: 'NIGHT', color: '#8fa8ff' },
+};
+// 昼夜アイコン（中心 x,y / 半径 r）
+export function drawPhaseIcon(ctx, phase, x, y, r, t = 0) {
+  ctx.save();
+  if (phase === 'night') {
+    ctx.shadowColor = '#bcd0ff'; ctx.shadowBlur = 10;
+    ctx.fillStyle = '#e8eeff';
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath(); ctx.arc(x + r * 0.45, y - r * 0.3, r * 0.85, 0, Math.PI * 2); ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = '#fff';
+    for (let i = 0; i < 2; i++) {
+      const a = 0.5 + 0.5 * Math.sin(t * 3 + i * 2);
+      ctx.globalAlpha = a;
+      starPath(ctx, x + r * (0.9 + i * 0.3), y - r * (0.7 - i * 1.2), r * 0.32, r * 0.12, 4, 0); ctx.fill();
+    }
+  } else {
+    const c = phase === 'dusk' ? '#ff8a3d' : phase === 'dawn' ? '#ff9ec7' : '#ffd447';
+    ctx.strokeStyle = c; ctx.lineWidth = 2; ctx.lineCap = 'round';
+    for (let i = 0; i < 8; i++) {
+      const a = i * Math.PI / 4 + t * 0.5;
+      ctx.beginPath();
+      ctx.moveTo(x + Math.cos(a) * r * 1.2, y + Math.sin(a) * r * 1.2);
+      ctx.lineTo(x + Math.cos(a) * r * 1.55, y + Math.sin(a) * r * 1.55);
+      ctx.stroke();
+    }
+    const g = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, 1, x, y, r);
+    g.addColorStop(0, '#fffbe0'); g.addColorStop(1, c);
+    ctx.fillStyle = g; ctx.shadowColor = c; ctx.shadowBlur = 10;
+    ctx.beginPath(); ctx.arc(x, y, r * 0.9, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
 }
