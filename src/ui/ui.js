@@ -226,7 +226,7 @@ export class UIManager {
       const topName = this.order[this.order.length - 1];
       if (topName === 'dialog') dialogKey(this, this.wins.dialog, P, eat);
       else if (topName === 'worldmap' && this.wins.worldmap?.confirm && P('confirm')) {
-        if (this.wins.worldmap.confirm.t > 0.15) rideTaxi(this, this.wins.worldmap);
+        rideTaxi(this, this.wins.worldmap);
         eat('confirm'); eat('interact'); consumed = true;
       }
       else if (topName === 'death') {

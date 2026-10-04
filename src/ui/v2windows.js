@@ -363,7 +363,7 @@ function drawTaxiConfirm(ui, ctx, win) {
   txt(ctx, 'VICE CAB  TAXI', bx + bw / 2, by + 25, { size: 17, align: 'center', color: '#1a1440', stroke: '#fff7c0', sw: 3, weight: 900 });
   txt(ctx, `「${mi.name}」へ移動しますか？`, bx + bw / 2, by + 72, { size: 18, align: 'center', color: '#fff', maxW: bw - 40 });
   txt(ctx, `料金`, bx + 110, by + 110, { size: 14, color: COL.sub });
-  txt(ctx, fmtMoney(fare), bx + bw - 110, by + 110, { size: 22, align: 'right', color: can ? COL.money : COL.bad, stroke: COL.moneyShadow, sw: 4 });
+  txt(ctx, fmtMoney(fare), bx + bw - 110, by + 110, { size: 22, align: 'right', color: (st.money || 0) >= fare ? COL.money : COL.bad, stroke: COL.moneyShadow, sw: 4 });
   txt(ctx, `所持金 ${fmtMoney(st.money || 0)}`, bx + bw / 2, by + 136, { size: 12.5, align: 'center', color: (st.money || 0) >= fare ? COL.sub : COL.bad });
   if (!chk.ok && chk.msg) txt(ctx, chk.msg, bx + bw / 2, by + 156, { size: 12.5, align: 'center', color: COL.bad, maxW: bw - 30 });
   const r1 = { x: bx + bw / 2 - 160, y: by + bh - 62, w: 150, h: 42 };

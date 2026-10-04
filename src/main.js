@@ -198,7 +198,8 @@ function updatePlay(dt) {
 
   const consumed = safe('ui.input', () => game.ui.handleInput());
   safe('ui.update', () => game.ui.update(dt));
-  if (game.paused) return;
+  // ワールドマップ表示中はワールドを一時停止
+  if (game.paused || safe('ui.isOpen', () => game.ui.isOpen?.('worldmap'))) return;
 
   safe('clock', () => updateClock(dt));
   safe('player', () => game.player.update(dt));
