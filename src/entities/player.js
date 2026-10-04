@@ -173,7 +173,7 @@ export class Player {
     if (inp.pressed('up') && this.tryPortal()) return;
     // 会話（V = 正式な会話キー。E/Enter は会話 → 乗車の順）
     if (inp.pressed('talk') && this.talk()) return;
-    if (inp.pressed('interact')) this.interact();
+    if (inp.pressed('interact')) { this.interact(); return; }
     // スキル（8枠: skill1..8 → skillBar[0..7]）
     const bar = s.skillBar || [];
     for (let i = 0; i < SKILL_SLOTS; i++) {
@@ -250,16 +250,15 @@ export class Player {
 
   interact() {
     const g = this.game;
-    // NPC
-    if (this.talk()) return;
-    let bd;
-    // 車
-    let car = null; bd = 110;
+    // E / Enter: 近くの車に乗る or NPC と話す（両方近いときは近い方。V は常に会話）
+    let car = null, bd = 110;
     for (const v of g.vehicles) {
       if (v.driverType) continue;
       const d = Math.abs(v.x - this.x);
       if (d < bd && Math.abs(v.y - this.y) < 70) { car = v; bd = d; }
     }
+    const npc = this.nearestNpc();
+    if (npc && (!car || Math.abs(npc.x - this.x) < bd)) { this.talk(); return; }
     if (car) { car.enter(this); this.attackLeft = 0; this.attackKind = null; }
   }
 

@@ -193,11 +193,13 @@ export function setTracked(game, id) {
 
 // ---------------- 設定 ----------------
 const SETTINGS_KEY = 'nvs_settings';
-export const DEFAULT_SETTINGS = { fx: 1, dmgMerge: false, bgm: 0.8, se: 0.9, master: 0.8 };
+export const DEFAULT_SETTINGS = { fx: 1, dmgCompact: false, bgm: 0.8, se: 0.9, master: 0.8 };
 export function loadSettings(game) {
   let s = {};
   try { s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}') || {}; } catch { s = {}; }
   const out = { ...DEFAULT_SETTINGS, ...(game?.settings || {}), ...s };
+  // 旧キー dmgMerge → dmgCompact（ダメージ数字のまとめ表示。render/effects.js が参照）
+  if ('dmgMerge' in out) { if (!('dmgCompact' in s)) out.dmgCompact = !!out.dmgMerge; delete out.dmgMerge; }
   if (game) game.settings = out;
   return out;
 }

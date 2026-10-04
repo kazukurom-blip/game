@@ -112,6 +112,9 @@ export class DebugPanel {
       if (before >= th && after < th && p) spawnEffect(g, 'tear', p.x, p.y - p.h * 0.55, { level: th, color: '#ff6fb5' });
     }
     if (p) p.lastHitT = p.t; // 自然回復を止める
+    // PET の自動 HP ポーション（petSkills.petAutoUse, 閾値 50%）で即回復しないよう 10 秒止める（服破れ確認用）
+    const a = (g._petAuto ||= { cdHp: 0, cdMp: 0, affT: 0, petId: st.equipped?.pet || null });
+    a.cdHp = Math.max(a.cdHp || 0, 10);
     return `HP ${st.hp}/${max} (damage ${(1 - after).toFixed(2)})`;
   }
 

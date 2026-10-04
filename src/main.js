@@ -34,7 +34,13 @@ import { DebugPanel } from './debug/debug.js';
 const W = 1280, H = 720;
 function loadSettings() {
   const def = { fx: 1, dmgCompact: false, bgm: 0.8, se: 0.9 };
-  try { return { ...def, ...(JSON.parse(localStorage.getItem('nvs_settings') || '{}')) }; } catch { return def; }
+  try {
+    const saved = JSON.parse(localStorage.getItem('nvs_settings') || '{}') || {};
+    const out = { ...def, ...saved };
+    // 旧キー dmgMerge（UI v3 初版）→ dmgCompact に統一
+    if ('dmgMerge' in out) { if (!('dmgCompact' in saved)) out.dmgCompact = !!out.dmgMerge; delete out.dmgMerge; }
+    return out;
+  } catch { return def; }
 }
 // カメラ下端: 地面が画面 y≈560 に来るまで下げる（HUD 下部 ~120px に足元や NPC 名が隠れないように）
 const HUD_BOTTOM = 160;

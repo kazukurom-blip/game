@@ -52,6 +52,8 @@ export class Pet {
     this.name = (pd.name || it.name || 'PET').replace(/^ペット[:：]\s*/, '');
     this.pickRange = Math.max(160, Math.min(420, pd.pickRange || 160));
     this.pickRate = Math.max(0.3, pd.pickRate || 1);
+    this._statT = 0;
+    this.refreshStats();
     this.flying = FLYING.has(this.look.style);
     const p = game.player;
     this.x = p ? p.x - (p.facing || 1) * 50 : 0;
@@ -66,6 +68,17 @@ export class Pet {
     this.pickAnim = 0;
     this._updT = -1; this._drawT = -1;
     this.remove = false;
+  }
+
+  /** 取得範囲・速度は systems/petSkills.js の petStats（親密度 Lv・range スキル込み）を使う。無ければアイテム定義の値 */
+  refreshStats() {
+    const f = sysFn('petStats', this.game, 'petSkills');
+    if (!f) return;
+    let ps = null;
+    try { ps = f(this.game.state, this.itemId); } catch (e) { ps = null; }
+    if (!ps) return;
+    if (ps.pickRange > 0) this.pickRange = Math.max(60, ps.pickRange);
+    if (ps.pickRate > 0) this.pickRate = Math.max(0.3, ps.pickRate);
   }
 
   warpToPlayer() {
@@ -98,6 +111,8 @@ export class Pet {
     if (!p || this._updT === g.time) return;
     this._updT = g.time;
     this.t += dt;
+    this._statT -= dt;
+    if (this._statT <= 0) { this._statT = 0.5; this.refreshStats(); }
     if (this.pickCd > 0) this.pickCd -= dt;
     if (this.pickAnim > 0) this.pickAnim -= dt;
     // PET の自動ポーション等（systems の petAutoUse があれば）

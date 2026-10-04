@@ -979,7 +979,7 @@ function drawSettings(ui, ctx, win) {
     const on = !!S[key];
     ui.btn(ctx, win, id, { x: x + w - 130, y: yv - 12, w: 106, h: 32 }, on ? 'ON' : 'OFF', () => { S[key] = !S[key]; save(); }, { color: on ? '#109f95' : '#4a3a6a', size: 15, active: on });
   };
-  toggle('dmgMerge', 'dmgMerge', yy);
+  toggle('dmgCompact', 'dmgCompact', yy);
   yy += 58;
   row('クエストナビ矢印', '画面端に次のポータル／目的地の方向を表示');
   if (S.nav == null) S.nav = true;
