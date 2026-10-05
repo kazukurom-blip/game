@@ -6,6 +6,31 @@
 - 頼みたいこと: 主人公・敵・ボス・PET の見た目を **PNG のスプライトで描き直す**。描いた PNG を置くとゲームがそれを使い、無いものは今まで通りコードで描く（**一部だけでも差し替えられる**）。
 - 仕組みの仕様: `docs/SPEC_SPRITES.md`（エンジニア向け）。この README は描く人向けに噛み砕いたもの。**食い違ったときはテンプレートの `manifest.json` が正**。
 
+## 1枚絵モード（画像生成AI向け）
+
+画像生成AI（ChatGPT / Gemini / Midjourney など）は**1体1枚のイラスト**が得意で、コマ割りのスプライトは苦手です。そのため、**敵・ボス・PET は「1枚絵」を置くだけで使える**ようにしてあります。動き（待機の呼吸・歩きの弾み・攻撃前の溜め・攻撃の伸び・被弾の白フラッシュと揺れ・倒れてフェード・空を飛ぶ敵の浮遊）はゲーム側が付けます。
+
+**AIに渡すもの（1体ごと）**
+1. 指示文: [`AI_PROMPTS.md`](AI_PROMPTS.md)（全93件。Excel で見るなら [`AI_PROMPTS.csv`](AI_PROMPTS.csv)）からその1体の分をコピー。
+2. 参考画像: `ref_enemies_<地域>.png` / `ref_bosses.png` / `ref_pets.png` の該当部分を切り抜いて添付（形・特徴を引き継ぐため）。
+3. 絵柄を揃えたい場合は、気に入った過去の絵を「この絵柄で」と一緒に添付。
+
+**できた画像の置き方**
+- 指示文に書いてある「保存先」の名前で `assets/sprites/` の下に置く（例 `assets/sprites/enemies/slime_green.png`）。
+- `assets/sprites/manifest.json` に1行足す。見本は [`manifest_single_example.json`](manifest_single_example.json)（全件入り。使う分だけ残す）。
+  ```json
+  { "version": 1,
+    "enemies": { "slime_green": "enemies/slime_green.png" },
+    "bosses":  { "boss_king_slime": { "file": "bosses/boss_king_slime.png", "single": true, "file2": "bosses/boss_king_slime_2.png" } },
+    "pets":    { "catPet": "pets/catPet.png" } }
+  ```
+- **背景が白など単色でもOK**（四隅の色を自動で透明にする）。透明背景ならそのまま。余白も自動で切り抜く。
+- 大きさは自動で敵の当たり判定に合わせる。大きすぎ/小さすぎるときは `"height": 60`（ゲーム内の高さ px）を指定。
+- 絵が左向きなら `"facesLeft": true`。ボスの第2形態の絵が無ければ、HP半分以下で赤く光る演出で代用。
+- 背景の自動除去がうまくいかない絵は `"bgRemove": false` にして透明背景で作り直す。
+
+**対象外**: 主人公・NPC・市民・警官・人型のボス（キャプテン・ドン）は、装備の着せ替えとアニメがあるため1枚絵モードは使えません（従来のテンプレート形式か、コード描画のまま）。
+
 ---
 
 ## 1. ゲームの概要とアートの方向性

@@ -132,6 +132,19 @@ test('onlyLayers（テンプレート書き出し）でも例外にならない'
 });
 
 let pass = 0, fail = 0;
+test('1枚絵モード: 文字列だけ・single:true の項目を受け付け、Image が無い環境でも例外にならない', () => {
+  const ok = S.setSpriteManifest({ version: 1,
+    enemies: { slime_green: 'enemies/slime_green.png', bad: '../x.png' },
+    bosses: { boss_king_slime: { file: 'bosses/k.png', single: true, height: 150, file2: 'bosses/k2.png' } },
+    pets: { catPet: 'pets/cat.png' } });
+  assert.equal(ok, true);
+  assert.equal(S.spriteStats().entries, 3, '不正なパスは除外');
+  const e = { def: ENEMIES.slime_green, x: 0, y: 0, facing: 1, t: 0, state: 'idle', hurtT: 0, hp: 1, maxHp: 1 };
+  assert.equal(S.drawSpriteEnemy(fakeCtx(), e, {}), false, '未読込はコード描画');
+  assert.doesNotThrow(() => drawEnemy(fakeCtx(), e));
+  S.setSpriteManifest(null);
+});
+
 for (const t of tests) {
   try { await t.fn(); pass++; console.log('✓ sprites: ' + t.name); } catch (e) { fail++; console.log('✗ sprites: ' + t.name + '\n   ' + (e.stack || e.message).split('\n').slice(0, 4).join('\n   ')); }
 }

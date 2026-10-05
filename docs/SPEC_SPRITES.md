@@ -128,3 +128,12 @@ accessory_back（wings・scarf のなびき） → hair_back → body → bottom
   重ね順で下になるのにコードでは上に描かれる部品は destination-out で抜く（`noErase: true` で抜かない）。
 - 敵は `setEnemyArtExport(true)` で影・オーラ・ボス演出・HPバーを描かずに書き出す（ゲームではこれらをスプライトの上下にコードで描く）。
 - 既知の差: 暗い色の装備（黒レザー等）は着色（掛け算）だとコード描画のハイライトが出ず黒っぽくなる。夜のリムライト・ネオン（敵）はシートに入らない。
+
+
+## 1枚絵モード（enemies / bosses / pets）
+- manifest の値を**文字列（ファイル名）だけ**にするか、`"single": true` を付けると1枚絵として扱う。
+- 読み込み時に、四隅が不透明でほぼ同色なら四隅から塗りつぶして背景を透明化（`bgRemove: "auto"` 既定 / `true` 強制 / `false` 無効）、不透明部分で自動トリミング。足元＝トリミング後の下端中央。
+- 表示の高さ: `height`（px）。省略時は敵の当たり判定の高さ×1.35（ボス×1.25）、PET は36px。
+- 動きはエンジン側で付ける: idle 呼吸、walk 弾み＋傾き、windup 縮み＋後傾、attack 伸び＋前進、hurt 揺れ＋白フラッシュ、dead 倒れ＋フェード、飛行は上下浮遊、第2形態は `file2`（無ければ赤く着色＋小刻みな震え）。
+- オプション: `facesLeft`, `flyBob`, `motion:false`（動きを付けない）。
+- 指示文の一覧は `node tools/gen_ai_prompts.mjs` で `docs/art_handoff/AI_PROMPTS.{md,csv}` と `manifest_single_example.json` に生成。

@@ -126,6 +126,7 @@ export function drawSpriteEnemy(ctx, e, info) {
     const I = info || {};
     const s = enemySheet(e, I.boss);
     if (!s || !ready(s)) return false;
+    if (s.single) return drawSingleEnemy(ctx, e, I, s);
     const st = I.st || (e.dead ? 'dead' : e.hurtT > 0 ? 'hurt' : e.state === 'attack' ? 'attack' : e.state === 'walk' ? 'walk' : 'idle');
     const fly = !!(e.flying || I.fly);
     let base = st === 'attack' && I.wind ? ['windup', 'attack'] : (fly && ROWS_FLY[st]) || ROWS_ENEMY[st] || [st];
@@ -167,6 +168,7 @@ export function drawSpritePet(ctx, x, y, look, anim) {
     look = look || {}; anim = anim || {};
     const s = MAN.pets[look.style];
     if (!s || !ready(s)) return false;
+    if (s.single) return drawSinglePet(ctx, x, y, anim, s);
     const raw = anim.state || 'idle';
     const st = raw === 'pick' ? 'pick' : (raw === 'walk' || raw === 'move' || anim.moving) ? 'walk' : raw === 'fly' ? 'fly' : 'idle';
     const row = pickRow(s, st === 'walk' ? ['walk', 'fly'] : st === 'fly' ? ['fly', 'walk'] : [st]);
@@ -398,6 +400,9 @@ function arr2(v) { return Array.isArray(v) && v.length >= 2 && isFinite(v[0]) &&
 function note(msg) { STATS.errors.push(msg); if (STATS.errors.length > 20) STATS.errors.shift(); if (typeof console !== 'undefined') console.warn('[sprites]', msg); }
 
 function normSheet(o, inh, defs, key) {
+  // 1枚絵モード: "slime_green": "enemies/slime_green.png" の文字列だけでも可
+  if (typeof o === 'string') o = { file: o, single: true };
+  if (o && typeof o === 'object' && o.single) return normSingle(o, key);
   if (!o || typeof o !== 'object' || typeof o.file !== 'string' || !o.file) return null;
   if (/^(?:[a-z]+:)?\/\//i.test(o.file) || o.file.includes('..')) { note(`${key}: file は assets/sprites/ からの相対パスにしてください`); return null; }
   const cell = arr2(o.cell) || arr2(inh.cell) || [160, 160];
@@ -464,6 +469,10 @@ function img(s) {
     r.img = im; r.st = 1; STATS.requested++;
     im.onload = () => {
       r.w = im.naturalWidth || im.width; r.h = im.naturalHeight || im.height;
+      if (r.w > 0 && r.h > 0 && s.single) {
+        try { r.single = prepSingle(im, r.w, r.h, s.bgRemove); } catch (e) { note('1枚絵の前処理に失敗: ' + s.file + ' ' + e.message); }
+        if (!r.single) { r.st = 3; STATS.failed++; REV++; for (const f of r.wait.splice(0)) f(); return; }
+      }
       if (r.w > 0 && r.h > 0) { r.st = 2; STATS.loaded++; } else { r.st = 3; STATS.failed++; }
       REV++;
       for (const f of r.wait.splice(0)) f();
@@ -547,4 +556,160 @@ function newCanvas(w, h) {
     if (typeof document !== 'undefined') { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
   } catch { /* ignore */ }
   return null;
+}
+
+// ================================================================ 1枚絵モード
+// 画像生成AIなどで作った「1体1枚」の絵をそのまま使う。動き（待機の呼吸・歩きの弾み・溜め・攻撃・被弾・倒れる）はゲーム側で付ける。
+// manifest: "slime_green": "enemies/slime_green.png"  または
+//           "slime_green": { "file": "...", "single": true, "height": 60, "facesLeft": false, "bgRemove": "auto", "file2": "...(第2形態)" }
+function normSingle(o, key) {
+  if (typeof o.file !== 'string' || !o.file || /^(?:[a-z]+:)?\/\//i.test(o.file) || o.file.includes('..')) { note(`${key}: file は assets/sprites/ からの相対パスにしてください`); return null; }
+  const file2 = typeof o.file2 === 'string' && !o.file2.includes('..') && !/^(?:[a-z]+:)?\/\//i.test(o.file2) ? o.file2 : null;
+  const s = {
+    key, file: o.file, single: true,
+    height: num(o.height, 0),                       // ゲーム内の表示の高さ(px)。0 = 敵の当たり判定から自動
+    facesLeft: !!o.facesLeft,                        // 絵が左向きで描かれている
+    bgRemove: o.bgRemove === false ? false : o.bgRemove === true ? true : 'auto',
+    motion: o.motion !== false,
+    flyBob: num(o.flyBob, 5),
+    rows: {}, nrows: 0, cell: [1, 1], anchor: [0, 0], scale: 1, fps: DEF_FPS, tint: null, plain: null, plainColor: null, size: null,
+  };
+  if (file2) s.phase2 = { ...s, key: key + ':2', file: file2, phase2: null };
+  return s;
+}
+
+/** 背景を透明に（四隅が不透明でほぼ同じ色なら、その色を四隅から塗りつぶして消す）＋不透明部分で切り抜き */
+function prepSingle(im, w, h, mode) {
+  const c = newCanvas(w, h);
+  if (!c) return null;
+  const g = c.getContext('2d', { willReadFrequently: true });
+  g.drawImage(im, 0, 0);
+  let data;
+  try { data = g.getImageData(0, 0, w, h); } catch { return { canvas: c, x: 0, y: 0, w, h }; } // 読み取り不可（別オリジン）ならそのまま
+  const d = data.data;
+  const at = (x, y) => (y * w + x) * 4;
+  const corners = [at(0, 0), at(w - 1, 0), at(0, h - 1), at(w - 1, h - 1)];
+  const opaque = corners.every((i) => d[i + 3] > 250);
+  if (mode === true || (mode === 'auto' && opaque)) {
+    const ref = corners[0];
+    const R = d[ref], G = d[ref + 1], B = d[ref + 2];
+    const same = corners.every((i) => Math.abs(d[i] - R) + Math.abs(d[i + 1] - G) + Math.abs(d[i + 2] - B) < 60);
+    if (same || mode === true) {
+      const tol = 70;
+      const seen = new Uint8Array(w * h);
+      const stack = [0, w - 1, (h - 1) * w, h * w - 1];
+      while (stack.length) {
+        const p = stack.pop();
+        if (seen[p]) continue;
+        seen[p] = 1;
+        const i = p * 4;
+        if (Math.abs(d[i] - R) + Math.abs(d[i + 1] - G) + Math.abs(d[i + 2] - B) > tol) continue;
+        d[i + 3] = 0;
+        const x = p % w, y = (p / w) | 0;
+        if (x > 0) stack.push(p - 1);
+        if (x < w - 1) stack.push(p + 1);
+        if (y > 0) stack.push(p - w);
+        if (y < h - 1) stack.push(p + w);
+      }
+      // 縁のにじみ（背景色が混ざった半端な画素）を薄くする
+      for (let p = 0; p < w * h; p++) {
+        const i = p * 4;
+        if (d[i + 3] === 0) continue;
+        const x = p % w, y = (p / w) | 0;
+        const nb = (x > 0 && d[i - 1] === 0) || (x < w - 1 && d[i + 7] === 0) || (y > 0 && d[i - w * 4 + 3] === 0) || (y < h - 1 && d[i + w * 4 + 3] === 0);
+        if (nb && Math.abs(d[i] - R) + Math.abs(d[i + 1] - G) + Math.abs(d[i + 2] - B) < tol * 1.6) d[i + 3] = Math.min(d[i + 3], 110);
+      }
+      g.putImageData(data, 0, 0);
+    }
+  }
+  // 不透明部分の範囲で切り抜き
+  let x0 = w, y0 = h, x1 = -1, y1 = -1;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    if (d[at(x, y) + 3] > 16) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  }
+  if (x1 < 0) return null;                          // 全部透明
+  const cw = x1 - x0 + 1, ch = y1 - y0 + 1;
+  const out = newCanvas(cw, ch);
+  if (!out) return null;
+  out.getContext('2d').drawImage(c, x0, y0, cw, ch, 0, 0, cw, ch);
+  c.width = c.height = 1;
+  return { canvas: out, w: cw, h: ch };
+}
+
+let SFC = null;
+function singleFlash(src, tintCol, a) {
+  const w = src.width, h = src.height;
+  if (!SFC) SFC = newCanvas(w, h);
+  if (!SFC) return src;
+  if (SFC.width < w || SFC.height < h) { SFC.width = Math.max(SFC.width, w); SFC.height = Math.max(SFC.height, h); }
+  const g = SFC.getContext('2d');
+  g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
+  g.clearRect(0, 0, w, h);
+  g.drawImage(src, 0, 0);
+  g.globalCompositeOperation = 'source-atop'; g.globalAlpha = a; g.fillStyle = tintCol; g.fillRect(0, 0, w, h);
+  g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
+  return SFC;
+}
+
+/**
+ * 1枚絵を足元基準で、動きを付けて描く。原点=足元（呼び出し側で translate 済み）。
+ * m: { st, t, wind, flash, rage, dead, deadT, fly, hurt, targetH, facingFlip }
+ */
+function drawSingleAt(ctx, s, m) {
+  const sheet = m.rage && s.phase2 && ready(s.phase2) ? s.phase2 : s;
+  const r = IMG.get(sheet.file);
+  if (!r || !r.single) return false;
+  const src = r.single.canvas, w = r.single.w, h = r.single.h;
+  const k = (m.targetH > 0 ? m.targetH : h) / h;
+  const t = m.t || 0;
+  let sx = 1, sy = 1, dx = 0, dy = 0, rot = 0, alpha = 1;
+  if (s.motion) {
+    switch (m.st) {
+      case 'walk': dy = -Math.abs(Math.sin(t * 9)) * 4; rot = Math.sin(t * 9) * 0.05; sy = 1 + Math.abs(Math.sin(t * 9)) * 0.03; sx = 2 - sy; break;
+      case 'attack':
+        if (m.wind) { sx = 1.1; sy = 0.9; dx = -4; rot = -0.08; }
+        else { sx = 1.14; sy = 0.92; dx = 8; rot = 0.06; }
+        break;
+      case 'hurt': dx = Math.sin(t * 60) * 3; rot = -0.08; break;
+      case 'dead': { const p = clamp((m.deadT || 0) * 2.5, 0, 1); rot = -p * 1.35; dy = p * 6; alpha = 1 - clamp((m.deadT || 0) * 1.6 - 0.4, 0, 1); break; }
+      default: { const b = Math.sin(t * 3); sy = 1 + b * 0.03; sx = 1 - b * 0.02; }
+    }
+    if (m.fly && m.st !== 'dead') dy += Math.sin(t * 3.2) * s.flyBob - s.flyBob;
+    if (m.rage && m.st !== 'dead') dx += Math.sin(t * 40) * 1.2;
+  }
+  let img = src;
+  if (m.flash) img = singleFlash(src, '#ffffff', 0.9);
+  else if (m.rage && sheet === s) img = singleFlash(src, '#ff2050', 0.22);   // 第2形態の絵が無ければ赤く
+  ctx.save();
+  if (s.facesLeft) ctx.scale(-1, 1);
+  ctx.translate(dx, dy);
+  ctx.rotate(rot);
+  ctx.scale(sx * k, sy * k);
+  if (alpha < 1) ctx.globalAlpha *= alpha;
+  ctx.drawImage(img, 0, 0, w, h, -w / 2, -h, w, h);
+  ctx.restore();
+  return true;
+}
+
+function drawSingleEnemy(ctx, e, I, s) {
+  const def = e.def || {};
+  const st = I.st || (e.dead ? 'dead' : e.hurtT > 0 ? 'hurt' : e.state === 'attack' ? 'attack' : e.state === 'walk' ? 'walk' : 'idle');
+  const baseH = s.height > 0 ? s.height : (I.h || e.h || def.h || 40) * (def.boss || e.boss ? 1.25 : 1.35);
+  const fx = e.facing < 0 ? -1 : 1;
+  ctx.save();
+  if (!I.local) { ctx.translate(e.x, e.y); ctx.scale(fx, 1); }
+  const ok = drawSingleAt(ctx, s, { st, t: e.t || 0, wind: !!I.wind, flash: !!I.flash, rage: !!I.rage, deadT: e.deadT || 0, fly: !!(e.flying || I.fly), targetH: baseH });
+  ctx.restore();
+  return ok;
+}
+
+function drawSinglePet(ctx, x, y, anim, s) {
+  const raw = anim.state || 'idle';
+  const st = raw === 'pick' ? 'attack' : (raw === 'walk' || raw === 'move' || anim.moving) ? 'walk' : 'idle';
+  ctx.save();
+  if (!anim.local) { const sc = anim.scale || 1; ctx.translate(x, y); ctx.scale((anim.facing < 0 ? -1 : 1) * sc, sc); }
+  if (raw === 'pick') ctx.translate(0, -Math.abs(Math.sin((anim.t || 0) * 10)) * 8);   // 拾ったときの喜びジャンプ
+  const ok = drawSingleAt(ctx, s, { st: st === 'attack' ? 'idle' : st, t: anim.t || 0, flash: !!anim.flash, fly: !!anim.flying || raw === 'fly', targetH: s.height > 0 ? s.height : 36 });
+  ctx.restore();
+  return ok;
 }
