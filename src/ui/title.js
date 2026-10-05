@@ -25,7 +25,8 @@ const LOOK_ROWS = ['hair', 'hairColor', 'eyeColor', 'skin', 'random'];
 const hasHead = (cls, g) => guard('hasHeroArt', () => SpriteM.hasHeroArt?.('heads', cls, g), false);
 const portraitOk = (cls, g) => !!guard('portraitFor', () => SpriteM.portraitFor?.(cls, g), null);
 // 顔・髪の分割方式（manifest faces / hairs。全クラス共通・性別ごと）。顔の絵がある性別では「顔」の行を出す
-const facesOf = (g) => guard('faceList', () => SpriteM.faceList?.(g), []) || [];
+// キャラ作成で選べるのは番号の顔（f_01〜・m_01〜）だけ。悪役（_v01〜）・ボスのドン（m_don）・老人（_o01〜）は NPC・敵の専用
+const facesOf = (g) => (guard('faceList', () => SpriteM.faceList?.(g), []) || []).filter((k) => /^[fm]_\d+$/.test(k));
 const hairArtOf = (g) => guard('hairArtList', () => SpriteM.hairArtList?.(g), []) || [];
 /** 顔（分割方式）が使える性別か: 顔の絵と髪の絵が1つ以上ある */
 const faceAvail = (g) => facesOf(g).length > 0 && hairArtOf(g).length > 0;

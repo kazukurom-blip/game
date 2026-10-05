@@ -3,7 +3,7 @@
 // テストの中で仮の画像を作り（正しい絵と、わざと間違えた絵）、ZIP にしてツールを通し、OK / 注意 / NG が期待どおりか確かめる。
 //  正しい絵: 素体の形に沿ったシャツ・木剣（持ち手の印つき）・顔 f_01 と表情・前髪・後ろ髪
 //  間違い: 枠はみ出し（パーカーの腕を枠の外へ）、関節で太さが急変（ズボンの膝）、色違い（靴）、持ち手の印なし（ナイフ）、
-//          表情の輪郭ずれ（f_01_hurt）、顔に髪（f_02）、依頼書に無い名前（beanie）
+//          表情の輪郭ずれ（f_01_hurt）、顔に髪（f_02）、依頼書に無い名前（neonSword）
 // あわせて、--install（一時フォルダのリポジトリの写しへ）と動画の出力、依頼書の一覧の読み取り（158枚）も確かめる。
 import fs from 'node:fs';
 import os from 'node:os';
@@ -81,16 +81,17 @@ function genImages() {
   // 依頼書に無い名前（ニット帽。頭の物の枠に丸）
   const hatM = new Uint8Array(W * H);
   for (let y = 120; y < 230; y++) for (let x = 170; x < 380; x++) if (((x - 275) / 105) ** 2 + ((y - 230) / 100) ** 2 < 1) hatM[y * W + x] = 1;
-  files['rig/hat/beanie_f.png'] = paint(W, H, hatM, '#7a7f8c', '#c9ccd6', (x, y) => y > 210);
   // 武器
-  const wpn = (mark) => {
+  const wpn = (mark, c1 = '#b98a52', c2 = '#6a4a2a') => {
     const m = new Uint8Array(1024 * 512);
     for (let y = 244; y < 268; y++) for (let x = 200; x < 820; x++) m[y * 1024 + x] = 1;
-    const im = paint(1024, 512, m, '#b98a52', '#6a4a2a', (x) => x < 275);
+    const im = paint(1024, 512, m, c1, c2, (x) => x < 275);
     if (mark) for (let y = 250; y <= 262; y++) for (let x = 234; x <= 246; x++) if ((x - 240) ** 2 + (y - 256) ** 2 <= 36) put(im, x, y, [255, 0, 255]);
     return im;
   };
   files['rig/weapon/woodSword.png'] = wpn(true);
+  // 依頼書（第1弾・第2弾）のどちらにも無い名前の例: ネオンソード（第2弾でニット帽などが依頼書に入ったため変更）
+  files['rig/weapon/neonSword.png'] = wpn(true, '#19f0ff', '#ffffff');
   const kn = wpn(false);
   for (let i = 0; i < kn.data.length; i += 4) if (kn.data[i + 3] && !(kn.data[i] === OUT[0] && kn.data[i + 1] === OUT[1])) { const c = (i >> 2) % 1024 < 275 ? hex('#ff6fb5') : hex('#c9ccd6'); kn.data[i] = c[0]; kn.data[i + 1] = c[1]; kn.data[i + 2] = c[2]; }
   files['rig/weapon/knife.png'] = kn;
@@ -124,11 +125,11 @@ const EXPECT = {
   'rig/top/plainShirt_f.png': 'OK', 'rig/weapon/woodSword.png': 'OK', 'heads/face/f_01.png': 'OK', 'heads/face/f_01_blink.png': 'OK',
   'heads/hair/f_twin.png': 'OK', 'heads/hair/f_twin_back.png': 'OK',
   'rig/top/hoodie_f.png': 'NG', 'rig/bottom/plainPants_f.png': 'NG', 'rig/shoes/oldShoes_f.png': 'NG', 'rig/weapon/knife.png': 'NG',
-  'heads/face/f_01_hurt.png': 'NG', 'heads/face/f_02.png': 'NG', 'rig/hat/beanie_f.png': '注意',
+  'heads/face/f_01_hurt.png': 'NG', 'heads/face/f_02.png': 'NG', 'rig/weapon/neonSword.png': '注意',
 };
 const REASON = {
   'rig/top/hoodie_f.png': /枠（＋余白12px）の外/, 'rig/bottom/plainPants_f.png': /関節.*太さが急に変わる/, 'rig/shoes/oldShoes_f.png': /色が基準色/,
-  'rig/weapon/knife.png': /持ち手の印がありません/, 'heads/face/f_01_hurt.png': /輪郭が基本の顔とずれ/, 'heads/face/f_02.png': /髪の色の画素/, 'rig/hat/beanie_f.png': /依頼書.*一覧にありません/,
+  'rig/weapon/knife.png': /持ち手の印がありません/, 'heads/face/f_01_hurt.png': /輪郭が基本の顔とずれ/, 'heads/face/f_02.png': /髪の色の画素/, 'rig/weapon/neonSword.png': /依頼書.*一覧にありません/,
 };
 
 async function main() {

@@ -40,7 +40,8 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const IMGS = Object.fromEntries(Object.entries(goodImages()).map(([k, v]) => [k, png(v)]));
 // 背景の画像を手放す（LRU）確認用: 他の地域のフィールドの中景にも同じ絵（別のファイル名）
 for (const r of ['swamp', 'casino', 'rooftop', 'spaceport']) IMGS[`bg/${r}_field_mid.png`] = IMGS['bg/beach_field_mid.png'];
-const REAL = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets', 'sprites', 'manifest.json'), 'utf8'));
+// 本物の manifest から、背景・タイル・アイコン・乗り物・UI の節を外したもの（本物の画像が入った後も「画像が無い時」を試す）
+const REAL = (() => { const j = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets', 'sprites', 'manifest.json'), 'utf8')); for (const k of ['bg', 'tiles', 'icons', 'vehicles', 'ui']) delete j[k]; return j; })();
 function envManifest() {
   const m = JSON.parse(JSON.stringify(REAL));
   for (const rel of Object.keys(IMGS)) {

@@ -278,7 +278,9 @@ async function main() {
     const don = D.enemies.find((e) => e.id === 'boss_don');
     check('on: ドンの髪は白髪交じりのグレー（#8e8f99）', don && /8e8f99/.test(don.head.file), don && don.head.file);
     const npcSuit = D.npcs.find((n) => n.id === 'don_caiman');
-    check('on: 服の絵が無い装備（スーツ等）はコードの代用パーツ', npcSuit && npcSuit.uses && npcSuit.uses.top === 'code', JSON.stringify(npcSuit && npcSuit.uses));
+    // スーツの絵が manifest にあれば絵、無ければコードの代用パーツ（Codex の第2弾でスーツ等の絵が入った）
+    const suitArt = !!(REAL.rig && REAL.rig.parts && REAL.rig.parts['top/suit_m']);
+    check(`on: 服の絵がある装備は絵・無い装備はコードの代用パーツ（スーツの絵: ${suitArt ? 'あり' : 'なし'}）`, npcSuit && npcSuit.uses && npcSuit.uses.top === (suitArt ? 'top/suit_m' : 'code'), JSON.stringify(npcSuit && npcSuit.uses));
     saveUrl('grid_on', await drawGrid(page, 'rig.npcs = true（本物の manifest）: NPC・市民・敵 × 状態', WHO));
     heroOn = await heroSheet(page);
     saveUrl('hero_on', heroOn);

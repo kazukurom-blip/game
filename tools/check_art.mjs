@@ -52,6 +52,7 @@ import {
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CATALOG_MD = path.join(ROOT, 'docs', 'art_handoff', 'CODEX_BATCH_01.md');
+const CATALOG02_MD = path.join(ROOT, 'docs', 'art_handoff', 'CODEX_BATCH_02.md');
 const CATALOG03_CSV = path.join(ROOT, 'docs', 'art_handoff', 'CODEX_BATCH_03.csv');
 
 // ---------------------------------------------------------------- 閾値
@@ -226,7 +227,8 @@ export function classify(rel) {
   if ((m = /^rig\/(top|bottom|shoes|hat|accessory)\/.+\.png$/.exec(rel))) return { kind: 'wear', slot: m[1], style: null, bad: true };
   if ((m = /^rig\/weapon\/([A-Za-z0-9]+)(?:__([0-9a-fA-F]{6}))?\.png$/.exec(rel))) return { kind: 'weapon', slot: 'weapon', style: m[1], variant: m[2] ? '#' + m[2].toLowerCase() : null };
   if ((m = /^rig\/tear\/([123])_([fm])\.png$/.exec(rel))) return { kind: 'wear', slot: 'tear', style: m[1], g: m[2] };
-  if ((m = /^heads\/face\/([fm])_(\d+)(?:_(blink|hurt|shout|happy))?\.png$/.exec(rel))) return { kind: 'face', g: m[1], id: `${m[1]}_${m[2]}`, expr: m[3] || null };
+  // 番号の顔（f_01）に加えて、NPC・敵専用の悪役（m_v01）・老人（m_o01）・ボスのドン（m_don）
+  if ((m = /^heads\/face\/([fm])_(\d+|v\d+|o\d+|don)(?:_(blink|hurt|shout|happy))?\.png$/.exec(rel))) return { kind: 'face', g: m[1], id: `${m[1]}_${m[2]}`, expr: m[3] || null };
   if ((m = /^heads\/hair\/([fm])_([A-Za-z0-9]+?)(_back)?\.png$/.exec(rel))) return { kind: 'hair', g: m[1], id: m[2], key: `${m[1]}_${m[2]}`, back: !!m[3] };
   if ((m = /^heads\/([a-z]+)_([fm])(_back)?\.png$/.exec(rel))) return { kind: 'head', cls: m[1], g: m[2], back: !!m[3] };
   return { kind: 'other' };
@@ -626,7 +628,9 @@ export async function checkArt(args) {
     if (isZip) { src = path.join(work, 'zip'); fs.mkdirSync(src); execFileSync('unzip', ['-o', '-qq', input, '-d', src]); }
     const files = collect(src);
     log(`対象: ${files.length} 枚（${isZip ? 'ZIP' : 'フォルダ'} ${input}）`);
-    const cat = fs.existsSync(CATALOG_MD) ? parseCatalog(fs.readFileSync(CATALOG_MD, 'utf8')) : {};
+    // 依頼書の一覧（第1弾＋第2弾）。第2弾は敵・NPC用の顔と服（タンクトップは胴だけ、など描く枠も読む）
+    const cat = {};
+    for (const f of [CATALOG_MD, CATALOG02_MD]) if (fs.existsSync(f)) { const c2 = parseCatalog(fs.readFileSync(f, 'utf8')); for (const k in c2) if (!cat[k]) cat[k] = c2[k]; }
     if (fs.existsSync(CATALOG03_CSV)) Object.assign(cat, parseCatalog03(fs.readFileSync(CATALOG03_CSV, 'utf8')));
     const repoSpr = path.join(args.root, 'assets', 'sprites');
     const imgs = new Map();
@@ -873,7 +877,7 @@ function install({ results, files, root, cat, log }) {
     man.faces = man.faces && typeof man.faces === 'object' ? man.faces : {};
     man.hairs = man.hairs && typeof man.hairs === 'object' ? man.hairs : {};
     if (fs.existsSync(fd)) for (const n of fs.readdirSync(fd).sort()) {
-      const m = /^([fm]_\d+)\.png$/.exec(n);
+      const m = /^([fm]_(?:\d+|v\d+|o\d+|don))\.png$/.exec(n);   // 番号の顔＋NPC・敵専用（悪役・老人・ドン）
       if (!m) continue;
       const id = m[1], old = man.faces[id] && typeof man.faces[id] === 'object' ? man.faces[id] : {};
       const expr = { ...(old.expr || {}) };
