@@ -240,6 +240,7 @@ accessory_back（wings・scarf のなびき） → hair_back → body → bottom
 ```
 - 値は配列（ファイル = `rig/<キー>.png`）か、`{ "<キー>": true | "rig/...png" | { "file", "base", "accent", "fit", "layout", "recolor", "bgRemove" } }`。
   `npm run rig:manifest`（`tools/rig_manifest.mjs`）が `assets/sprites/rig/` を見て書き直す（既存の指定は残す。rig を新しく作る時は `"fit": false`）。
+- **`view`**（rig 節）: `"3q"` = 右向き斜め前（体の右半身が手前。手前の腕 armF・脚 legF を画面の左側＝背中側に付けて胴の前へ、奥の腕・脚を顔の向きの側に付けて後ろへ）。配置図 v2 の既定。`"front"` = 正面の旧い重ね方。
 - **`fit`**（rig 節 = 全体の既定、各パーツで上書き）: `false` = 配置図 v2 の枠・支点の位置のまま正確に組む（新しい配置図で描いた絵。支点に関節が来る前提）。
   `true` = 枠の中の絵の範囲を、同じ物のコード描画（v2）の範囲に自動で合わせる（ずれた絵）。武器は `fit:false` のとき持ち手のマゼンタ印が必須（無ければ警告して自動フィット。`rigStats().fitFallback`）。
 - **`layout`**（全体の既定、各パーツで上書き）: `2` = 配置図 v2、`1` = 旧い配置図（旧い頭身。必ず自動フィットで v2 の骨格に合わせる）。

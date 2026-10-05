@@ -13,7 +13,7 @@ import { shade, rgba, mix, rng, clamp, lerp, OUTLINE } from './util.js';
 import { ITEMS } from '../data/items.js';
 import { spriteCharPlan, drawSpriteCharPlan, headFor, headBackOf, flashOf } from './sprites.js';
 import { RIG_PARTS, RIG_GROUP_PARTS, RIG_S, WPN_BOX, WPN_S, RIG_Y, RIG_LIMBS, RIG_CODE_HEAD, HEAD_BACK_PIVOT } from './rigLayout.js';
-import { rigPlanFor, rigCodePlanFor } from './rig.js';
+import { rigPlanFor, rigCodePlanFor, rigView } from './rig.js';
 
 export const HERO_LOOKS = {
   luna: { body: 'f', skin: '#ffe3d3', hair: 'twin', hairColor: '#ff6fb5', eyeColor: '#ff3d8b', expr: 'cute', hairShadow: '#c8458f', hairHi: '#ffd0ea', hairTip: '#b47cff', tie: '#ffd23f' },
@@ -3424,7 +3424,10 @@ function rigWeaponAndHand(ctx, K, parts, sx, sy) {
 }
 function rigFrontView(ctx, K, parts) {
   const P = K.P, B = K.B, tw = P.twist;
-  const sxF = B.sx - 0.4 + tw * 0.5, sxB = -B.sx - tw * 0.35;
+  // 右向き斜め前（3q）: 体の右半身が手前 → 手前の腕・脚は画面の左側（背中側）、奥の腕・脚は顔の向きの側（胸の陰で少し内側）
+  const q = rigView() === '3q';
+  const sxF = q ? -B.sx + 0.4 + tw * 2 : B.sx - 0.4 + tw * 0.5;   // 3q: ひねると手前の肩が大きく前へ（パンチ・斬りの踏み込み）
+  const sxB = q ? B.sx * 0.85 - tw * 0.8 : -B.sx - tw * 0.35;
   enterUpper(ctx, P);
   rigImg(ctx, parts.backA);
   if (!K.ai) { enterHead(ctx, K); enterCodeHead(ctx, K); drawHairBack(ctx, K); ctx.restore(); ctx.restore(); }
@@ -3432,7 +3435,7 @@ function rigFrontView(ctx, K, parts) {
   rigImg(ctx, parts.backT);
   rigLimb(ctx, parts.armB, sxB, K.shY + 0.3, P.ab[0], P.ab[1], B.upper);
   ctx.restore();
-  const lx = B.legX;
+  const lx = q ? -B.legX : B.legX;
   const hb = -lx + P.hx * 0.3, hf = lx + P.hx * 0.3;
   rigLimb(ctx, parts.legB, hb, P.hipY, P.lb[0], -P.lb[1], B.thigh);
   rigFoot(ctx, parts.footB, hb, P.hipY, P.lb[0], P.lb[1], B);
@@ -3442,7 +3445,7 @@ function rigFrontView(ctx, K, parts) {
   rigImg(ctx, parts.torso);
   rigHead(ctx, K, parts, false);
   rigWeaponAndHand(ctx, K, parts, sxF, K.shY + 0.6);
-  if (K.anim.bones) drawRigBonesUpper(ctx, K, sxF, sxB);
+  if (K.anim.bones) drawRigBonesUpper(ctx, K, sxF, sxB, hf, hb);
   if (!K.anim.noFx) {
     if (P.swoosh) drawSwoosh(ctx, K, sxF, K.shY + 0.5);
     if (K.wk === 'magic' && !FL) drawHoloPanel(ctx, K);
@@ -3457,7 +3460,7 @@ function boneLine(ctx, pts, col) {
   for (const [x, y] of pts) { ctx.beginPath(); ctx.arc(x, y, 0.9, 0, TAU); ctx.fill(); }
   ctx.restore();
 }
-function drawRigBonesUpper(ctx, K, sxF, sxB) {
+function drawRigBonesUpper(ctx, K, sxF, sxB, hf, hb) {
   const P = K.P, B = K.B;
   boneLine(ctx, [[0, 0], [0, RIG_Y.neck], [0, K.headY]], '#5ff');
   boneLine(ctx, [[sxB, K.shY + 0.3], [sxF, K.shY + 0.6]], '#5ff');
@@ -3466,7 +3469,6 @@ function drawRigBonesUpper(ctx, K, sxF, sxB) {
   limbPts(sxF, K.shY + 0.6, P.af[0], P.af[1], B.upper, B.fore);
   boneLine(ctx, [[sxF, K.shY + 0.6], [LP.kx, LP.ky], [LP.ex, LP.ey]], '#5ff');
   ctx.restore();   // 上半身の座標を抜けて足元の座標で脚（最後に enterUpper で戻す）
-  const hb = -B.legX + P.hx * 0.3, hf = B.legX + P.hx * 0.3;
   for (const [hx, L] of [[hb, P.lb], [hf, P.lf]]) {
     limbPts(hx, P.hipY, L[0], -L[1], B.thigh, B.shin);
     boneLine(ctx, [[hx, P.hipY], [LP.kx, LP.ky], [LP.ex, LP.ey]], '#5ff');

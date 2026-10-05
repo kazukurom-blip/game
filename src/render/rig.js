@@ -79,7 +79,9 @@ export function setRigManifest(j, base) {
   if (Array.isArray(src)) for (const k of src) add(k, null);
   else if (src && typeof src === 'object') for (const k of Object.keys(src)) add(k, src[k]);
   for (const k in files) SHEETS.set(k, files[k]);
-  RM = { enabled: j.enabled !== false, defaultWear: j.defaultWear !== false, heroesOnly: j.heroesOnly !== false, fit: gFit, layout: gLayout };
+  // view: '3q' = 右向き斜め前（手前 = 画面の左側の腕・脚を胴の前に）/ 'front' = 正面（旧い重ね方: 顔の向きの側の腕を前に）
+  const view = j.view === 'front' || j.view === '3q' ? j.view : gLayout === 2 ? '3q' : 'front';
+  RM = { enabled: j.enabled !== false, defaultWear: j.defaultWear !== false, heroesOnly: j.heroesOnly !== false, fit: gFit, layout: gLayout, view };
   return true;
 }
 /** パーツごとの微調整 { torso: { sx, sy, dx, dy } }（sx/sy = 支点まわりの拡大、dx/dy = ずらし。単位はリグの座標） */
@@ -107,8 +109,10 @@ function parseKey(key) {
   return null;
 }
 export function rigStats() {
-  return { enabled: !!(RM && RM.enabled), fit: RM ? RM.fit : null, layout: RM ? RM.layout : null, ...STAT, warnings: STAT.warnings.slice(-5), fitFallback: STAT.fitFallback.slice(), plans: PLANS.size, gens: GEN.size, rev: RREV };
+  return { enabled: !!(RM && RM.enabled), fit: RM ? RM.fit : null, layout: RM ? RM.layout : null, view: RM ? RM.view : null, ...STAT, warnings: STAT.warnings.slice(-5), fitFallback: STAT.fitFallback.slice(), plans: PLANS.size, gens: GEN.size, rev: RREV };
 }
+/** リグの見え方（'3q' | 'front'） */
+export function rigView() { return RM ? RM.view : 'front'; }
 export function hasRig() { return !!(RM && RM.enabled && SHEETS.size); }
 /** 全部のリグ画像を読み込む（テスト用）。完了で解決 */
 export function rigPreload() {
