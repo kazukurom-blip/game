@@ -127,14 +127,24 @@
     "enabled": true,
     "fit": false,
     "layout": 2,
-    "parts": {
-      "body_f": true
-    },
     "defaultWear": false,
     "profile": {
       "f": {
         "shDy": 1.9
       }
+    },
+    "parts": {
+      "body_f": "rig/body_f.png",
+      "body_m": "rig/body_m.png",
+      "bottom/plainPants_f": "rig/bottom/plainPants_f.png",
+      "bottom/skirt_f": "rig/bottom/skirt_f.png",
+      "hat/catEars_f": "rig/hat/catEars_f.png",
+      "shoes/oldShoes_f": "rig/shoes/oldShoes_f.png",
+      "shoes/sneakers_f": "rig/shoes/sneakers_f.png",
+      "top/hoodie_f": "rig/top/hoodie_f.png",
+      "top/plainShirt_f": "rig/top/plainShirt_f.png",
+      "weapon/knife": "rig/weapon/knife.png",
+      "weapon/woodSword": "rig/weapon/woodSword.png"
     }
   },
   "heads": {
