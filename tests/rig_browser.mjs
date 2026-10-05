@@ -69,7 +69,7 @@ async function genImages(browser) {
       for (const slot of Object.keys(STYLES)) for (const st of STYLES[slot]) {
         // いろいろな「AIのずれ」: 一部は全体を少しずらす・枠ごとに少し大きく・透明背景・薄い灰色の背景
         const k = i++ % 4;
-        const opts = k === 1 ? { shift: [7, -5] } : k === 2 ? { scale: 1.07 } : k === 3 ? { bg: null } : { bg: '#f4f4f0' };
+        const opts = k === 1 ? { shift: [26, -18] } : k === 2 ? { scale: 1.1, shift: [-10, 8] } : k === 3 ? { bg: null } : { bg: '#f4f4f0' };
         f[`${slot}/${st}_${g}`] = T.fake(slot, st, g, opts);
       }
       for (const n of [1, 2, 3]) f[`tear/${n}_${g}`] = T.fake('tear', String(n), g, { bg: null });
@@ -209,6 +209,7 @@ async function main() {
       const loaded = await preload(page);
       const rs = await page.evaluate(() => window.game.sprites.spriteStats().rig);
       check('リグの画像が全部読み込める', rs.loaded === rs.files && rs.failed === 0, `${rs.loaded}/${rs.files} 失敗 ${rs.failed} ${JSON.stringify(rs.warnings)}`);
+      check('読み込み時の前処理: 1枚あたり平均 < 150ms', rs.prepMs / rs.loaded < 150, `平均 ${(rs.prepMs / rs.loaded).toFixed(0)}ms 最大 ${rs.prepMax.toFixed(0)}ms`);
       void loaded;
       const planOk = await page.evaluate(async () => {
         const { rigPlanOf } = await import('./src/render/character.js');

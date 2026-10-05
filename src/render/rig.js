@@ -22,7 +22,7 @@ let RM = null;                     // 正規化済みの rig 設定（null = リ
 let BASE = 'assets/sprites/';
 let RREV = 0;                      // リグの画像が読み込まれるたびに +1（キャッシュのキー）
 const SHEETS = new Map();          // key → シートの記録
-const STAT = { files: 0, requested: 0, loaded: 0, failed: 0, gen: 0, bakes: 0, recolors: 0, warnings: [] };
+const STAT = { files: 0, requested: 0, loaded: 0, failed: 0, gen: 0, bakes: 0, recolors: 0, prepMs: 0, prepMax: 0, warnings: [] };
 const HAS = typeof OffscreenCanvas !== 'undefined' || typeof document !== 'undefined';
 const K2 = RIG_R / RIG_S;          // 配置図の px → 保持する px
 const MARGIN = 12;                 // 枠の外側にはみ出した絵も拾う幅（配置図の px）
@@ -42,7 +42,7 @@ const HEX = /^#[0-9a-f]{6}$/i;
 /** manifest の rig 節を設定（null で無効）。sprites.js の setSpriteManifest から呼ばれる */
 export function setRigManifest(j, base) {
   RM = null; SHEETS.clear(); PLANS.clear(); GEN.clear(); RREV++;
-  STAT.files = STAT.requested = STAT.loaded = STAT.failed = 0;
+  STAT.files = STAT.requested = STAT.loaded = STAT.failed = 0; STAT.prepMs = STAT.prepMax = 0;
   if (typeof base === 'string') BASE = base;
   if (!j || typeof j !== 'object' || Array.isArray(j)) return false;
   const src = j.parts || j.files;
@@ -107,15 +107,29 @@ function load(rec) {
   };
   try {
     const im = new Image();
-    im.onload = () => {
+    im.onload = () => queuePrep(() => {
       let ok = false;
+      const t0 = typeof performance !== 'undefined' ? performance.now() : 0;
       try { ok = rec.kind === 'weapon' ? prepWeapon(rec, im) : prepSheet(rec, im); } catch (e) { warn('rig: 前処理に失敗 ' + rec.file + ' ' + e.message); }
+      if (typeof performance !== 'undefined') { const ms = performance.now() - t0; STAT.prepMs += ms; STAT.prepMax = Math.max(STAT.prepMax, ms); }
       done(ok);
-    };
+    });
     im.onerror = () => { warn('rig: 画像を読めません ' + rec.file); done(false); };
     im.src = BASE + rec.file;
   } catch (e) { warn('rig: 読み込みに失敗 ' + rec.file + ' ' + e.message); done(false); }
   return rec;
+}
+// 前処理（背景除去・切り出し・位置合わせ。1枚 約0.1秒）は1回に1枚ずつ（画面が止まらないように間をあける）
+const PREPQ = [];
+let prepBusy = false;
+function queuePrep(fn) {
+  PREPQ.push(fn);
+  if (!prepBusy) { prepBusy = true; setTimeout(pumpPrep, 0); }
+}
+function pumpPrep() {
+  const fn = PREPQ.shift();
+  if (fn) { try { fn(); } catch (e) { warn('rig: ' + e.message); } }
+  if (PREPQ.length) setTimeout(pumpPrep, 16); else prepBusy = false;
 }
 /** シートの基準色 [主色, アクセント] */
 function baseColors(rec) {
@@ -190,6 +204,99 @@ function defringe(d, W, H, bg) {
     for (let k = 0; k < mark.length; k += 2) { const i = mark[k]; d[i] = OUT[0]; d[i + 1] = OUT[1]; d[i + 2] = OUT[2]; d[i + 3] = mark[k + 1]; }
   }
 }
+// ---- 絵の塊（連結成分）を枠に割り当てる（AI が枠から少しはみ出して・ずらして描いても拾う。小さなゴミ・写った枠線は捨てる）
+const BLK = 4;                       // 4×4px のブロック単位で調べる
+const REACH = 44;                    // 枠からこの px 以内にある塊はその枠の候補
+let BLAB = null;
+/** 枠ごとの { bb: [x0,y0,x1,y1]（px）, lab: ラベルの配列, set: その枠の塊のラベル } */
+function blobsByPart(d, W, H, names) {
+  const bw = Math.ceil(W / BLK), bh = Math.ceil(H / BLK);
+  const lab = BLAB && BLAB.length === bw * bh ? BLAB.fill(0) : (BLAB = new Int32Array(bw * bh));
+  const on = new Uint8Array(bw * bh);
+  for (let y = 0; y < H; y++) {
+    const row = (y / BLK | 0) * bw;
+    for (let x = 0; x < W; x++) if (d[(y * W + x) * 4 + 3] > 64) on[row + (x / BLK | 0)]++;
+  }
+  const comps = [null];
+  const st = [];
+  for (let i = 0; i < on.length; i++) {
+    if (on[i] < 2 || lab[i]) continue;
+    const id = comps.length;
+    const c = { id, n: 0, x0: 1e9, y0: 1e9, x1: -1, y1: -1 };
+    lab[i] = id; st.push(i);
+    while (st.length) {
+      const p = st.pop();
+      const x = p % bw, y = (p / bw) | 0;
+      c.n++; if (x < c.x0) c.x0 = x; if (x > c.x1) c.x1 = x; if (y < c.y0) c.y0 = y; if (y > c.y1) c.y1 = y;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= bw || ny >= bh) continue;
+        const q = ny * bw + nx;
+        if (on[q] >= 2 && !lab[q]) { lab[q] = id; st.push(q); }
+      }
+    }
+    comps.push(c);
+  }
+  // 塊 → 一番重なる枠（REACH まで広げた枠）
+  const per = {};
+  for (let k = 1; k < comps.length; k++) {
+    const c = comps[k];
+    const X0 = c.x0 * BLK, Y0 = c.y0 * BLK, X1 = (c.x1 + 1) * BLK, Y1 = (c.y1 + 1) * BLK;
+    let best = null, bo = 0, inside = 0;
+    for (const name of names) {
+      const b = RIG_PARTS[name];
+      const ov = Math.max(0, Math.min(X1, b.x + b.w + REACH) - Math.max(X0, b.x - REACH)) * Math.max(0, Math.min(Y1, b.y + b.h + REACH) - Math.max(Y0, b.y - REACH));
+      if (ov > bo) { bo = ov; best = name; inside = Math.max(0, Math.min(X1, b.x + b.w) - Math.max(X0, b.x)) * Math.max(0, Math.min(Y1, b.y + b.h) - Math.max(Y0, b.y)) / ((X1 - X0) * (Y1 - Y0)); }
+    }
+    if (!best) continue;
+    c.inside = inside;
+    (per[best] = per[best] || []).push(c);
+  }
+  const out = {};
+  for (const name of Object.keys(per)) {
+    const L = per[name];
+    const big = Math.max(...L.map((c) => c.n));
+    const keep = L.filter((c) => c.n >= Math.max(3, big * 0.02) && !(c.n < big * 0.08 && c.inside < 0.3));   // 小さなゴミ・枠の外の小さな物（写った文字など）は捨てる
+    if (!keep.length || big < 6) continue;
+    const set = new Set(keep.map((c) => c.id));
+    let x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1;
+    for (const c of keep) { x0 = Math.min(x0, c.x0); y0 = Math.min(y0, c.y0); x1 = Math.max(x1, c.x1); y1 = Math.max(y1, c.y1); }
+    // ブロックの範囲 → 画素の範囲（その塊の画素だけで詰める）
+    const r = [x0 * BLK, y0 * BLK, Math.min(W, (x1 + 1) * BLK), Math.min(H, (y1 + 1) * BLK)];
+    let px0 = 1e9, py0 = 1e9, px1 = -1, py1 = -1;
+    for (let y = r[1]; y < r[3]; y++) for (let x = r[0]; x < r[2]; x++) {
+      if (d[(y * W + x) * 4 + 3] <= 64 || !set.has(lab[(y / BLK | 0) * bw + (x / BLK | 0)])) continue;
+      if (x < px0) px0 = x; if (x > px1) px1 = x; if (y < py0) py0 = y; if (y > py1) py1 = y;
+    }
+    if (px1 < 0) continue;
+    out[name] = { bb: [Math.max(0, px0 - 1), Math.max(0, py0 - 1), Math.min(W, px1 + 2), Math.min(H, py1 + 2)], set, bw, lab };
+  }
+  return out;
+}
+/** その枠の塊の画素だけを切り出した canvas（bb の大きさ） */
+function blobCanvas(d, W, bb, B0) {
+  const w = bb[2] - bb[0], h = bb[3] - bb[1];
+  const cv = newCanvas(w, h);
+  const g = cv.getContext('2d');
+  const img = g.createImageData(w, h), o = img.data;
+  for (let y = 0; y < h; y++) {
+    const sy = y + bb[1];
+    for (let x = 0; x < w; x++) {
+      const sx = x + bb[0];
+      const i = (sy * W + sx) * 4;
+      if (d[i + 3] === 0) continue;
+      // 塊の境目のブロックは隣も見る（縁の半透明の画素を落とさない）
+      const bx = sx / BLK | 0, by = sy / BLK | 0;
+      let ok = B0.set.has(B0.lab[by * B0.bw + bx]);
+      if (!ok) for (let dy = -1; dy <= 1 && !ok; dy++) for (let dx = -1; dx <= 1 && !ok; dx++) { const q = (by + dy) * B0.bw + bx + dx; if (q >= 0 && q < B0.lab.length && B0.set.has(B0.lab[q])) ok = true; }
+      if (!ok) continue;
+      const j = (y * w + x) * 4;
+      o[j] = d[i]; o[j + 1] = d[i + 1]; o[j + 2] = d[i + 2]; o[j + 3] = d[i + 3];
+    }
+  }
+  g.putImageData(img, 0, 0);
+  return cv;
+}
 // パーツごとの位置合わせのしかた: 拡大率をどの辺で決めるか・どの点を合わせるか
 const FIT = {
   head: ['area', 'c', 'c'], back: ['area', 'c', 'c'], torso: ['h', 'c', 'c'],
@@ -224,10 +331,12 @@ function prepSheet(rec, im) {
   const names = rec.kind === 'slot' && rec.slot === 'accessory' && RIG_ACC_PARTS[rec.style] ? RIG_ACC_PARTS[rec.style] : RIG_GROUP_PARTS[group];
   rec.parts = {};
   let found = 0;
+  const blobs = blobsByPart(d, RIG_W, RIG_H, names);
   for (const name of names) {
     const b = RIG_PARTS[name];
-    const bb = bboxOf(d, RIG_W, RIG_H, b.x - MARGIN, b.y - MARGIN, b.w + MARGIN * 2, b.h + MARGIN * 2, 64, 1);
-    if (!bb) continue;
+    const B0 = blobs[name];
+    if (!B0) continue;
+    const bb = B0.bb;
     found++;
     const P = partCanvas(name);
     if (!P.cv) return false;
@@ -249,7 +358,7 @@ function prepSheet(rec, im) {
     const ox = b.x - MARGIN, oy = b.y - MARGIN;
     const bw = bb[2] - bb[0], bh = bb[3] - bb[1];
     const dx = ((bb[0] - ax) * s + rx - ox) * K2, dy = ((bb[1] - ay) * s + ry - oy) * K2;
-    pg.drawImage(c, bb[0], bb[1], bw, bh, dx, dy, bw * s * K2, bh * s * K2);
+    pg.drawImage(blobCanvas(d, RIG_W, bb, B0), 0, 0, bw, bh, dx, dy, bw * s * K2, bh * s * K2);
     rec.parts[name] = P;
   }
   c.width = c.height = 1;

@@ -91,7 +91,7 @@ function tearTemplate(n, g) {
   x.drawImage(grayOf(groupCanvas('bottom', g, TEAR_EQ), 0.2), 0, 0);
   x.save(); x.globalAlpha = 0.75; x.drawImage(groupCanvas('tear', g, TEAR_EQ, { dmg: TEAR_DMG[n] }), 0, 0); x.restore();
   boxes(x, RIG_GROUP_PARTS.tear);
-  title(x, `服破れ ${n}（${g === 'f' ? '♀' : '♂'}） HP ${[75, 50, 25][n - 1]}% 以下で服の上に重ねる`, '破れ穴（中はインナーの色 #3A3346）・すり傷・すす だけを描く ／ 服そのものは描かない ／ 灰色の服は位置の目安');
+  title(x, `服破れ ${n}（${g === 'f' ? '♀' : '♂'}） HP ${[75, 50, 25][n - 1]}% 以下で服の上に重ねる`, '破れ穴（中はインナーの色 #3A3346）・すり傷・すす だけ ／ 服は描かない ／ 灰色の服は目安');
   return c.toDataURL('image/png');
 }
 /** アイテムの下絵: その装備のコード描画を枠に分解して薄く＋素体のシルエット */
@@ -111,7 +111,7 @@ function template(slot, style, g, opts = {}) {
   }
   boxes(x, used);
   const base = slot === 'body' ? `肌 ${RIG_SKIN_BASE[g]}` : `基準色 ${RIG_BASE[slot][style].join(' / ')}`;
-  title(x, `${NAMES[slot]}：${style}（${g === 'f' ? '♀' : '♂'}）  ${base}`, `描く枠: ${used.map((n) => RIG_PARTS[n].short).join('・')} ／ 他の枠は空のまま ／ 薄い絵は位置と大きさの目安`);
+  title(x, `${NAMES[slot]}${slot === 'body' ? '' : '：' + style}（${g === 'f' ? '♀' : '♂'}）  ${base}`, `描く枠: ${used.map((n) => RIG_PARTS[n].short).join('・')} ／ 他の枠は空のまま ／ 薄い絵は位置と大きさの目安`);
   return c.toDataURL('image/png');
 }
 function weaponCanvas(style, color, accent, bg) {
