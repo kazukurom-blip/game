@@ -8,6 +8,7 @@ import { charHeadPose, itemColors, SPRITE_LAYER_ORDER, aiHeadOf, paintAiHead, pa
 import { setRigManifest, rigStats, rigPreload } from './rig.js';
 import { HEAD_W, HEAD_S, HEAD_PX, HEAD_PY } from './rigLayout.js';
 import { HEX6, colorInfo, effectiveColor, recolorData, sameColor } from './recolor.js';
+import { setArtManifest } from './artOverrides.js';
 
 export const SPRITE_BASE = 'assets/sprites/';
 const DEF_SCALE = 0.5, DEF_FPS = 8;
@@ -59,6 +60,7 @@ export function setSpriteManifest(j, base = SPRITE_BASE) {
   MAN = null; STATS.entries = 0; IMG.clear(); TINT.clear(); PLAIN.clear(); FRC.clear(); FHC.clear(); tintPx = 0; REV++;
   STATS.requested = STATS.loaded = STATS.failed = 0;
   setRigManifest(null, base);
+  try { setArtManifest(j, base); } catch (e) { note('背景・アイコン等の節の解釈に失敗: ' + e.message); } // bg / tiles / icons / vehicles / ui（artOverrides.js）
   if (!j || typeof j !== 'object' || Array.isArray(j)) { STATS.manifest = j == null ? 'none' : 'broken'; return false; }
   try { setRigManifest(j.rig, base); } catch (e) { note('rig の解釈に失敗: ' + e.message); }
   try {

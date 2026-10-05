@@ -1,6 +1,7 @@
 // 乗り物描画: 80年代ネオン×現代スポーツカー調（v.x,v.y = 足元中央）
 import { shade, rgba, rr, OUTLINE } from './util.js';
 import { drawCharacter, HERO_LOOKS, lastHeroEquip } from './character.js';
+import { vehicleArt } from './artOverrides.js';
 
 // 運転手の見た目: v.driverLook / v.driverEquip があればそれを使う。プレイヤー運転時は heroId から推定。
 function driverLook(v) {
@@ -55,6 +56,8 @@ export function drawVehicle(ctx, v) {
   ctx.scale(v.facing < 0 ? -1 : 1, 1);
   ctx.lineJoin = 'round'; ctx.lineCap = 'round';
   const rot = (v.x || 0) / 15;
+  // 差し替え画像（manifest の vehicles 節）。読み込み中・無い → コードの絵
+  if (drawArtVehicle(ctx, v, kind, t, rot)) { ctx.restore(); return; }
   if (kind === 'bike') drawBike(ctx, v, t, rot);
   else drawCar(ctx, v, t, rot, kind === 'police');
   ctx.restore();
@@ -193,4 +196,50 @@ function drawBike(ctx, v, t, rot) {
     if (dl) drawCharacter(ctx, -6, -18, dl[0], dl[1], { facing: 1, state: 'drive', t, scale: 0.95 });
     else { ctx.fillStyle = 'rgba(20,10,30,0.7)'; ctx.beginPath(); ctx.arc(-6, -58, 9, 0, PI * 2); ctx.fill(); ctx.fillRect(-14, -50, 14, 16); }
   }
+}
+
+// ---------------------------------------------------------------- 差し替え画像
+// 今のコードの絵のタイヤの位置・大きさ（足元中央が原点・右向き）。車体の絵はマゼンタの印がここに来るように縮めて置く
+export const VEHICLE_GEO = {
+  bike: { rear: [-30, -14], front: [32, -14], wheelR: 14 },
+  sports: { rear: [-46, -12], front: [48, -12], wheelR: 13 },
+  police: { rear: [-46, -12], front: [48, -12], wheelR: 13 },
+};
+function drawArtVehicle(ctx, v, kind, t, rot) {
+  const geo = VEHICLE_GEO[kind] || VEHICLE_GEO.sports;
+  const A = vehicleArt(kind, geo, v.color);
+  if (!A) return false;
+  const sp = Math.abs(v.speed || v.vx || 0);
+  const bounce = kind !== 'bike' && sp > 30 ? Math.sin(t * 30) * 0.6 : 0;
+  const glow = kind === 'police' ? '#2e7bff' : kind === 'bike' ? '#ff5fa2' : (v.glow || '#19f0ff');
+  underglow(ctx, kind === 'bike' ? 90 : 150, glow, t);
+  const dl = v.driver ? driverLook(v) : null;
+  // 車: 運転手を車体の後ろに（窓から見える）。バイク: 車体の上に
+  if (v.driver && kind !== 'bike') {
+    if (dl) drawCharacter(ctx, -8, -2 + bounce, dl[0], dl[1], { facing: 1, state: 'drive', t, scale: 0.85 });
+    else driverHead(ctx, -4, -36 + bounce, v.driverType === 'cop' || kind === 'police');
+  }
+  ctx.drawImage(A.body, A.bx, A.by + bounce, A.bw, A.bh);
+  for (const [wx, wy] of [geo.rear, geo.front]) {
+    if (A.wheel) {
+      ctx.save(); ctx.translate(wx, wy); ctx.rotate(rot);
+      ctx.drawImage(A.wheel, -A.wr, -A.wr, A.wr * 2, A.wr * 2);
+      ctx.restore();
+    } else wheel(ctx, wx, wy, A.wr * 0.86, rot);
+  }
+  if (v.driver && kind === 'bike') {
+    if (dl) drawCharacter(ctx, -6, -18, dl[0], dl[1], { facing: 1, state: 'drive', t, scale: 0.95 });
+    else { ctx.fillStyle = 'rgba(20,10,30,0.7)'; ctx.beginPath(); ctx.arc(-6, -58, 9, 0, PI * 2); ctx.fill(); ctx.fillRect(-14, -50, 14, 16); }
+  }
+  // パトカーの回転灯の光（絵の回転灯の上に、点滅する光だけ足す）
+  if (kind === 'police' && v.siren !== false) {
+    const ph = ((t * 6) | 0) % 2, cx = ph === 0 ? -8 : 8, c = ph === 0 ? '#ff2e4d' : '#2e7bff';
+    const top = A.top + 4;
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    const rg = ctx.createRadialGradient(cx, top, 2, cx, top, 60);
+    rg.addColorStop(0, rgba(c, 0.55)); rg.addColorStop(1, rgba(c, 0));
+    ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(cx, top, 60, 0, PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  return true;
 }

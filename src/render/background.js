@@ -6,6 +6,7 @@ import { shade, rgba, rng, hashStr, rr, starPath, makeCanvas, lerp, mix, mixW, c
 import { drawDecor } from './decor.js';
 import { drawScene } from './bgScenes.js';
 import { drawSpecial, specialOf, specialTile } from './bgSpecial.js';
+import { bgArt, tileArt } from './artOverrides.js';
 
 const PI = Math.PI;
 const LW = 1024;
@@ -206,13 +207,17 @@ export function drawBackground(ctx, map, cam, W, H, time) {
   ctx.save();
   ctx.clearRect(0, 0, W, H);
   ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-  try { if (!(sc.special && drawSpecial(ctx, S, map))) drawScene(ctx, S); } catch (e) { console.warn('[background] scene failed', e); }
+  // 差し替え画像（manifest の bg 節。中景が読み込めた地域だけ）→ 無ければコードの背景
+  const art = sc.special ? null : bgArt(sc);
+  if (art) { framePost.length = 0; try { drawArtScene(ctx, S, art); } catch (e) { console.warn('[background] art failed', e); } }
+  else try { if (!(sc.special && drawSpecial(ctx, S, map))) drawScene(ctx, S); } catch (e) { console.warn('[background] scene failed', e); }
   // 色調補正（描いた部分だけ）
   let [tc, ta] = weighted(TOD_TINT, w);
   if (S.indoor) ta *= 0.25;
   if (ta > 0.01) { ctx.globalCompositeOperation = 'source-atop'; ctx.globalAlpha = Math.min(0.85, ta); ctx.fillStyle = tc; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
   ctx.globalCompositeOperation = 'source-over';
   // 窓明かり・ネオン（夜ほど強い）
+  if (art) { glowKey = ''; glowHad = false; hasGlow = false; gb = null; reuse = false; if (art.lights && lights > 0.02) drawArtLights(ctx, S, art, lights); }
   if (gb) glowHad = hasGlow;
   if ((gb || reuse) && hasGlow) {
     ctx.globalCompositeOperation = 'lighter';
@@ -290,6 +295,41 @@ function drawSun(ctx, x, y, r, col, a, stripes, time) {
   g.addColorStop(0, rgba(col, 0.55)); g.addColorStop(1, rgba(col, 0));
   ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * 2.6, 0, PI * 2); ctx.fill();
   ctx.globalAlpha = 1;
+}
+
+// ================================================================ 差し替え画像の背景（manifest の bg 節）
+// 画像は 2560×720（高さ 720 = 画面の高さ）。横に繰り返して並べる（左右の端がつながる絵）。
+// 位置合わせ: 中景（mid）の地面の線（画像の y=640）を、画面上の地面の線 gS = map.groundY - cam.y に合わせる
+//   （= 地面のタイルの上端とぴったり重なる）。地面が画面の下より下（高い所にいる）時は、中景は 0.35 倍の速さで下がる。
+//   遠景（far）の線は 画面の 78% の高さ と中景の線の間（0.4）。横の速さ: far 0.1・mid 0.3（manifest の parallax で変更可）。
+export function artGroundLine(gS, H) { return gS <= H ? gS : H + (gS - H) * 0.35; }
+function artLayer(ctx, L, camX, line, W, H) {
+  const k = H / L.h;
+  const gy = (L.groundY ?? 640) * (L.h / 720);
+  const lw = L.w * k, lh = L.h * k;
+  const y = Math.round(line - gy * k);
+  if (y >= H || y + lh <= 0) return;
+  const off = -(((camX * L.parallax) % lw) + lw) % lw;
+  if (k === 1) for (let x = Math.round(off); x < W; x += L.w) ctx.drawImage(L.img, x, y);
+  else for (let x = off; x < W; x += lw) ctx.drawImage(L.img, Math.floor(x), y, Math.ceil(lw) + 1, lh);
+}
+function artLines(S) {
+  const gl = artGroundLine(S.gS, S.H);
+  return { mid: gl, far: S.H * 0.78 + (gl - S.H * 0.78) * 0.4 };
+}
+function drawArtScene(ctx, S, A) {
+  const ln = artLines(S);
+  if (A.far) artLayer(ctx, A.far, S.cam.x, ln.far, S.W, S.H);
+  artLayer(ctx, A.mid, S.cam.x, ln.mid, S.W, S.H);
+}
+function drawArtLights(ctx, S, A, lights) {
+  const ln = artLines(S);
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.globalAlpha = Math.min(1, lights) * (A.lights.alpha ?? 1);
+  // あかりは中景と同じ位置・速さ
+  artLayer(ctx, { ...A.lights, parallax: A.mid.parallax, groundY: A.lights.groundY ?? A.mid.groundY }, S.cam.x, ln.mid, S.W, S.H);
+  ctx.restore();
 }
 
 // ================================================================ drawNightOverlay（スクリーン空間・HUD の前）
@@ -398,14 +438,19 @@ export function drawMapTiles(ctx, map, time) {
     if (w.x + w.w < V.x0 || w.x > V.x1) continue;
     drawWall(ctx, w, S, theme);
   }
+  // 差し替え画像（manifest の tiles 節）。当たり判定は変えない（絵の「乗る面」の線を足場・地面の y に合わせるだけ）
+  const tg = sc.special ? null : tileArt(sc, 'ground'), tp = sc.special ? null : tileArt(sc, 'platform');
   // 足場
   if (map.platforms) for (const p of map.platforms) {
     if (p.x + p.w < V.x0 || p.x > V.x1 || p.y < V.y0 - 60 || p.y > V.y1 + 60) continue;
-    drawPlatform(ctx, p, S, theme, time);
+    if (tp) drawArtPlatform(ctx, p, tp); else drawPlatform(ctx, p, S, theme, time);
   }
   // 地面
-  drawGround(ctx, map, S, theme, V, time);
-  if (sc.town && theme !== 'downtown') drawSidewalk(ctx, map, S, region, V);
+  if (tg) drawArtGround(ctx, map, S, tg, V);
+  else {
+    drawGround(ctx, map, S, theme, V, time);
+    if (sc.town && theme !== 'downtown') drawSidewalk(ctx, map, S, region, V);
+  }
   // ポータル
   if (map.portals) for (const p of map.portals) {
     if (p.x < V.x0 - 100 || p.x > V.x1 + 100) continue;
@@ -548,6 +593,26 @@ function drawGround(ctx, map, S, theme, V, time) {
   }
   // 地面上端のアウトライン
   ctx.fillStyle = 'rgba(42,20,48,0.5)'; ctx.fillRect(x0, gy - 1, x1 - x0, 2);
+}
+
+// 差し替え画像の地面: 512×256 の絵を、上から surface(40)px の線が map.groundY に来るように x=0 から横に並べる。
+// 絵の下（256px より下）は絵の下端の色で塗る。
+function drawArtGround(ctx, map, S, T, V) {
+  const gy = map.groundY, k = T.scale;
+  const tw = T.w * k, th = T.h * k, top = gy - T.surface * k;
+  const x0 = Math.max(V.x0, -400), x1 = Math.min(V.x1, (map.width || 4000) + 400);
+  const bottom = Math.max((map.height || gy + 200), V.y1) + 50;
+  if (top + th < bottom) { ctx.fillStyle = T.fill || S.groundD; ctx.fillRect(x0, top + th - 1, x1 - x0, bottom - top - th + 1); }
+  const i0 = Math.floor(x0 / tw), i1 = Math.ceil(x1 / tw);
+  for (let i = i0; i < i1; i++) ctx.drawImage(T.img, i * tw, top, tw, th);
+}
+// 差し替え画像の足場: 512×96 の絵を、上から surface(16)px の線が足場の上面 p.y に来るように、足場の左端から並べて幅で切る
+function drawArtPlatform(ctx, p, T) {
+  const k = T.scale, tw = T.w * k, th = T.h * k, top = p.y - T.surface * k;
+  ctx.save();
+  ctx.beginPath(); ctx.rect(p.x, top - 2, p.w, th + 4); ctx.clip();
+  for (let x = p.x; x < p.x + p.w; x += tw) ctx.drawImage(T.img, x, top, tw, th);
+  ctx.restore();
 }
 
 function shell(ctx, h) {

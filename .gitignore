@@ -11,5 +11,3 @@ assets/sprites_template/presets/*_guide.png
 docs/art_handoff/packages/
 # 納品画像の検査の出力（node tools/check_art.mjs）
 tests/art_check/
-# 担当エージェントの作業用コピー（git worktree）
-.claude/worktrees/

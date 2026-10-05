@@ -3,6 +3,7 @@ import { shade, rgba, rr, starPath, makeCanvas, hashStr, OUTLINE } from './util.
 import { drawWeapon, itemColors, codeStyle } from './character.js';
 import { drawPet, PET_FLYING } from './pets.js';
 import { spriteRev } from './sprites.js';
+import { itemIconArt, skillIconArt } from './artOverrides.js';
 
 const PI = Math.PI;
 const cache = new Map();
@@ -31,6 +32,9 @@ export function drawItemIcon(ctx, item, x, y, size = 32) {
   const look = item.look;
   const key = 'i:' + (look ? `${item.slot}|${look.style}|${look.color}|${look.accent}` : `${item.icon || item.type || 'etc'}|${item.id}`);
   const petKey = look && (item.slot === 'pet' || /Pet$/.test(look.style || '')) ? '|spr' + spriteRev() : ''; // PET は差し替えスプライトの読込/切替で描き直す
+  // 差し替え画像（manifest の icons 節: equip/<slot>_<style>・item/<id>）。読み込み中・無い → コードの絵
+  const art = itemIconArt(item);
+  if (art) { ctx.drawImage(getCached('ia:' + key + '|' + artId(art), size, (g) => paintArtItem(g, art)), x - size / 2, y - size / 2, size, size); return; }
   const c = getCached(key + petKey, size, (g) => paintItem(g, item));
   ctx.drawImage(c, x - size / 2, y - size / 2, size, size);
 }
@@ -38,8 +42,33 @@ export function drawItemIcon(ctx, item, x, y, size = 32) {
 export function drawSkillIcon(ctx, skill, x, y, size = 32) {
   if (!skill) return;
   const key = 's:' + skill.id + '|' + skill.kind + '|' + skill.color;
-  const c = getCached(key, size, (g) => paintSkill(g, skill));
+  // 差し替え画像（manifest の icons 節: skill/<id>。正方形いっぱいの絵にゲームが枠を付ける）
+  const art = skillIconArt(skill);
+  const c = art ? getCached('sa:' + key + '|' + artId(art), size, (g) => paintArtSkill(g, skill, art)) : getCached(key, size, (g) => paintSkill(g, skill));
   ctx.drawImage(c, x - size / 2, y - size / 2, size, size);
+}
+
+// ---------------------------------------------------------------- 差し替え画像
+const ARTID = new WeakMap();
+let artSeq = 0;
+function artId(c) { let n = ARTID.get(c); if (!n) { n = ++artSeq; ARTID.set(c, n); } return n; }
+// アイテム: 透明背景の絵を 48 の枠いっぱいに（絵自体が 8 割の大きさで中央に描かれている）
+function paintArtItem(g, img) {
+  g.imageSmoothingQuality = 'high';
+  g.drawImage(img, 0, 0, BASE, BASE);
+}
+// スキル: 角丸の枠で切り抜いて、コードの絵と同じ縁（濃い紫の線＋内側の白い線）とツヤを付ける
+function paintArtSkill(g, sk, img) {
+  g.save();
+  g.beginPath(); rr(g, 2, 2, 44, 44, 9);
+  g.fillStyle = shade(sk.color || '#ff5fa2', -0.6); g.fill();
+  g.clip();
+  g.imageSmoothingQuality = 'high';
+  g.drawImage(img, 2, 2, 44, 44);
+  g.restore();
+  g.strokeStyle = OUTLINE; g.lineWidth = 2.4; g.beginPath(); rr(g, 2, 2, 44, 44, 9); g.stroke();
+  g.strokeStyle = 'rgba(255,255,255,0.35)'; g.lineWidth = 1.4; g.beginPath(); rr(g, 4.5, 4.5, 39, 39, 7); g.stroke();
+  g.fillStyle = 'rgba(255,255,255,0.12)'; g.beginPath(); g.ellipse(18, 10, 14, 5, -0.3, 0, PI * 2); g.fill();
 }
 
 // ---------------------------------------------------------------- アイテム
