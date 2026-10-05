@@ -1,6 +1,7 @@
 // HUD v3: 転職の吹き出し / クエストナビ矢印 / 転職完了の祝福演出 / トラッカーのクリック
 import { COL, FONT, font, txt, rrPath, rgba, clamp, ease, starPath, measure, RAINBOW } from './theme.js';
 import { guard, drawChar, equipLooks, mapInfo, skillDef, drawSkillIco } from './deps.js';
+import * as SpriteM from '../render/sprites.js';
 import { jobOffer, trackedGuide, trackedMissionId, charLook, charName, JOBS } from './v3deps.js';
 
 const W = 1280, H = 720;
@@ -243,7 +244,14 @@ export function drawJobFx(ctx, game) {
     ctx.beginPath(); ctx.ellipse(cx, cy, 40 + rr, 10 + rr * 0.25, 0, 0, Math.PI * 2); ctx.stroke();
   }
   ctx.restore();
-  drawChar(ctx, cx, cy, charLook(st), equipLooks(st), { facing: 1, state: 'idle', t: time, attackT: 0, damage: 0, scale: 2.6 * pop, aura: col });
+  // 立ち絵（manifest portraits）があれば笑顔の立ち絵を左に並べる（中央のキャラ・文字・スキル欄と重ならない位置）
+  const lk = charLook(st) || {};
+  const pc = lk.classId || st?.heroId, pg = lk.gender || st?.gender;
+  if (pc && pg) {
+    const sl = (1 - pop) * -120;
+    guard('jobPortrait', () => SpriteM.drawPortrait?.(ctx, pc + '_' + pg, 'smile', 250 + sl, H - 84, 420, { maxW: 330, alpha: pop }));
+  }
+  drawChar(ctx, cx, cy, lk, equipLooks(st), { facing: 1, state: 'idle', t: time, attackT: 0, damage: 0, scale: 2.6 * pop, aura: col, headExpr: 'happy' });
   // 文字
   ctx.save();
   const sc = t < 0.4 ? 0.3 + ease(t / 0.4) * 0.9 : 1.2 - Math.min(0.2, (t - 0.4) * 0.5);

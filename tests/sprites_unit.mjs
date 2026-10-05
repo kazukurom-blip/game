@@ -131,6 +131,56 @@ test('onlyLayers（テンプレート書き出し）でも例外にならない'
   }
 });
 
+test('主人公の立ち絵・頭（portraits/heads）: 読み込み・不正な項目・NPC には適用しない・Image 前処理不可でもコード描画', async () => {
+  const C = await import('../src/render/character.js');
+  const { DEFAULT_LOOKS } = await import('../src/data/classes.js');
+  const ok = S.setSpriteManifest({ version: 1,
+    portraits: { luna_f: 'portraits/luna_f.png', jin_m: { file: 'portraits/jin_m.png', expr: { smile: 'portraits/jin_m_smile.png', bad: '../x.png', n: 5 } }, bad1: { file: 3 }, bad2: '../../etc/passwd' },
+    heads: { luna_f: { file: 'heads/luna_f.png', expr: { blink: 'heads/luna_f_blink.png', hurt: 'heads/luna_f_hurt.png' }, scale: 1.2, offset: [1, -2], facesLeft: true }, x: null },
+    enemies: [] });
+  assert.equal(ok, true);
+  assert.equal(S.spriteStats().entries, 6, '立ち絵2+表情1+頭1+表情2（不正なパス・値は除外）');
+  assert.equal(S.hasHeroArt('portraits', 'luna', 'f'), true);
+  assert.equal(S.hasHeroArt('portraits', 'luna_f'), true);
+  assert.equal(S.hasHeroArt('heads', 'jin', 'm'), false);
+  assert.equal(S.hasHeroArt('portraits', 'bad1'), false);
+  assert.equal(S.hasHeroArt('heads', { classId: 'luna', gender: 'f' }), true, 'look でも引ける');
+  // 読み込み前
+  assert.equal(S.headFor('luna', 'f'), null);
+  assert.equal(S.heroArtState('heads', 'luna', 'f'), 1, '読み込み中');
+  flush();
+  // Node には canvas が無いので前処理（背景除去）できず失敗扱い → null（コード描画）
+  assert.equal(S.portraitFor('luna', 'f', 'smile'), null);
+  assert.equal(S.drawPortrait(fakeCtx(), 'jin_m', 'smile', 0, 0, 100), null);
+  assert.equal(S.heroArtState('heads', 'luna', 'f'), 3);
+  // 表情の選び方
+  assert.equal(C.aiHeadExpr('attack', 0), 'shout');
+  assert.equal(C.aiHeadExpr('shoot', 0), 'shout');
+  assert.equal(C.aiHeadExpr('hurt', 0), 'hurt');
+  assert.equal(C.aiHeadExpr('dead', 0), 'hurt');
+  assert.equal(C.aiHeadExpr('idle', 3.9), 'blink');
+  assert.equal(C.aiHeadExpr('idle', 1.0), null);
+  assert.equal(C.aiHeadExpr('idle', 1.0, { headExpr: 'happy' }), 'happy');
+  assert.equal(C.aiHeadExpr('idle', 1.0, { face: 'happy' }), 'happy');
+  assert.equal(C.aiHeadExpr('cheer', 1.0), 'happy');
+  // NPC（classId/gender なし）・aiHead:false・悪役 → 使わない
+  assert.equal(C.aiHeadOf(DEFAULT_LOOKS.luna.f, {}, 'idle', 0), null);
+  assert.equal(C.aiHeadOf({ ...DEFAULT_LOOKS.luna.f, classId: 'luna', gender: 'f', aiHead: false }, {}, 'idle', 0), null);
+  // 描画は例外なし（コード描画にフォールバック）
+  const look = { ...DEFAULT_LOOKS.luna.f, classId: 'luna', gender: 'f' };
+  for (const st of ['idle', 'walk', 'attack', 'hurt', 'climb', 'dead']) assert.doesNotThrow(() => drawCharacter(fakeCtx(), 0, 0, look, { hat: { style: 'cap' } }, { state: st, t: 0.2, noCache: true }));
+  S.setSpriteManifest(null);
+  assert.equal(S.hasHeroArt('heads', 'luna', 'f'), false);
+});
+test('progression: look に classId・gender が付く（列挙されない＝セーブ・比較に出ない）', async () => {
+  const P = await import('../src/systems/progression.js');
+  const st = P.newState('jin', { gender: 'f' });
+  assert.equal(st.look.classId, 'jin'); assert.equal(st.look.gender, 'f');
+  assert.equal(Object.keys(st.look).includes('classId'), false);
+  const back = JSON.parse(JSON.stringify(st));
+  assert.equal(back.look.classId, undefined);
+});
+
 let pass = 0, fail = 0;
 test('1枚絵モード: 文字列だけ・single:true の項目を受け付け、Image が無い環境でも例外にならない', () => {
   const ok = S.setSpriteManifest({ version: 1,

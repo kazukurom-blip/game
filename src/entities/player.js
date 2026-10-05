@@ -58,6 +58,8 @@ export class Player {
     if (ev) {
       this._unsub.push(ev.on('playerDamaged', () => { this.hurtT = 0.35; this.lastHitT = this.t; }));
       this._unsub.push(ev.on('equipChanged', () => syncPet(game)));
+      // AIの頭の表情: レベルアップ・転職・勝利で少しの間 happy（render/character.js aiHeadExpr）
+      for (const n of ['levelUp', 'jobAdvanced', 'bossClear', 'missionComplete', 'towerFloorCleared']) this._unsub.push(ev.on(n, () => { this.joyT = 1.8; }));
       this._unsub.push(ev.on('mapChanged', () => {
         this.move = null; this.gravityScale = 1; this.dashing = false;
         // changeMap が車を直接外した場合も降車イベントを出す（ラジオ停止など）
@@ -108,6 +110,7 @@ export class Player {
     const st = this.refreshStats();
     if (this.invulnT > 0) this.invulnT -= dt;
     if (this.hurtT > 0) this.hurtT -= dt;
+    if (this.joyT > 0) this.joyT -= dt;
     if (this.ropeCd > 0) this.ropeCd -= dt;
     if (this.attackCd > 0) this.attackCd -= dt;
     if (this.attackLeft > 0) {
@@ -672,6 +675,7 @@ export class Player {
     if (state === 'climb' && !this.climbMoving) a.t -= dt; // 止まっている時は手足停止
     a.state = state;
     a.attackT = this.attackT;
+    a.headExpr = this.joyT > 0 && (state === 'idle' || state === 'walk' || state === 'jump') ? 'happy' : null;
     a.damage = st.maxHp ? Math.max(0, Math.min(1, 1 - (s.hp / st.maxHp))) : 0;
     a.flash = this.invulnT > 0 && !this.dead && Math.floor(this.t * 18) % 2 === 0;
     a.alpha = a.flash ? 0.45 : 1; // 被弾無敵中は点滅
@@ -708,14 +712,25 @@ export class Player {
 
 /** プレイヤーの見た目: state.look → classes.defaultLook(class, gender) → HERO_LOOKS の順 */
 const _lookCache = new WeakMap();
+function tagLook(L, cls, g) {
+  for (const [k, v] of [['classId', cls], ['gender', g]]) {
+    if (!v || L[k] === v) continue;
+    try { Object.defineProperty(L, k, { value: v, writable: true, configurable: true, enumerable: false }); } catch (e) { /* ignore */ }
+  }
+}
 export function heroLookOf(state) {
   if (!state) return HERO_LOOKS?.luna;
-  if (state.look && typeof state.look === 'object' && state.look.body) return state.look;
+  if (state.look && typeof state.look === 'object' && state.look.body) {
+    // AIの頭・立ち絵用（render/character.js aiHeadOf）。NPC・敵の look には付けない
+    const L = state.look;
+    if (L.classId !== state.heroId || L.gender !== state.gender) tagLook(L, state.heroId, state.gender);
+    return L;
+  }
   let lk = _lookCache.get(state);
   if (lk && lk._k === state.heroId + ':' + state.gender) return lk;
   try { lk = defaultLook(state.heroId, state.gender); } catch (e) { lk = null; }
   if (!lk || !lk.body) lk = (HERO_LOOKS && (HERO_LOOKS[state.heroId] || HERO_LOOKS.luna)) || null;
-  if (lk) { lk = { ...lk }; Object.defineProperty(lk, '_k', { value: state.heroId + ':' + state.gender }); _lookCache.set(state, lk); }
+  if (lk) { lk = { ...lk, classId: state.heroId, gender: state.gender }; Object.defineProperty(lk, '_k', { value: state.heroId + ':' + state.gender }); _lookCache.set(state, lk); }
   return lk;
 }
 

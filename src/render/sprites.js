@@ -4,7 +4,7 @@
 //  - drawEnemy / drawPet / drawCharacter の入口から呼ばれ、描けたら true（呼び出し側はコード描画をしない）。
 //  - spriteMode: 'auto'（スプライトがあれば使う）| 'procedural'（常にコード描画）。デバッグパネル（F2）で切替。
 //  - パスはすべて相対（公開ページ・サブディレクトリ配信でも動く）。
-import { charHeadPose, itemColors, SPRITE_LAYER_ORDER } from './character.js';
+import { charHeadPose, itemColors, SPRITE_LAYER_ORDER, aiHeadExpr, paintAiHead } from './character.js';
 
 export const SPRITE_BASE = 'assets/sprites/';
 const DEF_SCALE = 0.5, DEF_FPS = 8;
@@ -58,13 +58,22 @@ export function setSpriteManifest(j, base = SPRITE_BASE) {
     BASE = base;
     const d = j.defaults && typeof j.defaults === 'object' ? j.defaults : {};
     const defs = { scale: num(d.scale, DEF_SCALE), fps: d.fps != null ? d.fps : DEF_FPS };
-    const M = { enemies: {}, bosses: {}, pets: {}, chars: null };
+    const M = { enemies: {}, bosses: {}, pets: {}, chars: null, portraits: {}, heads: {} };
     for (const sec of ['enemies', 'bosses', 'pets']) {
       const src = j[sec];
       if (!src || typeof src !== 'object') continue;
       for (const k of Object.keys(src)) {
         const s = normSheet(src[k], {}, defs, k);
         if (s) { M[sec][k] = s; STATS.entries++; }
+      }
+    }
+    // 主人公の立ち絵・頭（画像生成AI向けの1枚絵。キー = <classId>_<gender>）
+    for (const sec of ['portraits', 'heads']) {
+      const src = j[sec];
+      if (!src || typeof src !== 'object' || Array.isArray(src)) continue;
+      for (const k of Object.keys(src)) {
+        const E = normHero(src[k], sec, k);
+        if (E) M[sec][k] = E;
       }
     }
     const c = j.chars;
@@ -92,6 +101,7 @@ export function preloadSprites() {
   const all = [];
   for (const sec of ['enemies', 'bosses', 'pets']) for (const k in MAN[sec]) all.push(MAN[sec][k]);
   if (MAN.chars) for (const k in MAN.chars.layers) all.push(MAN.chars.layers[k]);
+  for (const sec of ['portraits', 'heads']) for (const k in MAN[sec]) { const E = MAN[sec][k]; all.push(E.base); for (const e in E.expr) all.push(E.expr[e]); }
   return Promise.all(all.map((s) => new Promise((res) => {
     const r = img(s);
     if (!r || r.st !== 1) return res();
@@ -245,7 +255,11 @@ export function spriteCharPlan(look, equip, A, state, wk, ws) {
     const wkKeys = (keys) => (wk === 'none' ? keys : [...keys.map((k) => k + '@' + wk), ...keys]);
     const picks = [];
     let loading = false;
+    // AIの頭（heads[<classId>_<gender>]）があれば髪・顔のレイヤーの代わりに使う
+    const ah = !vil && look.aiHead !== false && look.classId && look.gender ? headFor(look.classId, look.gender, aiHeadExpr(state, A.t || 0, A)) : null;
     for (const name of SPRITE_LAYER_ORDER) {
+      if (ah && (name === 'hair_back' || name === 'hair_front')) continue;
+      if (ah && name === 'face') { picks.push({ name: 'aihead', s: null, key: 'aihead' }); continue; }
       let keys = null, tintSlot = null;
       switch (name) {
         case 'accessory_back': if (sty('accessory')) keys = slotKeys('accessory', '_back'); tintSlot = 'accessory'; break;
@@ -280,6 +294,7 @@ export function spriteCharPlan(look, equip, A, state, wk, ws) {
     const layers = [];
     let repT = t, repAT = clamp(A.attackT || 0, 0, 1), repP = prog, master = null;
     for (const p of picks) {
+      if (p.name === 'aihead') { layers.push({ name: 'aihead', s: null, ai: ah, hat: sty('hat'), head: null }); continue; }
       const s = p.s;
       let row;
       if (p.name === 'face') row = pickRow(s, faceRows(state, A, dmg, vil));
@@ -302,11 +317,11 @@ export function spriteCharPlan(look, equip, A, state, wk, ws) {
       layers.push({ name: p.name, s: src, row, fi, tint, head: null });
     }
     // 顔: 頭の座標系に合わせる（body と同じコマの姿勢）
-    const fl = layers.find((l) => l.name === 'face');
+    const fl = layers.find((l) => l.name === 'face' || l.name === 'aihead');
     if (fl) {
       const hp = charHeadPose(look, eq, { state: A.state || state, t: repT, attackT: repAT, fallT: state === 'dead' ? repP : undefined, panic: A.panic });
-      if (hp.back) layers.splice(layers.indexOf(fl), 1);
-      else fl.head = hp.m;
+      if (hp.back && !fl.ai) layers.splice(layers.indexOf(fl), 1);
+      else { fl.head = hp.m; fl.back = hp.back; }
     }
     return { layers, repT, repAT, facing: A.facing < 0 ? -1 : 1, s: A.scale || 1 };
   } catch (err) { note('spriteCharPlan: ' + err.message); return null; }
@@ -351,6 +366,7 @@ export function drawSpriteCharacter(ctx, x, y, look, equip, anim) {
 function drawLayer(ctx, l) {
   ctx.save();
   if (l.head) { const m = l.head; ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]); }
+  if (l.ai) { paintAiHead(ctx, l.ai, l.hat, !!l.back, false); ctx.restore(); return; }
   ctx.scale(l.s.scale, l.s.scale);
   drawFrame(ctx, l.s, l.row, l.fi, l.tint);
   ctx.restore();
@@ -363,9 +379,10 @@ function composeScratch(layers, flash) {
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
   let R = 2;
   for (const l of layers) {
-    const s = l.s, k = s.scale;
-    R = Math.max(R, Math.min(4, 1 / k));
-    const pts = [[-s.anchor[0] * k, -s.anchor[1] * k], [(s.cell[0] - s.anchor[0]) * k, -s.anchor[1] * k], [-s.anchor[0] * k, (s.cell[1] - s.anchor[1]) * k], [(s.cell[0] - s.anchor[0]) * k, (s.cell[1] - s.anchor[1]) * k]];
+    const s = l.s, k = s ? s.scale : 1;
+    if (s) R = Math.max(R, Math.min(4, 1 / k));
+    const sc = l.ai ? (l.ai.scale || 1) : 1;
+    const pts = l.ai ? [[-32 * sc, -30 * sc], [32 * sc, -30 * sc], [-32 * sc, 26 * sc], [32 * sc, 26 * sc]] : [[-s.anchor[0] * k, -s.anchor[1] * k], [(s.cell[0] - s.anchor[0]) * k, -s.anchor[1] * k], [-s.anchor[0] * k, (s.cell[1] - s.anchor[1]) * k], [(s.cell[0] - s.anchor[0]) * k, (s.cell[1] - s.anchor[1]) * k]];
     for (const [px, py] of pts) {
       let X = px, Y = py;
       if (l.head) { const m = l.head; X = m[0] * px + m[2] * py + m[4]; Y = m[1] * px + m[3] * py + m[5]; }
@@ -470,7 +487,7 @@ function img(s) {
     im.onload = () => {
       r.w = im.naturalWidth || im.width; r.h = im.naturalHeight || im.height;
       if (r.w > 0 && r.h > 0 && s.single) {
-        try { r.single = prepSingle(im, r.w, r.h, s.bgRemove); } catch (e) { note('1枚絵の前処理に失敗: ' + s.file + ' ' + e.message); }
+        try { r.single = prepSingle(im, r.w, r.h, s.bgRemove, s.maxH); } catch (e) { note('1枚絵の前処理に失敗: ' + s.file + ' ' + e.message); }
         if (!r.single) { r.st = 3; STATS.failed++; REV++; for (const f of r.wait.splice(0)) f(); return; }
       }
       if (r.w > 0 && r.h > 0) { r.st = 2; STATS.loaded++; } else { r.st = 3; STATS.failed++; }
@@ -579,7 +596,7 @@ function normSingle(o, key) {
 }
 
 /** 背景を透明に（四隅が不透明でほぼ同じ色なら、その色を四隅から塗りつぶして消す）＋不透明部分で切り抜き */
-function prepSingle(im, w, h, mode) {
+function prepSingle(im, w, h, mode, maxH) {
   const c = newCanvas(w, h);
   if (!c) return null;
   const g = c.getContext('2d', { willReadFrequently: true });
@@ -633,7 +650,24 @@ function prepSingle(im, w, h, mode) {
   if (!out) return null;
   out.getContext('2d').drawImage(c, x0, y0, cw, ch, 0, 0, cw, ch);
   c.width = c.height = 1;
+  if (maxH > 0 && ch > maxH) return shrinkCanvas(out, cw, ch, maxH);
   return { canvas: out, w: cw, h: ch };
+}
+/** 大きすぎる1枚絵を半分ずつ縮小（画質を保ちつつ、毎フレームの drawImage を軽くする） */
+function shrinkCanvas(src, w, h, maxH) {
+  let cur = src, cw = w, ch = h;
+  while (ch > maxH) {
+    const nh = Math.max(maxH, Math.ceil(ch / 2));
+    const nw = Math.max(1, Math.round(cw * nh / ch));
+    const n = newCanvas(nw, nh);
+    if (!n) break;
+    const g = n.getContext('2d');
+    g.imageSmoothingEnabled = true; try { g.imageSmoothingQuality = 'high'; } catch { /* ignore */ }
+    g.drawImage(cur, 0, 0, cw, ch, 0, 0, nw, nh);
+    if (cur !== src) cur.width = cur.height = 1;
+    cur = n; cw = nw; ch = nh;
+  }
+  return { canvas: cur, w: cw, h: ch };
 }
 
 let SFC = null;
@@ -712,4 +746,162 @@ function drawSinglePet(ctx, x, y, anim, s) {
   const ok = drawSingleAt(ctx, s, { st: st === 'attack' ? 'idle' : st, t: anim.t || 0, flash: !!anim.flash, fly: !!anim.flying || raw === 'fly', targetH: s.height > 0 ? s.height : 36 });
   ctx.restore();
   return ok;
+}
+
+// ================================================================ 主人公の立ち絵・頭（画像生成AI向け）
+// manifest:
+//   "portraits": { "luna_f": "portraits/luna_f.png" | { "file": "...", "expr": { "smile": "...", ... } } }
+//   "heads":     { "luna_f": { "file": "heads/luna_f.png", "expr": { "blink": "...", "hurt": "...", "shout": "...", "happy": "..." },
+//                              "scale": 1, "offset": [0, 0], "facesLeft": false } }
+// どれも1枚絵（背景は透明か単色 → 自動で透明化・トリミング）。表情の絵が無い/読み込み中なら基本の絵。
+const HERO_MAXH = { portraits: 720, heads: 320 };      // 読み込み時にこの高さまで縮小（性能のため）
+/** 表情の別名（無ければ順に探す） */
+const EXPR_ALIAS = {
+  smile: ['smile', 'happy'], happy: ['happy', 'smile'], shout: ['shout', 'angry'], angry: ['angry', 'shout'],
+  surprised: ['surprised', 'hurt'], hurt: ['hurt', 'surprised'], sad: ['sad'], blink: ['blink'],
+};
+function heroSingle(v, inheritBg, key) {
+  if (typeof v === 'string') v = { file: v };
+  if (!v || typeof v !== 'object' || typeof v.file !== 'string') return null;
+  return normSingle({ file: v.file, single: true, bgRemove: v.bgRemove !== undefined ? v.bgRemove : inheritBg }, key);
+}
+function normHero(o, sec, k) {
+  if (typeof o === 'string') o = { file: o };
+  if (!o || typeof o !== 'object') return null;
+  const base = heroSingle(o, o.bgRemove, sec + ':' + k);
+  if (!base) return null;
+  base.maxH = HERO_MAXH[sec];
+  STATS.entries++;
+  const expr = {};
+  if (o.expr && typeof o.expr === 'object' && !Array.isArray(o.expr)) {
+    for (const e of Object.keys(o.expr)) {
+      const s = heroSingle(o.expr[e], o.bgRemove, sec + ':' + k + ':' + e);
+      if (s) { s.maxH = HERO_MAXH[sec]; expr[e] = s; STATS.entries++; }
+    }
+  }
+  const off = arr2(o.offset) || [0, 0];
+  return { key: k, sec, base, expr, scale: clamp(num(o.scale, 1), 0.1, 10), offset: off, facesLeft: !!o.facesLeft, pre: false };
+}
+function heroKey(a, b) {
+  if (a && typeof a === 'object') return a.classId && a.gender ? a.classId + '_' + a.gender : null;   // look オブジェクト
+  if (typeof a !== 'string' || !a) return null;
+  return b ? a + '_' + b : a;
+}
+function heroEntry(sec, a, b) {
+  if (!MAN || MODE !== 'auto' || !MAN[sec]) return null;
+  const k = heroKey(a, b);
+  return (k && MAN[sec][k]) || null;
+}
+function heroResolve(E, expr) {
+  if (!E) return null;
+  if (!E.pre) { E.pre = true; img(E.base); for (const e in E.expr) img(E.expr[e]); }   // 表情もまとめて先読み
+  if (expr) {
+    for (const c of EXPR_ALIAS[expr] || [expr]) {
+      const s = E.expr[c];
+      if (!s) continue;
+      const r = IMG.get(s.file);
+      if (r && r.st === 2 && r.single) return { r, s, expr: c };
+    }
+  }
+  const r = IMG.get(E.base.file);
+  if (r && r.st === 2 && r.single) return { r, s: E.base, expr: null };
+  return null;
+}
+function heroOut(E, R) {
+  const o = R.r.single;
+  return { canvas: o.canvas, w: o.w, h: o.h, expr: R.expr, file: R.s.file, scale: E.scale, offset: E.offset, facesLeft: E.facesLeft, rec: R.r };
+}
+/** 立ち絵 {canvas,w,h,expr,file} | null（画像が無い/読み込み中/壊れている）。classId には 'luna_f' や look も可 */
+export function portraitFor(classId, gender, expr) {
+  try {
+    const E = heroEntry('portraits', classId, gender);
+    const R = heroResolve(E, expr);
+    return R ? heroOut(E, R) : null;
+  } catch (err) { note('portraitFor: ' + err.message); return null; }
+}
+/** 頭の絵 {canvas,w,h,expr,file,scale,offset,facesLeft} | null */
+export function headFor(classId, gender, expr) {
+  try {
+    const E = heroEntry('heads', classId, gender);
+    const R = heroResolve(E, expr);
+    return R ? heroOut(E, R) : null;
+  } catch (err) { note('headFor: ' + err.message); return null; }
+}
+/** manifest に立ち絵/頭があるか（読み込み状態は問わない）。sec = 'portraits' | 'heads' */
+export function hasHeroArt(sec, classId, gender) { return !!heroEntry(sec, classId, gender); }
+/** 読み込み状態: 0 無し / 1 読み込み中 / 2 完了 / 3 失敗 */
+export function heroArtState(sec, classId, gender) {
+  const E = heroEntry(sec, classId, gender);
+  if (!E) return 0;
+  return img(E.base).st;
+}
+/** 背面（ロープ登り）用: 頭の絵のシルエットを髪の色（上の方の平均色）で塗ったもの。絵ごとにキャッシュ */
+export function headBackOf(h) {
+  if (!h || !h.rec) return null;
+  const rec = h.rec;
+  if (rec.back !== undefined) return rec.back;
+  rec.back = null;
+  try {
+    const src = h.canvas, w = h.w, hh = h.h;
+    const c = newCanvas(w, hh);
+    if (!c) return null;
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.drawImage(src, 0, 0);
+    let R = 90, G = 60, B = 50;
+    try {
+      const d = g.getImageData(0, 0, w, Math.max(1, Math.floor(hh * 0.3))).data;
+      let n = 0, r = 0, gg = 0, b = 0;
+      for (let i = 0; i < d.length; i += 16) if (d[i + 3] > 200) { r += d[i]; gg += d[i + 1]; b += d[i + 2]; n++; }
+      if (n) { R = r / n; G = gg / n; B = b / n; }
+    } catch { /* ignore */ }
+    g.globalCompositeOperation = 'source-atop';
+    const gr = g.createLinearGradient(0, 0, 0, hh);
+    gr.addColorStop(0, `rgb(${R | 0},${G | 0},${B | 0})`);
+    gr.addColorStop(1, `rgb(${(R * 0.62) | 0},${(G * 0.62) | 0},${(B * 0.62) | 0})`);
+    g.fillStyle = gr; g.fillRect(0, 0, w, hh);
+    g.globalCompositeOperation = 'source-over';
+    rec.back = c;
+  } catch (err) { note('headBackOf: ' + err.message); }
+  return rec.back;
+}
+/** 白フラッシュ（被弾）用のシルエット（共有の作業キャンバス。すぐに描くこと） */
+export function flashOf(canvas, col = '#ffffff', a = 0.9) { return singleFlash(canvas, col, a); }
+
+/**
+ * 立ち絵を描く。描けたら描いた矩形 {x,y,w,h}、無ければ null（呼び出し側は今まで通りの表示に）。
+ *  key: 'luna_f' / look（classId・gender を持つ）/ classId（gender は opts.gender）
+ *  x, y: opts.anchor='foot'（既定）なら足元中央、'center' なら中心。h: 表示の高さ(px)
+ *  opts: { anchor, gender, flip, alpha, maxW, dim(0..1 暗く), crop:[u0,v0,u1,v1]（0..1 の切り出し）, flash }
+ */
+export function drawPortrait(ctx, key, expr, x, y, h, opts = {}) {
+  try {
+    const p = portraitFor(key, typeof key === 'string' && opts.gender ? opts.gender : undefined, expr);
+    if (!p) return null;
+    const cr = Array.isArray(opts.crop) && opts.crop.length >= 4 ? opts.crop : null;
+    const sx = cr ? cr[0] * p.w : 0, sy = cr ? cr[1] * p.h : 0;
+    const sw = cr ? Math.max(1, (cr[2] - cr[0]) * p.w) : p.w, sh = cr ? Math.max(1, (cr[3] - cr[1]) * p.h) : p.h;
+    let k = h / sh;
+    if (opts.maxW > 0 && sw * k > opts.maxW) k = opts.maxW / sw;
+    const dw = sw * k, dh = sh * k;
+    const dx = x - dw / 2, dy = opts.anchor === 'center' ? y - dh / 2 : y - dh;
+    let src = p.canvas;
+    if (opts.flash) src = singleFlash(p.canvas, '#ffffff', 0.9);
+    ctx.save();
+    if (opts.alpha != null) ctx.globalAlpha *= clamp(opts.alpha, 0, 1);
+    ctx.imageSmoothingEnabled = true;
+    try { ctx.imageSmoothingQuality = 'high'; } catch { /* ignore */ }
+    const flip = !!opts.flip !== !!(portraitEntryFacesLeft(key, opts.gender));
+    if (flip) { ctx.translate(x * 2, 0); ctx.scale(-1, 1); }
+    ctx.drawImage(src, sx, sy, sw, sh, dx, dy, dw, dh);
+    if (opts.dim > 0) {   // 聞き手側は暗く（絵の形で塗った暗色を半透明で重ねる）
+      ctx.globalAlpha *= clamp(opts.dim, 0, 1);
+      ctx.drawImage(singleFlash(p.canvas, '#140828', 1), sx, sy, sw, sh, dx, dy, dw, dh);
+    }
+    ctx.restore();
+    return { x: dx, y: dy, w: dw, h: dh };
+  } catch (err) { note('drawPortrait: ' + err.message); return null; }
+}
+function portraitEntryFacesLeft(key, gender) {
+  const E = heroEntry('portraits', key, typeof key === 'string' ? gender : undefined);
+  return !!(E && E.facesLeft);
 }

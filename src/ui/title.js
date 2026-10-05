@@ -8,6 +8,7 @@ import {
 } from './v3deps.js';
 import * as SaveM from '../core/save.js';
 import { audio } from '../audio/audio.js';
+import * as SpriteM from '../render/sprites.js';
 import { showNameInput, hideNameInput, nameInputValue, setNameInputValue, clipName, NAME_MAX, focusNameInput } from './nameinput.js';
 
 const W = 1280, H = 720;
@@ -18,6 +19,36 @@ const CLASS_STARS = { luna: { 攻撃: 3, 速さ: 5, 耐久: 2, 範囲: 3 }, jin:
 const RANDOM_NAMES = ['ネオ', 'ミラ', 'カイ', 'ユナ', 'レオ', 'リリィ', 'ジェット', 'ノヴァ', 'ヒカル', 'サクラ', 'ブレイズ', 'ルミ', 'ゼン', 'アオイ', 'ヴァイス', 'キララ', 'ソラ', 'マックス'];
 const STEPS = ['クラス', '性別', '見た目', '名前'];
 const LOOK_ROWS = ['hair', 'hairColor', 'eyeColor', 'skin', 'random'];
+// AIの頭・立ち絵（manifest heads / portraits の <classId>_<gender>）。画像が無ければ今まで通り
+const hasHead = (cls, g) => guard('hasHeroArt', () => SpriteM.hasHeroArt?.('heads', cls, g), false);
+const portraitOk = (cls, g) => !!guard('portraitFor', () => SpriteM.portraitFor?.(cls, g), null);
+/** 見た目の行（頭の画像があるクラス×性別では先頭に「AIの顔を使う」） */
+function lookRows(c) { return c && hasHead(c.cls, c.gender) ? ['aiHead', ...LOOK_ROWS] : LOOK_ROWS; }
+/** AIの頭が有効で、髪型・髪色が絵の髪になる（選択は無効表示） */
+function aiHeadOn(c) { return !!(c && c.look && c.look.aiHead !== false && hasHead(c.cls, c.gender)); }
+function rowDisabled(c, key) { return (key === 'hair' || key === 'hairColor') && aiHeadOn(c); }
+/** プレビュー用: look に classId・gender を付ける（AIの頭・立ち絵の対象にする） */
+const HLC = new WeakMap();
+function heroLook(look, cls, g) {
+  if (!look) return look;
+  if (look.classId === cls && look.gender === g) return look;
+  let m = HLC.get(look);
+  if (!m || m.classId !== cls || m.gender !== g) { m = { ...look, classId: cls, gender: g }; HLC.set(look, m); }
+  return m;
+}
+const DLC = new Map();
+function heroDefaultLook(cls, g) {
+  const k = cls + '_' + g;
+  let v = DLC.get(k);
+  if (!v) { v = { ...defaultLook(cls, g), classId: cls, gender: g }; DLC.set(k, v); }
+  return v;
+}
+/** 立ち絵（あれば）をコード描画のキャラの横に描く。描いたら true */
+function sidePortrait(ctx, look, cls, g, x, y, h, expr, o) {
+  void look;
+  if (!cls || !g) return false;
+  return !!guard('drawPortrait', () => SpriteM.drawPortrait?.(ctx, cls + '_' + g, expr, x, y, h, o || {}), null);
+}
 const ccol = (id) => CLASS_COL[id] || COL.pink;
 
 const T = {
@@ -47,9 +78,14 @@ function go(screen) {
 }
 function startCreate(slot) {
   const cls = CLASS_IDS[0] || 'luna';
-  T.c = { slot, step: 0, cls, gender: legacyGender(cls), look: defaultLook(cls, legacyGender(cls)), row: 0, name: '' };
+  T.c = { slot, step: 0, cls, gender: legacyGender(cls), look: newLook(cls, legacyGender(cls)), row: 0, name: '' };
   setNameInputValue('');
   go('create');
+}
+function newLook(cls, g, prev) {
+  const l = { ...defaultLook(cls, g), classId: cls, gender: g };
+  if (prev && prev.aiHead === false) l.aiHead = false;
+  return l;
 }
 function setStep(n) {
   const c = T.c;
@@ -62,22 +98,29 @@ function setClass(cls) {
   if (c.cls === cls) return;
   c.cls = cls;
   if (!c.genderTouched) c.gender = legacyGender(cls);
-  c.look = defaultLook(cls, c.gender);
+  c.look = newLook(cls, c.gender, c.look);
 }
 function setGender(g) {
   const c = T.c;
   c.genderTouched = true;
   if (c.gender === g) return;
-  c.gender = g; c.look = defaultLook(c.cls, g);
+  c.gender = g; c.look = newLook(c.cls, g, c.look);
+}
+function toggleAiHead() {
+  const c = T.c;
+  c.look = { ...c.look, aiHead: c.look.aiHead === false };
+  T.flash = { t: performance.now() / 1000 };
 }
 function cycleHair(d) {
   const hs = hairStyles(), c = T.c;
+  if (rowDisabled(c, 'hair')) return;
   let i = hs.findIndex((h) => h.id === c.look.hair);
   i = (i + d + hs.length) % hs.length;
   c.look = { ...c.look, hair: hs[i].id };
 }
 function cyclePal(key, d) {
   const c = T.c;
+  if (rowDisabled(c, key)) return;
   const pal = key === 'hairColor' ? HAIR_COLORS : key === 'eyeColor' ? EYE_COLORS : SKIN_COLORS;
   let i = pal.indexOf(c.look[key]);
   i = i < 0 ? 0 : (i + d + pal.length) % pal.length;
@@ -85,6 +128,7 @@ function cyclePal(key, d) {
 }
 function setPal(key, v) {
   const c = T.c;
+  if (rowDisabled(c, key)) return;
   c.look = key === 'hairColor' ? withHairColor(c.look, v) : { ...c.look, [key]: v };
 }
 function randomLook() {
@@ -97,7 +141,9 @@ function finishCreate() {
   const c = T.c;
   const name = clipName(nameInputValue()) || defaultName(c.cls, c.gender);
   hideNameInput();
-  const out = { slot: c.slot, create: { classId: c.cls, name, gender: c.gender, look: { ...c.look } } };
+  const { classId: _c, gender: _g, ...look } = c.look;   // classId・gender は state 側で付ける（progression.tagHeroLook）
+  if (hasHead(c.cls, c.gender)) look.aiHead = c.look.aiHead !== false;   // state.look.aiHead に保存（画像があれば既定 ON）
+  const out = { slot: c.slot, create: { classId: c.cls, name, gender: c.gender, look } };
   T.c = null; T.screen = 'title';
   return out;
 }
@@ -182,15 +228,22 @@ export function titleInput(game) {
     } else if (c.step === 1) {
       if (L || R) setGender(c.gender === 'f' ? 'm' : 'f');
     } else if (c.step === 2) {
-      if (U) c.row = (c.row + LOOK_ROWS.length - 1) % LOOK_ROWS.length;
-      if (D) c.row = (c.row + 1) % LOOK_ROWS.length;
-      const k = LOOK_ROWS[c.row];
+      const LR = lookRows(c), n = LR.length;
+      if (c.row >= n) c.row = n - 1;
+      // 無効の行（AIの顔を使う時の髪型・髪色）は飛ばす
+      const stepRow = (d) => { let r = c.row; for (let i = 0; i < n; i++) { r = (r + d + n) % n; if (!rowDisabled(c, LR[r])) break; } c.row = r; };
+      if (U) stepRow(-1);
+      if (D) stepRow(1);
+      const k = LR[c.row];
       if (L || R) {
         const d = L ? -1 : 1;
-        if (k === 'hair') cycleHair(d); else if (k === 'random') randomLook(); else cyclePal(k, d);
+        if (k === 'aiHead') toggleAiHead(); else if (k === 'hair') cycleHair(d); else if (k === 'random') randomLook(); else cyclePal(k, d);
       }
     }
-    if (ok) { if (c.step === 2 && LOOK_ROWS[c.row] === 'random') randomLook(); else setStep(c.step + 1); }
+    if (ok) {
+      const k = c.step === 2 ? lookRows(c)[c.row] : null;
+      if (k === 'random') randomLook(); else if (k === 'aiHead') toggleAiHead(); else setStep(c.step + 1);
+    }
   }
   return null;
 }
@@ -296,7 +349,10 @@ function fmtDate(ms) {
   const rel = diff < 60 ? 'たった今' : diff < 3600 ? `${Math.floor(diff / 60)}分前` : diff < 86400 ? `${Math.floor(diff / 3600)}時間前` : `${Math.floor(diff / 86400)}日前`;
   return `${d.getFullYear()}/${p(d.getMonth() + 1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}（${rel}）`;
 }
-function slotLook(s) { return s.look || defaultLook(s.heroId || 'luna', s.gender || legacyGender(s.heroId)); }
+function slotLook(s) {
+  const cls = s.heroId || 'luna', g = s.gender || legacyGender(s.heroId);
+  return heroLook(s.look || defaultLook(cls, g), cls, g);
+}
 function slotEquip(s) { return guard('slotEquip', () => equipLooks(s.state || { equipped: s.equipped }), {}) || {}; }
 function slotJob(s) { return JOBS[s.state?.job?.id || s.job] || JOBS.beginner || { name: '見習い', title: '見習い', tier: 0 }; }
 /** スロットの現在地。タワー/アリーナ/ボス部屋で中断したキャラは再開する町（main.js と同じ規則）を出す */
@@ -364,8 +420,17 @@ function drawSelect(ctx, game, t) {
   if (s) {
     const job = slotJob(s);
     const fy = stage(ctx, px + 14, py + 14, pw - 28, 250, col, t);
-    aura(ctx, px + pw / 2, fy, job.aura, 2.3, t);
-    drawChar(ctx, px + pw / 2, fy, slotLook(s), slotEquip(s), { facing: 1, state: 'idle', t, attackT: 0, damage: 0, scale: 2.35, aura: job.aura || undefined, auraTier: job.tier || 1 });
+    const sg = s.gender || legacyGender(s.heroId);
+    // 立ち絵（manifest portraits）があればコード描画のキャラの横に並べる
+    const hasP = portraitOk(s.heroId || 'luna', sg);
+    const ccx = hasP ? px + pw * 0.3 : px + pw / 2;
+    if (hasP) {
+      ctx.save(); rrPath(ctx, px + 14, py + 14, pw - 28, 250, 12); ctx.clip();
+      sidePortrait(ctx, slotLook(s), s.heroId || 'luna', sg, px + pw * 0.69, py + 262, 240, null, { maxW: pw * 0.52 });
+      ctx.restore();
+    }
+    aura(ctx, ccx, fy, job.aura, 2.3, t);
+    drawChar(ctx, ccx, fy, slotLook(s), slotEquip(s), { facing: 1, state: 'idle', t, attackT: 0, damage: 0, scale: hasP ? 2.0 : 2.35, aura: job.aura || undefined, auraTier: job.tier || 1 });
     let yy = py + 290;
     txt(ctx, s.name || '???', px + 24, yy, { size: 28, color: '#fff', glow: col, sw: 5, maxW: 250 });
     txt(ctx, genderMark(s.gender || legacyGender(s.heroId)), px + 30 + Math.min(250, measure(ctx, s.name || '???', 28)), yy + 2, { size: 22, color: genderCol(s.gender || legacyGender(s.heroId)) });
@@ -495,7 +560,13 @@ function drawCreate(ctx, game, t) {
   }
   const facing = Math.floor(t / 3) % 2 ? -1 : 1;
   const st = c.step === 0 ? (Math.floor(t / 2) % 3 === 2 ? 'attack' : 'idle') : 'idle';
-  drawChar(ctx, lx + lw / 2, fy, c.look, starterEquipLooks(c.cls, c.gender), { facing, state: st, t, attackT: st === 'attack' ? (t % 2) / 2 : 0, damage: 0, scale: 3.3 });
+  const hasP = portraitOk(c.cls, c.gender);
+  if (hasP) {
+    ctx.save(); rrPath(ctx, lx + 14, ly + 14, lw - 28, 384, 12); ctx.clip();
+    sidePortrait(ctx, c.look, c.cls, c.gender, lx + lw * 0.68, ly + 396, 372, st === 'attack' ? 'shout' : c.step === 3 ? 'smile' : null, { maxW: lw * 0.56 });
+    ctx.restore();
+  }
+  drawChar(ctx, hasP ? lx + lw * 0.27 : lx + lw / 2, fy, heroLook(c.look, c.cls, c.gender), starterEquipLooks(c.cls, c.gender), { facing, state: st, t, attackT: st === 'attack' ? (t % 2) / 2 : 0, damage: 0, scale: hasP ? 2.5 : 3.3 });
   const nm = (c.step === 3 ? clipName(nameInputValue()) : '') || defaultName(c.cls, c.gender);
   txt(ctx, nm, lx + lw / 2, ly + 428, { size: 26, align: 'center', color: '#fff', glow: col, sw: 5, maxW: lw - 60 });
   txt(ctx, `${classOf(c.cls).name}  ${genderMark(c.gender)}`, lx + lw / 2, ly + 462, { size: 15, align: 'center', color: col, sw: 3 });
@@ -538,7 +609,7 @@ function stepClass(ctx, c, rx, ry, rw, rh, t) {
     const y = r.y - (on ? 4 : 0);
     panel(ctx, r.x, y, r.w, r.h, { r: 14, glow: on ? rgba(col, 0.9) : null, stroke: on ? '#fff' : hov ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.4)', inner: rgba(col, on ? 0.8 : 0.35), top: on ? 'rgba(70,36,140,0.95)' : 'rgba(34,22,80,0.9)' });
     const fy = stage(ctx, r.x + 8, y + 8, r.w - 16, 120, col, t);
-    drawChar(ctx, r.x + r.w / 2, fy, defaultLook(id, c.gender), starterEquipLooks(id, c.gender), { facing: 1, state: on ? 'walk' : 'idle', t: t + i, attackT: 0, damage: 0, scale: 1.25 });
+    drawChar(ctx, r.x + r.w / 2, fy, heroDefaultLook(id, c.gender), starterEquipLooks(id, c.gender), { facing: 1, state: on ? 'walk' : 'idle', t: t + i, attackT: 0, damage: 0, scale: 1.25 });
     let yy = y + 148;
     txt(ctx, C.name, r.x + r.w / 2, yy, { size: 18, align: 'center', color: '#fff', glow: on ? col : null, maxW: r.w - 16 });
     yy += 22;
@@ -576,7 +647,7 @@ function stepGender(ctx, c, rx, ry, rw, rh, t) {
     const y = r.y - (on ? 4 : 0);
     panel(ctx, r.x, y, r.w, r.h, { r: 16, glow: on ? rgba(gc, 0.9) : null, stroke: on ? '#fff' : hov ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.4)', inner: rgba(gc, on ? 0.8 : 0.35) });
     const fy = stage(ctx, r.x + 10, y + 10, r.w - 20, 260, gc, t);
-    drawChar(ctx, r.x + r.w / 2, fy, defaultLook(c.cls, g), starterEquipLooks(c.cls, g), { facing: i ? -1 : 1, state: 'idle', t: t + i, attackT: 0, damage: 0, scale: 2.4 });
+    drawChar(ctx, r.x + r.w / 2, fy, heroDefaultLook(c.cls, g), starterEquipLooks(c.cls, g), { facing: i ? -1 : 1, state: 'idle', t: t + i, attackT: 0, damage: 0, scale: 2.4 });
     txt(ctx, g === 'f' ? '♀ 女性' : '♂ 男性', r.x + r.w / 2, y + 300, { size: 24, align: 'center', color: gc, glow: on ? gc : null, sw: 5 });
     txt(ctx, `既定名: ${defaultName(c.cls, g)}`, r.x + r.w / 2, y + 330, { size: 13, align: 'center', color: COL.sub, sw: 3 });
   });
@@ -586,7 +657,8 @@ function swatchRow(ctx, c, key, pal, x, y, w, t, rowOn) {
   pal.forEach((v, i) => {
     const r = { x: x + i * (s + 6), y, w: s, h: s };
     const on = String(c.look[key]).toLowerCase() === v.toLowerCase();
-    const hov = region(ctx, key + i, r, () => { setPal(key, v); c.row = LOOK_ROWS.indexOf(key); return null; });
+    const dis = rowDisabled(c, key);
+    const hov = region(ctx, key + i, r, () => { setPal(key, v); c.row = lookRows(c).indexOf(key); return null; }, { disabled: dis });
     ctx.save();
     rrPath(ctx, r.x, r.y, r.w, r.h, 9);
     ctx.fillStyle = v; ctx.fill();
@@ -601,31 +673,54 @@ function swatchRow(ctx, c, key, pal, x, y, w, t, rowOn) {
 function stepLook(ctx, c, rx, ry, rw, rh, t) {
   stepTitle(ctx, '見た目をカスタマイズ', '←→ で切替・色はクリックで選択', rx, ry, rw);
   const x = rx + 24, w = rw - 48;
-  const rows = [['hair', '髪型'], ['hairColor', '髪の色'], ['eyeColor', '瞳の色'], ['skin', '肌の色'], ['random', 'おまかせ']];
-  rows.forEach(([key, label], i) => {
-    const y = ry + 66 + i * 70;
+  const LABEL = { aiHead: 'AIの顔', hair: '髪型', hairColor: '髪の色', eyeColor: '瞳の色', skin: '肌の色', random: 'おまかせ' };
+  const keys = lookRows(c);
+  const six = keys.length > 5, step = six ? 60 : 70, rh0 = six ? 52 : 60, dy = six ? -4 : 0;   // 6行なら少し詰める
+  keys.forEach((key, i) => {
+    const label = LABEL[key];
+    const y = ry + 66 + i * step;
     const on = c.row === i;
-    const rr = { x, y, w, h: 60 };
-    region(ctx, 'row' + key, { x, y, w: 150, h: 60 }, () => { c.row = i; return null; });
+    const dis = rowDisabled(c, key);
+    const rr = { x, y, w, h: rh0 };
+    region(ctx, 'row' + key, { x, y, w: 150, h: rh0 }, () => { if (!dis) c.row = i; return null; }, { disabled: dis });
+    ctx.save();
+    if (dis) ctx.globalAlpha *= 0.42;
     inset(ctx, rr.x, rr.y, rr.w, rr.h, { r: 12, fill: on ? 'rgba(255,95,162,0.2)' : 'rgba(6,4,24,0.45)', stroke: on ? COL.pink : 'rgba(190,170,255,0.3)', lw: on ? 2.5 : 1.5 });
-    txt(ctx, (on ? '▶ ' : '') + label, x + 18, y + 30, { size: 16, color: on ? '#fff' : COL.sub });
+    txt(ctx, (on ? '▶ ' : '') + label, x + 18, y + 30 + dy, { size: 16, color: on ? '#fff' : COL.sub });
+    ctx.restore();
     const cx = x + 170, cw2 = w - 190;
+    if (dis) {
+      // AIの顔を使う時は絵の髪になる（髪型・髪色は選べない）
+      ctx.save(); ctx.globalAlpha *= 0.42;
+      inset(ctx, cx, y + 10 + dy, cw2, 36, { r: 10, fill: 'rgba(0,0,0,0.35)' });
+      ctx.restore();
+      txt(ctx, 'AIの顔の髪を使用中（「AIの顔」をOFFで選べます）', cx + cw2 / 2, y + 28.5 + dy, { size: 13, align: 'center', color: COL.dim, sw: 2.5, maxW: cw2 - 16 });
+      return;
+    }
+    if (key === 'aiHead') {
+      const onAi = c.look.aiHead !== false;
+      btn(ctx, 'aiHead', { x: cx, y: y + 8 + dy, w: 240, h: 38 }, onAi ? '✔ AIの顔を使う：ON' : 'AIの顔を使う：OFF', () => { toggleAiHead(); c.row = 0; return null; }, { color: onAi ? '#109f95' : COL.purple, size: 15, glow: onAi && on ? COL.teal : null });
+      txt(ctx, onAi ? '頭（顔＋髪）を画像の絵にします' : 'コードで描いた顔と、選んだ髪型・髪色を使います', cx + 256, y + 27 + dy, { size: 12, color: COL.sub, sw: 2.5, maxW: cw2 - 260, weight: 700 });
+      return;
+    }
+    if (six) { ctx.save(); ctx.translate(0, -5); }
     if (key === 'hair') {
       const hs = hairStyles();
       const cur = hs.find((h) => h.id === c.look.hair) || { name: c.look.hair };
-      btn(ctx, 'hairL', { x: cx, y: y + 12, w: 44, h: 36 }, '◀', () => { cycleHair(-1); c.row = 0; return null; }, { color: COL.purple, size: 16 });
+      btn(ctx, 'hairL', { x: cx, y: y + 12, w: 44, h: 36 }, '◀', () => { cycleHair(-1); c.row = keys.indexOf('hair'); return null; }, { color: COL.purple, size: 16 });
       inset(ctx, cx + 54, y + 12, cw2 - 108, 36, { r: 10, fill: 'rgba(0,0,0,0.35)' });
       txt(ctx, cur.name, cx + 54 + (cw2 - 108) / 2, y + 30.5, { size: 17, align: 'center', color: '#fff' });
       const idx = hs.findIndex((h) => h.id === c.look.hair);
       txt(ctx, `${idx + 1} / ${hs.length}`, cx + cw2 - 66, y + 30.5, { size: 11, align: 'right', color: COL.dim, sw: 2.5 });
-      btn(ctx, 'hairR', { x: cx + cw2 - 44, y: y + 12, w: 44, h: 36 }, '▶', () => { cycleHair(1); c.row = 0; return null; }, { color: COL.purple, size: 16 });
+      btn(ctx, 'hairR', { x: cx + cw2 - 44, y: y + 12, w: 44, h: 36 }, '▶', () => { cycleHair(1); c.row = keys.indexOf('hair'); return null; }, { color: COL.purple, size: 16 });
     } else if (key === 'random') {
-      btn(ctx, 'rand', { x: cx, y: y + 10, w: 220, h: 40 }, '🎲 ランダム', () => { randomLook(); c.row = 4; return null; }, { color: '#c98a1a', size: 16, glow: on ? COL.gold : null });
-      btn(ctx, 'reset', { x: cx + 236, y: y + 10, w: 200, h: 40 }, '↺ 初期に戻す', () => { c.look = defaultLook(c.cls, c.gender); return null; }, { color: COL.purple, size: 15 });
+      btn(ctx, 'rand', { x: cx, y: y + 10, w: 220, h: 40 }, '🎲 ランダム', () => { randomLook(); c.row = keys.indexOf('random'); return null; }, { color: '#c98a1a', size: 16, glow: on ? COL.gold : null });
+      btn(ctx, 'reset', { x: cx + 236, y: y + 10, w: 200, h: 40 }, '↺ 初期に戻す', () => { c.look = newLook(c.cls, c.gender, c.look); return null; }, { color: COL.purple, size: 15 });
     } else {
       const pal = key === 'hairColor' ? HAIR_COLORS : key === 'eyeColor' ? EYE_COLORS : SKIN_COLORS;
       swatchRow(ctx, c, key, pal, cx, y + 13, cw2, t, on);
     }
+    if (six) ctx.restore();
   });
 }
 function stepName(ctx, game, c, rx, ry, rw, rh, t) {

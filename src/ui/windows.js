@@ -13,6 +13,7 @@ import {
 } from './v3deps.js';
 import { drawSkillPreview, kindLabel } from './v3windows.js';
 import { mapInfo } from './deps.js';
+import * as SpriteM from '../render/sprites.js';
 
 const W = 1280, H = 720;
 const WT = { melee: '近接', gun: '銃', magic: '魔法' };
@@ -784,9 +785,16 @@ export function initDialog(ui, win) {
   win.brief = null; win.reward = null;
   say(win, npc.dialog?.length ? npc.dialog : ['…やあ。'], null);
 }
+// 主人公のセリフ: 行の先頭に "@me:" / "@hero:"（全角コロン可）を付けると主人公が話す行（名前プレート・立ち絵が主人公に）
+const HERO_LINE = /^@(?:me|hero)\s*[:：]\s*/;
 function say(win, lines, after) {
-  win.lines = (Array.isArray(lines) ? lines : [String(lines)]).map(String);
-  if (!win.lines.length) win.lines = ['…'];
+  win.who = [];
+  win.lines = (Array.isArray(lines) ? lines : [String(lines)]).map((l) => {
+    const s = String(l), m = HERO_LINE.exec(s);
+    win.who.push(m ? 'me' : null);
+    return m ? s.slice(m[0].length) : s;
+  });
+  if (!win.lines.length) { win.lines = ['…']; win.who = [null]; }
   win.li = 0; win.chars = 0; win.opts = null; win.optSel = 0; win.after = after;
 }
 function advance(ui, win) {
@@ -902,11 +910,37 @@ export function dialogKey(ui, win, P, eat) {
     advance(ui, win);
   }
 }
+/** 会話での主人公の表情（立ち絵）: 報酬=smile、「！？」=surprised、「…」で始まる=sad、他は基本 */
+function heroExprOf(win, line) {
+  if (win.reward) return 'smile';
+  if (/[!！][?？]|[?？][!！]/.test(line)) return 'surprised';
+  if (/^[…‥]/.test(line)) return 'sad';
+  if (/♪|ありがと|やった/.test(line)) return 'smile';
+  return null;
+}
+function heroArtKey(g) {
+  const st = g.state;
+  if (!st) return null;
+  const lk = guard('charLook', () => charLook(st), null) || {};
+  const cls = lk.classId || st.heroId, gen = lk.gender || st.gender;
+  return cls && gen ? cls + '_' + gen : null;
+}
 function drawDialog(ui, ctx, win) {
   const g = ui.game;
   const npc = npcOf(win);
   const { x, y, w, h } = win;
   const t = g.time || ui.frame / 60;
+  const curLine = win.lines?.[win.li] || '';
+  const heroKey = heroArtKey(g);
+  const heroP = heroKey ? guard('portraitFor', () => SpriteM.portraitFor?.(heroKey, undefined, null), null) : null;
+  const meTalks = win.who?.[win.li] === 'me';
+  // 主人公の顔欄（立ち絵があるとき）: 窓の右上に立つ。主人公が話す/選ぶ時は明るく、相手が話す時は少し暗く
+  if (heroP && !meTalks) {
+    const lineDone0 = win.chars >= curLine.length && win.li >= (win.lines?.length || 1) - 1;
+    const active = !!(win.opts && lineDone0);
+    const bob = Math.sin(t * 2) * 1.5;
+    guard('heroPortrait', () => SpriteM.drawPortrait(ctx, heroKey, heroExprOf(win, curLine), x + w - 96, y + 6 + bob, 196, { maxW: 180, flip: true, dim: active ? 0 : 0.35 }));
+  }
   // 立ち絵
   const bx = x + 16, by = y + 16, bw = 170, bh = h - 32;
   ctx.save();
@@ -919,11 +953,17 @@ function drawDialog(ui, ctx, win) {
   ctx.beginPath(); ctx.arc(bx + bw / 2, by + 90, 48, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = 'rgba(20,6,40,0.55)';
   for (let i = 0; i < 7; i++) { const bw2 = 18 + (i * 37) % 22, bh2 = 40 + (i * 53) % 70; ctx.fillRect(bx + i * 26 - 4, by + bh - 40 - bh2, bw2, bh2 + 40); }
-  drawChar(ctx, bx + bw / 2, by + bh - 14, npc.look, looksFrom(npc.equip), { facing: 1, state: 'idle', t, attackT: 0, damage: 0, scale: 1.55 });
+  // 主人公が話す行（"@me:"）で立ち絵があれば主人公の立ち絵、無ければ相手の姿
+  // 立ち絵の上の方（顔〜腰）を枠の縦横比で切り出す
+  const drewMe = meTalks && heroP && guard('heroPortrait', () => SpriteM.drawPortrait(ctx, heroKey, heroExprOf(win, curLine), bx + bw / 2, by + bh, bh - 6, { maxW: bw + 24, crop: [0, 0, 1, Math.min(1, heroP.w / (bw / bh) / heroP.h)] }), null);
+  if (!drewMe) {
+    if (meTalks) drawChar(ctx, bx + bw / 2, by + bh - 14, charLook(g.state), equipLooks(g.state), { facing: 1, state: 'idle', t, attackT: 0, damage: 0, scale: 1.55 });
+    else drawChar(ctx, bx + bw / 2, by + bh - 14, npc.look, looksFrom(npc.equip), { facing: 1, state: 'idle', t, attackT: 0, damage: 0, scale: 1.55 });
+  }
   ctx.restore();
   ctx.save(); rrPath(ctx, bx, by, bw, bh, 12); ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.stroke(); ctx.restore();
   // 名前プレート
-  const nameStr = npc.name || '???';
+  const nameStr = meTalks ? (guard('charName', () => charName(g.state), '') || 'あなた') : (npc.name || '???');
   const nw = Math.max(110, measure(ctx, nameStr, 16) + 30);
   ctx.save();
   rrPath(ctx, x + 204, y - 14, nw, 30, 15);
@@ -933,7 +973,7 @@ function drawDialog(ui, ctx, win) {
   ctx.shadowBlur = 0; ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke();
   ctx.restore();
   txt(ctx, nameStr, x + 204 + nw / 2, y + 1.5, { size: 16, align: 'center' });
-  if (npc.title) txt(ctx, npc.title, x + 214 + nw, y + 2, { size: 12, color: COL.sub });
+  if (npc.title && !meTalks) txt(ctx, npc.title, x + 214 + nw, y + 2, { size: 12, color: COL.sub });
 
   const line = win.lines?.[win.li] || '';
   const lineDone = win.chars >= line.length && win.li >= (win.lines?.length || 1) - 1;

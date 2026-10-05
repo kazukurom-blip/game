@@ -642,7 +642,7 @@ export function attachFx(game, o = {}) {
     const col = j.aura || '#ffe066';
     spawnEffect(game, 'jobUp', p.x, p.y, { color: col, name: j.name, title: 'JOB UP!', _child: true });
     // UI 側に転職演出（JOB ADVANCE!）があるため、カットインは o.jobCutin=true のときだけ
-    if (o.jobCutin) spawnEffect(game, 'cutin', 0, 0, { name: j.name, color: col, line: j.title ? `「${j.title}」の名にかけて！` : undefined });
+    if (o.jobCutin) spawnEffect(game, 'cutin', 0, 0, { name: j.name, color: col, expr: 'smile', line: j.title ? `「${j.title}」の名にかけて！` : undefined });
     impact(game, 0.6, col);
   }));
   offs.push(ev.on('tuneResult', (d) => {

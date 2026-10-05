@@ -11,7 +11,7 @@
 //          攻撃/被弾/死亡などの一過性の状態や大きな拡大表示はその場でベクター描画する。
 import { shade, rgba, mix, rng, clamp, lerp, OUTLINE } from './util.js';
 import { ITEMS } from '../data/items.js';
-import { spriteCharPlan, drawSpriteCharPlan } from './sprites.js';
+import { spriteCharPlan, drawSpriteCharPlan, headFor, headBackOf, flashOf } from './sprites.js';
 
 export const HERO_LOOKS = {
   luna: { body: 'f', skin: '#ffe3d3', hair: 'twin', hairColor: '#ff6fb5', eyeColor: '#ff3d8b', expr: 'cute', hairShadow: '#c8458f', hairHi: '#ffd0ea', hairTip: '#b47cff', tie: '#ffd23f' },
@@ -573,6 +573,32 @@ function newCanvas(w, h) {
 function lookSig(l) {
   return (l.body || '') + (l.skin || '') + (l.hair || '') + (l.hairColor || '') + (l.eyeColor || '') + (l.expr || '') + (l.hairShadow || '') + (l.hairHi || '') + (l.hairTip || '') + (l.tie || '') + (l.mesh || '') + (l.rim || '') + (l.villain ? 'V' : '');
 }
+
+// ---- AIの頭（manifest の heads[<classId>_<gender>]）。主人公の look（classId・gender を持つ）だけに適用。
+//  髪（前後）と顔はコードで描かず、頭の座標系（charHeadPose と同じ）に絵を置く。帽子・アクセサリは上に重ねる。
+/** AIの頭の表情: 被弾=hurt、攻撃=shout、まばたき=blink（待機の周期）、レベルアップ/勝利=happy（anim.headExpr）、他は基本の絵 */
+export function aiHeadExpr(state, t, A) {
+  A = A || EMPTY;
+  if (state === 'dead' || A.panic) return 'hurt';
+  if (A.headExpr) return A.headExpr;
+  const fc = A.face;
+  if (fc === 'happy' || fc === 'wink') return 'happy';
+  if (fc === 'shout' || fc === 'angry') return 'shout';
+  if (fc === 'sad') return 'sad';
+  if (state === 'attack' || state === 'shoot') return 'shout';
+  if (state === 'hurt') return 'hurt';
+  if (state === 'cheer') return 'happy';
+  if (state === 'idle' || state === 'sit') {
+    const ph = (((t || 0) % LOOP) + LOOP) % LOOP;
+    if (ph >= 3.82 && ph < 4.0) return 'blink';
+  }
+  return null;
+}
+/** その look・姿勢で使う頭の絵（無い/読み込み中/壊れている/look.aiHead===false/NPC → null） */
+export function aiHeadOf(look, A, state, t) {
+  if (ONLY || !look || look.aiHead === false || !look.classId || !look.gender || look.villain) return null;
+  return headFor(look.classId, look.gender, aiHeadExpr(state, t, A));
+}
 const EQK = ['hat', 'top', 'bottom', 'shoes', 'weapon', 'accessory'];
 function eqSig(e) {
   let s = '';
@@ -583,8 +609,9 @@ function eqSig(e) {
   return s;
 }
 /** 装備からキャッシュ範囲（ローカル座標, scale 1）を見積もる */
-function boxOf(equip, look, state) {
+function boxOf(equip, look, state, ah) {
   let L = 34, R = 36, T = 98, Bm = 8;
+  if (ah) { const k = ah.scale || 1, o = ah.offset || [0, 0]; L = Math.max(L, 30 * k - o[0] + 6); R = Math.max(R, 30 * k + o[0] + 6); T = Math.max(T, 62 + 27 * k - o[1] + 6); }
   const hs = look.hair;
   if (hs === 'twin' || hs === 'ponytail' || hs === 'braid' || hs === 'long' || hs === 'wolf' || hs === 'curly') L = 40;
   const acc = equip.accessory && equip.accessory.style;
@@ -676,7 +703,8 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
       }
       const dmg = clamp(A.damage || 0, 0, 1);
       const ds = dmgStage(dmg);
-      const key = state + fi + '|' + ds + '|' + R + '|' + (A.flash ? 1 : 0) + (A.panic ? 1 : 0) + (vil ? 1 : 0) + (A.face || '') + (A.rim || '') + '|' + lookSig(look) + '|' + eqSig(equip);
+      const ah = aiHeadOf(look, A, state, repT);
+      const key = state + fi + '|' + ds + '|' + R + '|' + (A.flash ? 1 : 0) + (A.panic ? 1 : 0) + (vil ? 1 : 0) + (A.face || '') + (A.rim || '') + '|' + lookSig(look) + '|' + eqSig(equip) + (ah ? '|H' + ah.file : '');
       let ent = CACHE.get(key);
       if (ent) { CACHE.delete(key); CACHE.set(key, ent); CSTAT.hit++; }
       else {
@@ -684,14 +712,14 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
         if (now - buildWin > 12) { buildWin = now; builds = 0; }
         if (builds < MAX_BUILDS) {
           builds++; CSTAT.build++;
-          const bx = boxOf(equip, look, state);
+          const bx = boxOf(equip, look, state, ah);
           const w = Math.ceil((bx[0] + bx[1]) * R), h = Math.ceil((bx[2] + bx[3]) * R);
           const cv = newCanvas(w, h);
           const oc = cv.getContext('2d');
           if (oc) {
             oc.setTransform(1, 0, 0, 1, 0, 0); oc.clearRect(0, 0, w, h);
             oc.setTransform(R, 0, 0, R, bx[0] * R, bx[2] * R);
-            const a2 = { state: A.state, t: repT, attackT: repAT, damage: DMG_REP[ds], flash: A.flash, panic: A.panic, face: A.face, rim: A.rim, villain: vil, facing: 1, scale: 1, noFx: true };
+            const a2 = { state: A.state, t: repT, attackT: repAT, damage: DMG_REP[ds], flash: A.flash, panic: A.panic, face: A.face, headExpr: A.headExpr, rim: A.rim, villain: vil, facing: 1, scale: 1, noFx: true };
             renderChar(oc, look, equip, a2, state, ws, wk);
             ent = { cv, w, h, R, ox: bx[0] * R, oy: bx[2] * R, repT, repAT };
             CACHE.set(key, ent); cachePx += w * h;
@@ -838,6 +866,7 @@ function renderChar(ctx, look, equip, anim, state, ws, wk) {
   K.skinSh2 = sh(K.skin, -0.2);
   P.hipY += B.hipY;
   resolveFace(P, K, anim);
+  K.ai = vil ? null : aiHeadOf(look, anim, state, t);
   FL = !!anim.flash;
   RIM = anim.rim || look.rim || (f ? '#9ff4ff' : '#8fe8ff');
   // 地面の影
@@ -971,7 +1000,7 @@ function drawFrontView(ctx, K) {
   if (eq.accessory && eq.accessory.style === 'wings') drawWings(ctx, K);
   if (eq.accessory && eq.accessory.style === 'scarf') drawScarfTail(ctx, K);
   TAG = 'hair_back';
-  enterHead(ctx, K); drawHairBack(ctx, K); ctx.restore();
+  if (!K.ai) { enterHead(ctx, K); drawHairBack(ctx, K); ctx.restore(); }
   TAG = 'top';
   if (K.topS === 'hoodie') drawHood(ctx, K);
   drawArm(ctx, K, false, sxB, SHOULDER_Y + 0.3, P.ab[0], P.ab[1]);
@@ -997,7 +1026,7 @@ function drawFrontView(ctx, K) {
   }
   // ---- 頭
   enterHead(ctx, K);
-  drawHead(ctx, K);
+  if (K.ai) drawAiHead(ctx, K); else drawHead(ctx, K);
   ctx.restore();
   // ---- 前腕＋武器
   drawArm(ctx, K, true, sxF, SHOULDER_Y + 0.6, P.af[0], P.af[1]);
@@ -1050,11 +1079,14 @@ function drawBackView(ctx, K) {
   TAG = 'accessory';
   if (eq.accessory && eq.accessory.style === 'wings') drawWings(ctx, K, true);
   enterHead(ctx, K);
-  TAG = 'body';
-  ctx.beginPath(); ctx.ellipse(0, 0, 16.5, 15.5, 0, 0, TAU);
-  fillStroke(ctx, K.skin);
-  TAG = 'hair_front';
-  drawHairBack(ctx, K, true);
+  if (K.ai) drawAiHeadImage(ctx, K, true);
+  else {
+    TAG = 'body';
+    ctx.beginPath(); ctx.ellipse(0, 0, 16.5, 15.5, 0, 0, TAU);
+    fillStroke(ctx, K.skin);
+    TAG = 'hair_front';
+    drawHairBack(ctx, K, true);
+  }
   TAG = 'hat';
   drawHat(ctx, K, true);
   ctx.restore();
@@ -1975,6 +2007,51 @@ function drawHead(ctx, K) {
   if (P.sweat || P.panic) drawSweat(ctx, K);
   TAG = 'accessory';
   if (eq.accessory && eq.accessory.style === 'halo') drawHalo(ctx, K);
+}
+
+// ---- AIの頭
+// 帽子で隠れる髪: かぶる帽子（cap/beanie/bandana/helmet/cowboy）はつばの線より上・帽子の外側の髪を描かない（帽子に収まって見える）
+const HAT_CLIP = { cap: [-7, 18.8, -26.5], beanie: [-5, 18.8, -27], bandana: [-7, 18.8, -24], helmet: [-3, 19.8, -28], cowboy: [-10, 12.5, -30] };
+const AI_H = 46, AI_W = 58, AI_CX = FO * 0.5, AI_CY = -3;   // 頭の絵の既定の置き方（頭の座標系: 高さ46・幅58に収め、中心を(1.1,-3)に）
+function drawAiHeadImage(ctx, K, back) { paintAiHead(ctx, K.ai, K.eq.hat && K.eq.hat.style, back, FL); }
+/** 頭の絵を頭の座標系（原点=頭の中心、右向き、scale 1）に描く。sprites.js の人型レイヤー合成からも使う */
+export function paintAiHead(ctx, h, hat, back, flash) {
+  if (!h) return;
+  let src = back ? headBackOf(h) : h.canvas;
+  if (!src) return;
+  if (flash) src = flashOf(src, '#ffffff', 0.9);
+  const k = Math.min(AI_H / h.h, AI_W / h.w) * (h.scale || 1);
+  const o = h.offset || [0, 0];
+  const hc = HAT_CLIP[hat];
+  ctx.save();
+  if (hc) {
+    const [by, hw, top] = hc;
+    ctx.beginPath();
+    ctx.moveTo(-400, by); ctx.lineTo(400, by); ctx.lineTo(400, 400); ctx.lineTo(-400, 400); ctx.closePath();
+    ctx.moveTo(-hw, by + 1); ctx.bezierCurveTo(-hw - 0.6, top, hw + 0.6, top, hw, by + 1); ctx.closePath();
+    ctx.clip();
+  }
+  ctx.translate(AI_CX + o[0], AI_CY + o[1]);
+  if (!!h.facesLeft !== !!back) ctx.scale(-1, 1);
+  ctx.drawImage(src, 0, 0, h.w, h.h, -h.w * k / 2, -h.h * k / 2, h.w * k, h.h * k);
+  ctx.restore();
+}
+/** 前向きの頭: 絵＋上に重ねる物（マスク・サングラス・帽子・汗・天使の輪） */
+function drawAiHead(ctx, K) {
+  const P = K.P, eq = K.eq;
+  TAG = 'face';
+  drawAiHeadImage(ctx, K, false);
+  const acc = eq.accessory && eq.accessory.style;
+  TAG = 'accessory';
+  if (acc === 'mask') drawMask(ctx, K);
+  if (acc === 'sunglasses') drawGlasses(ctx, K);
+  TAG = 'hat';
+  drawHat(ctx, K, false);
+  TAG = 'face';
+  if (P.panic) drawPanicLines(ctx, K);
+  if (P.sweat || P.panic) drawSweat(ctx, K);
+  TAG = 'accessory';
+  if (acc === 'halo') drawHalo(ctx, K);
 }
 
 function drawSweat(ctx, K) {

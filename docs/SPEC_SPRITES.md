@@ -160,3 +160,24 @@ accessory_back（wings・scarf のなびき） → hair_back → body → bottom
 - 頭の位置・傾き・大きさは毎フレーム `charHeadPose()` に合わせる。`scale` / `offset` で微調整。
 - 表情: blink（まばたき）、hurt（被弾）、shout（攻撃）、happy（レベルアップ等）。無ければ基本の絵。
 - キャラ作成で「AIの顔を使う」を選んだキャラだけに適用（`state.look.aiHead = true`。既定は、画像があれば true）。髪型・髪色の選択はこの場合は無効（絵の髪になる）。
+
+### 実装メモ（src/render/sprites.js / character.js）
+- 読み込み: `portraits` / `heads` の各項目（文字列、または `{ file, expr: {名前: ファイル}, scale, offset, facesLeft, bgRemove }`）を1枚絵として扱う（背景除去・トリミングは1枚絵モードと同じ `prepSingle`）。読み込み時に立ち絵は高さ720px、頭は320pxまで半分ずつ縮小（毎フレームの drawImage を軽くする）。不正なパスの項目は無視。項目を最初に使った時に、その人の表情の絵もまとめて先読み。
+- API（sprites.js）:
+  - `portraitFor(classId, gender, expr)` / `headFor(classId, gender, expr)` → `{ canvas, w, h, expr, file, scale, offset, facesLeft }` | null（無い・読み込み中・壊れている・spriteMode=procedural）。`classId` に `'luna_f'` や look（`classId`・`gender` を持つ）も可。表情が無ければ別名（smile↔happy, shout↔angry, surprised↔hurt）→ 基本の絵。
+  - `drawPortrait(ctx, key, expr, x, y, h, opts)` → 描いた矩形 | null。`opts.anchor`: `'foot'`（既定・足元中央）/ `'center'`、`crop: [u0,v0,u1,v1]`（0..1 の切り出し）、`maxW`、`flip`、`alpha`、`dim`（0..1 暗く）、`flash`。
+  - `hasHeroArt('portraits'|'heads', classId, gender)`（manifest にあるか）/ `heroArtState(...)`（0 無し / 1 読み込み中 / 2 完了 / 3 失敗）/ `headBackOf(head)`（背面用シルエット）。
+- 頭の差し替え（character.js）: `aiHeadOf(look, anim, state, t)` が `look.aiHead !== false` かつ `look.classId`・`look.gender` あり（悪役・テンプレート書き出し（onlyLayers）中は除く）で頭の絵を返す。`renderChar` は K.ai があれば後ろ髪・耳・顔・前髪・眉・頬・煤を描かず、頭の座標系（`charHeadPose` と同じ `enterHead`）に `paintAiHead` で絵を置き、マスク・サングラス・帽子・汗・天使の輪を上に重ねる。かぶる帽子（cap/beanie/bandana/helmet/cowboy）はつばの線より上・帽子の外の部分を clip で隠す。背面（climb）はシルエット。被弾の白フラッシュは白いシルエット。
+  - 置き方: 絵を「高さ46・幅58」に収まる倍率 × `scale` で、中心を頭の座標 (1.1, -3) + `offset` に置く（頭の座標: 原点=頭の中心、顔の幅 約34、あご +15.5、髪の上端 約 -25）。`facesLeft` なら左右反転。
+  - 表情 `aiHeadExpr(state, t, anim)`: dead/panic→hurt、`anim.headExpr`（プレイヤーはレベルアップ・転職・ボス撃破・ミッション達成・タワー階クリアで 1.8 秒 happy）、`anim.face`（happy/wink→happy, shout/angry→shout, sad→sad）、attack/shoot→shout、hurt→hurt、cheer→happy、idle/sit のまばたき（コードの目と同じ周期 4.8 秒中 3.82〜4.0 秒）→blink、他は基本。
+  - 2xキャッシュのキーに使う絵のファイル名を含める（読み込み前はコード描画のキー → 読み込み完了で別のキー＝自動で作り直し）。`boxOf` は頭の絵の `scale`/`offset` に合わせて広げる。
+  - 人型レイヤー（`chars`）のスプライトで描く時も、頭の絵があれば hair_back / face / hair_front の代わりに頭の絵を置く。
+  - look.classId / look.gender: `progression.newState` / 旧セーブの補完（`tagHeroLook`）と `player.heroLookOf` が state.heroId / state.gender から**列挙されないプロパティ**として付ける（セーブ・見た目の比較には出ない）。NPC・敵・市民の look には付かない → 適用されない。タイトルのプレビューは classId・gender を付けたコピーで描く。
+- 立ち絵の使い場所:
+  - 会話窓（windows.js）: 行の先頭が `@me:` / `@hero:`（全角コロン可）の行は主人公のセリフ（名前プレートが主人公の名前、左の枠に立ち絵の上の方を枠の縦横比で切り出し。立ち絵が無ければ主人公のちびキャラ）。それ以外の行では窓の右上に主人公の立ち絵（顔欄。相手が話している間は少し暗く、選択肢の時は明るく）。表情: 報酬=smile、「！？」=surprised、「…」で始まる=sad、「♪/ありがと/やった」=smile。
+  - キャラ選択の詳細・キャラ作成のプレビュー（title.js）: 立ち絵があればコード描画のキャラを少し小さくして左へ、立ち絵を右に並べる（作成の攻撃ポーズ中は shout、名前の段階は smile）。
+  - カットイン（cutin.js）: 立ち絵があれば上の方（高さ＝幅×0.75。腰上なら顔〜肩、全身なら顔〜胸）を帯の中に拡大。`pushCutin(game, { expr })`（既定 shout、転職のカットインは smile）。無ければ今まで通りコード描画の顔アップ（`spriteRev` が変わったら作り直す＝頭の絵の読み込み完了も反映）。
+  - 転職の祝福演出（hud3.js）: 左に笑顔（smile）の立ち絵を並べる。中央のキャラは happy。
+- テスト: `node tests/hero_art_browser.mjs`（`npm run test:heroart`。仮のAI画像を canvas で生成して page.route で差し替え。スクショ `tests/screenshots/heroart_*.png`）、`tests/sprites_unit.mjs`（Node: 読み込み・不正な項目・表情の選び方・NPC に適用しない）。
+- 制限: 頭の絵は1方向（右向き）だけ。背面はシルエット。サングラス・マスクはコードの顔の位置（絵と合わなければ offset）。帽子の大きさは絵の頭の大きさに合わせない。服破れの煤・絆創膏は頭の絵には付かない。
+

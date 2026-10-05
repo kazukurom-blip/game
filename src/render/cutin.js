@@ -5,6 +5,7 @@
 import { rgba, shade, starPath, clamp } from './util.js';
 import { drawCharacter, lastDrawnArgs, HERO_LOOKS } from './character.js';
 import { BRANCH_STYLE, RAINBOW, jobStyleOf } from './fxStyle.js';
+import { portraitFor, drawPortrait, spriteRev } from './sprites.js';
 
 const PI = Math.PI;
 const CUTIN_LIFE = 0.95;
@@ -25,6 +26,7 @@ export function pushCutin(game, o = {}) {
     name: o.name || '', line: o.line != null ? o.line : (br ? br.line : ''),
     color: o.color || (br && br.col) || js.aura || '#ff3d7f',
     sub: o.sub || (br && br.sub) || '#ffe066',
+    expr: o.expr || 'shout',      // 立ち絵（manifest portraits）の表情: 奥義=shout、転職=smile
     seed: Math.random() * 100,
   });
 }
@@ -47,8 +49,9 @@ export function drawCutinLayer(ctx, game) {
 // カットインの顔アップのキャッシュ（cutin ごとに1枚。画面の帯に見える範囲＋余白）
 const PORTRAIT_S = 5.3, PORTRAIT_W = 760, PORTRAIT_H = 460;
 function portraitOf(c, fx, fy) {
-  if (c.por !== undefined) return c.por;
-  c.por = null;
+  // AIの頭の読み込み完了などで見た目が変わったら作り直す
+  if (c.por !== undefined && c.porRev === spriteRev()) return c.por;
+  c.por = null; c.porRev = spriteRev();
   if (typeof document === 'undefined' && typeof OffscreenCanvas === 'undefined') return null;
   const cv = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(PORTRAIT_W, PORTRAIT_H) : document.createElement('canvas');
   cv.width = PORTRAIT_W; cv.height = PORTRAIT_H;
@@ -102,9 +105,14 @@ function drawOne(ctx, c, W, H) {
   const s = 5.0 + t * 0.6;
   const fx = W * 0.3, fy = cy + 8;
   // 性能: 顔アップ（scale 5 の大きなベクター描画）は最初の1回だけオフスクリーンに描き、以降は拡大して貼る
+  // 立ち絵（manifest portraits）があればその上の方（顔〜胸）を切り出して使う
+  const pimg = portraitFor(c.look, undefined, c.expr);
   try {
-    const por = portraitOf(c, fx, fy);
-    if (por) {
+    const por = pimg ? null : portraitOf(c, fx, fy);
+    if (pimg) {
+      const ch = Math.min(1, (pimg.w * 0.75) / pimg.h);      // 幅の0.75倍の高さ = 腰上なら顔〜肩、全身なら顔〜胸
+      drawPortrait(ctx, c.look, c.expr, fx, cy + 46, 300 * (1 + t * 0.12), { anchor: 'center', crop: [0, 0, 1, ch], maxW: 480 });
+    } else if (por) {
       const k = s / PORTRAIT_S;
       ctx.save();
       ctx.translate(fx - 6 * s, fy + 58 * s); ctx.scale(k, k); ctx.translate(-(fx - 6 * PORTRAIT_S), -(fy + 58 * PORTRAIT_S));

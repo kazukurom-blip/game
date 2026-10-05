@@ -24,11 +24,22 @@ export { expToNext, MAX_LEVEL };
  * newState(classId, opts?) — opts = {name, gender:'f'|'m', look}
  *  未指定: gender はクラスの旧既定（luna=f, jin=m, hacker=f）、look は DEFAULT_LOOKS[class][gender]、name は既定名
  */
+/** look に classId・gender を付ける（AIの頭・立ち絵 = manifest heads/portraits の <classId>_<gender> 用）。
+ *  列挙しないプロパティ（セーブ・見た目の比較には出ない。毎回 state から付け直す） */
+export function tagHeroLook(look, classId, gender) {
+  if (!look || typeof look !== 'object') return look;
+  for (const [k, v] of [['classId', classId], ['gender', gender]]) {
+    if (!v || look[k] === v) continue;
+    try { Object.defineProperty(look, k, { value: v, writable: true, configurable: true, enumerable: false }); } catch { /* ignore */ }
+  }
+  return look;
+}
 export function newState(heroId = 'luna', opts = {}) {
   if (!HERO_BASE[heroId]) heroId = 'luna';
   const gender = GENDERS.includes(opts?.gender) ? opts.gender : (LEGACY_GENDER[heroId] || 'f');
   const name = typeof opts?.name === 'string' && opts.name.trim() ? opts.name.trim().slice(0, 12) : defaultName(heroId, gender);
   const look = opts?.look && typeof opts.look === 'object' ? { ...defaultLook(heroId, gender), ...opts.look } : defaultLook(heroId, gender);
+  tagHeroLook(look, heroId, gender);
   const base = HERO_BASE[heroId];
   const st = STARTER_SKILLS[heroId];
   const state = {
@@ -167,6 +178,7 @@ export function migrateState(state) {
   // v3 クラス/性別/見た目/名前: 旧セーブは luna=♀ルナ, jin=♂ジン
   if (!GENDERS.includes(state.gender)) state.gender = LEGACY_GENDER[state.heroId] || 'f';
   state.look = state.look && typeof state.look === 'object' ? { ...defaultLook(state.heroId, state.gender), ...state.look } : defaultLook(state.heroId, state.gender);
+  tagHeroLook(state.look, state.heroId, state.gender);
   if (typeof state.name !== 'string' || !state.name.trim()) state.name = defaultName(state.heroId, state.gender);
   // v3 SP プール
   const sbt = state.spByTier && typeof state.spByTier === 'object' ? state.spByTier : {};
