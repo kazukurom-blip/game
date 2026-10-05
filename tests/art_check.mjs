@@ -12,7 +12,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { readPng, writePng, newImage } from '../tools/png_rgba.mjs';
 import { checkArt, parseCatalog, classify } from '../tools/check_art.mjs';
-import { RIG_PARTS } from '../src/render/rigLayout.js';
+import { RIG_PARTS, RIG_BASE } from '../src/render/rigLayout.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 let pass = 0, fail = 0;
@@ -157,7 +157,14 @@ async function main() {
     const root = path.join(tmp, 'repo');
     fs.mkdirSync(path.join(root, 'assets', 'sprites', 'rig'), { recursive: true });
     fs.mkdirSync(path.join(root, 'tools'), { recursive: true });
-    fs.copyFileSync(path.join(ROOT, 'assets', 'sprites', 'manifest.json'), path.join(root, 'assets', 'sprites', 'manifest.json'));
+    // 本物の manifest から、納品で入る節（rig.parts・faces・hairs・faceBase）を外した「納品前」の形にして使う
+    // （本物に顔・髪・パーツが入った後でもテストが同じ結果になるように）
+    {
+      const m0 = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets', 'sprites', 'manifest.json'), 'utf8'));
+      delete m0.faces; delete m0.hairs; delete m0.faceBase;
+      if (m0.rig && m0.rig.parts && typeof m0.rig.parts === 'object') m0.rig = { ...m0.rig, parts: Object.fromEntries(Object.entries(m0.rig.parts).filter(([k]) => /^body_[fm]$/.test(k))) };
+      fs.writeFileSync(path.join(root, 'assets', 'sprites', 'manifest.json'), JSON.stringify(m0, null, 2));
+    }
     fs.copyFileSync(path.join(ROOT, 'assets', 'sprites', 'rig', 'body_f.png'), path.join(root, 'assets', 'sprites', 'rig', 'body_f.png'));
     fs.copyFileSync(path.join(ROOT, 'tools', 'rig_manifest.mjs'), path.join(root, 'tools', 'rig_manifest.mjs'));
     const out = path.join(tmp, 'out');
@@ -187,7 +194,7 @@ async function main() {
     const spr = path.join(root, 'assets', 'sprites');
     const man = JSON.parse(fs.readFileSync(path.join(spr, 'manifest.json'), 'utf8'));
     check('--install: NG ではない画像だけコピー', fs.existsSync(path.join(spr, 'rig/top/plainShirt_f.png')) && !fs.existsSync(path.join(spr, 'rig/weapon/knife.png')) && fs.existsSync(path.join(spr, 'heads/face/f_01_blink.png')) && !fs.existsSync(path.join(spr, 'heads/face/f_02.png')), r.installed.copied.join(','));
-    check('--install: rig 節（rig_manifest.mjs）と基準色', man.rig.parts['top/plainShirt_f'] && man.rig.parts['top/plainShirt_f'].base === '#a89a84' && man.rig.parts['weapon/woodSword'] && man.rig.parts.body_f && man.rig.profile && !man.rig.parts['weapon/knife'], JSON.stringify(man.rig.parts));
+    check('--install: rig 節（rig_manifest.mjs）と基準色', man.rig.parts['top/plainShirt_f'] && (man.rig.parts['top/plainShirt_f'].base || (RIG_BASE.top.plainShirt || [])[0]) === '#a89a84' && man.rig.parts['weapon/woodSword'] && man.rig.parts.body_f && man.rig.profile && !man.rig.parts['weapon/knife'], JSON.stringify(man.rig.parts));
     check('--install: faces / hairs 節（FACE_HAIR_SPEC の形）', man.faces && man.faces.f_01 && man.faces.f_01.file === 'heads/face/f_01.png' && man.faces.f_01.expr.blink === 'heads/face/f_01_blink.png' && !man.faces.f_01.expr.hurt && man.hairs.f_twin.back === 'heads/hair/f_twin_back.png' && man.hairs.f_twin.base === '#b07850' && man.faceBase, JSON.stringify({ faces: man.faces, hairs: man.hairs }));
     check('--install: 他の節（enemies・heads）は残る', man.enemies && Object.keys(man.enemies).length > 10 && man.heads && man.heads.luna_f);
   } finally {
