@@ -5,6 +5,7 @@
 //  - spriteMode: 'auto'（スプライトがあれば使う）| 'procedural'（常にコード描画）。デバッグパネル（F2）で切替。
 //  - パスはすべて相対（公開ページ・サブディレクトリ配信でも動く）。
 import { charHeadPose, itemColors, SPRITE_LAYER_ORDER, aiHeadExpr, paintAiHead } from './character.js';
+import { setRigManifest, rigStats, rigPreload } from './rig.js';
 
 export const SPRITE_BASE = 'assets/sprites/';
 const DEF_SCALE = 0.5, DEF_FPS = 8;
@@ -29,7 +30,9 @@ export function setSpriteMode(m) {
 export function toggleSpriteMode() { return setSpriteMode(MODE === 'auto' ? 'procedural' : 'auto'); }
 /** 画像の読み込み・モードが変わるたびに増える番号（キャッシュの無効化用） */
 export function spriteRev() { return REV; }
-export function spriteStats() { return { mode: MODE, ...STATS, errors: STATS.errors.slice(-5), tintCache: TINT.size }; }
+/** 画像の読み込み完了などで番号を進める（rig.js から） */
+export function bumpSpriteRev() { REV++; }
+export function spriteStats() { return { mode: MODE, ...STATS, errors: STATS.errors.slice(-5), tintCache: TINT.size, rig: rigStats() }; }
 export function hasSpriteManifest() { return !!MAN; }
 
 /** manifest.json を読み込む（失敗しても例外を投げない）。戻り値: 読み込めたら true */
@@ -44,7 +47,7 @@ export async function loadSpriteManifest(url = SPRITE_BASE + 'manifest.json') {
     const base = url.slice(0, url.lastIndexOf('/') + 1);
     return setSpriteManifest(j, base);
   } catch (e) {
-    MAN = null; STATS.manifest = 'none';
+    MAN = null; STATS.manifest = 'none'; setRigManifest(null);
     return false;
   }
 }
@@ -53,7 +56,9 @@ export async function loadSpriteManifest(url = SPRITE_BASE + 'manifest.json') {
 export function setSpriteManifest(j, base = SPRITE_BASE) {
   MAN = null; STATS.entries = 0; IMG.clear(); TINT.clear(); PLAIN.clear(); tintPx = 0; REV++;
   STATS.requested = STATS.loaded = STATS.failed = 0;
+  setRigManifest(null, base);
   if (!j || typeof j !== 'object' || Array.isArray(j)) { STATS.manifest = j == null ? 'none' : 'broken'; return false; }
+  try { setRigManifest(j.rig, base); } catch (e) { note('rig の解釈に失敗: ' + e.message); }
   try {
     BASE = base;
     const d = j.defaults && typeof j.defaults === 'object' ? j.defaults : {};
@@ -99,6 +104,7 @@ export function setSpriteManifest(j, base = SPRITE_BASE) {
 export function preloadSprites() {
   if (!MAN) return Promise.resolve(0);
   const all = [];
+  const rp = rigPreload();
   for (const sec of ['enemies', 'bosses', 'pets']) for (const k in MAN[sec]) all.push(MAN[sec][k]);
   if (MAN.chars) for (const k in MAN.chars.layers) all.push(MAN.chars.layers[k]);
   for (const sec of ['portraits', 'heads']) for (const k in MAN[sec]) { const E = MAN[sec][k]; all.push(E.base); for (const e in E.expr) all.push(E.expr[e]); }
@@ -106,7 +112,7 @@ export function preloadSprites() {
     const r = img(s);
     if (!r || r.st !== 1) return res();
     r.wait.push(res);
-  }))).then(() => STATS.loaded);
+  })).concat([rp])).then(() => STATS.loaded);
 }
 
 // ================================================================ 敵・ボス
@@ -595,6 +601,46 @@ function normSingle(o, key) {
   return s;
 }
 
+/**
+ * 背景を透明に（画素配列 d を直接書き換え）。四隅が不透明でほぼ同じ色なら、その色を四隅から塗りつぶして消し、縁のにじみを薄くする。
+ * mode: 'auto'（既定）| true（強制）| false（しない）。消したら背景色 [r,g,b]（真）、消さなければ false。リグのパーツシートでも使う。
+ */
+export function removeBg(d, w, h, mode = 'auto') {
+  if (mode === false) return false;
+  const at = (x, y) => (y * w + x) * 4;
+  const corners = [at(0, 0), at(w - 1, 0), at(0, h - 1), at(w - 1, h - 1)];
+  const opaque = corners.every((i) => d[i + 3] > 250);
+  if (!(mode === true || (mode === 'auto' && opaque))) return false;
+  const ref = corners[0];
+  const R = d[ref], G = d[ref + 1], B = d[ref + 2];
+  const same = corners.every((i) => Math.abs(d[i] - R) + Math.abs(d[i + 1] - G) + Math.abs(d[i + 2] - B) < 60);
+  if (!same && mode !== true) return false;
+  const tol = 70;
+  const seen = new Uint8Array(w * h);
+  const stack = [0, w - 1, (h - 1) * w, h * w - 1];
+  while (stack.length) {
+    const p = stack.pop();
+    if (seen[p]) continue;
+    seen[p] = 1;
+    const i = p * 4;
+    if (Math.abs(d[i] - R) + Math.abs(d[i + 1] - G) + Math.abs(d[i + 2] - B) > tol) continue;
+    d[i + 3] = 0;
+    const x = p % w, y = (p / w) | 0;
+    if (x > 0) stack.push(p - 1);
+    if (x < w - 1) stack.push(p + 1);
+    if (y > 0) stack.push(p - w);
+    if (y < h - 1) stack.push(p + w);
+  }
+  // 縁のにじみ（背景色が混ざった半端な画素）を薄くする
+  for (let p = 0; p < w * h; p++) {
+    const i = p * 4;
+    if (d[i + 3] === 0) continue;
+    const x = p % w, y = (p / w) | 0;
+    const nb = (x > 0 && d[i - 1] === 0) || (x < w - 1 && d[i + 7] === 0) || (y > 0 && d[i - w * 4 + 3] === 0) || (y < h - 1 && d[i + w * 4 + 3] === 0);
+    if (nb && Math.abs(d[i] - R) + Math.abs(d[i + 1] - G) + Math.abs(d[i + 2] - B) < tol * 1.6) d[i + 3] = Math.min(d[i + 3], 110);
+  }
+  return [R, G, B];
+}
 /** 背景を透明に（四隅が不透明でほぼ同じ色なら、その色を四隅から塗りつぶして消す）＋不透明部分で切り抜き */
 function prepSingle(im, w, h, mode, maxH) {
   const c = newCanvas(w, h);
@@ -605,40 +651,7 @@ function prepSingle(im, w, h, mode, maxH) {
   try { data = g.getImageData(0, 0, w, h); } catch { return { canvas: c, x: 0, y: 0, w, h }; } // 読み取り不可（別オリジン）ならそのまま
   const d = data.data;
   const at = (x, y) => (y * w + x) * 4;
-  const corners = [at(0, 0), at(w - 1, 0), at(0, h - 1), at(w - 1, h - 1)];
-  const opaque = corners.every((i) => d[i + 3] > 250);
-  if (mode === true || (mode === 'auto' && opaque)) {
-    const ref = corners[0];
-    const R = d[ref], G = d[ref + 1], B = d[ref + 2];
-    const same = corners.every((i) => Math.abs(d[i] - R) + Math.abs(d[i + 1] - G) + Math.abs(d[i + 2] - B) < 60);
-    if (same || mode === true) {
-      const tol = 70;
-      const seen = new Uint8Array(w * h);
-      const stack = [0, w - 1, (h - 1) * w, h * w - 1];
-      while (stack.length) {
-        const p = stack.pop();
-        if (seen[p]) continue;
-        seen[p] = 1;
-        const i = p * 4;
-        if (Math.abs(d[i] - R) + Math.abs(d[i + 1] - G) + Math.abs(d[i + 2] - B) > tol) continue;
-        d[i + 3] = 0;
-        const x = p % w, y = (p / w) | 0;
-        if (x > 0) stack.push(p - 1);
-        if (x < w - 1) stack.push(p + 1);
-        if (y > 0) stack.push(p - w);
-        if (y < h - 1) stack.push(p + w);
-      }
-      // 縁のにじみ（背景色が混ざった半端な画素）を薄くする
-      for (let p = 0; p < w * h; p++) {
-        const i = p * 4;
-        if (d[i + 3] === 0) continue;
-        const x = p % w, y = (p / w) | 0;
-        const nb = (x > 0 && d[i - 1] === 0) || (x < w - 1 && d[i + 7] === 0) || (y > 0 && d[i - w * 4 + 3] === 0) || (y < h - 1 && d[i + w * 4 + 3] === 0);
-        if (nb && Math.abs(d[i] - R) + Math.abs(d[i + 1] - G) + Math.abs(d[i + 2] - B) < tol * 1.6) d[i + 3] = Math.min(d[i + 3], 110);
-      }
-      g.putImageData(data, 0, 0);
-    }
-  }
+  if (removeBg(d, w, h, mode)) g.putImageData(data, 0, 0);
   // 不透明部分の範囲で切り抜き
   let x0 = w, y0 = h, x1 = -1, y1 = -1;
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {

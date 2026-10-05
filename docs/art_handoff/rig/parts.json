@@ -1,0 +1,399 @@
+{
+ "body": {
+  "f": [
+   "torso",
+   "armB",
+   "armF",
+   "legB",
+   "legF",
+   "footB",
+   "footF"
+  ],
+  "m": [
+   "torso",
+   "armB",
+   "armF",
+   "legB",
+   "legF",
+   "footB",
+   "footF"
+  ]
+ },
+ "weapon": {},
+ "top": {
+  "hoodie": {
+   "f": [
+    "back",
+    "torso",
+    "armB",
+    "armF"
+   ],
+   "m": [
+    "back",
+    "torso",
+    "armB",
+    "armF"
+   ]
+  },
+  "leatherJacket": {
+   "f": [
+    "torso",
+    "armB",
+    "armF"
+   ],
+   "m": [
+    "torso",
+    "armB",
+    "armF"
+   ]
+  },
+  "tshirt": {
+   "f": [
+    "torso",
+    "armB",
+    "armF"
+   ],
+   "m": [
+    "torso",
+    "armB",
+    "armF"
+   ]
+  },
+  "tank": {
+   "f": [
+    "torso"
+   ],
+   "m": [
+    "torso"
+   ]
+  },
+  "hawaiian": {
+   "f": [
+    "torso",
+    "armB",
+    "armF"
+   ],
+   "m": [
+    "torso",
+    "armB",
+    "armF"
+   ]
+  },
+  "tracksuit": {
+   "f": [
+    "torso",
+    "armB",
+    "armF"
+   ],
+   "m": [
+    "torso",
+    "armB",
+    "armF"
+   ]
+  },
+  "police": {
+   "f": [
+    "torso",
+    "armB",
+    "armF"
+   ],
+   "m": [
+    "torso",
+    "armB",
+    "armF"
+   ]
+  },
+  "suit": {
+   "f": [
+    "torso",
+    "armB",
+    "armF"
+   ],
+   "m": [
+    "torso",
+    "armB",
+    "armF"
+   ]
+  },
+  "idolDress": {
+   "f": [
+    "torso",
+    "armB",
+    "armF"
+   ],
+   "m": [
+    "torso",
+    "armB",
+    "armF"
+   ]
+  },
+  "armorVest": {
+   "f": [
+    "torso",
+    "armB",
+    "armF"
+   ],
+   "m": [
+    "torso",
+    "armB",
+    "armF"
+   ]
+  }
+ },
+ "bottom": {
+  "skirt": {
+   "f": [
+    "torso",
+    "legB",
+    "legF"
+   ],
+   "m": [
+    "torso",
+    "legB",
+    "legF"
+   ]
+  },
+  "trackPants": {
+   "f": [
+    "torso",
+    "legB",
+    "legF"
+   ],
+   "m": [
+    "torso",
+    "legB",
+    "legF"
+   ]
+  },
+  "jeans": {
+   "f": [
+    "torso",
+    "legB",
+    "legF"
+   ],
+   "m": [
+    "torso",
+    "legB",
+    "legF"
+   ]
+  },
+  "shorts": {
+   "f": [
+    "torso",
+    "legB",
+    "legF"
+   ],
+   "m": [
+    "torso",
+    "legB",
+    "legF"
+   ]
+  },
+  "cargo": {
+   "f": [
+    "torso",
+    "legB",
+    "legF"
+   ],
+   "m": [
+    "torso",
+    "legB",
+    "legF"
+   ]
+  },
+  "suitPants": {
+   "f": [
+    "torso",
+    "legB",
+    "legF"
+   ],
+   "m": [
+    "torso",
+    "legB",
+    "legF"
+   ]
+  },
+  "armorPants": {
+   "f": [
+    "torso",
+    "legB",
+    "legF"
+   ],
+   "m": [
+    "torso",
+    "legB",
+    "legF"
+   ]
+  }
+ },
+ "shoes": {
+  "sneakers": {
+   "f": [
+    "footB",
+    "footF"
+   ],
+   "m": [
+    "footB",
+    "footF"
+   ]
+  },
+  "boots": {
+   "f": [
+    "footB",
+    "footF"
+   ],
+   "m": [
+    "footB",
+    "footF"
+   ]
+  },
+  "sandals": {
+   "f": [
+    "footB",
+    "footF"
+   ],
+   "m": [
+    "footB",
+    "footF"
+   ]
+  },
+  "loafers": {
+   "f": [
+    "footB",
+    "footF"
+   ],
+   "m": [
+    "footB",
+    "footF"
+   ]
+  },
+  "heels": {
+   "f": [
+    "footB",
+    "footF"
+   ],
+   "m": [
+    "footB",
+    "footF"
+   ]
+  }
+ },
+ "hat": {
+  "catEars": {
+   "f": [
+    "head"
+   ],
+   "m": [
+    "head"
+   ]
+  },
+  "headphones": {
+   "f": [
+    "head"
+   ],
+   "m": [
+    "head"
+   ]
+  },
+  "cap": {
+   "f": [
+    "head"
+   ],
+   "m": [
+    "head"
+   ]
+  },
+  "beanie": {
+   "f": [
+    "head"
+   ],
+   "m": [
+    "head"
+   ]
+  },
+  "bandana": {
+   "f": [
+    "head"
+   ],
+   "m": [
+    "head"
+   ]
+  },
+  "cowboy": {
+   "f": [
+    "head"
+   ],
+   "m": [
+    "head"
+   ]
+  },
+  "helmet": {
+   "f": [
+    "head"
+   ],
+   "m": [
+    "head"
+   ]
+  },
+  "crown": {
+   "f": [
+    "head"
+   ],
+   "m": [
+    "head"
+   ]
+  }
+ },
+ "accessory": {
+  "sunglasses": {
+   "f": [
+    "head"
+   ],
+   "m": [
+    "head"
+   ]
+  },
+  "scarf": {
+   "f": [
+    "torso",
+    "back"
+   ],
+   "m": [
+    "torso",
+    "back"
+   ]
+  },
+  "goldChain": {
+   "f": [
+    "torso"
+   ],
+   "m": [
+    "torso"
+   ]
+  },
+  "mask": {
+   "f": [
+    "head"
+   ],
+   "m": [
+    "head"
+   ]
+  },
+  "wings": {
+   "f": [
+    "back"
+   ],
+   "m": [
+    "back"
+   ]
+  },
+  "halo": {
+   "f": [
+    "head"
+   ],
+   "m": [
+    "head"
+   ]
+  }
+ }
+}

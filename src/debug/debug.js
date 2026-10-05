@@ -311,6 +311,8 @@ export class DebugPanel {
     {
       const ss = spriteStats();
       lines.push(`sprites ${ss.mode === 'auto' ? 'ON' : 'OFF'}  manifest:${ss.manifest}  読込 ${ss.loaded}/${ss.entries}${ss.failed ? ` 失敗${ss.failed}` : ''}`);
+      const rg = ss.rig;
+      if (rg && rg.files) lines.push(`rig ${rg.enabled && ss.mode === 'auto' ? 'ON' : 'OFF'}  パーツ絵 ${rg.loaded}/${rg.files}${rg.failed ? ` 失敗${rg.failed}` : ''}  代用 ${rg.gens}`);
     }
     const errLine = g.lastError ? `ERR: ${String(g.lastError).slice(0, 44)}` : 'ERR: なし';
 

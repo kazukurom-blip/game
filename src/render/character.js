@@ -12,6 +12,8 @@
 import { shade, rgba, mix, rng, clamp, lerp, OUTLINE } from './util.js';
 import { ITEMS } from '../data/items.js';
 import { spriteCharPlan, drawSpriteCharPlan, headFor, headBackOf, flashOf } from './sprites.js';
+import { RIG_PARTS, RIG_GROUP_PARTS, RIG_S, WPN_BOX, WPN_S } from './rigLayout.js';
+import { rigPlanFor } from './rig.js';
 
 export const HERO_LOOKS = {
   luna: { body: 'f', skin: '#ffe3d3', hair: 'twin', hairColor: '#ff6fb5', eyeColor: '#ff3d8b', expr: 'cute', hairShadow: '#c8458f', hairHi: '#ffd0ea', hairTip: '#b47cff', tie: '#ffd23f' },
@@ -192,6 +194,8 @@ export const SPRITE_LAYER_ORDER = ['accessory_back', 'hair_back', 'body', 'botto
 const LRANK = Object.fromEntries(SPRITE_LAYER_ORDER.map((k, i) => [k, i]));
 LRANK.fx = 99;
 let TAG = 'body', ONLY = null, ONLY_RANK = 0, NO_ERASE = false;
+// リグ（パーツ式）用のフラグ: 脚の先の靴を描かない / 頭に帽子・アクセサリを描かない（リグが絵で重ねる）
+let RIG_NOSHOE = false, RIG_HEADITEMS = false;
 function layerMode() {
   if (ONLY.has(TAG)) return 1;
   return !NO_ERASE && (LRANK[TAG] ?? 99) < ONLY_RANK ? 2 : 0;
@@ -665,8 +669,13 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
     finally { ctx.restore(); setOnlyLayers(null); TAG = 'body'; }
     return;
   }
+  // ---- リグ（パーツ式の着せ替え。manifest の rig に素体があり、必要な絵が読み込み済みのとき）。無ければ下の既存の経路
+  const rig = !A.noSprite && !A.noRig ? rigPlanFor(look, equip) : null;
+  const RENDER = rig
+    ? (c, a2) => renderRig(c, look, equip, a2, state, ws, wk, rig)
+    : (c, a2) => renderChar(c, look, equip, a2, state, ws, wk);
   // ---- 差し替えスプライト（assets/sprites/manifest.json に人型があり spriteMode='auto' のとき。無ければ下のコード描画）
-  if (!A.noSprite) {
+  if (!A.noSprite && !rig) {
     const plan = spriteCharPlan(look, equip, A, state, wk, ws);
     if (plan) {
       if (auraT) { ctx.save(); ctx.translate(x, y); drawAuraBack(ctx, A.aura, auraT, A.t || 0, s); ctx.restore(); }
@@ -704,7 +713,7 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
       const dmg = clamp(A.damage || 0, 0, 1);
       const ds = dmgStage(dmg);
       const ah = aiHeadOf(look, A, state, repT);
-      const key = state + fi + '|' + ds + '|' + R + '|' + (A.flash ? 1 : 0) + (A.panic ? 1 : 0) + (vil ? 1 : 0) + (A.face || '') + (A.rim || '') + '|' + lookSig(look) + '|' + eqSig(equip) + (ah ? '|H' + ah.file : '');
+      const key = state + fi + '|' + ds + '|' + R + '|' + (A.flash ? 1 : 0) + (A.panic ? 1 : 0) + (vil ? 1 : 0) + (A.face || '') + (A.rim || '') + '|' + lookSig(look) + '|' + eqSig(equip) + (ah ? '|H' + ah.file : '') + (rig ? '|G' + rig.sig : '');
       let ent = CACHE.get(key);
       if (ent) { CACHE.delete(key); CACHE.set(key, ent); CSTAT.hit++; }
       else {
@@ -713,6 +722,7 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
         if (builds < MAX_BUILDS) {
           builds++; CSTAT.build++;
           const bx = boxOf(equip, look, state, ah);
+          if (rig) { bx[0] += 6; bx[1] += 6; bx[2] += 6; bx[3] += 2; }
           const w = Math.ceil((bx[0] + bx[1]) * R), h = Math.ceil((bx[2] + bx[3]) * R);
           const cv = newCanvas(w, h);
           const oc = cv.getContext('2d');
@@ -720,7 +730,7 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
             oc.setTransform(1, 0, 0, 1, 0, 0); oc.clearRect(0, 0, w, h);
             oc.setTransform(R, 0, 0, R, bx[0] * R, bx[2] * R);
             const a2 = { state: A.state, t: repT, attackT: repAT, damage: DMG_REP[ds], flash: A.flash, panic: A.panic, face: A.face, headExpr: A.headExpr, rim: A.rim, villain: vil, facing: 1, scale: 1, noFx: true };
-            renderChar(oc, look, equip, a2, state, ws, wk);
+            RENDER(oc, a2);
             ent = { cv, w, h, R, ox: bx[0] * R, oy: bx[2] * R, repT, repAT };
             CACHE.set(key, ent); cachePx += w * h;
             while (cachePx > CACHE_BUDGET && CACHE.size > 1) {
@@ -770,7 +780,7 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
     oc.setTransform(k, 0, 0, k, w / 2, h * 0.72);
     if (auraT) drawAuraBack(oc, A.aura, auraT, A.t || 0, s);
     oc.scale(facing * s, s);
-    renderChar(oc, look, equip, A2, state, ws, wk);
+    RENDER(oc, A2);
     oc.setTransform(k, 0, 0, k, w / 2, h * 0.72);
     if (auraT >= 2) drawAuraFront(oc, A.aura, auraT, A.t || 0, s);
     ctx.save();
@@ -785,7 +795,7 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
   ctx.translate(x, y);
   if (auraT) drawAuraBack(ctx, A.aura, auraT, A.t || 0, s);
   ctx.scale(facing * s, s);
-  renderChar(ctx, look, equip, A2, state, ws, wk);
+  RENDER(ctx, A2);
   ctx.restore();
   if (auraT >= 2) { ctx.save(); ctx.translate(x, y); drawAuraFront(ctx, A.aura, auraT, A.t || 0, s); ctx.restore(); }
 }
@@ -835,6 +845,30 @@ export function charHeadPose(look, equip, anim) {
   tr(P.twist * 0.25, HEAD_Y + (f ? 0.6 : 0)); ro(P.headTilt);
   if (B.head !== 1) { m[0] *= B.head; m[1] *= B.head; m[2] *= B.head; m[3] *= B.head; }
   return { m, back: !!P.back, state, wk };
+}
+
+/** 描画の文脈 K（renderChar / リグ / リグのコード部品で共通） */
+function makeK(look, equip, anim, state, ws, wk, P, t, at, w) {
+  const f = look.body === 'f';
+  const B = f ? BODY.f : BODY.m;
+  const dmg = clamp(anim.damage || 0, 0, 1);
+  const cool = look.expr === 'cool' || (!look.expr && look.body === 'm');
+  const vil = !!anim.villain;
+  const K = {
+    look, eq: equip, dmg, t, P, ws, wk, state, at, f, B, cool, w, anim, vil,
+    skin: look.skin || '#ffe0cc',
+    hair: look.hairColor || '#5a3a2a',
+    topS: equip.top ? equip.top.style : 'tshirt',
+    topC: equip.top ? itemColors(equip.top) : ['#f6f4f8', look.body === 'f' ? '#ff5fa2' : '#19d3c5'],
+    botS: equip.bottom ? equip.bottom.style : 'shorts',
+    botC: equip.bottom ? itemColors(equip.bottom) : ['#4d6fb5', '#ffffff'],
+    rTop: rarityOf(equip.top), rBot: rarityOf(equip.bottom), rHat: rarityOf(equip.hat), rShoe: rarityOf(equip.shoes),
+  };
+  K.defaultTop = !equip.top;
+  K.sw = B.sw; K.ww = B.ww; K.hw = B.hw;
+  K.skinSh = sh(K.skin, -0.12);
+  K.skinSh2 = sh(K.skin, -0.2);
+  return K;
 }
 
 /** 原点=足元・向き=右・scale 1 の座標系で描く */
@@ -1179,6 +1213,7 @@ function drawLeg(ctx, K, front, hx, hy, a, k) {
   }
   // 靴
   TAG = 'shoes';
+  if (RIG_NOSHOE) return;
   limbPts(hx, hy, a, e, T, S);
   drawShoe(ctx, K, LP.ex, LP.ey, a + e, front);
 }
@@ -1906,13 +1941,15 @@ export function drawWeapon(ctx, style, color, accent, t = 0, P = null, w = TAU /
       break;
     }
   }
-  if (P && P.muzzle) {
-    const mx0 = style === 'smg' ? 20 : 14, my = style === 'smg' ? -3.3 : -3.2;
-    ctx.save(); ctx.globalCompositeOperation = 'lighter';
-    ctx.fillStyle = 'rgba(255,220,120,0.9)';
-    ctx.beginPath(); ctx.moveTo(mx0, my - 3); ctx.lineTo(mx0 + 9, my); ctx.lineTo(mx0, my + 3); ctx.lineTo(mx0 + 3, my); ctx.closePath(); ctx.fill();
-    ctx.restore();
-  }
+  if (P && P.muzzle) muzzleFx(ctx, style);
+}
+/** 銃口の火花（武器の座標系） */
+function muzzleFx(ctx, style) {
+  const mx0 = style === 'smg' ? 20 : 14, my = style === 'smg' ? -3.3 : -3.2;
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  ctx.fillStyle = 'rgba(255,220,120,0.9)';
+  ctx.beginPath(); ctx.moveTo(mx0, my - 3); ctx.lineTo(mx0 + 9, my); ctx.lineTo(mx0, my + 3); ctx.lineTo(mx0 + 3, my); ctx.closePath(); ctx.fill();
+  ctx.restore();
 }
 
 // ---------------------------------------------------------------- 頭
@@ -1991,7 +2028,7 @@ function drawHead(ctx, K) {
     ctx.fillStyle = C('rgba(50,40,50,0.2)'); ctx.beginPath(); ctx.ellipse(FO + 10.4, 11, 2.2, 1.2, -0.3, 0, TAU); ctx.fill();
   }
   TAG = 'accessory';
-  if (hasMask) drawMask(ctx, K);
+  if (hasMask && !RIG_HEADITEMS) drawMask(ctx, K);
   // 前髪
   TAG = 'hair_front';
   drawHairFront(ctx, K, H);
@@ -1999,6 +2036,7 @@ function drawHead(ctx, K) {
   TAG = 'face';
   drawBrows(ctx, K);
   TAG = 'accessory';
+  if (RIG_HEADITEMS) return;     // リグ: 帽子・メガネ・天使の輪・汗は renderRig が重ねる
   if (eq.accessory && eq.accessory.style === 'sunglasses') drawGlasses(ctx, K);
   TAG = 'hat';
   drawHat(ctx, K, false);
@@ -2929,3 +2967,298 @@ function drawHalo(ctx, K) {
   ctx.strokeStyle = C(c); ctx.lineWidth = 2.4; ctx.beginPath(); ctx.ellipse(1, -29 + bob, 11, 3.2, 0, 0, TAU); ctx.stroke();
   ctx.strokeStyle = C(a); ctx.lineWidth = 0.9; ctx.beginPath(); ctx.ellipse(1, -29.4 + bob, 10, 2.6, 0, PI, TAU); ctx.stroke();
 }
+
+// ================================================================ リグ（パーツ式の着せ替え人形。仕様: docs/SPEC_SPRITES.md「リグ」）
+//  AI が配置図の枠に描いたパーツ（胴・腕・脚・足・頭の上の物・背中）を、関節（肩・肘・股・膝・足首・首）の回転で動かす。
+//  ポーズ（makePose）・関節の位置（BODY の長さ）はコード描画と同じ。肘・膝はパーツの絵を関節の位置で2つに分けて曲げる。
+//  画像の読み込み・切り出し・色替え・合成は rig.js。ここは「休めの姿勢のコード描画をパーツに分けて描く」と「リグで描く」。
+
+/** 休めの姿勢（直立、腕と脚はまっすぐ下） */
+function restPose() {
+  return {
+    bob: 0, tilt: 0, hipY: 0, hx: 0, lb: [0, 0], lf: [0, 0], ab: [0, 0], af: [0, 0],
+    eyes: 'n', mouth: 'n', brow: 'n', wAng: null, swoosh: null, back: false, lie: 0, headTilt: 0, hairSway: 0, hairLift: 0,
+    showWeapon: false, muzzle: false, punch: false, sit: false, handF: 'fist', handB: 'fist', twist: 0,
+  };
+}
+const RIG_LAYERS = {
+  body: ['body'], top: ['top'], bottom: ['bottom'], shoes: ['shoes'], hat: ['hat'], accessory: ['accessory'], tear: ['tear'],
+};
+/**
+ * 今のコード描画を、休めの姿勢でパーツの枠に分けて描く（配置図の参考シルエット・下絵・絵が無い装備の代わり・自己テストの仮のAI画像）。
+ *  ctx: 配置図の px 座標（scale で縮小可）。group: 'body'|'top'|'bottom'|'shoes'|'hat'|'accessory'|'tear'|'head'（コードの頭＝参考）
+ *  opts: { scale: 1単位の px（既定 RIG_S）, parts: 描く枠の名前の配列, dmg: 0..1（破れ・服の形）, clip: true | 余白px（枠で切る） }
+ */
+export function renderRigCode(ctx, gender, look, equip, group, opts = {}) {
+  const g = gender === 'm' ? 'm' : 'f';
+  const base = look || (g === 'f' ? HERO_LOOKS.luna : HERO_LOOKS.jin);
+  look = base.body === g ? base : Object.assign({}, base, { body: g });
+  equip = equip || EMPTY;
+  const S = opts.scale != null ? opts.scale : RIG_S;
+  const k = S / RIG_S;
+  const parts = opts.parts || (group === 'head' ? ['head'] : RIG_GROUP_PARTS[group] || []);
+  const sv = [FL, RIM, TAG, ONLY, ONLY_RANK, NO_ERASE, RIG_NOSHOE, RIG_HEADITEMS];
+  const P = restPose();
+  const ws = equip.weapon && equip.weapon.style;
+  const anim = { state: 'idle', t: 0, damage: opts.dmg || 0 };
+  const K = makeK(look, equip, anim, 'idle', ws, 'none', P, 0, 0, TAU / LOOP);
+  K.ai = null;
+  if (group === 'head') resolveFace(P, K, anim);
+  FL = false; RIM = look.rim || (g === 'f' ? '#9ff4ff' : '#8fe8ff');
+  try {
+    if (RIG_LAYERS[group]) setOnlyLayers(RIG_LAYERS[group], true); else ONLY = null;
+    const c = ONLY ? layerProxy(ctx) : ctx;
+    for (const name of parts) {
+      const box = RIG_PARTS[name];
+      if (!box) continue;
+      ctx.save();
+      if (opts.clip) { const m = opts.clip === true ? 0 : opts.clip; ctx.beginPath(); ctx.rect((box.x - m) * k, (box.y - m) * k, (box.w + m * 2) * k, (box.h + m * 2) * k); ctx.clip(); }
+      ctx.translate(box.px * k, box.py * k); ctx.scale(S, S);
+      ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      TAG = 'body';
+      switch (name) {
+        case 'back': {
+          const acc = equip.accessory && equip.accessory.style;
+          TAG = 'accessory_back';
+          if (acc === 'wings') drawWings(c, K);
+          if (acc === 'scarf') drawScarfTail(c, K);
+          TAG = 'top';
+          if (K.topS === 'hoodie') drawHood(c, K);
+          break;
+        }
+        case 'torso': {
+          TAG = 'body'; if (ONLY && ONLY.has('body')) innerHips(c, K);
+          TAG = 'bottom';
+          drawHips(c, K);
+          if (K.botS === 'skirt') drawSkirt(c, K, K.botC, false);
+          TAG = 'top';
+          if (K.topS === 'idolDress') drawSkirt(c, K, K.topC, true);
+          drawTorso(c, K);
+          TAG = 'accessory';
+          const acc = equip.accessory && equip.accessory.style;
+          if (acc === 'goldChain') drawChain(c, K);
+          if (acc === 'scarf') drawScarfFront(c, K);
+          break;
+        }
+        case 'armB': drawArm(c, K, false, 0, 0, 0, 0); break;
+        case 'armF': drawArm(c, K, true, 0, 0, 0, 0); break;
+        case 'legB': case 'legF':
+          RIG_NOSHOE = true;
+          try { drawLeg(c, K, name === 'legF', 0, 0, 0, 0); } finally { RIG_NOSHOE = false; }
+          break;
+        case 'footB': case 'footF':
+          TAG = group === 'body' ? 'body' : 'shoes';
+          drawShoe(c, group === 'body' ? Object.assign({}, K, { eq: EMPTY }) : K, 0, 0, 0, name === 'footF');
+          break;
+        case 'head': {
+          if (group === 'head') {
+            RIG_HEADITEMS = true;
+            try { drawHairBack(c, K); drawHead(c, K); } finally { RIG_HEADITEMS = false; }
+          } else {
+            const acc = equip.accessory && equip.accessory.style;
+            TAG = 'accessory';
+            if (acc === 'mask') drawMask(c, K);
+            if (acc === 'sunglasses') drawGlasses(c, K);
+            TAG = 'hat';
+            drawHat(c, K, false);
+            TAG = 'accessory';
+            if (acc === 'halo') drawHalo(c, K);
+          }
+          break;
+        }
+      }
+      ctx.restore();
+    }
+  } finally {
+    [FL, RIM, TAG, ONLY, ONLY_RANK, NO_ERASE, RIG_NOSHOE, RIG_HEADITEMS] = sv;
+  }
+}
+/** 武器のコード描画を武器の配置図（WPN_BOX、持ち手=支点）に描く */
+export function renderRigWeapon(ctx, style, color, accent, scale = WPN_S) {
+  const k = scale / WPN_S;
+  const sv = FL; FL = false;
+  ctx.save();
+  ctx.translate(WPN_BOX.px * k, WPN_BOX.py * k); ctx.scale(scale, scale);
+  try { drawWeapon(ctx, style, color, accent, 0, null); } finally { ctx.restore(); FL = sv; }
+}
+
+// ---- リグで描く
+/** パーツの白フラッシュ版（パーツごとにキャッシュ） */
+function rigFlash(p) {
+  if (p.fl) return p.fl;
+  const c = newCanvas(p.w, p.h);
+  const g = c.getContext('2d');
+  g.clearRect(0, 0, p.w, p.h);
+  g.drawImage(p.cv, 0, 0);
+  g.globalCompositeOperation = 'source-atop'; g.globalAlpha = 0.9; g.fillStyle = '#ffffff'; g.fillRect(0, 0, p.w, p.h);
+  p.fl = c;
+  return c;
+}
+function rigImg(ctx, p) {
+  if (!p) return;
+  const R = p.R;
+  ctx.drawImage(FL ? rigFlash(p) : p.cv, -p.px / R, -p.py / R, p.w / R, p.h / R);
+}
+/** 肢（肩/股〜手/足首の1枚の絵）を関節（肘/膝 = 支点から l1）で2つに分けて描く。a, e はコードの limb と同じ（a=付け根の角度, e=関節の曲がり） */
+function rigLimb(ctx, p, x0, y0, a, e, l1) {
+  if (!p) return;
+  const R = p.R, src = FL ? rigFlash(p) : p.cv;
+  const jy = p.py + l1 * R, ov = 1.15 * R;
+  const X = -p.px / R, W = p.w / R;
+  const kx = x0 + Math.sin(a) * l1, ky = y0 + Math.cos(a) * l1;
+  const y1 = Math.max(0, Math.floor(jy - ov)), h1 = p.h - y1;
+  if (h1 > 0) {
+    ctx.save(); ctx.translate(kx, ky); ctx.rotate(-(a + e));
+    ctx.drawImage(src, 0, y1, p.w, h1, X, (y1 - jy) / R, W, h1 / R);
+    if (Math.abs(e) > 0.12) {   // 関節の外側の隙間を、中間の角度の帯で埋める
+      ctx.rotate(e / 2);
+      const bh = Math.min(p.h - y1, Math.ceil(ov * 2));
+      ctx.drawImage(src, 0, y1, p.w, bh, X, (y1 - jy) / R, W, bh / R);
+    }
+    ctx.restore();
+  }
+  const h0 = Math.min(p.h, Math.ceil(jy + ov));
+  if (h0 > 0) {
+    ctx.save(); ctx.translate(x0, y0); ctx.rotate(-a);
+    ctx.drawImage(src, 0, 0, p.w, h0, X, -p.py / R, W, h0 / R);
+    ctx.restore();
+  }
+}
+/** 手前の手だけをもう一度（武器の上に。握っている見た目） */
+function rigHand(ctx, p, x0, y0, a, e, l1, L) {
+  if (!p) return;
+  const R = p.R, src = FL ? rigFlash(p) : p.cv;
+  const jy = p.py + l1 * R;
+  const hy = Math.max(0, Math.floor(p.py + (L - 3.2) * R)), hh = p.h - hy;
+  if (hh <= 0) return;
+  const kx = x0 + Math.sin(a) * l1, ky = y0 + Math.cos(a) * l1;
+  ctx.save(); ctx.translate(kx, ky); ctx.rotate(-(a + e));
+  ctx.beginPath(); ctx.arc(0, L - l1, 3.0, 0, TAU); ctx.clip();
+  ctx.drawImage(src, 0, hy, p.w, hh, -p.px / R, (hy - jy) / R, p.w / R, hh / R);
+  ctx.restore();
+}
+function rigFoot(ctx, p, hx, hy, a, k, B) {
+  if (!p) return;
+  limbPts(hx, hy, a, -k, B.thigh, B.shin);
+  ctx.save(); ctx.translate(LP.ex, LP.ey); ctx.rotate(-(a - k) * 0.85);
+  rigImg(ctx, p);
+  ctx.restore();
+}
+/** 杖の先の光（絵の武器の上に。コードの drawWeapon と同じ位置） */
+function staffGlow(ctx, c, P, t, w) {
+  const glow = P && P.magicGlow ? P.magicGlow : 0;
+  ctx.save(); ctx.translate(30, Math.sin(t * om(w, 3)) * 0.8);
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.fillStyle = FL ? '#ffffff' : rgba(c, 0.16 + glow * 0.3);
+  ctx.beginPath(); ctx.arc(0, 0, 6 + glow * 6 + Math.sin(t * om(w, 6)) * 0.8, 0, TAU); ctx.fill();
+  ctx.restore();
+}
+
+/** リグで1人描く（原点=足元・右向き・scale 1）。plan = rig.js の rigPlanFor() */
+function renderRig(ctx, look, equip, anim, state, ws, wk, plan) {
+  const dmg = clamp(anim.damage || 0, 0, 1);
+  const parts = plan.parts(dmg);       // 先に用意（中でコード部品を描くことがあるので、描画の状態を設定する前に）
+  const lp = LOOPS[state];
+  const w = TAU / (lp ? lp[0] : LOOP);
+  const t = anim.t || 0;
+  const at = clamp(anim.attackT || 0, 0, 1);
+  const f = look.body === 'f';
+  const B = f ? BODY.f : BODY.m;
+  const P = makePose(state, t, at, wk, ws, anim, w, f);
+  const K = makeK(look, equip, anim, state, ws, wk, P, t, at, w);
+  P.hipY += B.hipY;
+  resolveFace(P, K, anim);
+  K.ai = anim.villain ? null : aiHeadOf(look, anim, state, t);
+  FL = !!anim.flash;
+  RIM = anim.rim || look.rim || (f ? '#9ff4ff' : '#8fe8ff');
+  TAG = 'body';
+  if (state !== 'drive' && !P.lie) {
+    ctx.beginPath(); ctx.ellipse(0, 0, 13, 3.2, 0, 0, TAU);
+    ctx.fillStyle = 'rgba(20,0,30,0.28)'; ctx.fill();
+  }
+  ctx.save();
+  if (P.lie) { ctx.translate(34 * P.lie, -9 * P.lie); ctx.rotate(-PI / 2 * P.lie); }
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  try {
+    if (P.back) rigBackView(ctx, K, parts);
+    else rigFrontView(ctx, K, parts);
+  } finally { ctx.restore(); FL = false; }
+}
+function rigHead(ctx, K, parts, back) {
+  const P = K.P;
+  enterHead(ctx, K);
+  const hat = K.eq.hat && K.eq.hat.style;
+  if (K.ai) paintAiHead(ctx, K.ai, hat, back, FL);
+  else if (back) {
+    ctx.beginPath(); ctx.ellipse(0, 0, 16.5, 15.5, 0, 0, TAU); fillStroke(ctx, K.skin);
+    drawHairBack(ctx, K, true);
+  } else {
+    RIG_HEADITEMS = true;
+    try { drawHead(ctx, K); } finally { RIG_HEADITEMS = false; }
+  }
+  rigImg(ctx, parts.head);
+  if (!back) {
+    if (P.panic) drawPanicLines(ctx, K);
+    if (P.sweat || P.panic) drawSweat(ctx, K);
+  }
+  ctx.restore();
+}
+function rigWeaponAndHand(ctx, K, parts, sx, sy) {
+  const P = K.P, B = K.B, a = P.af[0], e = P.af[1];
+  rigLimb(ctx, parts.armF, sx, sy, a, e, B.upper);
+  if (!(P.showWeapon && K.eq.weapon)) return;
+  limbPts(sx, sy, a, e, B.upper, B.fore);
+  const fore = PI / 2 - (a + e);
+  const ang = K.wk === 'gun' ? fore : P.wAng != null ? P.wAng : fore;
+  const [wc, wa] = itemColors(K.eq.weapon);
+  ctx.save(); ctx.translate(LP.ex, LP.ey); ctx.rotate(ang);
+  if (parts.weapon) {
+    rigImg(ctx, parts.weapon);
+    if (P.muzzle) muzzleFx(ctx, K.ws);
+    if (K.ws === 'staff') staffGlow(ctx, wc, P, K.t, K.w);
+  } else drawWeapon(ctx, K.ws, wc, wa, K.t, P, K.w);
+  ctx.restore();
+  rigHand(ctx, parts.armF, sx, sy, a, e, B.upper, B.upper + B.fore);
+}
+function rigFrontView(ctx, K, parts) {
+  const P = K.P, B = K.B, tw = P.twist;
+  const sxF = B.sx - 0.4 + tw * 0.5, sxB = -B.sx - tw * 0.35;
+  enterUpper(ctx, P);
+  rigImg(ctx, parts.backA);
+  if (!K.ai) { enterHead(ctx, K); drawHairBack(ctx, K); ctx.restore(); }
+  rigImg(ctx, parts.backT);
+  rigLimb(ctx, parts.armB, sxB, SHOULDER_Y + 0.3, P.ab[0], P.ab[1], B.upper);
+  ctx.restore();
+  const lx = B.legX;
+  const hb = -lx + P.hx * 0.3, hf = lx + P.hx * 0.3;
+  rigLimb(ctx, parts.legB, hb, P.hipY, P.lb[0], -P.lb[1], B.thigh);
+  rigFoot(ctx, parts.footB, hb, P.hipY, P.lb[0], P.lb[1], B);
+  rigLimb(ctx, parts.legF, hf, P.hipY, P.lf[0], -P.lf[1], B.thigh);
+  rigFoot(ctx, parts.footF, hf, P.hipY, P.lf[0], P.lf[1], B);
+  enterUpper(ctx, P);
+  rigImg(ctx, parts.torso);
+  rigHead(ctx, K, parts, false);
+  rigWeaponAndHand(ctx, K, parts, sxF, SHOULDER_Y + 0.6);
+  if (!K.anim.noFx) {
+    if (P.swoosh) drawSwoosh(ctx, K, sxF, SHOULDER_Y + 0.5);
+    if (K.wk === 'magic' && !FL) drawHoloPanel(ctx, K);
+  }
+  ctx.restore();
+}
+function rigBackView(ctx, K, parts) {
+  const P = K.P, B = K.B;
+  rigLimb(ctx, parts.legB, -B.legX, P.hipY, P.lb[0], -P.lb[1], B.thigh);
+  rigFoot(ctx, parts.footB, -B.legX, P.hipY, P.lb[0], P.lb[1], B);
+  rigLimb(ctx, parts.legF, B.legX, P.hipY, P.lf[0], -P.lf[1], B.thigh);
+  rigFoot(ctx, parts.footF, B.legX, P.hipY, P.lf[0], P.lf[1], B);
+  enterUpper(ctx, P);
+  rigImg(ctx, parts.torso);
+  rigImg(ctx, parts.backT);
+  rigImg(ctx, parts.backA);
+  rigHead(ctx, K, parts, true);
+  rigLimb(ctx, parts.armB, -B.sx, SHOULDER_Y, P.ab[0], P.ab[1], B.upper);
+  rigLimb(ctx, parts.armF, B.sx, SHOULDER_Y, P.af[0], P.af[1], B.upper);
+  ctx.restore();
+}
+/** テスト・デバッグ用: その look・装備がリグで描かれるか（読み込み済みなら plan） */
+export function rigPlanOf(look, equip) { return rigPlanFor(look || HERO_LOOKS.luna, equip || EMPTY); }
