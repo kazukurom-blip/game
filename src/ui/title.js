@@ -10,6 +10,7 @@ import * as SaveM from '../core/save.js';
 import { audio } from '../audio/audio.js';
 import * as SpriteM from '../render/sprites.js';
 import * as CharM from '../render/character.js';
+import { uiArt } from '../render/artOverrides.js';
 import { showNameInput, hideNameInput, nameInputValue, setNameInputValue, clipName, NAME_MAX, focusNameInput } from './nameinput.js';
 
 const W = 1280, H = 720;
@@ -330,8 +331,8 @@ export function drawTitle(ctx, game, t) {
 function drawTitleScreen(ctx, game, t) {
   ctx.save(); ctx.fillStyle = 'rgba(10,4,30,0.18)'; ctx.fillRect(0, 0, W, H); ctx.restore();
   drawLogo(ctx, t, 170, 1.15);
-  // 3クラスのシルエット行進
-  const ids = CLASS_IDS.slice(0, 3);
+  // 3クラスのシルエット行進（タイトルの絵に主人公が描かれている時は省く）
+  const ids = guard('titleArt', () => uiArt('title_art'), null) ? [] : CLASS_IDS.slice(0, 3);
   ids.forEach((id, i) => {
     const x = W / 2 + (i - 1) * 230, y = 618;
     const g = i % 2 ? 'm' : 'f';
@@ -367,9 +368,13 @@ function header(ctx, title, t, sub) {
   ctx.save(); ctx.fillStyle = 'rgba(8,3,26,0.42)'; ctx.fillRect(0, 0, W, H); ctx.restore();
   ctx.save();
   ctx.font = `italic 900 26px ${FONT}`; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
-  ctx.lineWidth = 6; ctx.strokeStyle = '#1a0630'; ctx.strokeText('NEON VICE STORY', 36, 44);
-  const g = ctx.createLinearGradient(0, 30, 0, 58); g.addColorStop(0, '#fff6c8'); g.addColorStop(0.5, '#ff8ac0'); g.addColorStop(1, '#b47cff');
-  ctx.fillStyle = g; ctx.shadowColor = COL.pink; ctx.shadowBlur = 14; ctx.fillText('NEON VICE STORY', 36, 44);
+  const logo = guard('logoArt', () => uiArt('logo'), null);
+  if (logo) { const lh = 64, lw = lh * logo.w / logo.h; ctx.drawImage(logo.img, 24, 44 - lh / 2, lw, lh); }
+  else {
+    ctx.lineWidth = 6; ctx.strokeStyle = '#1a0630'; ctx.strokeText('NEON VICE STORY', 36, 44);
+    const g = ctx.createLinearGradient(0, 30, 0, 58); g.addColorStop(0, '#fff6c8'); g.addColorStop(0.5, '#ff8ac0'); g.addColorStop(1, '#b47cff');
+    ctx.fillStyle = g; ctx.shadowColor = COL.pink; ctx.shadowBlur = 14; ctx.fillText('NEON VICE STORY', 36, 44);
+  }
   ctx.restore();
   const tw = measure(ctx, title, 22) + 70;
   ctx.save();
@@ -810,7 +815,15 @@ export function _titleState() { return T; } // テスト用
 if (typeof window !== "undefined") window.__titleT = () => T;
 
 // ---------- 背景: シンセウェーブ夕焼け ----------
+// 画像を枠いっぱいに（はみ出す分は切る。縦横比はそのまま）
+function drawCover(ctx, A, x, y, w, h) {
+  const k = Math.max(w / A.w, h / A.h), dw = A.w * k, dh = A.h * k;
+  ctx.drawImage(A.img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+}
 function drawBackdrop(ctx, t) {
+  // 差し替え画像（manifest の ui.title_art）。読み込み中・無い → コードのシンセウェーブ夕焼け
+  const art = guard('titleArt', () => uiArt('title_art'), null);
+  if (art) { drawCover(ctx, art, 0, 0, W, H); return; }
   const sky = ctx.createLinearGradient(0, 0, 0, H);
   sky.addColorStop(0, '#1a0b3d');
   sky.addColorStop(0.32, '#5a1a7a');
@@ -937,6 +950,19 @@ function palm(ctx, x, y, s, t) {
 function drawLogo(ctx, t, cy = 112, sc = 1) {
   const cx = W / 2;
   const wob = Math.sin(t * 1.6) * 0.012;
+  // 差し替え画像（manifest の ui.logo。1600×600 の透明背景）。読み込み中・無い → コードの文字のロゴ
+  const logo = guard('logoArt', () => uiArt('logo'), null);
+  if (logo) {
+    const lw = 560 * sc, lh = lw * logo.h / logo.w;
+    ctx.save();
+    ctx.translate(cx, cy - 22 * sc + Math.sin(t * 2) * 3);
+    ctx.rotate(wob);
+    ctx.drawImage(logo.img, -lw / 2, -lh / 2, lw, lh);
+    ctx.restore();
+  } else drawTextLogo(ctx, t, cx, cy, sc, wob);
+  drawSubtitle(ctx, cx, cy, sc);
+}
+function drawTextLogo(ctx, t, cx, cy, sc, wob) {
   ctx.save();
   ctx.translate(cx, cy + Math.sin(t * 2) * 3);
   ctx.scale(sc, sc);
@@ -968,6 +994,8 @@ function drawLogo(ctx, t, cy = 112, sc = 1) {
   ctx.fillStyle = hg;
   ctx.fillText(txtLogo, 0, 0);
   ctx.restore();
+}
+function drawSubtitle(ctx, cx, cy, sc) {
   // サブタイトル
   ctx.save();
   const sw = 420;

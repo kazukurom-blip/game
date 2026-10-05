@@ -10,6 +10,7 @@ import {
 } from './deps.js';
 import { charLook, charName } from './v3deps.js';
 import { audio } from '../audio/audio.js';
+import { uiArt } from '../render/artOverrides.js';
 
 const W = 1280, H = 720;
 
@@ -175,10 +176,17 @@ export function drawWorldMap(ui, ctx, win) {
   sea.addColorStop(0, '#0d0a33'); sea.addColorStop(0.6, '#13164a'); sea.addColorStop(1, '#0a2a4a');
   ctx.fillStyle = sea; ctx.fill();
   ctx.clip();
-  // グリッド
-  ctx.strokeStyle = 'rgba(120,150,255,0.07)'; ctx.lineWidth = 1;
-  for (let gx = ax; gx < ax + aw; gx += 40) { ctx.beginPath(); ctx.moveTo(gx, ay); ctx.lineTo(gx, ay + ah); ctx.stroke(); }
-  for (let gy = ay; gy < ay + ah; gy += 40) { ctx.beginPath(); ctx.moveTo(ax, gy); ctx.lineTo(ax + aw, gy); ctx.stroke(); }
+  // 下絵（manifest の ui.world_map。2048×1152 の鳥瞰図を地図の枠いっぱいに伸ばし、少し暗くして地名・印を読みやすく）
+  const wmArt = guard('worldMapArt', () => uiArt('world_map'), null);
+  if (wmArt) {
+    ctx.drawImage(wmArt.img, ax, ay, aw, ah);
+    ctx.fillStyle = 'rgba(10,6,40,0.28)'; ctx.fillRect(ax, ay, aw, ah);
+  } else {
+    // グリッド
+    ctx.strokeStyle = 'rgba(120,150,255,0.07)'; ctx.lineWidth = 1;
+    for (let gx = ax; gx < ax + aw; gx += 40) { ctx.beginPath(); ctx.moveTo(gx, ay); ctx.lineTo(gx, ay + ah); ctx.stroke(); }
+    for (let gy = ay; gy < ay + ah; gy += 40) { ctx.beginPath(); ctx.moveTo(ax, gy); ctx.lineTo(ax + aw, gy); ctx.stroke(); }
+  }
   // 陸地（霧）: 地域色のぼかし円
   for (const id of ids) {
     const p = P(id), s = state[id];
