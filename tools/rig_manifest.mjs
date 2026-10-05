@@ -2,7 +2,7 @@
 // assets/sprites/rig/ に置いたパーツシート（PNG）を見て、assets/sprites/manifest.json の "rig" を書き直す
 //   npm run rig:manifest            （書き込む）
 //   node tools/rig_manifest.mjs --dry   （書き込まずに表示だけ）
-// 既にある "rig" の設定（enabled / defaultWear / fit / layout / 各パーツの base・accent・fit 等の指定）は残す。無くなったファイルの行は消す。
+// 既にある "rig" の設定（enabled / defaultWear / fit / layout / profile / view など全部 / 各パーツの base・accent・fit 等の指定）は残す。無くなったファイルの行は消す。
 // rig が無い manifest に新しく作る時は "fit": false（配置図 v2 のまま正確に組む）。
 // 名前の決まり（docs/art_handoff/HERO_PARTS_GUIDE.md）: body_f.png / top/hoodie_f.png / top/hoodie__1d2b24_f.png / weapon/knife.png / tear/1_f.png
 import fs from 'node:fs';
@@ -44,10 +44,10 @@ for (const k of keys) {
 }
 // fit / layout: 既にある指定は残す。新しく rig を作る時は配置図 v2 のまま正確に組む（"fit": false）
 const isNew = !man.rig || typeof man.rig !== 'object';
-man.rig = { enabled: old.enabled !== false, defaultWear: old.defaultWear !== false };
-if (old.fit !== undefined) man.rig.fit = old.fit; else if (isNew) man.rig.fit = false;
-if (old.layout !== undefined) man.rig.layout = old.layout;
-if (old.heroesOnly !== undefined) man.rig.heroesOnly = old.heroesOnly;
+// その他の設定（profile / view など）もそのまま残す
+const { parts: _p, files: _f, ...rest } = old;
+man.rig = { ...rest, enabled: old.enabled !== false, defaultWear: old.defaultWear !== false };
+if (old.fit === undefined && isNew) man.rig.fit = false;
 man.rig.parts = parts;
 if (!isNew && old.fit === undefined && old.layout === undefined) console.log('注意: rig に "fit" も "layout" も無いので、旧い配置図（layout 1・自動フィット）として読まれます。新しい配置図で描いた絵なら "fit": false を足してください');
 console.log(`rig: ${keys.length} 枚${keys.includes('body_f') || keys.includes('body_m') ? '' : '（素体 body_f / body_m が無いのでリグは使われません）'}`);
