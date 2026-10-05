@@ -365,7 +365,7 @@ function drawSelect(ctx, game, t) {
     const job = slotJob(s);
     const fy = stage(ctx, px + 14, py + 14, pw - 28, 250, col, t);
     aura(ctx, px + pw / 2, fy, job.aura, 2.3, t);
-    drawChar(ctx, px + pw / 2, fy, slotLook(s), slotEquip(s), { facing: 1, state: 'idle', t, attackT: 0, damage: 0, scale: 2.35, aura: job.aura || undefined });
+    drawChar(ctx, px + pw / 2, fy, slotLook(s), slotEquip(s), { facing: 1, state: 'idle', t, attackT: 0, damage: 0, scale: 2.35, aura: job.aura || undefined, auraTier: job.tier || 1 });
     let yy = py + 290;
     txt(ctx, s.name || '???', px + 24, yy, { size: 28, color: '#fff', glow: col, sw: 5, maxW: 250 });
     txt(ctx, genderMark(s.gender || legacyGender(s.heroId)), px + 30 + Math.min(250, measure(ctx, s.name || '???', 28)), yy + 2, { size: 22, color: genderCol(s.gender || legacyGender(s.heroId)) });

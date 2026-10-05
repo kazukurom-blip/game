@@ -677,9 +677,10 @@ export class Player {
     a.alpha = a.flash ? 0.45 : 1; // 被弾無敵中は点滅
     a.scale = 1;
     // 職のオーラ色（render/character.js が anim.aura を描画）・移動スキル種別（エフェクト用）
-    let aura = null;
-    try { aura = currentJob(s)?.aura || null; } catch (e) { aura = null; }
+    let aura = null, tier = 1;
+    try { const j = currentJob(s); aura = j?.aura || null; tier = j?.tier || 1; } catch (e) { aura = null; }
     a.aura = aura;
+    a.auraTier = tier; // 職の段階（1〜4次）でオーラが強くなる（character.js drawAuraBack/Front）
     a.move = this.move ? this.move.type : null;
     if (this.move && (this.move.type === 'rush' || this.move.type === 'wheelDash' || this.move.type === 'glide')) a.state = this.move.type === 'glide' ? 'jump' : 'walk';
   }
