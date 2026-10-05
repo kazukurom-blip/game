@@ -114,7 +114,7 @@ export function artState(sec, key) {
   if (!on()) return '';
   const E = entry(sec, key);
   if (!E) return '';
-  const r = load(E, sec);
+  const r = load(E, kindOf(sec, key));
   return r.st === 2 ? 'ready' : r.st === 1 ? 'loading' : 'failed';
 }
 /** 全画像（または節を絞って）を先読み。完了で解決（テスト・スクショ用） */

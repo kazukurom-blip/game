@@ -10,7 +10,8 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { checkArt, classify } from '../tools/check_art.mjs';
 import { parseCatalog03, seamMetric } from '../tools/check_art_env.mjs';
-import { goodImages, badImages, bgMid, png } from './art_env_fixtures.mjs';
+import { goodImages, badImages, bgMid, vehicleBody, png } from './art_env_fixtures.mjs';
+import { setArtManifest, artStats, hasArt, findMarkers, dominantColor, equipBase, itemIconKey } from '../src/render/artOverrides.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 let pass = 0, fail = 0;
@@ -32,6 +33,19 @@ async function main() {
   for (let y = 0; y < mid.h; y++) for (let x = 0; x < mid.w; x++) { const sx = Math.floor(x * 0.97); shifted.data.set(mid.data.subarray((y * mid.w + sx) * 4, (y * mid.w + sx) * 4 + 4), (y * mid.w + x) * 4); }
   const s1 = seamMetric(shifted);
   check('継ぎ目の検査: つながった絵は差 0・横に伸ばして右端を切った絵は継ぎ目あり', s0.seam === 0 && s1.score >= 0.6, `${JSON.stringify(s0)} / ${JSON.stringify(s1)}`);
+
+  // artOverrides.js（Node で動く部分）
+  const warn = console.warn; console.warn = () => {};
+  setArtManifest({ bg: { ok: 'bg/ok.png', up: '../x.png', abs: '/etc/x.png', url: { file: 'http://x/y.png' }, num: 42 }, icons: { 'equip/hat_cap': { file: 'icons/equip/hat_cap.png', base: '#123456', parallax: 'x' } }, enemies: { a: 'enemies/a.png' } });
+  console.warn = warn;
+  check('manifest: 正しいパスだけ読む（.. / 絶対パス / URL / 数値は無視）', artStats().entries === 2 && hasArt('bg', 'ok') && !hasArt('bg', 'up') && !hasArt('bg', 'url') && hasArt('icons', 'equip/hat_cap'), JSON.stringify(artStats().errors));
+  setArtManifest(null);
+  const vb = vehicleBody();
+  const mk = findMarkers(vb.data, vb.w, vb.h);
+  check('乗り物の印を2つ見つける（(250,380)・(780,380)）', mk.length === 2 && Math.round(mk[0].x) === 250 && Math.round(mk[1].x) === 780 && Math.round(mk[0].y) === 380, JSON.stringify(mk));
+  const dc = dominantColor(vb.data);
+  check('車体の主な色（赤 #dc1e28 付近）', dc && parseInt(dc.slice(1, 3), 16) > 180 && parseInt(dc.slice(3, 5), 16) < 60, dc);
+  check('装備アイコンの基準色・キー', equipBase('hat', 'catEars').join() === '#ff8ac8,#ffe0f0' && itemIconKey({ slot: 'hat', look: { style: 'catEars' } }) === 'equip/hat_catEars' && itemIconKey({ id: 'potion_red' }) === 'item/potion_red' && itemIconKey({ slot: 'pet', look: { style: 'catPet' } }) === null);
 
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'art_env_check_'));
   try {
