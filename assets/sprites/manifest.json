@@ -128,25 +128,12 @@
     "fit": false,
     "layout": 2,
     "parts": {
-      "body_f": {
-        "adjust": {
-          "torso": {
-            "sx": 1.12,
-            "sy": 1.0
-          },
-          "footB": {
-            "s": 0.85
-          },
-          "footF": {
-            "s": 0.85
-          }
-        }
-      }
+      "body_f": true
     },
     "defaultWear": false,
     "profile": {
       "f": {
-        "sx": 9.4
+        "shDy": 1.9
       }
     }
   },

@@ -230,7 +230,7 @@
             "parts": { "body_f": { "adjust": { "torso": { "sx": 1.12 }, "footF": { "s": 0.85 }, "footB": { "s": 0.85 } } } } },
    "heads": { "luna_f": { "file": "heads/luna_f.png", "back": "heads/luna_f_back.png", "backScale": 0.86, "backOffset": [0, -1] } }
    ```
-   - `profile.<f|m>`: 骨格の上書き。`sx` = 肩（腕の付け根）の左右の位置、ほかに `sw` `ww` `hw` `legX` `armW` `armW2` `legW` `legW2`（元の値の 0.5〜2 倍まで）。
+   - `profile.<f|m>`: 骨格の上書き。`sx` = 肩（腕の付け根）の左右の位置、ほかに `sw` `ww` `hw` `legX` `armW` `armW2` `legW` `legW2`（元の値の 0.5〜2 倍まで）、`shDy` = 肩（腕の支点）の高さのずらし（単位、下が正。胴の絵の肩の丸みの中心に合わせる）。
    - `adjust.<パーツ>`: そのシートのパーツを支点まわりに拡大（`s` = 縦横、`sx` 横、`sy` 縦。0.5〜2）・ずらす（`dx` `dy`、単位はリグの座標 1 = 8px）。
    - `backScale` / `backOffset`: 後ろ髪だけの大きさ・位置（頭の座標。`offset` は前の頭と共通）。
    - 例: ルナ v4（最初の3枚）の調整前後 → `style/luna_v4_adjust.png`。

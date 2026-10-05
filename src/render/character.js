@@ -62,9 +62,12 @@ const RIG_PROFILE_KEYS = ['sx', 'sw', 'ww', 'hw', 'legX', 'legW', 'legW2', 'armW
 export function setRigProfile(p) {
   for (const g of ['f', 'm']) {
     Object.assign(RIG_B[g], RIG_B0[g]);
+    RIG_B[g].shDy = 0;
     const o = p && p[g];
     if (!o || typeof o !== 'object') continue;
     for (const k of RIG_PROFILE_KEYS) if (typeof o[k] === 'number' && isFinite(o[k])) RIG_B[g][k] = clamp(o[k], RIG_B0[g][k] * 0.5, RIG_B0[g][k] * 2);
+    // shDy: 肩（腕の回転の中心）の高さのずらし（単位、下が正）。胴の絵の肩の丸みの中心に腕の支点を合わせる
+    if (typeof o.shDy === 'number' && isFinite(o.shDy)) RIG_B[g].shDy = clamp(o.shDy, -4, 4);
   }
 }
 // コードの胴（旧い肩 -17.5）を v2 の肩（-22）に合わせる縦の伸ばし: 腰の少し上 y0 より上だけを s 倍（裾・腰回りはそのまま）
@@ -901,7 +904,7 @@ function makeK(look, equip, anim, state, ws, wk, P, t, at, w, rig) {
   K.skinSh = sh(K.skin, -0.12);
   K.skinSh2 = sh(K.skin, -0.2);
   K.rig = !!rig;
-  K.shY = rig ? RIG_Y.shoulder : SHOULDER_Y;
+  K.shY = rig ? RIG_Y.shoulder + (B.shDy || 0) : SHOULDER_Y;
   K.headY = rig ? RIG_Y.head : HEAD_Y + (f ? 0.6 : 0);
   return K;
 }
@@ -3427,8 +3430,9 @@ function rigFrontView(ctx, K, parts) {
   const P = K.P, B = K.B, tw = P.twist;
   // 右向き斜め前（3q）: 体の右半身が手前 → 手前の腕・脚は画面の左側（背中側）、奥の腕・脚は顔の向きの側（胸の陰で少し内側）
   const q = rigView() === '3q';
-  const sxF = q ? -B.sx + 0.4 + tw * 2 : B.sx - 0.4 + tw * 0.5;   // 3q: ひねると手前の肩が大きく前へ（パンチ・斬りの踏み込み）
-  const sxB = q ? B.sx * 0.85 - tw * 0.8 : -B.sx - tw * 0.35;
+  // 胴の絵は動かないので、肩（腕の支点）のひねりによる横ずれは小さく（大きいと胴の肩から腕が離れて浮く）
+  const sxF = q ? -B.sx + 0.4 + tw * 0.35 : B.sx - 0.4 + tw * 0.5;
+  const sxB = q ? B.sx * 0.85 - tw * 0.25 : -B.sx - tw * 0.35;
   enterUpper(ctx, P);
   rigImg(ctx, parts.backA);
   if (!K.ai) { enterHead(ctx, K); enterCodeHead(ctx, K); drawHairBack(ctx, K); ctx.restore(); ctx.restore(); }

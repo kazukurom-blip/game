@@ -51,7 +51,7 @@ const P = {
 const P1 = {
   head:  { at: [16, 16],   ext: [-34, -38, 34, 22] },
 
-// ===== 骨格
+// ===== 骨格（manifest rig.profile で上書き。今のルナ: shDy 1.9）
 const BODY = {
   f: { sw: 8.5, ww: 6.3, hw: 8.6, legX: 3.5, thigh: 9.0, shin: 8.9, legW: 6.6, legW2: 5.4, upper: 7.6, fore: 7.2, armW: 4.9, armW2: 4.3, sx: 7.2, neck: 1.9, head: 0.96, hipY: -19.6 },
   m: { sw: 11.0, ww: 9.0, hw: 9.2, legX: 4.3, thigh: 8.6, shin: 8.4, legW: 7.6, legW2: 6.6, upper: 8.0, fore: 7.6, armW: 6.0, armW2: 5.4, sx: 9.3, neck: 2.8, head: 1.0, hipY: -19 },
@@ -67,14 +67,18 @@ const RIG_PROFILE_KEYS = ['sx', 'sw', 'ww', 'hw', 'legX', 'legW', 'legW2', 'armW
 export function setRigProfile(p) {
   for (const g of ['f', 'm']) {
     Object.assign(RIG_B[g], RIG_B0[g]);
+    RIG_B[g].shDy = 0;
     const o = p && p[g];
     if (!o || typeof o !== 'object') continue;
     for (const k of RIG_PROFILE_KEYS) if (typeof o[k] === 'number' && isFinite(o[k])) RIG_B[g][k] = clamp(o[k], RIG_B0[g][k] * 0.5, RIG_B0[g][k] * 2);
+    // shDy: 肩（腕の回転の中心）の高さのずらし（単位、下が正）。胴の絵の肩の丸みの中心に腕の支点を合わせる
+    if (typeof o.shDy === 'number' && isFinite(o.shDy)) RIG_B[g].shDy = clamp(o.shDy, -4, 4);
   }
 }
 // コードの胴（旧い肩 -17.5）を v2 の肩（-22）に合わせる縦の伸ばし: 腰の少し上 y0 より上だけを s 倍（裾・腰回りはそのまま）
 const RIG_STRETCH = { y0: -4, s: (-RIG_Y.shoulder - 4) / (-SHOULDER_Y - 4), top: RIG_Y.chin - 3 };
 // コードの靴（足首から靴底 +2.8）を v2 の大きな靴（足首から靴底 +6）に: 足首を中心に s 倍して dy 下げる
+const RIG_FOOT = { s: 1.3, dy: 6 - 2.8 * 1.3 };
 
 // ===== 関節の位置
 function limbPts(x0, y0, a, e, l1, l2) {
@@ -84,10 +88,6 @@ function limbPts(x0, y0, a, e, l1, l2) {
 }
 
 // ===== 姿勢（makePose）
-const LOOPS = {
-  idle: [LOOP, 24], walk: [0.6, 10], jump: [1.2, 8], climb: [0.9, 8], sit: [LOOP, 24], drive: [LOOP, 24], cheer: [1.2, 12],
-};
-
 function makePose(state, t, at, wk, ws, anim, w, f) {
   const P = {
     bob: 0, tilt: 0, hipY: 0, hx: 0, lb: [-0.06, 0], lf: [0.06, 0], ab: [-0.1, 0.25], af: [0.15, 0.45],
@@ -348,8 +348,9 @@ function rigFrontView(ctx, K, parts) {
   const P = K.P, B = K.B, tw = P.twist;
   // 右向き斜め前（3q）: 体の右半身が手前 → 手前の腕・脚は画面の左側（背中側）、奥の腕・脚は顔の向きの側（胸の陰で少し内側）
   const q = rigView() === '3q';
-  const sxF = q ? -B.sx + 0.4 + tw * 2 : B.sx - 0.4 + tw * 0.5;   // 3q: ひねると手前の肩が大きく前へ（パンチ・斬りの踏み込み）
-  const sxB = q ? B.sx * 0.85 - tw * 0.8 : -B.sx - tw * 0.35;
+  // 胴の絵は動かないので、肩（腕の支点）のひねりによる横ずれは小さく（大きいと胴の肩から腕が離れて浮く）
+  const sxF = q ? -B.sx + 0.4 + tw * 0.35 : B.sx - 0.4 + tw * 0.5;
+  const sxB = q ? B.sx * 0.85 - tw * 0.25 : -B.sx - tw * 0.35;
   enterUpper(ctx, P);
   rigImg(ctx, parts.backA);
   if (!K.ai) { enterHead(ctx, K); enterCodeHead(ctx, K); drawHairBack(ctx, K); ctx.restore(); ctx.restore(); }
