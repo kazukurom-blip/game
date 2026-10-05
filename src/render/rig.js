@@ -21,6 +21,8 @@ import {
 } from './rigLayout.js';
 import { renderRigCode, renderRigWeapon, itemColors, setRigProfile } from './character.js';
 import { getSpriteMode, bumpSpriteRev, removeBg } from './sprites.js';
+import { hexRgb, colorInfo, effectiveColor, recolorData, sameColor } from './recolor.js';
+const OUT = hexRgb('#2a1430');
 
 let RM = null;                     // 正規化済みの rig 設定（null = リグ無し）
 let BASE = 'assets/sprites/';
@@ -456,75 +458,16 @@ function prepWeapon(rec, im) {
 }
 
 // ================================================================ 色替え（色相回転＋彩度・明度補正。陰影・線・他の色は残す）
-function hexRgb(h) { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
-function rgbHsl(r, g, b) {
-  r /= 255; g /= 255; b /= 255;
-  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, c = mx - mn;
-  let h = 0, s = 0;
-  if (c > 1e-6) {
-    s = c / (1 - Math.abs(2 * l - 1) + 1e-9);
-    if (mx === r) h = ((g - b) / c) % 6; else if (mx === g) h = (b - r) / c + 2; else h = (r - g) / c + 4;
-    h *= 60; if (h < 0) h += 360;
-  }
-  return [h, Math.min(1, s), l, c];
-}
-function hslRgb(h, s, l, out, o) {
-  const c = (1 - Math.abs(2 * l - 1)) * s, hp = ((h % 360) + 360) % 360 / 60, x = c * (1 - Math.abs((hp % 2) - 1)), m = l - c / 2;
-  let r = 0, g = 0, b = 0;
-  if (hp < 1) { r = c; g = x; } else if (hp < 2) { r = x; g = c; } else if (hp < 3) { g = c; b = x; } else if (hp < 4) { g = x; b = c; } else if (hp < 5) { r = x; b = c; } else { r = c; b = x; }
-  out[o] = (r + m) * 255; out[o + 1] = (g + m) * 255; out[o + 2] = (b + m) * 255;
-}
-const sstep = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
-function colorInfo(hex) { const [r, g, b] = hexRgb(hex); const [h, s, l, c] = rgbHsl(r, g, b); return { h, s, l, c, chroma: c > 0.09, hex, rgb: [r, g, b] }; }
-const OUT = hexRgb('#2a1430');
-/** その画素が基準色 B の「布」っぽさ（0..1）。線（濃い紫・黒）・白いハイライト・他の色は 0 に近い */
-function weightOf(r, g, b, h, s, l, c, B) {
-  if (l < 0.05) return 0;
-  const dO = Math.abs(r - OUT[0]) + Math.abs(g - OUT[1]) + Math.abs(b - OUT[2]);
-  if (dO < 30 && dO < 0.75 * (Math.abs(r - B.rgb[0]) + Math.abs(g - B.rgb[1]) + Math.abs(b - B.rgb[2]))) return 0;   // 輪郭線（基準色より線の色に近い）
-  if (B.chroma) {
-    let dh = Math.abs(h - B.h); if (dh > 180) dh = 360 - dh;
-    return (1 - sstep(24, 44, dh)) * sstep(0.04, 0.1, c) * (1 - sstep(0.42, 0.6, Math.abs(l - B.l)));
-  }
-  return (1 - sstep(0.08, 0.16, c)) * (1 - sstep(0.4, 0.55, Math.abs(l - B.l)));
-}
-/** 明るさ: 基準の明るさ lb → 目標 lt。陰影の差はそのまま（はみ出す側だけ縮める） */
-function mapL(l, lb, lt) {
-  const d = l - lb;
-  const k = d < 0 ? Math.min(1, lt / Math.max(0.02, lb)) : Math.min(1, (1 - lt) / Math.max(0.02, 1 - lb));
-  return lt + d * k;
-}
+// （色の計算は recolor.js と共通）
 /** 実際に描かれた布の色の平均（基準色の近くの画素）→ 補正の元にする（AI が少し違う色で描いても合う） */
 function effectiveBase(rec) {
   const [bm, ba] = baseColors(rec);
-  const res = [null, null];
-  [bm, ba].forEach((hex, idx) => {
-    if (!hex) return;
-    const B = colorInfo(hex);
-    let n = 0, sx = 0, sy = 0, ss = 0, sl = 0;
-    for (const name in rec.parts) {
-      const p = rec.parts[name];
-      let d;
-      try { d = p.cv.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, p.w, p.h).data; } catch { return; }
-      for (let i = 0; i < d.length; i += 8) {
-        if (d[i + 3] < 200) continue;
-        const [h, s, l, c] = rgbHsl(d[i], d[i + 1], d[i + 2]);
-        const w = weightOf(d[i], d[i + 1], d[i + 2], h, s, l, c, B);
-        if (w < 0.6) continue;
-        n++; sx += Math.cos(h * Math.PI / 180); sy += Math.sin(h * Math.PI / 180); ss += s; sl += l;
-      }
-    }
-    if (n < 40) { res[idx] = B; return; }
-    const h = (Math.atan2(sy, sx) * 180 / Math.PI + 360) % 360;
-    // 平均は陰影で暗めに出るので、基準色の明るさと平均の中間を使う
-    res[idx] = { h: B.chroma ? h : B.h, s: B.chroma ? ss / n : B.s, l: (sl / n + B.l) / 2, c: B.c, chroma: B.chroma, hex, rgb: B.rgb };
-  });
-  return res;
-}
-function sameColor(a, b) {
-  if (!a || !b) return true;
-  const x = hexRgb(a), y = hexRgb(b);
-  return Math.abs(x[0] - y[0]) + Math.abs(x[1] - y[1]) + Math.abs(x[2] - y[2]) < 10;
+  const datas = [];
+  for (const name in rec.parts) {
+    const p = rec.parts[name];
+    try { datas.push(p.cv.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, p.w, p.h).data); } catch { return [bm ? colorInfo(bm) : null, ba ? colorInfo(ba) : null]; }
+  }
+  return [bm, ba].map((hex) => (hex ? effectiveColor(colorInfo(hex), datas) : null));
 }
 /** パーツを目標の色に（主色・アクセント）。同じ色なら元のまま。シート×色ごとにキャッシュ */
 function recolored(rec, name, main, acc) {
@@ -546,21 +489,7 @@ function recolored(rec, name, main, acc) {
   const g = cv.getContext('2d', { willReadFrequently: true });
   g.drawImage(p.cv, 0, 0);
   const img = g.getImageData(0, 0, p.w, p.h), d = img.data;
-  const tmp = [0, 0, 0];
-  for (let i = 0; i < d.length; i += 4) {
-    if (d[i + 3] === 0) continue;
-    const r = d[i], gg = d[i + 1], b = d[i + 2];
-    const [h, s, l, c] = rgbHsl(r, gg, b);
-    let best = 0, bi = -1;
-    for (let m = 0; m < maps.length; m++) { const w = weightOf(r, gg, b, h, s, l, c, maps[m][0]); if (w > best) { best = w; bi = m; } }
-    if (bi < 0 || best < 0.02) continue;
-    const [B, T] = maps[bi];
-    const h2 = B.chroma ? h + (T.h - B.h) : T.h;
-    const s2 = B.chroma ? Math.min(1, s * (T.s / Math.max(0.05, B.s))) : T.s * (T.chroma ? 1 : 0);
-    const l2 = Math.min(1, Math.max(0, mapL(l, B.l, T.l)));
-    hslRgb(h2, s2, l2, tmp, 0);
-    d[i] = r + (tmp[0] - r) * best; d[i + 1] = gg + (tmp[1] - gg) * best; d[i + 2] = b + (tmp[2] - b) * best;
-  }
+  recolorData(d, maps);
   g.putImageData(img, 0, 0);
   STAT.recolors++;
   o = { cv, w: p.w, h: p.h, px: p.px, py: p.py, R: p.R, name };
