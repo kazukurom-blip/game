@@ -9,6 +9,7 @@ import {
 import * as SaveM from '../core/save.js';
 import { audio } from '../audio/audio.js';
 import * as SpriteM from '../render/sprites.js';
+import * as CharM from '../render/character.js';
 import { showNameInput, hideNameInput, nameInputValue, setNameInputValue, clipName, NAME_MAX, focusNameInput } from './nameinput.js';
 
 const W = 1280, H = 720;
@@ -22,11 +23,43 @@ const LOOK_ROWS = ['hair', 'hairColor', 'eyeColor', 'skin', 'random'];
 // AIの頭・立ち絵（manifest heads / portraits の <classId>_<gender>）。画像が無ければ今まで通り
 const hasHead = (cls, g) => guard('hasHeroArt', () => SpriteM.hasHeroArt?.('heads', cls, g), false);
 const portraitOk = (cls, g) => !!guard('portraitFor', () => SpriteM.portraitFor?.(cls, g), null);
-/** 見た目の行（頭の画像があるクラス×性別では先頭に「AIの顔を使う」） */
-function lookRows(c) { return c && hasHead(c.cls, c.gender) ? ['aiHead', ...LOOK_ROWS] : LOOK_ROWS; }
-/** AIの頭が有効で、髪型・髪色が絵の髪になる（選択は無効表示） */
-function aiHeadOn(c) { return !!(c && c.look && c.look.aiHead !== false && hasHead(c.cls, c.gender)); }
-function rowDisabled(c, key) { return (key === 'hair' || key === 'hairColor') && aiHeadOn(c); }
+// 顔・髪の分割方式（manifest faces / hairs。全クラス共通・性別ごと）。顔の絵がある性別では「顔」の行を出す
+const facesOf = (g) => guard('faceList', () => SpriteM.faceList?.(g), []) || [];
+const hairArtOf = (g) => guard('hairArtList', () => SpriteM.hairArtList?.(g), []) || [];
+/** 顔（分割方式）が使える性別か: 顔の絵と髪の絵が1つ以上ある */
+const faceAvail = (g) => facesOf(g).length > 0 && hairArtOf(g).length > 0;
+/** 見た目の行（画像の頭・顔があるクラス×性別では先頭に「AIの顔を使う」、顔の絵がある性別では「顔」） */
+function lookRows(c) {
+  if (!c) return LOOK_ROWS;
+  if (facesOf(c.gender).length) return ['aiHead', 'face', ...LOOK_ROWS];
+  return hasHead(c.cls, c.gender) ? ['aiHead', ...LOOK_ROWS] : LOOK_ROWS;
+}
+/** 顔（分割方式）で描く: 画像の顔 ON で、その性別の顔・髪の絵がある（髪型は絵のある物だけ・色は塗り替え） */
+function faceOn(c) { return !!(c && c.look && c.look.aiHead !== false && faceAvail(c.gender)); }
+/** 画像の頭が有効（顔の分割方式 または heads の1枚の頭） */
+function aiHeadOn(c) { return !!(c && c.look && c.look.aiHead !== false && (faceAvail(c.gender) || hasHead(c.cls, c.gender))); }
+/** 無効の行: 顔 = 分割方式が使えない時 / 髪型・髪色 = 1枚の頭（heads）を使う時（髪は絵のまま） */
+function rowDisabled(c, key) {
+  if (key === 'face') return !faceOn(c);
+  return (key === 'hair' || key === 'hairColor') && aiHeadOn(c) && !faceOn(c);
+}
+/** 顔を使う時に選べる髪型（AI の髪の絵がある物）。それ以外は全部 */
+function hairChoices(c) {
+  const hs = hairStyles();
+  if (!faceOn(c)) return hs;
+  const ok = hairArtOf(c.gender);
+  const f = hs.filter((h) => ok.includes(h.id));
+  for (const id of ok) if (!f.some((h) => h.id === id)) f.push({ id, name: id });   // 髪型の一覧に無い ID の絵
+  return f.length ? f : hs;
+}
+/** 顔を使う時、look の顔・髪型を絵のある物にそろえる（無い顔 → その性別の最初の顔、絵の無い髪型 → 最初の髪型） */
+function fitFaceLook(l, g) {
+  if (!l || l.aiHead === false || !faceAvail(g)) return l;
+  const fs = facesOf(g), hs = hairArtOf(g);
+  if (!fs.includes(l.face)) l.face = fs[0];
+  if (!hs.includes(l.hair)) { const order = hairStyles().map((h) => h.id).filter((id) => hs.includes(id)); l.hair = order[0] || hs[0]; }
+  return l;
+}
 /** プレビュー用: look に classId・gender を付ける（AIの頭・立ち絵の対象にする） */
 const HLC = new WeakMap();
 function heroLook(look, cls, g) {
@@ -85,7 +118,7 @@ function startCreate(slot) {
 function newLook(cls, g, prev) {
   const l = { ...defaultLook(cls, g), classId: cls, gender: g };
   if (prev && prev.aiHead === false) l.aiHead = false;
-  return l;
+  return fitFaceLook(l, g);
 }
 function setStep(n) {
   const c = T.c;
@@ -108,11 +141,19 @@ function setGender(g) {
 }
 function toggleAiHead() {
   const c = T.c;
-  c.look = { ...c.look, aiHead: c.look.aiHead === false };
+  c.look = fitFaceLook({ ...c.look, aiHead: c.look.aiHead === false }, c.gender);
   T.flash = { t: performance.now() / 1000 };
 }
+function cycleFace(d) {
+  const c = T.c;
+  if (rowDisabled(c, 'face')) return;
+  const fs = facesOf(c.gender);
+  let i = fs.indexOf(c.look.face);
+  i = i < 0 ? 0 : (i + d + fs.length) % fs.length;
+  c.look = { ...c.look, face: fs[i] };
+}
 function cycleHair(d) {
-  const hs = hairStyles(), c = T.c;
+  const c = T.c, hs = hairChoices(c);
   if (rowDisabled(c, 'hair')) return;
   let i = hs.findIndex((h) => h.id === c.look.hair);
   i = (i + d + hs.length) % hs.length;
@@ -133,8 +174,8 @@ function setPal(key, v) {
 }
 function randomLook() {
   const c = T.c, R = (a) => a[Math.floor(Math.random() * a.length)];
-  const hs = hairStyles();
-  c.look = withHairColor({ ...c.look, hair: R(hs).id, eyeColor: R(EYE_COLORS), skin: R(SKIN_COLORS) }, R(HAIR_COLORS));
+  const hs = hairChoices(c), fs = faceOn(c) ? facesOf(c.gender) : null;
+  c.look = withHairColor({ ...c.look, hair: R(hs).id, eyeColor: R(EYE_COLORS), skin: R(SKIN_COLORS), ...(fs && fs.length ? { face: R(fs) } : {}) }, R(HAIR_COLORS));
   T.flash = { t: performance.now() / 1000 };
 }
 function finishCreate() {
@@ -142,7 +183,7 @@ function finishCreate() {
   const name = clipName(nameInputValue()) || defaultName(c.cls, c.gender);
   hideNameInput();
   const { classId: _c, gender: _g, ...look } = c.look;   // classId・gender は state 側で付ける（progression.tagHeroLook）
-  if (hasHead(c.cls, c.gender)) look.aiHead = c.look.aiHead !== false;   // state.look.aiHead に保存（画像があれば既定 ON）
+  if (hasHead(c.cls, c.gender) || faceAvail(c.gender)) look.aiHead = c.look.aiHead !== false;   // state.look.aiHead に保存（画像があれば既定 ON）
   const out = { slot: c.slot, create: { classId: c.cls, name, gender: c.gender, look } };
   T.c = null; T.screen = 'title';
   return out;
@@ -237,12 +278,12 @@ export function titleInput(game) {
       const k = LR[c.row];
       if (L || R) {
         const d = L ? -1 : 1;
-        if (k === 'aiHead') toggleAiHead(); else if (k === 'hair') cycleHair(d); else if (k === 'random') randomLook(); else cyclePal(k, d);
+        if (k === 'aiHead') toggleAiHead(); else if (k === 'face') cycleFace(d); else if (k === 'hair') cycleHair(d); else if (k === 'random') randomLook(); else cyclePal(k, d);
       }
     }
     if (ok) {
       const k = c.step === 2 ? lookRows(c)[c.row] : null;
-      if (k === 'random') randomLook(); else setStep(c.step + 1); // AIの顔は ←→ で切替（Enter は次へ）
+      if (k === 'random') randomLook(); else setStep(c.step + 1); // AIの顔・顔は ←→ で切替（Enter は次へ）
     }
   }
   return null;
@@ -673,9 +714,11 @@ function swatchRow(ctx, c, key, pal, x, y, w, t, rowOn) {
 function stepLook(ctx, c, rx, ry, rw, rh, t) {
   stepTitle(ctx, '見た目をカスタマイズ', '←→ で切替・色はクリックで選択', rx, ry, rw);
   const x = rx + 24, w = rw - 48;
-  const LABEL = { aiHead: 'AIの顔', hair: '髪型', hairColor: '髪の色', eyeColor: '瞳の色', skin: '肌の色', random: 'おまかせ' };
+  const LABEL = { aiHead: 'AIの顔', face: '顔', hair: '髪型', hairColor: '髪の色', eyeColor: '瞳の色', skin: '肌の色', random: 'おまかせ' };
   const keys = lookRows(c);
-  const six = keys.length > 5, step = six ? 60 : 70, rh0 = six ? 52 : 60, dy = six ? -4 : 0;   // 6行なら少し詰める
+  // 行が多いほど詰める（5行 70 / 6行 60 / 7行 52）。dy = 行の中の文字の上下、cy = 中身（ボタン・色）の上下
+  const n = keys.length, step = n > 6 ? 52 : n > 5 ? 60 : 70, rh0 = step - 8, dy = (rh0 - 60) / 2, cyOff = n > 6 ? -9 : n > 5 ? -5 : 0;
+  const six = cyOff !== 0;
   keys.forEach((key, i) => {
     const label = LABEL[key];
     const y = ry + 66 + i * step;
@@ -694,18 +737,32 @@ function stepLook(ctx, c, rx, ry, rw, rh, t) {
       ctx.save(); ctx.globalAlpha *= 0.42;
       inset(ctx, cx, y + 10 + dy, cw2, 36, { r: 10, fill: 'rgba(0,0,0,0.35)' });
       ctx.restore();
-      txt(ctx, 'AIの顔の髪を使用中（「AIの顔」をOFFで選べます）', cx + cw2 / 2, y + 28.5 + dy, { size: 13, align: 'center', color: COL.dim, sw: 2.5, maxW: cw2 - 16 });
+      const msg = key === 'face' ? (c.look.aiHead === false ? 'コードの顔を使用中（「AIの顔」をONで選べます）' : 'この性別の髪の絵がまだありません')
+        : 'AIの顔の髪を使用中（「AIの顔」をOFFで選べます）';
+      txt(ctx, msg, cx + cw2 / 2, y + 28.5 + dy, { size: 13, align: 'center', color: COL.dim, sw: 2.5, maxW: cw2 - 16 });
       return;
     }
     if (key === 'aiHead') {
       const onAi = c.look.aiHead !== false;
       btn(ctx, 'aiHead', { x: cx, y: y + 8 + dy, w: 240, h: 38 }, onAi ? '✔ AIの顔を使う：ON' : 'AIの顔を使う：OFF', () => { toggleAiHead(); c.row = 0; return null; }, { color: onAi ? '#109f95' : COL.purple, size: 15, glow: onAi && on ? COL.teal : null });
-      txt(ctx, onAi ? '頭（顔＋髪）を画像の絵にします' : 'コードで描いた顔と、選んだ髪型・髪色を使います', cx + 256, y + 27 + dy, { size: 12, color: COL.sub, sw: 2.5, maxW: cw2 - 260, weight: 700 });
+      txt(ctx, onAi ? (faceAvail(c.gender) ? '顔・髪を画像の絵にします（髪型・色は選べます）' : '頭（顔＋髪）を画像の絵にします') : 'コードで描いた顔と、選んだ髪型・髪色を使います', cx + 256, y + 27 + dy, { size: 12, color: COL.sub, sw: 2.5, maxW: cw2 - 260, weight: 700 });
       return;
     }
-    if (six) { ctx.save(); ctx.translate(0, -5); }
-    if (key === 'hair') {
-      const hs = hairStyles();
+    if (six) { ctx.save(); ctx.translate(0, cyOff); }
+    if (key === 'face') {
+      const fs = facesOf(c.gender);
+      const idx = fs.indexOf(c.look.face);
+      btn(ctx, 'faceL', { x: cx, y: y + 12, w: 44, h: 36 }, '◀', () => { cycleFace(-1); c.row = keys.indexOf('face'); return null; }, { color: COL.purple, size: 16 });
+      inset(ctx, cx + 54, y + 12, cw2 - 108, 36, { r: 10, fill: 'rgba(0,0,0,0.35)' });
+      // 小さなプレビュー（顔＋髪。読み込み中は番号だけ）
+      ctx.save(); rrPath(ctx, cx + 56, y + 13, cw2 - 112, 34, 9); ctx.clip();
+      const pv = guard('drawFacePreview', () => CharM.drawFacePreview?.(ctx, c.look, cx + 100, y + 32, 36), false);
+      ctx.restore();
+      txt(ctx, `顔 ${idx + 1}`, cx + 54 + (cw2 - 108) / 2 + (pv ? 20 : 0), y + 30.5, { size: 17, align: 'center', color: '#fff' });
+      txt(ctx, `${idx + 1} / ${fs.length}`, cx + cw2 - 66, y + 30.5, { size: 11, align: 'right', color: COL.dim, sw: 2.5 });
+      btn(ctx, 'faceR', { x: cx + cw2 - 44, y: y + 12, w: 44, h: 36 }, '▶', () => { cycleFace(1); c.row = keys.indexOf('face'); return null; }, { color: COL.purple, size: 16 });
+    } else if (key === 'hair') {
+      const hs = hairChoices(c);
       const cur = hs.find((h) => h.id === c.look.hair) || { name: c.look.hair };
       btn(ctx, 'hairL', { x: cx, y: y + 12, w: 44, h: 36 }, '◀', () => { cycleHair(-1); c.row = keys.indexOf('hair'); return null; }, { color: COL.purple, size: 16 });
       inset(ctx, cx + 54, y + 12, cw2 - 108, 36, { r: 10, fill: 'rgba(0,0,0,0.35)' });

@@ -2,7 +2,8 @@
 // ID は互換のため 'luna' / 'jin' を維持し、第3のクラス 'hacker' を追加。
 // CLASSES = {id: {id, name, desc, role, weaponType, baseStats, base, branches:[branchId], jobs1:[1次jobId], defaultNames:{f,m}}}
 //  - baseStats: 初期ステータス（str/dex/int/luk）, base: HP/MP/速度等（systems/progression.js HERO_BASE の元データ）
-// DEFAULT_LOOKS = {classId: {f: look, m: look}}（look は render/character.js drawCharacter 用 {body, skin, hair, hairColor, eyeColor, ...}）
+// DEFAULT_LOOKS = {classId: {f: look, m: look}}（look は render/character.js drawCharacter 用 {body, face, skin, hair, hairColor, eyeColor, ...}）
+//  - face: 顔・髪の分割方式の顔の番号（manifest faces。絵が無ければ使われず今まで通り）。旧セーブは state の移行で初期の顔が入る
 import { JOB_BRANCHES, jobsFor } from './jobs.js';
 
 export const CLASSES = {
@@ -41,16 +42,16 @@ export const GENDERS = ['f', 'm'];
 
 export const DEFAULT_LOOKS = {
   luna: {
-    f: { body: 'f', skin: '#ffe3d3', hair: 'twin', hairColor: '#ff6fb5', eyeColor: '#ff3d8b', expr: 'cute', hairShadow: '#c8458f', hairHi: '#ffd0ea', hairTip: '#b47cff', tie: '#ffd23f', rim: '#8ff4ff' },
-    m: { body: 'm', skin: '#fbdcc6', hair: 'short', hairColor: '#ff5fa8', eyeColor: '#ff3d8b', expr: 'cute', hairShadow: '#b8337e', hairHi: '#ffc6e4', rim: '#8ff4ff' },
+    f: { body: 'f', face: 'f_01', skin: '#ffe3d3', hair: 'twin', hairColor: '#ff6fb5', eyeColor: '#ff3d8b', expr: 'cute', hairShadow: '#c8458f', hairHi: '#ffd0ea', hairTip: '#b47cff', tie: '#ffd23f', rim: '#8ff4ff' },
+    m: { body: 'm', face: 'm_01', skin: '#fbdcc6', hair: 'short', hairColor: '#ff5fa8', eyeColor: '#ff3d8b', expr: 'cute', hairShadow: '#b8337e', hairHi: '#ffc6e4', rim: '#8ff4ff' },
   },
   jin: {
-    f: { body: 'f', skin: '#f8dac6', hair: 'ponytail', hairColor: '#e2e7f2', eyeColor: '#33c7e6', expr: 'cool', hairShadow: '#8790ab', hairHi: '#ffffff', mesh: '#3ee6d2', tie: '#ff4f8b', rim: '#d0a8ff' },
-    m: { body: 'm', skin: '#f2cfb6', hair: 'wolf', hairColor: '#dde3ee', eyeColor: '#2fb8e8', expr: 'cool', hairShadow: '#7d86a3', hairHi: '#ffffff', mesh: '#3ee6d2', rim: '#d0a8ff' },
+    f: { body: 'f', face: 'f_02', skin: '#f8dac6', hair: 'ponytail', hairColor: '#e2e7f2', eyeColor: '#33c7e6', expr: 'cool', hairShadow: '#8790ab', hairHi: '#ffffff', mesh: '#3ee6d2', tie: '#ff4f8b', rim: '#d0a8ff' },
+    m: { body: 'm', face: 'm_02', skin: '#f2cfb6', hair: 'wolf', hairColor: '#dde3ee', eyeColor: '#2fb8e8', expr: 'cool', hairShadow: '#7d86a3', hairHi: '#ffffff', mesh: '#3ee6d2', rim: '#d0a8ff' },
   },
   hacker: {
-    f: { body: 'f', skin: '#f0d2bc', hair: 'bob', hairColor: '#3dff8a', eyeColor: '#19f0ff', expr: 'cool', hairShadow: '#14a06a', hairHi: '#d4ffe6', rim: '#ff8ae0' },
-    m: { body: 'm', skin: '#e8c6aa', hair: 'spiky', hairColor: '#36f08a', eyeColor: '#19f0ff', expr: 'cool', hairShadow: '#12925e', hairHi: '#c8ffdf', rim: '#ff8ae0' },
+    f: { body: 'f', face: 'f_03', skin: '#f0d2bc', hair: 'bob', hairColor: '#3dff8a', eyeColor: '#19f0ff', expr: 'cool', hairShadow: '#14a06a', hairHi: '#d4ffe6', rim: '#ff8ae0' },
+    m: { body: 'm', face: 'm_03', skin: '#e8c6aa', hair: 'spiky', hairColor: '#36f08a', eyeColor: '#19f0ff', expr: 'cool', hairShadow: '#12925e', hairHi: '#c8ffdf', rim: '#ff8ae0' },
   },
 };
 
