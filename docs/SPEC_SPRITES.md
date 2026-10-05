@@ -193,6 +193,43 @@ accessory_back（wings・scarf のなびき） → hair_back → body → bottom
 - 制限: 頭の絵は1方向（右向き）だけ。背面はシルエット＋後ろ髪。サングラス・マスク・帽子はコードの顔・頭の位置と大きさ（配置図の頭頂・顎の線に合わせて描けば合う。合わなければ offset）。服破れの煤・絆創膏は頭の絵には付かない。後ろ髪の揺れは絵全体を結び目で回すだけ（毛先だけ曲がる動きは無い）。
 
 
+### ③ 顔・髪の分割方式 `faces` / `hairs` / `faceBase`（顔 + 前髪 + 後ろ髪の3枚重ね。キャラ作成で顔・髪型・色を選ぶ）
+描く人向けの依頼書: `docs/art_handoff/FACE_HAIR_SPEC.md`。顔は全クラス共通・♀♂別、髪型は顔と自由に組み合わせ、髪・肌・瞳の色はゲームが塗り替える。
+```json
+"faces": {
+  "f_01": { "file": "heads/face/f_01.png",
+            "expr": { "blink": "heads/face/f_01_blink.png", "hurt": "heads/face/f_01_hurt.png",
+                      "shout": "heads/face/f_01_shout.png", "happy": "heads/face/f_01_happy.png" } },
+  "m_01": "heads/face/m_01.png"
+},
+"hairs": {
+  "f_twin":  { "file": "heads/hair/f_twin.png",  "back": "heads/hair/f_twin_back.png", "base": "#b07850" },
+  "m_short": { "file": "heads/hair/m_short.png", "back": "heads/hair/m_short_back.png" }
+},
+"faceBase": { "skin": { "f": "#ffe3d3", "m": "#f6d5be" }, "eye": "#6a5cff" }
+```
+- **キー**: 顔 = `<性別>_<番号>`（`f_01`〜。性別はキーの頭 `f_`/`m_`、または `"gender"`）、髪 = `<性別>_<髪型ID>`（髪型 ID は look.hair と同じ: twin / ponytail / bob / long / bun / sidepart / short / wolf / spiky / messy / undercut など）。
+- **絵**: 3枚とも頭の配置図（1024×1024・1単位 = 10px・支点 (512,400)。②と同じ）。背景は透明（単色なら自動で透明化）。正方形でない絵は警告して使わない。読み込み時に 420px まで縮小。
+  - 顔 `file`（＋表情 `expr`。無い表情は基本の顔。別名は②と同じ）: 肌色の頭全体・耳・目・眉・鼻・口・頬（髪は描かない）。
+  - 前髪 `file`: 前髪・頭頂の髪・もみあげ。後ろ髪 `back`: 後頭部・ツインテール・ポニーテール・長い髪。どちらか片方だけでも可。
+- **look**: `look.face`（顔の ID）+ `look.hair`（髪型）+ `look.hairColor` / `look.skin` / `look.eyeColor`。性別は `look.gender`（無ければ `look.body`）。初期の顔は `DEFAULT_LOOKS`（data/classes.js: luna f_01/m_01、jin f_02/m_02、hacker f_03/m_03）。
+  旧セーブ（face が無い）は `progression.migrateState` の look の補完（`{ ...defaultLook, ...look }`）でクラス×性別の初期の顔が入る（絵が無ければ使われないので見た目は変わらない）。
+- **重ね順**（前向き）: 後ろ髪（体の後ろ。②の後ろ髪と同じ位置・揺れ `hairSway`/`hairLift`）→ 胴 → 顔 → 前髪 → マスク・サングラス → 帽子（リグは `parts.head`）→ 汗など。
+  背面（はしご）: 顔と前髪のシルエットを髪の色で塗った絵（`layeredBackOf`）→ 後ろ髪。被弾の白フラッシュは各レイヤーの白いシルエット。左右の向きは体ごと反転（絵は右向きで描く）。
+  かぶる帽子（cap/beanie/bandana/helmet/cowboy）の clip（つばより上・帽子の外を隠す）は顔・前髪・後ろ髪に掛ける（頭頂の肌が帽子の外に出ないように）。
+- **色替え**（`src/render/recolor.js`。リグの装備・体と共通の「色相回転＋彩度・明度補正」）:
+  - 髪（前髪・後ろ髪）: `hairs.<key>.base`（既定 `#b07850`）→ `look.hairColor`。顔: `faceBase.skin[顔の性別]` → `look.skin`、`faceBase.eye` → `look.eyeColor`。
+  - 絵の中の基準色に近い画素の実際の平均（陰影込み）を元にするので、少しずれた色で描かれても合う。陰影の差は保つ（明るさは基準 → 目標へ平行移動、はみ出す側だけ縮める）。
+  - 線の色 `#2A1430` 付近・白いハイライト・別の色（白目・口の中など）は変えない。白・黒・灰など無彩色の目標色は明るさで合わせ、髪はその色のわずかな色味（白っぽい青など）を残す。
+  - 結果は「絵 × 色」ごとにキャッシュ（上限 48 枚、古い物から捨てる）。重ね頭の組み立ても look の顔・髪・色・表情ごとにキャッシュ（`aiHeadOf` 1回 約1µs）。
+- **フォールバック**（上から順に）: ① `look.face` の顔と `hairs['<性別>_<look.hair>']` があり読み込み済み → 重ね頭。② 無い・読み込み中・壊れている → `heads.<クラス>_<性別>`（1枚の頭）。③ それも無い → コードの頭。
+  `look.aiHead === false`（キャラ作成の「AIの顔を使う：OFF」）・NPC（look.classId 無し）・悪役・spriteMode=procedural は常にコードの頭。
+- **キャラ作成**（ui/title.js の見た目）: その性別の顔の絵が1つ以上あると「顔」の行（←→で切替・番号とプレビュー）を「AIの顔」の下に出す。顔・髪の絵が両方ある時（顔を使う時）は髪型は髪の絵がある物だけ、髪の色・瞳・肌は塗り替えで反映。
+  「AIの顔」行は「画像の顔を使う／コードの顔」の切替（OFF の時は顔の行は無効・髪型は全部）。顔の絵が無く `heads` だけある時は今まで通り（髪型・髪色は無効）。ランダムは顔も選ぶ。Enter は次へ（ランダムの行だけはランダム）。
+- **API**（sprites.js）: `faceHeadFor(look, expr)` → `{ layered: true, canvas, w, h, place, front, back, expr, file, hairColor, ... }` | null、`faceList(gender)`、`hairArtList(gender)`、`hasFaceArt(look)`、`layeredBackOf(head)`。
+  character.js: `aiHeadOf` が重ね頭を優先して返し、`paintAiHead`（layered なら顔 → 前髪）/ `paintAiHeadBack`（後ろ髪）が②と同じ座標系に描く。`drawFacePreview(ctx, look, cx, cy, px)`（キャラ作成のプレビュー）。2xキャッシュのキーに顔・髪・色が入る（`lookSig` に face、頭の `file` に顔の絵・髪のキー・色）。
+- **テスト**: `node tests/face_hair_browser.mjs`（`npm run test:facehair`。仮の顔・髪の絵をテストの中で生成して page.route で差し込む。絵が無い時は今まで通り・重ね頭・表情・色替え（髪 ピンク/白/黒/緑・肌・瞳・線の色）・フォールバック・キャラ作成の顔の行・読み込み中。スクショ `tests/screenshots/facehair_*.png`）。
+
 ## リグ（パーツ式の着せ替え人形。主人公用・画像生成AI向け）
 主人公の体・服・武器を「パーツの絵」で組み立てて、関節の回転で動かす。AI は**配置図の枠の中に描く**だけ（コマ割り不要）。頭は `heads`（前の頭＋後ろ髪。無ければコードの頭）。
 絵柄の基準は承認済みの見本 `docs/art_handoff/style/luna_f_reference.png`（正面寄り・腕を曲げたポーズの見本。パーツは右向き斜め前・腕脚まっすぐで描く）。
