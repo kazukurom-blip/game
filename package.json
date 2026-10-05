@@ -11,6 +11,7 @@
     "test:smoke": "node tests/smoke.mjs",
     "test:sprites": "node tests/sprites_browser.mjs",
     "test:heroart": "node tests/hero_art_browser.mjs",
+    "test:facehair": "node tests/face_hair_browser.mjs",
     "export:sprites": "node tools/export_sprites.mjs",
     "export:rig": "node tools/export_rig_templates.mjs && node tools/gen_rig_guide.mjs",
     "test:rig": "node tests/rig_browser.mjs",
