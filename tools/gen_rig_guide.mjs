@@ -64,6 +64,9 @@ const PART_WHAT = {
 // ---------------------------------------------------------------- 一覧（優先度）
 const S_KEYS = new Set([
   'body_f', 'body_m',
+  // 初期装備（地味なセット: くすんだ布の服・普通のズボン・古い靴・木剣）
+  'top/plainShirt_f', 'top/plainShirt_m', 'bottom/plainPants_f', 'bottom/plainPants_m', 'shoes/oldShoes_f', 'shoes/oldShoes_m', 'weapon/woodSword',
+  // 着せ替え（前の初期装備。ビーチの店）
   'hat/catEars_f', 'hat/cap_m', 'hat/headphones_f', 'hat/headphones_m',
   'top/hoodie_f', 'top/hoodie_m', 'top/hoodie__1d2b24_f', 'top/hoodie__1d2b24_m', 'top/leatherJacket_f', 'top/leatherJacket_m',
   'bottom/skirt_f', 'bottom/jeans_f', 'bottom/jeans_m', 'bottom/trackPants_f', 'bottom/trackPants_m',
@@ -310,7 +313,7 @@ P('## 2. 作るもの一覧');
 P();
 P('| 優先度 | 枚数 | 内容 |');
 P('|---|---|---|');
-P(`| **S** | ${count('S')} | 素体♀♂、3クラス×♀♂の初期装備（ルナ: ネコミミ/キャップ・ピンクのパーカー・スカート/ジーンズ・スニーカー・ナイフ、ジン: 革ジャン・ジーンズ・ブーツ・バット、ハッカー: ヘッドホン・サイバーパーカー（色違い専用）・ジョガーパンツ・スニーカー・杖） |`);
+P(`| **S** | ${count('S')} | 素体♀♂、全クラス共通の地味な初期装備（くすんだ布の服・普通のズボン・古い靴・木剣。ハッカーは杖）、ビーチの店の着せ替え（ルナ: ネコミミ/キャップ・ピンクのパーカー・スカート/ジーンズ・スニーカー・ナイフ、ジン: 革ジャン・ジーンズ・ブーツ・バット、ハッカー: ヘッドホン・サイバーパーカー（色違い専用）・ジョガーパンツ・スニーカー） |`);
 P(`| **A** | ${count('A')} | 何も着ていない時の白Tシャツ・短パン、Lv20 までに手に入る装備（序盤の店・ドロップ）、序盤の武器（ピストル・刀・SMG・ギター） |`);
 P(`| **B** | ${count('B')} | 残りの装備（中盤以降のレア装備）、ネオンソード、服破れの重ね（任意。無ければコードの破れ） |`);
 P(`| 合計 | ${total} | ♀♂で体型が違うので、服は♀用と♂用を別に描きます（武器は共通） |`);
@@ -331,6 +334,18 @@ P('   "rig": { "enabled": true, "fit": false, "parts": ["body_f", "body_m", "top
 P('   ```');
 P('   `"fit": false`（全体の既定）＝配置図のまま正確に組む。ずれた絵だけ `"parts": { "top/hoodie_f": { "fit": true } }` で自動フィット。基準色と違う色で描いてしまった時は `{ "base": "#ff5aa0" }` のように実際に塗った色を書くと色替えが合います。色替えを止めるなら `"recolor": false`。');
 P('   ※ `fit` も `layout` も書いていない前からの manifest は、旧い配置図（v1）の絵として読みます（`"layout": 1`。自動フィット）。');
+P();
+P('   **描き直さずに体型を微調整する**（AIの絵が細すぎる・肩の位置がずれる時）:');
+P('   ```json');
+P('   "rig": { ..., "profile": { "f": { "shDy": 1.9 } },');
+P('            "parts": { "body_f": { "adjust": { "torso": { "sx": 1.12 }, "footF": { "s": 0.85 }, "footB": { "s": 0.85 } } } } },');
+P('   "heads": { "luna_f": { "file": "heads/luna_f.png", "back": "heads/luna_f_back.png", "backScale": 0.86, "backOffset": [0, -1] } }');
+P('   ```');
+P('   - `profile.<f|m>`: 骨格の上書き。`sx` = 肩（腕の付け根）の左右の位置、ほかに `sw` `ww` `hw` `legX` `armW` `armW2` `legW` `legW2`（元の値の 0.5〜2 倍まで）、`shDy` = 肩（腕の支点）の高さのずらし（単位、下が正。胴の絵の肩の丸みの中心に合わせる）。');
+P('   - `adjust.<パーツ>`: そのシートのパーツを支点まわりに拡大（`s` = 縦横、`sx` 横、`sy` 縦。0.5〜2）・ずらす（`dx` `dy`、単位はリグの座標 1 = 8px）。');
+P('   - `backScale` / `backOffset`: 後ろ髪だけの大きさ・位置（頭の座標。`offset` は前の頭と共通）。');
+P('   - `view`: `"3q"`（右向き斜め前。手前の腕・脚＝キャラの右側を画面の左に付けて胴の前へ。配置図 v2 の既定）/ `"front"`（正面の旧い重ね方）。');
+P('   - 例: ルナ v4（最初の3枚）の調整前後 → `style/luna_v4_adjust.png`、3/4の素体の肩 → `rig_assembly/shoulder_closeup.png`。');
 P('6. 確認（§6）。');
 P();
 P('## 4. 絵柄をそろえるコツ');

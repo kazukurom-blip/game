@@ -54,6 +54,7 @@ equip('crown_neon', 'ネオン・エンペラー', 'hat', 'mythic', 55, { def: 4
 
 // ============ 上着 top ============
 equip('hoodie_cyber', 'サイバーパーカー', 'top', 'common', 0, { def: 4, maxMp: 10 }, ['hoodie', '#1d2b24', '#3dff8a'], { desc: '袖にLEDテープを縫い込んだ自作パーカー。' });
+equip('shirt_plain', '生成りのシャツ', 'top', 'common', 0, { def: 3, maxHp: 8 }, ['plainShirt', '#a89a84', '#6e6252'], { desc: 'くすんだ布の服。ここから成り上がる。' });
 equip('hoodie_pink', 'ピンクのパーカー', 'top', 'common', 0, { def: 4, maxHp: 10 }, ['hoodie', '#ff6fb5', '#ffffff'], { desc: 'もこもこ。フードにネコ耳つき。' });
 equip('leather_jacket', 'ブラックレザージャケット', 'top', 'common', 0, { def: 6, maxHp: 15 }, ['leatherJacket', '#1d1d24', '#c0c0c8'], { desc: 'ジンの一張羅。肩に傷あり。' });
 equip('tshirt_white', 'ホワイトTシャツ', 'top', 'common', 3, { def: 5 }, ['tshirt', '#f4f4f4', '#ff3d7f']);
@@ -68,6 +69,7 @@ equip('suit_gold', 'ゴールデン・ボススーツ', 'top', 'legendary', 48, 
 equip('idol_dress_mythic', 'ギャラクシー・アイドル', 'top', 'mythic', 58, { def: 50, maxMp: 200, dex: 8, luk: 8, crit: 4 }, ['idolDress', '#7a3dff', '#19f0ff'], { desc: '星空を纏う伝説のステージ衣装。' });
 
 // ============ 下 bottom ============
+equip('pants_plain', '綿のズボン', 'bottom', 'common', 0, { def: 2 }, ['plainPants', '#5a5a62', '#3e3e44'], { desc: 'ふつうのズボン。動きやすいのが取り柄。' });
 equip('skirt_pink', 'プリーツスカート', 'bottom', 'common', 0, { def: 3, dex: 1 }, ['skirt', '#ff8ac8', '#ffffff'], { desc: '下にはしっかりスパッツ。' });
 equip('pants_cyber', 'カーゴ・ジョガー', 'bottom', 'common', 0, { def: 3, int: 1 }, ['trackPants', '#2a2f38', '#3dff8a']);
 equip('jeans_blue', 'ダメージジーンズ', 'bottom', 'common', 0, { def: 4 }, ['jeans', '#3a5a8c', '#c9d6ea']);
@@ -79,6 +81,7 @@ equip('armor_pants', 'タクティカルパンツ', 'bottom', 'epic', 40, { def:
 equip('skirt_star', 'スターダストスカート', 'bottom', 'legendary', 48, { def: 30, dex: 5, luk: 5, crit: 2 }, ['skirt', '#7a3dff', '#fff06a']);
 
 // ============ 靴 shoes ============
+equip('shoes_old', '古い布靴', 'shoes', 'common', 0, { def: 1, speed: 5 }, ['oldShoes', '#6a5848', '#3a2e26'], { desc: 'つま先がすり減っている。' });
 equip('sneakers_white', 'ホワイトスニーカー', 'shoes', 'common', 0, { def: 2, speed: 8 }, ['sneakers', '#f4f4f4', '#ff6fb5']);
 equip('boots_black', 'エンジニアブーツ', 'shoes', 'common', 0, { def: 3, speed: 4 }, ['boots', '#2a2018', '#8a8a8a']);
 equip('sandals_beach', 'ビーチサンダル', 'shoes', 'common', 3, { def: 1, speed: 12 }, ['sandals', '#ffd23f', '#19d3a0']);
@@ -100,6 +103,7 @@ equip('halo_angel', '天使の輪', 'accessory', 'mythic', 52, { def: 18, atk: 1
 equip('wings_neon', 'ネオン・セラフ', 'accessory', 'mythic', 58, { def: 24, atk: 14, speed: 30, crit: 4 }, ['wings', '#ff3dd2', '#19f0ff'], { desc: 'ネオン管でできた六枚の翼。' });
 
 // ============ 武器 weapon ============
+weapon('sword_wood', '木剣', 'common', 0, { atk: 13 }, ['woodSword', '#b98a52', '#6a4a2a'], 'melee', 85, 2.4, { desc: '飾りのない木の剣。握りに布を巻いただけ。' });
 weapon('knife_basic', 'ポケットナイフ', 'common', 0, { atk: 12 }, ['knife', '#c9ccd6', '#ff6fb5'], 'melee', 70, 3.0, { desc: '軽くて素早い。' });
 weapon('staff_glitch', 'グリッチ・ワンド', 'common', 0, { atk: 10, int: 2, maxMp: 15 }, ['staff', '#3dff8a', '#1d1d24'], 'magic', 380, 1.8, { desc: 'ジャンク基板を巻きつけた自作の杖。たまにバグる。' });
 weapon('bat_wood', 'ウッドバット', 'common', 0, { atk: 15 }, ['bat', '#b98a52', '#5a3a22'], 'melee', 90, 2.0, { desc: 'ジンの相棒。ホームランしか狙わない。' });
@@ -248,14 +252,13 @@ export const PET_IDS = list.filter((it) => it.slot === 'pet').map((it) => it.id)
 export function isPet(item) { const it = typeof item === 'string' ? ITEMS[item] : item; return !!it && it.slot === 'pet'; }
 
 export const STARTER_EQUIP = {
-  luna: { hat: 'cat_ears_pink', top: 'hoodie_pink', bottom: 'skirt_pink', shoes: 'sneakers_white', accessory: null, weapon: 'knife_basic', pet: null },
-  jin: { hat: null, top: 'leather_jacket', bottom: 'jeans_blue', shoes: 'boots_black', accessory: null, weapon: 'bat_wood', pet: null },
-  hacker: { hat: 'headphones_cyber', top: 'hoodie_cyber', bottom: 'pants_cyber', shoes: 'sneakers_white', accessory: null, weapon: 'staff_glitch', pet: null },
+  // 初期装備は地味なセット（くすんだ布の服・普通のズボン・古い靴・木剣）。前の初期装備（ピンクのパーカーなど）はビーチの店で買える着せ替え用
+  luna: { hat: null, top: 'shirt_plain', bottom: 'pants_plain', shoes: 'shoes_old', accessory: null, weapon: 'sword_wood', pet: null },
+  jin: { hat: null, top: 'shirt_plain', bottom: 'pants_plain', shoes: 'shoes_old', accessory: null, weapon: 'sword_wood', pet: null },
+  hacker: { hat: null, top: 'shirt_plain', bottom: 'pants_plain', shoes: 'shoes_old', accessory: null, weapon: 'staff_glitch', pet: null },
 };
 // v3: 性別ごとの初期装備の差し替え（STARTER_EQUIP に上書き）。newState(classId, {gender}) が使う
-export const STARTER_EQUIP_GENDER = {
-  luna: { m: { hat: 'cap_street', bottom: 'jeans_blue' } },
-};
+export const STARTER_EQUIP_GENDER = {};
 export function starterEquipFor(classId, gender) {
   return { ...(STARTER_EQUIP[classId] || STARTER_EQUIP.luna), ...(STARTER_EQUIP_GENDER[classId]?.[gender] || {}) };
 }

@@ -1,6 +1,6 @@
 // アイテム／スキルアイコン（中心(x,y)、size 四方）。オフスクリーンにキャッシュして drawImage。
 import { shade, rgba, rr, starPath, makeCanvas, hashStr, OUTLINE } from './util.js';
-import { drawWeapon, itemColors } from './character.js';
+import { drawWeapon, itemColors, codeStyle } from './character.js';
 import { drawPet, PET_FLYING } from './pets.js';
 import { spriteRev } from './sprites.js';
 
@@ -48,7 +48,7 @@ function paintItem(g, item) {
   if (look && (item.slot === 'pet' || (look.style && /Pet$/.test(look.style)))) return paintPet(g, look);
   if (look && look.style) {
     const [c, a] = itemColors(look);
-    const st = look.style;
+    const st = codeStyle(look.style);   // 絵の無い新しいスタイルは近い既存のスタイルで
     switch (item.slot) {
       case 'weapon': return paintWeapon(g, st, c, a);
       case 'hat': return paintHat(g, st, c, a);

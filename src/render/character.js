@@ -102,6 +102,9 @@ const TOPS = {
   armorVest: { sl: 'short', len: 2 },
 };
 const LONG_PANTS = { jeans: 1, cargo: 1, suitPants: 1, trackPants: 1, armorPants: 1 };
+// 絵（リグのパーツ）がまだ無い新しいスタイルを、コード描画では近い既存のスタイルで描く
+const CODE_STYLE = { plainShirt: 'tshirt', plainPants: 'jeans', oldShoes: 'sneakers', woodSword: 'katana' };
+export const codeStyle = (s) => CODE_STYLE[s] || s;
 const WEAPON_LEN = { bat: 26, knife: 13, katana: 34, guitar: 30, neonSword: 34, staff: 30, pistol: 12, smg: 18 };
 
 // レア度（ITEMS の look オブジェクト → 0..4）。look.rarity があればそれを優先
@@ -665,7 +668,7 @@ function boxOf(equip, look, state, ah, rig) {
   const hat = equip.hat && equip.hat.style;
   if (hat === 'crown' || hat === 'cowboy' || hat === 'catEars') T = Math.max(T, 104);
   if (hat === 'cowboy') { L = Math.max(L, 36); R = Math.max(R, 38); }
-  const ws = equip.weapon && equip.weapon.style;
+  const ws = equip.weapon && codeStyle(equip.weapon.style);
   if (ws) {
     const long = ws === 'staff' || ws === 'neonSword' || ws === 'katana' || ws === 'guitar';
     R = long ? 64 : ws === 'bat' ? 56 : 46;
@@ -691,7 +694,7 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
   const alpha = A.alpha != null ? A.alpha : 1;
   if (alpha <= 0.01) return;
   let state = A.state || 'idle';
-  const ws = equip.weapon && equip.weapon.style;
+  const ws = equip.weapon && codeStyle(equip.weapon.style);
   const wk = !ws ? 'none' : (ws === 'pistol' || ws === 'smg') ? 'gun' : ws === 'staff' ? 'magic' : 'melee';
   if (state === 'attack' && wk === 'gun') state = 'shoot';
   if (state === 'shoot' && wk !== 'gun') state = 'attack';
@@ -868,7 +871,7 @@ export function charHeadPose(look, equip, anim) {
   look = look || HERO_LOOKS.luna; equip = equip || EMPTY;
   const A = anim || EMPTY;
   let state = A.state || 'idle';
-  const ws = equip.weapon && equip.weapon.style;
+  const ws = equip.weapon && codeStyle(equip.weapon.style);
   const wk = !ws ? 'none' : (ws === 'pistol' || ws === 'smg') ? 'gun' : ws === 'staff' ? 'magic' : 'melee';
   if (state === 'attack' && wk === 'gun') state = 'shoot';
   if (state === 'shoot' && wk !== 'gun') state = 'attack';
@@ -898,9 +901,9 @@ function makeK(look, equip, anim, state, ws, wk, P, t, at, w, rig) {
     look, eq: equip, dmg, t, P, ws, wk, state, at, f, B, cool, w, anim, vil,
     skin: look.skin || '#ffe0cc',
     hair: look.hairColor || '#5a3a2a',
-    topS: equip.top ? equip.top.style : 'tshirt',
+    topS: equip.top ? codeStyle(equip.top.style) : 'tshirt',
     topC: equip.top ? itemColors(equip.top) : ['#f6f4f8', look.body === 'f' ? '#ff5fa2' : '#19d3c5'],
-    botS: equip.bottom ? equip.bottom.style : 'shorts',
+    botS: equip.bottom ? codeStyle(equip.bottom.style) : 'shorts',
     botC: equip.bottom ? itemColors(equip.bottom) : ['#4d6fb5', '#ffffff'],
     rTop: rarityOf(equip.top), rBot: rarityOf(equip.bottom), rHat: rarityOf(equip.hat), rShoe: rarityOf(equip.shoes),
   };
@@ -931,9 +934,9 @@ function renderChar(ctx, look, equip, anim, state, ws, wk) {
     look, eq: equip, dmg, t, P, ws, wk, state, at, f, B, cool, w, anim, vil,
     skin: look.skin || '#ffe0cc',
     hair: look.hairColor || '#5a3a2a',
-    topS: equip.top ? equip.top.style : 'tshirt',
+    topS: equip.top ? codeStyle(equip.top.style) : 'tshirt',
     topC: equip.top ? itemColors(equip.top) : ['#f6f4f8', look.body === 'f' ? '#ff5fa2' : '#19d3c5'],
-    botS: equip.bottom ? equip.bottom.style : 'shorts',
+    botS: equip.bottom ? codeStyle(equip.bottom.style) : 'shorts',
     botC: equip.bottom ? itemColors(equip.bottom) : ['#4d6fb5', '#ffffff'],
     rTop: rarityOf(equip.top), rBot: rarityOf(equip.bottom), rHat: rarityOf(equip.hat), rShoe: rarityOf(equip.shoes),
   };
@@ -1293,7 +1296,7 @@ function drawLeg(ctx, K, front, hx, hy, a, k) {
 
 function drawShoe(ctx, K, x, y, ang, front) {
   const sh0 = K.eq.shoes;
-  const st = sh0 ? sh0.style : null;
+  const st = sh0 ? codeStyle(sh0.style) : null;
   const [c, ac] = sh0 ? itemColors(sh0) : ['#5b5266', '#8a7f99'];
   const dk = front ? 0 : -0.12;
   ctx.save();
@@ -1902,6 +1905,7 @@ function drawSwoosh(ctx, K, sx, sy) {
 
 // ---------------------------------------------------------------- 武器（原点=握り、+x=刃の向き）
 export function drawWeapon(ctx, style, color, accent, t = 0, P = null, w = TAU / LOOP) {
+  style = codeStyle(style);
   const d = DEF_COL[style] || ['#ccc', '#fff'];
   const c = color || d[0], a = accent || d[1];
   ctx.lineJoin = 'round'; ctx.lineCap = 'round';
@@ -3182,7 +3186,7 @@ export function renderRigCode(ctx, gender, look, equip, group, opts = {}) {
   const parts = opts.parts || (group === 'head' || headOnly ? ['head'] : RIG_GROUP_PARTS[group] || []);
   const sv = [FL, RIM, TAG, ONLY, ONLY_RANK, NO_ERASE, RIG_NOSHOE, RIG_HEADITEMS];
   const P = restPose();
-  const ws = equip.weapon && equip.weapon.style;
+  const ws = equip.weapon && codeStyle(equip.weapon.style);
   const anim = { state: 'idle', t: 0, damage: opts.dmg || 0 };
   const K = makeK(look, equip, anim, 'idle', ws, 'none', P, 0, 0, TAU / LOOP, true);
   K.ai = null;
@@ -3276,7 +3280,7 @@ export function renderRigWeapon(ctx, style, color, accent, scale = WPN_S) {
   const sv = FL; FL = false;
   ctx.save();
   ctx.translate(WPN_BOX.px * k, WPN_BOX.py * k); ctx.scale(scale, scale);
-  try { drawWeapon(ctx, style, color, accent, 0, null); } finally { ctx.restore(); FL = sv; }
+  try { drawWeapon(ctx, codeStyle(style), color, accent, 0, null); } finally { ctx.restore(); FL = sv; }
 }
 
 // ---- リグで描く

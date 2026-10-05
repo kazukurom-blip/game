@@ -413,7 +413,7 @@ const NPC = {
     look: { body: 'f', skin: '#f5d0b0', hair: 'ponytail', hairColor: '#ffcc66', eyeColor: '#2a7de1' },
     equip: { hat: L('headphones', '#ff7a00', '#ffffff'), top: L('tank', '#ff3b3b', '#ffffff'), bottom: L('shorts', '#ff3b3b'), shoes: L('sandals', '#c98b4a'), accessory: L('sunglasses', '#222222', '#ff7a00') },
     dialog: ['ハーイ！ 冷えたドリンクにポーション、なんでもあるわよ！', '無理は禁物。HPが減ったら 1/2 キーでポーションね。'],
-    shop: ['potion_red', 'potion_blue', 'knife_basic', 'bat_wood', 'cap_street', 'tshirt_white', 'shorts_beach', 'sandals_beach', 'sunglasses_aviator'] },
+    shop: ['potion_red', 'potion_blue', 'knife_basic', 'bat_wood', 'cap_street', 'tshirt_white', 'shorts_beach', 'sandals_beach', 'sunglasses_aviator', 'cat_ears_pink', 'hoodie_pink', 'skirt_pink', 'sneakers_white', 'leather_jacket', 'jeans_blue', 'boots_black', 'headphones_cyber', 'hoodie_cyber', 'pants_cyber'] },
   mama_rosa: { id: 'mama_rosa', name: 'ママ・ローザ', title: '食堂ローザ / ポーション',
     look: { body: 'f', skin: '#d9a07a', hair: 'bob', hairColor: '#8b1e3f', eyeColor: '#3b2a1a' },
     equip: { hat: L('bandana', '#e63946', '#ffffff'), top: L('tshirt', '#ffffff', '#e63946'), bottom: L('skirt', '#8b1e3f'), shoes: L('loafers', '#3a2a1a'), accessory: L('goldChain', '#ffd166') },

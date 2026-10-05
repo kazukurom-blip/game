@@ -853,6 +853,7 @@ export default function register({ test, makeGame, step, fin }) {
   test('v3 sys: コンボ（ヒットで加算・同フレーム同一敵は1回・段階バフ・時間切れ）', () => {
     const g = makeGame('luna', 'beach_f1');
     setActiveBuffs([]); g.buffs = [];
+    g.state.equipped.weapon = 'katana_plasma'; // +2% が丸めで消えない攻撃力にする（初期の木剣だと差が 0 になる）
     const e = new Enemy(g, 'golem_steel', 900, g.map.groundY); g.enemies.push(e);
     const atk0 = computeStats(g.state).atk;
     for (let i = 0; i < 12; i++) { g.time += 0.1; damageEnemy(g, e, 1); }

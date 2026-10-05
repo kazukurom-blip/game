@@ -2,7 +2,7 @@
 // 地域の Lv 帯に合わせて「消費アイテム＋その地域で使う装備」を並べる。PET・ミシックは売らない。
 export const TOWN_SHOPS = {
   beach: [
-    { npcId: 'sunny', name: 'サニーのビーチ売店', items: ['potion_red', 'potion_blue', 'potion_orange', 'pet_food', 'sandals_beach', 'shorts_beach', 'tshirt_white', 'cap_street', 'sunglasses_aviator', 'pistol_9mm', 'knife_basic', 'bat_wood'] },
+    { npcId: 'sunny', name: 'サニーのビーチ売店', items: ['potion_red', 'potion_blue', 'potion_orange', 'pet_food', 'sandals_beach', 'shorts_beach', 'tshirt_white', 'cap_street', 'sunglasses_aviator', 'pistol_9mm', 'knife_basic', 'bat_wood', 'cat_ears_pink', 'hoodie_pink', 'skirt_pink', 'sneakers_white', 'leather_jacket', 'jeans_blue', 'boots_black', 'headphones_cyber', 'hoodie_cyber', 'pants_cyber'] },
   ],
   downtown: [
     { npcId: 'mama_rosa', name: 'ママ・ローザの食堂', items: ['potion_red', 'potion_orange', 'potion_blue', 'drink_energy', 'drink_tough'] },

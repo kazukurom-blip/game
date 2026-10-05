@@ -103,14 +103,14 @@ export const RIG_BASE = {
   top: {
     hoodie: ['#ff6fb5', '#ffffff'], leatherJacket: ['#1d1d24', '#c0c0c8'], tshirt: ['#f4f4f4', '#ff3d7f'], tank: ['#222228', '#ffd23f'],
     hawaiian: ['#ff8a00', '#19d3a0'], tracksuit: ['#1fae5b', '#ffffff'], police: ['#20335c', '#ffd23f'], suit: ['#15151b', '#d8283c'],
-    idolDress: ['#ff6fb5', '#fff06a'], armorVest: ['#3b4231', '#9aa07a'],
+    idolDress: ['#ff6fb5', '#fff06a'], armorVest: ['#3b4231', '#9aa07a'], plainShirt: ['#a89a84', '#6e6252'],
   },
   bottom: {
     skirt: ['#ff8ac8', '#ffffff'], trackPants: ['#2a2f38', '#3dff8a'], jeans: ['#3a5a8c', '#c9d6ea'], shorts: ['#4d6fb5', '#ffffff'],
-    cargo: ['#8a7a52', '#4a4232'], suitPants: ['#15151b', '#5a5a66'], armorPants: ['#3b4231', '#9aa07a'],
+    cargo: ['#8a7a52', '#4a4232'], suitPants: ['#15151b', '#5a5a66'], armorPants: ['#3b4231', '#9aa07a'], plainPants: ['#5a5a62', '#3e3e44'],
   },
   shoes: {
-    sneakers: ['#f4f4f4', '#ff6fb5'], boots: ['#2a2018', '#8a8a8a'], sandals: ['#ffd23f', '#19d3a0'], loafers: ['#5a3a22', '#c9a26a'], heels: ['#d8283c', '#ffd23f'],
+    sneakers: ['#f4f4f4', '#ff6fb5'], boots: ['#2a2018', '#8a8a8a'], sandals: ['#ffd23f', '#19d3a0'], loafers: ['#5a3a22', '#c9a26a'], heels: ['#d8283c', '#ffd23f'], oldShoes: ['#6a5848', '#3a2e26'],
   },
   accessory: {
     sunglasses: ['#2a2a2a', '#ffd23f'], scarf: ['#d8283c', '#ffffff'], goldChain: ['#ffd23f', '#fff4b0'], mask: ['#e8e8e8', '#16161e'],
@@ -118,7 +118,7 @@ export const RIG_BASE = {
   },
   weapon: {
     knife: ['#c9ccd6', '#ff6fb5'], bat: ['#b98a52', '#5a3a22'], staff: ['#3dff8a', '#1d1d24'], pistol: ['#2a2a30', '#8a8a8a'],
-    katana: ['#dfe4ee', '#d8283c'], smg: ['#1d1d24', '#ff8a00'], guitar: ['#d8283c', '#f4f4f4'], neonSword: ['#19f0ff', '#ffffff'],
+    katana: ['#dfe4ee', '#d8283c'], smg: ['#1d1d24', '#ff8a00'], guitar: ['#d8283c', '#f4f4f4'], neonSword: ['#19f0ff', '#ffffff'], woodSword: ['#b98a52', '#6a4a2a'],
   },
 };
 // 何も装備していない時の見た目（今のコード描画と同じ: 白Tシャツ・青の短パン・素体の足）

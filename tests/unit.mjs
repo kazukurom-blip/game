@@ -49,11 +49,11 @@ const results = { pass: 0, fail: 0, failures: [] };
 // ------------------------------------------------------------ 仕様（ARCHITECTURE.md）
 const STYLES = {
   hat: ['cap', 'beanie', 'bandana', 'headphones', 'crown', 'helmet', 'cowboy', 'catEars'],
-  top: ['tshirt', 'hoodie', 'leatherJacket', 'suit', 'hawaiian', 'tank', 'police', 'tracksuit', 'idolDress', 'armorVest'],
-  bottom: ['jeans', 'shorts', 'cargo', 'skirt', 'suitPants', 'trackPants', 'armorPants'],
-  shoes: ['sneakers', 'boots', 'sandals', 'loafers', 'heels'],
+  top: ['tshirt', 'hoodie', 'leatherJacket', 'suit', 'hawaiian', 'tank', 'police', 'tracksuit', 'idolDress', 'armorVest', 'plainShirt'],
+  bottom: ['jeans', 'shorts', 'cargo', 'skirt', 'suitPants', 'trackPants', 'armorPants', 'plainPants'],
+  shoes: ['sneakers', 'boots', 'sandals', 'loafers', 'heels', 'oldShoes'],
   accessory: ['sunglasses', 'goldChain', 'mask', 'scarf', 'wings', 'halo'],
-  weapon: ['bat', 'knife', 'katana', 'pistol', 'smg', 'guitar', 'neonSword', 'staff'],
+  weapon: ['bat', 'knife', 'katana', 'pistol', 'smg', 'guitar', 'neonSword', 'staff', 'woodSword'],
   pet: ['slimePet', 'flamingoPet', 'gatorPet', 'catPet', 'dronePet', 'ghostPet', 'alienPet', 'dragonPet', 'dolphinPet', 'robotPet'],
 };
 const HAIRS = ['twin', 'bob', 'long', 'spiky', 'short', 'ponytail', 'wolf'];
@@ -471,7 +471,7 @@ test('inventory: 追加・容量・装備', () => {
   assert.equal(st.equipped.weapon, 'neon_sword');
   assert.equal(countItem(st, STARTER_EQUIP.luna.weapon), 1, '旧装備がインベントリへ');
   assert.equal(getEquipLooks(st).weapon.style, 'neonSword');
-  assert.ok(unequip(g, 'hat').ok); assert.equal(st.equipped.hat, null);
+  assert.ok(unequip(g, 'top').ok); assert.equal(st.equipped.top, null);   // 初期装備に帽子は無い（地味なセット）
 });
 
 test('inventory: ポーション使用・ショップ', () => {
