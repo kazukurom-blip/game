@@ -720,6 +720,8 @@ function drawSingleAt(ctx, s, m) {
   ctx.rotate(rot);
   ctx.scale(sx * k, sy * k);
   if (alpha < 1) ctx.globalAlpha *= alpha;
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(img, 0, 0, w, h, -w / 2, -h, w, h);
   ctx.restore();
   return true;
@@ -728,7 +730,9 @@ function drawSingleAt(ctx, s, m) {
 function drawSingleEnemy(ctx, e, I, s) {
   const def = e.def || {};
   const st = I.st || (e.dead ? 'dead' : e.hurtT > 0 ? 'hurt' : e.state === 'attack' ? 'attack' : e.state === 'walk' ? 'walk' : 'idle');
-  const baseH = s.height > 0 ? s.height : (I.h || e.h || def.h || 40) * (def.boss || e.boss ? 1.25 : 1.35);
+  const isBoss = !!(def.boss || e.boss);
+  // 1枚絵は余白が無いぶん小さく見えるので、雑魚は最低 56px（主人公は約80px）
+  const baseH = s.height > 0 ? s.height : Math.max(isBoss ? 160 : 56, (I.h || e.h || def.h || 40) * (isBoss ? 1.25 : 1.45));
   const fx = e.facing < 0 ? -1 : 1;
   ctx.save();
   if (!I.local) { ctx.translate(e.x, e.y); ctx.scale(fx, 1); }
