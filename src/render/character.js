@@ -1606,7 +1606,8 @@ function topDetails(ctx, K, st, c, a, bot) {
       ctx.beginPath(); ctx.arc(1.2, -21, 4.2, 0.25, PI - 0.25); ctx.stroke();
       ctx.strokeStyle = C(sh(c, 0.15)); ctx.lineWidth = 0.6;
       ctx.beginPath(); ctx.arc(1.2, -21, 5.2, 0.35, PI - 0.35); ctx.stroke();
-      // ハートのロゴ（縁取り＋ツヤ）
+      // ハートのロゴ（縁取り＋ツヤ）。地味な布の服（plainShirt をTシャツで代わりに描く時）は無地
+      if (K.eq.top && K.eq.top.style === 'plainShirt') break;
       const hx = 1.5, hy = -10;
       ctx.beginPath();
       ctx.moveTo(hx, hy + 3); ctx.bezierCurveTo(hx - 5, hy - 0.5, hx - 2.4, hy - 4.5, hx, hy - 1.6);
@@ -3410,6 +3411,12 @@ function renderRig(ctx, look, equip, anim, state, ws, wk, plan) {
   // makePose の待機（手前の腕 前へ 0.15・肘 0.45）は正面の体用で、3q では手前の手がお腹の前に出てしまう
   if (state === 'idle' && wk === 'none' && rigView() === '3q') {
     P.af = [P.af[0] - 0.13, 0.15]; P.ab = [P.ab[0] + 0.1, 0.12];
+  }
+  // 3q では武器を持つ手前の手が胸の前に来るので、構えの武器（剣は斜め上・杖はほぼ真上）が顔に重なる。
+  // 構えたまま歩く・跳ぶ時だけ、剣は前へ寝かせ、杖は前へ傾けて顔の前を空ける（攻撃・被弾の振りはそのまま）
+  if ((state === 'idle' || state === 'walk' || state === 'jump') && rigView() === '3q') {
+    if (wk === 'melee' && P.wAng === -1.15) P.wAng = -0.75;
+    else if (wk === 'magic' && P.wAng === -1.48) { P.wAng = -0.92; P.af = [P.af[0] + 0.22, P.af[1]]; }
   }
   const K = makeK(look, equip, anim, state, ws, wk, P, t, at, w, true);
   P.hipY += K.B.hipY;

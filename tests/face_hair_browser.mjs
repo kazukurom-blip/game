@@ -157,6 +157,7 @@ async function genImages(browser) {
   return map;
 }
 const REAL = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets', 'sprites', 'manifest.json'), 'utf8'));
+const NOFACE = (() => { const j = { ...REAL }; delete j.faces; delete j.hairs; delete j.faceBase; return j; })();   // 本物の顔・髪の絵が入った後も「絵が無い時」を試す
 function manifestFor() {
   const m = JSON.parse(JSON.stringify(REAL));
   m.faces = {}; m.hairs = {};
@@ -170,7 +171,7 @@ function manifestFor() {
   return m;
 }
 
-/** mode: 'none'（今の manifest のまま）| 'ok' | 'slow'（顔・髪の絵の読み込みが遅い） */
+/** mode: 'none'（今の manifest から顔・髪の節を外したもの = 顔・髪の絵が無い時）| 'ok' | 'slow'（顔・髪の絵の読み込みが遅い） */
 async function openGame(browser, mode, IMGS) {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 }, deviceScaleFactor: 1 });
   const page = await ctx.newPage();
@@ -179,7 +180,7 @@ async function openGame(browser, mode, IMGS) {
   page.on('pageerror', (e) => errs.push('pageerror: ' + (e.stack || e.message)));
   await page.route('**/assets/sprites/**', async (route) => {
     const rel = decodeURIComponent(new URL(route.request().url()).pathname.split('/assets/sprites/')[1] || '');
-    if (rel === 'manifest.json') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mode === 'none' ? REAL : manifestFor()) });
+    if (rel === 'manifest.json') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mode === 'none' ? NOFACE : manifestFor()) });
     const b = IMGS[rel];
     if (!b) return route.continue();
     if (mode === 'slow') await sleep(2500);
