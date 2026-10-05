@@ -13,7 +13,7 @@ let MAN = null;
 let BASE = DEF_BASE;
 let REV = 0;
 const IMG = new Map();   // file → R { st: 1 読込中 / 2 完了 / 3 失敗, img, w, h, wait[], meta, scaled: Map }
-const ST = { entries: 0, requested: 0, loaded: 0, failed: 0, errors: [], prepMs: 0, recolors: 0 };
+const ST = { entries: 0, requested: 0, loaded: 0, failed: 0, errors: [], prepMs: 0, recolors: 0, evicted: 0 };
 const ICON_CACHE = new Map();   // key → canvas（色替え・縮小済み）
 const VEH_CACHE = new Map();    // key → canvas（縮小・色替え済みの車体）
 const ICON_WORK = 128;          // アイコンの作業用の大きさ（256 → 128 に縮めてから色替え）
@@ -42,8 +42,8 @@ function normEntry(v) {
 }
 /** manifest（JSON 全体）から bg / tiles / icons / vehicles / ui の節を読む。不正な項目は無視 */
 export function setArtManifest(j, base = DEF_BASE) {
-  MAN = null; BASE = base || DEF_BASE; IMG.clear(); ICON_CACHE.clear(); VEH_CACHE.clear(); REV++;
-  ST.entries = ST.requested = ST.loaded = ST.failed = 0; ST.prepMs = 0; ST.recolors = 0;
+  MAN = null; BASE = base || DEF_BASE; IMG.clear(); ICON_CACHE.clear(); VEH_CACHE.clear(); BG_LRU.clear(); REV++;
+  ST.entries = ST.requested = ST.loaded = ST.failed = 0; ST.prepMs = 0; ST.recolors = 0; ST.evicted = 0;
   if (!j || typeof j !== 'object' || Array.isArray(j)) return false;
   const M = {};
   let n = 0;
@@ -59,7 +59,10 @@ export function setArtManifest(j, base = DEF_BASE) {
 }
 export function artRev() { return REV; }
 export function artStats() { return { ...ST, errors: ST.errors.slice(-5), files: IMG.size, iconCache: ICON_CACHE.size, vehicleCache: VEH_CACHE.size }; }
-const on = () => !!MAN && getSpriteMode() === 'auto';
+let ENABLED = true;
+/** この仕組みだけを止める／戻す（計測・デバッグ用。キャラ・敵のスプライトは spriteMode のまま） */
+export function setArtEnabled(v) { ENABLED = v !== false; REV++; return ENABLED; }
+const on = () => ENABLED && !!MAN && getSpriteMode() === 'auto';
 /** manifest にその項目があるか（読み込み状態は問わない） */
 export function hasArt(sec, key) { return !!(MAN && MAN[sec] && MAN[sec][key]); }
 function entry(sec, key) { return MAN && MAN[sec] ? MAN[sec][key] || null : null; }
@@ -269,20 +272,37 @@ function bgKey(sc, layer) {
  * manifest にある遠景（far）が読み込み中なら待つ（null）。失敗した層は省く。
  * 戻り値: { far, mid, lights }（各 { img, w, h, parallax, groundY } または null）
  */
+// 背景の画像は大きい（2560×720 = 展開後 約 7MB）ので、最近使った BG_KEEP 枚（3 シーン分）だけ持ち、古い物は手放す（また必要になれば読み直す）
+const BG_KEEP = 9;
+const BG_LRU = new Map();
+function touchBg(file) {
+  if (BG_LRU.has(file)) { if (BG_LRU.size > 1) { BG_LRU.delete(file); BG_LRU.set(file, 1); } return; }
+  BG_LRU.set(file, 1);
+  let guard = BG_LRU.size;
+  while (BG_LRU.size > BG_KEEP && guard-- > 0) {
+    const f = BG_LRU.keys().next().value;
+    BG_LRU.delete(f);
+    const r = IMG.get(f);
+    if (r && r.st === 1) { BG_LRU.set(f, 1); continue; }   // 読み込み中は手放さない
+    if (r) { IMG.delete(f); ST.evicted = (ST.evicted || 0) + 1; }
+  }
+}
 export function bgArt(sc) {
   if (!on() || !sc || sc.special) return null;
   const km = bgKey(sc, 'mid');
   if (!km) return null;
   const out = { far: null, mid: null, lights: null };
+  let wait = false;
   for (const layer of ['far', 'mid', 'lights']) {
     const k = layer === 'mid' ? km : bgKey(sc, layer);
     if (!k) continue;
     const E = entry('bg', k), r = load(E, 'bg');
-    if (r.st === 1 && layer !== 'lights') return null;
+    touchBg(E.file);
+    if (r.st === 1 && layer !== 'lights') wait = true;
     if (r.st !== 2) continue;
     out[layer] = { img: r.img, w: r.w, h: r.h, key: k, parallax: E.parallax ?? (BG_DEF[layer] || BG_DEF.mid).parallax, groundY: E.groundY ?? 640, alpha: E.alpha ?? 1 };
   }
-  return out.mid ? out : null;
+  return out.mid && !wait ? out : null;
 }
 
 // ================================================================ 地面・足場（tiles）

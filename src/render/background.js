@@ -609,10 +609,12 @@ function drawArtGround(ctx, map, S, T, V) {
 // 差し替え画像の足場: 512×96 の絵を、上から surface(16)px の線が足場の上面 p.y に来るように、足場の左端から並べて幅で切る
 function drawArtPlatform(ctx, p, T) {
   const k = T.scale, tw = T.w * k, th = T.h * k, top = p.y - T.surface * k;
-  ctx.save();
-  ctx.beginPath(); ctx.rect(p.x, top - 2, p.w, th + 4); ctx.clip();
-  for (let x = p.x; x < p.x + p.w; x += tw) ctx.drawImage(T.img, x, top, tw, th);
-  ctx.restore();
+  // 最後の1枚は幅の分だけ切り出して描く（clip を使わない方が速い）
+  for (let x = p.x; x < p.x + p.w - 0.5; x += tw) {
+    const w = Math.min(tw, p.x + p.w - x);
+    if (w >= tw) ctx.drawImage(T.img, x, top, tw, th);
+    else ctx.drawImage(T.img, 0, 0, w / k, T.h, x, top, w, th);
+  }
 }
 
 function shell(ctx, h) {

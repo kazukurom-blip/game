@@ -38,6 +38,8 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // ---------------------------------------------------------------- 配信（/__good/ /__none/ /__fail/ の下に manifest と仮の画像）
 const IMGS = Object.fromEntries(Object.entries(goodImages()).map(([k, v]) => [k, png(v)]));
+// 背景の画像を手放す（LRU）確認用: 他の地域のフィールドの中景にも同じ絵（別のファイル名）
+for (const r of ['swamp', 'casino', 'rooftop', 'spaceport']) IMGS[`bg/${r}_field_mid.png`] = IMGS['bg/beach_field_mid.png'];
 const REAL = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets', 'sprites', 'manifest.json'), 'utf8'));
 function envManifest() {
   const m = JSON.parse(JSON.stringify(REAL));
@@ -170,7 +172,18 @@ try {
 
   // 性能（背景＋地面の1回あたり）
   const tArt = [];
-  for (const town of [true, false]) tArt.push(await P.evaluate((o) => window.ARTENV.time(o, 120), { region: 'beach', town, clock: 22 }));
+  for (const town of [true, false]) {
+    // 画像が読み込み済みになるまで待ってから（一覧を描いた時に古い画像は手放しているので）
+    for (let i = 0; i < 20; i++) { const p = await P.evaluate((o) => window.ARTENV.pixels(o, [[300, 555]]), { ...day, town }); if (p[0][0] > 170 && p[0][2] < 120) break; await sleep(100); }
+    tArt.push(await P.evaluate((o) => window.ARTENV.time(o, 120), { region: 'beach', town, clock: 22 }));
+  }
+  // 背景の画像は最近の 3 シーン分（9 枚）だけ持つ。古い物は手放し、また来たら読み直す
+  for (const region of ['swamp', 'casino', 'rooftop', 'spaceport']) await P.evaluate((r) => window.ARTENV.scene({ region: r, town: false, clock: 12 }), region);
+  const ev = await P.evaluate(() => window.ARTENV.stats());
+  let back = null;
+  for (let i = 0; i < 20; i++) { back = await P.evaluate((o) => window.ARTENV.pixels(o, [[300, 555]]), day); if (back[0][0] > 170 && back[0][2] < 120) break; await sleep(100); }
+  check('背景: 古い画像を手放し（LRU）、また来た時に読み直して描く', ev.evicted >= 1 && back[0][0] > 170 && back[0][1] > 150 && back[0][2] < 120, `手放した ${ev.evicted} 枚・持っている ${ev.files} 枚・戻った時 ${fmt(back[0])}`);
+
   if (G.errs.length) check('仮の画像あり: エラーなし', false, G.errs.slice(0, 3).join(' / '));
   else check('仮の画像あり: エラーなし', true);
   await P.close();
@@ -231,6 +244,26 @@ try {
   await sleep(500);
   const mapInfo = await page.evaluate(() => ({ id: window.game.map.id, region: window.game.map.region, town: !!window.game.map.town }));
   await page.screenshot({ path: path.join(SHOTS, 'art_env_game.png') });
+  // ゲームの1フレームの時間（町・夜 22時。画像あり → spriteMode=procedural で今のコードの絵）
+  const frameMs = async () => page.evaluate(async () => {
+    const G = window.game; G.debug.setClock?.(22); G.debug.profile = true;
+    await new Promise((r) => setTimeout(r, 300));
+    const ms = [], ph = {};
+    await new Promise((res) => { const f = () => { ms.push(G.perf.ms); for (const [k, v] of Object.entries(G.perf.phases || {})) ph[k] = (ph[k] || 0) + v; if (ms.length < 180) requestAnimationFrame(f); else res(); }; requestAnimationFrame(f); });
+    G.debug.profile = false;
+    ms.sort((a, b) => a - b);
+    return { avg: ms.reduce((a, b) => a + b, 0) / ms.length, p90: ms[Math.floor(ms.length * 0.9)], bg: (ph.bg || 0) / ms.length, tiles: (ph.tiles || 0) / ms.length };
+  });
+  // 交互に 3 回ずつ測って小さい方（たまたまの揺れを除く）
+  const setArt = (v) => page.evaluate(async (v) => (await import('./src/render/artOverrides.js')).setArtEnabled(v), v);
+  let fArt = null, fCode = null;
+  for (let i = 0; i < 3; i++) {
+    await setArt(false); const c = await frameMs(); if (!fCode || c.avg < fCode.avg) fCode = c;
+    await setArt(true); const a = await frameMs(); if (!fArt || a.avg < fArt.avg) fArt = a;
+    if (process.env.PERF_LOG) console.log('   ', a.avg.toFixed(2), c.avg.toFixed(2));
+  }
+  console.log(`  性能（ゲームの1フレーム・${mapInfo.id} 夜）: 画像 平均 ${fArt.avg.toFixed(2)}ms・p90 ${fArt.p90.toFixed(2)}ms（背景 ${fArt.bg.toFixed(2)}・地面 ${fArt.tiles.toFixed(2)}）/ コードの絵 平均 ${fCode.avg.toFixed(2)}ms・p90 ${fCode.p90.toFixed(2)}ms（背景 ${fCode.bg.toFixed(2)}・地面 ${fCode.tiles.toFixed(2)}）`);
+  check('性能: ゲームの1フレームが前より大きく重くない（1.3 倍＋1ms 以内）', fArt.avg <= fCode.avg * 1.3 + 1, `${fArt.avg.toFixed(2)} / ${fCode.avg.toFixed(2)}ms`);
   await page.evaluate(() => window.game.ui.open('worldmap'));
   await sleep(400);
   const wm = await page.evaluate(() => {
