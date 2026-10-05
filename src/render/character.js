@@ -3476,7 +3476,8 @@ function rigWeaponAndHand(ctx, K, parts, sx, sy) {
   if (parts.weapon) {
     rigImg(ctx, parts.weapon);
     if (P.muzzle) muzzleFx(ctx, K.ws);
-    // 絵の杖は先端の宝石・光まで描かれているので、コードの光（コードの杖の先端の位置）は重ねない（光だけ宙に浮いて見えるため）
+    // 絵の杖は先端の宝石・光まで描かれているので、待機中のコードの光は重ねない（光だけ宙に浮いて見えるため）。魔法を撃つ瞬間（magicGlow）の光は演出として残す
+    if (K.ws === 'staff' && P.magicGlow) staffGlow(ctx, wc, P, K.t, K.w);
   } else drawWeapon(ctx, K.ws, wc, wa, K.t, P, K.w);
   ctx.restore();
   rigHand(ctx, parts.armF, sx, sy, a, e, B.upper, B.upper + B.fore);
