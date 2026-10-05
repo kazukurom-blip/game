@@ -9,3 +9,5 @@ assets/sprites_template/*
 assets/sprites_template/pets/*_guide.png
 assets/sprites_template/presets/*_guide.png
 docs/art_handoff/packages/
+# 納品画像の検査の出力（node tools/check_art.mjs）
+tests/art_check/
