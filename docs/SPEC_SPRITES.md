@@ -137,3 +137,26 @@ accessory_back（wings・scarf のなびき） → hair_back → body → bottom
 - 動きはエンジン側で付ける: idle 呼吸、walk 弾み＋傾き、windup 縮み＋後傾、attack 伸び＋前進、hurt 揺れ＋白フラッシュ、dead 倒れ＋フェード、飛行は上下浮遊、第2形態は `file2`（無ければ赤く着色＋小刻みな震え）。
 - オプション: `facesLeft`, `flyBob`, `motion:false`（動きを付けない）。
 - 指示文の一覧は `node tools/gen_ai_prompts.mjs` で `docs/art_handoff/AI_PROMPTS.{md,csv}` と `manifest_single_example.json` に生成。
+
+## 主人公の立ち絵・頭の差し替え（画像生成AI向け）
+キー: `<classId>_<gender>`（例 `luna_f`, `jin_m`, `hacker_f`）。どれも1枚絵（背景は透明か単色。自動で透明化・トリミング）。
+
+### ① 立ち絵 `portraits`
+```json
+"portraits": { "luna_f": { "file": "portraits/luna_f.png",
+                           "expr": { "smile": "portraits/luna_f_smile.png", "angry": "portraits/luna_f_angry.png",
+                                     "surprised": "portraits/luna_f_surprised.png", "sad": "portraits/luna_f_sad.png", "shout": "portraits/luna_f_shout.png" } } }
+```
+- 腰から上〜全身の立ち絵。使う場所: 会話窓（主人公が話す行）、キャラ選択・作成画面のプレビュー、4次スキルのカットイン、転職の祝福演出。表情が無ければ基本の絵。
+- 文字列だけ（`"luna_f": "portraits/luna_f.png"`）でも可。
+
+### ② 頭 `heads`
+```json
+"heads": { "luna_f": { "file": "heads/luna_f.png", "expr": { "blink": "heads/luna_f_blink.png", "hurt": "heads/luna_f_hurt.png",
+                                                              "shout": "heads/luna_f_shout.png", "happy": "heads/luna_f_happy.png" },
+                       "scale": 1.0, "offset": [0, 0], "facesLeft": false } }
+```
+- 首から上（顔＋髪）だけの絵。右向き（斜め前）。ゲーム中の主人公の頭をこの絵に置き換え、体・服・装備はコード描画のまま（着せ替えは維持）。帽子・ヘルメットは上に重ねる。
+- 頭の位置・傾き・大きさは毎フレーム `charHeadPose()` に合わせる。`scale` / `offset` で微調整。
+- 表情: blink（まばたき）、hurt（被弾）、shout（攻撃）、happy（レベルアップ等）。無ければ基本の絵。
+- キャラ作成で「AIの顔を使う」を選んだキャラだけに適用（`state.look.aiHead = true`。既定は、画像があれば true）。髪型・髪色の選択はこの場合は無効（絵の髪になる）。
