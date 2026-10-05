@@ -3442,11 +3442,37 @@ function rigFrontView(ctx, K, parts) {
   rigImg(ctx, parts.torso);
   rigHead(ctx, K, parts, false);
   rigWeaponAndHand(ctx, K, parts, sxF, K.shY + 0.6);
+  if (K.anim.bones) drawRigBonesUpper(ctx, K, sxF, sxB);
   if (!K.anim.noFx) {
     if (P.swoosh) drawSwoosh(ctx, K, sxF, K.shY + 0.5);
     if (K.wk === 'magic' && !FL) drawHoloPanel(ctx, K);
   }
   ctx.restore();
+}
+// ---- デバッグ・資料用: 骨（anim.bones = true）。黄 = 関節、水色 = 骨。座標は股が原点の上半身 / 足元が原点の脚
+function boneLine(ctx, pts, col) {
+  ctx.save(); ctx.lineWidth = 0.7; ctx.strokeStyle = col; ctx.beginPath();
+  pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.stroke();
+  ctx.fillStyle = '#ffe14a';
+  for (const [x, y] of pts) { ctx.beginPath(); ctx.arc(x, y, 0.9, 0, TAU); ctx.fill(); }
+  ctx.restore();
+}
+function drawRigBonesUpper(ctx, K, sxF, sxB) {
+  const P = K.P, B = K.B;
+  boneLine(ctx, [[0, 0], [0, RIG_Y.neck], [0, K.headY]], '#5ff');
+  boneLine(ctx, [[sxB, K.shY + 0.3], [sxF, K.shY + 0.6]], '#5ff');
+  limbPts(sxB, K.shY + 0.3, P.ab[0], P.ab[1], B.upper, B.fore);
+  boneLine(ctx, [[sxB, K.shY + 0.3], [LP.kx, LP.ky], [LP.ex, LP.ey]], '#5ff');
+  limbPts(sxF, K.shY + 0.6, P.af[0], P.af[1], B.upper, B.fore);
+  boneLine(ctx, [[sxF, K.shY + 0.6], [LP.kx, LP.ky], [LP.ex, LP.ey]], '#5ff');
+  ctx.restore();   // 上半身の座標を抜けて足元の座標で脚（最後に enterUpper で戻す）
+  const hb = -B.legX + P.hx * 0.3, hf = B.legX + P.hx * 0.3;
+  for (const [hx, L] of [[hb, P.lb], [hf, P.lf]]) {
+    limbPts(hx, P.hipY, L[0], -L[1], B.thigh, B.shin);
+    boneLine(ctx, [[hx, P.hipY], [LP.kx, LP.ky], [LP.ex, LP.ey]], '#5ff');
+  }
+  boneLine(ctx, [[hb, P.hipY], [hf, P.hipY]], '#5ff');
+  enterUpper(ctx, P);
 }
 function rigBackView(ctx, K, parts) {
   const P = K.P, B = K.B;
