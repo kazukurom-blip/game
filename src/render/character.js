@@ -56,6 +56,17 @@ const RIG_B = {
   f: { ...BODY.f, ...RIG_LIMBS.f, head: 1, hipY: RIG_Y.hip },
   m: { ...BODY.m, ...RIG_LIMBS.m, head: 1, hipY: RIG_Y.hip },
 };
+const RIG_B0 = { f: { ...RIG_B.f }, m: { ...RIG_B.m } };
+// manifest rig.profile で骨格の一部（肩の位置 sx・腕/脚の太さなど）を上書き。null で元に戻す
+const RIG_PROFILE_KEYS = ['sx', 'sw', 'ww', 'hw', 'legX', 'legW', 'legW2', 'armW', 'armW2'];
+export function setRigProfile(p) {
+  for (const g of ['f', 'm']) {
+    Object.assign(RIG_B[g], RIG_B0[g]);
+    const o = p && p[g];
+    if (!o || typeof o !== 'object') continue;
+    for (const k of RIG_PROFILE_KEYS) if (typeof o[k] === 'number' && isFinite(o[k])) RIG_B[g][k] = clamp(o[k], RIG_B0[g][k] * 0.5, RIG_B0[g][k] * 2);
+  }
+}
 // コードの胴（旧い肩 -17.5）を v2 の肩（-22）に合わせる縦の伸ばし: 腰の少し上 y0 より上だけを s 倍（裾・腰回りはそのまま）
 const RIG_STRETCH = { y0: -4, s: (-RIG_Y.shoulder - 4) / (-SHOULDER_Y - 4), top: RIG_Y.chin - 3 };
 // コードの靴（足首から靴底 +2.8）を v2 の大きな靴（足首から靴底 +6）に: 足首を中心に s 倍して dy 下げる
@@ -2143,6 +2154,9 @@ export function paintAiHeadBack(ctx, h, hat, P, flash, frame = 'code', backView 
   const sc = h.scale || 1;
   enterAiFrame(ctx, false, hat, frame);
   ctx.translate(o[0], o[1]); if (sc !== 1) ctx.scale(sc, sc);
+  // 後ろ髪だけの微調整（manifest heads.<key>.backScale / backOffset）。頭の中心まわりに拡大
+  if (b.offset && (b.offset[0] || b.offset[1])) ctx.translate(b.offset[0], b.offset[1]);
+  if (b.scale && b.scale !== 1) ctx.scale(b.scale, b.scale);
   if (P) {
     const sw = P.hairSway || 0, lift = P.hairLift || 0;
     const [qx, qy] = HEAD_BACK_PIVOT;

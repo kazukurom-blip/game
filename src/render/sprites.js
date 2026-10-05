@@ -822,7 +822,9 @@ function normHero(o, sec, k) {
     if (back && fit) { note(`heads.${k}: 後ろ髪（back）は配置図方式（fit:false）の時だけ使えます`); back = null; }
   }
   if (sec === 'heads' && !fit) { base.maxH = HERO_MAXH.headsLayout; for (const e in expr) expr[e].maxH = HERO_MAXH.headsLayout; }
-  return { key: k, sec, base, expr, back, fit, scale: clamp(num(o.scale, 1), 0.1, 10), offset: off, facesLeft: !!o.facesLeft, pre: false };
+  // 後ろ髪だけの大きさ・位置の微調整（前の頭の scale/offset に掛け合わせる。単位は頭の座標）
+  const backScale = clamp(num(o.backScale, 1), 0.3, 3), backOffset = arr2(o.backOffset) || [0, 0];
+  return { key: k, sec, base, expr, back, fit, scale: clamp(num(o.scale, 1), 0.1, 10), offset: off, backScale, backOffset, facesLeft: !!o.facesLeft, pre: false };
 }
 function heroKey(a, b) {
   if (a && typeof a === 'object') return a.classId && a.gender ? a.classId + '_' + a.gender : null;   // look オブジェクト
@@ -867,7 +869,7 @@ function heroOut(E, R) {
       const rb = IMG.get(E.back.file);
       if (rb && rb.st === 2 && rb.single) {
         const bp = layoutPlace(rb.single);
-        if (bp) out.back = { canvas: rb.single.canvas, w: rb.single.w, h: rb.single.h, place: bp, file: E.back.file };
+        if (bp) out.back = { canvas: rb.single.canvas, w: rb.single.w, h: rb.single.h, place: bp, file: E.back.file, scale: E.backScale || 1, offset: E.backOffset || [0, 0] };
         else if (!rb.warnedFit) { rb.warnedFit = true; note(`heads.${E.key}: 後ろ髪 ${E.back.file} が正方形ではないので使いません（頭の配置図 1024×1024 で）`); }
       }
     }

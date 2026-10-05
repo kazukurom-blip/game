@@ -19,7 +19,7 @@ import {
   RIG_PARTS, RIG_W, RIG_H, RIG_S, RIG_R, RIG_GROUP_PARTS, RIG_BASE, RIG_SKIN_BASE, RIG_DEFAULT_WEAR, RIG_SLOTS, RIG_ACC_PARTS,
   WPN_W, WPN_H, WPN_S, WPN_R, WPN_BOX, RIG_PARTS_V1, RIG_LIMBS,
 } from './rigLayout.js';
-import { renderRigCode, renderRigWeapon, itemColors } from './character.js';
+import { renderRigCode, renderRigWeapon, itemColors, setRigProfile } from './character.js';
 import { getSpriteMode, bumpSpriteRev, removeBg } from './sprites.js';
 
 let RM = null;                     // 正規化済みの rig 設定（null = リグ無し）
@@ -48,7 +48,9 @@ export function setRigManifest(j, base) {
   RM = null; SHEETS.clear(); PLANS.clear(); GEN.clear(); RREV++;
   STAT.files = STAT.requested = STAT.loaded = STAT.failed = 0; STAT.prepMs = STAT.prepMax = 0; STAT.fitFallback = [];
   if (typeof base === 'string') BASE = base;
+  setRigProfile(null);
   if (!j || typeof j !== 'object' || Array.isArray(j)) return false;
+  if (j.profile && typeof j.profile === 'object') setRigProfile(j.profile);
   const src = j.parts || j.files;
   const files = {};
   // 全体の既定: fit / layout（rig 節に fit も layout も無い = 前からある manifest → 旧い配置図＋自動フィット）
@@ -68,6 +70,7 @@ export function setRigManifest(j, base) {
       base: HEX.test(o.base || '') ? o.base.toLowerCase() : null,
       accent: HEX.test(o.accent || '') ? o.accent.toLowerCase() : null,
       fit: layout === 1 ? true : typeof o.fit === 'boolean' ? o.fit : gFit, recolor: o.recolor !== false,
+      adjust: parseAdjust(o.adjust),
       bgRemove: o.bgRemove === false ? false : o.bgRemove === true ? true : 'auto',
       st: 0, parts: null, wpn: null, rc: new Map(),
     };
@@ -78,6 +81,18 @@ export function setRigManifest(j, base) {
   for (const k in files) SHEETS.set(k, files[k]);
   RM = { enabled: j.enabled !== false, defaultWear: j.defaultWear !== false, heroesOnly: j.heroesOnly !== false, fit: gFit, layout: gLayout };
   return true;
+}
+/** パーツごとの微調整 { torso: { sx, sy, dx, dy } }（sx/sy = 支点まわりの拡大、dx/dy = ずらし。単位はリグの座標） */
+function parseAdjust(a) {
+  if (!a || typeof a !== 'object') return null;
+  const out = {};
+  const n = (v, d, lo, hi) => (typeof v === 'number' && isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d);
+  for (const k of Object.keys(a)) {
+    if (!RIG_PARTS[k] || !a[k] || typeof a[k] !== 'object') continue;
+    const v = a[k];
+    out[k] = { sx: n(v.sx ?? v.s, 1, 0.5, 2), sy: n(v.sy ?? v.s, 1, 0.5, 2), dx: n(v.dx, 0, -20, 20), dy: n(v.dy, 0, -20, 20) };
+  }
+  return Object.keys(out).length ? out : null;
 }
 /** キー → { kind, slot, style, g, variant } */
 function parseKey(key) {
@@ -315,12 +330,12 @@ function anchorOf(bb, ax, ay) {
   return [ax === 'l' ? bb[0] : ax === 'r' ? bb[2] : (bb[0] + bb[2]) / 2, ay === 't' ? bb[1] : ay === 'b' ? bb[3] : (bb[1] + bb[3]) / 2];
 }
 /** パーツの入れ物（枠＋はみ出し分、RIG_R の解像度）。支点 px,py */
-function partCanvas(name) {
+function partCanvas(name, M = MARGIN) {
   const b = RIG_PARTS[name];
-  const w = Math.ceil((b.w + MARGIN * 2) * K2), h = Math.ceil((b.h + MARGIN * 2) * K2);
+  const w = Math.ceil((b.w + M * 2) * K2), h = Math.ceil((b.h + M * 2) * K2);
   const cv = newCanvas(w, h);
   if (cv) cv.getContext('2d', { willReadFrequently: true });
-  return { cv, w, h, px: (b.px - b.x + MARGIN) * K2, py: (b.py - b.y + MARGIN) * K2, R: RIG_R, name };
+  return { cv, w, h, px: (b.px - b.x + M) * K2, py: (b.py - b.y + M) * K2, R: RIG_R, name, M };
 }
 function prepSheet(rec, im) {
   const w0 = im.naturalWidth || im.width, h0 = im.naturalHeight || im.height;
@@ -347,7 +362,9 @@ function prepSheet(rec, im) {
     if (!B0) continue;
     const bb = B0.bb;
     found++;
-    const P = partCanvas(name);
+    const A = rec.adjust && rec.adjust[name];
+    // 微調整で大きくする・ずらす時は、はみ出し分の余白も広げる
+    const P = partCanvas(name, A ? MARGIN + Math.ceil(Math.max(A.sx, A.sy, 1) * Math.max(b.w, b.h) * 0.5 - Math.max(b.w, b.h) * 0.5 + Math.max(Math.abs(A.dx), Math.abs(A.dy)) * RIG_S) : MARGIN);
     if (!P.cv) return false;
     const r = ref[name];
     let s = 1, ax = 0, ay = 0, rx = 0, ry = 0;
@@ -364,10 +381,16 @@ function prepSheet(rec, im) {
     }
     const pg = P.cv.getContext('2d');
     pg.imageSmoothingEnabled = true; try { pg.imageSmoothingQuality = 'high'; } catch { /* ignore */ }
-    const ox = b.x - MARGIN, oy = b.y - MARGIN;
+    const ox = b.x - P.M, oy = b.y - P.M;
     const bw = bb[2] - bb[0], bh = bb[3] - bb[1];
-    const dx = ((bb[0] - ax) * s + rx - ox) * K2, dy = ((bb[1] - ay) * s + ry - oy) * K2;
-    pg.drawImage(blobCanvas(d, RIG_W, bb, B0), 0, 0, bw, bh, dx, dy, bw * s * K2, bh * s * K2);
+    // 配置図の座標での左上（自動フィット後）→ 微調整（支点まわりに拡大＋ずらし）
+    let x0 = (bb[0] - ax) * s + rx, y0 = (bb[1] - ay) * s + ry, kx = 1, ky = 1;
+    if (A) {
+      kx = A.sx; ky = A.sy;
+      x0 = b.px + (x0 - b.px) * kx + A.dx * RIG_S; y0 = b.py + (y0 - b.py) * ky + A.dy * RIG_S;
+    }
+    const dx = (x0 - ox) * K2, dy = (y0 - oy) * K2;
+    pg.drawImage(blobCanvas(d, RIG_W, bb, B0), 0, 0, bw, bh, dx, dy, bw * s * kx * K2, bh * s * ky * K2);
     rec.parts[name] = P;
   }
   c.width = c.height = 1;

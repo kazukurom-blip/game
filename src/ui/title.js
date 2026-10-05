@@ -242,7 +242,7 @@ export function titleInput(game) {
     }
     if (ok) {
       const k = c.step === 2 ? lookRows(c)[c.row] : null;
-      if (k === 'random') randomLook(); else if (k === 'aiHead') toggleAiHead(); else setStep(c.step + 1);
+      if (k === 'random') randomLook(); else setStep(c.step + 1); // AIの顔は ←→ で切替（Enter は次へ）
     }
   }
   return null;

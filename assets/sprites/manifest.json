@@ -122,5 +122,43 @@
     "robotPet": "pets/robotPet.png",
     "dragonPet": "pets/dragonPet.png",
     "alienPet": "pets/alienPet.png"
+  },
+  "rig": {
+    "enabled": true,
+    "fit": false,
+    "layout": 2,
+    "parts": {
+      "body_f": {
+        "adjust": {
+          "torso": {
+            "sx": 1.12,
+            "sy": 1.0
+          },
+          "footB": {
+            "s": 0.85
+          },
+          "footF": {
+            "s": 0.85
+          }
+        }
+      }
+    },
+    "defaultWear": false,
+    "profile": {
+      "f": {
+        "sx": 9.4
+      }
+    }
+  },
+  "heads": {
+    "luna_f": {
+      "file": "heads/luna_f.png",
+      "back": "heads/luna_f_back.png",
+      "backScale": 0.86,
+      "backOffset": [
+        0,
+        -1
+      ]
+    }
   }
 }

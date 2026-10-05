@@ -223,6 +223,17 @@
    ```
    `"fit": false`（全体の既定）＝配置図のまま正確に組む。ずれた絵だけ `"parts": { "top/hoodie_f": { "fit": true } }` で自動フィット。基準色と違う色で描いてしまった時は `{ "base": "#ff5aa0" }` のように実際に塗った色を書くと色替えが合います。色替えを止めるなら `"recolor": false`。
    ※ `fit` も `layout` も書いていない前からの manifest は、旧い配置図（v1）の絵として読みます（`"layout": 1`。自動フィット）。
+
+   **描き直さずに体型を微調整する**（AIの絵が細すぎる・肩の位置がずれる時）:
+   ```json
+   "rig": { ..., "profile": { "f": { "sx": 9.4 } },
+            "parts": { "body_f": { "adjust": { "torso": { "sx": 1.12 }, "footF": { "s": 0.85 }, "footB": { "s": 0.85 } } } } },
+   "heads": { "luna_f": { "file": "heads/luna_f.png", "back": "heads/luna_f_back.png", "backScale": 0.86, "backOffset": [0, -1] } }
+   ```
+   - `profile.<f|m>`: 骨格の上書き。`sx` = 肩（腕の付け根）の左右の位置、ほかに `sw` `ww` `hw` `legX` `armW` `armW2` `legW` `legW2`（元の値の 0.5〜2 倍まで）。
+   - `adjust.<パーツ>`: そのシートのパーツを支点まわりに拡大（`s` = 縦横、`sx` 横、`sy` 縦。0.5〜2）・ずらす（`dx` `dy`、単位はリグの座標 1 = 8px）。
+   - `backScale` / `backOffset`: 後ろ髪だけの大きさ・位置（頭の座標。`offset` は前の頭と共通）。
+   - 例: ルナ v4（最初の3枚）の調整前後 → `style/luna_v4_adjust.png`。
 6. 確認（§6）。
 
 ## 4. 絵柄をそろえるコツ
