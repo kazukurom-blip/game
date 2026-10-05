@@ -1051,9 +1051,31 @@ function enterUpper(ctx, P) {
 function enterHead(ctx, K) {
   const P = K.P;
   ctx.save();
+  if (K.rig && K.ai) { enterAiNeck(ctx, K); return; }
   ctx.translate(P.twist * 0.25, K.headY != null ? K.headY : HEAD_Y + (K.f ? 0.6 : 0));
   ctx.rotate(P.headTilt);
   if (K.B.head !== 1) ctx.scale(K.B.head, K.B.head);
+}
+/**
+ * 画像の頭（リグ）: 首の付け根を支点に回す。1枚絵の頭は表情も角度も変わらないので、
+ * 体の動きに少し遅れて・大きめに頭を振る（うなずき・攻撃の踏み込み・被弾ののけぞり）＋ひねりで横に少し縮めて「振り向き」に見せる
+ */
+function enterAiNeck(ctx, K) {
+  const P = K.P, t = K.t || 0, w = K.w || 1, st = K.state;
+  let a = P.headTilt * 1.6 + P.tilt * 0.55, dy = 0;
+  if (st === 'walk') { a += Math.sin(t * w * 2 - 0.6) * 0.05; dy = -Math.abs(Math.cos(t * w)) * 0.6 + 0.3; }
+  else if (st === 'attack' || st === 'shoot') a += P.twist * 0.05 + P.hx * 0.02;
+  else if (st === 'jump') { a -= 0.07; dy = -0.6; }
+  else if (st === 'hurt') a -= 0.12;
+  else if (st === 'cheer') a -= 0.08;
+  else if (!P.sit && !P.lie) a += Math.sin(t * w * 1.3) * 0.025;
+  a = clamp(a, -0.4, 0.4);
+  const ny = RIG_Y.neck - K.headY;                     // 頭の中心 → 首の付け根（下が正）
+  ctx.translate(P.twist * 0.35, K.headY + ny + dy);
+  ctx.rotate(a);
+  const turn = Math.min(0.09, Math.abs(P.twist) * 0.05);
+  if (turn) ctx.scale(1 - turn, 1);
+  ctx.translate(0, -ny);
 }
 /** リグの頭の座標（v2）で、コードの頭・帽子を描く座標系に入る（コード描画の時は何もしない）。restore は呼び出し側 */
 function enterCodeHead(ctx, K) {
