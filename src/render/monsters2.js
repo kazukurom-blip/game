@@ -7,6 +7,7 @@ import {
   tone, shadow, light, POSE, ENV, textUp,
 } from './mkit.js';
 import { drawCharacter } from './character.js';
+import { tagNpcLook } from './npcFace.js';
 
 const PI = Math.PI;
 
@@ -998,6 +999,7 @@ function makeCivilian(seed, kind) {
       if (R() < 0.4) eq.accessory = L('sunglasses', '#ff4fa0', '#ffffff');
   }
   if (!f && look.body === 'm' && (look.hair === 'twin')) look.hair = 'short';
+  tagNpcLook(look, { id: 'civ' + seed, role: kind === 'granny' ? 'old' : 'npc' });   // 顔・髪の絵の割り当て（seed のハッシュ）
   return { look, equip: eq, scale };
 }
 
@@ -1012,7 +1014,7 @@ export function drawCivilian(ctx, e, st, t, flash) {
     const kind = civKind(def.id) || civKind(def.kind) || null;
     c = makeCivilian(seed, kind);
     // 明示 look/equip があれば優先
-    if (def.look) c.look = def.look;
+    if (def.look) c.look = tagNpcLook({ ...def.look }, { id: (def.id || 'civ') + seed, role: civKind(def.id) === 'granny' ? 'old' : 'npc' });
     if (def.equip) c.equip = def.equip;
     civCache.set(e, c);
   }

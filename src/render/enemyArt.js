@@ -8,6 +8,7 @@ import {
 } from './mkit.js';
 import { drawMonster2, ART2_SIZE, drawCivilian } from './monsters2.js';
 import { drawSpriteEnemy, spriteEnemyReady } from './sprites.js';
+import { tagNpcLook } from './npcFace.js';
 
 const PI = Math.PI;
 // スプライトのテンプレート書き出し中（tools/export_sprites.mjs）: 影・オーラ・ボス演出・HPバーを描かない（ゲームが上から描くため）
@@ -34,6 +35,26 @@ const DEFAULT_HUMANS = {
     equip: { hat: L('crown', '#ffd23f', '#ff3d7f'), top: L('suit', '#ffd23f', '#15151b'), bottom: L('suitPants', '#15151b', '#5a5a66'), shoes: L('loafers', '#5a3a22', '#c9a26a'), accessory: L('goldChain', '#ffb800', '#ffffff'), weapon: L('pistol', '#ff8a00', '#ff3dd2') },
   },
 };
+
+// 人型の敵の look（def ごとのコピーに「敵の種類・id」を結び付ける = 顔・髪の絵の割り当て。src/render/npcFace.js）
+const ENEMY_LOOKS = new WeakMap();
+function enemyLook(def, art, base) {
+  let c = ENEMY_LOOKS.get(def);
+  if (!c || c.base !== base) {
+    const kind = art === 'thug' && (def.boss || def.ai === 'boss') ? 'boss' : art;
+    c = { base, look: tagNpcLook({ ...base }, { id: def.id || art, art: kind, role: art === 'bossDon' ? 'don' : 'villain' }) };
+    ENEMY_LOOKS.set(def, c);
+  }
+  return c.look;
+}
+
+/** テスト・図鑑用: 人型の敵の def → drawEnemy が drawCharacter に渡す { look, equip }（人型でなければ null） */
+export function humanEnemyLook(def) {
+  const art = def && def.art;
+  if (!HUMAN_ARTS[art]) return null;
+  const dflt = DEFAULT_HUMANS[art];
+  return { look: enemyLook(def, art, def.look || dflt.look), equip: def.equip || tintedEquip(art, dflt.equip, def.color, def.accent) };
+}
 
 function animState(e) {
   const s = e.state;
@@ -110,7 +131,7 @@ export function drawEnemy(ctx, e) {
   let topY = e.y - (e.h || def.h || 40);
   if (HUMAN_ARTS[art]) {
     const dflt = DEFAULT_HUMANS[art];
-    const look = def.look || dflt.look;
+    const look = enemyLook(def, art, def.look || dflt.look);
     const equip = def.equip || tintedEquip(art, dflt.equip, def.color, def.accent);
     const sc = def.scale || clamp((e.h || 70) / 72, 0.8, 2.2);
     if (boss && !EXPORT_MODE) humanBossFx(ctx, e, art, sc, t, st, wind, rage, false);

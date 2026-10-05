@@ -83,7 +83,10 @@ export function setRigManifest(j, base) {
   for (const k in files) SHEETS.set(k, files[k]);
   // view: '3q' = 右向き斜め前（手前 = 画面の左側の腕・脚を胴の前に）/ 'front' = 正面（旧い重ね方: 顔の向きの側の腕を前に）
   const view = j.view === 'front' || j.view === '3q' ? j.view : gLayout === 2 ? '3q' : 'front';
-  RM = { enabled: j.enabled !== false, defaultWear: j.defaultWear !== false, heroesOnly: j.heroesOnly !== false, fit: gFit, layout: gLayout, view };
+  // npcs（既定 true）: NPC・人型の敵・市民（look に classId が無い / 悪役）にもリグと顔・髪の絵を使う。false = 主人公だけ（前の動き）。
+  //  旧い指定 heroesOnly: true は npcs: false と同じ
+  const npcs = j.npcs === false || j.heroesOnly === true ? false : true;
+  RM = { enabled: j.enabled !== false, defaultWear: j.defaultWear !== false, npcs, fit: gFit, layout: gLayout, view };
   return true;
 }
 /** パーツごとの微調整 { torso: { sx, sy, dx, dy } }（sx/sy = 支点まわりの拡大、dx/dy = ずらし。単位はリグの座標） */
@@ -111,11 +114,13 @@ function parseKey(key) {
   return null;
 }
 export function rigStats() {
-  return { enabled: !!(RM && RM.enabled), fit: RM ? RM.fit : null, layout: RM ? RM.layout : null, view: RM ? RM.view : null, ...STAT, warnings: STAT.warnings.slice(-5), fitFallback: STAT.fitFallback.slice(), plans: PLANS.size, gens: GEN.size, rev: RREV };
+  return { enabled: !!(RM && RM.enabled), npcs: !!(RM && RM.npcs), fit: RM ? RM.fit : null, layout: RM ? RM.layout : null, view: RM ? RM.view : null, ...STAT, warnings: STAT.warnings.slice(-5), fitFallback: STAT.fitFallback.slice(), plans: PLANS.size, gens: GEN.size, rev: RREV };
 }
 /** リグの見え方（'3q' | 'front'） */
 export function rigView() { return RM ? RM.view : 'front'; }
 export function hasRig() { return !!(RM && RM.enabled && SHEETS.size); }
+/** NPC・人型の敵・市民にもリグ・顔/髪の絵を使うか（manifest の rig.npcs。rig 節が無ければ false = 今まで通り） */
+export function rigNpcs() { return !!(RM && RM.npcs); }
 /** 全部のリグ画像を読み込む（テスト用）。完了で解決 */
 export function rigPreload() {
   if (!RM) return Promise.resolve(0);
@@ -469,6 +474,8 @@ function effectiveBase(rec) {
   }
   return [bm, ba].map((hex) => (hex ? effectiveColor(colorInfo(hex), datas) : null));
 }
+// シート×枠×色ごとの色替えの上限（LRU）。NPC・市民の肌・服の色が多いので大きめ（素体は 7 枠 × 肌の色 約20）
+const RC_MAX = 160;
 /** パーツを目標の色に（主色・アクセント）。同じ色なら元のまま。シート×色ごとにキャッシュ */
 function recolored(rec, name, main, acc) {
   const p = rec.parts && rec.parts[name];
@@ -480,7 +487,7 @@ function recolored(rec, name, main, acc) {
   if (!doM && !doA) return p;
   const key = name + '|' + (doM ? main : '') + '|' + (doA ? acc : '');
   let o = rec.rc.get(key);
-  if (o) return o;
+  if (o) { rec.rc.delete(key); rec.rc.set(key, o); return o; }
   const eff = rec.eff || [colorInfo(bm), ba ? colorInfo(ba) : null];
   const maps = [];
   if (doM) maps.push([eff[0] || colorInfo(bm), colorInfo(main)]);
@@ -493,14 +500,14 @@ function recolored(rec, name, main, acc) {
   g.putImageData(img, 0, 0);
   STAT.recolors++;
   o = { cv, w: p.w, h: p.h, px: p.px, py: p.py, R: p.R, name };
-  if (rec.rc.size > 40) rec.rc.delete(rec.rc.keys().next().value);
+  if (rec.rc.size >= RC_MAX) rec.rc.delete(rec.rc.keys().next().value);
   rec.rc.set(key, o);
   return o;
 }
 
 // ================================================================ コード描画の代用パーツ（絵が無い装備）
 const GEN = new Map();
-const GEN_MAX = 60;
+const GEN_MAX = 160;               // NPC・敵の絵の無い服（スーツ・制服など）の代用パーツが多いので大きめ
 let GSC = null;
 function genParts(group, g, look, equip, dmg, names, sig) {
   const key = group + '|' + g + '|' + sig + '|' + dmg;
@@ -528,13 +535,13 @@ const itSig = (it) => it ? (it.style || '') + (it.color || '') + (it.accent || '
 
 // ================================================================ プラン（その人の見た目に使う絵の組み合わせ）
 const PLANS = new Map();
-const PLAN_MAX = 48;
+const PLAN_MAX = 160;              // 画面の人型（主人公＋NPC・市民・敵 数十人）の見た目の数より多く
 function find(keys) { for (const k of keys) { const r = SHEETS.get(k); if (r) return r; } return null; }
 const hex6 = (c) => (typeof c === 'string' && HEX.test(c) ? c.slice(1).toLowerCase() : null);
-/** 主人公の look・装備 → リグのプラン | null（リグ無し・素体が無い/読み込み中・必要な絵が読み込み中・spriteMode=procedural） */
+/** 主人公（rig.npcs なら NPC・敵・市民も）の look・装備 → リグのプラン | null（リグ無し・素体が無い/読み込み中・必要な絵が読み込み中・spriteMode=procedural） */
 export function rigPlanFor(look, equip) {
   if (!RM || !RM.enabled || !SHEETS.size || !HAS || getSpriteMode() !== 'auto') return null;
-  if (!look || look.villain || (RM.heroesOnly && !look.classId)) return null;
+  if (!look || ((look.villain || !look.classId) && !RM.npcs)) return null;
   equip = equip || {};
   const g = look.body === 'm' ? 'm' : 'f';
   const body = find(['body_' + g, 'body']);
@@ -562,7 +569,8 @@ export function rigPlanFor(look, equip) {
     sig += itSig(wi) + (use.weapon.rec ? '@' : '');
   }
   const tears = [1, 2, 3].map((n) => { const r = find([`tear/${n}_${g}`, `tear/${n}`]); if (r) load(r); return r && r.st === 2 ? r : null; });
-  const key = sig + '|' + RREV;
+  // キーは「使う絵（読み込み済みの物）」で決まる（全体の読み込み番号 RREV は入れない: 関係の無い絵の読み込みで全員のプランと 2x キャッシュを作り直さないように）
+  const key = sig + '|' + body.key + '|' + tears.map((r) => (r ? 1 : 0)).join('');
   let plan = PLANS.get(key);
   if (plan) { PLANS.delete(key); PLANS.set(key, plan); return plan; }
   plan = makePlan(key, g, look, equip, body, use, tears);
@@ -602,10 +610,11 @@ const STAGE_DMG = [0, 0.3, 0.6, 0.8, 0.95];
 const HAND_R = 2.9;                 // 手の丸（単位）。腕の長さ = BODY の upper+fore
 const ARM_L = { f: RIG_LIMBS.f.upper + RIG_LIMBS.f.fore, m: RIG_LIMBS.m.upper + RIG_LIMBS.m.fore };   // 骨格 v2 の腕の長さ（肩〜手の中心）
 function stageOf(d) { return d >= 0.9 ? 4 : d >= 0.75 ? 3 : d >= 0.5 ? 2 : d >= 0.25 ? 1 : 0; }
+let PLAN_ID = 0;
 function makePlan(key, g, look, equip, body, use, tears) {
   const bakes = [];
   return {
-    sig: 'r' + RREV,
+    sig: 'r' + (++PLAN_ID),
     g, body: body ? body.key : 'code',
     uses: Object.fromEntries(Object.entries(use).map(([k, v]) => [k, v.rec ? v.rec.key : 'code'])),
     parts(dmg) {

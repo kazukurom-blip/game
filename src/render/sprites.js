@@ -17,6 +17,7 @@ let MAN = null;                 // 正規化済み manifest（null = スプラ�
 let BASE = SPRITE_BASE;
 let MODE = 'auto';
 let REV = 0;                    // 画像の読み込み完了・モード切替で +1（アイコン等のキャッシュキー用）
+let MGEN = 0;                   // manifest の設定・モード切替で +1（manifest にある顔・髪の一覧が変わる時。NPC の顔の割り当てのキャッシュ用）
 const IMG = new Map();          // file → { img, st: 1 読込中 / 2 完了 / 3 失敗, w, h }
 const STATS = { manifest: 'none', entries: 0, requested: 0, loaded: 0, failed: 0, errors: [] };
 
@@ -26,7 +27,7 @@ try { const m = typeof localStorage !== 'undefined' && localStorage.getItem('nvs
 export function getSpriteMode() { return MODE; }
 export function setSpriteMode(m) {
   MODE = m === 'procedural' ? 'procedural' : 'auto';
-  REV++;
+  REV++; MGEN++;
   try { localStorage.setItem('nvs_sprite_mode', MODE); } catch { /* ignore */ }
   return MODE;
 }
@@ -35,6 +36,8 @@ export function toggleSpriteMode() { return setSpriteMode(MODE === 'auto' ? 'pro
 export function spriteRev() { return REV; }
 /** 画像の読み込み完了などで番号を進める（rig.js から） */
 export function bumpSpriteRev() { REV++; }
+/** manifest の設定・モード切替で増える番号（顔・髪の一覧が変わったかの判定用。画像の読み込みでは増えない） */
+export function spriteManifestGen() { return MGEN; }
 export function spriteStats() { return { mode: MODE, ...STATS, errors: STATS.errors.slice(-5), tintCache: TINT.size, faceRecolor: FRC.size, faceRecolors: FSTAT.recolors, rig: rigStats() }; }
 export function hasSpriteManifest() { return !!MAN; }
 
@@ -57,7 +60,7 @@ export async function loadSpriteManifest(url = SPRITE_BASE + 'manifest.json') {
 
 /** manifest を直接設定（テスト・ツール用）。不正な項目は無視する */
 export function setSpriteManifest(j, base = SPRITE_BASE) {
-  MAN = null; STATS.entries = 0; IMG.clear(); TINT.clear(); PLAIN.clear(); FRC.clear(); FHC.clear(); tintPx = 0; REV++;
+  MAN = null; STATS.entries = 0; IMG.clear(); TINT.clear(); PLAIN.clear(); FRC.clear(); FHC.clear(); tintPx = 0; frcPx = 0; REV++; MGEN++;
   STATS.requested = STATS.loaded = STATS.failed = 0;
   setRigManifest(null, base);
   try { setArtManifest(j, base); } catch (e) { note('背景・アイコン等の節の解釈に失敗: ' + e.message); } // bg / tiles / icons / vehicles / ui（artOverrides.js）
@@ -513,7 +516,9 @@ function img(s) {
     im.onload = () => {
       r.w = im.naturalWidth || im.width; r.h = im.naturalHeight || im.height;
       if (r.w > 0 && r.h > 0 && s.single) {
+        const t0 = typeof performance !== 'undefined' ? performance.now() : 0;
         try { r.single = prepSingle(im, r.w, r.h, s.bgRemove, s.maxH); } catch (e) { note('1枚絵の前処理に失敗: ' + s.file + ' ' + e.message); }
+        if (t0) { const ms = performance.now() - t0; STATS.prepMs = (STATS.prepMs || 0) + ms; STATS.prepMax = Math.max(STATS.prepMax || 0, ms); STATS.preps = (STATS.preps || 0) + 1; }
         if (!r.single) { r.st = 3; STATS.failed++; REV++; for (const f of r.wait.splice(0)) f(); return; }
       }
       if (r.w > 0 && r.h > 0) { r.st = 2; STATS.loaded++; } else { r.st = 3; STATS.failed++; }
@@ -985,9 +990,13 @@ function portraitEntryFacesLeft(key, gender) {
 // 3枚とも頭の配置図（1024×1024・1単位 = 10px・支点 (512,400)）。look.face（'f_01'）+ look.hair（髪型ID）で選ぶ。
 // 色: 髪 = hairs の base → look.hairColor、肌 = faceBase.skin[性別] → look.skin、瞳 = faceBase.eye → look.eyeColor に塗り替え。
 const FACE_BASE_DEF = { skin: { f: '#ffe3d3', m: '#f6d5be' }, eye: '#6a5cff', hair: '#b07850' };
-const FRC = new Map();          // 色替え済みの絵: file|色 → canvas（上限 FRC_MAX）
-const FRC_MAX = 48;
-const FHC = new Map();          // 解決済みの重ね頭: look の顔・髪・色・表情 → 出力（REV が変わったら作り直し）
+const FRC = new Map();          // 色替え済みの絵: file|色 → canvas（LRU。合計の画素数が FRC_BUDGET を超えたら古い物から捨てる）
+const FRC_BUDGET = 10e6;        // 約40MB（主人公の 420px の絵なら約56枚、NPC 用の縮小版 210px なら約220枚）
+let frcPx = 0;
+const FHC = new Map();          // 解決済みの重ね頭: look の顔・髪・色・表情 → 出力（REV が変わったら作り直し。LRU 上限 FHC_MAX）
+const FHC_MAX = 1500;
+/** NPC・市民・敵用の縮小版の倍率（420px → 210px。画面の頭は 2x キャッシュでも 100px 前後なので十分。色替えも 1/4 の画素で速い） */
+const SMALL_K = 0.5;
 const FSTAT = { recolors: 0 };
 const hex6 = (v, d) => (typeof v === 'string' && HEX6.test(v) ? v.toLowerCase() : d);
 function normFaceBase(o) {
@@ -1047,26 +1056,34 @@ function effOf(r, hex) {
   try { d = r.single.canvas.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, r.single.w, r.single.h).data; } catch { /* ignore */ }
   return (m[hex] = d ? effectiveColor(colorInfo(hex), [d]) : colorInfo(hex));
 }
-/** 1枚絵（読み込み済み）を色替え。pairs = [[基準色, 目標色], ...]。同じ色なら元の絵。絵×色ごとにキャッシュ */
-function recoloredSingle(r, file, pairs, tint) {
+/**
+ * 1枚絵（読み込み済み）を色替え。pairs = [[基準色, 目標色], ...]。同じ色なら元の絵。絵×色ごとにキャッシュ。
+ * small: NPC 用の縮小版（SMALL_K 倍。色替えが無くても縮小した絵を返す）
+ */
+function recoloredSingle(r, file, pairs, tint, small) {
   const o = r.single;
   const use = pairs.filter(([b, t]) => b && t && HEX6.test(t) && !sameColor(t.toLowerCase(), b));
-  if (!use.length) return o.canvas;
-  const key = file + '|' + use.map((p) => p[1].toLowerCase()).join(',');
+  if (!use.length && !small) return o.canvas;
+  const key = file + '|' + use.map((p) => p[1].toLowerCase()).join(',') + (small ? '|s' : '');
   let cv = FRC.get(key);
   if (cv) { FRC.delete(key); FRC.set(key, cv); return cv; }
-  cv = newCanvas(o.w, o.h);
+  const w = small ? Math.max(1, Math.round(o.w * SMALL_K)) : o.w, h = small ? Math.max(1, Math.round(o.h * SMALL_K)) : o.h;
+  cv = newCanvas(w, h);
   if (!cv) return o.canvas;
   const g = cv.getContext('2d', { willReadFrequently: true });
-  g.drawImage(o.canvas, 0, 0);
-  try {
-    const im = g.getImageData(0, 0, o.w, o.h);
-    recolorData(im.data, use.map(([b, t]) => [effOf(r, b), colorInfo(t.toLowerCase())]), { tint });
-    g.putImageData(im, 0, 0);
-  } catch (e) { note('色替えに失敗: ' + file + ' ' + e.message); return o.canvas; }
-  FSTAT.recolors++;
-  FRC.set(key, cv);
-  while (FRC.size > FRC_MAX) FRC.delete(FRC.keys().next().value);   // 捨てるだけ（描画中の重ね頭が持っていることがあるので消さない）
+  if (small) { g.imageSmoothingEnabled = true; try { g.imageSmoothingQuality = 'high'; } catch { /* ignore */ } }
+  g.drawImage(o.canvas, 0, 0, w, h);
+  if (use.length) {
+    try {
+      const im = g.getImageData(0, 0, w, h);
+      recolorData(im.data, use.map(([b, t]) => [effOf(r, b), colorInfo(t.toLowerCase())]), { tint });
+      g.putImageData(im, 0, 0);
+    } catch (e) { note('色替えに失敗: ' + file + ' ' + e.message); return o.canvas; }
+    FSTAT.recolors++;
+  }
+  FRC.set(key, cv); frcPx += w * h;
+  // 捨てるだけ（描画中の重ね頭が持っていることがあるので消さない）
+  while (frcPx > FRC_BUDGET && FRC.size > 1) { const [k0, c0] = FRC.entries().next().value; FRC.delete(k0); frcPx -= c0.width * c0.height; }
   return cv;
 }
 /** 読み込み状態: 0 無し / 1 読み込み中 / 2 完了 / 3 失敗（失敗は「その絵は無し」として扱う） */
@@ -1075,7 +1092,7 @@ function stOf(s) { if (!s) return 0; const r = img(s); return r.st === 2 && !r.s
  * 顔 + 前髪 + 後ろ髪の重ね頭（paintAiHead / paintAiHeadBack に渡せる形。layered: true）。
  * look.face の顔の絵と hairs['<性別>_<look.hair>'] があり、読み込み済みなら返す。無い/読み込み中 → null（呼び出し側は heads → コードの頭）
  */
-export function faceHeadFor(look, expr) {
+export function faceHeadFor(look, expr, small) {
   try {
     if (!MAN || MODE !== 'auto' || !look || !look.face) return null;
     const F = MAN.faces[look.face];
@@ -1083,9 +1100,10 @@ export function faceHeadFor(look, expr) {
     const g = look.gender || look.body || F.g;
     const H = MAN.hairs[g + '_' + look.hair];
     if (!H) return null;
-    const ck = look.face + '|' + H.key + '|' + (look.skin || '') + (look.eyeColor || '') + (look.hairColor || '') + '|' + (expr || '');
+    small = !!small;
+    const ck = look.face + '|' + H.key + '|' + (look.skin || '') + (look.eyeColor || '') + (look.hairColor || '') + '|' + (expr || '') + (small ? '|s' : '');
     let out = FHC.get(ck);
-    if (out && out.rev === REV) return out.v;
+    if (out && out.rev === REV) { FHC.delete(ck); FHC.set(ck, out); return out.v; }
     if (!H.pre) { H.pre = true; if (H.front) img(H.front); if (H.back) img(H.back); }
     const R = heroResolve(F, expr);                     // 表情の絵（無ければ基本の顔）
     const sf = stOf(H.front), sb = stOf(H.back);
@@ -1097,26 +1115,27 @@ export function faceHeadFor(look, expr) {
       } else {
         const FB = MAN.faceBase;
         const hc = look.hairColor;
-        const face = recoloredSingle(R.r, R.s.file, [[FB.skin[F.g] || FB.skin.f, look.skin], [FB.eye, look.eyeColor]], false);
+        const face = recoloredSingle(R.r, R.s.file, [[FB.skin[F.g] || FB.skin.f, look.skin], [FB.eye, look.eyeColor]], false, small);
         const part = (s) => {
           if (!s) return null;
           const r = IMG.get(s.file);
           if (!r || r.st !== 2 || !r.single) return null;
           const pl = layoutPlace(r.single);
           if (!pl) { if (!r.warnedFit) { r.warnedFit = true; note(`hairs.${H.key}: ${s.file} が正方形ではないので使いません（頭の配置図 1024×1024 で）`); } return null; }
-          return { canvas: recoloredSingle(r, s.file, [[H.base, hc]], true), w: r.single.w, h: r.single.h, place: pl, file: s.file, scale: 1, offset: [0, 0] };
+          const cv = recoloredSingle(r, s.file, [[H.base, hc]], true, small);
+          return { canvas: cv, w: cv.width, h: cv.height, place: pl, file: s.file, scale: 1, offset: [0, 0] };
         };
         const front = part(H.front), back = part(H.back);
         v = {
           layered: true, fit: false, scale: 1, offset: [0, 0], facesLeft: false,
-          canvas: face, w: R.r.single.w, h: R.r.single.h, place: fp, expr: R.expr,
-          file: 'F:' + R.s.file + '+' + H.key + (front ? '' : '-f') + (back ? '' : '-b') + '|' + (look.skin || '') + (look.eyeColor || '') + (hc || ''),
+          canvas: face, w: face.width, h: face.height, place: fp, expr: R.expr,
+          file: 'F:' + R.s.file + '+' + H.key + (front ? '' : '-f') + (back ? '' : '-b') + '|' + (look.skin || '') + (look.eyeColor || '') + (hc || '') + (small ? '|s' : ''),
           front, back, hairColor: hex6(hc, H.base), rec: {},
         };
       }
     }
-    if (FHC.size > 200) FHC.clear();
     FHC.set(ck, { rev: REV, v });
+    while (FHC.size > FHC_MAX) FHC.delete(FHC.keys().next().value);
     return v;
   } catch (err) { note('faceHeadFor: ' + err.message); return null; }
 }

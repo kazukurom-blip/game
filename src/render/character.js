@@ -13,7 +13,8 @@ import { shade, rgba, mix, rng, clamp, lerp, OUTLINE } from './util.js';
 import { ITEMS } from '../data/items.js';
 import { spriteCharPlan, drawSpriteCharPlan, headFor, headBackOf, flashOf, faceHeadFor, layeredBackOf } from './sprites.js';
 import { RIG_PARTS, RIG_GROUP_PARTS, RIG_S, WPN_BOX, WPN_S, RIG_Y, RIG_LIMBS, RIG_CODE_HEAD, HEAD_BACK_PIVOT } from './rigLayout.js';
-import { rigPlanFor, rigCodePlanFor, rigView } from './rig.js';
+import { rigPlanFor, rigCodePlanFor, rigView, rigNpcs } from './rig.js';
+import { npcHeadLook } from './npcFace.js';
 
 export const HERO_LOOKS = {
   luna: { body: 'f', skin: '#ffe3d3', hair: 'twin', hairColor: '#ff6fb5', eyeColor: '#ff3d8b', expr: 'cute', hairShadow: '#c8458f', hairHi: '#ffd0ea', hairTip: '#b47cff', tie: '#ffd23f' },
@@ -586,6 +587,8 @@ let OFF = null, OFFCTX = null;
 //  向き（facing）は描画時に左右反転するのでキーに含めない。半透明（alpha）は drawImage 時に掛けるので重なりも透けない。
 //  加算合成のエフェクト（斬撃の軌跡・ホロ画面）はキャッシュに入れず、毎フレーム上から描く。
 const SS = 2;                               // スーパーサンプリング倍率
+let NPC_SS1 = true;                         // NPC・敵・市民のリグは等倍でキャッシュ（setNpcCacheSS1(false) で 2x。見比べ・計測用）
+export function setNpcCacheSS1(v) { NPC_SS1 = !!v; clearCharacterCache(); }
 const CACHE = new Map();
 let cachePx = 0;
 const CACHE_BUDGET = 16e6;                  // 総画素数の上限（約64MB）
@@ -631,8 +634,18 @@ export function aiHeadExpr(state, t, A) {
  * その look・姿勢で使う頭の絵（無い/読み込み中/壊れている/look.aiHead===false/NPC → null）。
  * 顔・髪の分割方式（look.face の顔 + look.hair の前髪・後ろ髪。layered: true）を優先し、無ければ heads[<classId>_<gender>] の1枚の頭
  */
-export function aiHeadOf(look, A, state, t) {
-  if (ONLY || !look || look.aiHead === false || !look.classId || !look.gender || look.villain) return null;
+export function aiHeadOf(look, A, state, t, vil, res) {
+  if (ONLY || !look || look.aiHead === false) return null;
+  if (!look.classId || !look.gender || look.villain) {
+    // NPC・人型の敵・市民（manifest の rig.npcs）: 役割・id から選んだ顔＋近い髪型の重ね頭（src/render/npcFace.js）。
+    // 描く解像度（1単位の px。anim.headRes = 2x キャッシュの倍率、無ければ 2×scale）が 2.4 以下なら縮小版の絵（210px）
+    if (!rigNpcs()) return null;
+    A = A || EMPTY;
+    const nl = npcHeadLook(look, !!(vil || A.villain || look.villain));
+    if (!nl) return null;
+    res = res || A.headRes || 2 * (A.scale || 1);
+    return faceHeadFor(nl, aiHeadExpr(state, t, A), res <= 2.4);
+  }
   const ex = aiHeadExpr(state, t, A);
   if (look.face) { const fh = faceHeadFor(look, ex); if (fh) return fh; }
   return headFor(look.classId, look.gender, ex);
@@ -738,7 +751,10 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
     const m = ctx.getTransform();
     const k = Math.hypot(m.a, m.b);
     const kq = Math.max(0.5, Math.round(k * s * 8) / 8);
-    const ss = kq <= 1.6 ? SS : kq <= 3.2 ? 1 : 0;
+    // NPC・敵・市民のリグ（絵のパーツを並べるだけ）は 2x にせず等倍でキャッシュ（画面に何十人もいるので、2x だとキャッシュが溢れて毎フレーム作り直しになる）。
+    // 縮小のにじみは imageSmoothingQuality = 'high' で抑える。主人公は今まで通り 2x
+    const npcRig = !!rig && !look.classId && NPC_SS1;
+    const ss = kq <= 1.6 ? (npcRig ? 1 : SS) : kq <= 3.2 ? 1 : 0;
     if (ss) {
       const R = kq * ss;
       let fi, repT, repAT = 0;
@@ -755,7 +771,7 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
       }
       const dmg = clamp(A.damage || 0, 0, 1);
       const ds = dmgStage(dmg);
-      const ah = aiHeadOf(look, A, state, repT);
+      const ah = aiHeadOf(look, A, state, repT, vil, R);
       const key = state + fi + '|' + ds + '|' + R + '|' + (A.flash ? 1 : 0) + (A.panic ? 1 : 0) + (vil ? 1 : 0) + (A.face || '') + (A.rim || '') + '|' + lookSig(look) + '|' + eqSig(equip) + (ah ? '|H' + ah.file + (ah.back ? '+B' : '') : '') + (rig ? '|G' + rig.sig : '');
       let ent = CACHE.get(key);
       if (ent) { CACHE.delete(key); CACHE.set(key, ent); CSTAT.hit++; }
@@ -772,7 +788,8 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
           if (oc) {
             oc.setTransform(1, 0, 0, 1, 0, 0); oc.clearRect(0, 0, w, h);
             oc.setTransform(R, 0, 0, R, bx[0] * R, bx[2] * R);
-            const a2 = { state: A.state, t: repT, attackT: repAT, damage: DMG_REP[ds], flash: A.flash, panic: A.panic, face: A.face, headExpr: A.headExpr, rim: A.rim, villain: vil, facing: 1, scale: 1, noFx: true };
+            oc.imageSmoothingEnabled = true; oc.imageSmoothingQuality = npcRig ? 'high' : 'low';   // プールの canvas の前の状態を残さない
+            const a2 = { state: A.state, t: repT, attackT: repAT, damage: DMG_REP[ds], flash: A.flash, panic: A.panic, face: A.face, headExpr: A.headExpr, rim: A.rim, villain: vil, facing: 1, scale: 1, noFx: true, headRes: R };
             RENDER(oc, a2);
             ent = { cv, w, h, R, ox: bx[0] * R, oy: bx[2] * R, repT, repAT };
             CACHE.set(key, ent); cachePx += w * h;
@@ -947,7 +964,7 @@ function renderChar(ctx, look, equip, anim, state, ws, wk) {
   K.rig = false; K.shY = SHOULDER_Y; K.headY = HEAD_Y + (f ? 0.6 : 0);
   P.hipY += B.hipY;
   resolveFace(P, K, anim);
-  K.ai = vil ? null : aiHeadOf(look, anim, state, t);
+  K.ai = vil && look.classId ? null : aiHeadOf(look, anim, state, t);
   FL = !!anim.flash;
   RIM = anim.rim || look.rim || (f ? '#9ff4ff' : '#8fe8ff');
   // 地面の影
@@ -3421,7 +3438,7 @@ function renderRig(ctx, look, equip, anim, state, ws, wk, plan) {
   const K = makeK(look, equip, anim, state, ws, wk, P, t, at, w, true);
   P.hipY += K.B.hipY;
   resolveFace(P, K, anim);
-  K.ai = anim.villain ? null : aiHeadOf(look, anim, state, t);
+  K.ai = anim.villain && look.classId ? null : aiHeadOf(look, anim, state, t);
   FL = !!anim.flash;
   RIM = anim.rim || look.rim || (f ? '#9ff4ff' : '#8fe8ff');
   TAG = 'body';

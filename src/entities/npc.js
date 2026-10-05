@@ -1,5 +1,6 @@
 // NPC。頭上に名前・肩書。受注可能クエスト=黄色「！」、完了報告可=「？」
 import { drawCharacter } from '../render/character.js';
+import { tagNpcLook } from '../render/npcFace.js';
 import { MISSIONS } from '../data/missions.js';
 import { inHours, clockOf } from '../world/sys.js';
 
@@ -27,6 +28,7 @@ export class NPC {
     this.dialog = data.dialog || [];
     this.shop = data.shop || null;
     this.look = { ...DEFAULT_LOOK, ...(data.look || {}) };
+    tagNpcLook(this.look, { id: data.id, name: data.name, title: data.title });   // 顔・髪の絵の割り当て（id のハッシュ・老人/ドン）
     this.equip = {};
     for (const s of SLOTS) this.equip[s] = (data.equip && data.equip[s]) || null;
     this.x = data.x ?? 300;
