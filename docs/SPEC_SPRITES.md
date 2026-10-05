@@ -403,3 +403,77 @@ npm run check:art -- <zip>
   `RIG_BASE` に無いスタイル（plainShirt など）は依頼書の基準色を `rig.parts` の `base`/`accent` に書く。終了コードは NG があれば 1。
 - テスト: `npm run test:art`（`tests/art_check.mjs`、約15秒）。仮の正しい絵・わざと間違えた絵（枠はみ出し・膝で太さが急変・色違い・印なし・表情の輪郭ずれ・顔に髪・一覧に無い名前）で判定と --install・動画を確かめる。
 - 限界: 絵柄・向き・描き込みの良し悪しは見ない（動画とオーバーレイを目で確認）。はみ出し・隙間は素体のアルファとの比較なので、ふくらんだ服（スカート・フード）は注意になりやすい。顔の髪の色の判定は茶色の眉や陰でも少し反応する。
+
+## 背景・タイル・アイコン・乗り物・UI の画像差し替え
+
+キャラ以外の画像（依頼書 `docs/art_handoff/CODEX_BATCH_03.md` / `.csv`、全 269 枚）を置くと、その部分だけ画像で描く。**画像が無い・読み込み中・読めない・`spriteMode = procedural` の間は今のコードの絵のまま**（1画素も変わらない。テストで確認）。
+
+- 実装: `src/render/artOverrides.js`（manifest の bg / tiles / icons / vehicles / ui 節を読む。`sprites.js` の `setSpriteManifest` から `setArtManifest(j, base)` が呼ばれる）。
+  使う所: `background.js`（背景・地面・足場）・`icons.js`（アイテム・スキルのアイコン）・`vehicles.js`（乗り物）・`ui/title.js`（タイトルの絵・ロゴ）・`ui/v2windows.js`（ワールドマップの下絵）。
+- 画像は最初に必要になった時に読み込む（大きい画像は `decode()` を待ってから使う）。前処理（乗り物の印・タイヤの円・地面の下端の色・アイコンの縮小と色替え）は読み込み時・最初に使う時に1回だけ。
+- 計測・デバッグ用: `setArtEnabled(false)` でこの仕組みだけ止められる（キャラ・敵のスプライトはそのまま）。`artStats()` で読込数・失敗数・前処理の時間・手放した数。
+
+### manifest の書き方
+
+```json
+{
+  "bg":       { "beach_town_far": "bg/beach_town_far.png", "beach_town_mid": "bg/beach_town_mid.png", "beach_town_lights": "bg/beach_town_lights.png",
+                "downtown_field_v1_mid": { "file": "bg/downtown_field_v1_mid.png", "parallax": 0.3, "groundY": 640 } },
+  "tiles":    { "beach_ground": "tiles/beach_ground.png", "beach_platform": "tiles/beach_platform.png" },
+  "icons":    { "equip/hat_cap": "icons/equip/hat_cap.png", "item/potion_red": "icons/item/potion_red.png", "skill/luna_neon_rush": "icons/skill/luna_neon_rush.png" },
+  "vehicles": { "bike": "vehicles/bike.png", "bike_wheel": "vehicles/bike_wheel.png" },
+  "ui":       { "title_art": "ui/title_art.png", "logo": "ui/logo.png", "world_map": "ui/world_map.png" }
+}
+```
+- 値は `assets/sprites/` からのパス（文字列）か `{ "file": ..., 任意の設定 }`。キーは「保存先から節のフォルダと `.png` を除いた物」（`tools/check_art.mjs --install` がこの形で書く）。
+- 任意の設定: bg `parallax`（横の速さ。既定 far 0.1・mid 0.3）・`groundY`（地面の線。既定 640）・`alpha`（lights の強さ）／ tiles `surface`（面の線。既定 地面 40・足場 16）・`scale`（既定 1）／
+  icons `base`・`accent`（装備の基準色。既定はそのスタイルの最初のアイテムの色）・`recolor: false`／ vehicles `wheelR`（タイヤの半径）・`base`（車体の主な色。既定は絵から自動）・`recolor: false`。
+- 不正なパス（`..`・`/` 始まり・`http:` 等・png/webp/jpg 以外）は無視。
+
+### 背景（bg: 2560×720、far / mid / lights）
+- キー `<地域>_<town|field>_<far|mid|lights>`（地域 = `REGIONS`: beach, downtown, slums, swamp, casino, rooftop, spaceport）。地域内のバリアント（`map.variant`）は同じ画像。
+  バリアント専用の絵を使う時は `<地域>_<town|field>_v<0-3>_<層>`（あれば優先）。屋内のバリアント（トンネル・金庫・月面など `INDOOR`）は v 付きのキーがある時だけ画像にする。
+- 重ね方: 今のコードの空・太陽・月・星（昼夜）の上に、far（0.1 倍の速さ）→ mid（0.3 倍）を横に繰り返して描く。その上に今のコードの昼夜の色かぶせ（`TOD_TINT`、source-atop）が掛かる。
+  夜（`map._clock`）は lights を mid と同じ位置に**加算合成**（強さ = 今のコードの窓明かりと同じ `TOD_LIGHTS` の重み）。画像の時は今のコードの窓明かり（光バッファ）・サーチライトは描かない。
+- **位置合わせ**: 画像の高さ 720 = 画面の高さ（等倍）。mid の地面の線（画像の y=640）を、画面上の地面の線 `gS = map.groundY − cam.y`（= 地面のタイルの歩く面）に合わせる（`artGroundLine`）。
+  カメラは地面に立つと `cam.y = groundY + 160 − 720`（HUD の分）まで下がるので、ふだん `gS = 560` → 画像は y=−80 から描かれ、建物の足元がちょうど地面の上に乗る。
+  高い足場にいて地面が画面の下より下（`gS > 720`）の時は、mid の線は `720 + (gS − 720) × 0.35`（ゆっくり下がる）。far の線は 画面の 78% と mid の線の間（0.4）。
+- mid が読めた時だけ画像の背景にする（mid が無い・読み込み中 → その地域は今のコードの背景）。far が manifest にあって読み込み中なら待つ（mid だけ先に出さない）。far / lights が無い・失敗 → その層だけ省く。
+- メモリ: 背景の画像は展開すると 1 枚約 7MB なので、最近使った 9 枚（3 シーン分）だけ持ち、古い物は手放す（また来た時に読み直す。その間の数フレームはコードの背景）。
+
+### 地面・足場（tiles）
+- `<地域>_ground`（512×256、上から 40px の線が歩く面）・`<地域>_platform`（512×96、上から 16px の線が乗る面）。屋内のバリアントは `<地域>_v<0-3>_ground` 等がある時だけ。
+- 地面: 線が `map.groundY` に来るよう x=0 から 512px ごとに並べる（ワールド座標なので継ぎ目の位置は固定）。256px より下は絵の下端 8 行の平均色で塗る。画像の時は町の歩道（`drawSidewalk`）は描かない。
+- 足場: 線が足場の上面 `p.y` に来るよう、足場の左端から並べて足場の幅で切る（最後の 1 枚は切り出して描く）。**当たり判定は変えない**（絵の位置を合わせるだけ）。
+- 特殊マップ（塔・アリーナ・ボス部屋など `bgSpecial`）は今のコードのまま。
+
+### アイコン（icons: 256×256）
+- 装備 `equip/<slot>_<style>`（スタイルごと 1 枚）: 基準色（`CODEX_BATCH_03` の各行の色 = そのスタイルの `ITEMS` の最初のアイテムの `look.color` / `look.accent`）→ アイテムの色へ `recolor.js` の `recolorData` で塗り替え（主色・差し色の2組。`effectiveColor` で絵の実際の色に合わせる）。
+- 消耗品・素材 `item/<id>`・スキル `skill/<id>`（正方形いっぱいの絵を、ゲームが角丸の枠で切り抜き、濃い紫の線＋内側の白い線＋ツヤを付ける）。PET は今まで通り（PET のスプライト）。
+- 128px に縮めてから色替え（色ごとにキャッシュ）。表示の大きさへは `icons.js` の今のキャッシュ（DPR 込み）で縮める。
+
+### 乗り物（vehicles: 車体 1024×512・タイヤ 256×256）
+- `<kind>`（bike / sports / police。右向きの真横・タイヤなし・前後のタイヤの中心にマゼンタ #FF00FF の小さな丸）と `<kind>_wheel`。
+- 読み込み時にマゼンタの画素を探して x の一番大きい隙間で前後に分け、それぞれの重心をタイヤの位置にする。印の周り（印の大きさの 3 倍）のマゼンタっぽい画素は透明にする（印は残らない）。
+  印が無い時は絵の範囲の左右 20%・下の方と推定（注意を記録）。タイヤの絵は不透明の範囲の中心と半径。
+- 大きさ: 今のコードの絵のタイヤの位置（`VEHICLE_GEO`: bike (−30,−14)/(32,−14) 半径 14、車 (−46,−12)/(48,−12) 半径 13）に印が来るように縮めて置く。タイヤは印の位置で `rot = v.x / 15` だけ回す。左向きは今まで通り `scale(−1, 1)` で反転。
+- 色: 車体の主な色（色の濃い画素の色相のヒストグラムの一番多い所）を `v.color` に塗り替える（police は塗り替えない）。運転手は車なら車体の後ろ（窓から見える）、バイクなら上に今のコードで描く。パトカーの回転灯の光・下の光（underglow）は今のコードで足す。
+
+### タイトル・ロゴ・ワールドマップ（ui）
+- `title_art`（1920×1080）: タイトル・キャラ選択・キャラ作成の背景（画面いっぱい・縦横比そのまま・はみ出しは切る）。タイトル画面では今のコードの 3 人の行進は描かない（絵に主人公がいるので）。
+- `logo`（1600×600）: タイトルのロゴ（幅 560 × 1.15）と、キャラ選択などの左上の小さいロゴ（高さ 64）。サブタイトルの帯は今まで通り上に描く。
+- `world_map`（2048×1152）: ワールドマップ（M）の地図の枠いっぱいに伸ばして少し暗くし、その上に今まで通り地域名・道・町の印・現在地を描く（格子は描かない）。
+
+### 検査（`tools/check_art.mjs` → `tools/check_art_env.mjs`）
+- 種類はパスで判定（`bg/` `tiles/` `icons/` `vehicles/` `ui/`）。依頼書の一覧は `CODEX_BATCH_03.csv`（装備は「主色・差し色」も読む）。
+- 検査: 大きさ／背景の空（上 48 行の不透明 10% で注意・50% で NG）・far の地面より下（y=648〜）／**左右の継ぎ目**（右端の列と左端の列の差を、絵の中の隣り合う列の差の 98% 点・無関係な列どうしの差と比べる。
+  差 10 以下か自然な差の 1.2 倍以下なら OK、score =（差 − 自然な差）/（無関係 − 自然な差）が 0.3 以上で注意・0.6 以上で NG）／
+  地面の線（横の 90% 以上が埋まる最初の行が 40・16 から 6px 以内 OK・16px 以内 注意）・地面の断面の穴・mid の建物の足元（y=620〜639 の不透明が 25% 未満なら注意）／
+  lights の明るさ・塗りすぎ／アイコンの外周の透明・物の大きさ・装備の基準色／スキルは正方形いっぱい（四隅が透明なら注意）／
+  乗り物のマゼンタの印（2つ・下半分・同じ高さ・離れている・タイヤの所が空いている）／タイヤの円の中心と丸さ／ロゴの外周の透明。
+- オーバーレイ: 背景・タイルは「右端の続きに左端」を並べた絵（真ん中の赤い印が継ぎ目）＋地面の線、アイコン・乗り物は市松の上（印に十字）。
+- プレビュー: `preview_env_bg.png`（地域ごとに夕方・夜、ゲームの `drawBackground` / `drawMapTiles` で背景＋地面＋足場）・`preview_env_icons.png`（装備は同じスタイルのアイテム3色）・`preview_env_vehicles.png`（3色・左右）・`preview_env_ui.png`。
+  テスト用ページ `tests/art_env_preview.html`（`tests/art_env_preview.js`）。
+- `--install`: NG ではない画像をコピーし、manifest の bg / tiles / icons / vehicles / ui 節に `"キー": "パス"` を書く（既に `{file, ...}` の形なら設定を残して file だけ更新）。
+- テスト: `npm run test:artenv`（`tests/art_env_browser.mjs` = 仮の画像で差し替わること・位置合わせ・色替え・無い時/失敗時は今のコードの絵・LRU・性能、`tests/art_env_check.mjs` = 検査ツールの判定と --install）。
+- 限界: 継ぎ目は端の1列どうしの比較なので、ぼかしてごまかした継ぎ目・形の食い違い（屋根の高さが端でずれる等）は数値に出にくい（オーバーレイの真ん中を目で確認）。建物の足元の判定は不透明の割合だけ（足元の影や手前の縁の厚さで変わる）。
