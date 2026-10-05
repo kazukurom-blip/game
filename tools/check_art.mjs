@@ -29,6 +29,10 @@
 //   7. 頭: 支点 (512,400)・頭頂 y=220・顎 y=560 との位置。表情違いは基本の顔とのアルファの輪郭の一致率（IoU）。
 //      前髪と顔を重ねて、頭頂の肌が前髪から出ていないか。顔に髪の色の画素が無いか
 //   8. ファイル名が依頼書の一覧に無いものは注意
+//   9. キャラ以外（依頼書 CODEX_BATCH_03: bg/ tiles/ icons/ vehicles/ ui/）は tools/check_art_env.mjs で検査:
+//      大きさ・透明（背景の空・アイコンの外周）・左右の継ぎ目・地面の線の位置・乗り物のマゼンタの印・タイヤの中心。
+//      プレビューは preview_env_bg / icons / vehicles / ui.png（ゲームの描画関数で描いたスクショ）。
+//      --install で manifest の bg / tiles / icons / vehicles / ui 節に "キー": "パス" を書く（例 bg.beach_town_far・icons."equip/hat_cap"）。
 //
 // PNG の読み書きは tools/png_rgba.mjs（依存なし）。動画は Playwright（Chromium）でテスト用ページ tests/art_preview.html を開き、
 // 一時フォルダの画像を assets/sprites/ に重ねて配信（このツールの中の小さな http サーバー）し、manifest を上書きして drawCharacter で描く。
@@ -40,6 +44,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { readPng, writePng, newImage } from './png_rgba.mjs';
+import { classifyEnv, parseCatalog03, checkEnv, envOverlay, envManifestKey, ENV_KINDS, ENV_PREFIX } from './check_art_env.mjs';
 import {
   RIG_PARTS, RIG_GROUP_PARTS, RIG_ACC_PARTS, RIG_BASE, RIG_SKIN_BASE, WPN_W, WPN_H, WPN_BOX,
   HEAD_W, HEAD_H, HEAD_PX, HEAD_PY, HEAD_S, HEAD_GUIDE,
@@ -47,6 +52,7 @@ import {
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CATALOG_MD = path.join(ROOT, 'docs', 'art_handoff', 'CODEX_BATCH_01.md');
+const CATALOG03_CSV = path.join(ROOT, 'docs', 'art_handoff', 'CODEX_BATCH_03.csv');
 
 // ---------------------------------------------------------------- 閾値
 export const TH = {
@@ -213,6 +219,8 @@ function dimmed(im, k = 0.45) { const o = { w: im.w, h: im.h, data: new Uint8Arr
 /** rel（assets/sprites/ からのパス）→ { kind, slot, style, variant, g, id, expr, back } */
 export function classify(rel) {
   let m;
+  const env = classifyEnv(rel);   // 背景・地面/足場・アイコン・乗り物・UI（tools/check_art_env.mjs）
+  if (env) return env;
   if ((m = /^rig\/body_([fm])\.png$/.exec(rel))) return { kind: 'body', slot: 'body', g: m[1] };
   if ((m = /^rig\/(top|bottom|shoes|hat|accessory)\/([A-Za-z0-9]+)(?:__([0-9a-fA-F]{6}))?_([fm])\.png$/.exec(rel))) return { kind: 'wear', slot: m[1], style: m[2], variant: m[3] ? '#' + m[3].toLowerCase() : null, g: m[4] };
   if ((m = /^rig\/(top|bottom|shoes|hat|accessory)\/.+\.png$/.exec(rel))) return { kind: 'wear', slot: m[1], style: null, bad: true };
@@ -234,8 +242,8 @@ export function collect(dir) {
     let rel = null;
     const i = p.indexOf('assets/sprites/');
     if (i >= 0) rel = p.slice(i + 'assets/sprites/'.length);
-    else { const m = /(?:^|\/)((?:rig|heads)\/.+)$/.exec(p); if (m) rel = m[1]; }
-    if (rel && !/^(rig|heads)\//.test(rel) && i < 0) rel = null;
+    else { const m = /(?:^|\/)((?:rig|heads|bg|tiles|icons|vehicles|ui)\/.+)$/.exec(p); if (m) rel = m[1]; }
+    if (rel && !/^(rig|heads)\//.test(rel) && !ENV_PREFIX.test(rel) && i < 0) rel = null;
     if (rel) out.push({ rel, abs: f });
   }
   // 同じ rel が2つ（assets/sprites/ と直下）なら assets/sprites/ の方
@@ -619,6 +627,7 @@ export async function checkArt(args) {
     const files = collect(src);
     log(`対象: ${files.length} 枚（${isZip ? 'ZIP' : 'フォルダ'} ${input}）`);
     const cat = fs.existsSync(CATALOG_MD) ? parseCatalog(fs.readFileSync(CATALOG_MD, 'utf8')) : {};
+    if (fs.existsSync(CATALOG03_CSV)) Object.assign(cat, parseCatalog03(fs.readFileSync(CATALOG03_CSV, 'utf8')));
     const repoSpr = path.join(args.root, 'assets', 'sprites');
     const imgs = new Map();
     const get = (rel) => {
@@ -637,7 +646,13 @@ export async function checkArt(args) {
       let im;
       try { im = get(f.rel); if (!im) throw new Error('読めません'); } catch (e) { r.add('NG', 'PNG として読めない: ' + e.message, 'PNG で保存し直してください'); continue; }
       const c = cat[f.rel] || null;
-      if (Object.keys(cat).length && !c && info.kind !== 'body' && info.kind !== 'head') r.add('注意', 'ファイル名が依頼書（CODEX_BATCH_01.md）の一覧にありません', '保存先とファイル名を依頼書の表のとおりにしてください');
+      if (Object.keys(cat).length && !c && info.kind !== 'body' && info.kind !== 'head' && !(ENV_KINDS.has(info.kind) && (info.v != null || info.bad))) r.add('注意', `ファイル名が依頼書（${ENV_KINDS.has(info.kind) ? 'CODEX_BATCH_03.md' : 'CODEX_BATCH_01.md'}）の一覧にありません`, '保存先とファイル名を依頼書の表のとおりにしてください');
+      if (ENV_KINDS.has(info.kind)) {
+        // 背景・地面/足場・アイコン・乗り物・UI
+        const ok = checkEnv(r, im, info, c, { colorStats, compareColor });
+        if (ok) { const ov = envOverlay(im, info, { checker, drawOver, hline, vline, cross, C }); if (ov) { const of = `overlay_${safeName(f.rel)}.png`; fs.writeFileSync(path.join(outDir, of), writePng(ov)); r.overlay = of; } }
+        continue;
+      }
       if (info.kind === 'other' || info.bad) { r.add('NG', 'ファイルの場所・名前の形がゲームの決まりに合わない（rig/<種類>/<スタイル>_<f|m>.png・heads/face/<f|m>_<番号>.png 等）', '依頼書の保存先のとおりにしてください'); continue; }
       const W = info.kind === 'weapon' ? WPN_W : info.kind === 'face' || info.kind === 'hair' || info.kind === 'head' ? HEAD_W : 1024;
       const H = info.kind === 'weapon' ? WPN_H : info.kind === 'face' || info.kind === 'hair' || info.kind === 'head' ? HEAD_H : 1024;
@@ -709,24 +724,30 @@ export async function checkArt(args) {
       if (i.kind === 'face' && !i.expr) for (const e of EXPRS) if (!rels.has(`heads/face/${i.id}_${e}.png`) && !fs.existsSync(path.join(repoSpr, `heads/face/${i.id}_${e}.png`))) missing.push(`heads/face/${i.id}_${e}.png`);
       if (i.kind === 'hair' && !i.back && !rels.has(`heads/hair/${i.key}_back.png`) && !fs.existsSync(path.join(repoSpr, `heads/hair/${i.key}_back.png`))) missing.push(`heads/hair/${i.key}_back.png`);
     }
+    // ゲーム内の見た目（キャラ以外: 背景・地面・アイコン一覧・乗り物のスクリーンショット）
+    let envPreview = null;
+    const envFiles = files.filter((f) => ENV_KINDS.has(classify(f.rel).kind) && !classify(f.rel).bad);
+    if (args.video && envFiles.length) {
+      try { envPreview = await renderEnvPreview({ files: envFiles, results, outDir, root: args.root, log }); } catch (e) { envPreview = { error: e.message }; log('プレビューを作れませんでした: ' + e.message); }
+    }
     // ゲーム内の見た目
     let video = null;
-    if (args.video && files.length) {
+    if (args.video && files.length && files.length > envFiles.length) {
       try { video = await renderPreview({ files, outDir, root: args.root, cat, log }); } catch (e) { video = { error: e.message }; log('動画を作れませんでした: ' + e.message); }
     }
     // 入れる
     let installed = null;
     if (args.install) installed = install({ results, files, root: args.root, cat, log });
-    const report = buildReport({ name, input, results, video, installed, missing, catalogN: Object.keys(cat).length });
+    const report = buildReport({ name, input, results, video, envPreview, installed, missing, catalogN: Object.keys(cat).length });
     fs.writeFileSync(path.join(outDir, 'report.md'), report);
-    const json = { name, input, results: results.map((r) => ({ rel: r.rel, kind: r.info.kind, verdict: r.verdict, items: r.items, metrics: r.metrics, overlay: r.overlay })), video, installed, missing };
+    const json = { name, input, results: results.map((r) => ({ rel: r.rel, kind: r.info.kind, verdict: r.verdict, items: r.items, metrics: r.metrics, overlay: r.overlay })), video, envPreview, installed, missing };
     fs.writeFileSync(path.join(outDir, 'result.json'), JSON.stringify(json, null, 2));
     const cnt = { OK: 0, '注意': 0, NG: 0 };
     for (const r of results) cnt[r.verdict]++;
     log(`結果: OK ${cnt.OK} / 注意 ${cnt['注意']} / NG ${cnt.NG}`);
     for (const r of results) log(`  ${r.verdict.padEnd(2, '　')} ${r.rel}${r.verdict !== 'OK' ? ' — ' + r.items.filter((x) => x.level === r.verdict)[0].msg : ''}`);
     log(`出力: ${path.relative(process.cwd(), outDir) || outDir}/report.md${video && video.mp4 ? '・' + video.mp4 : ''}`);
-    return { outDir, results: json.results, counts: cnt, video, installed };
+    return { outDir, results: json.results, counts: cnt, video, envPreview, installed };
   } finally {
     fs.rmSync(work, { recursive: true, force: true });
   }
@@ -737,10 +758,10 @@ function listRepoFaces(spr) {
 }
 
 // ---------------------------------------------------------------- report.md
-function buildReport({ name, input, results, video, installed, missing, catalogN }) {
+function buildReport({ name, input, results, video, envPreview, installed, missing, catalogN }) {
   const cnt = { OK: 0, '注意': 0, NG: 0 };
   for (const r of results) cnt[r.verdict]++;
-  const KIND = { body: '素体', wear: '服・装備', weapon: '武器', face: '顔', hair: '髪', head: '1枚の頭', other: '不明' };
+  const KIND = { body: '素体', wear: '服・装備', weapon: '武器', face: '顔', hair: '髪', head: '1枚の頭', other: '不明', bg: '背景', tile: '地面・足場', icon: 'アイコン', vehicle: '乗り物', wheel: 'タイヤ', ui: 'タイトル・地図' };
   const L = [];
   L.push(`# 納品画像の検査: ${name}`, '');
   L.push(`- 入力: \`${input}\``, `- 日時: ${new Date().toISOString().replace('T', ' ').slice(0, 16)}（UTC）`, `- 結果: **OK ${cnt.OK} / 注意 ${cnt['注意']} / NG ${cnt.NG}**（全 ${results.length} 枚。依頼書の一覧 ${catalogN} 枚と照合）`, '');
@@ -749,6 +770,12 @@ function buildReport({ name, input, results, video, installed, missing, catalogN
     if (video.cases) for (const c of video.cases) L.push(`  - ${c}`);
     if (video.notes) for (const n of video.notes) L.push(`  - 注: ${n}`);
     if (video.error) L.push(`- 動画: 作れませんでした（${video.error}）`);
+    L.push('');
+  }
+  if (envPreview) {
+    if (envPreview.shots) L.push('- ゲーム内の見た目（キャラ以外）: ' + envPreview.shots.map((s) => `[${s}](${s})`).join('・'));
+    if (envPreview.notes) for (const n of envPreview.notes) L.push(`  - 注: ${n}`);
+    if (envPreview.error) L.push(`- プレビュー: 作れませんでした（${envPreview.error}）`);
     L.push('');
   }
   if (missing.length) { L.push('**同じ段階で足りないファイル**（表情4枚・後ろ髪）:', ...missing.map((m) => `- \`${m}\``), ''); }
@@ -777,6 +804,15 @@ function buildReport({ name, input, results, video, installed, missing, catalogN
     if (m.bbox) lines.push(`絵の範囲: x ${m.bbox.x0}〜${m.bbox.x1}・y ${m.bbox.y0}〜${m.bbox.y1}（中心 x=${m.bbox.cx}。支点 (${HEAD_PX},${HEAD_PY})・頭頂 y=${HEAD_PY + HEAD_GUIDE.top * HEAD_S}・顎 y=${HEAD_PY + HEAD_GUIDE.chin * HEAD_S}）`);
     if (m.exprIoU != null) lines.push(`基本の顔との輪郭の一致 IoU ${m.exprIoU}%・外枠のずれ ${JSON.stringify(m.bboxShift)}`);
     if (m.hairColoredRatio != null) lines.push(`髪の色に近い画素 ${m.hairColoredPx}px（${m.hairColoredRatio}%）`);
+    if (m.seam) lines.push(`左右の継ぎ目: 右端と左端の列の差 ${m.seam.seam}（絵の中の隣の列の差 平均 ${m.seam.base}）`);
+    if (m.skyOpaque != null) lines.push(`空（上 48 行）の不透明 ${m.skyOpaque}%`);
+    if (m.belowGroundOpaque != null) lines.push(`地面の線より下（y=648〜）の不透明 ${m.belowGroundOpaque}%`);
+    if (m.footCoverage != null) lines.push(`建物の足元（y=620〜639）の不透明 ${m.footCoverage}%・不透明が半分を切る行 y=${m.footY ?? '-'}`);
+    if (m.surfaceY !== undefined) lines.push(`面の線（横の 90% 以上が埋まる最初の行）y=${m.surfaceY ?? '-'}（正しくは ${m.surfaceWant}）・線より上の不透明 ${m.aboveOpaque}%${m.solidBelow != null ? `・断面の不透明 ${m.solidBelow}%` : ''}`);
+    if (m.lightsLightness != null) lines.push(`あかりの明るさ ${m.lightsLightness}%`);
+    if (m.fill != null) lines.push(`不透明 ${m.fill}%（スキルは正方形いっぱい）`);
+    if (m.markers) lines.push(`マゼンタの印: ${m.markers.map((x) => `(${x.x},${x.y}) ${x.px}px`).join('・') || 'なし'}${m.wheelAreaOpaque ? `・タイヤの所の不透明 ${m.wheelAreaOpaque.join('%・')}%` : ''}`);
+    if (m.wheel) lines.push(`タイヤ: 中心 (${m.wheel.cx},${m.wheel.cy})・${m.wheel.w}×${m.wheel.h}px`);
     if (m.onFaces) for (const o of m.onFaces) lines.push(`${o.face} と重ねる: 頭頂の肌が出る ${o.crownUncovered}%・こめかみで外に出る肌 ${o.sideSkinOutside}%`);
     if (lines.length) L.push('', '<details><summary>数値</summary>', '', ...lines.map((x) => '- ' + x), '', '</details>');
     L.push('');
@@ -788,6 +824,7 @@ function buildReport({ name, input, results, video, installed, missing, catalogN
     L.push(`- rig_manifest.mjs: ${installed.rigManifest}`);
     if (installed.faces.length || installed.hairs.length) L.push(`- manifest に書いた faces: ${installed.faces.join(', ') || 'なし'} / hairs: ${installed.hairs.join(', ') || 'なし'}`);
     if (installed.bases.length) L.push(`- rig.parts に基準色を書いた: ${installed.bases.join(', ')}`);
+    if (installed.env && installed.env.length) L.push(`- manifest の bg / tiles / icons / vehicles / ui に書いた: ${installed.env.join(', ')}`);
     L.push('');
   }
   L.push('## 閾値', '', '```json', JSON.stringify(TH), '```', '');
@@ -857,9 +894,20 @@ function install({ results, files, root, cat, log }) {
     }
     if (!man.faceBase) man.faceBase = { skin: { ...RIG_SKIN_BASE }, eye: EYE_BASE };
   }
+  // 背景・地面/足場・アイコン・乗り物・UI: manifest の節に "キー": "パス"（bg/beach_town_far.png → bg.beach_town_far）
+  const env = [];
+  for (const rel of copied) {
+    const k = envManifestKey(rel);
+    if (!k || !ENV_KINDS.has(classify(rel).kind)) continue;
+    const [sec, key] = k;
+    man[sec] = man[sec] && typeof man[sec] === 'object' && !Array.isArray(man[sec]) ? man[sec] : {};
+    const old = man[sec][key];
+    man[sec][key] = old && typeof old === 'object' ? { ...old, file: rel } : rel;
+    env.push(`${sec}.${key}`);
+  }
   fs.writeFileSync(manPath, JSON.stringify(man, null, 2) + '\n');
   log(`組み込み: ${copied.length} 枚コピー、NG で除外 ${skipped.length} 枚`);
-  return { copied, skipped, rigManifest, faces, hairs, bases };
+  return { copied, skipped, rigManifest, faces, hairs, bases, env };
 }
 
 // ---------------------------------------------------------------- ゲーム内の見た目（動画・コマ並べ）
@@ -984,6 +1032,63 @@ async function renderPreview({ files, outDir, root, cat, log }) {
     await browser.close();
     srv.close();
     fs.rmSync(fdir, { recursive: true, force: true });
+  }
+}
+
+// ---------------------------------------------------------------- ゲーム内の見た目（キャラ以外）
+// 納品物を manifest の bg / tiles / icons / vehicles / ui に足して tests/art_env_preview.html を開き、ゲームの描画関数で描いたスクショを出す
+//   preview_env_bg.png（地域ごと 夕方・夜。背景＋地面・足場）/ preview_env_icons.png / preview_env_vehicles.png / preview_env_ui.png
+async function renderEnvPreview({ files, results, outDir, root, log }) {
+  const man = JSON.parse(fs.readFileSync(path.join(root, 'assets', 'sprites', 'manifest.json'), 'utf8'));
+  const sizeNg = new Set(results.filter((r) => r.items.some((it) => it.level === 'NG' && /^大きさ|PNG として読めない/.test(it.msg))).map((r) => r.rel));
+  const use = files.filter((f) => !sizeNg.has(f.rel));
+  const kinds = new Set();
+  for (const f of use) {
+    const k = envManifestKey(f.rel); if (!k) continue;
+    man[k[0]] = man[k[0]] && typeof man[k[0]] === 'object' ? man[k[0]] : {};
+    man[k[0]][k[1]] = f.rel;
+    kinds.add(k[0] === 'tiles' ? 'bg' : k[0]);
+  }
+  if (!kinds.size) return { notes: ['描ける画像がありません（大きさが違う物は描きません）'] };
+  const byRel = new Map(use.map((f) => [f.rel, f.abs]));
+  const srv = http.createServer((req, res) => {
+    const u = decodeURIComponent(req.url.split('?')[0]);
+    if (u === '/__art/assets/sprites/manifest.json') { res.writeHead(200, { 'Content-Type': MIME['.json'] }); res.end(JSON.stringify(man)); return; }
+    let f;
+    if (u.startsWith('/__art/assets/sprites/')) { const rel = u.slice('/__art/assets/sprites/'.length); f = byRel.get(rel) || path.join(root, 'assets', 'sprites', rel); }
+    else f = path.join(ROOT, u);
+    const rp = path.resolve(f);
+    if (!byRel.has(u.slice('/__art/assets/sprites/'.length)) && !rp.startsWith(path.resolve(ROOT)) && !rp.startsWith(path.resolve(root))) { res.writeHead(403); res.end(); return; }
+    if (!fs.existsSync(f) || fs.statSync(f).isDirectory()) { res.writeHead(404); res.end(); return; }
+    res.writeHead(200, { 'Content-Type': MIME[path.extname(f)] || 'application/octet-stream', 'Cache-Control': 'no-store' });
+    fs.createReadStream(f).pipe(res);
+  });
+  await new Promise((r) => srv.listen(0, '127.0.0.1', r));
+  const port = srv.address().port;
+  const { chromium } = await loadPlaywright();
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+    const errs = [];
+    page.on('pageerror', (e) => errs.push(e.message));
+    await page.goto(`http://127.0.0.1:${port}/tests/art_env_preview.html`);
+    await page.waitForFunction(() => window.ARTENV && window.ARTENV.ready, null, { timeout: 20000 });
+    const st = await page.evaluate(() => window.ARTENV.setup('/__art/assets/sprites/manifest.json'));
+    const shots = [];
+    for (const k of ['bg', 'icons', 'vehicles', 'ui']) {
+      if (!kinds.has(k)) continue;
+      const url = await page.evaluate((k) => window.ARTENV.sheet(k), k);
+      if (!url) continue;
+      const fn = `preview_env_${k}.png`;
+      fs.writeFileSync(path.join(outDir, fn), Buffer.from(url.split(',')[1], 'base64'));
+      shots.push(fn);
+    }
+    log(`プレビュー（キャラ以外）: ${shots.join('・')}`);
+    const notes = [...(st.stats.errors || []), ...errs.map((e) => 'ページのエラー: ' + e)];
+    return { shots, notes, stats: { loaded: st.stats.loaded, failed: st.stats.failed } };
+  } finally {
+    await browser.close();
+    srv.close();
   }
 }
 
