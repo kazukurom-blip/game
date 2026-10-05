@@ -415,10 +415,13 @@ function makePose(state, t, at, wk, ws, anim, w, f) {
     case 'walk': {
       const ww = w; // 0.6s で1周（2歩）
       const s = Math.sin(t * ww), c = Math.cos(t * ww);
-      const amp = f ? 0.52 : 0.6;
-      P.lf = [amp * s, Math.max(0, -c) * 0.65 + 0.05]; P.lb = [-amp * s, Math.max(0, c) * 0.65 + 0.05];
-      P.ab = [0.7 * s, 0.35];
-      if (wk === 'none') { P.af = [-0.7 * s, 0.4]; P.handF = 'fist'; } else P.af[0] += -0.22 * s;
+      // 人の歩き: 脚を前へ振り出す間（遊脚）だけ膝を大きく曲げ、着地〜後ろへ送る間（立脚）はほぼ伸ばす。
+      // 脚の角度 amp·sin の増える側（cos > 0）が前へ振り出す時。かかと着地の直後に少しだけ膝を曲げて衝撃を受ける
+      const amp = f ? 0.44 : 0.5;
+      const knee = (q) => Math.max(0, q) ** 1.3 * 0.95 + Math.max(0, -q) * 0.12 + 0.06;
+      P.lf = [amp * s, knee(c)]; P.lb = [-amp * s, knee(-c)];
+      P.ab = [0.45 * s, 0.3 + Math.max(0, s) * 0.25];
+      if (wk === 'none') { P.af = [-0.45 * s, 0.3 + Math.max(0, -s) * 0.25]; P.handF = 'fist'; } else P.af[0] += -0.18 * s;
       P.handB = 'fist';
       P.bob = -Math.abs(c) * 1.8 + 0.9; P.tilt = 0.07; P.twist = -s * 0.9;
       P.headTilt = Math.sin(t * ww * 2 - 1.1) * 0.025 - 0.02;
@@ -3251,28 +3254,69 @@ function rigImg(ctx, p) {
   ctx.drawImage(FL ? rigFlash(p) : p.cv, -p.px / R, -p.py / R, p.w / R, p.h / R);
 }
 /** 肢（肩/股〜手/足首の1枚の絵）を関節（肘/膝 = 支点から l1）で2つに分けて描く。a, e はコードの limb と同じ（a=付け根の角度, e=関節の曲がり） */
+// 関節を曲げる幅（単位）。この範囲で上の骨と下の骨の角度をなめらかに混ぜる
+const JOINT_BLEND = 3;
+/**
+ * 腕・脚の絵を、関節（肘・膝）でなめらかに曲げて描く（細い横帯に分け、帯ごとに角度を少しずつ変えて並べる＝2Dのスキニング）。
+ * 絵の縦の軸が骨。支点（肩・股）から l1 の所が関節。a = 上の骨の角度、e = 関節の曲げ角
+ */
 function rigLimb(ctx, p, x0, y0, a, e, l1) {
   if (!p) return;
   const R = p.R, src = FL ? rigFlash(p) : p.cv;
-  const jy = p.py + l1 * R, ov = 1.15 * R;
   const X = -p.px / R, W = p.w / R;
-  const kx = x0 + Math.sin(a) * l1, ky = y0 + Math.cos(a) * l1;
-  const y1 = Math.max(0, Math.floor(jy - ov)), h1 = p.h - y1;
-  if (h1 > 0) {
-    ctx.save(); ctx.translate(kx, ky); ctx.rotate(-(a + e));
-    ctx.drawImage(src, 0, y1, p.w, h1, X, (y1 - jy) / R, W, h1 / R);
-    if (Math.abs(e) > 0.12) {   // 関節の外側の隙間を、中間の角度の帯で埋める
-      ctx.rotate(e / 2);
-      const bh = Math.min(p.h - y1, Math.ceil(ov * 2));
-      ctx.drawImage(src, 0, y1, p.w, bh, X, (y1 - jy) / R, W, bh / R);
-    }
-    ctx.restore();
-  }
-  const h0 = Math.min(p.h, Math.ceil(jy + ov));
-  if (h0 > 0) {
+  if (Math.abs(e) < 0.06) {   // ほぼまっすぐ: 1枚で
     ctx.save(); ctx.translate(x0, y0); ctx.rotate(-a);
-    ctx.drawImage(src, 0, 0, p.w, h0, X, -p.py / R, W, h0 / R);
+    ctx.drawImage(src, 0, 0, p.w, p.h, X, -p.py / R, W, p.h / R);
     ctx.restore();
+    return;
+  }
+  const step = 0.75, sp = step * R;                       // 帯の高さ（単位 / 保持 px）
+  const d0 = -p.py / R, d1 = (p.h - p.py) / R;           // 支点からの距離の範囲（上が負）
+  const lo = l1 - JOINT_BLEND, hi = l1 + JOINT_BLEND;
+  const wOf = (d) => (d <= lo ? 0 : d >= hi ? 1 : ((d - lo) / (hi - lo)) ** 2 * (3 - 2 * (d - lo) / (hi - lo)));
+  // 支点より上（肩・腰の丸み）は上の骨と同じ向き
+  let px = x0, py = y0;
+  ctx.save(); ctx.translate(x0, y0); ctx.rotate(-a);
+  const top = Math.min(p.h, Math.ceil(p.py + (lo + 0.15) * R));
+  ctx.drawImage(src, 0, 0, p.w, top, X, d0, W, top / R);
+  ctx.restore();
+  // 関節の手前まではまっすぐ進む
+  px += Math.sin(a) * lo; py += Math.cos(a) * lo;
+  const XL = X - 0.6, XR = X + W + 0.6, EPS = 0.14;                  // 帯の切り抜きの左右（少し外まで）
+  let th0 = a;
+  for (let d = lo; d < d1; d += step) {
+    const last = d + step >= hi;
+    const th1 = last ? a + e : a + e * wOf(d + step), thm = (th0 + th1) / 2;
+    const y = Math.max(0, p.py + (d - step) * R);
+    if (y >= p.h) break;
+    const nx = px + Math.sin(thm) * step, ny = py + Math.cos(thm) * step;
+    if (last) {
+      // 関節より下は1枚で（上端だけ前の帯との境目で切る）
+      const c1 = Math.cos(th1), s1 = Math.sin(th1);
+      ctx.save();
+      ctx.beginPath();
+      const ux = px - Math.sin(th0) * EPS, uy = py - Math.cos(th0) * EPS;
+      ctx.moveTo(ux + Math.cos(th0) * XL, uy - Math.sin(th0) * XL); ctx.lineTo(ux + Math.cos(th0) * XR, uy - Math.sin(th0) * XR);
+      ctx.lineTo(nx + c1 * XR + s1 * 40, ny - s1 * XR + c1 * 40); ctx.lineTo(nx + c1 * XL + s1 * 40, ny - s1 * XL + c1 * 40);
+      ctx.closePath(); ctx.clip();
+      ctx.translate(px, py); ctx.rotate(-thm);
+      ctx.drawImage(src, 0, y, p.w, p.h - y, X, (y - p.py) / R - d, W, (p.h - y) / R);
+      ctx.restore();
+      break;
+    }
+    // 上の境目（角度 th0）と下の境目（角度 th1）で囲んだ四角に切り抜いて描く（外側の隙間・内側のギザギザが出ない）
+    // 境目の細い線が出ないよう、上下に少し（EPS）重ねる
+    const ux = px - Math.sin(th0) * EPS, uy = py - Math.cos(th0) * EPS, bx = nx + Math.sin(th1) * EPS, by = ny + Math.cos(th1) * EPS;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(ux + Math.cos(th0) * XL, uy - Math.sin(th0) * XL); ctx.lineTo(ux + Math.cos(th0) * XR, uy - Math.sin(th0) * XR);
+    ctx.lineTo(bx + Math.cos(th1) * XR, by - Math.sin(th1) * XR); ctx.lineTo(bx + Math.cos(th1) * XL, by - Math.sin(th1) * XL);
+    ctx.closePath(); ctx.clip();
+    ctx.translate(px, py); ctx.rotate(-thm);
+    const h = Math.min(p.h - y, sp * 3);
+    ctx.drawImage(src, 0, y, p.w, h, X, (y - p.py) / R - d, W, h / R);
+    ctx.restore();
+    px = nx; py = ny; th0 = th1;
   }
 }
 /** 手前の手だけをもう一度（武器の上に。握っている見た目） */
