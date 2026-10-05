@@ -145,15 +145,16 @@ function enterHead(ctx, K) {
  * 体の動きに少し遅れて・大きめに頭を振る（うなずき・攻撃の踏み込み・被弾ののけぞり）＋ひねりで横に少し縮めて「振り向き」に見せる
  */
 function enterAiNeck(ctx, K) {
+  // 頭の振りの元は makePose の P.headTilt だけ（うなずき・被弾ののけぞり・待機の揺れ）。上半身の傾き P.tilt は
+  // 呼び出し元（enterUpper の中）で既に掛かっているので足さない。1枚絵は表情が変わらない分、headTilt を少し大きめに
+  // 効かせ、makePose に無い動き（攻撃のひねりへの追従・ジャンプの見上げ）だけをここで足す。周期はループ（LOOP）の整数倍のみ
   const P = K.P, t = K.t || 0, w = K.w || 1, st = K.state;
-  let a = P.headTilt * 1.6 + P.tilt * 0.55, dy = 0;
-  if (st === 'walk') { a += Math.sin(t * w * 2 - 0.6) * 0.05; dy = -Math.abs(Math.cos(t * w)) * 0.6 + 0.3; }
-  else if (st === 'attack' || st === 'shoot') a += P.twist * 0.05 + P.hx * 0.02;
-  else if (st === 'jump') { a -= 0.07; dy = -0.6; }
-  else if (st === 'hurt') a -= 0.12;
-  else if (st === 'cheer') a -= 0.08;
-  else if (!P.sit && !P.lie) a += Math.sin(t * w * 1.3) * 0.025;
-  a = clamp(a, -0.4, 0.4);
+  let a = P.headTilt * 1.4, dy = 0;
+  if (st === 'walk') dy = -Math.abs(Math.cos(t * w)) * 0.6 + 0.3;   // 首の弾み（体の弾み bob と同じ周期で少し遅れる）
+  else if (st === 'attack' || st === 'shoot') a += P.twist * 0.04;
+  else if (st === 'jump') { a -= 0.05; dy = -0.6; }
+  else if (st === 'cheer') a -= 0.06;
+  a = clamp(a, -0.3, 0.3);
   const ny = RIG_Y.neck - K.headY;                     // 頭の中心 → 首の付け根（下が正）
   ctx.translate(P.twist * 0.35, K.headY + ny + dy);
   ctx.rotate(a);
@@ -167,9 +168,6 @@ function enterCodeHead(ctx, K) {
   if (K.rig) { ctx.translate(0, RIG_CODE_HEAD.dy); ctx.scale(RIG_CODE_HEAD.s, RIG_CODE_HEAD.s); }
 }
 
-function drawFrontView(ctx, K) {
-  const P = K.P, eq = K.eq, B = K.B;
-  const tw = P.twist;
 
 // ===== パーツの描画と重ね順
 function rigImg(ctx, p) {
