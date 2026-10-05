@@ -3363,6 +3363,11 @@ function renderRig(ctx, look, equip, anim, state, ws, wk, plan) {
   const at = clamp(anim.attackT || 0, 0, 1);
   const f = look.body === 'f';
   const P = makePose(state, t, at, wk, ws, anim, w, f);
+  // 右向き斜め前（3q）の素手の立ち姿: 人の自然な立ち方は、上腕がほぼ真下・肘は 5〜10°だけ曲がり、手は太ももの横。
+  // makePose の待機（手前の腕 前へ 0.15・肘 0.45）は正面の体用で、3q では手前の手がお腹の前に出てしまう
+  if (state === 'idle' && wk === 'none' && rigView() === '3q') {
+    P.af = [P.af[0] - 0.13, 0.15]; P.ab = [P.ab[0] + 0.1, 0.12];
+  }
   const K = makeK(look, equip, anim, state, ws, wk, P, t, at, w, true);
   P.hipY += K.B.hipY;
   resolveFace(P, K, anim);
