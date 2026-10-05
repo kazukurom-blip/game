@@ -17,6 +17,7 @@
     "test:rig": "node tests/rig_browser.mjs",
     "rig:manifest": "node tools/rig_manifest.mjs",
     "check:art": "node tools/check_art.mjs",
-    "test:art": "node tests/art_check.mjs"
+    "test:art": "node tests/art_check.mjs",
+    "test:artenv": "node tests/art_env_browser.mjs && node tests/art_env_check.mjs"
   }
 }
