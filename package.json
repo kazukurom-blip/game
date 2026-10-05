@@ -7,7 +7,9 @@
   "scripts": {
     "serve": "http-server . -p 8080 -c-1",
     "test": "npm run test:unit && npm run test:smoke",
-    "test:unit": "node tests/unit.mjs",
-    "test:smoke": "node tests/smoke.mjs"
+    "test:unit": "node tests/unit.mjs && node tests/sprites_unit.mjs",
+    "test:smoke": "node tests/smoke.mjs",
+    "test:sprites": "node tests/sprites_browser.mjs",
+    "export:sprites": "node tools/export_sprites.mjs"
   }
 }

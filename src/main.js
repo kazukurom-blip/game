@@ -30,6 +30,7 @@ import { drawHUD } from './ui/hud.js';
 import { drawTitle, titleInput } from './ui/title.js';
 
 import { DebugPanel } from './debug/debug.js';
+import * as Sprites from './render/sprites.js';
 
 const W = 1280, H = 720;
 function loadSettings() {
@@ -114,6 +115,9 @@ window.game = game; // デバッグ/テスト用
 onSlotDeleted((slot) => safe('removeSharedChar', () => removeSharedChar(slot)));
 game.ui = new UIManager(game);
 game.debug = new DebugPanel(game);
+// 差し替えスプライト（assets/sprites/manifest.json。無い/壊れている → 全部コード描画のまま）
+game.sprites = Sprites;
+Sprites.loadSpriteManifest().catch(() => {});
 game.saveSettings = () => { try { localStorage.setItem('nvs_settings', JSON.stringify(game.settings)); } catch { /* ignore */ } };
 // 永続的なイベント購読（各 attach は game.state を都度参照する）
 safe('attachAudio', () => attachAudio(game));

@@ -12,6 +12,7 @@ import { computeStats, gainExp, expToNext } from '../systems/progression.js';
 import { addItem, countItem, freeSlots, equip } from '../systems/inventory.js';
 import { damageEnemy, setWantedLevel, TEAR_THRESHOLDS } from '../systems/combat.js';
 import { spawnEffect } from '../render/effects.js';
+import { getSpriteMode, toggleSpriteMode, spriteStats } from '../render/sprites.js';
 
 const PANEL_W = 300;
 const BTN_H = 24;
@@ -51,6 +52,7 @@ export class DebugPanel {
       { id: 'clearInv', label: () => 'インベントリ整理', key: '⇧F8', fn: () => this.clearInventory() },
       { id: 'pet', label: () => `PET付与 ${this.game.state?.equipped?.pet ? '(次)' : ''}`, key: '⇧F9', fn: () => this.givePet() },
       { id: 'visitAll', label: () => '全マップ訪問済み', key: '⇧F10', fn: () => this.visitAll() },
+      { id: 'sprites', label: () => `見た目: ${getSpriteMode() === 'auto' ? 'スプライト' : 'コード描画'}`, key: '', fn: () => { const m = toggleSpriteMode(); const st = spriteStats(); return `${m === 'auto' ? 'スプライト優先' : 'コード描画'}（読込 ${st.loaded}/${st.entries}）`; } },
       ...Object.keys(CLOCK_PRESETS).map((k) => ({ id: 'clock_' + k, label: () => `時刻: ${CLOCK_LABEL[k]} ${CLOCK_PRESETS[k]}時`, key: '', fn: () => this.setClock(CLOCK_PRESETS[k]) })),
     ];
     this._keyMap = {};
@@ -305,6 +307,10 @@ export class DebugPanel {
       lines.push(`damage ${(p.anim?.damage ?? 0).toFixed(2)}  inv ${st.inventory.length}/48  missions ${st.missions.active.length}`);
       const ck = g.clock ?? st.clock ?? 0;
       lines.push(`${g.map?.town ? 'TOWN' : 'FIELD'} ${g.map?.region || '-'}  clock ${String(Math.floor(ck)).padStart(2, '0')}:${String(Math.floor((ck % 1) * 60)).padStart(2, '0')}  pet ${st.equipped?.pet || '-'}`);
+    }
+    {
+      const ss = spriteStats();
+      lines.push(`sprites ${ss.mode === 'auto' ? 'ON' : 'OFF'}  manifest:${ss.manifest}  読込 ${ss.loaded}/${ss.entries}${ss.failed ? ` 失敗${ss.failed}` : ''}`);
     }
     const errLine = g.lastError ? `ERR: ${String(g.lastError).slice(0, 44)}` : 'ERR: なし';
 

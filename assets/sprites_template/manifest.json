@@ -1,0 +1,7665 @@
+{
+ "version": 1,
+ "note": "tools/export_sprites.mjs が書き出したテンプレート。assets/sprites/ にコピーすればそのまま使える（docs/SPEC_SPRITES.md）",
+ "defaults": {
+  "scale": 0.5,
+  "fps": 8
+ },
+ "enemies": {
+  "alien_grey": {
+   "file": "enemies/alien_grey.png",
+   "cell": [
+    88,
+    160
+   ],
+   "anchor": [
+    45,
+    144
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    34,
+    56
+   ]
+  },
+  "alien_moon": {
+   "file": "enemies/alien_moon.png",
+   "cell": [
+    96,
+    168
+   ],
+   "anchor": [
+    48,
+    149
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    36,
+    58
+   ]
+  },
+  "alien_warrior": {
+   "file": "enemies/alien_warrior.png",
+   "cell": [
+    96,
+    176
+   ],
+   "anchor": [
+    50,
+    159
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    38,
+    62
+   ]
+  },
+  "cop_detective": {
+   "file": "enemies/cop_detective.png",
+   "cell": [
+    216,
+    216
+   ],
+   "anchor": [
+    122,
+    187
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    38.89,
+    79.72
+   ]
+  },
+  "cop_patrol": {
+   "file": "enemies/cop_patrol.png",
+   "cell": [
+    208,
+    200
+   ],
+   "anchor": [
+    112,
+    173
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    38.89,
+    79.72
+   ]
+  },
+  "crab_hermit": {
+   "file": "enemies/crab_hermit.png",
+   "cell": [
+    144,
+    120
+   ],
+   "anchor": [
+    67,
+    101
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    50,
+    40
+   ]
+  },
+  "crab_iron": {
+   "file": "enemies/crab_iron.png",
+   "cell": [
+    160,
+    120
+   ],
+   "anchor": [
+    72,
+    101
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    54,
+    40
+   ]
+  },
+  "crab_rust": {
+   "file": "enemies/crab_rust.png",
+   "cell": [
+    160,
+    120
+   ],
+   "anchor": [
+    74,
+    105
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    56,
+    42
+   ]
+  },
+  "crab_sand": {
+   "file": "enemies/crab_sand.png",
+   "cell": [
+    136,
+    96
+   ],
+   "anchor": [
+    62,
+    77
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    46,
+    30
+   ]
+  },
+  "drone_attack": {
+   "file": "enemies/drone_attack.png",
+   "cell": [
+    160,
+    120
+   ],
+   "anchor": [
+    79,
+    101
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    50,
+    34
+   ]
+  },
+  "drone_casino": {
+   "file": "enemies/drone_casino.png",
+   "cell": [
+    152,
+    112
+   ],
+   "anchor": [
+    73,
+    94
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    46,
+    32
+   ]
+  },
+  "drone_guardian": {
+   "file": "enemies/drone_guardian.png",
+   "cell": [
+    176,
+    120
+   ],
+   "anchor": [
+    85,
+    108
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    54,
+    36
+   ]
+  },
+  "drone_launch": {
+   "file": "enemies/drone_launch.png",
+   "cell": [
+    152,
+    104
+   ],
+   "anchor": [
+    73,
+    92
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    46,
+    30
+   ]
+  },
+  "drone_night_owl": {
+   "file": "enemies/drone_night_owl.png",
+   "cell": [
+    152,
+    112
+   ],
+   "anchor": [
+    73,
+    96
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    46,
+    34
+   ]
+  },
+  "drone_peeping": {
+   "file": "enemies/drone_peeping.png",
+   "cell": [
+    136,
+    104
+   ],
+   "anchor": [
+    67,
+    85
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    42,
+    28
+   ]
+  },
+  "drone_scout": {
+   "file": "enemies/drone_scout.png",
+   "cell": [
+    144,
+    104
+   ],
+   "anchor": [
+    70,
+    89
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    44,
+    30
+   ]
+  },
+  "drone_toy": {
+   "file": "enemies/drone_toy.png",
+   "cell": [
+    136,
+    96
+   ],
+   "anchor": [
+    64,
+    80
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    40,
+    26
+   ]
+  },
+  "drone_traffic": {
+   "file": "enemies/drone_traffic.png",
+   "cell": [
+    144,
+    104
+   ],
+   "anchor": [
+    70,
+    89
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    44,
+    30
+   ]
+  },
+  "flamingo": {
+   "file": "enemies/flamingo.png",
+   "cell": [
+    136,
+    184
+   ],
+   "anchor": [
+    64,
+    170
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    40,
+    70
+   ]
+  },
+  "flamingo_punk": {
+   "file": "enemies/flamingo_punk.png",
+   "cell": [
+    144,
+    192
+   ],
+   "anchor": [
+    67,
+    179
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    42,
+    74
+   ]
+  },
+  "gator_albino": {
+   "file": "enemies/gator_albino.png",
+   "cell": [
+    264,
+    112
+   ],
+   "anchor": [
+    137,
+    98
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    96,
+    42
+   ]
+  },
+  "gator_fog": {
+   "file": "enemies/gator_fog.png",
+   "cell": [
+    256,
+    112
+   ],
+   "anchor": [
+    132,
+    94
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    92,
+    40
+   ]
+  },
+  "gator_swamp": {
+   "file": "enemies/gator_swamp.png",
+   "cell": [
+    248,
+    112
+   ],
+   "anchor": [
+    129,
+    94
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    90,
+    40
+   ]
+  },
+  "ghost_after_hours": {
+   "file": "enemies/ghost_after_hours.png",
+   "cell": [
+    152,
+    144
+   ],
+   "anchor": [
+    73,
+    130
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    44,
+    52
+   ]
+  },
+  "ghost_astral": {
+   "file": "enemies/ghost_astral.png",
+   "cell": [
+    152,
+    160
+   ],
+   "anchor": [
+    76,
+    140
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    46,
+    56
+   ]
+  },
+  "ghost_bayou": {
+   "file": "enemies/ghost_bayou.png",
+   "cell": [
+    136,
+    136
+   ],
+   "anchor": [
+    66,
+    121
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    40,
+    48
+   ]
+  },
+  "ghost_chip": {
+   "file": "enemies/ghost_chip.png",
+   "cell": [
+    144,
+    144
+   ],
+   "anchor": [
+    69,
+    126
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    42,
+    50
+   ]
+  },
+  "ghost_jackpot": {
+   "file": "enemies/ghost_jackpot.png",
+   "cell": [
+    184,
+    176
+   ],
+   "anchor": [
+    89,
+    162
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    54.6,
+    65
+   ]
+  },
+  "ghost_neon": {
+   "file": "enemies/ghost_neon.png",
+   "cell": [
+    144,
+    144
+   ],
+   "anchor": [
+    69,
+    126
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    42,
+    50
+   ]
+  },
+  "golem_garden": {
+   "file": "enemies/golem_garden.png",
+   "cell": [
+    248,
+    248
+   ],
+   "anchor": [
+    88,
+    230
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    84,
+    96
+   ]
+  },
+  "golem_gold": {
+   "file": "enemies/golem_gold.png",
+   "cell": [
+    256,
+    256
+   ],
+   "anchor": [
+    91,
+    239
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    87.5,
+    100
+   ]
+  },
+  "golem_moon": {
+   "file": "enemies/golem_moon.png",
+   "cell": [
+    256,
+    256
+   ],
+   "anchor": [
+    91,
+    239
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    87.5,
+    100
+   ]
+  },
+  "golem_steel": {
+   "file": "enemies/golem_steel.png",
+   "cell": [
+    248,
+    248
+   ],
+   "anchor": [
+    88,
+    230
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    84,
+    96
+   ]
+  },
+  "jelly_coast": {
+   "file": "enemies/jelly_coast.png",
+   "cell": [
+    144,
+    152
+   ],
+   "anchor": [
+    70,
+    131
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    42,
+    48
+   ]
+  },
+  "jelly_cosmic": {
+   "file": "enemies/jelly_cosmic.png",
+   "cell": [
+    176,
+    208
+   ],
+   "anchor": [
+    85,
+    184
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    52,
+    67.6
+   ]
+  },
+  "jelly_moonlit": {
+   "file": "enemies/jelly_moonlit.png",
+   "cell": [
+    152,
+    152
+   ],
+   "anchor": [
+    73,
+    137
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    44,
+    50
+   ]
+  },
+  "jelly_void": {
+   "file": "enemies/jelly_void.png",
+   "cell": [
+    184,
+    224
+   ],
+   "anchor": [
+    91,
+    197
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    56,
+    72.8
+   ]
+  },
+  "jellyfish_pier": {
+   "file": "enemies/jellyfish_pier.png",
+   "cell": [
+    136,
+    144
+   ],
+   "anchor": [
+    66,
+    126
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    40,
+    46
+   ]
+  },
+  "mosquito_giant": {
+   "file": "enemies/mosquito_giant.png",
+   "cell": [
+    184,
+    144
+   ],
+   "anchor": [
+    87,
+    126
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    49.4,
+    49.4
+   ]
+  },
+  "mosquito_queen": {
+   "file": "enemies/mosquito_queen.png",
+   "cell": [
+    216,
+    160
+   ],
+   "anchor": [
+    100,
+    145
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    57,
+    57
+   ]
+  },
+  "mosquito_swamp": {
+   "file": "enemies/mosquito_swamp.png",
+   "cell": [
+    136,
+    80
+   ],
+   "anchor": [
+    61,
+    68
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    34,
+    26
+   ]
+  },
+  "mushroom_bog": {
+   "file": "enemies/mushroom_bog.png",
+   "cell": [
+    128,
+    136
+   ],
+   "anchor": [
+    64,
+    121
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    48,
+    52
+   ]
+  },
+  "mushroom_cone": {
+   "file": "enemies/mushroom_cone.png",
+   "cell": [
+    120,
+    128
+   ],
+   "anchor": [
+    59,
+    111
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    44,
+    50
+   ]
+  },
+  "mushroom_fog": {
+   "file": "enemies/mushroom_fog.png",
+   "cell": [
+    128,
+    136
+   ],
+   "anchor": [
+    64,
+    121
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    48,
+    54
+   ]
+  },
+  "mushroom_glow": {
+   "file": "enemies/mushroom_glow.png",
+   "cell": [
+    128,
+    128
+   ],
+   "anchor": [
+    61,
+    116
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    46,
+    52
+   ]
+  },
+  "mushroom_mutant": {
+   "file": "enemies/mushroom_mutant.png",
+   "cell": [
+    144,
+    152
+   ],
+   "anchor": [
+    70,
+    133
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    52.8,
+    57.6
+   ]
+  },
+  "mushroom_neon": {
+   "file": "enemies/mushroom_neon.png",
+   "cell": [
+    128,
+    128
+   ],
+   "anchor": [
+    61,
+    116
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    46,
+    50
+   ]
+  },
+  "mushroom_orange": {
+   "file": "enemies/mushroom_orange.png",
+   "cell": [
+    120,
+    128
+   ],
+   "anchor": [
+    59,
+    111
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    44,
+    48
+   ]
+  },
+  "mushroom_park": {
+   "file": "enemies/mushroom_park.png",
+   "cell": [
+    128,
+    128
+   ],
+   "anchor": [
+    61,
+    116
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    46,
+    50
+   ]
+  },
+  "mushroom_spore": {
+   "file": "enemies/mushroom_spore.png",
+   "cell": [
+    136,
+    144
+   ],
+   "anchor": [
+    66,
+    126
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    50,
+    54
+   ]
+  },
+  "rat_alley": {
+   "file": "enemies/rat_alley.png",
+   "cell": [
+    120,
+    80
+   ],
+   "anchor": [
+    62,
+    65
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    40,
+    26
+   ]
+  },
+  "rat_dock": {
+   "file": "enemies/rat_dock.png",
+   "cell": [
+    136,
+    88
+   ],
+   "anchor": [
+    70,
+    75
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    46,
+    30
+   ]
+  },
+  "rat_giant": {
+   "file": "enemies/rat_giant.png",
+   "cell": [
+    176,
+    120
+   ],
+   "anchor": [
+    89,
+    103
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    58.8,
+    42
+   ]
+  },
+  "rat_neon": {
+   "file": "enemies/rat_neon.png",
+   "cell": [
+    136,
+    88
+   ],
+   "anchor": [
+    67,
+    70
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    44,
+    28
+   ]
+  },
+  "rat_ship": {
+   "file": "enemies/rat_ship.png",
+   "cell": [
+    136,
+    88
+   ],
+   "anchor": [
+    67,
+    70
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    44,
+    28
+   ]
+  },
+  "rat_subway": {
+   "file": "enemies/rat_subway.png",
+   "cell": [
+    136,
+    88
+   ],
+   "anchor": [
+    67,
+    70
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    44,
+    28
+   ]
+  },
+  "robot_dealer": {
+   "file": "enemies/robot_dealer.png",
+   "cell": [
+    136,
+    176
+   ],
+   "anchor": [
+    59,
+    163
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    48,
+    62
+   ]
+  },
+  "robot_loader": {
+   "file": "enemies/robot_loader.png",
+   "cell": [
+    144,
+    184
+   ],
+   "anchor": [
+    64,
+    168
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    52,
+    64
+   ]
+  },
+  "robot_lunar": {
+   "file": "enemies/robot_lunar.png",
+   "cell": [
+    152,
+    176
+   ],
+   "anchor": [
+    66,
+    157
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    54,
+    60
+   ]
+  },
+  "robot_patrol": {
+   "file": "enemies/robot_patrol.png",
+   "cell": [
+    128,
+    176
+   ],
+   "anchor": [
+    57,
+    157
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    46,
+    60
+   ]
+  },
+  "robot_scrap": {
+   "file": "enemies/robot_scrap.png",
+   "cell": [
+    128,
+    176
+   ],
+   "anchor": [
+    57,
+    157
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    46,
+    60
+   ]
+  },
+  "robot_slot": {
+   "file": "enemies/robot_slot.png",
+   "cell": [
+    128,
+    176
+   ],
+   "anchor": [
+    57,
+    157
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    46,
+    60
+   ]
+  },
+  "robot_valet": {
+   "file": "enemies/robot_valet.png",
+   "cell": [
+    128,
+    176
+   ],
+   "anchor": [
+    57,
+    157
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    46,
+    60
+   ]
+  },
+  "robot_worker": {
+   "file": "enemies/robot_worker.png",
+   "cell": [
+    136,
+    176
+   ],
+   "anchor": [
+    59,
+    163
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    48,
+    62
+   ]
+  },
+  "robot_xeno": {
+   "file": "enemies/robot_xeno.png",
+   "cell": [
+    144,
+    192
+   ],
+   "anchor": [
+    64,
+    173
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    52,
+    66
+   ]
+  },
+  "seagull_beach": {
+   "file": "enemies/seagull_beach.png",
+   "cell": [
+    128,
+    88
+   ],
+   "anchor": [
+    62,
+    71
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    44,
+    30
+   ]
+  },
+  "seagull_highway": {
+   "file": "enemies/seagull_highway.png",
+   "cell": [
+    136,
+    88
+   ],
+   "anchor": [
+    65,
+    71
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    46,
+    30
+   ]
+  },
+  "seagull_jet": {
+   "file": "enemies/seagull_jet.png",
+   "cell": [
+    144,
+    88
+   ],
+   "anchor": [
+    68,
+    71
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    48,
+    30
+   ]
+  },
+  "slime_diamond": {
+   "file": "enemies/slime_diamond.png",
+   "cell": [
+    160,
+    112
+   ],
+   "anchor": [
+    79,
+    99
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    46,
+    36
+   ]
+  },
+  "slime_fuel": {
+   "file": "enemies/slime_fuel.png",
+   "cell": [
+    168,
+    120
+   ],
+   "anchor": [
+    83,
+    104
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    48,
+    38
+   ]
+  },
+  "slime_gold": {
+   "file": "enemies/slime_gold.png",
+   "cell": [
+    160,
+    112
+   ],
+   "anchor": [
+    79,
+    99
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    46,
+    36
+   ]
+  },
+  "slime_green": {
+   "file": "enemies/slime_green.png",
+   "cell": [
+    144,
+    104
+   ],
+   "anchor": [
+    70,
+    89
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    40,
+    32
+   ]
+  },
+  "slime_oil": {
+   "file": "enemies/slime_oil.png",
+   "cell": [
+    176,
+    128
+   ],
+   "anchor": [
+    85,
+    109
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    50,
+    40
+   ]
+  },
+  "slime_pink": {
+   "file": "enemies/slime_pink.png",
+   "cell": [
+    144,
+    112
+   ],
+   "anchor": [
+    72,
+    94
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    42,
+    34
+   ]
+  },
+  "slime_toxic": {
+   "file": "enemies/slime_toxic.png",
+   "cell": [
+    168,
+    120
+   ],
+   "anchor": [
+    83,
+    104
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    48,
+    38
+   ]
+  },
+  "slime_wave": {
+   "file": "enemies/slime_wave.png",
+   "cell": [
+    168,
+    120
+   ],
+   "anchor": [
+    82,
+    105
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    48,
+    38.4
+   ]
+  },
+  "snake_fog": {
+   "file": "enemies/snake_fog.png",
+   "cell": [
+    176,
+    88
+   ],
+   "anchor": [
+    76,
+    73
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    64,
+    26
+   ]
+  },
+  "snake_king": {
+   "file": "enemies/snake_king.png",
+   "cell": [
+    200,
+    128
+   ],
+   "anchor": [
+    86,
+    108
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    72.8,
+    39
+   ]
+  },
+  "snake_mangrove": {
+   "file": "enemies/snake_mangrove.png",
+   "cell": [
+    192,
+    96
+   ],
+   "anchor": [
+    83,
+    79
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    70,
+    28
+   ]
+  },
+  "snake_rattle": {
+   "file": "enemies/snake_rattle.png",
+   "cell": [
+    176,
+    88
+   ],
+   "anchor": [
+    76,
+    73
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    64,
+    26
+   ]
+  },
+  "snake_reed": {
+   "file": "enemies/snake_reed.png",
+   "cell": [
+    168,
+    80
+   ],
+   "anchor": [
+    72,
+    68
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    60,
+    24
+   ]
+  },
+  "swat_heavy": {
+   "file": "enemies/swat_heavy.png",
+   "cell": [
+    248,
+    240
+   ],
+   "anchor": [
+    131,
+    203
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    46,
+    94.3
+   ]
+  },
+  "swat_trooper": {
+   "file": "enemies/swat_trooper.png",
+   "cell": [
+    216,
+    208
+   ],
+   "anchor": [
+    115,
+    177
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    40,
+    82
+   ]
+  },
+  "thug_biker": {
+   "file": "enemies/thug_biker.png",
+   "cell": [
+    224,
+    208
+   ],
+   "anchor": [
+    114,
+    175
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    40,
+    82
+   ]
+  },
+  "thug_bouncer": {
+   "file": "enemies/thug_bouncer.png",
+   "cell": [
+    224,
+    248
+   ],
+   "anchor": [
+    137,
+    211
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    44,
+    90.2
+   ]
+  },
+  "thug_desert": {
+   "file": "enemies/thug_desert.png",
+   "cell": [
+    248,
+    208
+   ],
+   "anchor": [
+    120,
+    181
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    40,
+    82
+   ]
+  },
+  "thug_dockhand": {
+   "file": "enemies/thug_dockhand.png",
+   "cell": [
+    232,
+    208
+   ],
+   "anchor": [
+    117,
+    181
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    40,
+    82
+   ]
+  },
+  "thug_elite": {
+   "file": "enemies/thug_elite.png",
+   "cell": [
+    264,
+    232
+   ],
+   "anchor": [
+    135,
+    199
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    42.22,
+    86.56
+   ]
+  },
+  "thug_graffiti": {
+   "file": "enemies/thug_graffiti.png",
+   "cell": [
+    208,
+    200
+   ],
+   "anchor": [
+    112,
+    173
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    38.89,
+    79.72
+   ]
+  },
+  "thug_gunner": {
+   "file": "enemies/thug_gunner.png",
+   "cell": [
+    208,
+    208
+   ],
+   "anchor": [
+    110,
+    172
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    38.89,
+    79.72
+   ]
+  },
+  "thug_hitman": {
+   "file": "enemies/thug_hitman.png",
+   "cell": [
+    208,
+    200
+   ],
+   "anchor": [
+    112,
+    175
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    40,
+    82
+   ]
+  },
+  "thug_merc": {
+   "file": "enemies/thug_merc.png",
+   "cell": [
+    216,
+    208
+   ],
+   "anchor": [
+    115,
+    177
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    40,
+    82
+   ]
+  },
+  "thug_night_racer": {
+   "file": "enemies/thug_night_racer.png",
+   "cell": [
+    216,
+    200
+   ],
+   "anchor": [
+    111,
+    171
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    38.89,
+    79.72
+   ]
+  },
+  "thug_punk": {
+   "file": "enemies/thug_punk.png",
+   "cell": [
+    232,
+    200
+   ],
+   "anchor": [
+    120,
+    169
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    38.89,
+    79.72
+   ]
+  },
+  "thug_scrapper": {
+   "file": "enemies/thug_scrapper.png",
+   "cell": [
+    232,
+    208
+   ],
+   "anchor": [
+    115,
+    184
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    41.11,
+    84.28
+   ]
+  },
+  "thug_skater": {
+   "file": "enemies/thug_skater.png",
+   "cell": [
+    216,
+    200
+   ],
+   "anchor": [
+    112,
+    175
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    38.89,
+    79.72
+   ]
+  },
+  "thug_smuggler": {
+   "file": "enemies/thug_smuggler.png",
+   "cell": [
+    208,
+    208
+   ],
+   "anchor": [
+    115,
+    177
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    40,
+    82
+   ]
+  },
+  "thug_vip": {
+   "file": "enemies/thug_vip.png",
+   "cell": [
+    224,
+    216
+   ],
+   "anchor": [
+    125,
+    195
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4
+   },
+   "fps": 8,
+   "size": [
+    41.11,
+    84.28
+   ]
+  }
+ },
+ "bosses": {
+  "boss_alien": {
+   "file": "bosses/boss_alien.png",
+   "cell": [
+    728,
+    736
+   ],
+   "anchor": [
+    361,
+    593
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4,
+    "idle2": 4,
+    "walk2": 6,
+    "windup2": 2,
+    "attack2": 4
+   },
+   "fps": 8,
+   "size": [
+    272,
+    272
+   ]
+  },
+  "boss_captain": {
+   "file": "bosses/boss_captain.png",
+   "cell": [
+    336,
+    296
+   ],
+   "anchor": [
+    165,
+    253
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4,
+    "idle2": 4,
+    "walk2": 6,
+    "windup2": 2,
+    "attack2": 4
+   },
+   "fps": 8,
+   "size": [
+    56,
+    114.8
+   ]
+  },
+  "boss_don": {
+   "file": "bosses/boss_don.png",
+   "cell": [
+    312,
+    304
+   ],
+   "anchor": [
+    178,
+    263
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4,
+    "idle2": 4,
+    "walk2": 6,
+    "windup2": 2,
+    "attack2": 4
+   },
+   "fps": 8,
+   "size": [
+    56,
+    114.8
+   ]
+  },
+  "boss_gator": {
+   "file": "bosses/boss_gator.png",
+   "cell": [
+    640,
+    296
+   ],
+   "anchor": [
+    309,
+    276
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4,
+    "idle2": 4,
+    "walk2": 6,
+    "windup2": 2,
+    "attack2": 4
+   },
+   "fps": 8,
+   "size": [
+    220,
+    110
+   ]
+  },
+  "boss_king_slime": {
+   "file": "bosses/boss_king_slime.png",
+   "cell": [
+    472,
+    376
+   ],
+   "anchor": [
+    236,
+    341
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4,
+    "idle2": 4,
+    "walk2": 6,
+    "windup2": 2,
+    "attack2": 4
+   },
+   "fps": 8,
+   "size": [
+    120,
+    96
+   ]
+  },
+  "boss_mecha": {
+   "file": "bosses/boss_mecha.png",
+   "cell": [
+    448,
+    448
+   ],
+   "anchor": [
+    220,
+    326
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4,
+    "idle2": 4,
+    "walk2": 6,
+    "windup2": 2,
+    "attack2": 4
+   },
+   "fps": 8,
+   "size": [
+    140.8,
+    96
+   ]
+  },
+  "boss_rat_king": {
+   "file": "bosses/boss_rat_king.png",
+   "cell": [
+    360,
+    320
+   ],
+   "anchor": [
+    185,
+    295
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "windup": 2,
+    "attack": 4,
+    "hurt": 2,
+    "dead": 4,
+    "idle2": 4,
+    "walk2": 6,
+    "windup2": 2,
+    "attack2": 4
+   },
+   "fps": 8,
+   "size": [
+    126,
+    90
+   ]
+  }
+ },
+ "pets": {
+  "alienPet": {
+   "file": "pets/alienPet.png",
+   "cell": [
+    96,
+    128
+   ],
+   "anchor": [
+    45,
+    116
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "fly": 4,
+    "pick": [
+     4,
+     11.46
+    ]
+   },
+   "fps": 8
+  },
+  "catPet": {
+   "file": "pets/catPet.png",
+   "cell": [
+    88,
+    120
+   ],
+   "anchor": [
+    46,
+    108
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "fly": 4,
+    "pick": [
+     4,
+     11.46
+    ]
+   },
+   "fps": 8
+  },
+  "dolphinPet": {
+   "file": "pets/dolphinPet.png",
+   "cell": [
+    88,
+    128
+   ],
+   "anchor": [
+    43,
+    111
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "fly": 4,
+    "pick": [
+     4,
+     11.46
+    ]
+   },
+   "fps": 8
+  },
+  "dragonPet": {
+   "file": "pets/dragonPet.png",
+   "cell": [
+    120,
+    136
+   ],
+   "anchor": [
+    56,
+    123
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "fly": 4,
+    "pick": [
+     4,
+     11.46
+    ]
+   },
+   "fps": 8
+  },
+  "dronePet": {
+   "file": "pets/dronePet.png",
+   "cell": [
+    80,
+    120
+   ],
+   "anchor": [
+    38,
+    105
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "fly": 4,
+    "pick": [
+     4,
+     11.46
+    ]
+   },
+   "fps": 8
+  },
+  "flamingoPet": {
+   "file": "pets/flamingoPet.png",
+   "cell": [
+    96,
+    128
+   ],
+   "anchor": [
+    42,
+    112
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "fly": 4,
+    "pick": [
+     4,
+     11.46
+    ]
+   },
+   "fps": 8
+  },
+  "gatorPet": {
+   "file": "pets/gatorPet.png",
+   "cell": [
+    120,
+    112
+   ],
+   "anchor": [
+    58,
+    93
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "fly": 4,
+    "pick": [
+     4,
+     11.46
+    ]
+   },
+   "fps": 8
+  },
+  "ghostPet": {
+   "file": "pets/ghostPet.png",
+   "cell": [
+    96,
+    128
+   ],
+   "anchor": [
+    45,
+    113
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "fly": 4,
+    "pick": [
+     4,
+     11.46
+    ]
+   },
+   "fps": 8
+  },
+  "robotPet": {
+   "file": "pets/robotPet.png",
+   "cell": [
+    88,
+    136
+   ],
+   "anchor": [
+    42,
+    117
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "fly": 4,
+    "pick": [
+     4,
+     11.46
+    ]
+   },
+   "fps": 8
+  },
+  "slimePet": {
+   "file": "pets/slimePet.png",
+   "cell": [
+    88,
+    112
+   ],
+   "anchor": [
+    41,
+    96
+   ],
+   "rows": {
+    "idle": 4,
+    "walk": 6,
+    "fly": 4,
+    "pick": [
+     4,
+     11.46
+    ]
+   },
+   "fps": 8
+  }
+ },
+ "chars": {
+  "enabled": true,
+  "scale": 0.5,
+  "fps": {
+   "default": 8,
+   "idle": 2.5,
+   "walk": 13.333,
+   "jump": 1.667,
+   "climb": 4.444,
+   "drive": 1,
+   "sit": 1
+  },
+  "rows": {
+   "idle": 6,
+   "walk": 8,
+   "jump": 2,
+   "climb": 4,
+   "attack": 6,
+   "shoot": 4,
+   "hurt": 2,
+   "dead": 4,
+   "drive": 1,
+   "sit": 1,
+   "attack_melee": 6,
+   "attack_magic": 6
+  },
+  "layers": {
+   "accessory:goldChain_f": {
+    "file": "chars/equip/accessory/goldChain_f_gray.png",
+    "cell": [
+     72,
+     104
+    ],
+    "anchor": [
+     37,
+     90
+    ],
+    "tint": "color",
+    "plain": "chars/equip/accessory/goldChain_f.png",
+    "plainColor": "#ffcc33"
+   },
+   "accessory:goldChain_m": {
+    "file": "chars/equip/accessory/goldChain_m_gray.png",
+    "cell": [
+     72,
+     104
+    ],
+    "anchor": [
+     36,
+     89
+    ],
+    "tint": "color",
+    "plain": "chars/equip/accessory/goldChain_m.png",
+    "plainColor": "#ffcc33"
+   },
+   "accessory:halo_f": {
+    "file": "chars/equip/accessory/halo_f_gray.png",
+    "cell": [
+     192,
+     208
+    ],
+    "anchor": [
+     128,
+     193
+    ],
+    "tint": "color",
+    "plain": "chars/equip/accessory/halo_f.png",
+    "plainColor": "#ffe066"
+   },
+   "accessory:halo_m": {
+    "file": "chars/equip/accessory/halo_m_gray.png",
+    "cell": [
+     192,
+     208
+    ],
+    "anchor": [
+     131,
+     196
+    ],
+    "tint": "color",
+    "plain": "chars/equip/accessory/halo_m.png",
+    "plainColor": "#ffe066"
+   },
+   "accessory:mask_f": {
+    "file": "chars/equip/accessory/mask_f_gray.png",
+    "cell": [
+     120,
+     144
+    ],
+    "anchor": [
+     69,
+     125
+    ],
+    "tint": "color",
+    "plain": "chars/equip/accessory/mask_f.png",
+    "plainColor": "#2a2a35"
+   },
+   "accessory:mask_m": {
+    "file": "chars/equip/accessory/mask_m_gray.png",
+    "cell": [
+     120,
+     144
+    ],
+    "anchor": [
+     69,
+     125
+    ],
+    "tint": "color",
+    "plain": "chars/equip/accessory/mask_m.png",
+    "plainColor": "#2a2a35"
+   },
+   "accessory:scarf_back_f": {
+    "file": "chars/equip/accessory/scarf_back_f_gray.png",
+    "cell": [
+     80,
+     120
+    ],
+    "anchor": [
+     63,
+     90
+    ],
+    "tint": "color",
+    "plain": "chars/equip/accessory/scarf_back_f.png",
+    "plainColor": "#ff5fa2"
+   },
+   "accessory:scarf_back_m": {
+    "file": "chars/equip/accessory/scarf_back_m_gray.png",
+    "cell": [
+     80,
+     120
+    ],
+    "anchor": [
+     63,
+     89
+    ],
+    "tint": "color",
+    "plain": "chars/equip/accessory/scarf_back_m.png",
+    "plainColor": "#ff5fa2"
+   },
+   "accessory:scarf_f": {
+    "file": "chars/equip/accessory/scarf_f_gray.png",
+    "cell": [
+     80,
+     112
+    ],
+    "anchor": [
+     41,
+     94
+    ],
+    "tint": "color",
+    "plain": "chars/equip/accessory/scarf_f.png",
+    "plainColor": "#ff5fa2"
+   },
+   "accessory:scarf_m": {
+    "file": "chars/equip/accessory/scarf_m_gray.png",
+    "cell": [
+     80,
+     112
+    ],
+    "anchor": [
+     40,
+     93
+    ],
+    "tint": "color",
+    "plain": "chars/equip/accessory/scarf_m.png",
+    "plainColor": "#ff5fa2"
+   },
+   "accessory:sunglasses_f": {
+    "file": "chars/equip/accessory/sunglasses_f_gray.png",
+    "cell": [
+     128,
+     144
+    ],
+    "anchor": [
+     79,
+     132
+    ],
+    "tint": "color",
+    "plain": "chars/equip/accessory/sunglasses_f.png",
+    "plainColor": "#1a1a24"
+   },
+   "accessory:sunglasses_m": {
+    "file": "chars/equip/accessory/sunglasses_m_gray.png",
+    "cell": [
+     136,
+     152
+    ],
+    "anchor": [
+     79,
+     133
+    ],
+    "tint": "color",
+    "plain": "chars/equip/accessory/sunglasses_m.png",
+    "plainColor": "#1a1a24"
+   },
+   "accessory:wings_back_f": {
+    "file": "chars/equip/accessory/wings_back_f_gray.png",
+    "cell": [
+     112,
+     160
+    ],
+    "anchor": [
+     90,
+     107
+    ],
+    "tint": "color",
+    "plain": "chars/equip/accessory/wings_back_f.png",
+    "plainColor": "#ffffff"
+   },
+   "accessory:wings_back_m": {
+    "file": "chars/equip/accessory/wings_back_m_gray.png",
+    "cell": [
+     112,
+     160
+    ],
+    "anchor": [
+     90,
+     106
+    ],
+    "tint": "color",
+    "plain": "chars/equip/accessory/wings_back_m.png",
+    "plainColor": "#ffffff"
+   },
+   "accessory:wings_f": {
+    "file": "chars/equip/accessory/wings_f_gray.png",
+    "cell": [
+     160,
+     120
+    ],
+    "anchor": [
+     81,
+     102
+    ],
+    "tint": "color",
+    "plain": "chars/equip/accessory/wings_f.png",
+    "plainColor": "#ffffff"
+   },
+   "accessory:wings_m": {
+    "file": "chars/equip/accessory/wings_m_gray.png",
+    "cell": [
+     160,
+     120
+    ],
+    "anchor": [
+     81,
+     101
+    ],
+    "tint": "color",
+    "plain": "chars/equip/accessory/wings_m.png",
+    "plainColor": "#ffffff"
+   },
+   "arm_f": {
+    "file": "chars/arm_f_gray.png",
+    "cell": [
+     88,
+     128
+    ],
+    "anchor": [
+     24,
+     116
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "skin",
+    "plain": "chars/arm_f.png",
+    "plainColor": "#ffe3d3"
+   },
+   "arm_f@gun": {
+    "file": "chars/arm_f__gun_gray.png",
+    "cell": [
+     80,
+     128
+    ],
+    "anchor": [
+     24,
+     116
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "skin",
+    "plain": "chars/arm_f__gun.png",
+    "plainColor": "#ffe3d3"
+   },
+   "arm_f@magic": {
+    "file": "chars/arm_f__magic_gray.png",
+    "cell": [
+     88,
+     128
+    ],
+    "anchor": [
+     24,
+     116
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "skin",
+    "plain": "chars/arm_f__magic.png",
+    "plainColor": "#ffe3d3"
+   },
+   "arm_f@melee": {
+    "file": "chars/arm_f__melee_gray.png",
+    "cell": [
+     88,
+     128
+    ],
+    "anchor": [
+     24,
+     116
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "skin",
+    "plain": "chars/arm_f__melee.png",
+    "plainColor": "#ffe3d3"
+   },
+   "arm_m": {
+    "file": "chars/arm_m_gray.png",
+    "cell": [
+     96,
+     136
+    ],
+    "anchor": [
+     22,
+     117
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "skin",
+    "plain": "chars/arm_m.png",
+    "plainColor": "#f2cfb6"
+   },
+   "arm_m@gun": {
+    "file": "chars/arm_m__gun_gray.png",
+    "cell": [
+     88,
+     136
+    ],
+    "anchor": [
+     22,
+     117
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "skin",
+    "plain": "chars/arm_m__gun.png",
+    "plainColor": "#f2cfb6"
+   },
+   "arm_m@magic": {
+    "file": "chars/arm_m__magic_gray.png",
+    "cell": [
+     96,
+     136
+    ],
+    "anchor": [
+     22,
+     117
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "skin",
+    "plain": "chars/arm_m__magic.png",
+    "plainColor": "#f2cfb6"
+   },
+   "arm_m@melee": {
+    "file": "chars/arm_m__melee_gray.png",
+    "cell": [
+     96,
+     136
+    ],
+    "anchor": [
+     22,
+     118
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "skin",
+    "plain": "chars/arm_m__melee.png",
+    "plainColor": "#f2cfb6"
+   },
+   "body_f": {
+    "file": "chars/body_f_gray.png",
+    "cell": [
+     168,
+     176
+    ],
+    "anchor": [
+     91,
+     154
+    ],
+    "tint": "skin",
+    "plain": "chars/body_f.png",
+    "plainColor": "#ffe3d3"
+   },
+   "body_m": {
+    "file": "chars/body_m_gray.png",
+    "cell": [
+     168,
+     184
+    ],
+    "anchor": [
+     92,
+     156
+    ],
+    "tint": "skin",
+    "plain": "chars/body_m.png",
+    "plainColor": "#f2cfb6"
+   },
+   "bottom:_default_f": {
+    "file": "chars/equip/bottom/_default_f.png",
+    "cell": [
+     96,
+     72
+    ],
+    "anchor": [
+     32,
+     56
+    ]
+   },
+   "bottom:_default_m": {
+    "file": "chars/equip/bottom/_default_m.png",
+    "cell": [
+     96,
+     72
+    ],
+    "anchor": [
+     36,
+     59
+    ]
+   },
+   "bottom:armorPants_f": {
+    "file": "chars/equip/bottom/armorPants_f_gray.png",
+    "cell": [
+     120,
+     72
+    ],
+    "anchor": [
+     43,
+     56
+    ],
+    "tint": "color",
+    "plain": "chars/equip/bottom/armorPants_f.png",
+    "plainColor": "#3d4636"
+   },
+   "bottom:armorPants_m": {
+    "file": "chars/equip/bottom/armorPants_m_gray.png",
+    "cell": [
+     120,
+     80
+    ],
+    "anchor": [
+     46,
+     59
+    ],
+    "tint": "color",
+    "plain": "chars/equip/bottom/armorPants_m.png",
+    "plainColor": "#3d4636"
+   },
+   "bottom:cargo_f": {
+    "file": "chars/equip/bottom/cargo_f_gray.png",
+    "cell": [
+     120,
+     72
+    ],
+    "anchor": [
+     43,
+     58
+    ],
+    "tint": "color",
+    "plain": "chars/equip/bottom/cargo_f.png",
+    "plainColor": "#7a6e4a"
+   },
+   "bottom:cargo_m": {
+    "file": "chars/equip/bottom/cargo_m_gray.png",
+    "cell": [
+     128,
+     80
+    ],
+    "anchor": [
+     47,
+     59
+    ],
+    "tint": "color",
+    "plain": "chars/equip/bottom/cargo_m.png",
+    "plainColor": "#7a6e4a"
+   },
+   "bottom:jeans_f": {
+    "file": "chars/equip/bottom/jeans_f_gray.png",
+    "cell": [
+     120,
+     72
+    ],
+    "anchor": [
+     42,
+     53
+    ],
+    "tint": "color",
+    "plain": "chars/equip/bottom/jeans_f.png",
+    "plainColor": "#3e5f9e"
+   },
+   "bottom:jeans_m": {
+    "file": "chars/equip/bottom/jeans_m_gray.png",
+    "cell": [
+     120,
+     72
+    ],
+    "anchor": [
+     46,
+     58
+    ],
+    "tint": "color",
+    "plain": "chars/equip/bottom/jeans_m.png",
+    "plainColor": "#3e5f9e"
+   },
+   "bottom:shorts_f": {
+    "file": "chars/equip/bottom/shorts_f_gray.png",
+    "cell": [
+     96,
+     72
+    ],
+    "anchor": [
+     32,
+     56
+    ],
+    "tint": "color",
+    "plain": "chars/equip/bottom/shorts_f.png",
+    "plainColor": "#4d6fb5"
+   },
+   "bottom:shorts_m": {
+    "file": "chars/equip/bottom/shorts_m_gray.png",
+    "cell": [
+     96,
+     72
+    ],
+    "anchor": [
+     36,
+     59
+    ],
+    "tint": "color",
+    "plain": "chars/equip/bottom/shorts_m.png",
+    "plainColor": "#4d6fb5"
+   },
+   "bottom:skirt_f": {
+    "file": "chars/equip/bottom/skirt_f_gray.png",
+    "cell": [
+     88,
+     80
+    ],
+    "anchor": [
+     36,
+     62
+    ],
+    "tint": "color",
+    "plain": "chars/equip/bottom/skirt_f.png",
+    "plainColor": "#3a2f6b"
+   },
+   "bottom:skirt_m": {
+    "file": "chars/equip/bottom/skirt_m_gray.png",
+    "cell": [
+     96,
+     80
+    ],
+    "anchor": [
+     37,
+     61
+    ],
+    "tint": "color",
+    "plain": "chars/equip/bottom/skirt_m.png",
+    "plainColor": "#3a2f6b"
+   },
+   "bottom:suitPants_f": {
+    "file": "chars/equip/bottom/suitPants_f_gray.png",
+    "cell": [
+     120,
+     72
+    ],
+    "anchor": [
+     42,
+     53
+    ],
+    "tint": "color",
+    "plain": "chars/equip/bottom/suitPants_f.png",
+    "plainColor": "#2f3550"
+   },
+   "bottom:suitPants_m": {
+    "file": "chars/equip/bottom/suitPants_m_gray.png",
+    "cell": [
+     120,
+     72
+    ],
+    "anchor": [
+     45,
+     57
+    ],
+    "tint": "color",
+    "plain": "chars/equip/bottom/suitPants_m.png",
+    "plainColor": "#2f3550"
+   },
+   "bottom:trackPants_f": {
+    "file": "chars/equip/bottom/trackPants_f_gray.png",
+    "cell": [
+     120,
+     72
+    ],
+    "anchor": [
+     42,
+     53
+    ],
+    "tint": "color",
+    "plain": "chars/equip/bottom/trackPants_f.png",
+    "plainColor": "#2a2a3a"
+   },
+   "bottom:trackPants_m": {
+    "file": "chars/equip/bottom/trackPants_m_gray.png",
+    "cell": [
+     120,
+     72
+    ],
+    "anchor": [
+     46,
+     58
+    ],
+    "tint": "color",
+    "plain": "chars/equip/bottom/trackPants_m.png",
+    "plainColor": "#2a2a3a"
+   },
+   "face_f": {
+    "file": "chars/face_f.png",
+    "cell": [
+     104,
+     112
+    ],
+    "anchor": [
+     52,
+     68
+    ],
+    "rows": {
+     "neutral": 1,
+     "smile": 1,
+     "shout": 1,
+     "hurt": 1,
+     "happy": 1,
+     "jito": 1,
+     "angry": 1,
+     "sad": 1,
+     "wink": 1,
+     "blink": 1,
+     "dead": 1,
+     "aim": 1,
+     "panic": 1
+    },
+    "fps": 1,
+    "head": true
+   },
+   "face_f@19f0ff": {
+    "file": "chars/face_f__19f0ff.png",
+    "cell": [
+     104,
+     112
+    ],
+    "anchor": [
+     52,
+     68
+    ],
+    "rows": {
+     "neutral": 1,
+     "smile": 1,
+     "shout": 1,
+     "hurt": 1,
+     "happy": 1,
+     "jito": 1,
+     "angry": 1,
+     "sad": 1,
+     "wink": 1,
+     "blink": 1,
+     "dead": 1,
+     "aim": 1,
+     "panic": 1
+    },
+    "fps": 1,
+    "head": true
+   },
+   "face_f@33c7e6": {
+    "file": "chars/face_f__33c7e6.png",
+    "cell": [
+     104,
+     112
+    ],
+    "anchor": [
+     52,
+     68
+    ],
+    "rows": {
+     "neutral": 1,
+     "smile": 1,
+     "shout": 1,
+     "hurt": 1,
+     "happy": 1,
+     "jito": 1,
+     "angry": 1,
+     "sad": 1,
+     "wink": 1,
+     "blink": 1,
+     "dead": 1,
+     "aim": 1,
+     "panic": 1
+    },
+    "fps": 1,
+    "head": true
+   },
+   "face_m": {
+    "file": "chars/face_m.png",
+    "cell": [
+     104,
+     112
+    ],
+    "anchor": [
+     52,
+     68
+    ],
+    "rows": {
+     "neutral": 1,
+     "smile": 1,
+     "shout": 1,
+     "hurt": 1,
+     "happy": 1,
+     "jito": 1,
+     "angry": 1,
+     "sad": 1,
+     "wink": 1,
+     "blink": 1,
+     "dead": 1,
+     "aim": 1,
+     "panic": 1
+    },
+    "fps": 1,
+    "head": true
+   },
+   "face_m@19f0ff": {
+    "file": "chars/face_m__19f0ff.png",
+    "cell": [
+     104,
+     112
+    ],
+    "anchor": [
+     52,
+     68
+    ],
+    "rows": {
+     "neutral": 1,
+     "smile": 1,
+     "shout": 1,
+     "hurt": 1,
+     "happy": 1,
+     "jito": 1,
+     "angry": 1,
+     "sad": 1,
+     "wink": 1,
+     "blink": 1,
+     "dead": 1,
+     "aim": 1,
+     "panic": 1
+    },
+    "fps": 1,
+    "head": true
+   },
+   "face_m@ff3d8b": {
+    "file": "chars/face_m__ff3d8b.png",
+    "cell": [
+     104,
+     112
+    ],
+    "anchor": [
+     52,
+     68
+    ],
+    "rows": {
+     "neutral": 1,
+     "smile": 1,
+     "shout": 1,
+     "hurt": 1,
+     "happy": 1,
+     "jito": 1,
+     "angry": 1,
+     "sad": 1,
+     "wink": 1,
+     "blink": 1,
+     "dead": 1,
+     "aim": 1,
+     "panic": 1
+    },
+    "fps": 1,
+    "head": true
+   },
+   "hair:bob_back_f": {
+    "file": "chars/hair/bob_back_f_gray.png",
+    "cell": [
+     168,
+     184
+    ],
+    "anchor": [
+     104,
+     167
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/bob_back_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:bob_back_m": {
+    "file": "chars/hair/bob_back_m_gray.png",
+    "cell": [
+     176,
+     184
+    ],
+    "anchor": [
+     105,
+     168
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/bob_back_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:bob_front_f": {
+    "file": "chars/hair/bob_front_f_gray.png",
+    "cell": [
+     192,
+     208
+    ],
+    "anchor": [
+     122,
+     189
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/bob_front_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:bob_front_m": {
+    "file": "chars/hair/bob_front_m_gray.png",
+    "cell": [
+     192,
+     208
+    ],
+    "anchor": [
+     124,
+     192
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/bob_front_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:braid_back_f": {
+    "file": "chars/hair/braid_back_f_gray.png",
+    "cell": [
+     168,
+     200
+    ],
+    "anchor": [
+     104,
+     167
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/braid_back_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:braid_back_m": {
+    "file": "chars/hair/braid_back_m_gray.png",
+    "cell": [
+     176,
+     200
+    ],
+    "anchor": [
+     105,
+     168
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/braid_back_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:braid_front_f": {
+    "file": "chars/hair/braid_front_f_gray.png",
+    "cell": [
+     176,
+     192
+    ],
+    "anchor": [
+     112,
+     175
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/braid_front_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:braid_front_m": {
+    "file": "chars/hair/braid_front_m_gray.png",
+    "cell": [
+     184,
+     192
+    ],
+    "anchor": [
+     114,
+     177
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/braid_front_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:bun_back_f": {
+    "file": "chars/hair/bun_back_f_gray.png",
+    "cell": [
+     184,
+     192
+    ],
+    "anchor": [
+     117,
+     179
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/bun_back_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:bun_back_m": {
+    "file": "chars/hair/bun_back_m_gray.png",
+    "cell": [
+     184,
+     200
+    ],
+    "anchor": [
+     120,
+     182
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/bun_back_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:bun_front_f": {
+    "file": "chars/hair/bun_front_f_gray.png",
+    "cell": [
+     176,
+     192
+    ],
+    "anchor": [
+     112,
+     177
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/bun_front_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:bun_front_m": {
+    "file": "chars/hair/bun_front_m_gray.png",
+    "cell": [
+     184,
+     192
+    ],
+    "anchor": [
+     114,
+     180
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/bun_front_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:curly_back_f": {
+    "file": "chars/hair/curly_back_f_gray.png",
+    "cell": [
+     200,
+     208
+    ],
+    "anchor": [
+     121,
+     182
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/curly_back_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:curly_back_m": {
+    "file": "chars/hair/curly_back_m_gray.png",
+    "cell": [
+     208,
+     216
+    ],
+    "anchor": [
+     123,
+     185
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/curly_back_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:curly_front_f": {
+    "file": "chars/hair/curly_front_f_gray.png",
+    "cell": [
+     200,
+     200
+    ],
+    "anchor": [
+     120,
+     182
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/curly_front_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:curly_front_m": {
+    "file": "chars/hair/curly_front_m_gray.png",
+    "cell": [
+     208,
+     208
+    ],
+    "anchor": [
+     123,
+     184
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/curly_front_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:long_back_f": {
+    "file": "chars/hair/long_back_f_gray.png",
+    "cell": [
+     168,
+     184
+    ],
+    "anchor": [
+     104,
+     167
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/long_back_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:long_back_m": {
+    "file": "chars/hair/long_back_m_gray.png",
+    "cell": [
+     176,
+     192
+    ],
+    "anchor": [
+     105,
+     168
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/long_back_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:long_front_f": {
+    "file": "chars/hair/long_front_f_gray.png",
+    "cell": [
+     176,
+     192
+    ],
+    "anchor": [
+     112,
+     175
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/long_front_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:long_front_m": {
+    "file": "chars/hair/long_front_m_gray.png",
+    "cell": [
+     184,
+     192
+    ],
+    "anchor": [
+     114,
+     177
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/long_front_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:messy_back_f": {
+    "file": "chars/hair/messy_back_f_gray.png",
+    "cell": [
+     168,
+     184
+    ],
+    "anchor": [
+     104,
+     167
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/messy_back_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:messy_back_m": {
+    "file": "chars/hair/messy_back_m_gray.png",
+    "cell": [
+     176,
+     184
+    ],
+    "anchor": [
+     105,
+     168
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/messy_back_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:messy_front_f": {
+    "file": "chars/hair/messy_front_f_gray.png",
+    "cell": [
+     192,
+     200
+    ],
+    "anchor": [
+     124,
+     187
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/messy_front_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:messy_front_m": {
+    "file": "chars/hair/messy_front_m_gray.png",
+    "cell": [
+     192,
+     208
+    ],
+    "anchor": [
+     126,
+     190
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/messy_front_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:ponytail_back_f": {
+    "file": "chars/hair/ponytail_back_f_gray.png",
+    "cell": [
+     176,
+     200
+    ],
+    "anchor": [
+     110,
+     167
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/ponytail_back_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:ponytail_back_m": {
+    "file": "chars/hair/ponytail_back_m_gray.png",
+    "cell": [
+     176,
+     208
+    ],
+    "anchor": [
+     112,
+     168
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/ponytail_back_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:ponytail_front_f": {
+    "file": "chars/hair/ponytail_front_f_gray.png",
+    "cell": [
+     176,
+     192
+    ],
+    "anchor": [
+     113,
+     176
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/ponytail_front_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:ponytail_front_m": {
+    "file": "chars/hair/ponytail_front_m_gray.png",
+    "cell": [
+     184,
+     192
+    ],
+    "anchor": [
+     115,
+     178
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/ponytail_front_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:short_back_f": {
+    "file": "chars/hair/short_back_f_gray.png",
+    "cell": [
+     168,
+     184
+    ],
+    "anchor": [
+     104,
+     167
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/short_back_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:short_back_m": {
+    "file": "chars/hair/short_back_m_gray.png",
+    "cell": [
+     176,
+     184
+    ],
+    "anchor": [
+     105,
+     168
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/short_back_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:short_front_f": {
+    "file": "chars/hair/short_front_f_gray.png",
+    "cell": [
+     192,
+     208
+    ],
+    "anchor": [
+     123,
+     190
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/short_front_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:short_front_m": {
+    "file": "chars/hair/short_front_m_gray.png",
+    "cell": [
+     192,
+     208
+    ],
+    "anchor": [
+     125,
+     193
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/short_front_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:sidepart_back_f": {
+    "file": "chars/hair/sidepart_back_f_gray.png",
+    "cell": [
+     168,
+     184
+    ],
+    "anchor": [
+     104,
+     167
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/sidepart_back_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:sidepart_back_m": {
+    "file": "chars/hair/sidepart_back_m_gray.png",
+    "cell": [
+     176,
+     184
+    ],
+    "anchor": [
+     105,
+     168
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/sidepart_back_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:sidepart_front_f": {
+    "file": "chars/hair/sidepart_front_f_gray.png",
+    "cell": [
+     184,
+     192
+    ],
+    "anchor": [
+     112,
+     175
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/sidepart_front_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:sidepart_front_m": {
+    "file": "chars/hair/sidepart_front_m_gray.png",
+    "cell": [
+     184,
+     192
+    ],
+    "anchor": [
+     114,
+     177
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/sidepart_front_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:spiky_back_f": {
+    "file": "chars/hair/spiky_back_f_gray.png",
+    "cell": [
+     168,
+     184
+    ],
+    "anchor": [
+     104,
+     167
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/spiky_back_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:spiky_back_m": {
+    "file": "chars/hair/spiky_back_m_gray.png",
+    "cell": [
+     176,
+     184
+    ],
+    "anchor": [
+     105,
+     168
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/spiky_back_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:spiky_front_f": {
+    "file": "chars/hair/spiky_front_f_gray.png",
+    "cell": [
+     200,
+     208
+    ],
+    "anchor": [
+     130,
+     191
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/spiky_front_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:spiky_front_m": {
+    "file": "chars/hair/spiky_front_m_gray.png",
+    "cell": [
+     200,
+     208
+    ],
+    "anchor": [
+     133,
+     194
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/spiky_front_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:topknot_back_f": {
+    "file": "chars/hair/topknot_back_f_gray.png",
+    "cell": [
+     184,
+     200
+    ],
+    "anchor": [
+     121,
+     184
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/topknot_back_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:topknot_back_m": {
+    "file": "chars/hair/topknot_back_m_gray.png",
+    "cell": [
+     192,
+     200
+    ],
+    "anchor": [
+     123,
+     187
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/topknot_back_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:topknot_front_f": {
+    "file": "chars/hair/topknot_front_f_gray.png",
+    "cell": [
+     176,
+     200
+    ],
+    "anchor": [
+     111,
+     183
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/topknot_front_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:topknot_front_m": {
+    "file": "chars/hair/topknot_front_m_gray.png",
+    "cell": [
+     184,
+     200
+    ],
+    "anchor": [
+     113,
+     185
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/topknot_front_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:twin_back_f": {
+    "file": "chars/hair/twin_back_f_gray.png",
+    "cell": [
+     184,
+     192
+    ],
+    "anchor": [
+     104,
+     167
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/twin_back_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:twin_back_m": {
+    "file": "chars/hair/twin_back_m_gray.png",
+    "cell": [
+     192,
+     200
+    ],
+    "anchor": [
+     105,
+     168
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/twin_back_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:twin_front_f": {
+    "file": "chars/hair/twin_front_f_gray.png",
+    "cell": [
+     192,
+     208
+    ],
+    "anchor": [
+     123,
+     190
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/twin_front_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:twin_front_m": {
+    "file": "chars/hair/twin_front_m_gray.png",
+    "cell": [
+     192,
+     208
+    ],
+    "anchor": [
+     125,
+     193
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/twin_front_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:undercut_back_f": {
+    "file": "chars/hair/undercut_back_f_gray.png",
+    "cell": [
+     168,
+     184
+    ],
+    "anchor": [
+     104,
+     167
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/undercut_back_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:undercut_back_m": {
+    "file": "chars/hair/undercut_back_m_gray.png",
+    "cell": [
+     176,
+     184
+    ],
+    "anchor": [
+     105,
+     168
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/undercut_back_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:undercut_front_f": {
+    "file": "chars/hair/undercut_front_f_gray.png",
+    "cell": [
+     192,
+     192
+    ],
+    "anchor": [
+     116,
+     179
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/undercut_front_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:undercut_front_m": {
+    "file": "chars/hair/undercut_front_m_gray.png",
+    "cell": [
+     192,
+     200
+    ],
+    "anchor": [
+     118,
+     181
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/undercut_front_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:wolf_back_f": {
+    "file": "chars/hair/wolf_back_f_gray.png",
+    "cell": [
+     168,
+     184
+    ],
+    "anchor": [
+     104,
+     167
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/wolf_back_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:wolf_back_m": {
+    "file": "chars/hair/wolf_back_m_gray.png",
+    "cell": [
+     176,
+     192
+    ],
+    "anchor": [
+     105,
+     168
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/wolf_back_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hair:wolf_front_f": {
+    "file": "chars/hair/wolf_front_f_gray.png",
+    "cell": [
+     192,
+     200
+    ],
+    "anchor": [
+     125,
+     186
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/wolf_front_f.png",
+    "plainColor": "#ff6fb5"
+   },
+   "hair:wolf_front_m": {
+    "file": "chars/hair/wolf_front_m_gray.png",
+    "cell": [
+     200,
+     208
+    ],
+    "anchor": [
+     128,
+     189
+    ],
+    "tint": "hairColor",
+    "plain": "chars/hair/wolf_front_m.png",
+    "plainColor": "#dde3ee"
+   },
+   "hat:bandana_f": {
+    "file": "chars/equip/hat/bandana_f_gray.png",
+    "cell": [
+     176,
+     184
+    ],
+    "anchor": [
+     112,
+     164
+    ],
+    "tint": "color",
+    "plain": "chars/equip/hat/bandana_f.png",
+    "plainColor": "#d6334a"
+   },
+   "hat:bandana_m": {
+    "file": "chars/equip/hat/bandana_m_gray.png",
+    "cell": [
+     184,
+     184
+    ],
+    "anchor": [
+     114,
+     166
+    ],
+    "tint": "color",
+    "plain": "chars/equip/hat/bandana_m.png",
+    "plainColor": "#d6334a"
+   },
+   "hat:beanie_f": {
+    "file": "chars/equip/hat/beanie_f_gray.png",
+    "cell": [
+     184,
+     192
+    ],
+    "anchor": [
+     115,
+     179
+    ],
+    "tint": "color",
+    "plain": "chars/equip/hat/beanie_f.png",
+    "plainColor": "#19d3c5"
+   },
+   "hat:beanie_m": {
+    "file": "chars/equip/hat/beanie_m_gray.png",
+    "cell": [
+     184,
+     200
+    ],
+    "anchor": [
+     117,
+     181
+    ],
+    "tint": "color",
+    "plain": "chars/equip/hat/beanie_m.png",
+    "plainColor": "#19d3c5"
+   },
+   "hat:cap_f": {
+    "file": "chars/equip/hat/cap_f_gray.png",
+    "cell": [
+     184,
+     184
+    ],
+    "anchor": [
+     105,
+     169
+    ],
+    "tint": "color",
+    "plain": "chars/equip/hat/cap_f.png",
+    "plainColor": "#ff5fa2"
+   },
+   "hat:cap_m": {
+    "file": "chars/equip/hat/cap_m_gray.png",
+    "cell": [
+     192,
+     184
+    ],
+    "anchor": [
+     107,
+     171
+    ],
+    "tint": "color",
+    "plain": "chars/equip/hat/cap_m.png",
+    "plainColor": "#ff5fa2"
+   },
+   "hat:catEars_f": {
+    "file": "chars/equip/hat/catEars_f_gray.png",
+    "cell": [
+     176,
+     192
+    ],
+    "anchor": [
+     117,
+     177
+    ],
+    "tint": "color",
+    "plain": "chars/equip/hat/catEars_f.png",
+    "plainColor": "#ff9ad5"
+   },
+   "hat:catEars_m": {
+    "file": "chars/equip/hat/catEars_m_gray.png",
+    "cell": [
+     176,
+     192
+    ],
+    "anchor": [
+     120,
+     180
+    ],
+    "tint": "color",
+    "plain": "chars/equip/hat/catEars_m.png",
+    "plainColor": "#ff9ad5"
+   },
+   "hat:cowboy_f": {
+    "file": "chars/equip/hat/cowboy_f_gray.png",
+    "cell": [
+     200,
+     200
+    ],
+    "anchor": [
+     117,
+     179
+    ],
+    "tint": "color",
+    "plain": "chars/equip/hat/cowboy_f.png",
+    "plainColor": "#9b6a3c"
+   },
+   "hat:cowboy_m": {
+    "file": "chars/equip/hat/cowboy_m_gray.png",
+    "cell": [
+     208,
+     208
+    ],
+    "anchor": [
+     119,
+     181
+    ],
+    "tint": "color",
+    "plain": "chars/equip/hat/cowboy_m.png",
+    "plainColor": "#9b6a3c"
+   },
+   "hat:crown_f": {
+    "file": "chars/equip/hat/crown_f_gray.png",
+    "cell": [
+     168,
+     192
+    ],
+    "anchor": [
+     114,
+     180
+    ],
+    "tint": "color",
+    "plain": "chars/equip/hat/crown_f.png",
+    "plainColor": "#ffd23f"
+   },
+   "hat:crown_m": {
+    "file": "chars/equip/hat/crown_m_gray.png",
+    "cell": [
+     176,
+     200
+    ],
+    "anchor": [
+     117,
+     182
+    ],
+    "tint": "color",
+    "plain": "chars/equip/hat/crown_m.png",
+    "plainColor": "#ffd23f"
+   },
+   "hat:headphones_f": {
+    "file": "chars/equip/hat/headphones_f_gray.png",
+    "cell": [
+     176,
+     184
+    ],
+    "anchor": [
+     107,
+     171
+    ],
+    "tint": "color",
+    "plain": "chars/equip/hat/headphones_f.png",
+    "plainColor": "#2b2b3a"
+   },
+   "hat:headphones_m": {
+    "file": "chars/equip/hat/headphones_m_gray.png",
+    "cell": [
+     176,
+     192
+    ],
+    "anchor": [
+     109,
+     173
+    ],
+    "tint": "color",
+    "plain": "chars/equip/hat/headphones_m.png",
+    "plainColor": "#2b2b3a"
+   },
+   "hat:helmet_f": {
+    "file": "chars/equip/hat/helmet_f_gray.png",
+    "cell": [
+     176,
+     184
+    ],
+    "anchor": [
+     106,
+     168
+    ],
+    "tint": "color",
+    "plain": "chars/equip/hat/helmet_f.png",
+    "plainColor": "#3a3f55"
+   },
+   "hat:helmet_m": {
+    "file": "chars/equip/hat/helmet_m_gray.png",
+    "cell": [
+     176,
+     184
+    ],
+    "anchor": [
+     107,
+     170
+    ],
+    "tint": "color",
+    "plain": "chars/equip/hat/helmet_m.png",
+    "plainColor": "#3a3f55"
+   },
+   "shoes:_default_f": {
+    "file": "chars/equip/shoes/_default_f.png",
+    "cell": [
+     120,
+     64
+    ],
+    "anchor": [
+     43,
+     45
+    ]
+   },
+   "shoes:_default_m": {
+    "file": "chars/equip/shoes/_default_m.png",
+    "cell": [
+     120,
+     64
+    ],
+    "anchor": [
+     47,
+     48
+    ]
+   },
+   "shoes:boots_f": {
+    "file": "chars/equip/shoes/boots_f_gray.png",
+    "cell": [
+     120,
+     64
+    ],
+    "anchor": [
+     43,
+     44
+    ],
+    "tint": "color",
+    "plain": "chars/equip/shoes/boots_f.png",
+    "plainColor": "#5a3a2a"
+   },
+   "shoes:boots_m": {
+    "file": "chars/equip/shoes/boots_m_gray.png",
+    "cell": [
+     120,
+     64
+    ],
+    "anchor": [
+     47,
+     47
+    ],
+    "tint": "color",
+    "plain": "chars/equip/shoes/boots_m.png",
+    "plainColor": "#5a3a2a"
+   },
+   "shoes:heels_f": {
+    "file": "chars/equip/shoes/heels_f_gray.png",
+    "cell": [
+     120,
+     56
+    ],
+    "anchor": [
+     43,
+     43
+    ],
+    "tint": "color",
+    "plain": "chars/equip/shoes/heels_f.png",
+    "plainColor": "#d6265e"
+   },
+   "shoes:heels_m": {
+    "file": "chars/equip/shoes/heels_m_gray.png",
+    "cell": [
+     120,
+     64
+    ],
+    "anchor": [
+     46,
+     46
+    ],
+    "tint": "color",
+    "plain": "chars/equip/shoes/heels_m.png",
+    "plainColor": "#d6265e"
+   },
+   "shoes:loafers_f": {
+    "file": "chars/equip/shoes/loafers_f_gray.png",
+    "cell": [
+     120,
+     64
+    ],
+    "anchor": [
+     42,
+     45
+    ],
+    "tint": "color",
+    "plain": "chars/equip/shoes/loafers_f.png",
+    "plainColor": "#3a2620"
+   },
+   "shoes:loafers_m": {
+    "file": "chars/equip/shoes/loafers_m_gray.png",
+    "cell": [
+     120,
+     64
+    ],
+    "anchor": [
+     45,
+     47
+    ],
+    "tint": "color",
+    "plain": "chars/equip/shoes/loafers_m.png",
+    "plainColor": "#3a2620"
+   },
+   "shoes:sandals_f": {
+    "file": "chars/equip/shoes/sandals_f_gray.png",
+    "cell": [
+     120,
+     56
+    ],
+    "anchor": [
+     42,
+     43
+    ],
+    "tint": "color",
+    "plain": "chars/equip/shoes/sandals_f.png",
+    "plainColor": "#c58a4a"
+   },
+   "shoes:sandals_m": {
+    "file": "chars/equip/shoes/sandals_m_gray.png",
+    "cell": [
+     120,
+     64
+    ],
+    "anchor": [
+     45,
+     46
+    ],
+    "tint": "color",
+    "plain": "chars/equip/shoes/sandals_m.png",
+    "plainColor": "#c58a4a"
+   },
+   "shoes:sneakers_f": {
+    "file": "chars/equip/shoes/sneakers_f_gray.png",
+    "cell": [
+     120,
+     64
+    ],
+    "anchor": [
+     43,
+     45
+    ],
+    "tint": "color",
+    "plain": "chars/equip/shoes/sneakers_f.png",
+    "plainColor": "#ffffff"
+   },
+   "shoes:sneakers_m": {
+    "file": "chars/equip/shoes/sneakers_m_gray.png",
+    "cell": [
+     120,
+     64
+    ],
+    "anchor": [
+     47,
+     48
+    ],
+    "tint": "color",
+    "plain": "chars/equip/shoes/sneakers_m.png",
+    "plainColor": "#ffffff"
+   },
+   "tear_1_f": {
+    "file": "chars/tear_1_f.png",
+    "cell": [
+     56,
+     96
+    ],
+    "anchor": [
+     26,
+     77
+    ]
+   },
+   "tear_1_m": {
+    "file": "chars/tear_1_m.png",
+    "cell": [
+     56,
+     88
+    ],
+    "anchor": [
+     25,
+     76
+    ]
+   },
+   "tear_2_f": {
+    "file": "chars/tear_2_f.png",
+    "cell": [
+     88,
+     128
+    ],
+    "anchor": [
+     38,
+     113
+    ]
+   },
+   "tear_2_m": {
+    "file": "chars/tear_2_m.png",
+    "cell": [
+     88,
+     128
+    ],
+    "anchor": [
+     37,
+     113
+    ]
+   },
+   "tear_3_f": {
+    "file": "chars/tear_3_f.png",
+    "cell": [
+     88,
+     128
+    ],
+    "anchor": [
+     38,
+     113
+    ]
+   },
+   "tear_3_m": {
+    "file": "chars/tear_3_m.png",
+    "cell": [
+     88,
+     128
+    ],
+    "anchor": [
+     37,
+     113
+    ]
+   },
+   "top:_default_f": {
+    "file": "chars/equip/top/_default_f.png",
+    "cell": [
+     88,
+     112
+    ],
+    "anchor": [
+     49,
+     100
+    ]
+   },
+   "top:_default_m": {
+    "file": "chars/equip/top/_default_m.png",
+    "cell": [
+     96,
+     120
+    ],
+    "anchor": [
+     54,
+     100
+    ]
+   },
+   "top:_default_sleeve_f": {
+    "file": "chars/equip/top/_default_sleeve_f.png",
+    "cell": [
+     80,
+     112
+    ],
+    "anchor": [
+     26,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    }
+   },
+   "top:_default_sleeve_f@gun": {
+    "file": "chars/equip/top/_default_sleeve_f__gun.png",
+    "cell": [
+     72,
+     112
+    ],
+    "anchor": [
+     26,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    }
+   },
+   "top:_default_sleeve_f@magic": {
+    "file": "chars/equip/top/_default_sleeve_f__magic.png",
+    "cell": [
+     72,
+     112
+    ],
+    "anchor": [
+     26,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    }
+   },
+   "top:_default_sleeve_f@melee": {
+    "file": "chars/equip/top/_default_sleeve_f__melee.png",
+    "cell": [
+     72,
+     112
+    ],
+    "anchor": [
+     26,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    }
+   },
+   "top:_default_sleeve_m": {
+    "file": "chars/equip/top/_default_sleeve_m.png",
+    "cell": [
+     80,
+     112
+    ],
+    "anchor": [
+     23,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    }
+   },
+   "top:_default_sleeve_m@gun": {
+    "file": "chars/equip/top/_default_sleeve_m__gun.png",
+    "cell": [
+     72,
+     112
+    ],
+    "anchor": [
+     23,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    }
+   },
+   "top:_default_sleeve_m@magic": {
+    "file": "chars/equip/top/_default_sleeve_m__magic.png",
+    "cell": [
+     80,
+     112
+    ],
+    "anchor": [
+     23,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    }
+   },
+   "top:_default_sleeve_m@melee": {
+    "file": "chars/equip/top/_default_sleeve_m__melee.png",
+    "cell": [
+     80,
+     112
+    ],
+    "anchor": [
+     23,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    }
+   },
+   "top:armorVest_f": {
+    "file": "chars/equip/top/armorVest_f_gray.png",
+    "cell": [
+     88,
+     112
+    ],
+    "anchor": [
+     49,
+     100
+    ],
+    "tint": "color",
+    "plain": "chars/equip/top/armorVest_f.png",
+    "plainColor": "#3d4636"
+   },
+   "top:armorVest_m": {
+    "file": "chars/equip/top/armorVest_m_gray.png",
+    "cell": [
+     96,
+     120
+    ],
+    "anchor": [
+     54,
+     100
+    ],
+    "tint": "color",
+    "plain": "chars/equip/top/armorVest_m.png",
+    "plainColor": "#3d4636"
+   },
+   "top:armorVest_sleeve_f": {
+    "file": "chars/equip/top/armorVest_sleeve_f_gray.png",
+    "cell": [
+     80,
+     112
+    ],
+    "anchor": [
+     26,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/armorVest_sleeve_f.png",
+    "plainColor": "#3d4636"
+   },
+   "top:armorVest_sleeve_f@gun": {
+    "file": "chars/equip/top/armorVest_sleeve_f__gun_gray.png",
+    "cell": [
+     72,
+     112
+    ],
+    "anchor": [
+     26,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/armorVest_sleeve_f__gun.png",
+    "plainColor": "#3d4636"
+   },
+   "top:armorVest_sleeve_f@magic": {
+    "file": "chars/equip/top/armorVest_sleeve_f__magic_gray.png",
+    "cell": [
+     72,
+     112
+    ],
+    "anchor": [
+     26,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/armorVest_sleeve_f__magic.png",
+    "plainColor": "#3d4636"
+   },
+   "top:armorVest_sleeve_f@melee": {
+    "file": "chars/equip/top/armorVest_sleeve_f__melee_gray.png",
+    "cell": [
+     72,
+     112
+    ],
+    "anchor": [
+     26,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/armorVest_sleeve_f__melee.png",
+    "plainColor": "#3d4636"
+   },
+   "top:armorVest_sleeve_m": {
+    "file": "chars/equip/top/armorVest_sleeve_m_gray.png",
+    "cell": [
+     80,
+     112
+    ],
+    "anchor": [
+     23,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/armorVest_sleeve_m.png",
+    "plainColor": "#3d4636"
+   },
+   "top:armorVest_sleeve_m@gun": {
+    "file": "chars/equip/top/armorVest_sleeve_m__gun_gray.png",
+    "cell": [
+     72,
+     112
+    ],
+    "anchor": [
+     23,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/armorVest_sleeve_m__gun.png",
+    "plainColor": "#3d4636"
+   },
+   "top:armorVest_sleeve_m@magic": {
+    "file": "chars/equip/top/armorVest_sleeve_m__magic_gray.png",
+    "cell": [
+     80,
+     112
+    ],
+    "anchor": [
+     23,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/armorVest_sleeve_m__magic.png",
+    "plainColor": "#3d4636"
+   },
+   "top:armorVest_sleeve_m@melee": {
+    "file": "chars/equip/top/armorVest_sleeve_m__melee_gray.png",
+    "cell": [
+     80,
+     112
+    ],
+    "anchor": [
+     23,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/armorVest_sleeve_m__melee.png",
+    "plainColor": "#3d4636"
+   },
+   "top:hawaiian_f": {
+    "file": "chars/equip/top/hawaiian_f_gray.png",
+    "cell": [
+     88,
+     112
+    ],
+    "anchor": [
+     49,
+     100
+    ],
+    "tint": "color",
+    "plain": "chars/equip/top/hawaiian_f.png",
+    "plainColor": "#ff9a3c"
+   },
+   "top:hawaiian_m": {
+    "file": "chars/equip/top/hawaiian_m_gray.png",
+    "cell": [
+     96,
+     120
+    ],
+    "anchor": [
+     54,
+     100
+    ],
+    "tint": "color",
+    "plain": "chars/equip/top/hawaiian_m.png",
+    "plainColor": "#ff9a3c"
+   },
+   "top:hawaiian_sleeve_f": {
+    "file": "chars/equip/top/hawaiian_sleeve_f_gray.png",
+    "cell": [
+     80,
+     112
+    ],
+    "anchor": [
+     26,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/hawaiian_sleeve_f.png",
+    "plainColor": "#ff9a3c"
+   },
+   "top:hawaiian_sleeve_f@gun": {
+    "file": "chars/equip/top/hawaiian_sleeve_f__gun_gray.png",
+    "cell": [
+     72,
+     112
+    ],
+    "anchor": [
+     26,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/hawaiian_sleeve_f__gun.png",
+    "plainColor": "#ff9a3c"
+   },
+   "top:hawaiian_sleeve_f@magic": {
+    "file": "chars/equip/top/hawaiian_sleeve_f__magic_gray.png",
+    "cell": [
+     72,
+     112
+    ],
+    "anchor": [
+     26,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/hawaiian_sleeve_f__magic.png",
+    "plainColor": "#ff9a3c"
+   },
+   "top:hawaiian_sleeve_f@melee": {
+    "file": "chars/equip/top/hawaiian_sleeve_f__melee_gray.png",
+    "cell": [
+     72,
+     112
+    ],
+    "anchor": [
+     26,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/hawaiian_sleeve_f__melee.png",
+    "plainColor": "#ff9a3c"
+   },
+   "top:hawaiian_sleeve_m": {
+    "file": "chars/equip/top/hawaiian_sleeve_m_gray.png",
+    "cell": [
+     80,
+     112
+    ],
+    "anchor": [
+     23,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/hawaiian_sleeve_m.png",
+    "plainColor": "#ff9a3c"
+   },
+   "top:hawaiian_sleeve_m@gun": {
+    "file": "chars/equip/top/hawaiian_sleeve_m__gun_gray.png",
+    "cell": [
+     72,
+     112
+    ],
+    "anchor": [
+     23,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/hawaiian_sleeve_m__gun.png",
+    "plainColor": "#ff9a3c"
+   },
+   "top:hawaiian_sleeve_m@magic": {
+    "file": "chars/equip/top/hawaiian_sleeve_m__magic_gray.png",
+    "cell": [
+     80,
+     112
+    ],
+    "anchor": [
+     23,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/hawaiian_sleeve_m__magic.png",
+    "plainColor": "#ff9a3c"
+   },
+   "top:hawaiian_sleeve_m@melee": {
+    "file": "chars/equip/top/hawaiian_sleeve_m__melee_gray.png",
+    "cell": [
+     80,
+     112
+    ],
+    "anchor": [
+     23,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/hawaiian_sleeve_m__melee.png",
+    "plainColor": "#ff9a3c"
+   },
+   "top:hoodie_f": {
+    "file": "chars/equip/top/hoodie_f_gray.png",
+    "cell": [
+     104,
+     136
+    ],
+    "anchor": [
+     58,
+     115
+    ],
+    "tint": "color",
+    "plain": "chars/equip/top/hoodie_f.png",
+    "plainColor": "#7b2ff7"
+   },
+   "top:hoodie_m": {
+    "file": "chars/equip/top/hoodie_m_gray.png",
+    "cell": [
+     112,
+     144
+    ],
+    "anchor": [
+     65,
+     116
+    ],
+    "tint": "color",
+    "plain": "chars/equip/top/hoodie_m.png",
+    "plainColor": "#7b2ff7"
+   },
+   "top:hoodie_sleeve_f": {
+    "file": "chars/equip/top/hoodie_sleeve_f_gray.png",
+    "cell": [
+     88,
+     128
+    ],
+    "anchor": [
+     26,
+     115
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/hoodie_sleeve_f.png",
+    "plainColor": "#7b2ff7"
+   },
+   "top:hoodie_sleeve_f@gun": {
+    "file": "chars/equip/top/hoodie_sleeve_f__gun_gray.png",
+    "cell": [
+     80,
+     128
+    ],
+    "anchor": [
+     26,
+     115
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/hoodie_sleeve_f__gun.png",
+    "plainColor": "#7b2ff7"
+   },
+   "top:hoodie_sleeve_f@magic": {
+    "file": "chars/equip/top/hoodie_sleeve_f__magic_gray.png",
+    "cell": [
+     88,
+     128
+    ],
+    "anchor": [
+     26,
+     115
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/hoodie_sleeve_f__magic.png",
+    "plainColor": "#7b2ff7"
+   },
+   "top:hoodie_sleeve_f@melee": {
+    "file": "chars/equip/top/hoodie_sleeve_f__melee_gray.png",
+    "cell": [
+     88,
+     128
+    ],
+    "anchor": [
+     26,
+     115
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/hoodie_sleeve_f__melee.png",
+    "plainColor": "#7b2ff7"
+   },
+   "top:hoodie_sleeve_m": {
+    "file": "chars/equip/top/hoodie_sleeve_m_gray.png",
+    "cell": [
+     96,
+     128
+    ],
+    "anchor": [
+     23,
+     116
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/hoodie_sleeve_m.png",
+    "plainColor": "#7b2ff7"
+   },
+   "top:hoodie_sleeve_m@gun": {
+    "file": "chars/equip/top/hoodie_sleeve_m__gun_gray.png",
+    "cell": [
+     88,
+     128
+    ],
+    "anchor": [
+     23,
+     116
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/hoodie_sleeve_m__gun.png",
+    "plainColor": "#7b2ff7"
+   },
+   "top:hoodie_sleeve_m@magic": {
+    "file": "chars/equip/top/hoodie_sleeve_m__magic_gray.png",
+    "cell": [
+     96,
+     128
+    ],
+    "anchor": [
+     23,
+     116
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/hoodie_sleeve_m__magic.png",
+    "plainColor": "#7b2ff7"
+   },
+   "top:hoodie_sleeve_m@melee": {
+    "file": "chars/equip/top/hoodie_sleeve_m__melee_gray.png",
+    "cell": [
+     96,
+     136
+    ],
+    "anchor": [
+     23,
+     117
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/hoodie_sleeve_m__melee.png",
+    "plainColor": "#7b2ff7"
+   },
+   "top:idolDress_f": {
+    "file": "chars/equip/top/idolDress_f_gray.png",
+    "cell": [
+     104,
+     112
+    ],
+    "anchor": [
+     43,
+     93
+    ],
+    "tint": "color",
+    "plain": "chars/equip/top/idolDress_f.png",
+    "plainColor": "#ff8fc8"
+   },
+   "top:idolDress_m": {
+    "file": "chars/equip/top/idolDress_m_gray.png",
+    "cell": [
+     104,
+     112
+    ],
+    "anchor": [
+     47,
+     92
+    ],
+    "tint": "color",
+    "plain": "chars/equip/top/idolDress_m.png",
+    "plainColor": "#ff8fc8"
+   },
+   "top:idolDress_sleeve_f": {
+    "file": "chars/equip/top/idolDress_sleeve_f_gray.png",
+    "cell": [
+     64,
+     112
+    ],
+    "anchor": [
+     21,
+     93
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/idolDress_sleeve_f.png",
+    "plainColor": "#ff8fc8"
+   },
+   "top:idolDress_sleeve_f@gun": {
+    "file": "chars/equip/top/idolDress_sleeve_f__gun_gray.png",
+    "cell": [
+     56,
+     112
+    ],
+    "anchor": [
+     21,
+     93
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/idolDress_sleeve_f__gun.png",
+    "plainColor": "#ff8fc8"
+   },
+   "top:idolDress_sleeve_f@magic": {
+    "file": "chars/equip/top/idolDress_sleeve_f__magic_gray.png",
+    "cell": [
+     64,
+     112
+    ],
+    "anchor": [
+     21,
+     93
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/idolDress_sleeve_f__magic.png",
+    "plainColor": "#ff8fc8"
+   },
+   "top:idolDress_sleeve_f@melee": {
+    "file": "chars/equip/top/idolDress_sleeve_f__melee_gray.png",
+    "cell": [
+     64,
+     112
+    ],
+    "anchor": [
+     21,
+     93
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/idolDress_sleeve_f__melee.png",
+    "plainColor": "#ff8fc8"
+   },
+   "top:idolDress_sleeve_m": {
+    "file": "chars/equip/top/idolDress_sleeve_m_gray.png",
+    "cell": [
+     72,
+     112
+    ],
+    "anchor": [
+     19,
+     93
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/idolDress_sleeve_m.png",
+    "plainColor": "#ff8fc8"
+   },
+   "top:idolDress_sleeve_m@gun": {
+    "file": "chars/equip/top/idolDress_sleeve_m__gun_gray.png",
+    "cell": [
+     64,
+     112
+    ],
+    "anchor": [
+     19,
+     93
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/idolDress_sleeve_m__gun.png",
+    "plainColor": "#ff8fc8"
+   },
+   "top:idolDress_sleeve_m@magic": {
+    "file": "chars/equip/top/idolDress_sleeve_m__magic_gray.png",
+    "cell": [
+     64,
+     112
+    ],
+    "anchor": [
+     19,
+     93
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/idolDress_sleeve_m__magic.png",
+    "plainColor": "#ff8fc8"
+   },
+   "top:idolDress_sleeve_m@melee": {
+    "file": "chars/equip/top/idolDress_sleeve_m__melee_gray.png",
+    "cell": [
+     64,
+     112
+    ],
+    "anchor": [
+     19,
+     93
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/idolDress_sleeve_m__melee.png",
+    "plainColor": "#ff8fc8"
+   },
+   "top:leatherJacket_f": {
+    "file": "chars/equip/top/leatherJacket_f_gray.png",
+    "cell": [
+     96,
+     136
+    ],
+    "anchor": [
+     58,
+     115
+    ],
+    "tint": "color",
+    "plain": "chars/equip/top/leatherJacket_f.png",
+    "plainColor": "#2a2230"
+   },
+   "top:leatherJacket_m": {
+    "file": "chars/equip/top/leatherJacket_m_gray.png",
+    "cell": [
+     104,
+     144
+    ],
+    "anchor": [
+     65,
+     116
+    ],
+    "tint": "color",
+    "plain": "chars/equip/top/leatherJacket_m.png",
+    "plainColor": "#2a2230"
+   },
+   "top:leatherJacket_sleeve_f": {
+    "file": "chars/equip/top/leatherJacket_sleeve_f_gray.png",
+    "cell": [
+     88,
+     128
+    ],
+    "anchor": [
+     26,
+     115
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/leatherJacket_sleeve_f.png",
+    "plainColor": "#2a2230"
+   },
+   "top:leatherJacket_sleeve_f@gun": {
+    "file": "chars/equip/top/leatherJacket_sleeve_f__gun_gray.png",
+    "cell": [
+     80,
+     128
+    ],
+    "anchor": [
+     26,
+     115
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/leatherJacket_sleeve_f__gun.png",
+    "plainColor": "#2a2230"
+   },
+   "top:leatherJacket_sleeve_f@magic": {
+    "file": "chars/equip/top/leatherJacket_sleeve_f__magic_gray.png",
+    "cell": [
+     88,
+     128
+    ],
+    "anchor": [
+     26,
+     115
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/leatherJacket_sleeve_f__magic.png",
+    "plainColor": "#2a2230"
+   },
+   "top:leatherJacket_sleeve_f@melee": {
+    "file": "chars/equip/top/leatherJacket_sleeve_f__melee_gray.png",
+    "cell": [
+     88,
+     128
+    ],
+    "anchor": [
+     26,
+     115
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/leatherJacket_sleeve_f__melee.png",
+    "plainColor": "#2a2230"
+   },
+   "top:leatherJacket_sleeve_m": {
+    "file": "chars/equip/top/leatherJacket_sleeve_m_gray.png",
+    "cell": [
+     96,
+     128
+    ],
+    "anchor": [
+     23,
+     116
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/leatherJacket_sleeve_m.png",
+    "plainColor": "#2a2230"
+   },
+   "top:leatherJacket_sleeve_m@gun": {
+    "file": "chars/equip/top/leatherJacket_sleeve_m__gun_gray.png",
+    "cell": [
+     88,
+     128
+    ],
+    "anchor": [
+     23,
+     116
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/leatherJacket_sleeve_m__gun.png",
+    "plainColor": "#2a2230"
+   },
+   "top:leatherJacket_sleeve_m@magic": {
+    "file": "chars/equip/top/leatherJacket_sleeve_m__magic_gray.png",
+    "cell": [
+     96,
+     128
+    ],
+    "anchor": [
+     23,
+     116
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/leatherJacket_sleeve_m__magic.png",
+    "plainColor": "#2a2230"
+   },
+   "top:leatherJacket_sleeve_m@melee": {
+    "file": "chars/equip/top/leatherJacket_sleeve_m__melee_gray.png",
+    "cell": [
+     96,
+     136
+    ],
+    "anchor": [
+     23,
+     117
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/leatherJacket_sleeve_m__melee.png",
+    "plainColor": "#2a2230"
+   },
+   "top:police_f": {
+    "file": "chars/equip/top/police_f_gray.png",
+    "cell": [
+     88,
+     112
+    ],
+    "anchor": [
+     49,
+     100
+    ],
+    "tint": "color",
+    "plain": "chars/equip/top/police_f.png",
+    "plainColor": "#1f3a8a"
+   },
+   "top:police_m": {
+    "file": "chars/equip/top/police_m_gray.png",
+    "cell": [
+     96,
+     120
+    ],
+    "anchor": [
+     54,
+     100
+    ],
+    "tint": "color",
+    "plain": "chars/equip/top/police_m.png",
+    "plainColor": "#1f3a8a"
+   },
+   "top:police_sleeve_f": {
+    "file": "chars/equip/top/police_sleeve_f_gray.png",
+    "cell": [
+     80,
+     112
+    ],
+    "anchor": [
+     26,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/police_sleeve_f.png",
+    "plainColor": "#1f3a8a"
+   },
+   "top:police_sleeve_f@gun": {
+    "file": "chars/equip/top/police_sleeve_f__gun_gray.png",
+    "cell": [
+     72,
+     112
+    ],
+    "anchor": [
+     26,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/police_sleeve_f__gun.png",
+    "plainColor": "#1f3a8a"
+   },
+   "top:police_sleeve_f@magic": {
+    "file": "chars/equip/top/police_sleeve_f__magic_gray.png",
+    "cell": [
+     72,
+     112
+    ],
+    "anchor": [
+     26,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/police_sleeve_f__magic.png",
+    "plainColor": "#1f3a8a"
+   },
+   "top:police_sleeve_f@melee": {
+    "file": "chars/equip/top/police_sleeve_f__melee_gray.png",
+    "cell": [
+     72,
+     112
+    ],
+    "anchor": [
+     26,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/police_sleeve_f__melee.png",
+    "plainColor": "#1f3a8a"
+   },
+   "top:police_sleeve_m": {
+    "file": "chars/equip/top/police_sleeve_m_gray.png",
+    "cell": [
+     80,
+     112
+    ],
+    "anchor": [
+     23,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/police_sleeve_m.png",
+    "plainColor": "#1f3a8a"
+   },
+   "top:police_sleeve_m@gun": {
+    "file": "chars/equip/top/police_sleeve_m__gun_gray.png",
+    "cell": [
+     72,
+     112
+    ],
+    "anchor": [
+     23,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/police_sleeve_m__gun.png",
+    "plainColor": "#1f3a8a"
+   },
+   "top:police_sleeve_m@magic": {
+    "file": "chars/equip/top/police_sleeve_m__magic_gray.png",
+    "cell": [
+     80,
+     112
+    ],
+    "anchor": [
+     23,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/police_sleeve_m__magic.png",
+    "plainColor": "#1f3a8a"
+   },
+   "top:police_sleeve_m@melee": {
+    "file": "chars/equip/top/police_sleeve_m__melee_gray.png",
+    "cell": [
+     80,
+     112
+    ],
+    "anchor": [
+     23,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/police_sleeve_m__melee.png",
+    "plainColor": "#1f3a8a"
+   },
+   "top:suit_f": {
+    "file": "chars/equip/top/suit_f_gray.png",
+    "cell": [
+     104,
+     136
+    ],
+    "anchor": [
+     58,
+     115
+    ],
+    "tint": "color",
+    "plain": "chars/equip/top/suit_f.png",
+    "plainColor": "#2f3550"
+   },
+   "top:suit_m": {
+    "file": "chars/equip/top/suit_m_gray.png",
+    "cell": [
+     112,
+     144
+    ],
+    "anchor": [
+     65,
+     116
+    ],
+    "tint": "color",
+    "plain": "chars/equip/top/suit_m.png",
+    "plainColor": "#2f3550"
+   },
+   "top:suit_sleeve_f": {
+    "file": "chars/equip/top/suit_sleeve_f_gray.png",
+    "cell": [
+     88,
+     128
+    ],
+    "anchor": [
+     26,
+     115
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/suit_sleeve_f.png",
+    "plainColor": "#2f3550"
+   },
+   "top:suit_sleeve_f@gun": {
+    "file": "chars/equip/top/suit_sleeve_f__gun_gray.png",
+    "cell": [
+     80,
+     128
+    ],
+    "anchor": [
+     26,
+     115
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/suit_sleeve_f__gun.png",
+    "plainColor": "#2f3550"
+   },
+   "top:suit_sleeve_f@magic": {
+    "file": "chars/equip/top/suit_sleeve_f__magic_gray.png",
+    "cell": [
+     88,
+     128
+    ],
+    "anchor": [
+     26,
+     115
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/suit_sleeve_f__magic.png",
+    "plainColor": "#2f3550"
+   },
+   "top:suit_sleeve_f@melee": {
+    "file": "chars/equip/top/suit_sleeve_f__melee_gray.png",
+    "cell": [
+     88,
+     128
+    ],
+    "anchor": [
+     26,
+     115
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/suit_sleeve_f__melee.png",
+    "plainColor": "#2f3550"
+   },
+   "top:suit_sleeve_m": {
+    "file": "chars/equip/top/suit_sleeve_m_gray.png",
+    "cell": [
+     96,
+     128
+    ],
+    "anchor": [
+     23,
+     116
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/suit_sleeve_m.png",
+    "plainColor": "#2f3550"
+   },
+   "top:suit_sleeve_m@gun": {
+    "file": "chars/equip/top/suit_sleeve_m__gun_gray.png",
+    "cell": [
+     88,
+     128
+    ],
+    "anchor": [
+     23,
+     116
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/suit_sleeve_m__gun.png",
+    "plainColor": "#2f3550"
+   },
+   "top:suit_sleeve_m@magic": {
+    "file": "chars/equip/top/suit_sleeve_m__magic_gray.png",
+    "cell": [
+     96,
+     128
+    ],
+    "anchor": [
+     23,
+     116
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/suit_sleeve_m__magic.png",
+    "plainColor": "#2f3550"
+   },
+   "top:suit_sleeve_m@melee": {
+    "file": "chars/equip/top/suit_sleeve_m__melee_gray.png",
+    "cell": [
+     96,
+     136
+    ],
+    "anchor": [
+     23,
+     117
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/suit_sleeve_m__melee.png",
+    "plainColor": "#2f3550"
+   },
+   "top:tank_f": {
+    "file": "chars/equip/top/tank_f_gray.png",
+    "cell": [
+     72,
+     104
+    ],
+    "anchor": [
+     36,
+     89
+    ],
+    "tint": "color",
+    "plain": "chars/equip/top/tank_f.png",
+    "plainColor": "#ff5fa2"
+   },
+   "top:tank_m": {
+    "file": "chars/equip/top/tank_m_gray.png",
+    "cell": [
+     80,
+     104
+    ],
+    "anchor": [
+     37,
+     88
+    ],
+    "tint": "color",
+    "plain": "chars/equip/top/tank_m.png",
+    "plainColor": "#ff5fa2"
+   },
+   "top:tracksuit_f": {
+    "file": "chars/equip/top/tracksuit_f_gray.png",
+    "cell": [
+     96,
+     136
+    ],
+    "anchor": [
+     58,
+     115
+    ],
+    "tint": "color",
+    "plain": "chars/equip/top/tracksuit_f.png",
+    "plainColor": "#19d3c5"
+   },
+   "top:tracksuit_m": {
+    "file": "chars/equip/top/tracksuit_m_gray.png",
+    "cell": [
+     104,
+     144
+    ],
+    "anchor": [
+     65,
+     116
+    ],
+    "tint": "color",
+    "plain": "chars/equip/top/tracksuit_m.png",
+    "plainColor": "#19d3c5"
+   },
+   "top:tracksuit_sleeve_f": {
+    "file": "chars/equip/top/tracksuit_sleeve_f_gray.png",
+    "cell": [
+     88,
+     128
+    ],
+    "anchor": [
+     26,
+     115
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/tracksuit_sleeve_f.png",
+    "plainColor": "#19d3c5"
+   },
+   "top:tracksuit_sleeve_f@gun": {
+    "file": "chars/equip/top/tracksuit_sleeve_f__gun_gray.png",
+    "cell": [
+     80,
+     128
+    ],
+    "anchor": [
+     26,
+     115
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/tracksuit_sleeve_f__gun.png",
+    "plainColor": "#19d3c5"
+   },
+   "top:tracksuit_sleeve_f@magic": {
+    "file": "chars/equip/top/tracksuit_sleeve_f__magic_gray.png",
+    "cell": [
+     88,
+     128
+    ],
+    "anchor": [
+     26,
+     115
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/tracksuit_sleeve_f__magic.png",
+    "plainColor": "#19d3c5"
+   },
+   "top:tracksuit_sleeve_f@melee": {
+    "file": "chars/equip/top/tracksuit_sleeve_f__melee_gray.png",
+    "cell": [
+     88,
+     128
+    ],
+    "anchor": [
+     26,
+     115
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/tracksuit_sleeve_f__melee.png",
+    "plainColor": "#19d3c5"
+   },
+   "top:tracksuit_sleeve_m": {
+    "file": "chars/equip/top/tracksuit_sleeve_m_gray.png",
+    "cell": [
+     96,
+     128
+    ],
+    "anchor": [
+     23,
+     116
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/tracksuit_sleeve_m.png",
+    "plainColor": "#19d3c5"
+   },
+   "top:tracksuit_sleeve_m@gun": {
+    "file": "chars/equip/top/tracksuit_sleeve_m__gun_gray.png",
+    "cell": [
+     88,
+     128
+    ],
+    "anchor": [
+     23,
+     116
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/tracksuit_sleeve_m__gun.png",
+    "plainColor": "#19d3c5"
+   },
+   "top:tracksuit_sleeve_m@magic": {
+    "file": "chars/equip/top/tracksuit_sleeve_m__magic_gray.png",
+    "cell": [
+     96,
+     128
+    ],
+    "anchor": [
+     23,
+     116
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/tracksuit_sleeve_m__magic.png",
+    "plainColor": "#19d3c5"
+   },
+   "top:tracksuit_sleeve_m@melee": {
+    "file": "chars/equip/top/tracksuit_sleeve_m__melee_gray.png",
+    "cell": [
+     96,
+     136
+    ],
+    "anchor": [
+     23,
+     117
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/tracksuit_sleeve_m__melee.png",
+    "plainColor": "#19d3c5"
+   },
+   "top:tshirt_f": {
+    "file": "chars/equip/top/tshirt_f_gray.png",
+    "cell": [
+     88,
+     112
+    ],
+    "anchor": [
+     49,
+     100
+    ],
+    "tint": "color",
+    "plain": "chars/equip/top/tshirt_f.png",
+    "plainColor": "#f6f4f8"
+   },
+   "top:tshirt_m": {
+    "file": "chars/equip/top/tshirt_m_gray.png",
+    "cell": [
+     96,
+     120
+    ],
+    "anchor": [
+     54,
+     100
+    ],
+    "tint": "color",
+    "plain": "chars/equip/top/tshirt_m.png",
+    "plainColor": "#f6f4f8"
+   },
+   "top:tshirt_sleeve_f": {
+    "file": "chars/equip/top/tshirt_sleeve_f_gray.png",
+    "cell": [
+     80,
+     112
+    ],
+    "anchor": [
+     26,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/tshirt_sleeve_f.png",
+    "plainColor": "#f6f4f8"
+   },
+   "top:tshirt_sleeve_f@gun": {
+    "file": "chars/equip/top/tshirt_sleeve_f__gun_gray.png",
+    "cell": [
+     72,
+     112
+    ],
+    "anchor": [
+     26,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/tshirt_sleeve_f__gun.png",
+    "plainColor": "#f6f4f8"
+   },
+   "top:tshirt_sleeve_f@magic": {
+    "file": "chars/equip/top/tshirt_sleeve_f__magic_gray.png",
+    "cell": [
+     72,
+     112
+    ],
+    "anchor": [
+     26,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/tshirt_sleeve_f__magic.png",
+    "plainColor": "#f6f4f8"
+   },
+   "top:tshirt_sleeve_f@melee": {
+    "file": "chars/equip/top/tshirt_sleeve_f__melee_gray.png",
+    "cell": [
+     72,
+     112
+    ],
+    "anchor": [
+     26,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/tshirt_sleeve_f__melee.png",
+    "plainColor": "#f6f4f8"
+   },
+   "top:tshirt_sleeve_m": {
+    "file": "chars/equip/top/tshirt_sleeve_m_gray.png",
+    "cell": [
+     80,
+     112
+    ],
+    "anchor": [
+     23,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/tshirt_sleeve_m.png",
+    "plainColor": "#f6f4f8"
+   },
+   "top:tshirt_sleeve_m@gun": {
+    "file": "chars/equip/top/tshirt_sleeve_m__gun_gray.png",
+    "cell": [
+     72,
+     112
+    ],
+    "anchor": [
+     23,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/tshirt_sleeve_m__gun.png",
+    "plainColor": "#f6f4f8"
+   },
+   "top:tshirt_sleeve_m@magic": {
+    "file": "chars/equip/top/tshirt_sleeve_m__magic_gray.png",
+    "cell": [
+     80,
+     112
+    ],
+    "anchor": [
+     23,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/tshirt_sleeve_m__magic.png",
+    "plainColor": "#f6f4f8"
+   },
+   "top:tshirt_sleeve_m@melee": {
+    "file": "chars/equip/top/tshirt_sleeve_m__melee_gray.png",
+    "cell": [
+     80,
+     112
+    ],
+    "anchor": [
+     23,
+     100
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/top/tshirt_sleeve_m__melee.png",
+    "plainColor": "#f6f4f8"
+   },
+   "weapon:bat_f": {
+    "file": "chars/equip/weapon/bat_f_gray.png",
+    "cell": [
+     160,
+     184
+    ],
+    "anchor": [
+     45,
+     165
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/weapon/bat_f.png",
+    "plainColor": "#c8935a"
+   },
+   "weapon:bat_m": {
+    "file": "chars/equip/weapon/bat_m_gray.png",
+    "cell": [
+     160,
+     184
+    ],
+    "anchor": [
+     42,
+     166
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/weapon/bat_m.png",
+    "plainColor": "#c8935a"
+   },
+   "weapon:guitar_f": {
+    "file": "chars/equip/weapon/guitar_f_gray.png",
+    "cell": [
+     192,
+     216
+    ],
+    "anchor": [
+     60,
+     181
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/weapon/guitar_f.png",
+    "plainColor": "#ff3e7f"
+   },
+   "weapon:guitar_m": {
+    "file": "chars/equip/weapon/guitar_m_gray.png",
+    "cell": [
+     192,
+     216
+    ],
+    "anchor": [
+     57,
+     182
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/weapon/guitar_m.png",
+    "plainColor": "#ff3e7f"
+   },
+   "weapon:katana_f": {
+    "file": "chars/equip/weapon/katana_f_gray.png",
+    "cell": [
+     184,
+     200
+    ],
+    "anchor": [
+     59,
+     176
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/weapon/katana_f.png",
+    "plainColor": "#e8eef5"
+   },
+   "weapon:katana_m": {
+    "file": "chars/equip/weapon/katana_m_gray.png",
+    "cell": [
+     192,
+     200
+    ],
+    "anchor": [
+     57,
+     177
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/weapon/katana_m.png",
+    "plainColor": "#e8eef5"
+   },
+   "weapon:knife_f": {
+    "file": "chars/equip/weapon/knife_f_gray.png",
+    "cell": [
+     112,
+     152
+    ],
+    "anchor": [
+     25,
+     139
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/weapon/knife_f.png",
+    "plainColor": "#d8dde8"
+   },
+   "weapon:knife_m": {
+    "file": "chars/equip/weapon/knife_m_gray.png",
+    "cell": [
+     112,
+     152
+    ],
+    "anchor": [
+     22,
+     140
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/weapon/knife_m.png",
+    "plainColor": "#d8dde8"
+   },
+   "weapon:neonSword_f": {
+    "file": "chars/equip/weapon/neonSword_f_gray.png",
+    "cell": [
+     192,
+     216
+    ],
+    "anchor": [
+     60,
+     182
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/weapon/neonSword_f.png",
+    "plainColor": "#19f0ff"
+   },
+   "weapon:neonSword_m": {
+    "file": "chars/equip/weapon/neonSword_m_gray.png",
+    "cell": [
+     192,
+     216
+    ],
+    "anchor": [
+     57,
+     183
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/weapon/neonSword_m.png",
+    "plainColor": "#19f0ff"
+   },
+   "weapon:pistol_f": {
+    "file": "chars/equip/weapon/pistol_f_gray.png",
+    "cell": [
+     104,
+     144
+    ],
+    "anchor": [
+     12,
+     131
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/weapon/pistol_f.png",
+    "plainColor": "#3a3d48"
+   },
+   "weapon:pistol_m": {
+    "file": "chars/equip/weapon/pistol_m_gray.png",
+    "cell": [
+     112,
+     144
+    ],
+    "anchor": [
+     12,
+     132
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/weapon/pistol_m.png",
+    "plainColor": "#3a3d48"
+   },
+   "weapon:smg_f": {
+    "file": "chars/equip/weapon/smg_f_gray.png",
+    "cell": [
+     120,
+     160
+    ],
+    "anchor": [
+     12,
+     143
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/weapon/smg_f.png",
+    "plainColor": "#2e3038"
+   },
+   "weapon:smg_m": {
+    "file": "chars/equip/weapon/smg_m_gray.png",
+    "cell": [
+     128,
+     160
+    ],
+    "anchor": [
+     12,
+     144
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/weapon/smg_m.png",
+    "plainColor": "#2e3038"
+   },
+   "weapon:staff_f": {
+    "file": "chars/equip/weapon/staff_f_gray.png",
+    "cell": [
+     208,
+     200
+    ],
+    "anchor": [
+     74,
+     184
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/weapon/staff_f.png",
+    "plainColor": "#19f0ff"
+   },
+   "weapon:staff_m": {
+    "file": "chars/equip/weapon/staff_m_gray.png",
+    "cell": [
+     216,
+     200
+    ],
+    "anchor": [
+     72,
+     185
+    ],
+    "rows": {
+     "idle": 6,
+     "walk": 8,
+     "jump": 2,
+     "climb": 4,
+     "attack": 6,
+     "shoot": 4,
+     "hurt": 2,
+     "dead": 4,
+     "drive": 1,
+     "sit": 1
+    },
+    "tint": "color",
+    "plain": "chars/equip/weapon/staff_m.png",
+    "plainColor": "#19f0ff"
+   }
+  },
+  "cell": [
+   168,
+   176
+  ],
+  "anchor": [
+   91,
+   154
+  ]
+ }
+}

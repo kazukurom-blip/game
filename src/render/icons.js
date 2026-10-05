@@ -2,6 +2,7 @@
 import { shade, rgba, rr, starPath, makeCanvas, hashStr, OUTLINE } from './util.js';
 import { drawWeapon, itemColors } from './character.js';
 import { drawPet, PET_FLYING } from './pets.js';
+import { spriteRev } from './sprites.js';
 
 const PI = Math.PI;
 const cache = new Map();
@@ -29,7 +30,8 @@ export function drawItemIcon(ctx, item, x, y, size = 32) {
   if (!item) return;
   const look = item.look;
   const key = 'i:' + (look ? `${item.slot}|${look.style}|${look.color}|${look.accent}` : `${item.icon || item.type || 'etc'}|${item.id}`);
-  const c = getCached(key, size, (g) => paintItem(g, item));
+  const petKey = look && (item.slot === 'pet' || /Pet$/.test(look.style || '')) ? '|spr' + spriteRev() : ''; // PET は差し替えスプライトの読込/切替で描き直す
+  const c = getCached(key + petKey, size, (g) => paintItem(g, item));
   ctx.drawImage(c, x - size / 2, y - size / 2, size, size);
 }
 

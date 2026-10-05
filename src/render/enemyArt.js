@@ -7,8 +7,12 @@ import {
   fierceEye, mouth, mouthFor, tone, shadow, light, hue, setEnv, setPose, POSE, ENV, textUp,
 } from './mkit.js';
 import { drawMonster2, ART2_SIZE, drawCivilian } from './monsters2.js';
+import { drawSpriteEnemy, spriteEnemyReady } from './sprites.js';
 
 const PI = Math.PI;
+// スプライトのテンプレート書き出し中（tools/export_sprites.mjs）: 影・オーラ・ボス演出・HPバーを描かない（ゲームが上から描くため）
+let EXPORT_MODE = false;
+export function setEnemyArtExport(v) { EXPORT_MODE = !!v; }
 
 const L = (style, color, accent) => ({ style, color, accent: accent || '#ffffff' });
 // def.look/equip が無い場合のデフォルト
@@ -109,14 +113,14 @@ export function drawEnemy(ctx, e) {
     const look = def.look || dflt.look;
     const equip = def.equip || tintedEquip(art, dflt.equip, def.color, def.accent);
     const sc = def.scale || clamp((e.h || 70) / 72, 0.8, 2.2);
-    if (boss) humanBossFx(ctx, e, art, sc, t, st, wind, rage, false);
+    if (boss && !EXPORT_MODE) humanBossFx(ctx, e, art, sc, t, st, wind, rage, false);
     let attackT = 0;
     if (st === 'attack') { attackT = wind ? 0.05 : ((t * 2.2) % 1); }
-    drawCharacter(ctx, e.x, e.y, look, equip, {
+    if (EXPORT_MODE || !drawSpriteEnemy(ctx, e, { st, wind, rage, flash, boss, w: 40 * sc, h: 82 * sc })) drawCharacter(ctx, e.x, e.y, look, equip, {
       facing: e.facing || 1, state: st, t, attackT, damage: art === 'bossDon' ? (1 - hpF) * 0.8 : 0,
       scale: sc, flash, deadT: clamp((e.deadT || 0) * 3, 0, 1),
     });
-    if (boss) humanBossFx(ctx, e, art, sc, t, st, wind, rage, true);
+    if (boss && !EXPORT_MODE) humanBossFx(ctx, e, art, sc, t, st, wind, rage, true);
     topY = e.y - 82 * sc;
   } else if (art === 'civilian') {
     topY = drawCivilian(ctx, e, st, t, flash);
@@ -128,7 +132,7 @@ export function drawEnemy(ctx, e) {
     const fly = e.flying || FLYERS[art];
     ctx.translate(e.x, e.y);
     // 接地影（飛行体は薄く小さく）— キャッシュ外で毎フレーム
-    if (!fly) groundShadow(ctx, 0, 0, w * 0.42, 0.3);
+    if (EXPORT_MODE) { /* 書き出しでは影なし（ゲームが描く） */ } else if (!fly) groundShadow(ctx, 0, 0, w * 0.42, 0.3);
     else if (st !== 'dead') groundShadow(ctx, 0, 0, w * 0.26, 0.14);
     const fx = e.facing < 0 ? -1 : 1;
     ctx.scale(fx, 1);
@@ -140,7 +144,7 @@ export function drawEnemy(ctx, e) {
   }
   ctx.restore();
   // HPバー・名前
-  if (st !== 'dead') {
+  if (st !== 'dead' && !EXPORT_MODE) {
     if (boss) drawBossTag(ctx, e, topY);
     else if (e.hurtT > 0 || e.showHpT > 0) drawHpBar(ctx, e.x, topY - 10, 40, 5, e.hp / e.maxHp);
   }
@@ -155,12 +159,18 @@ function drawArt(ctx, e, def, art, w, h, st, t, flash, wind, rage, night, boss) 
   const dc = DEF_COLORS[art];
   const col = tone(dc ? pickCol(def.color, dc[0]) : (def.color || '#5cff9a'));
   const acc = def.accent || (dc && dc[1]) || (art === 'flamingo' && def.color === '#b04dff' ? '#19f0ff' : null);
-  if (boss && art !== 'bossGator' && art !== 'bossAlien' && art !== 'drone') drawAura(ctx, 0, -h * 0.5, Math.max(w, h) * 0.7, t, rage ? '#ff5a3c' : '#ffc93c', rage ? '#ff2e6a' : '#ff4fa0', wind);
+  if (boss && !EXPORT_MODE && art !== 'bossGator' && art !== 'bossAlien' && art !== 'drone') drawAura(ctx, 0, -h * 0.5, Math.max(w, h) * 0.7, t, rage ? '#ff5a3c' : '#ffc93c', rage ? '#ff2e6a' : '#ff4fa0', wind);
+  // 差し替えスプライト（読み込み済みならコード描画の代わりに。影・オーラはこの外/上で描いたまま）
+  if (!EXPORT_MODE && spriteEnemyReady(e, boss)) {
+    if (art === 'bossGator') drawAura(ctx, 0, -h * 0.45, w * 0.6, t, rage ? '#ff6a2a' : '#c8ff5a', rage ? '#ff2e4d' : '#ffc93c', wind);
+    const ok = drawSpriteEnemy(ctx, e, { st, wind, rage, flash, boss, w, h, local: true, fly: !!(e.flying || FLYERS[art]) });
+    if (ok) { setFL(false); setPose(0, 0, false); return; }
+  }
   if (art === 'slime') drawSlime(ctx, w, h, col, t, st, boss, acc);
   else if (art === 'mushroom') drawMushroom(ctx, w, h, col, t, st, acc);
   else if (art === 'flamingo') drawFlamingo(ctx, w, h, col, t, st, acc);
   else if (art === 'gator') drawGator(ctx, w, h, col, t, st, false, acc);
-  else if (art === 'bossGator') { drawAura(ctx, 0, -h * 0.45, w * 0.6, t, rage ? '#ff6a2a' : '#c8ff5a', rage ? '#ff2e4d' : '#ffc93c', wind); drawGator(ctx, w, h, col, t, st, true, acc); }
+  else if (art === 'bossGator') { if (!EXPORT_MODE) drawAura(ctx, 0, -h * 0.45, w * 0.6, t, rage ? '#ff6a2a' : '#c8ff5a', rage ? '#ff2e4d' : '#ffc93c', wind); drawGator(ctx, w, h, col, t, st, true, acc); }
   else if (art === 'drone') { if (boss) drawMecha(ctx, w, h, col, t, st, acc); else drawDrone(ctx, w, h, col, t, st, acc); }
   else if (!drawMonster2(ctx, art, w, h, def.color, def.accent, t, st, boss, e)) drawSlime(ctx, w, h, tone(pickCol(def.color, '#5cff9a')), t, st, boss, acc || '#ff4fa0');
   setFL(false);

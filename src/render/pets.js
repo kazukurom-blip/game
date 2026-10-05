@@ -6,6 +6,7 @@
 // 親密度 anim.affection: Lv10 リボン / Lv20 王冠 / Lv30 オーラ（値が無ければ何も付かない）。
 import { shade, rgba, rr, mix } from './util.js';
 import { FL, setFL, C, OC, glow } from './mkit.js';
+import { drawSpritePet, spritePetReady } from './sprites.js';
 
 const PI = Math.PI, TAU = PI * 2;
 export const PET_STYLES = ['slimePet', 'flamingoPet', 'gatorPet', 'catPet', 'dronePet', 'ghostPet', 'alienPet', 'dragonPet', 'dolphinPet', 'robotPet'];
@@ -50,6 +51,26 @@ export function drawPet(ctx, x, y, look, anim) {
   setFL(!!anim.flash);
   if (!anim.noShadow && !FL) footSparkle(ctx, t, acc);
   const pick = st === 'pick';
+  // 差し替えスプライト（読み込み済みなら本体だけ差し替え。影・きらめき・オーラ・ハートはコードのまま）
+  if (spritePetReady(style)) {
+    const [ax, ay, ar] = AURA[style];
+    ctx.save();
+    if (fly) ctx.translate(0, -8 + Math.sin(t * 3) * 2.5);
+    if (lv >= 3 && !FL) auraBack(ctx, ax, ay, ar, t, col, acc);
+    else if (!FL && !anim.noShadow) glow(ctx, ax, ay, ar * 0.9, mix(col, '#ffffff', 0.3), 0.1);
+    ctx.restore();
+    const ok = drawSpritePet(ctx, 0, 0, look, { state: st, t, flash: FL, local: true });
+    if (ok) {
+      ctx.save();
+      if (fly) ctx.translate(0, -8 + Math.sin(t * 3) * 2.5);
+      if (lv >= 3 && !FL) auraFront(ctx, ax, ay, ar, t);
+      if (pick && !FL) { hearts(ctx, 6, ay - ar * 0.9, t); sparkle(ctx, -8, ay - ar * 0.7, t); }
+      ctx.restore();
+      setFL(false);
+      ctx.restore();
+      return;
+    }
+  }
   if (pick) { // 喜びジャンプ（伸び縮み）
     const j = Math.abs(Math.sin(t * 9));
     ctx.translate(0, -j * 8);
@@ -77,7 +98,7 @@ export function drawPet(ctx, x, y, look, anim) {
   if (lv >= 1) atAnchor(ctx, 'bow', () => bigBow(ctx, lv >= 3 ? '#ff4f9a' : acc === col ? '#ff4f9a' : acc));
   if (lv >= 2) atAnchor(ctx, 'top', () => crown(ctx, t));
   if (lv >= 3 && !FL) auraFront(ctx, ax, ay, ar, t);
-  if (pick && !FL) { hearts(ctx, 6, ay - ar * 0.9, t); sparkle(ctx, -8, ay - ar * 0.7, t); }
+  if (pick && !FL && !anim.noFx) { hearts(ctx, 6, ay - ar * 0.9, t); sparkle(ctx, -8, ay - ar * 0.7, t); }
   RIM = null;
   setFL(false);
   ctx.restore();

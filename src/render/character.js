@@ -11,6 +11,7 @@
 //          攻撃/被弾/死亡などの一過性の状態や大きな拡大表示はその場でベクター描画する。
 import { shade, rgba, mix, rng, clamp, lerp, OUTLINE } from './util.js';
 import { ITEMS } from '../data/items.js';
+import { spriteCharPlan, drawSpriteCharPlan } from './sprites.js';
 
 export const HERO_LOOKS = {
   luna: { body: 'f', skin: '#ffe3d3', hair: 'twin', hairColor: '#ff6fb5', eyeColor: '#ff3d8b', expr: 'cute', hairShadow: '#c8458f', hairHi: '#ffd0ea', hairTip: '#b47cff', tie: '#ffd23f' },
@@ -179,6 +180,57 @@ const C = (c) => (FL ? '#ffffff' : c);
 const OC = () => (FL ? '#ffd8ea' : OUTLINE);
 const LINE = () => (FL ? '#ffd8ea' : '#3a1c40');      // 内側の細線
 let RIM = '#8ff4ff';
+
+// ---------------------------------------------------------------- レイヤー別描画（スプライトのテンプレート書き出し用）
+// anim.onlyLayers = ['body'|'arm'|'hair_back'|'hair_front'|'face'|'top'|'sleeve'|'bottom'|'shoes'|'hat'|'accessory'|'weapon'|'tear', ...]
+// 描画コードの各部品の直前で TAG（どのレイヤーか）を設定し、書き出し時だけ ctx を Proxy で包んで
+//  - 選んだレイヤー: そのまま描く
+//  - 合成順（SPRITE_LAYER_ORDER）で下にあるのにコードでは上に描かれる部品: destination-out で消す（＝隠れる部分を抜く）
+//  - それ以外: 描かない
+// 通常のゲーム描画では ONLY=null で、TAG の代入以外は何もしない。
+export const SPRITE_LAYER_ORDER = ['accessory_back', 'hair_back', 'body', 'bottom', 'shoes', 'top', 'tear', 'face', 'hair_front', 'accessory', 'hat', 'arm', 'sleeve', 'weapon'];
+const LRANK = Object.fromEntries(SPRITE_LAYER_ORDER.map((k, i) => [k, i]));
+LRANK.fx = 99;
+let TAG = 'body', ONLY = null, ONLY_RANK = 0, NO_ERASE = false;
+function layerMode() {
+  if (ONLY.has(TAG)) return 1;
+  return !NO_ERASE && (LRANK[TAG] ?? 99) < ONLY_RANK ? 2 : 0;
+}
+const DRAW_OPS = new Set(['fill', 'stroke', 'fillRect', 'strokeRect', 'fillText', 'strokeText', 'drawImage', 'putImageData']);
+function layerProxy(real) {
+  return new Proxy(real, {
+    get(t, p) {
+      const v = t[p];
+      if (typeof v !== 'function') return v;
+      if (!DRAW_OPS.has(p)) return (...a) => v.apply(t, a);
+      return (...a) => {
+        const m = layerMode();
+        if (m === 1) return v.apply(t, a);
+        if (m === 2) { const op = t.globalCompositeOperation; t.globalCompositeOperation = 'destination-out'; v.apply(t, a); t.globalCompositeOperation = op; }
+        return undefined;
+      };
+    },
+    set(t, p, v) { t[p] = v; return true; },
+  });
+}
+function setOnlyLayers(list, noErase) {
+  if (!list) { ONLY = null; return; }
+  const s = new Set();
+  for (const n of list) {
+    if (n === 'accessory') { s.add('accessory'); s.add('accessory_back'); } else if (n === 'accessory_front') s.add('accessory');
+    else if (n === 'hair') { s.add('hair_back'); s.add('hair_front'); }
+    else if (n === 'body') { s.add('body'); s.add('arm'); } else if (n === 'body_main') s.add('body');   // body = 素体（手前の腕込み）
+    else if (n === 'top') { s.add('top'); s.add('sleeve'); } else if (n === 'top_main') s.add('top');    // top = 上着（手前の袖込み）
+    else s.add(n);
+  }
+  ONLY = s; NO_ERASE = !!noErase;
+  ONLY_RANK = Math.min(...[...s].map((n) => LRANK[n] ?? 99));
+}
+// 書き出し時だけ: 素体の腰（インナーのスパッツ）。通常はパンツ（bottom）の腰が覆う
+function innerHips(ctx, K) {
+  const hw = K.hw - 0.4;
+  ctx.beginPath(); rrect(ctx, -hw, -5, hw * 2, 9.5, 3); fillStroke(ctx, INNER_BOT);
+}
 
 function fillStroke(ctx, col, lw = OLW) {
   ctx.fillStyle = C(col); ctx.fill();
@@ -577,6 +629,31 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
   const auraT = A.aura && state !== 'drive' && state !== 'dead' ? clamp(A.auraTier || 1, 1, 4) | 0 : 0;
   const vil = !!(look.villain || A.villain || (A.deadT !== undefined && !look.expr));
   const lp = LOOPS[state], qn = QUANT[state];
+  // ---- レイヤー別描画（スプライトのテンプレート書き出し用: anim.onlyLayers）
+  if (A.onlyLayers) {
+    setOnlyLayers(A.onlyLayers, A.noErase);
+    TAG = 'body';
+    ctx.save(); ctx.translate(x, y); ctx.scale(facing * s, s);
+    try { renderChar(layerProxy(ctx), look, equip, Object.assign({}, A, { villain: vil, noFx: true }), state, ws, wk); }
+    finally { ctx.restore(); setOnlyLayers(null); TAG = 'body'; }
+    return;
+  }
+  // ---- 差し替えスプライト（assets/sprites/manifest.json に人型があり spriteMode='auto' のとき。無ければ下のコード描画）
+  if (!A.noSprite) {
+    const plan = spriteCharPlan(look, equip, A, state, wk, ws);
+    if (plan) {
+      if (auraT) { ctx.save(); ctx.translate(x, y); drawAuraBack(ctx, A.aura, auraT, A.t || 0, s); ctx.restore(); }
+      drawSpriteCharPlan(ctx, x, y, plan, A);
+      if ((state === 'attack' && wk !== 'none') || wk === 'magic') {
+        ctx.save(); ctx.translate(x, y); ctx.scale(facing * s, s);
+        if (alpha < 1) ctx.globalAlpha *= alpha;
+        liveFx(ctx, look, equip, A, state, ws, wk, plan.repT, plan.repAT);
+        ctx.restore();
+      }
+      if (auraT >= 2) { ctx.save(); ctx.translate(x, y); drawAuraFront(ctx, A.aura, auraT, A.t || 0, s); ctx.restore(); }
+      return;
+    }
+  }
   // ---- キャッシュ経路
   if ((lp || qn) && HAS_CANVAS && !A.noCache && ctx.getTransform) {
     const m = ctx.getTransform();
@@ -705,6 +782,33 @@ function liveFx(ctx, look, equip, anim, state, ws, wk, repT, repAT) {
   FL = false;
 }
 
+/**
+ * スプライト合成用: 頭の座標系（顔シートの基準点）を返す。原点=足元・右向き・scale 1。
+ * 戻り値 { m: [a,b,c,d,e,f], back } — back=true（ロープ登りの背面）は顔を描かない。
+ */
+export function charHeadPose(look, equip, anim) {
+  look = look || HERO_LOOKS.luna; equip = equip || EMPTY;
+  const A = anim || EMPTY;
+  let state = A.state || 'idle';
+  const ws = equip.weapon && equip.weapon.style;
+  const wk = !ws ? 'none' : (ws === 'pistol' || ws === 'smg') ? 'gun' : ws === 'staff' ? 'magic' : 'melee';
+  if (state === 'attack' && wk === 'gun') state = 'shoot';
+  if (state === 'shoot' && wk !== 'gun') state = 'attack';
+  const lp = LOOPS[state];
+  const w = TAU / (lp ? lp[0] : LOOP);
+  const f = look.body === 'f';
+  const B = f ? BODY.f : BODY.m;
+  const P = makePose(state, A.t || 0, clamp(A.attackT || 0, 0, 1), wk, ws, A, w, f);
+  const m = [1, 0, 0, 1, 0, 0];
+  const tr = (x, y) => { m[4] += m[0] * x + m[2] * y; m[5] += m[1] * x + m[3] * y; };
+  const ro = (r) => { const c = Math.cos(r), s = Math.sin(r); const a = m[0], b = m[1], cc = m[2], d = m[3]; m[0] = a * c + cc * s; m[1] = b * c + d * s; m[2] = cc * c - a * s; m[3] = d * c - b * s; };
+  if (P.lie) { tr(34 * P.lie, -9 * P.lie); ro(-PI / 2 * P.lie); }
+  tr(P.hx, P.hipY + B.hipY + P.bob); ro(P.tilt);
+  tr(P.twist * 0.25, HEAD_Y + (f ? 0.6 : 0)); ro(P.headTilt);
+  if (B.head !== 1) { m[0] *= B.head; m[1] *= B.head; m[2] *= B.head; m[3] *= B.head; }
+  return { m, back: !!P.back, state, wk };
+}
+
 /** 原点=足元・向き=右・scale 1 の座標系で描く */
 function renderChar(ctx, look, equip, anim, state, ws, wk) {
   const lp = LOOPS[state];
@@ -737,6 +841,7 @@ function renderChar(ctx, look, equip, anim, state, ws, wk) {
   FL = !!anim.flash;
   RIM = anim.rim || look.rim || (f ? '#9ff4ff' : '#8fe8ff');
   // 地面の影
+  TAG = 'body';
   if (state !== 'drive' && !P.lie) {
     ctx.beginPath(); ctx.ellipse(0, 0, 13, 3.2, 0, 0, TAU);
     ctx.fillStyle = 'rgba(20,0,30,0.28)'; ctx.fill();
@@ -862,9 +967,12 @@ function drawFrontView(ctx, K) {
   const sxF = B.sx - 0.4 + tw * 0.5, sxB = -B.sx - tw * 0.35;
   // ---- 背面レイヤー
   enterUpper(ctx, P);
+  TAG = 'accessory_back';
   if (eq.accessory && eq.accessory.style === 'wings') drawWings(ctx, K);
   if (eq.accessory && eq.accessory.style === 'scarf') drawScarfTail(ctx, K);
+  TAG = 'hair_back';
   enterHead(ctx, K); drawHairBack(ctx, K); ctx.restore();
+  TAG = 'top';
   if (K.topS === 'hoodie') drawHood(ctx, K);
   drawArm(ctx, K, false, sxB, SHOULDER_Y + 0.3, P.ab[0], P.ab[1]);
   ctx.restore();
@@ -874,10 +982,14 @@ function drawFrontView(ctx, K) {
   drawLeg(ctx, K, true, lx + P.hx * 0.3, P.hipY, P.lf[0], P.lf[1]);
   // ---- 腰・胴
   enterUpper(ctx, P);
+  if (ONLY) { TAG = 'body'; innerHips(ctx, K); }
+  TAG = 'bottom';
   drawHips(ctx, K);
   if (K.botS === 'skirt') drawSkirt(ctx, K, K.botC, false);
+  TAG = 'top';
   if (K.topS === 'idolDress') drawSkirt(ctx, K, K.topC, true);
   drawTorso(ctx, K);
+  TAG = 'accessory';
   if (eq.accessory) {
     const st = eq.accessory.style;
     if (st === 'goldChain') drawChain(ctx, K);
@@ -889,6 +1001,7 @@ function drawFrontView(ctx, K) {
   ctx.restore();
   // ---- 前腕＋武器
   drawArm(ctx, K, true, sxF, SHOULDER_Y + 0.6, P.af[0], P.af[1]);
+  TAG = 'fx';
   if (!K.anim.noFx) {
     if (P.swoosh) drawSwoosh(ctx, K, sxF, SHOULDER_Y + 0.5);
     if (K.wk === 'magic' && !FL) drawHoloPanel(ctx, K);
@@ -925,16 +1038,24 @@ function drawBackView(ctx, K) {
   drawLeg(ctx, K, false, -B.legX, P.hipY, P.lb[0], P.lb[1]);
   drawLeg(ctx, K, true, B.legX, P.hipY, P.lf[0], P.lf[1]);
   enterUpper(ctx, P);
+  if (ONLY) { TAG = 'body'; innerHips(ctx, K); }
+  TAG = 'bottom';
   drawHips(ctx, K);
   if (K.botS === 'skirt') drawSkirt(ctx, K, K.botC, false);
+  TAG = 'top';
   if (K.topS === 'idolDress') drawSkirt(ctx, K, K.topC, true);
   drawTorso(ctx, K, true);
+  TAG = 'top';
   if (K.topS === 'hoodie') drawHood(ctx, K, true);
+  TAG = 'accessory';
   if (eq.accessory && eq.accessory.style === 'wings') drawWings(ctx, K, true);
   enterHead(ctx, K);
+  TAG = 'body';
   ctx.beginPath(); ctx.ellipse(0, 0, 16.5, 15.5, 0, 0, TAU);
   fillStroke(ctx, K.skin);
+  TAG = 'hair_front';
   drawHairBack(ctx, K, true);
+  TAG = 'hat';
   drawHat(ctx, K, true);
   ctx.restore();
   drawArm(ctx, K, false, -B.sx, SHOULDER_Y, P.ab[0], P.ab[1]);
@@ -950,7 +1071,9 @@ function drawLeg(ctx, K, front, hx, hy, a, k) {
   const w1 = B.legW - 0.6, w2 = B.legW2 - 0.4;
   const skin = front ? K.skin : K.skinSh;
   const dark = front ? 0 : -0.12;
+  TAG = 'body';
   limb(ctx, hx, hy, a, e, T, S, 0, L, w1, w2, skin, 'round', 0.1);
+  TAG = 'bottom';
   const bs = K.botS;
   const [bc, ba] = K.botC;
   const dmg = K.dmg;
@@ -991,6 +1114,7 @@ function drawLeg(ctx, K, front, hx, hy, a, k) {
       limbAt(hx - 1.4, hy, a, e, T, S, end - 2); ctx.lineTo(PT.x, PT.y); ctx.stroke();
     }
     // 破れ: 膝の擦れ→穴（スパッツが見える）
+    TAG = 'tear';
     if (dmg >= 0.25) {
       limbPts(hx, hy, a, e, T, S);
       ctx.fillStyle = C('rgba(60,40,50,0.25)');
@@ -1016,11 +1140,13 @@ function drawLeg(ctx, K, front, hx, hy, a, k) {
     }
   }
   // 絆創膏（膝）
+  TAG = 'tear';
   if (dmg >= 0.9 && front && !LONG_PANTS[bs]) {
     limbPts(hx, hy, a, e, T, S);
     bandaid(ctx, LP.kx + 0.5, LP.ky + 1.5, 0.5);
   }
   // 靴
+  TAG = 'shoes';
   limbPts(hx, hy, a, e, T, S);
   drawShoe(ctx, K, LP.ex, LP.ey, a + e, front);
 }
@@ -1159,11 +1285,13 @@ function drawSkirt(ctx, K, cols, dress) {
     ctx.fillStyle = '#ffffff';
     sparkle(ctx, -hwB * 0.5, hb - 4, 1.4, 'rgba(255,255,255,0.9)'); sparkle(ctx, hwB * 0.3, hb - 6.5, 1.1, 'rgba(255,255,255,0.8)');
   }
+  const tg0 = TAG; TAG = 'tear';
   if (K.dmg >= 0.75) {
     ctx.save(); ctx.translate(-4, top + 8);
     ctx.beginPath(); polyPath(ctx, SKIRT_HOLE); fillStroke(ctx, INNER_BOT, 1);
     ctx.restore();
   }
+  TAG = tg0;
 }
 
 // ---------------------------------------------------------------- 胴
@@ -1229,11 +1357,13 @@ function drawTorso(ctx, K, back) {
   const info = TOPS[st] || TOPS.tshirt;
   const bot = 1 + info.len;
   const jag = dmg >= 0.5;
+  TAG = 'body';
   if (!back) drawNeck(ctx, K);
   // 肌（肩・首）
   torsoPath(ctx, K, -2, false); fillStroke(ctx, K.skin);
   // インナー（タンクトップ）— 破れても必ず残る
   tankPath(ctx, K, 0.5, false); fillStroke(ctx, INNER_TOP);
+  TAG = 'top';
   if (st === 'armorVest') { torsoPath(ctx, K, 1, jag); fillStroke(ctx, '#2b2b33'); }
   // 本体
   bodyShape(ctx, K, st, bot, jag);
@@ -1289,6 +1419,7 @@ function drawTorso(ctx, K, back) {
     ctx.restore();
   }
   // ---- 破れ
+  TAG = 'tear';
   if (dmg >= 0.25) {
     ctx.strokeStyle = C('rgba(40,20,40,0.45)'); ctx.lineWidth = 0.8; ctx.beginPath();
     for (const s of SCRATCHES) { ctx.moveTo(s[0], s[1]); ctx.lineTo(s[2], s[3]); }
@@ -1310,6 +1441,7 @@ function drawTorso(ctx, K, back) {
   }
   ctx.restore();
   // 再アウトライン
+  TAG = 'top';
   ctx.strokeStyle = OC(); ctx.lineWidth = OLW;
   bodyShape(ctx, K, st, bot, jag);
   ctx.stroke();
@@ -1502,7 +1634,9 @@ function drawArm(ctx, K, front, sx, sy, a, e) {
   const sl = (TOPS[st] || TOPS.tshirt).sl;
   const slCol = st === 'armorVest' ? '#2b2b33' : c;
   const aw = B.armW, aw2 = B.armW2;
+  TAG = front ? 'arm' : 'body';
   limb(ctx, sx, sy, a, e, U, F, 0, L, aw - 0.6, aw2 - 0.6, skin, 'round', 0.1);
+  TAG = front ? 'sleeve' : 'top';
   const lost = front && dmg >= 0.75 && sl !== 'none';
   if (lost) {
     jagEnd(ctx, sx, sy, a, aw + 1.4, sh(slCol, dk), 2.6);
@@ -1540,6 +1674,7 @@ function drawArm(ctx, K, front, sx, sy, a, e) {
     ctx.fillStyle = C(sh(slCol, dk + 0.25)); ctx.beginPath(); ctx.arc(PT.x - 1.2, PT.y - 1.4, 1.6, 0, TAU); ctx.fill();
     ctx.fillStyle = C(sh(ac, dk)); ctx.beginPath(); ctx.arc(PT.x, PT.y + 3.2, 1.2, 0, TAU); ctx.fill();
   }
+  TAG = 'tear';
   if (front && dmg >= 0.9) { limbAt(sx, sy, a, e, U, F, U + 3.5); bandaid(ctx, PT.x, PT.y, PT.a + 0.3); }
   if (front && dmg >= 0.6 && lost) {
     ctx.fillStyle = C('rgba(50,35,45,0.3)'); limbAt(sx, sy, a, e, U, F, 4);
@@ -1551,14 +1686,18 @@ function drawArm(ctx, K, front, sx, sy, a, e) {
   let hand = front ? K.P.handF : K.P.handB;
   if (front && K.P.showWeapon && K.eq.weapon) {
     const ang = K.wk === 'gun' ? fore : K.P.wAng != null ? K.P.wAng : fore;
+    TAG = 'weapon';
     ctx.save(); ctx.translate(hx, hy); ctx.rotate(ang);
     drawWeapon(ctx, K.ws, K.eq.weapon.color, K.eq.weapon.accent, K.t, K.P, K.w);
     ctx.restore();
+    TAG = 'arm';
     drawHand(ctx, hx, hy, ang, 'grip', skin, K.f, front && K.P.punch);
   } else {
     if (hand === 'grip') hand = 'fist';
+    TAG = front ? 'arm' : 'body';
     drawHand(ctx, hx, hy, fore, hand, skin, K.f, front && K.P.punch);
   }
+  TAG = 'fx';
   if (front && K.P.punch) {
     ctx.strokeStyle = C('#ffffff'); ctx.lineWidth = 1.4; ctx.beginPath();
     for (let i = 0; i < 3; i++) { const an = -0.6 + i * 0.6; ctx.moveTo(hx + Math.cos(an) * 6, hy + Math.sin(an) * 6); ctx.lineTo(hx + Math.cos(an) * 10, hy + Math.sin(an) * 10); }
@@ -1767,6 +1906,7 @@ function drawHead(ctx, K) {
   const P = K.P, eq = K.eq;
   // 耳（奥側）
   const H = hairDef(K);
+  TAG = 'body';
   if (H.ear) {
     ctx.beginPath(); ctx.ellipse(-16.4, 3.5, 3, 4.2, 0.15, 0, TAU); fillStroke(ctx, K.skin, 1.8);
     ctx.strokeStyle = C(K.skinSh2); ctx.lineWidth = 0.8; ctx.beginPath(); ctx.arc(-16.4, 3.6, 1.8, -1.9, 1.6); ctx.stroke();
@@ -1789,6 +1929,7 @@ function drawHead(ctx, K) {
   }
   ctx.restore();
   // 頬の赤み（ぼかし2層＋斜線）
+  TAG = 'face';
   const cute = !K.cool;
   const hurt = P.eyes === 'hurt' || P.mouth === 'shout';
   const bA = K.vil ? 0.1 : cute ? 0.42 : 0.24;
@@ -1810,21 +1951,29 @@ function drawHead(ctx, K) {
   const hasMask = eq.accessory && eq.accessory.style === 'mask';
   if (!hasMask) drawMouth(ctx, K);
   // 煤・絆創膏
+  TAG = 'tear';
   if (K.dmg >= 0.9) {
     ctx.fillStyle = C('rgba(50,40,50,0.32)'); ctx.beginPath(); ctx.ellipse(FO - 10, 11, 2.6, 1.4, 0.3, 0, TAU); ctx.fill();
     bandaid(ctx, FO + 11, 3.6, -0.5);
   } else if (K.dmg >= 0.5) {
     ctx.fillStyle = C('rgba(50,40,50,0.2)'); ctx.beginPath(); ctx.ellipse(FO + 10.4, 11, 2.2, 1.2, -0.3, 0, TAU); ctx.fill();
   }
+  TAG = 'accessory';
   if (hasMask) drawMask(ctx, K);
   // 前髪
+  TAG = 'hair_front';
   drawHairFront(ctx, K, H);
   // 眉（前髪の上に、透けて見える表現）
+  TAG = 'face';
   drawBrows(ctx, K);
+  TAG = 'accessory';
   if (eq.accessory && eq.accessory.style === 'sunglasses') drawGlasses(ctx, K);
+  TAG = 'hat';
   drawHat(ctx, K, false);
+  TAG = 'face';
   if (P.panic) drawPanicLines(ctx, K);
   if (P.sweat || P.panic) drawSweat(ctx, K);
+  TAG = 'accessory';
   if (eq.accessory && eq.accessory.style === 'halo') drawHalo(ctx, K);
 }
 

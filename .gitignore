@@ -1,3 +1,10 @@
 node_modules/
 tests/screenshots/
 .DS_Store
+# 差し替え用テンプレート（約300MB）は `npm run export:sprites` で生成する。参考用の一部だけコミット
+assets/sprites_template/*
+!assets/sprites_template/manifest.json
+!assets/sprites_template/presets/
+!assets/sprites_template/pets/
+assets/sprites_template/pets/*_guide.png
+assets/sprites_template/presets/*_guide.png
