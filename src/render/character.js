@@ -3388,9 +3388,9 @@ function rigFoot(ctx, p, hx, hy, a, k, B) {
   ctx.restore();
 }
 /** 杖の先の光（絵の武器の上に。コードの drawWeapon と同じ位置） */
-function staffGlow(ctx, c, P, t, w) {
+function staffGlow(ctx, c, P, t, w, tip = 30) {
   const glow = P && P.magicGlow ? P.magicGlow : 0;
-  ctx.save(); ctx.translate(30, Math.sin(t * om(w, 3)) * 0.8);
+  ctx.save(); ctx.translate(tip, Math.sin(t * om(w, 3)) * 0.8);
   ctx.globalCompositeOperation = 'lighter';
   ctx.fillStyle = FL ? '#ffffff' : rgba(c, 0.16 + glow * 0.3);
   ctx.beginPath(); ctx.arc(0, 0, 6 + glow * 6 + Math.sin(t * om(w, 6)) * 0.8, 0, TAU); ctx.fill();
@@ -3476,7 +3476,7 @@ function rigWeaponAndHand(ctx, K, parts, sx, sy) {
   if (parts.weapon) {
     rigImg(ctx, parts.weapon);
     if (P.muzzle) muzzleFx(ctx, K.ws);
-    if (K.ws === 'staff') staffGlow(ctx, wc, P, K.t, K.w);
+    // 絵の杖は先端の宝石・光まで描かれているので、コードの光（コードの杖の先端の位置）は重ねない（光だけ宙に浮いて見えるため）
   } else drawWeapon(ctx, K.ws, wc, wa, K.t, P, K.w);
   ctx.restore();
   rigHand(ctx, parts.armF, sx, sy, a, e, B.upper, B.upper + B.fore);
