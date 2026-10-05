@@ -1,0 +1,120 @@
+{
+  "portraits": {
+    "luna_f": {
+      "file": "portraits/luna_f.png",
+      "expr": {
+        "smile": "portraits/luna_f_smile.png",
+        "angry": "portraits/luna_f_angry.png",
+        "surprised": "portraits/luna_f_surprised.png",
+        "sad": "portraits/luna_f_sad.png",
+        "shout": "portraits/luna_f_shout.png"
+      }
+    },
+    "luna_m": {
+      "file": "portraits/luna_m.png",
+      "expr": {
+        "smile": "portraits/luna_m_smile.png",
+        "angry": "portraits/luna_m_angry.png",
+        "surprised": "portraits/luna_m_surprised.png",
+        "sad": "portraits/luna_m_sad.png",
+        "shout": "portraits/luna_m_shout.png"
+      }
+    },
+    "jin_f": {
+      "file": "portraits/jin_f.png",
+      "expr": {
+        "smile": "portraits/jin_f_smile.png",
+        "angry": "portraits/jin_f_angry.png",
+        "surprised": "portraits/jin_f_surprised.png",
+        "sad": "portraits/jin_f_sad.png",
+        "shout": "portraits/jin_f_shout.png"
+      }
+    },
+    "jin_m": {
+      "file": "portraits/jin_m.png",
+      "expr": {
+        "smile": "portraits/jin_m_smile.png",
+        "angry": "portraits/jin_m_angry.png",
+        "surprised": "portraits/jin_m_surprised.png",
+        "sad": "portraits/jin_m_sad.png",
+        "shout": "portraits/jin_m_shout.png"
+      }
+    },
+    "hacker_f": {
+      "file": "portraits/hacker_f.png",
+      "expr": {
+        "smile": "portraits/hacker_f_smile.png",
+        "angry": "portraits/hacker_f_angry.png",
+        "surprised": "portraits/hacker_f_surprised.png",
+        "sad": "portraits/hacker_f_sad.png",
+        "shout": "portraits/hacker_f_shout.png"
+      }
+    },
+    "hacker_m": {
+      "file": "portraits/hacker_m.png",
+      "expr": {
+        "smile": "portraits/hacker_m_smile.png",
+        "angry": "portraits/hacker_m_angry.png",
+        "surprised": "portraits/hacker_m_surprised.png",
+        "sad": "portraits/hacker_m_sad.png",
+        "shout": "portraits/hacker_m_shout.png"
+      }
+    }
+  },
+  "heads": {
+    "luna_f": {
+      "file": "heads/luna_f.png",
+      "expr": {
+        "blink": "heads/luna_f_blink.png",
+        "hurt": "heads/luna_f_hurt.png",
+        "shout": "heads/luna_f_shout.png",
+        "happy": "heads/luna_f_happy.png"
+      }
+    },
+    "luna_m": {
+      "file": "heads/luna_m.png",
+      "expr": {
+        "blink": "heads/luna_m_blink.png",
+        "hurt": "heads/luna_m_hurt.png",
+        "shout": "heads/luna_m_shout.png",
+        "happy": "heads/luna_m_happy.png"
+      }
+    },
+    "jin_f": {
+      "file": "heads/jin_f.png",
+      "expr": {
+        "blink": "heads/jin_f_blink.png",
+        "hurt": "heads/jin_f_hurt.png",
+        "shout": "heads/jin_f_shout.png",
+        "happy": "heads/jin_f_happy.png"
+      }
+    },
+    "jin_m": {
+      "file": "heads/jin_m.png",
+      "expr": {
+        "blink": "heads/jin_m_blink.png",
+        "hurt": "heads/jin_m_hurt.png",
+        "shout": "heads/jin_m_shout.png",
+        "happy": "heads/jin_m_happy.png"
+      }
+    },
+    "hacker_f": {
+      "file": "heads/hacker_f.png",
+      "expr": {
+        "blink": "heads/hacker_f_blink.png",
+        "hurt": "heads/hacker_f_hurt.png",
+        "shout": "heads/hacker_f_shout.png",
+        "happy": "heads/hacker_f_happy.png"
+      }
+    },
+    "hacker_m": {
+      "file": "heads/hacker_m.png",
+      "expr": {
+        "blink": "heads/hacker_m_blink.png",
+        "hurt": "heads/hacker_m_hurt.png",
+        "shout": "heads/hacker_m_shout.png",
+        "happy": "heads/hacker_m_happy.png"
+      }
+    }
+  }
+}
