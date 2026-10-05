@@ -477,7 +477,7 @@ async function main() {
           const look = { ...DEFAULT_LOOKS[c][g], classId: c, gender: g };
           for (const st of [['idle', 0.3], ['walk', 0.15], ['jump', 0.2]]) {
             const cv = [0, 1].map(() => { const k = document.createElement('canvas'); k.width = 260; k.height = 300; return k; });
-            const an = { state: st[0], t: st[1], scale: 2.6, noCache: true };
+            const an = { state: st[0], t: st[1], scale: 2.6, noCache: true, aiHeadPlain: true };   // 画像の頭の首の振り（enterAiNeck）を止めて、置き場所だけを比べる
             drawCharacter(cv[0].getContext('2d'), 130, 280, look, eq, an);
             drawCharacter(cv[1].getContext('2d'), 130, 280, { ...look, aiHead: false }, eq, an);
             const d1 = cv[0].getContext('2d').getImageData(0, 0, 260, 300).data, d2 = cv[1].getContext('2d').getImageData(0, 0, 260, 300).data;

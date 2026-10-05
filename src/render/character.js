@@ -1062,7 +1062,7 @@ function enterUpper(ctx, P) {
 function enterHead(ctx, K) {
   const P = K.P;
   ctx.save();
-  if (K.rig && K.ai) { enterAiNeck(ctx, K); return; }
+  if (K.rig && K.ai && !K.anim.aiHeadPlain) { enterAiNeck(ctx, K); return; }   // aiHeadPlain: テスト用（コードの頭と同じ動きで置く）
   ctx.translate(P.twist * 0.25, K.headY != null ? K.headY : HEAD_Y + (K.f ? 0.6 : 0));
   ctx.rotate(P.headTilt);
   if (K.B.head !== 1) ctx.scale(K.B.head, K.B.head);
