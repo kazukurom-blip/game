@@ -1,9 +1,13 @@
 // 主人公のパーツ式（着せ替え人形 = リグ）: パーツシートの読み込み・切り出し・位置合わせ・色替え・合成
 //  manifest.json:
-//    "rig": { "enabled": true, "defaultWear": true,
+//    "rig": { "enabled": true, "defaultWear": true, "fit": false,
 //             "parts": ["body_f", "body_m", "top/hoodie_f", "weapon/knife", "tear/1_f", ...]       … ファイルは rig/<キー>.png
 //             または "parts": { "top/hoodie_f": "rig/top/hoodie_f.png" | { "file": "...", "base": "#ff6fb5", "accent": "#ffffff",
-//                                                                         "fit": true, "bgRemove": "auto", "recolor": true } } }
+//                                                                         "fit": true, "layout": 2, "bgRemove": "auto", "recolor": true } } }
+//  fit（全体の既定。各パーツの fit で上書き）: false = 配置図 v2 の枠・支点の位置のまま正確に組む（新しい配置図で描いた絵）/
+//      true = 枠の中の絵の範囲を、同じ物のコード描画の範囲に自動で合わせる（多少ずれた絵）。
+//  layout（全体の既定。各パーツで上書き）: 2 = 今の配置図（骨格 v2）、1 = 旧い配置図（旧い頭身。必ず自動フィット）。
+//      既定: rig 節に fit も layout も無ければ 1（前からある manifest の互換）、どちらかがあれば 2。
 //  キー: body_<g> / <slot>/<style>_<g> / <slot>/<style>__<色hex>_<g>（色違いの専用の絵）/ <slot>/<style>（性別共通）/
 //        weapon/<style> / weapon/<style>__<色hex> / tear/<1|2|3>_<g>
 //  - 素体（body）が無い・読み込み中 → null（今まで通りの描画）。着ている装備の絵が読み込み中の間も null。
@@ -13,7 +17,7 @@
 // 仕様: docs/SPEC_SPRITES.md「リグ（パーツ式）」
 import {
   RIG_PARTS, RIG_W, RIG_H, RIG_S, RIG_R, RIG_GROUP_PARTS, RIG_BASE, RIG_SKIN_BASE, RIG_DEFAULT_WEAR, RIG_SLOTS, RIG_ACC_PARTS,
-  WPN_W, WPN_H, WPN_S, WPN_R, WPN_BOX,
+  WPN_W, WPN_H, WPN_S, WPN_R, WPN_BOX, RIG_PARTS_V1, RIG_LIMBS,
 } from './rigLayout.js';
 import { renderRigCode, renderRigWeapon, itemColors } from './character.js';
 import { getSpriteMode, bumpSpriteRev, removeBg } from './sprites.js';
@@ -22,7 +26,7 @@ let RM = null;                     // 正規化済みの rig 設定（null = リ
 let BASE = 'assets/sprites/';
 let RREV = 0;                      // リグの画像が読み込まれるたびに +1（キャッシュのキー）
 const SHEETS = new Map();          // key → シートの記録
-const STAT = { files: 0, requested: 0, loaded: 0, failed: 0, gen: 0, bakes: 0, recolors: 0, prepMs: 0, prepMax: 0, warnings: [] };
+const STAT = { files: 0, requested: 0, loaded: 0, failed: 0, gen: 0, bakes: 0, recolors: 0, prepMs: 0, prepMax: 0, warnings: [], fitFallback: [] };
 const HAS = typeof OffscreenCanvas !== 'undefined' || typeof document !== 'undefined';
 const K2 = RIG_R / RIG_S;          // 配置図の px → 保持する px
 const MARGIN = 12;                 // 枠の外側にはみ出した絵も拾う幅（配置図の px）
@@ -42,11 +46,14 @@ const HEX = /^#[0-9a-f]{6}$/i;
 /** manifest の rig 節を設定（null で無効）。sprites.js の setSpriteManifest から呼ばれる */
 export function setRigManifest(j, base) {
   RM = null; SHEETS.clear(); PLANS.clear(); GEN.clear(); RREV++;
-  STAT.files = STAT.requested = STAT.loaded = STAT.failed = 0; STAT.prepMs = STAT.prepMax = 0;
+  STAT.files = STAT.requested = STAT.loaded = STAT.failed = 0; STAT.prepMs = STAT.prepMax = 0; STAT.fitFallback = [];
   if (typeof base === 'string') BASE = base;
   if (!j || typeof j !== 'object' || Array.isArray(j)) return false;
   const src = j.parts || j.files;
   const files = {};
+  // 全体の既定: fit / layout（rig 節に fit も layout も無い = 前からある manifest → 旧い配置図＋自動フィット）
+  const gLayout = j.layout === 1 || j.layout === 2 ? j.layout : j.fit !== undefined ? 2 : 1;
+  const gFit = typeof j.fit === 'boolean' ? j.fit : true;
   const add = (key, v) => {
     if (typeof key !== 'string' || !/^[\w/@-]+$/.test(key) || key.includes('..')) { warn('rig: 不正なキー ' + key); return; }
     let o = v === true || v == null ? {} : typeof v === 'string' ? { file: v } : v;
@@ -55,11 +62,12 @@ export function setRigManifest(j, base) {
     if (!safePath(file)) { warn('rig: ' + key + ' の file は assets/sprites/ からの相対パスにしてください'); return; }
     const info = parseKey(key);
     if (!info) { warn('rig: キーの形が違います ' + key + '（例 body_f, top/hoodie_f, weapon/knife, tear/1_f）'); return; }
+    const layout = o.layout === 1 || o.layout === 2 ? o.layout : gLayout;
     files[key] = {
-      key, file, ...info,
+      key, file, ...info, layout,
       base: HEX.test(o.base || '') ? o.base.toLowerCase() : null,
       accent: HEX.test(o.accent || '') ? o.accent.toLowerCase() : null,
-      fit: o.fit !== false, recolor: o.recolor !== false,
+      fit: layout === 1 ? true : typeof o.fit === 'boolean' ? o.fit : gFit, recolor: o.recolor !== false,
       bgRemove: o.bgRemove === false ? false : o.bgRemove === true ? true : 'auto',
       st: 0, parts: null, wpn: null, rc: new Map(),
     };
@@ -68,7 +76,7 @@ export function setRigManifest(j, base) {
   if (Array.isArray(src)) for (const k of src) add(k, null);
   else if (src && typeof src === 'object') for (const k of Object.keys(src)) add(k, src[k]);
   for (const k in files) SHEETS.set(k, files[k]);
-  RM = { enabled: j.enabled !== false, defaultWear: j.defaultWear !== false, heroesOnly: j.heroesOnly !== false };
+  RM = { enabled: j.enabled !== false, defaultWear: j.defaultWear !== false, heroesOnly: j.heroesOnly !== false, fit: gFit, layout: gLayout };
   return true;
 }
 /** キー → { kind, slot, style, g, variant } */
@@ -84,7 +92,7 @@ function parseKey(key) {
   return null;
 }
 export function rigStats() {
-  return { enabled: !!(RM && RM.enabled), ...STAT, warnings: STAT.warnings.slice(-5), plans: PLANS.size, gens: GEN.size, rev: RREV };
+  return { enabled: !!(RM && RM.enabled), fit: RM ? RM.fit : null, layout: RM ? RM.layout : null, ...STAT, warnings: STAT.warnings.slice(-5), fitFallback: STAT.fitFallback.slice(), plans: PLANS.size, gens: GEN.size, rev: RREV };
 }
 export function hasRig() { return !!(RM && RM.enabled && SHEETS.size); }
 /** 全部のリグ画像を読み込む（テスト用）。完了で解決 */
@@ -209,7 +217,7 @@ const BLK = 4;                       // 4×4px のブロック単位で調べる
 const REACH = 44;                    // 枠からこの px 以内にある塊はその枠の候補
 let BLAB = null;
 /** 枠ごとの { bb: [x0,y0,x1,y1]（px）, lab: ラベルの配列, set: その枠の塊のラベル } */
-function blobsByPart(d, W, H, names) {
+function blobsByPart(d, W, H, names, BOX = RIG_PARTS) {
   const bw = Math.ceil(W / BLK), bh = Math.ceil(H / BLK);
   const lab = BLAB && BLAB.length === bw * bh ? BLAB.fill(0) : (BLAB = new Int32Array(bw * bh));
   const on = new Uint8Array(bw * bh);
@@ -244,7 +252,7 @@ function blobsByPart(d, W, H, names) {
     const X0 = c.x0 * BLK, Y0 = c.y0 * BLK, X1 = (c.x1 + 1) * BLK, Y1 = (c.y1 + 1) * BLK;
     let best = null, bo = 0, inside = 0;
     for (const name of names) {
-      const b = RIG_PARTS[name];
+      const b = BOX[name];
       const ov = Math.max(0, Math.min(X1, b.x + b.w + REACH) - Math.max(X0, b.x - REACH)) * Math.max(0, Math.min(Y1, b.y + b.h + REACH) - Math.max(Y0, b.y - REACH));
       if (ov > bo) { bo = ov; best = name; inside = Math.max(0, Math.min(X1, b.x + b.w) - Math.max(X0, b.x)) * Math.max(0, Math.min(Y1, b.y + b.h) - Math.max(Y0, b.y)) / ((X1 - X0) * (Y1 - Y0)); }
     }
@@ -317,6 +325,7 @@ function partCanvas(name) {
 function prepSheet(rec, im) {
   const w0 = im.naturalWidth || im.width, h0 = im.naturalHeight || im.height;
   if (!(w0 > 0 && h0 > 0)) return false;
+  if (Math.abs(w0 / h0 - 1) > 0.03) warn(`rig: ${rec.key} は正方形ではありません（${w0}×${h0}）。配置図と同じ 1024×1024 で描いてください`);
   const c = newCanvas(RIG_W, RIG_H);
   const g = c.getContext('2d', { willReadFrequently: true });
   g.imageSmoothingEnabled = true; try { g.imageSmoothingQuality = 'high'; } catch { /* ignore */ }
@@ -331,7 +340,7 @@ function prepSheet(rec, im) {
   const names = rec.kind === 'slot' && rec.slot === 'accessory' && RIG_ACC_PARTS[rec.style] ? RIG_ACC_PARTS[rec.style] : RIG_GROUP_PARTS[group];
   rec.parts = {};
   let found = 0;
-  const blobs = blobsByPart(d, RIG_W, RIG_H, names);
+  const blobs = blobsByPart(d, RIG_W, RIG_H, names, rec.layout === 1 ? RIG_PARTS_V1 : RIG_PARTS);
   for (const name of names) {
     const b = RIG_PARTS[name];
     const B0 = blobs[name];
@@ -395,12 +404,14 @@ function prepWeapon(rec, im) {
   renderRigWeapon(rg, rec.style, bc, ba, WPN_S * k);
   const rbb0 = bboxOf(rg.getImageData(0, 0, rc.width, rc.height).data, rc.width, rc.height, 0, 0, rc.width, rc.height, 40, 1);
   const rbb = rbb0 ? rbb0.map((v) => v / k) : [WPN_BOX.px, WPN_BOX.py - 32, WPN_BOX.px + 320, WPN_BOX.py + 32];
-  let s = (rbb[2] - rbb[0]) / (bb[2] - bb[0]);
-  if (!rec.fit) s = 1;
+  // fit:false は持ち手の印が必須（印の位置 = 持ち手、大きさは描いたまま）。印が無ければ警告して自動フィット
+  let fit = rec.fit;
+  if (!fit && mn < 4) { STAT.fitFallback.push(rec.key); warn(`rig: ${rec.key} に持ち手の印（マゼンタ #FF00FF の丸）がありません。fit:false では必須 → 自動フィットで読み込みます`); fit = true; }
+  rec.fitUsed = fit;
+  let s = fit ? (rbb[2] - rbb[0]) / (bb[2] - bb[0]) : 1;
   s = Math.min(1.6, Math.max(0.6, s));
   let ax, ay, rx, ry;
   if (mn >= 4) { ax = mx / mn; ay = my / mn; rx = WPN_BOX.px; ry = WPN_BOX.py; }
-  else if (!rec.fit) { ax = rx = 0; ay = ry = 0; }
   else { ax = bb[0]; ay = (bb[1] + bb[3]) / 2; rx = rbb[0]; ry = (rbb[1] + rbb[3]) / 2; }
   // 合わせた後の範囲で切り抜く
   const f0 = (bb[0] - ax) * s + rx, f1 = (bb[1] - ay) * s + ry, f2 = (bb[2] - ax) * s + rx, f3 = (bb[3] - ay) * s + ry;
@@ -603,15 +614,43 @@ export function rigPlanFor(look, equip) {
   while (PLANS.size > PLAN_MAX) PLANS.delete(PLANS.keys().next().value);
   return plan;
 }
+/**
+ * テスト・見比べ用: 絵を1枚も使わず、全部コード描画の代用パーツ（骨格 v2）で組んだプラン。
+ * 仮のAI画像（下絵そのもの）を fit:false で差し込んだリグと画素で比べる基準になる。canvas が無ければ null
+ */
+export function rigCodePlanFor(look, equip) {
+  if (!HAS || !look) return null;
+  equip = equip || {};
+  const g = look.body === 'm' ? 'm' : 'f';
+  const dw = !RM || RM.defaultWear;
+  let sig = 'code|' + g + '|' + (look.skin || '') + '|';
+  const use = {};
+  for (const slot of RIG_SLOTS) {
+    let it = equip[slot];
+    if (!it && dw && RIG_DEFAULT_WEAR[slot]) it = RIG_DEFAULT_WEAR[slot](g);
+    if (!it || !it.style) { sig += ','; continue; }
+    use[slot] = { it, rec: null };
+    sig += itSig(it) + ',';
+  }
+  if (equip.weapon && equip.weapon.style) { use.weapon = { it: equip.weapon, rec: null }; sig += itSig(equip.weapon); }
+  const key = sig + '|' + RREV;
+  let plan = PLANS.get(key);
+  if (plan) return plan;
+  plan = makePlan(key, g, look, equip, null, use, [null, null, null]);
+  plan.sig = 'c' + RREV + '|' + sig;
+  PLANS.set(key, plan);
+  while (PLANS.size > PLAN_MAX) PLANS.delete(PLANS.keys().next().value);
+  return plan;
+}
 const STAGE_DMG = [0, 0.3, 0.6, 0.8, 0.95];
 const HAND_R = 2.9;                 // 手の丸（単位）。腕の長さ = BODY の upper+fore
-const ARM_L = { f: 7.6 + 7.2, m: 8.0 + 7.6 };
+const ARM_L = { f: RIG_LIMBS.f.upper + RIG_LIMBS.f.fore, m: RIG_LIMBS.m.upper + RIG_LIMBS.m.fore };   // 骨格 v2 の腕の長さ（肩〜手の中心）
 function stageOf(d) { return d >= 0.9 ? 4 : d >= 0.75 ? 3 : d >= 0.5 ? 2 : d >= 0.25 ? 1 : 0; }
 function makePlan(key, g, look, equip, body, use, tears) {
   const bakes = [];
   return {
     sig: 'r' + RREV,
-    g, body: body.key,
+    g, body: body ? body.key : 'code',
     uses: Object.fromEntries(Object.entries(use).map(([k, v]) => [k, v.rec ? v.rec.key : 'code'])),
     parts(dmg) {
       const st = stageOf(dmg || 0);
@@ -648,7 +687,9 @@ function compose(base, clothes, tear, hand) {
 function bake(g, look, equip, body, use, tears, st) {
   const dmg = STAGE_DMG[st];
   const skin = look.skin || RIG_SKIN_BASE[g];
-  const B = (n) => recolored(body, n, skin, null);
+  let BP = null;
+  if (!body) BP = genParts('body', g, Object.assign({}, look, { skin }), {}, 0, RIG_GROUP_PARTS.body, 'skin' + skin);
+  const B = (n) => (body ? recolored(body, n, skin, null) : BP[n] || null);
   // 各スロットのパーツ（絵 → 色替え / 無ければコード描画の代用）
   const L = {};
   for (const slot of RIG_SLOTS) {

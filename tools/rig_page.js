@@ -1,11 +1,16 @@
 // リグ（パーツ式）の配置図・下絵・仮のAI画像をブラウザ内で描くモジュール（tools/export_rig_templates.mjs と tests/rig_browser.mjs が使う）
-//  window.RIGTOOL = { layout(g), template(slot, style, g), weaponLayout(), weaponTemplate(style), fake(kind, ...), used(slot, style, g) }
-//  どれも PNG の dataURL を返す（used は使う枠の名前の配列）。
+//  window.RIGTOOL = { layout(g), template(slot, style, g), weaponLayout(), weaponTemplate(style), headLayout(), headTemplate(cls, g, part),
+//                     fake(kind, ...), fakeHead(cls, g, part, opts), fakeOld(kind, style, g, opts), used(slot, style, g), table() }
+//  どれも PNG の dataURL を返す（used は使う枠の名前の配列、table は枠・支点の表）。
 import { renderRigCode, renderRigWeapon } from '../src/render/character.js';
-import { RIG_PARTS, RIG_W, RIG_H, RIG_S, RIG_GROUP_PARTS, RIG_BASE, RIG_SKIN_BASE, RIG_ACC_PARTS, WPN_W, WPN_H, WPN_S, WPN_BOX, GRIP_MARK } from '../src/render/rigLayout.js';
+import {
+  RIG_PARTS, RIG_PARTS_V1, RIG_W, RIG_H, RIG_S, RIG_GROUP_PARTS, RIG_BASE, RIG_SKIN_BASE, RIG_ACC_PARTS, WPN_W, WPN_H, WPN_S, WPN_BOX, GRIP_MARK,
+  RIG_PROFILE, RIG_Y, RIG_LIMBS, HEAD_W, HEAD_H, HEAD_S, HEAD_PX, HEAD_PY, HEAD_GUIDE,
+} from '../src/render/rigLayout.js';
 import { DEFAULT_LOOKS } from '../src/data/classes.js';
 
 const LOOK = { f: { ...DEFAULT_LOOKS.luna.f, skin: RIG_SKIN_BASE.f }, m: { ...DEFAULT_LOOKS.jin.m, skin: RIG_SKIN_BASE.m } };
+const CLS_LOOK = (cls, g) => ({ ...DEFAULT_LOOKS[cls][g] });
 const mk = (w, h, bg) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d', { willReadFrequently: true }); if (bg) { g.fillStyle = bg; g.fillRect(0, 0, w, h); } return [c, g]; };
 const NAMES = { top: '上着', bottom: '下（パンツ・スカート）', shoes: '靴', hat: '帽子', accessory: 'アクセサリ', weapon: '武器', body: '素体', tear: '服破れ' };
 
@@ -78,7 +83,92 @@ function layout(g) {
   const [c, x] = mk(RIG_W, RIG_H, '#ffffff');
   x.drawImage(grayOf(bodyRef(g), 0.28), 0, 0);
   boxes(x, null);
-  title(x, `配置図（${g === 'f' ? '♀' : '♂'}） 1024×1024`, '青い点線の枠の中に描く ／ 桃色の十字＝回転の支点（肩・股・足首・首・腰）／ 腕と脚はまっすぐ下ろした形');
+  pivotNotes(x);
+  title(x, `配置図 v2（${g === 'f' ? '♀' : '♂'}） 1024×1024・1単位=8px・背丈84`, '青い点線の枠の中に描く ／ 桃色の十字＝支点（肩・股・足首・腰・頭の中心）／ 腕と脚はまっすぐ ／ 頭は別の配置図');
+  return c.toDataURL('image/png');
+}
+/** 関節の目安（腕の肘・手、脚の膝・足首）を枠の中に小さく */
+function pivotNotes(x) {
+  x.save();
+  x.strokeStyle = '#ff9ac4'; x.lineWidth = 1.5; x.setLineDash([4, 4]); x.font = '13px sans-serif'; x.fillStyle = '#d0407a';
+  for (const n of ['armB', 'armF']) {
+    const b = RIG_PARTS[n], L = RIG_LIMBS.f;
+    for (const [d, t] of [[L.upper, '肘'], [L.upper + L.fore, '手']]) { const y = b.py + d * RIG_S; x.beginPath(); x.moveTo(b.x + 4, y); x.lineTo(b.x + b.w - 4, y); x.stroke(); x.fillText(t, b.x + b.w - 18, y - 3); }
+  }
+  for (const n of ['legB', 'legF']) {
+    const b = RIG_PARTS[n], L = RIG_LIMBS.f;
+    for (const [d, t] of [[L.thigh, '膝'], [L.thigh + L.shin, '足首']]) { const y = b.py + d * RIG_S; x.beginPath(); x.moveTo(b.x + 4, y); x.lineTo(b.x + b.w - 4, y); x.stroke(); x.fillText(t, b.x + b.w - 30, y - 3); }
+  }
+  for (const n of ['footB', 'footF']) { const b = RIG_PARTS[n]; const y = b.py + RIG_PROFILE.ankle * RIG_S; x.beginPath(); x.moveTo(b.x + 4, y); x.lineTo(b.x + b.w - 4, y); x.stroke(); x.fillText('靴底', b.x + 4, y - 3); }
+  { const b = RIG_PARTS.torso; for (const [v, t] of [[RIG_Y.shoulder, '肩'], [RIG_Y.chin, '顎']]) { const y = b.py + v * RIG_S; x.beginPath(); x.moveTo(b.x + 4, y); x.lineTo(b.x + b.w - 4, y); x.stroke(); x.fillText(t, b.x + 4, y - 3); } }
+  { const b = RIG_PARTS.head; for (const [v, t] of [[HEAD_GUIDE.top, '頭頂'], [HEAD_GUIDE.chin, '顎']]) { const y = b.py + v * RIG_S; x.beginPath(); x.moveTo(b.x + 4, y); x.lineTo(b.x + b.w - 4, y); x.stroke(); x.fillText(t, b.x + 4, y - 3); } }
+  x.restore();
+}
+/** 枠・支点の表（指示書用） */
+function table() {
+  const T = {};
+  for (const [n, b] of Object.entries(RIG_PARTS)) T[n] = { x: b.x, y: b.y, w: b.w, h: b.h, px: b.px, py: b.py, ext: b.ext, label: b.label, short: b.short };
+  return { parts: T, weapon: { ...WPN_BOX }, head: { w: HEAD_W, h: HEAD_H, s: HEAD_S, px: HEAD_PX, py: HEAD_PY, guide: HEAD_GUIDE } };
+}
+// ---------------------------------------------------------------- 頭の配置図（前の頭・後ろ髪 共通）
+const hy = (v) => HEAD_PY + v * HEAD_S;
+/** コードの頭（前 / 後ろ髪 / 両方）を頭の配置図の座標に描いた canvas */
+function headCanvas(look, g, part, bg) {
+  const [c, x] = mk(HEAD_W, HEAD_H, bg);
+  const group = part === 'front' ? 'headFront' : part === 'back' ? 'headBack' : 'head';
+  renderRigCode(x, g, { ...look, skin: look.skin }, {}, group, { scale: HEAD_S, frame: 'head', px: HEAD_PX, py: HEAD_PY });
+  return c;
+}
+function headGuides(x, opts = {}) {
+  x.save();
+  const G = HEAD_GUIDE;
+  const lines = [[G.top, '頭頂（髪の上端。アホ毛は上にはみ出してよい）', '#3d8bff'], [G.eye, '目の高さ', '#19a37a'], [G.chin, '顎', '#3d8bff'], [G.shoulder, '肩（体の肩の高さ・目安）', '#b8b8c4'], [G.waist, '腰（ツインテールの先の目安）', '#b8b8c4']];
+  x.font = 'bold 18px sans-serif';
+  for (const [v, t, col] of lines) {
+    const y = hy(v);
+    x.strokeStyle = col; x.lineWidth = 2; x.setLineDash([12, 6]);
+    x.beginPath(); x.moveTo(16, y); x.lineTo(HEAD_W - 16, y); x.stroke();
+    x.setLineDash([]); x.fillStyle = col; x.fillText(t + `（y=${y}）`, 20, y - 6);
+  }
+  // 前の頭の目安の枠
+  if (opts.front !== false) {
+    x.strokeStyle = '#3d8bff'; x.lineWidth = 3; x.setLineDash([10, 6]);
+    x.strokeRect(HEAD_PX - 24 * HEAD_S, hy(-26), 48 * HEAD_S, (G.chin + 4 + 26) * HEAD_S);
+    x.setLineDash([]);
+  }
+  x.strokeStyle = '#ff3d8b'; x.lineWidth = 3;
+  x.beginPath(); x.moveTo(HEAD_PX - 20, HEAD_PY); x.lineTo(HEAD_PX + 20, HEAD_PY); x.moveTo(HEAD_PX, HEAD_PY - 20); x.lineTo(HEAD_PX, HEAD_PY + 20); x.stroke();
+  x.beginPath(); x.arc(HEAD_PX, HEAD_PY, 7, 0, 7); x.stroke();
+  x.fillStyle = '#d0407a'; x.font = 'bold 18px sans-serif'; x.fillText(`頭の中心（支点 ${HEAD_PX},${HEAD_PY}）`, HEAD_PX + 14, HEAD_PY + 30);
+  x.restore();
+}
+/** 頭の配置図: 前の頭と後ろ髪の両方の型紙（1024×1024・1単位=10px・支点=頭の中心） */
+function headLayout() {
+  const [c, x] = mk(HEAD_W, HEAD_H, '#ffffff');
+  x.drawImage(grayOf(headCanvas(LOOK.f, 'f', 'both'), 0.28), 0, 0);
+  headGuides(x);
+  title(x, '頭の配置図 1024×1024・1単位=10px（前の頭・後ろ髪 共通）', '前の頭＝顔・前髪・頭頂の髪（青い枠）／ 後ろ髪＝ツインテール等（全体を使ってよい）', 960);
+  return c.toDataURL('image/png');
+}
+/** キャラ別の頭の下絵: part = 'front'（前の頭）| 'back'（後ろ髪） */
+function headTemplate(cls, g, part) {
+  const look = CLS_LOOK(cls, g);
+  const [c, x] = mk(HEAD_W, HEAD_H, '#ffffff');
+  if (part === 'back') x.drawImage(grayOf(headCanvas(look, g, 'front'), 0.12), 0, 0);
+  x.save(); x.globalAlpha = 0.5; x.drawImage(headCanvas(look, g, part), 0, 0); x.restore();
+  if (part === 'front') x.drawImage(grayOf(headCanvas(look, g, 'back'), 0.12), 0, 0);
+  headGuides(x, { front: part === 'front' });
+  title(x, `${part === 'front' ? '前の頭' : '後ろ髪'}：${cls}_${g}  heads/${cls}_${g}${part === 'back' ? '_back' : ''}.png`,
+    part === 'front' ? '顔・前髪・頭頂の髪だけ（後ろ髪・ツインテールは描かない）／ ネコミミ・鈴・帽子は描かない' : '後ろ髪だけ（顔・前髪は描かない。薄い灰色の顔は位置の目安）／ 体の後ろに表示されます', 960);
+  return c.toDataURL('image/png');
+}
+/** 仮のAIの頭（コードの頭をそのまま不透明で。テスト用）: part = 'front' | 'back' */
+function fakeHead(cls, g, part, opts = {}) {
+  const look = { ...CLS_LOOK(cls, g), ...(opts.look || {}) };
+  const src = headCanvas(look, g, part);
+  const [c, x] = mk(HEAD_W, HEAD_H, opts.bg === undefined ? '#ffffff' : opts.bg);
+  x.drawImage(src, 0, 0);
+  if (opts.tint) { x.globalCompositeOperation = 'source-atop'; x.globalAlpha = 0.35; x.fillStyle = opts.tint; x.fillRect(0, 0, HEAD_W, HEAD_H); }
   return c.toDataURL('image/png');
 }
 const TEAR_DMG = { 1: 0.3, 2: 0.6, 3: 0.8 };
@@ -133,7 +223,8 @@ function weaponLayout() {
   const [c, x] = mk(WPN_W, WPN_H, '#ffffff');
   x.drawImage(grayOf(weaponCanvas('katana', '#dfe4ee', '#d8283c'), 0.3), 0, 0);
   wBoxes(x);
-  x.fillStyle = '#2a1430'; x.font = 'bold 22px sans-serif'; x.fillText('武器の配置図 1024×512：右向きに水平、握る所を十字に', 24, 24);
+  x.fillStyle = '#2a1430'; x.font = 'bold 22px sans-serif'; x.fillText('武器の配置図 1024×512・1単位=16px：右向きに水平、握る所を十字に', 24, 24);
+  x.font = '18px sans-serif'; x.fillStyle = '#c0007a'; x.fillText(`握る所の真ん中にマゼンタ（#FF00FF）の丸を必ず1つ（支点 ${WPN_BOX.px},${WPN_BOX.py}）`, 24, 500);
   return c.toDataURL('image/png');
 }
 function weaponTemplate(style) {
@@ -142,6 +233,7 @@ function weaponTemplate(style) {
   x.save(); x.globalAlpha = 0.5; x.drawImage(weaponCanvas(style, b[0], b[1]), 0, 0); x.restore();
   wBoxes(x);
   x.fillStyle = '#2a1430'; x.font = 'bold 22px sans-serif'; x.fillText(`武器：${style}  基準色 ${b.join(' / ')}  （右向きに水平、握る所を十字に）`, 24, 24);
+  x.font = '18px sans-serif'; x.fillStyle = '#c0007a'; x.fillText('握る所の真ん中にマゼンタ（#FF00FF）の丸を必ず1つ', 24, 500);
   return c.toDataURL('image/png');
 }
 
@@ -192,4 +284,27 @@ function fake(kind, style, g, opts = {}) {
   return c.toDataURL('image/png');
 }
 
-window.RIGTOOL = { layout, template, weaponLayout, weaponTemplate, fake, used: usedParts, ready: true };
+/**
+ * 旧い配置図（v1）の位置に描かれた「古い絵」の代わり（互換テスト用）: 今の仮の絵の各枠を、旧い枠の位置へ支点を合わせて移す
+ * （腕・脚・胴は旧い枠の高さの比で縮める＝旧い頭身っぽく）。manifest は layout: 1（または fit も layout も書かない）で読む
+ */
+function fakeOld(kind, style, g, opts = {}) {
+  const im = new Image();
+  return new Promise((res) => {
+    im.onload = () => {
+      const [c, x] = mk(RIG_W, RIG_H, '#ffffff');
+      for (const n of Object.keys(RIG_PARTS)) {
+        const a = RIG_PARTS[n], b = RIG_PARTS_V1[n];
+        const k = /^(arm|leg|torso)/.test(n) ? b.h / a.h : 1;
+        x.save(); x.beginPath(); x.rect(b.x - 8, b.y - 8, b.w + 16, b.h + 16); x.clip();
+        x.translate(b.px, b.py); x.scale(k, k);
+        x.drawImage(im, a.x - 8, a.y - 8, a.w + 16, a.h + 16, a.x - 8 - a.px, a.y - 8 - a.py, a.w + 16, a.h + 16);
+        x.restore();
+      }
+      res(c.toDataURL('image/png'));
+    };
+    im.src = fake(kind, style, g, { ...opts, bg: null });
+  });
+}
+
+window.RIGTOOL = { layout, template, weaponLayout, weaponTemplate, headLayout, headTemplate, fake, fakeHead, fakeOld, table, used: usedParts, ready: true };

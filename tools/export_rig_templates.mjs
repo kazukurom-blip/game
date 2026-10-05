@@ -5,12 +5,15 @@
 // 出力（--out の下）:
 //   layout_f.png / layout_m.png          … ♀♂の配置図（枠・支点の十字・パーツ名・薄い参考シルエット）
 //   layout_weapon.png                    … 武器の配置図（持ち手の十字）
+//   layout_head.png                      … 頭の配置図（前の頭・後ろ髪 共通。頭の中心の支点・頭頂/目/顎の目安線）
+//   templates/head/<cls>_<g>.png / <cls>_<g>_back.png … キャラ別の前の頭・後ろ髪の下絵（コードの頭）
+//   layout.json                          … 各枠のピクセル座標・支点（指示書の表に使う）
 //   templates/body/body_<g>.png          … 素体の下絵
 //   templates/<slot>/<style>_<g>.png     … 各装備の下絵（その装備のコード描画を枠に分解して薄く）
 //   templates/weapon/<style>.png         … 武器の下絵
 //   templates/tear/<1|2|3>_<g>.png       … 服破れの重ねの下絵（任意）
 //   parts.json                           … 各シートが使う枠の一覧（指示書の生成 tools/gen_rig_guide.mjs が読む）
-// --fake=<dir>: 今のコード描画のパーツを不透明でそのまま書き出す（「AIが描いた」とみなせる仮の絵。<dir>/rig/... と manifest_rig.json）
+// --fake=<dir>: 今のコード描画のパーツを不透明でそのまま書き出す（「AIが描いた」とみなせる仮の絵。<dir>/rig/...・<dir>/heads/... と manifest_rig.json）
 // しくみ: 組み込みの静的サーバー → Playwright(chromium) で tools/rig_page.js を読み込み → 描画 → PNG を保存
 import { createRequire } from 'node:module';
 import http from 'node:http';
@@ -22,6 +25,7 @@ import { RIG_BASE } from '../src/render/rigLayout.js';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const arg = (k, d) => { const a = process.argv.find((x) => x.startsWith(`--${k}=`)); return a ? a.slice(k.length + 3) : d; };
 const OUT = path.resolve(ROOT, arg('out', 'docs/art_handoff/rig'));
+const CLS = ['luna', 'jin', 'hacker'];
 const FAKE = arg('fake', '') ? path.resolve(ROOT, arg('fake', '')) : null;
 const PORT = Number(process.env.EXPORT_PORT) || 8141;
 process.env.PLAYWRIGHT_BROWSERS_PATH ||= '/opt/pw-browsers';
@@ -61,6 +65,11 @@ async function main() {
   const put = (rel, url) => { bytes += save(path.join(OUT, rel), url); n++; };
   for (const g of ['f', 'm']) put(`layout_${g}.png`, await page.evaluate((g) => window.RIGTOOL.layout(g), g));
   put('layout_weapon.png', await page.evaluate(() => window.RIGTOOL.weaponLayout()));
+  put('layout_head.png', await page.evaluate(() => window.RIGTOOL.headLayout()));
+  for (const cls of CLS) for (const g of ['f', 'm']) for (const part of ['front', 'back']) {
+    put(`templates/head/${cls}_${g}${part === 'back' ? '_back' : ''}.png`, await page.evaluate(([c, g, p]) => window.RIGTOOL.headTemplate(c, g, p), [cls, g, part]));
+  }
+  fs.writeFileSync(path.join(OUT, 'layout.json'), JSON.stringify(await page.evaluate(() => window.RIGTOOL.table()), null, 1));
   const parts = { body: {}, weapon: {} };
   for (const g of ['f', 'm']) {
     put(`templates/body/body_${g}.png`, await page.evaluate((g) => window.RIGTOOL.template('body', null, g), g));
@@ -90,8 +99,13 @@ async function main() {
         for (const style of Object.keys(RIG_BASE[slot])) putF(`${slot}/${style}_${g}`, await page.evaluate(([s, st, g]) => window.RIGTOOL.fake(s, st, g, {}), [slot, style, g]));
       }
     }
-    for (const style of Object.keys(RIG_BASE.weapon)) putF(`weapon/${style}`, await page.evaluate((s) => window.RIGTOOL.fake('weapon', s, null, {}), style));
-    fs.writeFileSync(path.join(FAKE, 'manifest_rig.json'), JSON.stringify({ version: 1, rig: { enabled: true, parts: keys } }, null, 1));
+    for (const style of Object.keys(RIG_BASE.weapon)) putF(`weapon/${style}`, await page.evaluate((s) => window.RIGTOOL.fake('weapon', s, null, { mark: true }), style));
+    const heads = {};
+    for (const cls of CLS) for (const g of ['f', 'm']) {
+      for (const part of ['front', 'back']) save(path.join(FAKE, 'heads', `${cls}_${g}${part === 'back' ? '_back' : ''}.png`), await page.evaluate(([c, g, p]) => window.RIGTOOL.fakeHead(c, g, p, {}), [cls, g, part]));
+      heads[`${cls}_${g}`] = { file: `heads/${cls}_${g}.png`, back: `heads/${cls}_${g}_back.png` };
+    }
+    fs.writeFileSync(path.join(FAKE, 'manifest_rig.json'), JSON.stringify({ version: 1, rig: { enabled: true, fit: false, parts: keys }, heads }, null, 1));
     console.log(`仮のAI画像: ${fn} 枚 → ${path.relative(ROOT, FAKE)}/rig/（manifest_rig.json の rig を assets/sprites/manifest.json に入れると使える）`);
   }
   await browser.close();

@@ -4,8 +4,9 @@
 //  - drawEnemy / drawPet / drawCharacter の入口から呼ばれ、描けたら true（呼び出し側はコード描画をしない）。
 //  - spriteMode: 'auto'（スプライトがあれば使う）| 'procedural'（常にコード描画）。デバッグパネル（F2）で切替。
 //  - パスはすべて相対（公開ページ・サブディレクトリ配信でも動く）。
-import { charHeadPose, itemColors, SPRITE_LAYER_ORDER, aiHeadExpr, paintAiHead } from './character.js';
+import { charHeadPose, itemColors, SPRITE_LAYER_ORDER, aiHeadExpr, paintAiHead, paintAiHeadBack } from './character.js';
 import { setRigManifest, rigStats, rigPreload } from './rig.js';
+import { HEAD_W, HEAD_S, HEAD_PX, HEAD_PY } from './rigLayout.js';
 
 export const SPRITE_BASE = 'assets/sprites/';
 const DEF_SCALE = 0.5, DEF_FPS = 8;
@@ -107,7 +108,7 @@ export function preloadSprites() {
   const rp = rigPreload();
   for (const sec of ['enemies', 'bosses', 'pets']) for (const k in MAN[sec]) all.push(MAN[sec][k]);
   if (MAN.chars) for (const k in MAN.chars.layers) all.push(MAN.chars.layers[k]);
-  for (const sec of ['portraits', 'heads']) for (const k in MAN[sec]) { const E = MAN[sec][k]; all.push(E.base); for (const e in E.expr) all.push(E.expr[e]); }
+  for (const sec of ['portraits', 'heads']) for (const k in MAN[sec]) { const E = MAN[sec][k]; all.push(E.base); for (const e in E.expr) all.push(E.expr[e]); if (E.back) all.push(E.back); }
   return Promise.all(all.map((s) => new Promise((res) => {
     const r = img(s);
     if (!r || r.st !== 1) return res();
@@ -264,7 +265,8 @@ export function spriteCharPlan(look, equip, A, state, wk, ws) {
     // AIの頭（heads[<classId>_<gender>]）があれば髪・顔のレイヤーの代わりに使う
     const ah = !vil && look.aiHead !== false && look.classId && look.gender ? headFor(look.classId, look.gender, aiHeadExpr(state, A.t || 0, A)) : null;
     for (const name of SPRITE_LAYER_ORDER) {
-      if (ah && (name === 'hair_back' || name === 'hair_front')) continue;
+      if (ah && name === 'hair_back') { if (ah.back) picks.push({ name: 'aiback', s: null, key: 'aiback' }); continue; }
+      if (ah && name === 'hair_front') continue;
       if (ah && name === 'face') { picks.push({ name: 'aihead', s: null, key: 'aihead' }); continue; }
       let keys = null, tintSlot = null;
       switch (name) {
@@ -300,7 +302,7 @@ export function spriteCharPlan(look, equip, A, state, wk, ws) {
     const layers = [];
     let repT = t, repAT = clamp(A.attackT || 0, 0, 1), repP = prog, master = null;
     for (const p of picks) {
-      if (p.name === 'aihead') { layers.push({ name: 'aihead', s: null, ai: ah, hat: sty('hat'), head: null }); continue; }
+      if (p.name === 'aihead' || p.name === 'aiback') { layers.push({ name: p.name, s: null, ai: ah, hat: sty('hat'), head: null, aiBack: p.name === 'aiback' }); continue; }
       const s = p.s;
       let row;
       if (p.name === 'face') row = pickRow(s, faceRows(state, A, dmg, vil));
@@ -328,6 +330,11 @@ export function spriteCharPlan(look, equip, A, state, wk, ws) {
       const hp = charHeadPose(look, eq, { state: A.state || state, t: repT, attackT: repAT, fallT: state === 'dead' ? repP : undefined, panic: A.panic });
       if (hp.back && !fl.ai) layers.splice(layers.indexOf(fl), 1);
       else { fl.head = hp.m; fl.back = hp.back; }
+      const bl = layers.find((l) => l.name === 'aiback');
+      if (bl) {
+        if (hp.back) layers.splice(layers.indexOf(bl), 1);   // 背面は後ろ髪を頭の上に（aihead の中で）
+        else { bl.head = hp.m; bl.back = false; }
+      }
     }
     return { layers, repT, repAT, facing: A.facing < 0 ? -1 : 1, s: A.scale || 1 };
   } catch (err) { note('spriteCharPlan: ' + err.message); return null; }
@@ -372,7 +379,12 @@ export function drawSpriteCharacter(ctx, x, y, look, equip, anim) {
 function drawLayer(ctx, l) {
   ctx.save();
   if (l.head) { const m = l.head; ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]); }
-  if (l.ai) { paintAiHead(ctx, l.ai, l.hat, !!l.back, false); ctx.restore(); return; }
+  if (l.aiBack) { paintAiHeadBack(ctx, l.ai, l.hat, null, false, 'code'); ctx.restore(); return; }
+  if (l.ai) {
+    paintAiHead(ctx, l.ai, l.hat, !!l.back, false);
+    if (l.back && l.ai.back) paintAiHeadBack(ctx, l.ai, l.hat, null, false, 'code', true);
+    ctx.restore(); return;
+  }
   ctx.scale(l.s.scale, l.s.scale);
   drawFrame(ctx, l.s, l.row, l.fi, l.tint);
   ctx.restore();
@@ -387,8 +399,10 @@ function composeScratch(layers, flash) {
   for (const l of layers) {
     const s = l.s, k = s ? s.scale : 1;
     if (s) R = Math.max(R, Math.min(4, 1 / k));
-    const sc = l.ai ? (l.ai.scale || 1) : 1;
-    const pts = l.ai ? [[-32 * sc, -30 * sc], [32 * sc, -30 * sc], [-32 * sc, 26 * sc], [32 * sc, 26 * sc]] : [[-s.anchor[0] * k, -s.anchor[1] * k], [(s.cell[0] - s.anchor[0]) * k, -s.anchor[1] * k], [-s.anchor[0] * k, (s.cell[1] - s.anchor[1]) * k], [(s.cell[0] - s.anchor[0]) * k, (s.cell[1] - s.anchor[1]) * k]];
+    const sc = l.ai ? (l.ai.scale || 1) * (l.ai.place ? 1.15 : 1) : 1;
+    const pl = l.ai && l.ai.place ? (l.aiBack && l.ai.back ? l.ai.back.place : l.ai.place) : null;
+    const ex = pl ? Math.max(-pl[0], pl[0] + pl[2]) : 32;
+    const pts = l.ai ? [[-ex * sc, (pl ? pl[1] : -30) * sc], [ex * sc, (pl ? pl[1] : -30) * sc], [-ex * sc, (pl ? pl[1] + pl[3] : 26) * sc], [ex * sc, (pl ? pl[1] + pl[3] : 26) * sc]] : [[-s.anchor[0] * k, -s.anchor[1] * k], [(s.cell[0] - s.anchor[0]) * k, -s.anchor[1] * k], [-s.anchor[0] * k, (s.cell[1] - s.anchor[1]) * k], [(s.cell[0] - s.anchor[0]) * k, (s.cell[1] - s.anchor[1]) * k]];
     for (const [px, py] of pts) {
       let X = px, Y = py;
       if (l.head) { const m = l.head; X = m[0] * px + m[2] * py + m[4]; Y = m[1] * px + m[3] * py + m[5]; }
@@ -663,8 +677,10 @@ function prepSingle(im, w, h, mode, maxH) {
   if (!out) return null;
   out.getContext('2d').drawImage(c, x0, y0, cw, ch, 0, 0, cw, ch);
   c.width = c.height = 1;
-  if (maxH > 0 && ch > maxH) return shrinkCanvas(out, cw, ch, maxH);
-  return { canvas: out, w: cw, h: ch };
+  // 切り抜き前の位置（配置図方式の頭の絵で使う）: ox,oy = 元の画像での左上、cw,ch = 元の画像での大きさ、srcW/srcH = 元の画像の大きさ
+  const trim = { ox: x0, oy: y0, cw, ch, srcW: w, srcH: h };
+  if (maxH > 0 && ch > maxH) return Object.assign(shrinkCanvas(out, cw, ch, maxH), trim);
+  return { canvas: out, w: cw, h: ch, ...trim };
 }
 /** 大きすぎる1枚絵を半分ずつ縮小（画質を保ちつつ、毎フレームの drawImage を軽くする） */
 function shrinkCanvas(src, w, h, maxH) {
@@ -771,7 +787,7 @@ function drawSinglePet(ctx, x, y, anim, s) {
 //   "heads":     { "luna_f": { "file": "heads/luna_f.png", "expr": { "blink": "...", "hurt": "...", "shout": "...", "happy": "..." },
 //                              "scale": 1, "offset": [0, 0], "facesLeft": false } }
 // どれも1枚絵（背景は透明か単色 → 自動で透明化・トリミング）。表情の絵が無い/読み込み中なら基本の絵。
-const HERO_MAXH = { portraits: 720, heads: 320 };      // 読み込み時にこの高さまで縮小（性能のため）
+const HERO_MAXH = { portraits: 720, heads: 320, headsLayout: 420 };      // 読み込み時にこの高さまで縮小（性能のため）。配置図方式の頭は後ろ髪も入るので少し大きめ
 /** 表情の別名（無ければ順に探す） */
 const EXPR_ALIAS = {
   smile: ['smile', 'happy'], happy: ['happy', 'smile'], shout: ['shout', 'angry'], angry: ['angry', 'shout'],
@@ -797,7 +813,16 @@ function normHero(o, sec, k) {
     }
   }
   const off = arr2(o.offset) || [0, 0];
-  return { key: k, sec, base, expr, scale: clamp(num(o.scale, 1), 0.1, 10), offset: off, facesLeft: !!o.facesLeft, pre: false };
+  // 頭: fit:false（既定）= 頭の配置図（1024×1024、支点 = 頭の中心）のまま置く / fit:true = 旧方式（範囲を 46×58 に収める）
+  const fit = sec === 'heads' ? o.fit === true : true;
+  let back = null;
+  if (sec === 'heads' && o.back != null) {
+    back = heroSingle(o.back, o.bgRemove, sec + ':' + k + ':back');
+    if (back) { back.maxH = HERO_MAXH.headsLayout; STATS.entries++; }
+    if (back && fit) { note(`heads.${k}: 後ろ髪（back）は配置図方式（fit:false）の時だけ使えます`); back = null; }
+  }
+  if (sec === 'heads' && !fit) { base.maxH = HERO_MAXH.headsLayout; for (const e in expr) expr[e].maxH = HERO_MAXH.headsLayout; }
+  return { key: k, sec, base, expr, back, fit, scale: clamp(num(o.scale, 1), 0.1, 10), offset: off, facesLeft: !!o.facesLeft, pre: false };
 }
 function heroKey(a, b) {
   if (a && typeof a === 'object') return a.classId && a.gender ? a.classId + '_' + a.gender : null;   // look オブジェクト
@@ -811,7 +836,7 @@ function heroEntry(sec, a, b) {
 }
 function heroResolve(E, expr) {
   if (!E) return null;
-  if (!E.pre) { E.pre = true; img(E.base); for (const e in E.expr) img(E.expr[e]); }   // 表情もまとめて先読み
+  if (!E.pre) { E.pre = true; img(E.base); for (const e in E.expr) img(E.expr[e]); if (E.back) img(E.back); }   // 表情・後ろ髪もまとめて先読み
   if (expr) {
     for (const c of EXPR_ALIAS[expr] || [expr]) {
       const s = E.expr[c];
@@ -824,9 +849,30 @@ function heroResolve(E, expr) {
   if (r && r.st === 2 && r.single) return { r, s: E.base, expr: null };
   return null;
 }
+/** 配置図方式（頭の配置図 1024×1024、1単位 = HEAD_S px、支点 HEAD_PX/HEAD_PY）の絵の置き場所 [x, y, w, h]（頭の座標の単位）。正方形でなければ null */
+function layoutPlace(o) {
+  if (!o || !(o.srcW > 0) || o.ox == null) return null;
+  if (Math.abs(o.srcW / o.srcH - 1) > 0.03) return null;
+  const u = HEAD_S * o.srcW / HEAD_W;              // 元の画像の 1単位の px
+  return [o.ox / u - HEAD_PX / HEAD_S, o.oy / u - HEAD_PY / HEAD_S, o.cw / u, o.ch / u];
+}
 function heroOut(E, R) {
   const o = R.r.single;
-  return { canvas: o.canvas, w: o.w, h: o.h, expr: R.expr, file: R.s.file, scale: E.scale, offset: E.offset, facesLeft: E.facesLeft, rec: R.r };
+  const out = { canvas: o.canvas, w: o.w, h: o.h, expr: R.expr, file: R.s.file, scale: E.scale, offset: E.offset, facesLeft: E.facesLeft, rec: R.r, fit: true, place: null, back: null };
+  if (E.sec === 'heads' && !E.fit) {
+    const pl = layoutPlace(o);
+    if (pl) { out.fit = false; out.place = pl; }
+    else if (!R.r.warnedFit) { R.r.warnedFit = true; note(`heads.${E.key}: ${R.s.file} が正方形ではないので旧方式（自動で範囲に収める）で置きます。頭の配置図（1024×1024）で描くか、manifest に "fit": true`); }
+    if (out.place && E.back) {
+      const rb = IMG.get(E.back.file);
+      if (rb && rb.st === 2 && rb.single) {
+        const bp = layoutPlace(rb.single);
+        if (bp) out.back = { canvas: rb.single.canvas, w: rb.single.w, h: rb.single.h, place: bp, file: E.back.file };
+        else if (!rb.warnedFit) { rb.warnedFit = true; note(`heads.${E.key}: 後ろ髪 ${E.back.file} が正方形ではないので使いません（頭の配置図 1024×1024 で）`); }
+      }
+    }
+  }
+  return out;
 }
 /** 立ち絵 {canvas,w,h,expr,file} | null（画像が無い/読み込み中/壊れている）。classId には 'luna_f' や look も可 */
 export function portraitFor(classId, gender, expr) {

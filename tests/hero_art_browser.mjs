@@ -149,7 +149,8 @@ function manifestFor() {
   const m = { version: 1, portraits: {}, heads: {} };
   for (const k of ['luna_f', 'jin_m']) {
     m.portraits[k] = { file: `portraits/${k}.png`, expr: Object.fromEntries(['smile', 'angry', 'surprised', 'sad', 'shout'].map((e) => [e, `portraits/${k}_${e}.png`])) };
-    m.heads[k] = { file: `heads/${k}.png`, expr: Object.fromEntries(['blink', 'hurt', 'shout', 'happy'].map((e) => [e, `heads/${k}_${e}.png`])), scale: 1, offset: [0, 0] };
+    // この仮の頭は旧方式（首から上を画像いっぱいに描いた絵）→ fit:true（範囲に収める）。配置図方式（fit:false 既定）は tests/rig_browser.mjs ②
+    m.heads[k] = { file: `heads/${k}.png`, expr: Object.fromEntries(['blink', 'hurt', 'shout', 'happy'].map((e) => [e, `heads/${k}_${e}.png`])), scale: 1, offset: [0, 0], fit: true };
   }
   return m;
 }

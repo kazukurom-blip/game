@@ -1,10 +1,11 @@
 // 主人公のパーツ式（リグ）のブラウザテスト（Playwright）
 //   node tests/rig_browser.mjs        （npm run test:rig）
-// 仮のAI画像（今のコード描画のパーツを配置図に書き出したもの＝tools/rig_page.js の fake）を page.route で assets/sprites/rig/ に差し込み、
-//  ① 全状態 × 装備 × ♀♂ × 色違い × 武器種 でリグ描画が破綻しないか（コード描画との差・例外なし・スクショ）
-//  ② 位置合わせ（ずれ・拡大・透明背景）、持ち手の印、色替え（陰影を残す）、服破れ、白フラッシュ、半透明、左右反転
-//  ③ ゲーム中の主人公・F2 の切替・NPC には使わない・AIの頭と一緒
-//  ④ フォールバック（素体なし / 読み込み中 / 壊れた画像 / 一部の装備だけ）、性能（10人）
+// 仮のAI画像（骨格 v2 の下絵そのもの＝tools/rig_page.js の fake）を page.route で assets/sprites/rig/ に差し込み、
+//  ① 全状態 × 装備 × ♀♂ × 色違い × 武器種 で、fit:false（配置図のまま）で組んだリグが「全部コードの代用パーツで組んだリグ（anim.rigCode）」と
+//     画素で一致するか（つなぎ目・重なり順）。一部はわざとずらして fit:true（各パーツの上書き）で自動フィット
+//  ② 持ち手の印（fit:false は必須・無ければ警告＋自動フィット）、色替え（陰影を残す）、服破れ、白フラッシュ、半透明、左右反転
+//  ③ ゲーム中の主人公・F2 の切替・NPC には使わない・AIの頭（配置図方式の前の頭＋後ろ髪の揺れ・重なり順 / 旧方式 fit:true）
+//  ④ 旧い配置図（layout 1）の古い絵の互換、フォールバック（素体なし / 読み込み中 / 壊れた画像 / 一部の装備だけ）、性能（10人）
 // スクショ: tests/screenshots/rig_*.png
 import { createRequire } from 'node:module';
 import http from 'node:http';
@@ -64,28 +65,59 @@ async function genImages(browser) {
   const out = await page.evaluate(([STYLES, WEAPONS]) => {
     const T = window.RIGTOOL, f = {};
     let i = 0;
+    const fitTrue = [];
     for (const g of ['f', 'm']) {
       f[`body_${g}`] = T.fake('body', null, g, {});
       for (const slot of Object.keys(STYLES)) for (const st of STYLES[slot]) {
-        // いろいろな「AIのずれ」: 一部は全体を少しずらす・枠ごとに少し大きく・透明背景・薄い灰色の背景
-        const k = i++ % 4;
+        // いろいろな「AIのずれ」: 一部は全体を少しずらす・枠ごとに少し大きく（→ そのパーツだけ fit:true）・透明背景・薄い灰色の背景
+        const k = i++ % 5;
         const opts = k === 1 ? { shift: [26, -18] } : k === 2 ? { scale: 1.1, shift: [-10, 8] } : k === 3 ? { bg: null } : { bg: '#f4f4f0' };
         f[`${slot}/${st}_${g}`] = T.fake(slot, st, g, opts);
+        if (k === 1 || k === 2) fitTrue.push(`${slot}/${st}_${g}`);
       }
       for (const n of [1, 2, 3]) f[`tear/${n}_${g}`] = T.fake('tear', String(n), g, { bg: null });
     }
-    WEAPONS.forEach((w, j) => { f[`weapon/${w}`] = T.fake('weapon', w, null, j % 2 ? { mark: true, shift: [20, 6], scale: 1.1 } : {}); });
+    // 武器: 0 = 印あり（fit:false で正確）、1 = 印あり＋ずれ・拡大（fit:true）、2 = 印なし（fit:false → 警告＋自動フィット）
+    WEAPONS.forEach((w, j) => {
+      const m = j % 3;
+      f[`weapon/${w}`] = T.fake('weapon', w, null, m === 0 ? { mark: true } : m === 1 ? { mark: true, shift: [20, 6], scale: 1.1 } : {});
+      if (m === 1) fitTrue.push(`weapon/${w}`);
+    });
     // 色違い専用（目印に緑がかった色で描く）
     f['top/hoodie__1d2b24_f'] = T.fake('top', 'hoodie', 'f', { color: '#1d2b24', accent: '#3dff8a' });
+    // 頭（前の頭・後ろ髪）: 頭の配置図方式（コードの頭をそのまま）
+    for (const [c, g] of [['luna', 'f'], ['jin', 'm'], ['hacker', 'f']]) {
+      f[`heads/${c}_${g}`] = T.fakeHead(c, g, 'front', {});
+      f[`heads/${c}_${g}_back`] = T.fakeHead(c, g, 'back', {});
+    }
+    // 重なり順の確認用: 一面の緑の後ろ髪
+    { const cv = document.createElement('canvas'); cv.width = cv.height = 1024; const x = cv.getContext('2d'); x.fillStyle = '#ffffff'; x.fillRect(0, 0, 1024, 1024); x.fillStyle = '#00e040'; x.fillRect(112, 160, 800, 760); f['heads/green_back'] = cv.toDataURL('image/png'); }
+    f.__fitTrue = JSON.stringify(fitTrue);
     return f;
   }, [STYLES, WEAPONS]);
+  const old = await page.evaluate(async () => {
+    const T = window.RIGTOOL, o = {};
+    for (const g of ['f', 'm']) {
+      o[`body_${g}`] = await T.fakeOld('body', null, g, {});
+      o[`top/hoodie_${g}`] = await T.fakeOld('top', 'hoodie', g, {});
+      o[`bottom/jeans_${g}`] = await T.fakeOld('bottom', 'jeans', g, {});
+      o[`shoes/boots_${g}`] = await T.fakeOld('shoes', 'boots', g, {});
+    }
+    return o;
+  });
   await page.close();
   const map = {};
-  for (const [k, v] of Object.entries(out)) map[`rig/${k}.png`] = Buffer.from(v.split(',')[1], 'base64');
+  FIT_TRUE = JSON.parse(out.__fitTrue); delete out.__fitTrue;
+  for (const [k, v] of Object.entries(out)) map[k.startsWith('heads/') ? `${k}.png` : `rig/${k}.png`] = Buffer.from(v.split(',')[1], 'base64');
+  for (const [k, v] of Object.entries(old)) map[`rigold/${k}.png`] = Buffer.from(v.split(',')[1], 'base64');
   fs.writeFileSync(path.join(SHOTS, 'rig_fake_body_f.png'), map['rig/body_f.png']);
   fs.writeFileSync(path.join(SHOTS, 'rig_fake_hoodie_f.png'), map['rig/top/hoodie_f.png']);
+  fs.writeFileSync(path.join(SHOTS, 'rig_fake_old_body_f.png'), map['rigold/body_f.png']);
+  fs.writeFileSync(path.join(SHOTS, 'rig_fake_head_luna_f.png'), map['heads/luna_f.png']);
+  fs.writeFileSync(path.join(SHOTS, 'rig_fake_head_luna_f_back.png'), map['heads/luna_f_back.png']);
   return map;
 }
+let FIT_TRUE = [];
 function headImage() {
   // 簡単な頭の絵（白背景に丸い顔＋髪）
   return null;
@@ -93,10 +125,17 @@ function headImage() {
 void headImage;
 function manifestFor(IMGS, mode) {
   const keys = Object.keys(IMGS).filter((k) => k.startsWith('rig/')).map((k) => k.slice(4, -4));
-  let parts = keys;
-  if (mode === 'nobody') parts = keys.filter((k) => !k.startsWith('body'));
-  if (mode === 'partial') parts = ['body_f', 'body_m', 'top/hoodie_f', 'weapon/knife', 'top/missing_f'];
-  return { version: 1, rig: { enabled: true, parts } };
+  if (mode === 'old') {
+    // 旧い配置図の古い絵（fit も layout も書かない＝前からある manifest の形）
+    const ok = Object.keys(IMGS).filter((k) => k.startsWith('rigold/')).map((k) => k.slice(7, -4));
+    return { version: 1, rig: { enabled: true, parts: Object.fromEntries(ok.map((k) => [k, `rigold/${k}.png`])) } };
+  }
+  let list = keys;
+  if (mode === 'nobody') list = keys.filter((k) => !k.startsWith('body'));
+  if (mode === 'partial') list = ['body_f', 'body_m', 'top/hoodie_f', 'weapon/knife', 'top/missing_f'];
+  const parts = {};
+  for (const k of list) parts[k] = FIT_TRUE.includes(k) ? { fit: true } : true;
+  return { version: 1, rig: { enabled: true, fit: false, parts } };
 }
 
 /** mode: 'ok' | 'none' | 'nobody' | 'broken' | 'slow' | 'partial' */
@@ -154,14 +193,15 @@ window.__rigGrid = async function (cases, opts) {
   const ax = A.getContext('2d', { willReadFrequently: true }), bx = B.getContext('2d', { willReadFrequently: true });
   cases.forEach((c, i) => {
     const X = (i % cols) * cw + cw / 2, Y = Math.floor(i / cols) * rh + rh - 22;
-    const an = { state: c.state || 'idle', t: c.t || 0, attackT: c.at || 0, scale: c.scale || sc, facing: c.facing || 1, damage: c.dmg || 0, flash: c.flash, alpha: c.alpha, aura: c.aura, auraTier: c.auraTier, deadT: c.state === 'dead' ? 1 : undefined, fallT: c.state === 'dead' ? (c.fall ?? 1) : undefined, noRig: c.noRig };
+    const an = { state: c.state || 'idle', t: c.t || 0, attackT: c.at || 0, scale: c.scale || sc, facing: c.facing || 1, damage: c.dmg || 0, flash: c.flash, alpha: c.alpha, aura: c.aura, auraTier: c.auraTier, deadT: c.state === 'dead' ? 1 : undefined, fallT: c.state === 'dead' ? (c.fall ?? 1) : undefined, noRig: c.noRig, rigCode: c.rigCode };
     drawCharacter(x, X, Y, look(c), c.eq || {}, an);
     x.fillStyle = '#fff'; x.fillText((c.label || c.state || '') .slice(0, 22), X - cw / 2 + 3, Y + 16);
     if (opts.diff && !c.flash && !(c.alpha < 1)) {
       ax.setTransform(1, 0, 0, 1, 0, 0); bx.setTransform(1, 0, 0, 1, 0, 0); ax.clearRect(0, 0, 200, 220); bx.clearRect(0, 0, 200, 220);
       const a1 = { ...an, scale: 1.5, facing: 1, noCache: true, aura: null };
       drawCharacter(ax, 100, 190, look(c), c.eq || {}, a1);
-      drawCharacter(bx, 100, 190, look(c), c.eq || {}, { ...a1, noRig: true });
+      // 基準: 絵を使わず全部コードの代用パーツで組んだリグ（同じ骨格 v2）
+      drawCharacter(bx, 100, 190, look(c), c.eq || {}, { ...a1, noRig: false, rigCode: true });
       const d1 = ax.getImageData(0, 0, 200, 220).data, d2 = bx.getImageData(0, 0, 200, 220).data;
       let un = 0, bad = 0, hole = 0;
       for (let p = 0; p < d1.length; p += 4) {
@@ -223,16 +263,16 @@ async function main() {
         const [cls, g] = key.split('_');
         const cases = [];
         for (const s of STATES) cases.push({ ...s, cls: cls === 'gun' ? 'jin' : cls, g, eq, facing: cases.length % 3 === 2 ? -1 : 1 });
-        for (const s of STATES.slice(0, 5)) cases.push({ ...s, cls: cls === 'gun' ? 'jin' : cls, g, eq, noRig: true, label: 'code ' + (s.label || s.state) });
+        for (const s of STATES.slice(0, 5)) cases.push({ ...s, cls: cls === 'gun' ? 'jin' : cls, g, eq, rigCode: true, label: 'code ' + (s.label || s.state) });
         const r = await page.evaluate(([cases]) => window.__rigGrid(cases, { cols: 10, rh: 230, scale: 1.9, diff: true }), [cases]);
         await shot(page, `states_${key}`);
         allDiffs.push(...r.diffs.filter((d) => !d.label.startsWith('code')).map((d) => ({ ...d, key })));
       }
       const worst = allDiffs.slice().sort((a, b) => b.diff - a.diff).slice(0, 4);
       const avg = allDiffs.reduce((s, d) => s + d.diff, 0) / allDiffs.length;
-      check('リグ（仮のAI画像）とコード描画の差が小さい（平均 < 6%・最大 < 18%）', avg < 0.06 && worst[0].diff < 0.18, `平均 ${(avg * 100).toFixed(1)}% 最大 ${worst.map((d) => `${d.key}:${d.label} ${(d.diff * 100).toFixed(1)}%`).join(', ')}`);
+      check('fit:false のリグ（仮のAI画像）と、コードの代用パーツで組んだリグの差が小さい（平均 < 6%・最大 < 18%）', avg < 0.06 && worst[0].diff < 0.18, `平均 ${(avg * 100).toFixed(1)}% 最大 ${worst.map((d) => `${d.key}:${d.label} ${(d.diff * 100).toFixed(1)}%`).join(', ')}`);
       const holes = allDiffs.slice().sort((a, b) => b.hole - a.hole)[0];
-      check('関節の隙間（コードにあってリグに無い画素）が小さい（< 6%）', holes.hole < 0.06, `${holes.key}:${holes.label} ${(holes.hole * 100).toFixed(1)}%`);
+      check('関節の隙間（代用パーツにあって絵のリグに無い画素）が小さい（< 6%）', holes.hole < 0.06, `${holes.key}:${holes.label} ${(holes.hole * 100).toFixed(1)}%`);
 
       // 全装備スタイル × ♀♂
       for (const g of ['f', 'm']) {
@@ -257,15 +297,37 @@ async function main() {
         const r = await page.evaluate(([cases]) => window.__rigGrid(cases, { cols: 8, rh: 175, scale: 1.4, diff: true }), [cases]);
         await shot(page, 'weapons');
         const w = r.diffs.slice().sort((a, b) => b.diff - a.diff)[0];
-        check('武器種 × 攻撃の進み（持ち手の位置・角度）がコード描画と合う（< 18%）', w.diff < 0.18, `最大 ${w.label} ${(w.diff * 100).toFixed(1)}%`);
+        check('武器種 × 攻撃の進み（持ち手の位置・角度）がコードの代用と合う（< 18%）', w.diff < 0.18, `最大 ${w.label} ${(w.diff * 100).toFixed(1)}%`);
+        const fb = await page.evaluate(() => window.game.sprites.spriteStats().rig.fitFallback);
+        const noMark = WEAPONS.filter((_, j) => j % 3 === 2).map((x) => 'weapon/' + x);
+        check('武器: fit:false で持ち手の印が無い絵だけ警告＋自動フィット（印がある絵はそのまま）', noMark.every((k) => fb.includes(k)) && fb.every((k) => noMark.includes(k)), JSON.stringify(fb));
+      }
+      // fit:false（ずらしていない絵だけ）: ほぼ完全に一致（支点に関節が来る）
+      {
+        const exact = (slot, g) => STYLES[slot].filter((st) => !FIT_TRUE.includes(`${slot}/${st}_${g}`));
+        const cases = [];
+        for (const g of ['f', 'm']) {
+          const W = WEAPONS.filter((w, j) => j % 3 === 0);
+          for (let i = 0; i < 6; i++) {
+            const eq = {};
+            for (const slot of Object.keys(STYLES)) { const L = exact(slot, g); if (L.length) eq[slot] = { style: L[i % L.length] }; }
+            eq.weapon = { style: W[i % W.length] };
+            const s = STATES[(i * 3 + (g === 'm' ? 1 : 0)) % STATES.length];
+            cases.push({ ...s, cls: g === 'f' ? 'luna' : 'jin', g, eq, label: `exact ${g} ${s.label || s.state}` });
+          }
+        }
+        const r = await page.evaluate(([cases]) => window.__rigGrid(cases, { cols: 6, rh: 330, scale: 2.2, diff: true }), [cases]);
+        await shot(page, 'exact_fitfalse');
+        const avg = r.diffs.reduce((a, d) => a + d.diff, 0) / r.diffs.length, w = r.diffs.slice().sort((a, b) => b.diff - a.diff)[0];
+        check('fit:false の絵はコードの代用とほぼ同じ（平均 < 2%・最大 < 5%）', avg < 0.02 && w.diff < 0.05, `平均 ${(avg * 100).toFixed(2)}% 最大 ${w.label} ${(w.diff * 100).toFixed(2)}%`);
       }
       // 色違い・破れ・フラッシュ・半透明・拡大・オーラ・AIでない頭
       {
         const cols = ['#ff6fb5', '#1d2b24', '#19f0ff', '#ffd23f', '#7a3dff', '#ffffff', '#16161e', '#d8283c'];
         const cases = cols.map((c) => ({ cls: 'luna', g: 'f', eq: { top: { style: 'hoodie', color: c, accent: '#3dff8a' }, bottom: { style: 'jeans', color: c }, shoes: { style: 'sneakers', color: c, accent: '#ff3dd2' }, weapon: { style: 'katana', color: c } }, state: 'idle', t: 0.4, label: 'color ' + c }));
-        cases.push(...cols.slice(0, 2).map((c) => ({ cls: 'luna', g: 'f', eq: { top: { style: 'hoodie', color: c, accent: '#3dff8a' } }, state: 'idle', t: 0.4, noRig: true, label: 'code ' + c })));
+        cases.push(...cols.slice(0, 2).map((c) => ({ cls: 'luna', g: 'f', eq: { top: { style: 'hoodie', color: c, accent: '#3dff8a' } }, state: 'idle', t: 0.4, rigCode: true, label: 'code ' + c })));
         for (const d of [0, 0.3, 0.6, 0.8, 0.95]) cases.push({ cls: 'jin', g: 'm', eq: EQ.jin_m, state: 'walk', t: 0.15, dmg: d, label: 'dmg ' + d });
-        for (const d of [0.6, 0.95]) cases.push({ cls: 'jin', g: 'm', eq: EQ.jin_m, state: 'walk', t: 0.15, dmg: d, noRig: true, label: 'code dmg ' + d });
+        for (const d of [0.6, 0.95]) cases.push({ cls: 'jin', g: 'm', eq: EQ.jin_m, state: 'walk', t: 0.15, dmg: d, rigCode: true, label: 'code dmg ' + d });
         cases.push({ cls: 'luna', g: 'f', eq: EQ.luna_f, state: 'hurt', t: 0.05, flash: true, label: 'flash' });
         cases.push({ cls: 'luna', g: 'f', eq: EQ.luna_f, state: 'idle', alpha: 0.5, label: 'alpha 0.5' });
         cases.push({ cls: 'luna', g: 'f', eq: EQ.luna_f, state: 'idle', aura: '#ff3dd2', auraTier: 4, label: 'aura' });
@@ -367,8 +429,8 @@ async function main() {
       await ctx.close();
     }
 
-    // ================================================================ ② ♂主人公・AIの頭と一緒
-    console.log('\n② ♂主人公（ジン）のゲーム中・AIの頭と一緒');
+    // ================================================================ ② AIの頭（配置図方式＋後ろ髪 / 旧方式 fit:true）と一緒
+    console.log('\n② AIの頭（配置図方式の前の頭＋後ろ髪・旧方式）＋リグ');
     {
       const head = await (async () => {
         const p = await browser.newPage();
@@ -376,7 +438,14 @@ async function main() {
         await p.close();
         return Buffer.from(u.split(',')[1], 'base64');
       })();
-      const IM2 = { ...IMGS, 'heads/jin_m.png': head };
+      const IM2 = { ...IMGS, 'heads/old_m.png': head };
+      const HEADS = {
+        luna_f: { file: 'heads/luna_f.png', back: 'heads/luna_f_back.png' },
+        jin_m: { file: 'heads/jin_m.png', back: 'heads/jin_m_back.png' },
+        hacker_f: { file: 'heads/hacker_f.png', back: 'heads/green_back.png' },       // 重なり順の確認用（一面の緑の後ろ髪）
+        jin_f: { file: 'heads/old_m.png', fit: true },                                 // 旧方式（範囲に収める）
+        hacker_m: { file: 'heads/old_m.png' },                                          // 正方形でない絵 → 警告して旧方式
+      };
       const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 } });
       const page = await ctx.newPage();
       const errs = [];
@@ -384,7 +453,7 @@ async function main() {
       page.on('pageerror', (e) => errs.push('pageerror: ' + e.message));
       await page.route('**/assets/sprites/**', async (route) => {
         const rel = decodeURIComponent(new URL(route.request().url()).pathname.split('/assets/sprites/')[1] || '');
-        if (rel === 'manifest.json') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ...manifestFor(IMGS, 'ok'), heads: { jin_m: 'heads/jin_m.png' } }) });
+        if (rel === 'manifest.json') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ...manifestFor(IMGS, 'ok'), heads: HEADS }) });
         const b = IM2[rel];
         return b ? route.fulfill({ status: 200, contentType: 'image/png', body: b }) : route.fulfill({ status: 404, body: '' });
       });
@@ -392,9 +461,72 @@ async function main() {
       await page.waitForFunction(() => window.game && window.game.sprites && window.__titleT, null, { timeout: 20000 });
       await preload(page);
       await page.evaluate(GRID_FN);
-      const cases = STATES.map((s) => ({ ...s, cls: 'jin', g: 'm', eq: { ...EQ.jin_m, hat: { style: 'cap', color: '#2b2b38', accent: '#ff3d7f' }, accessory: { style: 'sunglasses' } } }));
-      await page.evaluate(([cases]) => window.__rigGrid(cases, { cols: 8, rh: 330, scale: 2.4 }), [cases]);
-      await shot(page, 'aihead_jin');
+      const hi = await page.evaluate(() => {
+        const S = window.game.sprites;
+        const f = (c, g) => { const h = S.headFor(c, g); return h ? { fit: h.fit, place: h.place && h.place.map((v) => +v.toFixed(1)), back: !!h.back, bplace: h.back && h.back.place.map((v) => +v.toFixed(1)) } : null; };
+        return { luna_f: f('luna', 'f'), jin_m: f('jin', 'm'), jin_f: f('jin', 'f'), hacker_m: f('hacker', 'm') };
+      });
+      check('頭: 配置図方式（fit:false 既定）で置き場所が決まり、後ろ髪も読める', hi.luna_f && hi.luna_f.fit === false && hi.luna_f.back && Math.abs(hi.luna_f.place[0] + hi.luna_f.place[2] / 2) < 6 && hi.jin_m && hi.jin_m.back, JSON.stringify(hi));
+      check('頭: 旧方式（fit:true）・正方形でない絵（警告して旧方式）も読める', hi.jin_f && hi.jin_f.fit === true && !hi.jin_f.back && hi.hacker_m && hi.hacker_m.fit === true, JSON.stringify({ jin_f: hi.jin_f, hacker_m: hi.hacker_m }));
+      // AIの頭（中身はコードの頭そのもの）と、コードの頭（aiHead:false）の差: 待機は一致するはず
+      const hd = await page.evaluate(async () => {
+        const { drawCharacter } = await import('./src/render/character.js');
+        const { DEFAULT_LOOKS } = await import('./src/data/classes.js');
+        const res = {};
+        for (const [c, g, eq] of [['luna', 'f', { top: { style: 'hoodie', color: '#ff6fb5' } }], ['jin', 'm', { top: { style: 'leatherJacket', color: '#1d1d24' } }]]) {
+          const look = { ...DEFAULT_LOOKS[c][g], classId: c, gender: g };
+          for (const st of [['idle', 0.3], ['walk', 0.15], ['jump', 0.2]]) {
+            const cv = [0, 1].map(() => { const k = document.createElement('canvas'); k.width = 260; k.height = 300; return k; });
+            const an = { state: st[0], t: st[1], scale: 2.6, noCache: true };
+            drawCharacter(cv[0].getContext('2d'), 130, 280, look, eq, an);
+            drawCharacter(cv[1].getContext('2d'), 130, 280, { ...look, aiHead: false }, eq, an);
+            const d1 = cv[0].getContext('2d').getImageData(0, 0, 260, 300).data, d2 = cv[1].getContext('2d').getImageData(0, 0, 260, 300).data;
+            let un = 0, bad = 0;
+            for (let p = 0; p < d1.length; p += 4) {
+              const o1 = d1[p + 3] > 100, o2 = d2[p + 3] > 100;
+              if (!o1 && !o2) continue;
+              un++;
+              if (o1 !== o2 || Math.abs(d1[p] - d2[p]) + Math.abs(d1[p + 1] - d2[p + 1]) + Math.abs(d1[p + 2] - d2[p + 2]) > 160) bad++;
+            }
+            res[`${c}_${g} ${st[0]}`] = +(bad / un * 100).toFixed(1);
+          }
+        }
+        return res;
+      });
+      // 待機はほぼ一致。歩き・ジャンプはコードの髪（毛束が曲がる）と後ろ髪の絵（結び目を中心に回る）で揺れ方が違う分だけ差が出る
+      check('頭の配置図方式: コードの頭を描いた仮の頭＋後ろ髪が、コードの頭と同じ位置・大きさ（待機 < 6%・歩き/ジャンプ < 18%）',
+        Object.entries(hd).every(([k, v]) => v < (k.endsWith('idle') ? 6 : 18)), JSON.stringify(hd));
+      // 後ろ髪の二次運動（揺れ・ジャンプでふわっと）と重なり順（体の後ろ・顔の後ろ）
+      const bh = await page.evaluate(async () => {
+        const { paintAiHeadBack, drawCharacter } = await import('./src/render/character.js');
+        const { DEFAULT_LOOKS } = await import('./src/data/classes.js');
+        const S = window.game.sprites;
+        const h = S.headFor('luna', 'f');
+        const draw = (P) => { const k = document.createElement('canvas'); k.width = k.height = 300; const x = k.getContext('2d'); x.translate(150, 120); x.scale(3, 3); paintAiHeadBack(x, h, null, P, false, 'rig'); return x.getImageData(0, 0, 300, 300).data; };
+        const dif = (a, b) => { let n = 0; for (let i = 3; i < a.length; i += 4) if ((a[i] > 100) !== (b[i] > 100)) n++; return n; };
+        const base = draw({ hairSway: 0, hairLift: 0 });
+        const r = { sway: dif(base, draw({ hairSway: 0.9, hairLift: 0 })), lift: dif(base, draw({ hairSway: 0, hairLift: 1 })), same: dif(base, draw({ hairSway: 0, hairLift: 0 })) };
+        // 重なり順: 一面の緑の後ろ髪（hacker_f）
+        const k = document.createElement('canvas'); k.width = 300; k.height = 320; const x = k.getContext('2d');
+        const s = 3, X = 150, Y = 300;
+        drawCharacter(x, X, Y, { ...DEFAULT_LOOKS.hacker.f, classId: 'hacker', gender: 'f' }, { top: { style: 'tshirt', color: '#f4f4f4' } }, { state: 'idle', t: 0.3, scale: s, noCache: true });
+        const px = (u, v) => { const d = x.getImageData(Math.round(X + u * s), Math.round(Y - v * s), 1, 1).data; return d[1] > 180 && d[0] < 80 && d[2] < 120 ? 'green' : 'other'; };
+        r.order = { side: px(34, 44), torso: px(0, 36), face: px(1, 62), leg: px(3, 10) };
+        return r;
+      });
+      check('後ろ髪の二次運動: 揺れ（hairSway）・ジャンプ（hairLift）で動く', bh.sway > 200 && bh.lift > 200 && bh.same === 0, JSON.stringify({ sway: bh.sway, lift: bh.lift, same: bh.same }));
+      check('後ろ髪の重なり順: 体・顔の後ろ（横は見える）', bh.order.side === 'green' && bh.order.torso === 'other' && bh.order.face === 'other', JSON.stringify(bh.order));
+      // 全状態 × 帽子（AIの頭＋後ろ髪 × 帽子の clip）
+      const HATS = ['catEars', 'cap', 'beanie', 'helmet', 'cowboy', 'crown', 'headphones', 'bandana'];
+      const cases = [];
+      STATES.forEach((s, i) => cases.push({ ...s, cls: 'luna', g: 'f', eq: { ...EQ.luna_f, hat: { style: HATS[i % HATS.length] } }, label: `${s.label || s.state} ${HATS[i % HATS.length]}` }));
+      STATES.slice(0, 9).forEach((s, i) => cases.push({ ...s, cls: 'jin', g: 'm', eq: { ...EQ.jin_m, hat: { style: HATS[(i + 3) % HATS.length] }, accessory: i % 2 ? { style: 'sunglasses' } : { style: 'mask' } }, label: `${s.label || s.state} ${HATS[(i + 3) % HATS.length]}` }));
+      await page.evaluate(([cases]) => window.__rigGrid(cases, { cols: 8, rh: 240, scale: 2.0 }), [cases]);
+      await shot(page, 'aihead_layout');
+      const cases2 = STATES.slice(0, 8).map((s) => ({ ...s, cls: 'jin', g: 'f', eq: { ...EQ.jin_m, hat: { style: 'cap' } }, label: 'old fit:true ' + (s.label || s.state) }))
+        .concat(STATES.slice(0, 8).map((s) => ({ ...s, cls: 'hacker', g: 'm', eq: EQ.hacker_f, label: 'non-square ' + (s.label || s.state) })));
+      await page.evaluate(([cases]) => window.__rigGrid(cases, { cols: 8, rh: 300, scale: 2.2 }), [cases2]);
+      await shot(page, 'aihead_old');
       await page.evaluate(() => window.__rigClear());
       await startPlay(page, 'jin', 'm');
       await sleep(400);
@@ -403,8 +535,29 @@ async function main() {
       await ctx.close();
     }
 
-    // ================================================================ ③ フォールバック
-    console.log('\n③ フォールバック');
+    // ================================================================ ③ 旧い配置図（layout 1）の古い絵
+    console.log('\n③ 旧い配置図の古い絵（fit も layout も書かない manifest）');
+    {
+      const { page, ctx, errs } = await openGame(browser, 'old', IMGS);
+      await page.evaluate(GRID_FN);
+      await preload(page);
+      const st = await page.evaluate(() => window.game.sprites.spriteStats().rig);
+      check('旧形式: layout 1・自動フィットで全部読める', st.layout === 1 && st.fit === true && st.loaded === st.files && st.failed === 0, JSON.stringify({ layout: st.layout, fit: st.fit, loaded: st.loaded, files: st.files, w: st.warnings }));
+      const cases = [];
+      for (const g of ['f', 'm']) {
+        const eq = { top: { style: 'hoodie', color: '#ff6fb5', accent: '#ffffff' }, bottom: { style: 'jeans', color: '#3a5a8c', accent: '#c9d6ea' }, shoes: { style: 'boots', color: '#2a2018', accent: '#8a8a8a' } };
+        for (const s of STATES.slice(0, 11)) cases.push({ ...s, cls: g === 'f' ? 'luna' : 'jin', g, eq, label: 'old ' + (s.label || s.state) });
+      }
+      const r = await page.evaluate(([cases]) => window.__rigGrid(cases, { cols: 11, rh: 330, scale: 2.0, diff: true }), [cases]);
+      await shot(page, 'old_layout');
+      const avg = r.diffs.reduce((a, d) => a + d.diff, 0) / r.diffs.length, w = r.diffs.slice().sort((a, b) => b.diff - a.diff)[0];
+      check('旧形式: 自動フィットで骨格 v2 に組める（コードの代用パーツとの差 平均 < 12%・最大 < 25%）', avg < 0.12 && w.diff < 0.25, `平均 ${(avg * 100).toFixed(1)}% 最大 ${w.label} ${(w.diff * 100).toFixed(1)}%`);
+      check('旧形式: 例外・コンソールエラーなし', errs.length === 0, errs.slice(0, 3).join(' | '));
+      await ctx.close();
+    }
+
+    // ================================================================ ④ フォールバック
+    console.log('\n④ フォールバック');
     for (const mode of ['none', 'nobody', 'broken', 'slow', 'partial']) {
       const { page, ctx, errs } = await openGame(browser, mode, IMGS);
       await page.evaluate(GRID_FN);

@@ -64,6 +64,7 @@
   "heads": {
     "luna_f": {
       "file": "heads/luna_f.png",
+      "back": "heads/luna_f_back.png",
       "expr": {
         "blink": "heads/luna_f_blink.png",
         "hurt": "heads/luna_f_hurt.png",
@@ -73,6 +74,7 @@
     },
     "luna_m": {
       "file": "heads/luna_m.png",
+      "back": "heads/luna_m_back.png",
       "expr": {
         "blink": "heads/luna_m_blink.png",
         "hurt": "heads/luna_m_hurt.png",
@@ -82,6 +84,7 @@
     },
     "jin_f": {
       "file": "heads/jin_f.png",
+      "back": "heads/jin_f_back.png",
       "expr": {
         "blink": "heads/jin_f_blink.png",
         "hurt": "heads/jin_f_hurt.png",
@@ -91,6 +94,7 @@
     },
     "jin_m": {
       "file": "heads/jin_m.png",
+      "back": "heads/jin_m_back.png",
       "expr": {
         "blink": "heads/jin_m_blink.png",
         "hurt": "heads/jin_m_hurt.png",
@@ -100,6 +104,7 @@
     },
     "hacker_f": {
       "file": "heads/hacker_f.png",
+      "back": "heads/hacker_f_back.png",
       "expr": {
         "blink": "heads/hacker_f_blink.png",
         "hurt": "heads/hacker_f_hurt.png",
@@ -109,6 +114,7 @@
     },
     "hacker_m": {
       "file": "heads/hacker_m.png",
+      "back": "heads/hacker_m_back.png",
       "expr": {
         "blink": "heads/hacker_m_blink.png",
         "hurt": "heads/hacker_m_hurt.png",
