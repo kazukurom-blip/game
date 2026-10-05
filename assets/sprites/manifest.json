@@ -157,5 +157,105 @@
         -1
       ]
     }
+  },
+  "faces": {
+    "f_01": {
+      "file": "heads/face/f_01.png",
+      "expr": {
+        "blink": "heads/face/f_01_blink.png",
+        "hurt": "heads/face/f_01_hurt.png",
+        "shout": "heads/face/f_01_shout.png",
+        "happy": "heads/face/f_01_happy.png"
+      }
+    },
+    "f_02": {
+      "file": "heads/face/f_02.png",
+      "expr": {
+        "blink": "heads/face/f_02_blink.png",
+        "hurt": "heads/face/f_02_hurt.png",
+        "shout": "heads/face/f_02_shout.png",
+        "happy": "heads/face/f_02_happy.png"
+      }
+    },
+    "f_03": {
+      "file": "heads/face/f_03.png",
+      "expr": {
+        "blink": "heads/face/f_03_blink.png",
+        "hurt": "heads/face/f_03_hurt.png",
+        "shout": "heads/face/f_03_shout.png",
+        "happy": "heads/face/f_03_happy.png"
+      }
+    },
+    "m_01": {
+      "file": "heads/face/m_01.png",
+      "expr": {
+        "blink": "heads/face/m_01_blink.png",
+        "hurt": "heads/face/m_01_hurt.png",
+        "shout": "heads/face/m_01_shout.png",
+        "happy": "heads/face/m_01_happy.png"
+      }
+    },
+    "m_02": {
+      "file": "heads/face/m_02.png",
+      "expr": {
+        "blink": "heads/face/m_02_blink.png",
+        "hurt": "heads/face/m_02_hurt.png",
+        "shout": "heads/face/m_02_shout.png",
+        "happy": "heads/face/m_02_happy.png"
+      }
+    },
+    "m_03": {
+      "file": "heads/face/m_03.png",
+      "expr": {
+        "blink": "heads/face/m_03_blink.png",
+        "hurt": "heads/face/m_03_hurt.png",
+        "shout": "heads/face/m_03_shout.png",
+        "happy": "heads/face/m_03_happy.png"
+      }
+    }
+  },
+  "hairs": {
+    "f_bob": {
+      "file": "heads/hair/f_bob.png",
+      "back": "heads/hair/f_bob_back.png",
+      "base": "#b07850"
+    },
+    "f_long": {
+      "file": "heads/hair/f_long.png",
+      "back": "heads/hair/f_long_back.png",
+      "base": "#b07850"
+    },
+    "f_ponytail": {
+      "file": "heads/hair/f_ponytail.png",
+      "back": "heads/hair/f_ponytail_back.png",
+      "base": "#b07850"
+    },
+    "f_twin": {
+      "file": "heads/hair/f_twin.png",
+      "back": "heads/hair/f_twin_back.png",
+      "base": "#b07850"
+    },
+    "m_short": {
+      "file": "heads/hair/m_short.png",
+      "back": "heads/hair/m_short_back.png",
+      "base": "#b07850"
+    },
+    "m_spiky": {
+      "file": "heads/hair/m_spiky.png",
+      "back": "heads/hair/m_spiky_back.png",
+      "base": "#b07850"
+    },
+    "m_wolf": {
+      "file": "heads/hair/m_wolf.png",
+      "back": "heads/hair/m_wolf_back.png",
+      "base": "#b07850"
+    }
+  },
+  "faceBase": {
+    "skin": {
+      "f": "#ffe3d3",
+      "m": "#f6d5be"
+    },
+    "eye": "#6a5cff"
   }
 }
