@@ -44,8 +44,8 @@ const P = {
   torso: { at: [16, 500],  ext: [-20, -32, 20, 16], frame: 'upper', label: '胴（首の付け根〜腰。スカート・ドレスの裾も）', short: '胴' },
   armB:  { at: [356, 500], ext: [-7, -5, 7, 24],    frame: 'upper', label: '後ろの腕（肩〜手）', short: '後ろ腕', joint: 'elbow' },
   armF:  { at: [488, 500], ext: [-7, -5, 7, 24],    frame: 'upper', label: '手前の腕（肩〜手）', short: '前腕', joint: 'elbow' },
-  legB:  { at: [620, 500], ext: [-8, -5, 8, 22],    frame: 'root',  label: '後ろの脚（股〜足首）', short: '後ろ脚', joint: 'knee' },
-  legF:  { at: [768, 500], ext: [-8, -5, 8, 22],    frame: 'root',  label: '手前の脚（股〜足首）', short: '前脚', joint: 'knee' },
+  legB:  { at: [620, 500], ext: [-8, -5, 8, 23],    frame: 'root',  label: '後ろの脚（股〜足首）', short: '後ろ脚', joint: 'knee' },
+  legF:  { at: [768, 500], ext: [-8, -5, 8, 23],    frame: 'root',  label: '手前の脚（股〜足首）', short: '前脚', joint: 'knee' },
   footB: { at: [356, 752], ext: [-8, -9, 13, 8],    frame: 'root',  label: '後ろの足（靴）', short: '後ろ足' },
   footF: { at: [544, 752], ext: [-8, -9, 13, 8],    frame: 'root',  label: '手前の足（靴）', short: '前足' },
 };
