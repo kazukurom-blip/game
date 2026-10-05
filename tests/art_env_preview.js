@@ -47,6 +47,20 @@ window.ARTENV = {
   scene(o) { return scene(o).toDataURL('image/png'); },
   /** 画面の画素（テスト用）: [[x, y], ...] → [[r, g, b, a], ...] */
   pixels(o, pts) { const g = scene(o).getContext('2d'); return pts.map(([x, y]) => [...g.getImageData(x, y, 1, 1).data]); },
+  /** アイコン 1つを size 四方に描いて画素を返す（テスト用）。type: 'item' | 'skill'、id: ITEMS / SKILLS の id */
+  iconPixels(type, id, size, pts) {
+    const c = mk(size, size), g = c.getContext('2d');
+    if (type === 'skill') drawSkillIcon(g, SKILLS[id] || { id, kind: 'buff', color: '#ff5fa2' }, size / 2, size / 2, size);
+    else drawItemIcon(g, ITEMS[id] || { id, type: 'etc' }, size / 2, size / 2, size);
+    return pts.map(([x, y]) => [...g.getImageData(x, y, 1, 1).data]);
+  },
+  /** 乗り物を 400×200 の (200,150) に描いた画素（RGBA 全部）。o = { kind, facing, color, x, t } */
+  vehicleData(o) {
+    const c = mk(400, 200), g = c.getContext('2d');
+    g.translate(200, 150);
+    drawVehicle(g, { kind: o.kind, x: o.x || 0, y: 0, facing: o.facing || 1, color: o.color, speed: 0, t: o.t ?? 0.25, siren: false });
+    return Array.from(g.getImageData(0, 0, 400, 200).data);
+  },
   time(o, n = 60) {
     const c = mk(W, H), g = c.getContext('2d');
     const map = demoMap(o.region || 'beach', o.town, o.v, o.clock);
