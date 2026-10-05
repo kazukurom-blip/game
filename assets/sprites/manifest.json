@@ -273,6 +273,31 @@
       "file": "heads/hair/m_wolf.png",
       "back": "heads/hair/m_wolf_back.png",
       "base": "#b07850"
+    },
+    "f_bun": {
+      "file": "heads/hair/f_bun.png",
+      "back": "heads/hair/f_bun_back.png",
+      "base": "#b07850"
+    },
+    "f_sidepart": {
+      "file": "heads/hair/f_sidepart.png",
+      "back": "heads/hair/f_sidepart_back.png",
+      "base": "#b07850"
+    },
+    "m_messy": {
+      "file": "heads/hair/m_messy.png",
+      "back": "heads/hair/m_messy_back.png",
+      "base": "#b07850"
+    },
+    "m_sidepart": {
+      "file": "heads/hair/m_sidepart.png",
+      "back": "heads/hair/m_sidepart_back.png",
+      "base": "#b07850"
+    },
+    "m_undercut": {
+      "file": "heads/hair/m_undercut.png",
+      "back": "heads/hair/m_undercut_back.png",
+      "base": "#b07850"
     }
   },
   "faceBase": {
