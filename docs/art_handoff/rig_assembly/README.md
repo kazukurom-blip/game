@@ -7,6 +7,8 @@
 | `README.md` | これ。座標・倍率・回転・重ね順・肘膝の曲げ方・歩き方の数値 |
 | `joint_compare.png` | 新しい体の案（一体の絵）と、今のゲーム内の骨格を同じ縮尺で並べ、関節の高さの線を引いた比較 |
 | `stand_walk_right.mp4` | 右向きの立ち（2.4秒）→歩き（2.4秒＝4周）。左 = そのまま、中 = 骨（黄 = 関節、水色 = 骨）、右 = 実寸 |
+| `stand_walk_right.gif` | 同じ動画の GIF 版（動画が開けない時用） |
+| `walk_frames.png` | 歩き1周（0.6秒）を 9コマ並べた静止画（骨つき） |
 | `SPEC_SPRITES_rig.md` | 仕様書 `docs/SPEC_SPRITES.md` のリグ部分 |
 | `rig_code_excerpt.js` | 組み立て・歩行描画のコードの抜粋（読むだけ） |
 
