@@ -183,7 +183,7 @@ accessory_back（wings・scarf のなびき） → hair_back → body → bottom
   - 表情 `aiHeadExpr(state, t, anim)`: dead/panic→hurt、`anim.headExpr`（プレイヤーはレベルアップ・転職・ボス撃破・ミッション達成・タワー階クリアで 1.8 秒 happy）、`anim.face`（happy/wink→happy, shout/angry→shout, sad→sad）、attack/shoot→shout、hurt→hurt、cheer→happy、idle/sit のまばたき（コードの目と同じ周期 4.8 秒中 3.82〜4.0 秒）→blink、他は基本。
   - 2xキャッシュのキーに使う絵のファイル名（＋後ろ髪の有無）を含める（読み込み前はコード描画のキー → 読み込み完了で別のキー＝自動で作り直し）。`boxOf` は頭の絵の `scale`/`offset`（配置図方式は `place` と後ろ髪の範囲）に合わせて広げる。
   - 人型レイヤー（`chars`）のスプライトで描く時も、頭の絵があれば hair_back の位置に後ろ髪（`aiback` レイヤー）、face の位置に前の頭（`aihead`）を置く（hair_front は描かない）。
-  - look.classId / look.gender: `progression.newState` / 旧セーブの補完（`tagHeroLook`）と `player.heroLookOf` が state.heroId / state.gender から**列挙されないプロパティ**として付ける（セーブ・見た目の比較には出ない）。NPC・敵・市民の look には付かない → 適用されない。タイトルのプレビューは classId・gender を付けたコピーで描く。
+  - look.classId / look.gender: `progression.newState` / 旧セーブの補完（`tagHeroLook`）と `player.heroLookOf` が state.heroId / state.gender から**列挙されないプロパティ**として付ける（セーブ・見た目の比較には出ない）。NPC・敵・市民の look には付かない → `heads`（1枚の頭）は適用されない（顔・髪の分割方式は「NPC・敵のリグ」の割り当てで使う）。タイトルのプレビューは classId・gender を付けたコピーで描く。
 - 立ち絵の使い場所:
   - 会話窓（windows.js）: 行の先頭が `@me:` / `@hero:`（全角コロン可）の行は主人公のセリフ（名前プレートが主人公の名前、左の枠に立ち絵の上の方を枠の縦横比で切り出し。立ち絵が無ければ主人公のちびキャラ）。それ以外の行では窓の右上に主人公の立ち絵（顔欄。相手が話している間は少し暗く、選択肢の時は明るく）。表情: 報酬=smile、「！？」=surprised、「…」で始まる=sad、「♪/ありがと/やった」=smile。
   - キャラ選択の詳細・キャラ作成のプレビュー（title.js）: 立ち絵があればコード描画のキャラを少し小さくして左へ、立ち絵を右に並べる（作成の攻撃ポーズ中は shout、名前の段階は smile）。
@@ -221,9 +221,9 @@ accessory_back（wings・scarf のなびき） → hair_back → body → bottom
   - 髪（前髪・後ろ髪）: `hairs.<key>.base`（既定 `#b07850`）→ `look.hairColor`。顔: `faceBase.skin[顔の性別]` → `look.skin`、`faceBase.eye` → `look.eyeColor`。
   - 絵の中の基準色に近い画素の実際の平均（陰影込み）を元にするので、少しずれた色で描かれても合う。陰影の差は保つ（明るさは基準 → 目標へ平行移動、はみ出す側だけ縮める）。
   - 線の色 `#2A1430` 付近・白いハイライト・別の色（白目・口の中など）は変えない。白・黒・灰など無彩色の目標色は明るさで合わせ、髪はその色のわずかな色味（白っぽい青など）を残す。
-  - 結果は「絵 × 色」ごとにキャッシュ（上限 48 枚、古い物から捨てる）。重ね頭の組み立ても look の顔・髪・色・表情ごとにキャッシュ（`aiHeadOf` 1回 約1µs）。
+  - 結果は「絵 × 色」ごとにキャッシュ（LRU。合計 1000万画素まで、古い物から捨てる）。重ね頭の組み立ても look の顔・髪・色・表情ごとにキャッシュ（`aiHeadOf` 1回 約1µs）。
 - **フォールバック**（上から順に）: ① `look.face` の顔と `hairs['<性別>_<look.hair>']` があり読み込み済み → 重ね頭。② 無い・読み込み中・壊れている → `heads.<クラス>_<性別>`（1枚の頭）。③ それも無い → コードの頭。
-  `look.aiHead === false`（キャラ作成の「AIの顔を使う：OFF」）・NPC（look.classId 無し）・悪役・spriteMode=procedural は常にコードの頭。
+  `look.aiHead === false`（キャラ作成の「AIの顔を使う：OFF」）・spriteMode=procedural は常にコードの頭。NPC（look.classId 無し）・悪役は `rig.npcs` が true の時だけ、下の「NPC・敵のリグ」の割り当てで重ね頭（false なら常にコードの頭）。
 - **キャラ作成**（ui/title.js の見た目）: その性別の顔の絵が1つ以上あると「顔」の行（←→で切替・番号とプレビュー）を「AIの顔」の下に出す。顔・髪の絵が両方ある時（顔を使う時）は髪型は髪の絵がある物だけ、髪の色・瞳・肌は塗り替えで反映。
   「AIの顔」行は「画像の顔を使う／コードの顔」の切替（OFF の時は顔の行は無効・髪型は全部）。顔の絵が無く `heads` だけある時は今まで通り（髪型・髪色は無効）。ランダムは顔も選ぶ。Enter は次へ（ランダムの行だけはランダム）。
 - **API**（sprites.js）: `faceHeadFor(look, expr)` → `{ layered: true, canvas, w, h, place, front, back, expr, file, hairColor, ... }` | null、`faceList(gender)`、`hairArtList(gender)`、`hasFaceArt(look)`、`layeredBackOf(head)`。
@@ -287,7 +287,7 @@ accessory_back（wings・scarf のなびき） → hair_back → body → bottom
   性別を省いた `<slot>/<style>` も可（♀♂共通）。
 - グループ → 枠: body = 胴・腕・脚・足、top = 背中・胴・腕、bottom = 胴・脚、shoes = 足、hat = 頭、accessory = 頭/背中/胴（種類ごと `RIG_ACC_PARTS`）、tear = 胴・腕・脚。
 - 何も装備していない top/bottom は、今と同じ白Tシャツ・青の短パン（`tshirt`/`shorts` の絵 → 無ければコード）。`defaultWear: false` なら素体のまま。靴が無い時は素体の足。
-- 主人公（look に `classId` がある）だけ。悪役・NPC・市民には使わない（`heroesOnly: false` で classId の無い look にも）。spriteMode=procedural（F2）で使わない。
+- 主人公（look に `classId` がある）と、`rig.npcs`（既定 true）なら NPC・人型の敵・市民も（次の節）。`npcs: false`（旧い `heroesOnly: true` も同じ）で主人公だけ。spriteMode=procedural（F2）で使わない。
 
 ### 読み込み・切り出し・位置合わせ
 - 絵を配置図の大きさ（1024×1024 / 武器 1024×512）に拡大縮小（正方形でなければ警告）→ 背景の自動透明化（`removeBg`、1枚絵と同じ。四隅が同じ色なら塗りつぶして消す）→
@@ -328,6 +328,53 @@ accessory_back（wings・scarf のなびき） → hair_back → body → bottom
   腕・脚は1枚の絵を関節で折るだけ（曲げた時の形の変化・手の形（グー/パー/握り）・袖の破れで短くなる等の形の変化は無い）。向きは右向き1方向（背面のはしご登りは前向きの胴の絵を使う）。
   翼のはばたき・ネコミミの動き・天使の輪の上下・スカートのなびきは無い（コードの代用部品も休めの姿勢の静止画）。夜のリムライトは絵に入らない。読み込み時の前処理は1枚あたり数十〜百ms（着ている物だけ、1回だけ）。
   暗い基準色（黒レザー等）→ 明るい色、への色替えは陰影が浅くなりやすい（色違い専用の絵で対処）。
+
+## NPC・敵のリグ（`rig.npcs`。NPC・人型の敵・市民も主人公と同じ素体＋服＋顔・髪の絵で描く）
+町の人・クエストの人・店の人（`world/maps.js` の npcs）、人型の敵（チンピラ thug・警官 cop・SWAT swat・ドン bossDon。`data/enemies.js` の look/equip、無ければ `enemyArt.js` の `DEFAULT_HUMANS`）、
+市民（`monsters2.js` の `makeCivilian` のランダムな見た目）を、主人公と同じリグ（骨格 v2・3q の重ね方・関節のスキニング）と顔・髪の分割方式の重ね頭で描く。
+```json
+"rig": { "enabled": true, "fit": false, "npcs": true, "parts": { ... } }
+```
+- `npcs`（既定 true）: false にすると今まで通り（NPC・敵・市民はコードの体＋コードの頭。主人公は変わらない）。rig 節が無い manifest も false 扱い。`rigNpcs()`（rig.js）。
+- 服: look/equip（`L(style, color, accent)` / アイテム ID から作った物）をそのままリグのパーツに。絵の無い服（スーツ・制服・ベスト等）は主人公と同じコードの代用パーツ（`renderRigCode`）。武器・破れも同じ。
+- 素体の絵が無い／読み込み中、顔か髪の絵がその性別に1つも無い → その部分は今まで通り（コードの体・コードの頭）。
+- 表情: 主人公と同じ `aiHeadExpr`（被弾 hurt・攻撃 shout・死亡/パニック hurt・待機のまばたき blink）。敵の悪役の目つき（コードの `vil` の目）は重ね頭では使わない。
+
+### 顔・髪の割り当て（`src/render/npcFace.js`）
+- look に役割と id を結び付ける: `tagNpcLook(look, { id, name, title, role, art })`（WeakMap。セーブ・見た目の比較に出ない）。
+  NPC = `entities/npc.js`（id・名前・肩書）、敵 = `enemyArt.js` の `enemyLook`（def ごとのコピー。id = 敵の ID、art = 敵の種類。人型ボスの thug は `boss`）、市民 = `makeCivilian`（id = `civ<seed>`、おばあちゃんは old）。
+  タグの無い look は、見た目の値のハッシュと anim.villain（悪役 → villain）で決める。
+- 役割: `don`（ボスのドン `boss_don` / NPC の `don_caiman` / art bossDon）・`villain`（thug / cop / swat）・`old`（id・名前・肩書に old_ / gran / elder / じいさん / ばあさん / 老 など。例 old_boone）・`npc`（それ以外）。
+- 性別 = `look.body`。顔: `look.face` が manifest にあればそれ。無ければ候補を優先順に見て、manifest にある物から **id のハッシュ（FNV-1a）で決定論的に1つ**:
+  | 役割 | 候補（優先順。無い物は飛ばす） |
+  |---|---|
+  | npc | 通常の顔（`f_04`〜 / `m_04`〜。主人公の初期の顔 `f_01〜f_03`・`m_01〜m_03` を除く）→ 通常の顔全部 → 全部 |
+  | villain | 種類の好み（チンピラ ♂ m_v01〜03 / ♀ f_v01、警官 m_v04 / f_v02、SWAT m_v05 / f_v02、人型ボス m_v06 / f_v01）→ 悪役の顔全部（m_v01〜06・f_v01〜02）→ npc と同じ |
+  | don | `m_don` → 悪役の顔 → npc と同じ |
+  | old | 老人の顔（♂ m_o01・m_o02 / ♀ f_o01）→ npc と同じ |
+- 髪: `hairs['<性別>_<look.hair>']` があればそれ。無ければ同じ性別の絵のある髪型から長さが近い物（`HAIR_LEN`: short 1・spiky 1.2・bun 2・bob 2.5・wolf 2.8・ponytail 3.5・twin 3.8・long 4.5 など。結ぶ髪/結ばない髪が違えば +0.6）。
+  ドンは `m_slick` → `m_short` → 近い物。
+- 色: `look.hairColor` / `skin` / `eyeColor` をそのまま重ね頭の色替えへ。ドンの髪だけ白髪交じりのグレー `#8e8f99`。
+- 結果は look ごとにキャッシュ（manifest の設定・モードの切替 = `spriteManifestGen()`、または look の値が変わったら作り直し）。
+
+### 性能（キャッシュ）
+- 2x キャッシュ（`drawCharacter`）: NPC・敵・市民のリグ（classId の無い look）は **等倍**でキャッシュする（`imageSmoothingQuality = 'high'` で縮小。主人公は今まで通り 2x）。
+  画面に何十人もいると 2x では予算（1600万画素）を超えて毎フレーム作り直しになっていたため。`setNpcCacheSS1(false)` で 2x（見比べ用）。画面外の人は main.js が描かない（カメラ ±300px）。
+- 重ね頭: NPC 用は縮小版（420px → 210px。描く解像度 = キャッシュの倍率 ≤ 2.4 の時。ドンなど拡大した人は元の大きさ）。色替え済みの絵の LRU を画素の予算（1000万画素）に、重ね頭の解決結果を LRU 1500 に。
+- リグ: プラン LRU 160・代用パーツ LRU 160・色替え（シートあたり）LRU 160。プランのキーから全体の読み込み番号を外した（関係の無い絵の読み込みで全員のプランと 2x キャッシュを作り直さない）。
+- 計測（`node tests/npc_perf.mjs`。ダウンタウンに NPC 24人・市民 30人・人型の敵 8人を画面内に並べ、600 フレーム。ヘッドレス Chromium）:
+  | | 1フレーム平均 | p90 | p99 | 最大 |
+  |---|---|---|---|---|
+  | rig.npcs=false（今まで） | 23.9ms | 31.5 | 44.1 | 110 |
+  | rig.npcs=true（等倍キャッシュ） | 4.1ms | 6.1 | 12.6 | 22 |
+  入った直後（絵の読み込み・プランの作成中、300 フレーム）: false 平均 21.9ms・33ms 超 49 フレーム / true 平均 10.4ms・33ms 超 10 フレーム（最大 150ms 前後が数回）。
+
+### テスト
+- `node tests/npc_rig_browser.mjs`（`npm run test:npcrig`）: 本物の manifest で町の NPC 全員・人型の敵・市民 40人にプランと重ね頭・主人公の初期の顔を避ける・ばらける・決定論的・表情・ドンの髪色・
+  主人公の描画が rig.npcs の有無で画素まで同じ・40人の描画時間・rig.npcs=false で今まで通り・悪役/ドン/老人の顔（本物の顔を別名で差し込み）の割り当て。
+  スクショ `tests/screenshots/npcrig_grid_on|off|vil.png`（NPC・市民・敵 × 待機/左向き/歩き/攻撃/被弾/白フラッシュ/ジャンプ/座る/運転/はしご/死亡）、`npcrig_on|off_<beach|downtown|casino|down_f1>.png`（ゲーム中）。
+- `tests/rig_unit.mjs`: rig.npcs の解釈、割り当ての規則（Node）。
+- 制限: NPC の頭上の名前・肩書の位置は今まで通り（リグの背丈は 84＋髪・帽子で、コードの体より少し高い）。悪役の顔の絵（m_v01 等）がまだ無い間は、敵も通常の顔（主人公の初期以外）。
 
 ## 納品画像の検査（`tools/check_art.mjs`）
 
