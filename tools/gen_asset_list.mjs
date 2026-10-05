@@ -205,12 +205,13 @@ function buildFromManifest(man) {
   const baseRows = C.rows || Object.fromEntries(ROWS.human);
   const rs = (o) => Object.entries(o).map(([k, v]) => `${k}(${Array.isArray(v) ? v[0] : v})`).join(' ');
   const cellS = (e) => `${e.cell[0]}x${e.cell[1]}`;
-  const anc = (e) => `基準点 ${e.anchor[0]},${e.anchor[1]}`;
+  const anc = (e) => `基準点 ${e.anchor[0]},${e.anchor[1]}${e._plain || ''}`;
   const defHair = new Set(Object.values(DEFAULT_LOOKS).flatMap((gg) => Object.entries(gg).map(([g, l]) => `${l.hair}:${g}`)));
   const defHairAny = new Set([...defHair].map((k) => k.split(':')[0]));
   const { set: starter, topWk } = starterPairs();
   const HAIR_JA = Object.fromEntries(HAIR_STYLES.map((h) => [h.id, h.name]));
-  for (const [key, e] of Object.entries(C.layers || {})) {
+  for (const [key, e0] of Object.entries(C.layers || {})) {
+    const e = e0.plain ? { ...e0, anchor: e0.anchor, _plain: `。色付き版（任意）: ${e0.plain}（色が ${e0.plainColor} のときはこちらをそのまま使う）` } : e0;
     const rws = rs(e.rows || baseRows);
     const tint = e.tint || '';
     let m;

@@ -4,6 +4,7 @@
 //  - 図鑑ボーナスのキャッシュ（JSON.stringify をやめた）が正しく更新される
 //  - 実績の判定まとめ（高頻度イベント）でも取りこぼさない
 //  - 夜限定の敵は昼に通常出現しない
+//  - （見た目QA）プレイヤーのオーラは職の段階（auraTier=1〜4次）で強くなる
 import assert from 'node:assert/strict';
 import { ENEMIES } from '../src/data/enemies.js';
 import { MAPS } from '../src/world/maps.js';
@@ -13,6 +14,8 @@ import { bookBonus } from '../src/systems/book.js';
 import { attachAchievements, achievementList } from '../src/systems/achievements.js';
 import { syncPet } from '../src/entities/pet.js';
 import { sysReady } from '../src/world/sys.js';
+import { advanceJob } from '../src/systems/jobs.js';
+import { JOBS } from '../src/data/jobs.js';
 
 export default function register({ test, makeGame, step }) {
   test('debug v3: E は近い方（車 > NPC）— NPC の横に停めた車にも乗れる', () => {
@@ -104,5 +107,19 @@ export default function register({ test, makeGame, step }) {
     };
     assert.equal(count(12), 0, '昼は出ない');
     assert.ok(count(23) > 0, '夜は出る');
+  });
+  test('debug 見た目QA: プレイヤーの anim.auraTier = 職の段階（1〜4次）', () => {
+    const g = makeGame('luna', 'beach');
+    g.player.updateAnim(0.016);
+    assert.equal(g.player.anim.aura, null, '見習いはオーラなし');
+    const line = ['luna_gunner', 'luna_sharpshooter', 'luna_trigger_maestro', 'luna_galaxy_outlaw'];
+    for (const j of line) {
+      g.state.level = Math.max(g.state.level, JOBS[j].reqLevel);
+      const r = advanceJob(g, j);
+      assert.ok(r.ok, j + ' に転職: ' + r.msg);
+      g.player.updateAnim(0.016);
+      assert.equal(g.player.anim.aura, JOBS[j].aura, j + ' のオーラ色');
+      assert.equal(g.player.anim.auraTier, JOBS[j].tier, j + ' のオーラ段階');
+    }
   });
 }

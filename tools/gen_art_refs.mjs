@@ -340,7 +340,7 @@ function pageCode() {
     const half = Math.ceil(pets.length / 2);
     const BW = LW + cols.length * (CW + 6) + 24, RH = CH + 14;
     const [c, ctx] = canvas(BW * 2, top + half * RH + 10);
-    header(ctx, 'ref_pets — PET 10 種（pets/<style>.png）', '表示 3倍（納品は 2倍。セルと基準点はファイルごとに違う → ASSET_LIST.csv / テンプレート）。桃色の十字 = 足元。飛ぶPET は地面から浮いた位置に描く。リボン・王冠・オーラ（親密度）はゲームが重ねる');
+    header(ctx, 'ref_pets — PET 10 種（pets/<style>.png）', '表示 3倍（納品は 2倍。セルと基準点はファイルごとに違う → ASSET_LIST.csv / テンプレート）。桃色の十字 = 足元。飛ぶPET は地面から浮いた位置に描く。親密度のオーラ・ハートはゲームが重ねる（リボン・王冠はスプライト版では今は出ない）');
     for (let k = 0; k < 2; k++) cols.forEach(([n], i) => text(ctx, n, k * BW + LW + i * (CW + 6) + CW / 2, top - 26, { align: 'center', size: 13 }));
     pets.forEach((p, idx) => {
       const k = idx < half ? 0 : 1, r = idx % half, bx = k * BW, y = top + r * RH;
