@@ -4,9 +4,10 @@
 //  - drawEnemy / drawPet / drawCharacter の入口から呼ばれ、描けたら true（呼び出し側はコード描画をしない）。
 //  - spriteMode: 'auto'（スプライトがあれば使う）| 'procedural'（常にコード描画）。デバッグパネル（F2）で切替。
 //  - パスはすべて相対（公開ページ・サブディレクトリ配信でも動く）。
-import { charHeadPose, itemColors, SPRITE_LAYER_ORDER, aiHeadExpr, paintAiHead, paintAiHeadBack } from './character.js';
+import { charHeadPose, itemColors, SPRITE_LAYER_ORDER, aiHeadOf, paintAiHead, paintAiHeadBack } from './character.js';
 import { setRigManifest, rigStats, rigPreload } from './rig.js';
 import { HEAD_W, HEAD_S, HEAD_PX, HEAD_PY } from './rigLayout.js';
+import { HEX6, colorInfo, effectiveColor, recolorData, sameColor } from './recolor.js';
 
 export const SPRITE_BASE = 'assets/sprites/';
 const DEF_SCALE = 0.5, DEF_FPS = 8;
@@ -33,7 +34,7 @@ export function toggleSpriteMode() { return setSpriteMode(MODE === 'auto' ? 'pro
 export function spriteRev() { return REV; }
 /** 画像の読み込み完了などで番号を進める（rig.js から） */
 export function bumpSpriteRev() { REV++; }
-export function spriteStats() { return { mode: MODE, ...STATS, errors: STATS.errors.slice(-5), tintCache: TINT.size, rig: rigStats() }; }
+export function spriteStats() { return { mode: MODE, ...STATS, errors: STATS.errors.slice(-5), tintCache: TINT.size, faceRecolor: FRC.size, faceRecolors: FSTAT.recolors, rig: rigStats() }; }
 export function hasSpriteManifest() { return !!MAN; }
 
 /** manifest.json を読み込む（失敗しても例外を投げない）。戻り値: 読み込めたら true */
@@ -55,7 +56,7 @@ export async function loadSpriteManifest(url = SPRITE_BASE + 'manifest.json') {
 
 /** manifest を直接設定（テスト・ツール用）。不正な項目は無視する */
 export function setSpriteManifest(j, base = SPRITE_BASE) {
-  MAN = null; STATS.entries = 0; IMG.clear(); TINT.clear(); PLAIN.clear(); tintPx = 0; REV++;
+  MAN = null; STATS.entries = 0; IMG.clear(); TINT.clear(); PLAIN.clear(); FRC.clear(); FHC.clear(); tintPx = 0; REV++;
   STATS.requested = STATS.loaded = STATS.failed = 0;
   setRigManifest(null, base);
   if (!j || typeof j !== 'object' || Array.isArray(j)) { STATS.manifest = j == null ? 'none' : 'broken'; return false; }
@@ -64,7 +65,7 @@ export function setSpriteManifest(j, base = SPRITE_BASE) {
     BASE = base;
     const d = j.defaults && typeof j.defaults === 'object' ? j.defaults : {};
     const defs = { scale: num(d.scale, DEF_SCALE), fps: d.fps != null ? d.fps : DEF_FPS };
-    const M = { enemies: {}, bosses: {}, pets: {}, chars: null, portraits: {}, heads: {} };
+    const M = { enemies: {}, bosses: {}, pets: {}, chars: null, portraits: {}, heads: {}, faces: {}, hairs: {}, faceBase: normFaceBase(j.faceBase) };
     for (const sec of ['enemies', 'bosses', 'pets']) {
       const src = j[sec];
       if (!src || typeof src !== 'object') continue;
@@ -82,6 +83,8 @@ export function setSpriteManifest(j, base = SPRITE_BASE) {
         if (E) M[sec][k] = E;
       }
     }
+    // 顔・髪の分割方式（顔 + 前髪 + 後ろ髪の3枚重ね。キー = 顔 'f_01' / 髪 '<性別>_<髪型>'）
+    normFacesHairs(j, M);
     const c = j.chars;
     if (c && typeof c === 'object' && c.layers && typeof c.layers === 'object') {
       const inh = { cell: c.cell, anchor: c.anchor, rows: c.rows, fps: c.fps, scale: c.scale };
@@ -108,7 +111,8 @@ export function preloadSprites() {
   const rp = rigPreload();
   for (const sec of ['enemies', 'bosses', 'pets']) for (const k in MAN[sec]) all.push(MAN[sec][k]);
   if (MAN.chars) for (const k in MAN.chars.layers) all.push(MAN.chars.layers[k]);
-  for (const sec of ['portraits', 'heads']) for (const k in MAN[sec]) { const E = MAN[sec][k]; all.push(E.base); for (const e in E.expr) all.push(E.expr[e]); if (E.back) all.push(E.back); }
+  for (const sec of ['portraits', 'heads', 'faces']) for (const k in MAN[sec]) { const E = MAN[sec][k]; all.push(E.base); for (const e in E.expr) all.push(E.expr[e]); if (E.back) all.push(E.back); }
+  for (const k in MAN.hairs) { const H = MAN.hairs[k]; if (H.front) all.push(H.front); if (H.back) all.push(H.back); }
   return Promise.all(all.map((s) => new Promise((res) => {
     const r = img(s);
     if (!r || r.st !== 1) return res();
@@ -263,7 +267,7 @@ export function spriteCharPlan(look, equip, A, state, wk, ws) {
     const picks = [];
     let loading = false;
     // AIの頭（heads[<classId>_<gender>]）があれば髪・顔のレイヤーの代わりに使う
-    const ah = !vil && look.aiHead !== false && look.classId && look.gender ? headFor(look.classId, look.gender, aiHeadExpr(state, A.t || 0, A)) : null;
+    const ah = !vil ? aiHeadOf(look, A, state, A.t || 0) : null;
     for (const name of SPRITE_LAYER_ORDER) {
       if (ah && name === 'hair_back') { if (ah.back) picks.push({ name: 'aiback', s: null, key: 'aiback' }); continue; }
       if (ah && name === 'hair_front') continue;
@@ -969,4 +973,175 @@ export function drawPortrait(ctx, key, expr, x, y, h, opts = {}) {
 function portraitEntryFacesLeft(key, gender) {
   const E = heroEntry('portraits', key, typeof key === 'string' ? gender : undefined);
   return !!(E && E.facesLeft);
+}
+
+// ================================================================ 顔・髪の分割方式（顔 + 前髪 + 後ろ髪の3枚重ね）
+// manifest（仕様: docs/SPEC_SPRITES.md「顔・髪の分割方式」, docs/art_handoff/FACE_HAIR_SPEC.md）:
+//   "faces":    { "f_01": { "file": "heads/face/f_01.png", "expr": { "blink": "...", "hurt": "...", "shout": "...", "happy": "..." } } }
+//   "hairs":    { "f_twin": { "file": "heads/hair/f_twin.png", "back": "heads/hair/f_twin_back.png", "base": "#b07850" } }
+//   "faceBase": { "skin": { "f": "#ffe3d3", "m": "#f6d5be" }, "eye": "#6a5cff" }
+// 3枚とも頭の配置図（1024×1024・1単位 = 10px・支点 (512,400)）。look.face（'f_01'）+ look.hair（髪型ID）で選ぶ。
+// 色: 髪 = hairs の base → look.hairColor、肌 = faceBase.skin[性別] → look.skin、瞳 = faceBase.eye → look.eyeColor に塗り替え。
+const FACE_BASE_DEF = { skin: { f: '#ffe3d3', m: '#f6d5be' }, eye: '#6a5cff', hair: '#b07850' };
+const FRC = new Map();          // 色替え済みの絵: file|色 → canvas（上限 FRC_MAX）
+const FRC_MAX = 48;
+const FHC = new Map();          // 解決済みの重ね頭: look の顔・髪・色・表情 → 出力（REV が変わったら作り直し）
+const FSTAT = { recolors: 0 };
+const hex6 = (v, d) => (typeof v === 'string' && HEX6.test(v) ? v.toLowerCase() : d);
+function normFaceBase(o) {
+  o = o && typeof o === 'object' && !Array.isArray(o) ? o : {};
+  const sk = o.skin && typeof o.skin === 'object' ? o.skin : {};
+  return { skin: { f: hex6(sk.f, FACE_BASE_DEF.skin.f), m: hex6(sk.m, FACE_BASE_DEF.skin.m) }, eye: hex6(o.eye, FACE_BASE_DEF.eye) };
+}
+const genderOfKey = (k, o) => (o && (o.gender === 'f' || o.gender === 'm') ? o.gender : /^m_/.test(k) ? 'm' : 'f');
+function normFacesHairs(j, M) {
+  const fs = j.faces;
+  if (fs && typeof fs === 'object' && !Array.isArray(fs)) {
+    for (const k of Object.keys(fs)) {
+      const E = normHero(fs[k], 'faces', k);
+      if (!E) continue;
+      E.base.maxH = HERO_MAXH.headsLayout;
+      for (const e in E.expr) E.expr[e].maxH = HERO_MAXH.headsLayout;
+      E.back = null; E.fit = false; E.g = genderOfKey(k, fs[k]);
+      M.faces[k] = E;
+    }
+  }
+  const hs = j.hairs;
+  if (hs && typeof hs === 'object' && !Array.isArray(hs)) {
+    for (const k of Object.keys(hs)) {
+      let o = hs[k];
+      if (typeof o === 'string') o = { file: o };
+      if (!o || typeof o !== 'object') continue;
+      const front = o.file != null ? heroSingle(o.file, o.bgRemove, 'hairs:' + k) : null;
+      const back = o.back != null ? heroSingle(o.back, o.bgRemove, 'hairs:' + k + ':back') : null;
+      if (!front && !back) { note(`hairs.${k}: file（前髪）か back（後ろ髪）が必要です`); continue; }
+      for (const s of [front, back]) if (s) { s.maxH = HERO_MAXH.headsLayout; STATS.entries++; }
+      const m = /^([fm])_(.+)$/.exec(k);
+      M.hairs[k] = { key: k, g: m ? m[1] : genderOfKey(k, o), id: m ? m[2] : k, front, back, base: hex6(o.base, FACE_BASE_DEF.hair), pre: false };
+    }
+  }
+}
+/** その性別の顔の ID 一覧（manifest にある物。読み込み状態は問わない）。並びは ID 順 */
+export function faceList(gender) {
+  if (!MAN || MODE !== 'auto') return [];
+  return Object.keys(MAN.faces).filter((k) => MAN.faces[k].g === gender).sort();
+}
+/** その性別で、AI の髪の絵がある髪型 ID（'twin' など、性別の接頭辞なし）の一覧 */
+export function hairArtList(gender) {
+  if (!MAN || MODE !== 'auto') return [];
+  return Object.keys(MAN.hairs).map((k) => MAN.hairs[k]).filter((H) => H.g === gender).map((H) => H.id);
+}
+/** look の顔・髪の絵が manifest にあるか（読み込み状態は問わない） */
+export function hasFaceArt(look) {
+  if (!MAN || MODE !== 'auto' || !look || !look.face) return false;
+  const F = MAN.faces[look.face];
+  return !!(F && MAN.hairs[(look.gender || look.body || F.g) + '_' + look.hair]);
+}
+/** 絵の基準色の実際の平均（読み込んだ絵ごとに1回） */
+function effOf(r, hex) {
+  const m = r.eff || (r.eff = {});
+  if (m[hex]) return m[hex];
+  let d = null;
+  try { d = r.single.canvas.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, r.single.w, r.single.h).data; } catch { /* ignore */ }
+  return (m[hex] = d ? effectiveColor(colorInfo(hex), [d]) : colorInfo(hex));
+}
+/** 1枚絵（読み込み済み）を色替え。pairs = [[基準色, 目標色], ...]。同じ色なら元の絵。絵×色ごとにキャッシュ */
+function recoloredSingle(r, file, pairs, tint) {
+  const o = r.single;
+  const use = pairs.filter(([b, t]) => b && t && HEX6.test(t) && !sameColor(t.toLowerCase(), b));
+  if (!use.length) return o.canvas;
+  const key = file + '|' + use.map((p) => p[1].toLowerCase()).join(',');
+  let cv = FRC.get(key);
+  if (cv) { FRC.delete(key); FRC.set(key, cv); return cv; }
+  cv = newCanvas(o.w, o.h);
+  if (!cv) return o.canvas;
+  const g = cv.getContext('2d', { willReadFrequently: true });
+  g.drawImage(o.canvas, 0, 0);
+  try {
+    const im = g.getImageData(0, 0, o.w, o.h);
+    recolorData(im.data, use.map(([b, t]) => [effOf(r, b), colorInfo(t.toLowerCase())]), { tint });
+    g.putImageData(im, 0, 0);
+  } catch (e) { note('色替えに失敗: ' + file + ' ' + e.message); return o.canvas; }
+  FSTAT.recolors++;
+  FRC.set(key, cv);
+  while (FRC.size > FRC_MAX) FRC.delete(FRC.keys().next().value);   // 捨てるだけ（描画中の重ね頭が持っていることがあるので消さない）
+  return cv;
+}
+/** 読み込み状態: 0 無し / 1 読み込み中 / 2 完了 / 3 失敗（失敗は「その絵は無し」として扱う） */
+function stOf(s) { if (!s) return 0; const r = img(s); return r.st === 2 && !r.single ? 3 : r.st; }
+/**
+ * 顔 + 前髪 + 後ろ髪の重ね頭（paintAiHead / paintAiHeadBack に渡せる形。layered: true）。
+ * look.face の顔の絵と hairs['<性別>_<look.hair>'] があり、読み込み済みなら返す。無い/読み込み中 → null（呼び出し側は heads → コードの頭）
+ */
+export function faceHeadFor(look, expr) {
+  try {
+    if (!MAN || MODE !== 'auto' || !look || !look.face) return null;
+    const F = MAN.faces[look.face];
+    if (!F) return null;
+    const g = look.gender || look.body || F.g;
+    const H = MAN.hairs[g + '_' + look.hair];
+    if (!H) return null;
+    const ck = look.face + '|' + H.key + '|' + (look.skin || '') + (look.eyeColor || '') + (look.hairColor || '') + '|' + (expr || '');
+    let out = FHC.get(ck);
+    if (out && out.rev === REV) return out.v;
+    if (!H.pre) { H.pre = true; if (H.front) img(H.front); if (H.back) img(H.back); }
+    const R = heroResolve(F, expr);                     // 表情の絵（無ければ基本の顔）
+    const sf = stOf(H.front), sb = stOf(H.back);
+    let v = null;
+    if (R && sf !== 1 && sb !== 1 && (sf === 2 || sb === 2)) {
+      const fp = layoutPlace(R.r.single);
+      if (!fp) {
+        if (!R.r.warnedFit) { R.r.warnedFit = true; note(`faces.${F.key}: ${R.s.file} が正方形ではないので使えません（頭の配置図 1024×1024 で）`); }
+      } else {
+        const FB = MAN.faceBase;
+        const hc = look.hairColor;
+        const face = recoloredSingle(R.r, R.s.file, [[FB.skin[F.g] || FB.skin.f, look.skin], [FB.eye, look.eyeColor]], false);
+        const part = (s) => {
+          if (!s) return null;
+          const r = IMG.get(s.file);
+          if (!r || r.st !== 2 || !r.single) return null;
+          const pl = layoutPlace(r.single);
+          if (!pl) { if (!r.warnedFit) { r.warnedFit = true; note(`hairs.${H.key}: ${s.file} が正方形ではないので使いません（頭の配置図 1024×1024 で）`); } return null; }
+          return { canvas: recoloredSingle(r, s.file, [[H.base, hc]], true), w: r.single.w, h: r.single.h, place: pl, file: s.file, scale: 1, offset: [0, 0] };
+        };
+        const front = part(H.front), back = part(H.back);
+        v = {
+          layered: true, fit: false, scale: 1, offset: [0, 0], facesLeft: false,
+          canvas: face, w: R.r.single.w, h: R.r.single.h, place: fp, expr: R.expr,
+          file: 'F:' + R.s.file + '+' + H.key + (front ? '' : '-f') + (back ? '' : '-b') + '|' + (look.skin || '') + (look.eyeColor || '') + (hc || ''),
+          front, back, hairColor: hex6(hc, H.base), rec: {},
+        };
+      }
+    }
+    if (FHC.size > 200) FHC.clear();
+    FHC.set(ck, { rev: REV, v });
+    return v;
+  } catch (err) { note('faceHeadFor: ' + err.message); return null; }
+}
+/** 重ね頭の背面（ロープ登り）: 顔と前髪のシルエットを髪の色で塗った絵 { canvas, w, h, place }。重ね頭ごとにキャッシュ */
+export function layeredBackOf(h) {
+  if (!h || !h.layered) return null;
+  const rec = h.rec || (h.rec = {});
+  if (rec.back !== undefined) return rec.back;
+  rec.back = null;
+  try {
+    const ls = [h, h.front].filter((x) => x && x.place);
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const l of ls) { x0 = Math.min(x0, l.place[0]); y0 = Math.min(y0, l.place[1]); x1 = Math.max(x1, l.place[0] + l.place[2]); y1 = Math.max(y1, l.place[1] + l.place[3]); }
+    const k = h.w / h.place[2];                       // 1単位の px（顔の絵の解像度）
+    const w = Math.max(1, Math.ceil((x1 - x0) * k)), hh = Math.max(1, Math.ceil((y1 - y0) * k));
+    const c = newCanvas(w, hh);
+    if (!c) return null;
+    const g = c.getContext('2d');
+    for (const l of ls) g.drawImage(l.canvas, 0, 0, l.w, l.h, (l.place[0] - x0) * k, (l.place[1] - y0) * k, l.place[2] * k, l.place[3] * k);
+    const [R, G, B] = [1, 3, 5].map((i) => parseInt(h.hairColor.slice(i, i + 2), 16));
+    g.globalCompositeOperation = 'source-atop';
+    const gr = g.createLinearGradient(0, 0, 0, hh);
+    gr.addColorStop(0, `rgb(${R},${G},${B})`);
+    gr.addColorStop(1, `rgb(${(R * 0.62) | 0},${(G * 0.62) | 0},${(B * 0.62) | 0})`);
+    g.fillStyle = gr; g.fillRect(0, 0, w, hh);
+    g.globalCompositeOperation = 'source-over';
+    rec.back = { canvas: c, w, h: hh, place: [x0, y0, x1 - x0, y1 - y0] };
+  } catch (err) { note('layeredBackOf: ' + err.message); }
+  return rec.back;
 }

@@ -11,7 +11,7 @@
 //          攻撃/被弾/死亡などの一過性の状態や大きな拡大表示はその場でベクター描画する。
 import { shade, rgba, mix, rng, clamp, lerp, OUTLINE } from './util.js';
 import { ITEMS } from '../data/items.js';
-import { spriteCharPlan, drawSpriteCharPlan, headFor, headBackOf, flashOf } from './sprites.js';
+import { spriteCharPlan, drawSpriteCharPlan, headFor, headBackOf, flashOf, faceHeadFor, layeredBackOf } from './sprites.js';
 import { RIG_PARTS, RIG_GROUP_PARTS, RIG_S, WPN_BOX, WPN_S, RIG_Y, RIG_LIMBS, RIG_CODE_HEAD, HEAD_BACK_PIVOT } from './rigLayout.js';
 import { rigPlanFor, rigCodePlanFor, rigView } from './rig.js';
 
@@ -601,7 +601,7 @@ function newCanvas(w, h) {
   const c = document.createElement('canvas'); c.width = w; c.height = h; return c;
 }
 function lookSig(l) {
-  return (l.body || '') + (l.skin || '') + (l.hair || '') + (l.hairColor || '') + (l.eyeColor || '') + (l.expr || '') + (l.hairShadow || '') + (l.hairHi || '') + (l.hairTip || '') + (l.tie || '') + (l.mesh || '') + (l.rim || '') + (l.villain ? 'V' : '');
+  return (l.body || '') + (l.face || '') + (l.skin || '') + (l.hair || '') + (l.hairColor || '') + (l.eyeColor || '') + (l.expr || '') + (l.hairShadow || '') + (l.hairHi || '') + (l.hairTip || '') + (l.tie || '') + (l.mesh || '') + (l.rim || '') + (l.villain ? 'V' : '');
 }
 
 // ---- AIの頭（manifest の heads[<classId>_<gender>]）。主人公の look（classId・gender を持つ）だけに適用。
@@ -624,10 +624,15 @@ export function aiHeadExpr(state, t, A) {
   }
   return null;
 }
-/** その look・姿勢で使う頭の絵（無い/読み込み中/壊れている/look.aiHead===false/NPC → null） */
+/**
+ * その look・姿勢で使う頭の絵（無い/読み込み中/壊れている/look.aiHead===false/NPC → null）。
+ * 顔・髪の分割方式（look.face の顔 + look.hair の前髪・後ろ髪。layered: true）を優先し、無ければ heads[<classId>_<gender>] の1枚の頭
+ */
 export function aiHeadOf(look, A, state, t) {
   if (ONLY || !look || look.aiHead === false || !look.classId || !look.gender || look.villain) return null;
-  return headFor(look.classId, look.gender, aiHeadExpr(state, t, A));
+  const ex = aiHeadExpr(state, t, A);
+  if (look.face) { const fh = faceHeadFor(look, ex); if (fh) return fh; }
+  return headFor(look.classId, look.gender, ex);
 }
 const EQK = ['hat', 'top', 'bottom', 'shoes', 'weapon', 'accessory'];
 function eqSig(e) {
@@ -644,7 +649,7 @@ function boxOf(equip, look, state, ah, rig) {
   if (ah && ah.fit === false && ah.place) {
     // 配置図方式の頭（＋後ろ髪）: 頭の中心からの範囲（左右反転もあるので左右は同じ幅で）
     const k = (ah.scale || 1) * (rig ? 1 : 1.12), o = ah.offset || [0, 0], cy = rig ? -RIG_Y.hip - RIG_Y.head : 62;
-    for (const pl of [ah.place, ah.back && ah.back.place]) {
+    for (const pl of [ah.place, ah.back && ah.back.place, ah.front && ah.front.place]) {
       if (!pl) continue;
       const side = Math.max(-pl[0], pl[0] + pl[2]) * k + Math.abs(o[0]) + 6;
       L = Math.max(L, side); R = Math.max(R, side);
@@ -2153,6 +2158,7 @@ function drawAiPlaced(ctx, src, img, mirror) {
  */
 export function paintAiHead(ctx, h, hat, back, flash, frame = 'code') {
   if (!h) return;
+  if (h.layered) { paintLayeredHead(ctx, h, hat, back, flash, frame); return; }
   let src = back ? headBackOf(h) : h.canvas;
   if (!src) return;
   if (flash) src = flashOf(src, '#ffffff', 0.9);
@@ -2167,6 +2173,39 @@ export function paintAiHead(ctx, h, hat, back, flash, frame = 'code') {
     ctx.translate(AI_CX + o[0], AI_CY + o[1]);
     if (!!h.facesLeft !== !!back) ctx.scale(-1, 1);
     ctx.drawImage(src, 0, 0, h.w, h.h, -h.w * k / 2, -h.h * k / 2, h.w * k, h.h * k);
+  }
+  ctx.restore();
+}
+/**
+ * キャラ作成の顔の小さなプレビュー: 顔・髪の分割方式の頭（後ろ髪 → 顔 → 前髪）を (cx, cy) を頭の中心に、高さ約 px で描く。
+ * 絵が無い/読み込み中なら false（何も描かない）
+ */
+export function drawFacePreview(ctx, look, cx, cy, px, expr) {
+  const h = look && look.face ? faceHeadFor(look, expr || null) : null;
+  if (!h) return false;
+  ctx.save();
+  ctx.translate(cx, cy);
+  const k = px / 44; ctx.scale(k, k);              // 頭頂の髪〜顎 ≒ 44単位
+  ctx.imageSmoothingEnabled = true;
+  try { ctx.imageSmoothingQuality = 'high'; } catch { /* ignore */ }
+  for (const l of [h.back, h, h.front]) if (l && l.place) ctx.drawImage(l.canvas, 0, 0, l.w, l.h, l.place[0], l.place[1], l.place[2], l.place[3]);
+  ctx.restore();
+  return true;
+}
+/**
+ * 顔・髪の分割方式の頭（顔 → 前髪。後ろ髪は paintAiHeadBack で体の後ろに）。配置図の単位で置く。
+ * 帽子の clip（つばより上・帽子の外の髪を隠す）は顔と前髪の両方に掛ける（帽子の外に頭頂の肌が出ないように）。
+ * back（背面・ロープ登り）: 顔と前髪のシルエットを髪の色で塗った絵（左右反転）
+ */
+function paintLayeredHead(ctx, h, hat, back, flash, frame) {
+  enterAiFrame(ctx, false, hat, frame);
+  if (back) {
+    const b = layeredBackOf(h);
+    if (b) drawAiPlaced(ctx, flash ? flashOf(b.canvas, '#ffffff', 0.9) : b.canvas, b, true);
+  } else {
+    drawAiPlaced(ctx, flash ? flashOf(h.canvas, '#ffffff', 0.9) : h.canvas, h, false);
+    const f = h.front;
+    if (f) drawAiPlaced(ctx, flash ? flashOf(f.canvas, '#ffffff', 0.9) : f.canvas, f, false);
   }
   ctx.restore();
 }
