@@ -123,9 +123,72 @@ test('canvas の無い環境: プランは null・drawCharacter は例外なし�
   }
   assert.ok(ctx.calls.length > 100);
 });
-test('NPC・悪役の look（classId なし / villain）にはリグを使わない', () => {
+test('NPC・悪役の look（classId なし / villain）: canvas の無い環境では null（コード描画）', () => {
   assert.equal(R.rigPlanFor({ ...DEFAULT_LOOKS.luna.f }, {}), null);
   assert.equal(R.rigPlanFor({ ...hero(), villain: true }, {}), null);
+});
+test('rig.npcs: 既定 true・false / heroesOnly:true で主人公だけ・rig 節が無ければ false', () => {
+  S.setSpriteManifest({ version: 1, rig: { enabled: true, parts: ['body_f'] } });
+  assert.equal(R.rigNpcs(), true);
+  S.setSpriteManifest({ version: 1, rig: { enabled: true, npcs: false, parts: ['body_f'] } });
+  assert.equal(R.rigNpcs(), false);
+  S.setSpriteManifest({ version: 1, rig: { enabled: true, heroesOnly: true, parts: ['body_f'] } });
+  assert.equal(R.rigNpcs(), false);
+  S.setSpriteManifest({ version: 1 });
+  assert.equal(R.rigNpcs(), false);
+});
+test('NPC の顔・髪の割り当て（npcFace.js）: 役割・ハッシュ・主人公の初期の顔を避ける・近い髪型・ドン・老人・フォールバック', async () => {
+  const NF = await import('../src/render/npcFace.js');
+  const faces = (ks) => Object.fromEntries(ks.map((k) => [k, `heads/face/${k}.png`]));
+  const hairs = (ks) => Object.fromEntries(ks.map((k) => [k, { file: `heads/hair/${k}.png` }]));
+  const man = (fk, hk, npcs = true) => S.setSpriteManifest({ version: 1, rig: { enabled: true, npcs, parts: ['body_f'] }, faces: faces(fk), hairs: hairs(hk) });
+  // 通常の顔だけ（悪役の顔が無い）: 主人公の初期の顔は使わない・性別どおり・決定論的
+  man(['f_01', 'f_02', 'f_03', 'f_04', 'f_05', 'm_01', 'm_02', 'm_03', 'm_04', 'm_05', 'm_06'], ['f_twin', 'f_long', 'f_bob', 'f_bun', 'm_short', 'm_wolf', 'm_spiky']);
+  const npc = (id, body, hair, extra) => NF.tagNpcLook({ body, hair, skin: '#c08a60', hairColor: '#333333', eyeColor: '#222222', ...(extra || {}) }, { id, ...(extra && extra.info) });
+  const got = [];
+  for (let i = 0; i < 30; i++) { const r = NF.npcHeadLook(npc('n' + i, i % 2 ? 'm' : 'f', 'short')); got.push(r.face); assert.ok(r.face.startsWith(i % 2 ? 'm_' : 'f_')); }
+  assert.ok(got.every((f) => !NF.HERO_FACES[f]), '主人公の初期の顔を避ける: ' + got.join());
+  assert.ok(new Set(got).size >= 4, 'ばらける');
+  assert.equal(NF.npcHeadLook(npc('n3', 'm', 'short')).face, got[3], '同じ id は同じ顔');
+  // 悪役の顔が無い間の敵 → 通常の顔（主人公の初期以外）
+  const thug = NF.tagNpcLook({ body: 'm', hair: 'spiky' }, { id: 'thug_punk', art: 'thug' });
+  assert.ok(/^m_0[456]$/.test(NF.npcHeadLook(thug).face));
+  // look.face があればそれ
+  assert.equal(NF.npcHeadLook(npc('x', 'f', 'twin', { face: 'f_02' })).face, 'f_02');
+  // 髪: 絵があればそれ、無ければ近い長さ（結ぶ髪を優先）
+  assert.equal(NF.npcHeadLook(npc('a', 'f', 'bob')).hair, 'bob');
+  assert.equal(NF.npcHeadLook(npc('b', 'f', 'ponytail')).hair, 'twin');
+  assert.equal(NF.npcHeadLook(npc('c', 'f', 'short')).hair, 'bob');
+  assert.equal(NF.npcHeadLook(npc('d', 'm', 'long')).hair, 'wolf');
+  assert.equal(NF.npcHeadLook(npc('e', 'm', 'undercut')).hair, 'short');
+  assert.equal(NF.nearestHair('braid', ['bob', 'long', 'ponytail']), 'ponytail');
+  // 悪役・ドン・老人の顔がある時
+  man(['f_04', 'm_04', 'm_05', 'm_v01', 'm_v02', 'm_v03', 'm_v04', 'm_v05', 'm_v06', 'f_v01', 'f_v02', 'm_don', 'm_o01', 'm_o02', 'f_o01'], ['f_bun', 'f_bob', 'm_short', 'm_slick', 'm_wolf']);
+  const en = (id, art, body = 'm') => NF.npcHeadLook(NF.tagNpcLook({ body, hair: 'short', hairColor: '#e8e8e8' }, { id, art, role: art === 'bossDon' ? 'don' : 'villain' }));
+  assert.ok(/^m_v0[123]$/.test(en('thug_a', 'thug').face));
+  assert.equal(en('thug_f', 'thug', 'f').face, 'f_v01');
+  assert.equal(en('cop_a', 'cop').face, 'm_v04');
+  assert.equal(en('cop_f', 'cop', 'f').face, 'f_v02');
+  assert.equal(en('swat_a', 'swat').face, 'm_v05');
+  assert.equal(en('boss_captain', 'boss').face, 'm_v06');
+  const don = en('boss_don', 'bossDon');
+  assert.equal(don.face, 'm_don'); assert.equal(don.hair, 'slick'); assert.equal(don.hairColor, '#8e8f99');
+  const boone = NF.npcHeadLook(NF.tagNpcLook({ body: 'm', hair: 'long' }, { id: 'old_boone', name: 'ブーンじいさん' }));
+  assert.ok(/^m_o0[12]$/.test(boone.face));
+  assert.equal(NF.npcHeadLook(NF.tagNpcLook({ body: 'f', hair: 'bun' }, { id: 'civ1', role: 'old' })).face, 'f_o01');
+  assert.equal(NF.roleOf('don_caiman'), 'don');
+  assert.equal(NF.roleOf('rico', 'リコ', 'ビーチの情報屋'), 'npc');
+  // 普通の NPC は悪役・老人・ドンの顔を使わない
+  for (let i = 0; i < 20; i++) assert.ok(/^m_0[45]$/.test(NF.npcHeadLook(npc('p' + i, 'm', 'short')).face));
+  // タグの無い look: anim.villain なら悪役の顔
+  assert.ok(/^m_v/.test(NF.npcHeadLook({ body: 'm', hair: 'short', skin: '#aa8866' }, true).face));
+  // その性別の顔か髪の絵が無い → null（コードの頭）
+  man(['m_04'], ['m_short']);
+  assert.equal(NF.npcHeadLook(npc('q', 'f', 'twin')), null);
+  // rig.npcs=false → aiHeadOf は NPC に null
+  man(['m_04'], ['m_short'], false);
+  assert.equal(C.aiHeadOf(npc('r', 'm', 'short'), {}, 'idle', 0), null);
+  S.setSpriteManifest({ version: 1 });
 });
 test('配置図: 枠は 1024×1024 の中・重ならない・支点は枠の中', () => {
   const P = L.RIG_PARTS;

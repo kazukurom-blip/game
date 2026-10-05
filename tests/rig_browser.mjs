@@ -257,7 +257,7 @@ async function main() {
         const hero = { ...DEFAULT_LOOKS.luna.f, classId: 'luna', gender: 'f' };
         return { hero: !!rigPlanOf(hero, {}), npc: !!rigPlanOf({ ...DEFAULT_LOOKS.luna.f }, {}), vil: !!rigPlanOf({ ...hero, villain: true }, {}) };
       });
-      check('主人公だけにリグ（NPC・悪役には使わない）', planOk.hero && !planOk.npc && !planOk.vil, JSON.stringify(planOk));
+      check('主人公・NPC・悪役にリグ（rig.npcs 既定 true。false で主人公だけ = tests/npc_rig_browser.mjs）', planOk.hero && planOk.npc && planOk.vil, JSON.stringify(planOk));
       const allDiffs = [];
       for (const [key, eq] of Object.entries(EQ)) {
         const [cls, g] = key.split('_');

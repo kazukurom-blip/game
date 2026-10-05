@@ -386,7 +386,16 @@ async function main() {
     const noFace = await headInfo(page, { face: 'f_99' });
     check('ok: manifest に無い顔 → 今まで通り', !noFace || !noFace.layered, JSON.stringify(noFace));
     const npc = await page.evaluate(async () => { const C = await import('./src/render/character.js'); const l = { ...window.game.state.look }; return C.aiHeadOf(l, {}, 'idle', 0.3); });
-    check('ok: NPC（classId なし）には出ない', npc === null);
+    check('ok: NPC（classId なし）も rig.npcs（既定 true）なら重ね頭（look.face の顔）', !!npc && npc.layered && /f_01/.test(npc.file), JSON.stringify(npc && npc.file));
+    const npcOff = await page.evaluate(async () => {
+      const C = await import('./src/render/character.js'), S = await import('./src/render/sprites.js');
+      const j = await (await fetch('./assets/sprites/manifest.json')).json();
+      S.setSpriteManifest({ ...j, rig: { ...j.rig, npcs: false } });
+      const r = C.aiHeadOf({ ...window.game.state.look }, {}, 'idle', 0.3);
+      S.setSpriteManifest(j); await S.preloadSprites();
+      return r;
+    });
+    check('ok: rig.npcs=false なら NPC には出ない（今まで通り）', npcOff === null);
 
     // ---- 色替え
     const rc = await page.evaluate(async () => {

@@ -15,6 +15,7 @@
     "export:sprites": "node tools/export_sprites.mjs",
     "export:rig": "node tools/export_rig_templates.mjs && node tools/gen_rig_guide.mjs",
     "test:rig": "node tests/rig_browser.mjs",
+    "test:npcrig": "node tests/npc_rig_browser.mjs",
     "rig:manifest": "node tools/rig_manifest.mjs",
     "check:art": "node tools/check_art.mjs",
     "test:art": "node tests/art_check.mjs",
