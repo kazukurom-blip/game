@@ -5,7 +5,9 @@
 //   time(o, n) → 背景＋地面を n 回描いた 1 回あたりの ms
 import { loadSpriteManifest, setSpriteMode } from '../src/render/sprites.js';
 import { preloadArt, artStats, _artInternal } from '../src/render/artOverrides.js';
-import { drawBackground, drawMapTiles, _clearBackgroundCache } from '../src/render/background.js';
+import { drawBackground, drawMapTiles, _clearBackgroundCache, setBgHaze } from '../src/render/background.js';
+// 画像の位置・色を測るので、奥行きのもや（背景を薄くする演出）は切る
+setBgHaze(0);
 import { drawItemIcon, drawSkillIcon } from '../src/render/icons.js';
 import { drawVehicle } from '../src/render/vehicles.js';
 import { ITEMS } from '../src/data/items.js';

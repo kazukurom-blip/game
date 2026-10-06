@@ -25,6 +25,9 @@ const ID_VARIANT = {
 };
 const INDOOR = { 'downtown:1': 1, 'casino:1': 1, 'casino:2': 1, 'rooftop:2': 1, 'spaceport:2': 1, 'spaceport:3': 1 };
 const sceneMemo = new WeakMap();
+// 奥行きのもやの既定の強さ（0 = なし）
+export let BG_HAZE = 0.36;
+export function setBgHaze(v) { BG_HAZE = clamp(+v || 0, 0, 0.6); }
 export function sceneOf(map) {
   if (!map) return { region: 'beach', v: 0, town: false, id: '' };
   let s = sceneMemo.get(map);
@@ -215,6 +218,17 @@ export function drawBackground(ctx, map, cam, W, H, time) {
   let [tc, ta] = weighted(TOD_TINT, w);
   if (S.indoor) ta *= 0.25;
   if (ta > 0.01) { ctx.globalCompositeOperation = 'source-atop'; ctx.globalAlpha = Math.min(0.85, ta); ctx.fillStyle = tc; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
+  // 奥行きのもや（描いた部分だけ）: 背景の色の濃さ・コントラストを少し落として、手前のキャラを見やすくする。
+  //  昼は明るいもや、夜は暗いもや。強さは設定（game.settings.bgHaze 0〜1、既定 BG_HAZE）で変えられる
+  const hz = BG_HAZE * (S.haze ?? 1);
+  if (hz > 0.01) {
+    const day = clamp(w.day + w.dawn * 0.6 + w.dusk * 0.4, 0, 1);
+    ctx.globalCompositeOperation = 'source-atop';
+    ctx.globalAlpha = hz * (0.75 + 0.25 * day);
+    ctx.fillStyle = day > 0.5 ? '#f3eefb' : '#15112a';
+    ctx.fillRect(0, 0, W, H);
+    ctx.globalAlpha = 1;
+  }
   ctx.globalCompositeOperation = 'source-over';
   // 窓明かり・ネオン（夜ほど強い）
   if (art) { glowKey = ''; glowHad = false; hasGlow = false; gb = null; reuse = false; if (art.lights && lights > 0.02) drawArtLights(ctx, S, art, lights); }
