@@ -3,7 +3,8 @@
 import { COL, panel, txt, drawButton, inRect, rrPath, font, clamp } from './theme.js';
 import { drawHUD, hudSlots } from './hud.js';
 import { guard, getItemDef, skillDef, drawItemIco, drawSkillIco } from './deps.js';
-import { WINDOW_DRAW, drawTooltipBox, initDialog, dialogKey } from './windows.js';
+import { WINDOW_DRAW, drawTooltipBox } from './windows.js';
+import { initDialog, dialogKey, drawDialog, dialogTick, syncDialogTouch } from './dialogMaple.js';
 import { drawWorldMap, drawBook, drawPhone, rideTaxi } from './v2windows.js';
 import { V3_WINDOWS, V3_LAYOUT, drawPopup } from './v3windows.js';
 import { drawJobFx } from './hud3.js';
@@ -11,7 +12,7 @@ import { loadSettings, applySettings, SKILL_BAR_SIZE, BAR_KEYS } from './v3deps.
 import { enemyDef } from './deps.js';
 import { audio } from '../audio/audio.js';
 
-Object.assign(WINDOW_DRAW, { worldmap: drawWorldMap, book: drawBook, phone: drawPhone }, V3_WINDOWS);
+Object.assign(WINDOW_DRAW, { dialog: drawDialog, worldmap: drawWorldMap, book: drawBook, phone: drawPhone }, V3_WINDOWS);
 
 const W = 1280, H = 720;
 const MODAL = new Set(['dialog', 'shop', 'death', 'worldmap', 'menu', 'jobOffer']);
@@ -20,7 +21,7 @@ const LAYOUT = {
   skills: { w: 860, h: 640, title: 'スキル', key: 'K', y: 8 },
   stats: { w: 440, h: 664, title: 'ステータス', key: 'T', y: 28 }, // ダメージ幅の欄のぶん高い
   missions: { w: 900, h: 560, title: 'ミッション', key: 'J' },
-  dialog: { w: 940, h: 260, title: null, x: (W - 940) / 2, y: H - 290 },
+  dialog: { w: 960, h: 274, title: null, x: (W - 960) / 2, y: H - 294 }, // 大きさ・位置は中身に合わせて dialogMaple.js が決める
   shop: { w: 780, h: 520, title: 'ショップ' },
   death: { w: 460, h: 250, title: null },
   worldmap: { w: 1240, h: 690, title: 'ワールドマップ  —  ネオリダ州 ヴァイス・ベイ', key: 'M' },
@@ -168,6 +169,11 @@ export class UIManager {
     this.order = []; this.drag = null; this.dnd = null; this.popup = null; this.tip = null;
     this.jobFx = null; this.levelFx = null; this.banners = []; this.petFx = null; this.toasts = [];
   }
+  /**
+   * 選択肢の窓: askChoice({npc, prompt, choices:[{id, text, hint?}], onPick(id, choice), onCancel?, cancelText?, key?})
+   *  NPC の会話の窓に 2〜4 個の選択肢を出し、選んだ結果を onPick で返す（'dialogChoice' イベントも出る）
+   */
+  askChoice(o = {}) { this.open('dialog', { npc: o.npc || {}, choice: o }); }
   openPopup(x, y, items) { this.popup = { x, y, items: (items || []).filter(Boolean), t: 0 }; }
   /** HUD 上のクリック領域（main の drawHUD 中に登録。ui.draw で hits にまとめる） */
   hudHit(id, r, h = {}) { (this._hudHits ||= []).push({ id: 'hud:' + id, win: null, r, ...h }); }
@@ -390,10 +396,7 @@ export class UIManager {
       const w = this.wins[n];
       if (!w) continue;
       w.t += dt;
-      if (n === 'dialog' && w.lines) {
-        const line = w.lines[w.li] || '';
-        if (w.chars < line.length) w.chars = Math.min(line.length, w.chars + dt * 42);
-      }
+      if (n === 'dialog') dialogTick(w, dt);
     }
   }
 
@@ -416,7 +419,8 @@ export class UIManager {
   frameWin(ctx, win) {
     const { x, y, w, h } = win;
     if (win.name === 'phone') return; // スマホは自前のフレーム
-    if (win.name === 'death' || win.name === 'dialog') {
+    if (win.name === 'dialog') return; // 会話の窓は自前の枠（dialogMaple.js）
+    if (win.name === 'death') {
       panel(ctx, x, y, w, h, { r: 18, glow: win.name === 'death' ? 'rgba(255,95,162,0.6)' : 'rgba(25,211,197,0.45)', inner: win.name === 'death' ? 'rgba(255,95,162,0.6)' : 'rgba(25,211,197,0.55)' });
       return;
     }
@@ -529,6 +533,7 @@ export class UIManager {
       }
       ctx.restore();
     }
+    guard('dialogTouch', () => syncDialogTouch(!!this.wins.dialog));
     this.hits = (this._hudFrameHits === (this.game?.frameNo ?? this.frame) ? this._hudHits : []).concat(this._hits);
     void font;
   }
