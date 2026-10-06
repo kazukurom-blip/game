@@ -183,6 +183,7 @@ const COMBO_TIERS = [
 export function drawCombo(ctx, game) {
   const cb = game && game.combo;
   if (!cb) return;
+  if (game.ui && game.ui.hudCombo) return; // HUD（ui/hudMaple.js）が中央やや右下に出す
   const jf = game.ui && game.ui.jobFx;
   if (jf && jf.t < (jf.life || 5) - 0.7) return; // 転職の全画面演出中は出さない
   const W = game.W || 1280;
