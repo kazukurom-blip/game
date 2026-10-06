@@ -79,6 +79,8 @@ export function withHairColor(look, c) {
 
 // ---------------- 職 ----------------
 export const JOBS = JobD.JOBS || {};
+/** 転職の必要Lv（段階 0〜5） */
+export const JOB_TIERS = JobD.JOB_TIERS || [0, 10, 30, 60, 100, 120];
 export function jobDef(id) { return JOBS[id] || null; }
 export function currentJob(state) {
   return guard('currentJob', () => (typeof JobS.currentJob === 'function' ? JobS.currentJob(state) : null), null) || JOBS[state?.job?.id] || JOBS.beginner || { name: '見習い', title: '見習い', tier: 0 };

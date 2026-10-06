@@ -34,8 +34,15 @@ function targetName(o) {
     case 'kill': case 'boss': return ENEMIES[o.target]?.name || o.target;
     case 'collect': return ITEMS[o.target]?.name || o.target;
     case 'talk': return MISSION_NPCS[o.target]?.name || o.target;
+    case 'killAny': return o.text || o.area || '';
     default: return o.target;
   }
+}
+
+/** マップがその地域か（area = マップIDの頭。'w2_arkcity' は w2_arkcity と w2_arkcity_f1… に一致。area 無しは全マップ） */
+export function inArea(mapId, area) {
+  if (!area) return true;
+  return mapId === area || String(mapId || '').startsWith(area + '_');
 }
 
 export class MissionManager {
@@ -110,6 +117,11 @@ export class MissionManager {
     const eid = enemy?.def?.id || enemy?.defId;
     if (!eid) return;
     this._bump((o) => (o.type === 'kill' || o.type === 'boss') && o.target === eid);
+    // v4 killAny: 敵の ID に依らず、倒した場所（area で始まるマップ）で数える（市民は数えない）
+    if (enemy.def?.civilian || enemy.civilian) return;
+    const mapId = enemy.mapId || this.game.map?.id || this.game.state?.mapId || '';
+    const boss = !!(enemy.def?.boss || enemy.boss);
+    this._bump((o) => o.type === 'killAny' && inArea(mapId, o.area || o.mapId) && (!o.boss || boss));
   }
   _onTalk(npcId) { if (npcId) this._bump((o) => o.type === 'talk' && o.target === npcId); }
   _onReach(mapId) { if (mapId) this._bump((o) => o.type === 'reach' && o.target === mapId); }
@@ -283,7 +295,7 @@ export class MissionManager {
         const v = Math.min(vals[i], o.count);
         const ok = v >= o.count;
         let t;
-        if (o.type === 'reach' || o.type === 'talk' || o.type === 'boss') t = o.text;
+        if (o.type === 'reach' || o.type === 'talk' || o.type === 'boss' || (o.type === 'killAny' && o.boss)) t = o.text;
         else t = `${o.text} ${Math.floor(v)}/${o.count}`;
         if (o.type === 'talk' && o.target === turnInNpc && !ok) return done ? null : `・${t}`;
         return `${ok ? '✔' : '・'}${t}`;

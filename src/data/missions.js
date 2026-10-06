@@ -5,6 +5,8 @@
 //   collect: target=アイテムID, count=所持数（報告時に消費）
 //   reach  : target=マップID（そのマップに入る）, count=1
 //   talk   : target=NPC ID（talkNpc イベント）, count=1
+//   killAny: 敵の ID に依らない討伐。area（マップIDの頭。'w2_arkcity' なら w2_arkcity と w2_arkcity_f1〜f4）で倒した敵を数える。
+//            boss: true ならボスだけ。count=撃破数。mapId はナビの行き先（任意）。v4: 5次転職の試練（第2ワールドの敵の ID が決まる前から使える）
 //   ※ 旧 wanted（手配度）/ drive（車で走る）は警察・乗り物の廃止にともない使わない
 // 追加フィールド: category 'main'|'sub'|'daily', turnIn?: 報告先NPC（省略時 giver）, daily?: true（1日1回繰り返し）
 // v2: 町にはモンスターが出ないため kill/collect の mapId はフィールドID（SPEC_V2）。
@@ -40,6 +42,10 @@ export const MISSION_NPCS = {
   job_byte:    { name: 'バイト', mapId: 'slums', role: '[2次転職教官/ストリートハッカー] 港の闇ジャンク屋。元・軍の電子戦技師。', jobInstructor: true },
   job_cipher:  { name: 'サイファー', mapId: 'rooftop', role: '[3次転職教官/ストリートハッカー] 摩天楼の屋上に潜む伝説のハッカー。ノヴァの師匠。', jobInstructor: true },
   job_quasar:  { name: 'クェーサー', mapId: 'spaceport', role: '[4次転職教官/ストリートハッカー] 宇宙港の量子コンピュータ。ホログラムの姿で話す。', jobInstructor: true },
+  // v4: 5次転職教官（第2ワールド「ネオン・アーク」のアーク・シティ。townName は町がまだ無い時の表示用）
+  job_nyx:     { name: 'ニクス', mapId: 'w2_arkcity', townName: 'アーク・シティ', role: '[5次転職教官/ストリートスター] 次元ラジオ「NYX FM」のDJ。裏の顔は次元をまたぐ賞金稼ぎ。', jobInstructor: true },
+  job_garo:    { name: 'ガロウ', mapId: 'w2_arkcity', townName: 'アーク・シティ', role: '[5次転職教官/ストリートブロウラー] 方舟都市の地下ハイウェイ闘技場「ゼロ・グラビティ・リング」の主。', jobInstructor: true },
+  job_akasha:  { name: 'アカシャ', mapId: 'w2_arkcity', townName: 'アーク・シティ', role: '[5次転職教官/ストリートハッカー] 方舟都市の全記録を収めた中枢AI。光の粒子の姿で話す。', jobInstructor: true },
 };
 
 // SPEC_V2 の全マップID（町7＋フィールド27）
@@ -472,7 +478,11 @@ const list = [
 const T = (target, text, extra = {}) => ({ type: 'talk', target, count: 1, text, ...extra });
 const K = (target, count, mapId, text) => ({ type: 'kill', target, count, mapId, text });
 const B = (target, mapId, text) => ({ type: 'boss', target, count: 1, mapId, text });
-const JOB_TIER_LEVEL = [0, 10, 30, 60, 100];
+// v4（5次）: 敵の ID に依らない試練。area の地域で倒した敵を数える（boss: true ならボスだけ）・マップに着く
+const KA = (count, area, mapId, text) => ({ type: 'killAny', count, area, mapId, text });
+const BA = (area, text) => ({ type: 'killAny', boss: true, count: 1, area, text });
+const RE = (target, text) => ({ type: 'reach', target, count: 1, text });
+const JOB_TIER_LEVEL = [0, 10, 30, 60, 100, 120];
 const JOB_TOWN = Object.fromEntries(Object.entries(MISSION_NPCS).filter(([, n]) => n.jobInstructor).map(([id, n]) => [id, n.mapId]));
 function jobMission(jobId, tier, instructor, name, desc, offer, done, trials, reward = {}) {
   const npc = MISSION_NPCS[instructor];
@@ -480,7 +490,7 @@ function jobMission(jobId, tier, instructor, name, desc, offer, done, trials, re
     id: 'job_' + jobId, type: 'job', jobId, tier, name: `[転職] ${name}`, category: 'job', giver: instructor, turnIn: instructor,
     reqLevel: JOB_TIER_LEVEL[tier], prereq: [], desc, dialog: { offer, done },
     objectives: [T(instructor, `${npc.name}（${JOB_TOWN[instructor]}）に会う`, { mapId: JOB_TOWN[instructor] }), ...trials],
-    reward: { money: [0, 3000, 20000, 120000, 500000][tier], items: [], ...reward },
+    reward: { money: [0, 3000, 20000, 120000, 500000, 2000000][tier], items: [], ...reward },
   };
 }
 const jobMissions = [
@@ -616,6 +626,37 @@ const jobMissions = [
     ['……衛星軌道ネットワークの管理者候補を確認。', '宇宙船のゼノメカとエイリアン戦士を軌道兵器で殲滅せよ。'],
     ['……全衛星、あなたの指揮下に入った。称号「オービタル・マスター」を付与する。', '空の上から、街を守れ。'],
     [K('robot_xeno', 30, 'space_f4', '謎の宇宙船でゼノメカを倒す'), K('alien_warrior', 25, 'space_f4', '謎の宇宙船でエイリアン戦士を倒す')]),
+  // ---- 5次（第2ワールド・アーク・シティ / ニクス・ガロウ・アカシャ）。試練は w2_arkcity 周辺の敵を「地域の敵 N 体」「地域のボス」で数える ----
+  jobMission('luna_dimension_desperado', 5, 'job_nyx', 'ディメンション・デスペラードへの道',
+    '次元ラジオのDJニクスは、次元をまたぐ賞金稼ぎでもあった。方舟都市の賞金首リストの頂点を狙う。',
+    ['NYX FM、今夜のリクエストは…あなたの伝説。', '銀河のお尋ね者さん、次元の向こうにも賞金首はいるわ。アーク・シティの外の敵を40体、それから地域のボスを撃ち落として。'],
+    ['ハイ、全次元に速報。今日からあなたは「ディメンション・デスペラード」。', 'どの次元のどの空でも、あなたの弾は届くわ。'],
+    [RE('w2_arkcity_f2', 'アーク・シティの第2フィールドへ行く'), KA(40, 'w2_arkcity', 'w2_arkcity_f2', 'アーク・シティ周辺の敵を倒す'), BA('w2_arkcity', 'アーク・シティ周辺のボスを倒す')]),
+  jobMission('luna_hyper_icon', 5, 'job_nyx', 'ハイパー・アイコンへの道',
+    'ニクスの番組で、全次元同時配信のステージが決まった。最後の演出は「本物の戦い」。',
+    ['全次元ネットで生配信。視聴者は何億人いるか分からないわ。', 'アーク・シティの外で敵を50体、華麗に踊らせて。最後は地域のボスとのダンスバトルよ。'],
+    ['同接、計測不能！ 今日からあなたは「ハイパー・アイコン」。', 'あなたが踊れば、どの次元もステージになる。'],
+    [RE('w2_arkcity_f3', 'アーク・シティの第3フィールドへ行く'), KA(50, 'w2_arkcity', 'w2_arkcity_f3', 'アーク・シティ周辺の敵を倒す'), BA('w2_arkcity', 'アーク・シティ周辺のボスを倒す')]),
+  jobMission('jin_neon_emperor', 5, 'job_garo', 'ネオン天帝への道',
+    '地下ハイウェイ闘技場の主ガロウが、覇王の先にある「天帝」の座を示す。',
+    ['覇王か。この街じゃ、それは入場券にすぎん。', 'アーク・シティの外の敵を45体殴り倒し、地域のボスを拳ひとつで沈めてこい。'],
+    ['…天が割れた音がしたぞ。今日からお前が「ネオン天帝」だ。', '次元の果てまで、お前の拳は届く。'],
+    [RE('w2_arkcity_f1', 'アーク・シティの第1フィールドへ行く'), KA(45, 'w2_arkcity', 'w2_arkcity_f1', 'アーク・シティ周辺の敵を倒す'), BA('w2_arkcity', 'アーク・シティ周辺のボスを倒す')]),
+  jobMission('jin_dimension_racer', 5, 'job_garo', 'ディメンション・レーサーへの道',
+    'ガロウは昔、次元のハイウェイを走った唯一の男を知っていた。その轍を追え。',
+    ['光速の次は、次元だ。ハイウェイは空の上にも続いてる。', 'アーク・シティの外れまで走り込み、道を塞ぐ敵を45体跳ね飛ばして、地域のボスをぶっちぎれ。'],
+    ['時空の轍が見えるぜ。今日からお前は「ディメンション・レーサー」！', 'ゴールは無い。走り続けろ。'],
+    [RE('w2_arkcity_f4', 'アーク・シティの第4フィールドへ行く'), KA(45, 'w2_arkcity', 'w2_arkcity_f4', 'アーク・シティ周辺の敵を倒す'), BA('w2_arkcity', 'アーク・シティ周辺のボスを倒す')]),
+  jobMission('hk_demiurge', 5, 'job_akasha', 'デミウルゴス・コードへの道',
+    '方舟都市の中枢AIアカシャが、世界を記述する原初のコードへの接続を許可する。',
+    ['……照合完了。あなたは、世界のコードを読める側の存在。', 'アーク・シティ周辺の敵性データを40体ぶん削除し、地域のボスの存在記録を書き換えて。'],
+    ['……記録更新。あなたを「デミウルゴス・コード」として登録した。', 'この世界の行は、あなたが書いていい。'],
+    [RE('w2_arkcity_f2', 'アーク・シティの第2フィールドへ行く'), KA(40, 'w2_arkcity', 'w2_arkcity_f2', 'アーク・シティ周辺の敵を倒す'), BA('w2_arkcity', 'アーク・シティ周辺のボスを倒す')]),
+  jobMission('hk_star_admiral', 5, 'job_akasha', 'スターフリート・アドミラルへの道',
+    'アカシャの記録に眠っていた星間艦隊。指揮権を得るには、提督にふさわしい戦果が要る。',
+    ['……星間艦隊の指揮官席は、長いあいだ空席だった。', 'アーク・シティ周辺の敵を50体、艦隊戦術で殲滅して。仕上げは地域のボスへの一斉砲撃。'],
+    ['……全艦、新提督に敬礼。今日からあなたは「スターフリート・アドミラル」。', '空はもう、あなたの艦隊で埋まっている。'],
+    [RE('w2_arkcity_f3', 'アーク・シティの第3フィールドへ行く'), KA(50, 'w2_arkcity', 'w2_arkcity_f3', 'アーク・シティ周辺の敵を倒す'), BA('w2_arkcity', 'アーク・シティ周辺のボスを倒す')]),
 ];
 list.push(...jobMissions);
 

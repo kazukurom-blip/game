@@ -29,6 +29,7 @@ const KIND = { melee: '近接', projectile: '遠距離', aoe: '範囲', buff: '�
 const MOVE_NAME = { flashJump: 'フラッシュジャンプ', teleport: 'テレポート', rush: 'ラッシュ', glide: 'グライド', wheelDash: 'ホイールダッシュ' };
 export function kindLabel(sk) {
   if (!sk) return '';
+  if (sk.screen) return '画面全体・奥義'; // 5次の画面全体攻撃
   if (sk.kind === 'move') return '移動・' + (MOVE_NAME[sk.move?.type] || '移動');
   if (sk.kind === 'passive' && sk.enhances) return 'パッシブ・強化';
   if (sk.kind === 'passive' && (sk.finalAttack || /FA|ファイナル/.test(sk.desc || ''))) return 'パッシブ・FA';
@@ -199,11 +200,15 @@ function drawJobOffer(ui, ctx, win) {
     txt(ctx, '◆ 獲得スキル', r.x + 16, sy, { size: 13, color: COL.pink }); sy += 14;
     const nSk = Math.min(5, (J.skills || []).length);
     const skBottom = r.y + r.h - 64 - 44 - (hov ? 3 : 0); // 教官・試練の行の上まで
-    const step = nSk ? Math.max(34, Math.min(43, (skBottom - sy) / nSk)) : 43;
+    // 5次（5スキル）は1行に収まらないので、広いカード（1択）なら2列に並べる
+    const cols = nSk > 4 && r.w >= 600 ? 2 : 1, rows = Math.ceil(nSk / cols);
+    const colW = (r.w - 24 - (cols - 1) * 8) / cols;
+    const step = rows ? Math.max(34, Math.min(43, (skBottom - sy) / rows)) : 43;
     (J.skills || []).slice(0, 5).forEach((sid, k) => {
       const sk = skillDef(sid);
       if (!sk) return;
-      const rr = { x: r.x + 12, y: sy + k * step, w: r.w - 24, h: step - 4 };
+      const col = cols > 1 ? Math.floor(k / rows) : 0, row = cols > 1 ? k % rows : k;
+      const rr = { x: r.x + 12 + col * (colW + 8), y: sy + row * step, w: colW, h: step - 4 };
       const sh = ui.hover(win, rr);
       inset(ctx, rr.x, rr.y, rr.w, rr.h, { r: 9, fill: sh ? 'rgba(123,47,247,0.35)' : 'rgba(6,4,24,0.5)' });
       drawSkillIco(ctx, sk, rr.x + 22, rr.y + 20, 32);
@@ -218,7 +223,9 @@ function drawJobOffer(ui, ctx, win) {
     const npc = MISSION_NPCS[J.instructor];
     const by = r.y + r.h - 64 - (hov ? 3 : 0);
     const trial = (M?.objectives || []).slice(1).map((o) => o.text).join(' / ');
-    txt(ctx, `教官: ${npc?.name || '???'}（${mapInfo(npc?.mapId || '').name || '?'}）`, r.x + 16, by - 30, { size: 11.5, color: COL.sub, sw: 2.5, maxW: r.w - 32 });
+    const townRaw = mapInfo(npc?.mapId || '').name;
+    const town = !townRaw || townRaw === npc?.mapId ? (npc?.townName || townRaw || '?') : townRaw; // 町がまだ無い時は townName
+    txt(ctx, `教官: ${npc?.name || '???'}（${town}）`, r.x + 16, by - 30, { size: 11.5, color: COL.sub, sw: 2.5, maxW: r.w - 32 });
     if (trial) txt(ctx, `試練: ${trial}`, r.x + 16, by - 12, { size: 11, color: '#ffd6e8', sw: 2.5, maxW: r.w - 32, weight: 700 });
     const isAct = offer.active && offer.active === (J.mission || 'job_' + jid);
     ui.btn(ctx, win, 'accept:' + jid, { x: r.x + 16, y: by, w: r.w - 32, h: 46 }, isAct ? '✔ 受注中' : offer.active ? '他の転職ミッションを受注中' : '★ この職で受注する', () => {

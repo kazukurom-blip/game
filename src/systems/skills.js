@@ -10,6 +10,8 @@ import { playerAttackArea, calcDamage, newAttackId, setPlayerInvuln } from './co
 import { updateCombo } from './combo.js';
 import { updateContent } from './content.js';
 import { spawnSummon, updateSummons } from './summons.js';
+import { BRANCH_STYLE } from '../render/fxStyle.js';
+import { ultChildren } from '../render/fxUlt.js';
 
 const cds = {};       // skillId → {left, total}
 let _dash = null;     // 進行中のダッシュ
@@ -131,6 +133,7 @@ export function useSkill(game, skillId) {
       break;
     }
     case 'aoe': {
+      if (sk.screen) { useUltimate(game, sk, mult, anim, at); break; } // 5次: 画面全体攻撃
       anim('melee');
       at(hitT, () => {
         const rect = { x: p.x - sk.range.w / 2, y: p.y - p.h / 2 - sk.range.h / 2, w: sk.range.w, h: sk.range.h };
@@ -155,6 +158,7 @@ export function useSkill(game, skillId) {
       anim('magic');
       const b = sk.buff(lv);
       addBuff(game, { id: sk.id, name: sk.name, color: sk.color, ...b });
+      if (b.empower) hookBasicAttack(game); // 5次: 通常攻撃強化
       at(hitT, () => spawnEffect(game, 'buff', p.x, p.y, { color: sk.color }));
       game.notify?.(`${sk.name}！`, sk.color);
       break;
@@ -189,12 +193,84 @@ export function useSkill(game, skillId) {
   return true;
 }
 
+// ---------------------------------------------------------------- 5次: 画面全体攻撃
+/** 画面に映っている範囲（ワールド座標の矩形）。画面全体攻撃はこの中の敵すべてに当たる */
+export function screenRect(game) {
+  const c = game?.cam || { x: 0, y: 0 };
+  return { x: c.x || 0, y: c.y || 0, w: game?.W || 1280, h: game?.H || 720 };
+}
+/** 矩形の中にいる、攻撃できる敵 */
+function enemiesIn(game, rect) {
+  return (game.enemies || []).filter((e) => e && !e.dead && e.hp > 0 && !e.civilian && !e.def?.civilian && rectOverlap(rect, entRect(e)));
+}
+/**
+ * 画面全体攻撃（skill.screen）: 暗転＋カットイン＋狙いの印 → ult.delay 秒後に、その時画面に映っている敵すべてへ hits 回。
+ * 当たった瞬間に系統の大きな演出（render/fxUlt.js ultChildren）・ヒットストップ・揺れ。溜めの間は無敵。
+ */
+function useUltimate(game, sk, mult, anim, at) {
+  const p = game.player;
+  const branch = JOBS[sk.reqJob]?.branch || null;
+  const delay = sk.ult?.delay ?? 1.0;
+  anim('melee');
+  setPlayerInvuln(game, delay + 0.5);
+  const oy = -(p.h || 70) / 2;
+  spawnEffect(game, 'ult5Dark', p.x, p.y + oy, { color: sk.color, branch, delay, life: delay + 1.5, target: p, offsetY: oy, _child: true });
+  if (game.settings?.cutin !== false) {
+    spawnEffect(game, 'cutin', 0, 0, { name: sk.name, color: sk.color, sub: BRANCH_STYLE[branch]?.sub, branch, life: Math.min(0.95, delay - 0.05) }); // 当たる前に消える
+    game.events?.emit('cutin', { skillId: sk.id });
+  }
+  for (const e of enemiesIn(game, screenRect(game)).slice(0, 30)) {
+    spawnEffect(game, 'ult5Mark', e.x, e.y - (e.h || 40) / 2, { color: sk.color, branch, target: e, offsetY: -(e.h || 40) / 2, life: delay + 0.15, _child: true });
+  }
+  game.shake = Math.max(game.shake || 0, 4);
+  at(delay, () => {
+    const rect = screenRect(game);
+    const hit = playerAttackArea(game, rect, mult, { hits: sk.hits, knock: sk.knock ?? 280, launch: sk.launch, effect: 'hit', color: sk.color, maxTargets: sk.maxTargets ?? 999 });
+    try { ultChildren(game, spawnEffect, { branch, color: sk.color, rect, targets: hit, hits: sk.hits }); } catch (e) { console.warn('[ult fx]', e); }
+    impact(game, 1, sk.color);
+    if (game.flash) game.flash.a = Math.min(game.flash.a || 0, 0.3); // 画面が色で飛ばないよう、閃光は控えめに（演出は ult5Burst が出す）
+    game.shake = Math.max(game.shake || 0, 16);
+    tryFinalAttack(game, hit);
+    game.events?.emit('ultimate', { skillId: sk.id, hits: hit.length });
+  });
+}
+
+// ---------------------------------------------------------------- 5次: 通常攻撃強化（buff.empower）
+/** player.startAttack('basic') の後に onBasicAttack を呼ぶよう包む（player.js は触らない。プレイヤーが作り直されたら包み直す） */
+function hookBasicAttack(game) {
+  const p = game?.player;
+  if (!p || typeof p.startAttack !== 'function' || p.startAttack === p._empHook) return;
+  const orig = p.startAttack;
+  const wrapped = function (kind = 'basic', opts) {
+    const r = orig.call(this, kind, opts);
+    if (r && kind === 'basic') { try { onBasicAttack(game); } catch (e) { console.warn('[empower]', e); } }
+    return r;
+  };
+  p.startAttack = wrapped; p._empHook = wrapped;
+}
+/** 通常攻撃強化のバフ中なら、通常攻撃に合わせて追撃（少し遅らせて通常攻撃の後に当てる）。追撃を出したら true */
+export function onBasicAttack(game) {
+  const b = getBuffs(game).find((x) => x && x.empower && x.t > 0);
+  const p = game?.player;
+  if (!b || !p) return false;
+  const em = b.empower;
+  const f = p.facing || 1;
+  _pending.push({ t: 0.06, map: game.map?.id, fn: () => {
+    const cy = p.y - (p.h || 70) * 0.55;
+    const rect = em.kind === 'beam' ? { x: f > 0 ? p.x : p.x - em.w, y: cy - em.h / 2, w: em.w, h: em.h } : frontRect(p, em.w, em.h);
+    spawnEffect(game, em.kind === 'beam' ? 'empBeam' : 'empWave', p.x + f * 24, cy, { color: em.color, facing: f, w: em.w, h: em.h, _child: true });
+    playerAttackArea(game, rect, em.mult, { hits: em.hits, knock: 160, effect: 'hit', color: em.color, maxTargets: em.kind === 'beam' ? 8 : 6, knockDir: f });
+  } });
+  return true;
+}
+
 /** updateSkills(game, dt) — クールダウン・バフ・ダッシュを進める（毎フレーム呼ぶ） */
 export function updateSkills(game, dt) {
   for (const k in cds) {
     cds[k].left = Math.max(0, cds[k].left - dt);
   }
   tickBuffs(game, dt);
+  if (game.player && game.player.startAttack !== game.player._empHook && getBuffs(game).some((b) => b && b.empower)) hookBasicAttack(game);
   // 召喚獣（寿命・追従・自動攻撃・マップ移動/死亡/町の扱い）
   try { updateSummons(game, dt); } catch (e) { if (!game._summonErr) { game._summonErr = true; console.warn('[updateSummons]', e); } }
   // 当たる瞬間を待っている処理（倒れた・車に乗った・マップが変わった時は取り消す）

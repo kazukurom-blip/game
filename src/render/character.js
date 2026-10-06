@@ -948,6 +948,35 @@ const SKILL_MOTIONS = {
     ], at), wk);
     P.handB = 'fist'; P.swoosh = null; P.eyes = at > 0.6 ? 'happy' : 'n'; P.brow = 'up'; P.mouth = at > 0.6 ? 'grin' : 'n';
   },
+  // 画面全体攻撃（5次）: 深く沈んで溜め → 跳び上がって両腕を天へ → 両腕を前へ振り下ろして一気に解き放つ
+  finale(P, at, wk) {
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.22, af: [0.5, 1.2], ab: [0.4, 1.2], lf: [0.7, 1.4], lb: [-0.5, 1.3], tilt: 0.3, twist: -0.6, hx: -0.5, bob: 7, hs: -0.4, wm: -0.8 },
+      { t: 0.45, af: [3.05, 0.1], ab: [2.9, 0.15], lf: [0.4, 0.6], lb: [-0.3, 0.4], tilt: -0.2, twist: 0, hx: 0, bob: -12, hl: 1, hs: 0.6, ht: -0.2, wm: -1.57 },
+      { t: 0.62, af: [PI / 2 + 0.1, 0.05], ab: [PI / 2 - 0.2, 0.1], lf: [0.8, 0.5], lb: [-0.8, 0.3], tilt: 0.24, twist: 1.4, hx: 3, bob: 2, hs: -0.9, wm: -0.1 },
+      { t: 0.88, af: [PI / 2 + 0.05, 0.1], ab: [PI / 2 - 0.25, 0.15], lf: [0.75, 0.5], lb: [-0.75, 0.3], tilt: 0.18, twist: 1.2, hx: 2.6, bob: 2, hs: -0.4, wm: -0.15 },
+      restKey(wk, 1),
+    ], at), wk);
+    P.handB = 'open'; if (wk === 'none') P.handF = 'open';
+    P.magicGlow = wk === 'magic' ? (inR(at, 0.2, 0.9) ? 1 : 0) : 0;
+    P.muzzle = wk === 'gun' && inR(at, 0.6, 0.85) && Math.floor(at * 40) % 2 === 0;
+    swingArc(P, at, 3.05, PI / 2, 0.45, 0.66, wk);
+    P.eyes = at < 0.4 ? 'fierce' : 'aim'; P.brow = 'angry'; P.mouth = at < 0.4 ? 'grit' : 'shout';
+  },
+  // 覚醒（5次のバフ）: 両腕を胸の前で交差して力を溜め → 両腕を左右へ大きく広げて気を解き放つ
+  awaken(P, at, wk) {
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.3, af: [1.1, 2.0], ab: [1.0, 2.0], lf: [0.4, 0.8], lb: [-0.4, 0.7], tilt: 0.16, twist: 0, bob: 5, hs: -0.5, ht: 0.15, wm: -1.0 },
+      { t: 0.55, af: [2.4, 0.2], ab: [-2.2, 0.2], lf: [0.35, 0.2], lb: [-0.4, 0.2], tilt: -0.12, twist: 0.2, bob: -3, hl: 1, hs: 0.6, ht: -0.15, wm: -1.2 },
+      { t: 0.85, af: [2.3, 0.25], ab: [-2.1, 0.25], lf: [0.35, 0.2], lb: [-0.4, 0.2], tilt: -0.1, twist: 0.2, bob: -2, hl: 0.8, hs: 0.4, ht: -0.12, wm: -1.2 },
+      restKey(wk, 1),
+    ], at), wk);
+    P.handB = at < 0.5 ? 'fist' : 'open'; if (wk === 'none') P.handF = P.handB;
+    P.magicGlow = wk === 'magic' && at > 0.45 ? 1 : 0; P.swoosh = null;
+    P.eyes = 'fierce'; P.brow = 'angry'; P.mouth = at < 0.5 ? 'grit' : 'shout';
+  },
 };
 export const SKILL_MOTION_IDS = Object.keys(SKILL_MOTIONS);
 
