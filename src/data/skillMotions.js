@@ -42,6 +42,15 @@ const DUR = {
   throwBomb: 0.5, stagePose: 0.65, castThrust: 0.5, castSweep: 0.5, castRaise: 0.6, command: 0.55, flex: 0.6, idolPose: 0.6,
   hackType: 0.6, reload: 0.55, laceUp: 0.55,
 };
+// 当たる瞬間（モーションの進み 0〜1）。ダメージ・弾・爆発はこの瞬間に出す（ボタンを押した瞬間ではなく）
+const IMPACT = {
+  flurry: 0.1, spinKick: 0.3, heavySmash: 0.5, haymaker: 0.5, jabRush: 0.14, uppercut: 0.42, groundPunch: 0.5, tackle: 0, slideStep: 0,
+  palmBlast: 0.48, revEngine: 0.25, meteor: 0.6, multiShot: 0.18, fanSweep: 0.2, snipe: 0.52, skyShot: 0.25, throwBomb: 0.5,
+  stagePose: 0.6, castThrust: 0.45, castSweep: 0.45, castRaise: 0.55, command: 0.5, flex: 0.55, idolPose: 0.5, hackType: 0.8,
+  reload: 0.6, laceUp: 0.65,
+};
+// 当たった瞬間の手ごたえ（ヒットストップ・揺れの強さ 0〜1）。重い一撃ほど強く
+const WEIGHT = { heavySmash: 0.6, groundPunch: 0.65, meteor: 0.8, uppercut: 0.5, haymaker: 0.55, snipe: 0.5, palmBlast: 0.45, castRaise: 0.45, stagePose: 0.35, throwBomb: 0.35 };
 const HITS_SCALED = { flurry: 1, spinKick: 1, jabRush: 1, multiShot: 1 };
 
 const BY_KIND = {
@@ -59,5 +68,8 @@ export function skillMotionOf(sk, heroId) {
   let duration = DUR[id] || 0.5;
   if (HITS_SCALED[id]) duration = Math.min(0.8, duration + Math.max(0, hits - 3) * 0.06);
   if (sk.kind === 'dash' && sk.dash) duration = Math.max(duration, (sk.dash.time || 0) + 0.12);
-  return { id, hits, duration };
+  const impact = Math.min(0.42, (IMPACT[id] ?? 0.3) * duration);
+  // 連射は、反動のコマに合わせて1発ずつ（spawn 時刻 = モーションの 0.18 + i/n × 0.62）
+  const shots = id === 'multiShot' && hits > 1 && hits <= 5 ? Array.from({ length: hits }, (_, i) => (0.18 + (i / hits) * 0.62) * duration) : null;
+  return { id, hits, duration, impact, shots, weight: WEIGHT[id] ?? 0.25 };
 }

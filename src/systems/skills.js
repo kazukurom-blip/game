@@ -4,7 +4,7 @@ import { SKILLS, jobSkillUnlocked } from '../data/skills.js';
 import { JOBS, hasJob, skillSpTier, getSp, addSp } from '../data/jobs.js';
 import { Projectile } from '../entities/projectile.js';
 import { rectOverlap, entRect } from '../world/physics.js';
-import { spawnEffect } from '../render/effects.js';
+import { spawnEffect, impact } from '../render/effects.js';
 import { computeStats, addBuff, getBuffs, tickBuffs } from './progression.js';
 import { playerAttackArea, calcDamage, newAttackId, setPlayerInvuln } from './combat.js';
 import { updateCombo } from './combo.js';
@@ -12,6 +12,7 @@ import { updateContent } from './content.js';
 
 const cds = {};       // skillId → {left, total}
 let _dash = null;     // 進行中のダッシュ
+let _pending = [];    // モーションの「当たる瞬間」を待っている処理 {t, fn, map}
 let _lastWarn = 0;
 let _lastTownWarn = -1e9;
 export const TOWN_SKILL_WARN_INTERVAL = 1.5; // 秒
@@ -32,7 +33,7 @@ export function getCooldown(skillId) {
 
 export function resetCooldowns() {
   for (const k in cds) delete cds[k];
-  _dash = null;
+  _dash = null; _pending = [];
 }
 
 export function activeBuffs(game) { return getBuffs(game); }
@@ -86,40 +87,54 @@ export function useSkill(game, skillId) {
   // スキルごとの専用モーション（通常攻撃の振りとは別）
   const smo = skillMotionOf(sk, game.state?.heroId);
   const anim = (kind) => p.startAttack?.(kind, smo ? { motion: smo.id, hits: smo.hits, duration: smo.duration } : {});
+  // 当たる瞬間に実行する（モーションの振り下ろし・拳が届く・着地に合わせる）。0 秒なら今すぐ
+  const at = (sec, fn) => { if (!(sec > 0.01)) fn(); else _pending.push({ t: sec, fn, map: game.map?.id }); };
+  const hitT = smo ? smo.impact : 0;
+  // 当たった時の手ごたえ（ヒットストップ・揺れ）
+  const feel = (hit) => { if (hit && hit.length && smo) impact(game, smo.weight * (hit.length > 2 ? 1 : 0.8), sk.color); };
 
   switch (sk.kind) {
     case 'melee': {
       anim('melee');
-      const rect = frontRect(p, sk.range.w, sk.range.h);
-      spawnEffect(game, 'slash', p.x + f * sk.range.w * 0.45, p.y - p.h / 2, { color: sk.color, facing: f, w: sk.range.w, h: sk.range.h, hits: sk.hits });
-      const hit = playerAttackArea(game, rect, mult, { hits: sk.hits, knock: sk.knock ?? 200, launch: sk.launch, effect: sk.effect, color: sk.color, maxTargets: sk.maxTargets ?? 6, knockDir: f });
-      tryFinalAttack(game, hit);
+      at(hitT, () => {
+        const rect = frontRect(p, sk.range.w, sk.range.h);
+        spawnEffect(game, 'slash', p.x + f * sk.range.w * 0.45, p.y - p.h / 2, { color: sk.color, facing: f, w: sk.range.w, h: sk.range.h, hits: sk.hits });
+        const hit = playerAttackArea(game, rect, mult, { hits: sk.hits, knock: sk.knock ?? 200, launch: sk.launch, effect: sk.effect, color: sk.color, maxTargets: sk.maxTargets ?? 6, knockDir: f });
+        feel(hit);
+        tryFinalAttack(game, hit);
+      });
       break;
     }
     case 'projectile': {
       anim('gun');
       const pr = sk.proj;
       const n = pr.count || 1;
-      const ox = p.x + f * 26, oy = p.y - p.h * 0.55;
-      spawnEffect(game, 'muzzle', ox, oy, { color: sk.color, facing: f });
-      for (let i = 0; i < n; i++) {
+      const fire = (i, single) => {
+        const ox = p.x + f * 26, oy = p.y - p.h * 0.55;
+        if (i === 0 || single) spawnEffect(game, 'muzzle', ox, oy, { color: sk.color, facing: f });
         const k = n === 1 ? 0 : i / (n - 1) - 0.5;
         const r = calcDamage(stats.atk, mult, 0, stats.crit, stats.critDmg);
         game.projectiles.push(new Projectile(game, {
-          owner: 'player', x: ox - f * i * (n <= 3 ? 18 : 0), y: oy + (n <= 3 ? (i - (n - 1) / 2) * 10 : 0),
+          owner: 'player', x: ox - f * (single ? 0 : i * (n <= 3 ? 18 : 0)), y: oy + (n <= 3 && !single ? (i - (n - 1) / 2) * 10 : 0),
           vx: f * pr.speed, vy: k * (pr.spread || 0),
           damage: r.dmg, crit: r.crit, life: pr.life, kind: pr.kind, pierce: pr.pierce ?? 0,
           w: pr.w, h: pr.h, color: sk.color, skillId,
         }));
-      }
+      };
+      // 連射のモーションは、反動のコマに合わせて1発ずつ。それ以外は撃つ瞬間にまとめて
+      if (smo && smo.shots && smo.shots.length === n) smo.shots.forEach((t, i) => at(t, () => fire(i, true)));
+      else at(hitT, () => { for (let i = 0; i < n; i++) fire(i, false); if (smo && smo.weight >= 0.45) impact(game, smo.weight * 0.6, sk.color); });
       break;
     }
     case 'aoe': {
       anim('melee');
-      const rect = { x: p.x - sk.range.w / 2, y: p.y - p.h / 2 - sk.range.h / 2, w: sk.range.w, h: sk.range.h };
-      spawnEffect(game, sk.effect || 'explosion', p.x, p.y - p.h / 2, { color: sk.color, radius: sk.range.w / 2, w: sk.range.w, h: sk.range.h });
-      const hit = playerAttackArea(game, rect, mult, { hits: sk.hits, knock: sk.knock ?? 300, launch: sk.launch, effect: 'hit', color: sk.color, maxTargets: sk.maxTargets ?? 10 });
-      tryFinalAttack(game, hit);
+      at(hitT, () => {
+        const rect = { x: p.x - sk.range.w / 2, y: p.y - p.h / 2 - sk.range.h / 2, w: sk.range.w, h: sk.range.h };
+        spawnEffect(game, sk.effect || 'explosion', p.x, p.y - p.h / 2, { color: sk.color, radius: sk.range.w / 2, w: sk.range.w, h: sk.range.h });
+        const hit = playerAttackArea(game, rect, mult, { hits: sk.hits, knock: sk.knock ?? 300, launch: sk.launch, effect: 'hit', color: sk.color, maxTargets: sk.maxTargets ?? 10 });
+        feel(hit);
+        tryFinalAttack(game, hit);
+      });
       break;
     }
     case 'dash': {
@@ -136,7 +151,7 @@ export function useSkill(game, skillId) {
       anim('magic');
       const b = sk.buff(lv);
       addBuff(game, { id: sk.id, name: sk.name, color: sk.color, ...b });
-      spawnEffect(game, 'buff', p.x, p.y, { color: sk.color });
+      at(hitT, () => spawnEffect(game, 'buff', p.x, p.y, { color: sk.color }));
       game.notify?.(`${sk.name}！`, sk.color);
       break;
     }
@@ -168,6 +183,18 @@ export function updateSkills(game, dt) {
     cds[k].left = Math.max(0, cds[k].left - dt);
   }
   tickBuffs(game, dt);
+  // 当たる瞬間を待っている処理（倒れた・車に乗った・マップが変わった時は取り消す）
+  if (_pending.length) {
+    const p = game.player;
+    const keep = [];
+    for (const q of _pending) {
+      if (!p || p.dead || p.inVehicle || q.map !== game.map?.id) continue;
+      q.t -= dt;
+      if (q.t > 0) { keep.push(q); continue; }
+      try { q.fn(); } catch (e) { console.warn('[skill]', e); }
+    }
+    _pending = keep;
+  }
   // v3: コンボの時間切れ・エンドコンテンツ（ボス/スパイア/アリーナの制限時間）
   try { updateCombo(game, dt); } catch (e) { /* noop */ }
   try { updateContent(game, dt); } catch (e) { if (!game._contentErr) { game._contentErr = true; console.warn('[updateContent]', e); } }
@@ -202,6 +229,8 @@ export function updateSkills(game, dt) {
 }
 
 export function isDashing() { return !!_dash; }
+/** テスト用: 当たる瞬間を待っている処理を今すぐ全部実行する */
+export function flushSkillHits() { const q = _pending; _pending = []; for (const it of q) { try { it.fn(); } catch (e) { console.warn('[skill]', e); } } return q.length; }
 
 /** ファイナルアタック: 習得済みスキルの finalAttack(lv) のうち最大の {chance, mult, color, skillId} | null */
 export function finalAttackOf(state) {

@@ -1191,7 +1191,7 @@ async function main() {
       const out = {};
       for (const v of [1, 0]) {
         G.settings.fx = v; SK.resetCooldowns(); G.state.mp = 9999; G.effects.length = 0;
-        SK.useSkill(G, G.state.skillBar.find((s) => s && s !== 'street_dash'));
+        SK.useSkill(G, G.state.skillBar.find((s) => s && s !== 'street_dash')); SK.flushSkillHits?.(); // 効果はモーションの当たる瞬間に出るので、待たずに出させる
         out[v] = G.effects.length ? Math.max(...G.effects.map((e) => e.fx ?? 1)) : null;
       }
       G.settings.fx = 1;
