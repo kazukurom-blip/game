@@ -18,7 +18,7 @@ const MODAL = new Set(['dialog', 'shop', 'death', 'worldmap', 'menu', 'jobOffer'
 const LAYOUT = {
   inventory: { w: 800, h: 520, title: 'インベントリ', key: 'I', y: 70 }, // 下端が左下の HUD に重ならない高さ
   skills: { w: 860, h: 640, title: 'スキル', key: 'K', y: 8 },
-  stats: { w: 440, h: 610, title: 'ステータス', key: 'T', y: 50 },
+  stats: { w: 440, h: 664, title: 'ステータス', key: 'T', y: 28 }, // ダメージ幅の欄のぶん高い
   missions: { w: 900, h: 560, title: 'ミッション', key: 'J' },
   dialog: { w: 940, h: 260, title: null, x: (W - 940) / 2, y: H - 290 },
   shop: { w: 780, h: 520, title: 'ショップ' },
@@ -503,6 +503,8 @@ export class UIManager {
       try { drawPopup(this, ctx, this.popup); } catch (e) { guard('popup', () => { throw e; }); }
       ctx.restore();
     }
+    // HUD（右上のバフ・召喚獣）のツールチップ。HUD は ui.draw より先に描かれ tip が消されるので、ここで拾う
+    if (!this.tip && this._hudTip && this._hudTip.frame === (g?.frameNo ?? this.frame)) this.tip = this._hudTip.tip;
     // ツールチップ
     if (this.tip && !this.dnd?.active) {
       ctx.save();

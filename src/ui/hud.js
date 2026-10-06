@@ -1,4 +1,4 @@
-// HUD: 左下ステータス / 右上 所持金＋手配★ / 左上ミニマップ / 下中央スキルバー / 右クエストトラッカー
+// HUD: 左下ステータス / 右上 バフ・召喚獣の残り時間 / 左上ミニマップ / 下中央スキルバー / 右クエストトラッカー
 //      トースト / レアドロップバナー / レベルアップ演出 / 低HPビネット / 警官接近フラッシュ
 import {
   COL, FONT, font, panel, inset, txt, bar, rrPath, starPath, fmtMoney, rgba, clamp, ease, rarityFill, measure,
@@ -376,105 +376,140 @@ function drawSkillBar(ctx, game) {
   void t;
 }
 
-// ---------- 右上 所持金＋手配度 ----------
+// ---------- 右上 バフ・召喚獣の残り時間（メイプル風）＋所持金の増減トースト ----------
+// 所持金そのものは持ち物画面に出すので HUD には出さない。手配度★も出さない（警察の仕組みは廃止予定）
+export const BUFF_ICON = 34;
+const BUFF_GAP = 5, BUFF_PER_ROW = 12, BUFF_TOP = 12;
+const BUFF_FX = [
+  ['atkPct', '攻撃力', true], ['defPct', '防御力', true], ['speedPct', '移動速度', true], ['attackSpeedPct', '攻撃速度', true],
+  ['critAdd', 'クリティカル率', true], ['luckAdd', '幸運', false],
+];
+function buffEffectText(b) {
+  const out = [];
+  for (const [k, lab, pct] of BUFF_FX) {
+    const v = b[k];
+    if (!v) continue;
+    out.push(`${lab} ${v > 0 ? '+' : ''}${pct ? Math.round(v * 100) + '%' : Math.round(v)}`);
+  }
+  return out.join('  ');
+}
+// バフの出どころ（スキルなら skillId、ドリンクなら itemId）
+function buffSource(b) {
+  const id = String(b.id || '');
+  const sk = skillDef(id) || skillDef(id.replace(/_after$/, ''));
+  if (sk) return { sk };
+  const it = getItemDef(id);
+  if (it) return { it };
+  return {};
+}
+function fmtLeft(sec) {
+  const n = Math.max(0, Math.ceil(sec));
+  if (n >= 3600) return Math.floor(n / 3600) + 'h';
+  if (n >= 60) return Math.floor(n / 60) + ':' + String(n % 60).padStart(2, '0');
+  return n + '';
+}
+/** 右上に並べる項目（バフ → 召喚獣）。テストからも使う */
+export function buffBarItems(game) {
+  const out = [];
+  for (const b of game.buffs || []) {
+    if (!b || b.combo || !(b.t > 0) || (b.duration || 0) >= 1e5) continue; // コンボのバフは専用の表示があるので出さない
+    const src = buffSource(b);
+    out.push({
+      kind: 'buff', key: 'b:' + b.id, left: b.t, dur: b.duration || b.t, color: b.color || src.sk?.color || COL.teal,
+      name: b.name || src.sk?.name || src.it?.name || 'バフ', fx: buffEffectText(b), sk: src.sk || null, it: src.it || null,
+    });
+  }
+  const sums = Array.isArray(game.summons) ? game.summons : [];
+  for (const m of sums) {
+    if (!m || !(m.left > 0)) continue;
+    const sk = skillDef(m.skillId);
+    out.push({
+      kind: 'summon', key: 's:' + (m.id ?? m.skillId), left: m.left, dur: m.dur || m.left, color: m.color || sk?.color || COL.gold,
+      name: m.name || sk?.name || '召喚獣', fx: '召喚獣がいっしょに戦う', sk, it: null,
+    });
+  }
+  return out;
+}
+function drawBuffIcon(ctx, e, x, y, sz, t) {
+  const cx = x + sz / 2, cy = y + sz / 2;
+  const low = e.left <= 5;
+  ctx.save();
+  if (low && Math.floor(t * 4) % 2 === 0) ctx.globalAlpha *= 0.4; // 残りわずかで点滅
+  rrPath(ctx, x - 1, y - 1, sz + 2, sz + 2, 8);
+  ctx.fillStyle = 'rgba(6,4,24,0.8)'; ctx.fill();
+  if (e.sk) drawSkillIco(ctx, e.sk, cx, cy, sz);
+  else if (e.it) drawItemIco(ctx, e.it, cx, cy, sz - 4);
+  else {
+    rrPath(ctx, x + 3, y + 3, sz - 6, sz - 6, 7);
+    ctx.fillStyle = rgba(e.color, 0.85); ctx.fill();
+    txt(ctx, String(e.name).slice(0, 1), cx, cy + 1, { size: sz * 0.42, align: 'center' });
+  }
+  // 経過した分を時計回りに暗くする
+  const k = clamp(1 - e.left / Math.max(0.001, e.dur), 0, 1);
+  if (k > 0) {
+    ctx.save();
+    rrPath(ctx, x, y, sz, sz, 7); ctx.clip();
+    ctx.beginPath(); ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, sz, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * k, false);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fill();
+    ctx.restore();
+  }
+  rrPath(ctx, x - 1, y - 1, sz + 2, sz + 2, 8);
+  ctx.lineWidth = e.kind === 'summon' ? 2.2 : 1.6;
+  ctx.strokeStyle = e.kind === 'summon' ? COL.gold : rgba(e.color, 0.95);
+  ctx.stroke();
+  ctx.restore();
+  if (e.kind === 'summon') txt(ctx, '召', x + 2, y + 7, { size: 9.5, color: COL.gold, sw: 2.5 });
+  txt(ctx, fmtLeft(e.left), x + sz - 2, y + sz - 6, { size: 12, align: 'right', color: low ? '#ff9aa8' : '#fff', sw: 3, alpha: low && Math.floor(t * 4) % 2 === 0 ? 0.5 : 1 });
+}
+function drawBuffBar(ctx, game) {
+  const ui = game.ui;
+  const items = buffBarItems(game);
+  if (ui) ui._buffBarBottom = 0;
+  if (!items.length) return 0;
+  const t = game.time || 0, sz = BUFF_ICON;
+  const m = game.input?.mouse;
+  let hov = null;
+  items.forEach((e, i) => {
+    const col = i % BUFF_PER_ROW, row = Math.floor(i / BUFF_PER_ROW);
+    const x = W - 14 - sz - col * (sz + BUFF_GAP), y = BUFF_TOP + row * (sz + BUFF_GAP);
+    drawBuffIcon(ctx, e, x, y, sz, t);
+    const r = { x, y, w: sz, h: sz };
+    if (m && ui && !ui.drag && !ui.dnd?.active && m.x >= r.x && m.x <= r.x + r.w && m.y >= r.y && m.y <= r.y + r.h && !ui.winAt?.(m.x, m.y)) hov = e;
+  });
+  const rows = Math.ceil(items.length / BUFF_PER_ROW);
+  const bottom = BUFF_TOP + rows * (sz + BUFF_GAP);
+  if (ui) ui._buffBarBottom = bottom;
+  // マウスを乗せたら名前と効果（ツールチップは ui.draw がウィンドウの上に描く）
+  if (hov && ui) {
+    const lines = [{ t: hov.name, c: hov.color, size: 15 }];
+    lines.push({ t: hov.kind === 'summon' ? '召喚獣' : 'バフ', c: COL.sub, size: 11.5, r: `残り ${fmtLeft(hov.left)}${hov.left < 60 ? '秒' : ''}`, rc: hov.left <= 5 ? COL.bad : '#fff' });
+    if (hov.fx) lines.push({ t: hov.fx, c: COL.good, size: 12.5, wrap: true });
+    ui._hudTip = { frame: game.frameNo ?? ui.frame, tip: { lines, border: hov.color } };
+  }
+  return bottom;
+}
 function drawMoney(ctx, game, s, dt) {
+  const bottom = drawBuffBar(ctx, game) || 0;
   const money = game.state.money ?? 0;
   if (money !== s.money) {
     s.deltas.push({ v: money - s.money, t: 0 });
     if (s.deltas.length > 4) s.deltas.shift();
     s.money = money;
   }
-  // カウントアップ
-  const diff = money - s.moneyShown;
-  if (Math.abs(diff) < 1) s.moneyShown = money;
-  else s.moneyShown += diff * Math.min(1, dt * 8) + Math.sign(diff) * Math.min(Math.abs(diff), dt * 30);
-  const rx = W - 22, y = 40;
-  const str = fmtMoney(s.moneyShown);
-  ctx.save();
-  ctx.font = `italic 900 34px ${FONT}`;
-  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-  ctx.lineJoin = 'round';
-  ctx.lineWidth = 7; ctx.strokeStyle = COL.moneyShadow;
-  ctx.strokeText(str, rx + 2, y + 3);
-  ctx.strokeStyle = '#06200f'; ctx.lineWidth = 5;
-  ctx.strokeText(str, rx, y);
-  const mg = ctx.createLinearGradient(0, y - 16, 0, y + 16);
-  mg.addColorStop(0, '#eaffef'); mg.addColorStop(0.5, COL.money); mg.addColorStop(1, '#2fcf68');
-  ctx.fillStyle = mg;
-  ctx.shadowColor = 'rgba(124,255,155,0.6)'; ctx.shadowBlur = 10;
-  ctx.fillText(str, rx, y);
-  ctx.restore();
-  // 増減アニメ
+  // 増減アニメ（+$100 など）。バフの列の下に出す
+  const rx = W - 16, y0 = Math.max(26, bottom + 12);
   s.deltas.forEach((d, i) => {
     d.t += dt;
     const a = 1 - clamp((d.t - 1.0) / 0.6, 0, 1);
     if (a <= 0) return;
-    const yy = y + 70 + i * 18 + Math.min(d.t, 1) * 4;
+    const yy = y0 + i * 20 - Math.min(d.t, 1) * 4;
     txt(ctx, (d.v > 0 ? '+' : '-') + fmtMoney(Math.abs(d.v)), rx, yy, {
       size: 17, align: 'right', color: d.v > 0 ? COL.money : COL.bad, alpha: a, sw: 4, stroke: d.v > 0 ? COL.moneyShadow : '#3d0b14',
     });
   });
   s.deltas = s.deltas.filter((d) => d.t < 1.6);
-
-  // 手配度★5
-  const wanted = clamp(Math.round(game.wanted || 0), 0, 5);
-  if (wanted !== s.wanted) { s.wanted = wanted; s.wantedT = game.time || 0; }
-  const seen = wanted > 0 && copsNear(game);
-  const town = !!game.map?.town;
-  const decaying = wanted > 0 && game.map && !town;
-  const t = game.time || 0;
-  const since = t - s.wantedT;
-  const sy = 80;
-  const sz = 15, gap = 34;
-  const sx0 = rx - 14 - gap * 4;
-  ctx.save();
-  rrPath(ctx, sx0 - 22, sy - 19, gap * 4 + 50, 38, 19);
-  ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.fill();
-  if (wanted > 0 && town) {
-    const pulse = 0.5 + 0.5 * Math.sin(t * 8);
-    ctx.lineWidth = 2.5; ctx.strokeStyle = Math.floor(t * 3) % 2 ? COL.copRed : COL.copBlue;
-    ctx.shadowColor = ctx.strokeStyle; ctx.shadowBlur = 8 + pulse * 10; ctx.stroke();
-  }
-  ctx.restore();
-  if (wanted > 0 && town) {
-    txt(ctx, 'WANTED', sx0 - 32, sy, { size: 15, align: 'right', color: '#fff', glow: COL.copRed, sw: 4, stroke: '#3d0010', weight: 900 });
-  }
-  if (decaying) {
-    txt(ctx, '手配度 減衰中…（フィールド）', rx, sy + 28, { size: 11.5, align: 'right', color: '#cfd8ff', sw: 3, alpha: 0.6 + 0.4 * Math.sin(t * 3) });
-  }
-  ctx.save();
-  if (decaying) ctx.globalAlpha *= 0.5;
-  for (let i = 0; i < 5; i++) {
-    const cx = sx0 + i * gap, cy = sy;
-    const on = i < wanted;
-    ctx.save();
-    let scale = 1;
-    if (on && since < 0.6 && i === wanted - 1) scale = 1 + (1 - since / 0.6) * 0.8;
-    ctx.translate(cx, cy); ctx.scale(scale, scale);
-    starPath(ctx, 0, 0, sz, sz * 0.45);
-    if (on) {
-      const blink = (Math.floor(t * 4) % 2 === 0) || !seen && Math.floor(t * 2) % 2 === 0;
-      if (seen) {
-        // 視認されている → 塗り★（点滅）
-        ctx.fillStyle = blink ? COL.star : '#fff6d0';
-        ctx.shadowColor = COL.star; ctx.shadowBlur = blink ? 16 : 6;
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.lineWidth = 2.5; ctx.strokeStyle = '#7a4a00'; ctx.stroke();
-      } else {
-        // 捜索中 → 中抜き★（白縁のみ、ゆっくり点滅）
-        ctx.fillStyle = 'rgba(255,201,60,0.12)'; ctx.fill();
-        ctx.lineWidth = 3; ctx.strokeStyle = blink ? '#ffffff' : 'rgba(255,255,255,0.45)';
-        ctx.shadowColor = '#fff'; ctx.shadowBlur = blink ? 10 : 0;
-        ctx.stroke();
-      }
-    } else {
-      ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fill();
-      ctx.lineWidth = 1.5; ctx.strokeStyle = 'rgba(255,255,255,0.28)'; ctx.stroke();
-    }
-    ctx.restore();
-  }
-  ctx.restore();
 }
 
 // ---------- 右側 クエストトラッカー ----------
@@ -483,7 +518,7 @@ function drawTracker(ctx, game) {
   if (game.ui) game.ui._trackerBottom = 0;
   if (!list.length) return;
   const w = 290, x = W - w - 12;
-  let y = 140;
+  let y = Math.max(140, (game.ui?._buffBarBottom || 0) + 60); // バフが2段になったら下げる
   // 高さを計算
   const trackedId = game.state?.trackedMission;
   const items = list.slice(0, 4).map((m, i) => ({ id: m.id, name: m.name || '', lines: (m.lines || []).slice(0, 4), done: !!(m.done || m.complete), tracked: trackedId ? m.id === trackedId : i === 0 }));
