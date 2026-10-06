@@ -122,7 +122,6 @@ export function bossEntry(game, bossId, mode = 'normal', opts = {}) {
   const u = bossUnlocked(st, bossId, mode);
   if (!u.ok) return { ok: false, msg: u.reason };
   if (bossStock(st, bossId, mode, opts.now ?? gameNow(game)) <= 0) return { ok: false, msg: `今${BOSS_MODES[mode].period === 'weekly' ? '週' : '日'}の挑戦回数を使い切りました（練習モードは何度でも）` };
-  if ((game.wanted || 0) > 0) return { ok: false, msg: '手配中はボスに挑めない！' };
   const room = bossRoomId(bossId);
   if (!room || !MAPS[room]) return { ok: false, msg: 'ボス部屋が見つかりません' };
   const m = BOSS_MODES[mode];

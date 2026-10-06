@@ -8,7 +8,7 @@
 //   melee/aoe:  knock(ノックバック px/s), launch(上方向打ち上げ px/s)
 //   move (v3):  move:{type:'flashJump'|'teleport'|'rush'|'glide', power, distance, perLv, ...}（docs/SPEC_JOB.md「移動スキル」）
 //               3次の強化パッシブは enhances:'<moveSkillId>' と enhance(lv) → {distancePct, powerPct, cooldownCut, invulnAdd, afterBuff}
-//   townOk: true のスキルは町でも使える（移動系のみ）
+//   townOk: 旧仕様（町ではスキル不可）の名残。今はすべてのスキルが町でも使える
 //   buff/passive の attackSpeedPct は攻撃速度（ブースター）
 
 import { hasJob } from './jobs.js';

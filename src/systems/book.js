@@ -8,7 +8,7 @@ export const BOOK_RANKS = [10, 50, 100];
 export const BOOK_RANK_NAMES = ['', 'ブロンズ', 'シルバー', 'ゴールド'];
 export const REGION_NAMES = {
   beach: 'ビーチ', downtown: 'ダウンタウン', slums: 'ポート・スラム', swamp: 'スワンプ',
-  casino: 'カジノ', rooftop: 'ヴァイス・タワー', spaceport: 'ルミナ宇宙港', police: '警察',
+  casino: 'カジノ', rooftop: 'ヴァイス・タワー', spaceport: 'ルミナ宇宙港',
 };
 // 地域コンプ（その地域のモンスター＋ボスを全種登録）ボーナス
 export const REGION_COMPLETE_BONUS = {
@@ -19,11 +19,10 @@ export const REGION_COMPLETE_BONUS = {
   casino: { luk: 6, crit: 0.01 },
   rooftop: { atk: 10, def: 10 },
   spaceport: { atk: 12, maxHp: 200, crit: 0.02 },
-  police: { def: 5 },
 };
 
-/** 図鑑に載る敵（市民を除く。警官は 'police' 地域として掲載） */
-export function isBookTarget(def) { return !!def && !def.civilian; }
+/** 図鑑に載る敵（住民と、廃止した警察ユニット isCop を除く） */
+export function isBookTarget(def) { return !!def && !def.civilian && !def.isCop; }
 export const BOOK_IDS = Object.values(ENEMIES).filter(isBookTarget)
   .sort((a, b) => regionOrder(a.region) - regionOrder(b.region) || (a.boss - b.boss) || a.level - b.level)
   .map((e) => e.id);

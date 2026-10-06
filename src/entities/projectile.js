@@ -1,5 +1,5 @@
 // 弾・魔法弾。owner: 'player' | 'enemy'
-import { calcDamage, damageEnemy, damagePlayer } from '../systems/combat.js';
+import { calcDamage, damageEnemy, damagePlayer, isUntargetable } from '../systems/combat.js';
 import { sysFn } from '../world/sys.js';
 import { spawnEffect } from '../render/effects.js';
 import { rectOverlap, entRect } from '../world/physics.js';
@@ -69,7 +69,7 @@ export class Projectile {
 
     if (this.owner === 'player') {
       for (const e of g.enemies) {
-        if (e.dead || e.remove || this.hits.has(e) || e.hp <= 0) continue;
+        if (e.dead || e.remove || this.hits.has(e) || e.hp <= 0 || isUntargetable(e)) continue; // 住民はすり抜ける
         if (!rectOverlap(r, entRect(e))) continue;
         this.hits.add(e);
         let dmg = this.dmg, crit = false;
@@ -81,18 +81,18 @@ export class Projectile {
         damageEnemy(g, e, dmg, crit, Math.sign(this.vx) || 1);
         spawnEffect(g, crit ? 'critHit' : this.hitEffect, this.x, this.y, { color: this.color });
         if (this.onHit) this.onHit(e);
-        // ファイナルアタック（通常攻撃・スキルの弾。市民には出さない）。コンボは damageEnemy 側で加算
-        if (!e.civilian) { const fa = sysFn('tryFinalAttack', g); if (fa) { try { fa(g, [e]); } catch (err) { /* noop */ } } }
+        // ファイナルアタック（通常攻撃・スキルの弾）。コンボは damageEnemy 側で加算
+        { const fa = sysFn('tryFinalAttack', g); if (fa) { try { fa(g, [e]); } catch (err) { /* noop */ } } }
         if (this.pierce-- <= 0) return this.kill();
       }
     } else {
       const p = g.player;
       if (p && !p.dead && g.state && g.state.hp > 0) {
-        const pr = p.inVehicle ? entRect(p.inVehicle) : entRect(p);
+        const pr = entRect(p);
         if (rectOverlap(r, pr)) {
           if (!(p.invulnT > 0)) {
             const amt = this.dmg ?? this.atk;
-            damagePlayer(g, p.inVehicle ? Math.ceil(amt * 0.5) : amt, this.x - this.vx * 0.01);
+            damagePlayer(g, amt, this.x - this.vx * 0.01);
           }
           spawnEffect(g, 'hit', this.x, this.y, { color: this.color });
           return this.kill();

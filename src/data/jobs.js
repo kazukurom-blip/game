@@ -19,7 +19,7 @@ export const JOB_BRANCHES = {
   gunslinger:    { id: 'gunslinger',    hero: 'luna',   name: 'ガンスリンガー系',       desc: '銃・遠距離・クリティカル',     color: '#ff3d7f' },
   neondancer:    { id: 'neondancer',    hero: 'luna',   name: 'ネオンダンサー系',       desc: 'スピード・連撃・テレポート',   color: '#19f0ff' },
   streetfighter: { id: 'streetfighter', hero: 'jin',    name: 'ストリートファイター系', desc: '格闘・高火力・タフ・突進',     color: '#ff8a00' },
-  nightracer:    { id: 'nightracer',    hero: 'jin',    name: 'ナイトレーサー系',       desc: '車・ニトロ・範囲・高速走行',   color: '#7b5cff' },
+  nightracer:    { id: 'nightracer',    hero: 'jin',    name: 'ナイトレーサー系',       desc: '走り・ニトロ・範囲・高速移動',   color: '#7b5cff' },
   netrunner:     { id: 'netrunner',     hero: 'hacker', name: 'ネットランナー系',       desc: '電脳魔法・範囲・グリッチ',     color: '#3dff8a' },
   dronemaster:   { id: 'dronemaster',   hero: 'hacker', name: 'ドローンマスター系',     desc: 'ドローン召喚・爆撃・滑空',     color: '#ffb000' },
 };

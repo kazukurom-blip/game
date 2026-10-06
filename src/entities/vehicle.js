@@ -1,4 +1,4 @@
-// 乗り物。プレイヤーが乗ると高速移動・敵を轢く（手配度上昇）。パトカーは警官AIが運転する簡易版。
+// 乗り物（現在は未使用: 乗り物は廃止し、ゲームには出てこない。将来用にコードだけ残す）。プレイヤーが乗ると高速移動・敵を轢く。パトカーは警官AIが運転する簡易版。
 import { moveAndCollide, entRect, rectOverlap } from '../world/physics.js';
 import { drawVehicle } from '../render/vehicles.js';
 import { spawnEffect } from '../render/effects.js';

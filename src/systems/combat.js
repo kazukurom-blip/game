@@ -1,11 +1,12 @@
-// 戦闘: ダメージ計算・プレイヤー攻撃判定・敵/プレイヤー被弾・手配度
+// 戦闘: ダメージ計算・プレイヤー攻撃判定・敵/プレイヤー被弾
+// ※ 警察制度（手配度・警官・パトカー）は廃止。住民（civilian）は攻撃の対象にならない。
+//    addWanted / setWantedLevel / updateWanted は古い呼び出し元が落ちないよう、何もしない関数として残す（game.wanted は常に 0）。
 import { spawnEffect, spawnDamageNumber } from '../render/effects.js';
 import { Drop } from '../entities/drop.js';
 import { rectOverlap, entRect } from '../world/physics.js';
 import { computeStats, gainExp } from './progression.js';
 import { rollDrops } from './loot.js';
 import { bookRecord } from './book.js';
-import { isFieldMap } from './travel.js';
 import { isNight, NIGHT_EXP_BONUS } from '../data/balance.js';
 import { comboHit } from './combo.js';
 import { weekdayEvent } from './daily.js';
@@ -20,14 +21,8 @@ export const ENEMY_INVULN = 0.1;   // 敵の無敵時間（短め）
 export const PLAYER_INVULN = 1.0;  // プレイヤー被弾後の無敵時間
 export const TEAR_THRESHOLDS = [0.75, 0.5, 0.25, 0.1];
 
-// 手配度: wantedHeat がこの値以上で ★n
-export const WANTED_HEAT = [0, 1, 5, 12, 22, 35];
-export const WANTED_MAX_HEAT = 45;
-// 市民への攻撃（GTA風）: 殴る=小, 倒す=中
-export const CIVILIAN_HIT_HEAT = 0.8;
-export const CIVILIAN_KILL_HEAT = 4;
-// フィールド（警察がいない）での手配度減衰倍率
-export const FIELD_WANTED_DECAY = 5;
+/** 攻撃の対象になれない相手（住民）。通常攻撃・スキル・弾のどれも当たらない */
+export function isUntargetable(e) { return !!(e && (e.civilian || e.def?.civilian || e.ai === 'civilian')); }
 
 /**
  * 敵撃破時の経験値（市民は 0）
@@ -68,7 +63,7 @@ export function playerAttackArea(game, rect, mult = 1, opts = {}) {
   const t = now(game);
   const cands = [];
   for (const e of game.enemies || []) {
-    if (!e || e.dead || e.hp <= 0) continue;
+    if (!e || e.dead || e.hp <= 0 || isUntargetable(e)) continue;
     if (opts.attackId != null) {
       if (e._hitBy === opts.attackId) continue;
     } else if (e._invulnUntil && t < e._invulnUntil) continue;
@@ -96,7 +91,7 @@ export function playerAttackArea(game, rect, mult = 1, opts = {}) {
 
 /** damageEnemy(game, enemy, dmg, crit, knockDir, opts={stack, knock, launch}) */
 export function damageEnemy(game, enemy, dmg, crit = false, knockDir = 0, opts = {}) {
-  if (!enemy || enemy.dead) return;
+  if (!enemy || enemy.dead || isUntargetable(enemy)) return; // 住民にはダメージが入らない
   dmg = Math.max(1, Math.round(dmg));
   enemy.hp -= dmg;
   enemy.hurtT = 0.3;
@@ -104,7 +99,7 @@ export function damageEnemy(game, enemy, dmg, crit = false, knockDir = 0, opts =
   enemy.provoked = true;
   const stack = opts.stack || 0;
   // v3: コンボ（同フレーム同一敵は1回）・ボスモードの最大ダメージ記録
-  if (!enemy.def?.civilian) comboHit(game, 1, [enemy]);
+  comboHit(game, 1, [enemy]);
   if (enemy.def?.boss && (game.bossMode || game.bossRun) && dmg > (game.bossMaxHit || 0)) {
     game.bossMaxHit = dmg;
     game.events?.emit('bossHit', { dmg, bossId: enemy.def.id });
@@ -113,14 +108,6 @@ export function damageEnemy(game, enemy, dmg, crit = false, knockDir = 0, opts =
   if (crit && stack === 0) spawnEffect(game, 'critHit', enemy.x, enemy.y - enemy.h / 2);
 
   const def = enemy.def || {};
-  if (def.civilian) {
-    // 市民を殴った → 手配度（小）・逃げる
-    enemy.scared = true;
-    enemy.fleeT = 4;
-    enemy.fleeDir = knockDir || (game.player ? (enemy.x >= game.player.x ? 1 : -1) : 1);
-    if (enemy.hp > 0) addWanted(game, CIVILIAN_HIT_HEAT);
-    game.events?.emit('civilianHit', { enemy });
-  }
   const resist = def.boss ? 0.15 : 1;
   const knock = opts.knock ?? 180;
   if (knockDir && knock > 0) {
@@ -157,11 +144,6 @@ function killEnemy(game, enemy) {
     game.drops.push(d);
   });
   spawnEffect(game, def.art === 'drone' ? 'explosion' : 'smoke', enemy.x, enemy.y - enemy.h / 2);
-  if (def.isCop) addWanted(game, def.heat ?? 3);
-  if (def.civilian) {
-    addWanted(game, CIVILIAN_KILL_HEAT);
-    game.events?.emit('civilianKilled', { enemy });
-  }
   if (def.boss) game.notify?.(`${def.name} を倒した！`, '#ffd23f');
   game.events?.emit('enemyKilled', { enemy });
 }
@@ -227,64 +209,21 @@ export function damagePlayer(game, amount, fromX) {
   return dmg;
 }
 
-// ---- 手配度 ----
-export function wantedLevelFor(heat) {
-  let lv = 0;
-  for (let i = 1; i < WANTED_HEAT.length; i++) if (heat >= WANTED_HEAT[i]) lv = i;
-  return lv;
+// ---- 手配度（廃止） ----
+// 警察制度は廃止した。古いコード・セーブ・デバッグから呼ばれても落ちないよう、手配度を 0 に保つだけの関数を残す。
+export function wantedLevelFor() { return 0; }
+
+function clearWanted(game) {
+  if (!game) return;
+  game.wanted = 0;
+  game.wantedHeat = 0;
 }
 
-function refreshWanted(game) {
-  const lv = wantedLevelFor(game.wantedHeat || 0);
-  if (lv !== (game.wanted || 0)) {
-    const up = lv > (game.wanted || 0);
-    game.wanted = lv;
-    game.events?.emit('wantedChanged', { level: lv });
-    if (up) game.notify?.(`手配度 ${'★'.repeat(lv)}`, '#ff3d3d');
-    else if (lv === 0) game.notify?.('警察をまいた！', '#5cff9a');
-  }
-}
+/** addWanted(game, heat) — 廃止（何もしない。手配度は常に 0） */
+export function addWanted(game) { clearWanted(game); }
 
-/** addWanted(game, heat) — 負の値で減少 */
-export function addWanted(game, heat) {
-  game.wantedHeat = Math.max(0, Math.min(WANTED_MAX_HEAT, (game.wantedHeat || 0) + heat));
-  if (heat > 0) game._wantedLastAdd = now(game);
-  refreshWanted(game);
-}
+/** setWantedLevel(game, level) — 廃止（何もしない。手配度は常に 0） */
+export function setWantedLevel(game) { clearWanted(game); }
 
-export function setWantedLevel(game, level) {
-  level = Math.max(0, Math.min(5, level | 0));
-  game.wantedHeat = WANTED_HEAT[level] + (level ? 0.5 : 0);
-  if (level) game._wantedLastAdd = now(game);
-  refreshWanted(game);
-}
-
-/** 警官に見られていない時に減衰（main/spawner から毎フレーム呼ぶ）。opts: {seen?:bool, sight, grace, rate}
- *  フィールド（map.town === false。警察がいない）では素早く減衰する（grace 1 秒・速度 ×FIELD_WANTED_DECAY） */
-export function updateWanted(game, dt, opts = {}) {
-  if (!(game.wantedHeat > 0)) return;
-  if (isFieldMap(game.map)) {
-    const since = now(game) - (game._wantedLastAdd || 0);
-    if (since > (opts.grace ?? 1)) {
-      const rate = (opts.rate ?? (0.6 + game.wantedHeat * 0.03)) * FIELD_WANTED_DECAY;
-      game.wantedHeat = Math.max(0, game.wantedHeat - rate * dt);
-      refreshWanted(game);
-    }
-    return;
-  }
-  const p = game.player;
-  const sight = opts.sight ?? 650;
-  let seen = typeof opts.seen === 'boolean' ? opts.seen : false;
-  if (p && typeof opts.seen !== 'boolean') {
-    for (const e of game.enemies || []) {
-      if (!e || e.dead || !e.def?.isCop) continue;
-      if (Math.abs(e.x - p.x) < sight && Math.abs(e.y - p.y) < 300) { seen = true; break; }
-    }
-  }
-  const since = now(game) - (game._wantedLastAdd || 0);
-  if (!seen && since > (opts.grace ?? 4)) {
-    const rate = opts.rate ?? (0.6 + (game.wantedHeat * 0.03));
-    game.wantedHeat = Math.max(0, game.wantedHeat - rate * dt);
-    refreshWanted(game);
-  }
-}
+/** updateWanted(game, dt) — 廃止（何もしない。手配度は常に 0） */
+export function updateWanted(game) { clearWanted(game); }

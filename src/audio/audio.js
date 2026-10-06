@@ -1425,10 +1425,8 @@ export const audio = {
     }
     const p = game.player;
     const inCar = !!(p && p.inVehicle && game.scene !== 'title');
-    if (inp?.pressed?.('radio')) {
-      if (inCar) audio.nextRadio();
-      else game.notify?.('📻 ラジオは乗車中のみ（R）', '#9ad');
-    }
+    // カーラジオ（乗り物は廃止したので今は鳴らない。乗車中だけ R で局を変える仕組みは将来用に残す）
+    if (inp?.pressed?.('radio') && inCar) audio.nextRadio();
     E.inRadio = inCar;
     // 選曲
     const want = trackFor(game);

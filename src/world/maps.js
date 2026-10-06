@@ -2,7 +2,7 @@
 // 座標: y 下向き。groundY が地面。platforms は {x, y(上面), w, solid?}。
 // solid !== true の足場は一方通行（下から抜けられ、↓+ジャンプで降りられる）。
 //
-// 町（town:true）はデータ主体（NPC・車・建物 decor 多め、モンスターなし、市民と警察）。
+// 町（town:true）はデータ主体（NPC・建物 decor 多め、モンスターなし、歩く住民だけ。警察・乗り物は廃止）。
 // フィールド（town:false）は「名前・接続・Lv・特徴（style）」だけをデータで書き、
 // 足場・ロープ・decor はマップIDをシードにした手続き生成（毎回同じ形）。
 // spawns に types を書かないフィールドは spawner が ENEMIES[].habitats から自動選択する。
@@ -325,8 +325,8 @@ function field(cfg) {
     spawns.push({ x1: arena[0] + 150, x2: arena[1] - 150, boss: true, max: 1, interval: 240 });
   }
 
+  // 乗り物は廃止（vehicles は常に空。描画コード render/vehicles.js は将来用に残す）
   const vehicles = [];
-  if (st.cars) vehicles.push({ kind: R.pick(['sports', 'bike']), x: 420, color: R.pick(['#ff2e88', '#19d3c5', '#ffd166', '#b04dff']) });
 
   return finish({
     id: cfg.id, name: cfg.name, region: cfg.region, theme: cfg.region, variant: cfg.variant ?? 0,
@@ -396,10 +396,10 @@ function town(cfg) {
 
   return finish({
     id: cfg.id, name: cfg.name, region: cfg.region, theme: cfg.region, variant: cfg.variant ?? 0,
-    town: true, copSpawns: true, levelRange: cfg.lv, safe: !!cfg.safe, desc: cfg.desc,
+    town: true, copSpawns: false, levelRange: cfg.lv, safe: !!cfg.safe, desc: cfg.desc,
     width, groundY, spawnX: cfg.spawnX ?? 260, gravity: 1,
     platforms, ropes, walls: [], portals, spawns: [], decor, npcs,
-    vehicles: cfg.vehicles || [], bgColor: cfg.bgColor, world: cfg.world,
+    vehicles: [], bgColor: cfg.bgColor, world: cfg.world,
   });
 }
 
@@ -408,7 +408,7 @@ const NPC = {
   rico: { id: 'rico', name: 'リコ', title: 'ビーチの情報屋',
     look: { body: 'm', skin: '#c68e5e', hair: 'wolf', hairColor: '#1a1a1a', eyeColor: '#3b2a1a' },
     equip: { hat: L('cap', '#ff5fa2', '#ffffff'), top: L('hawaiian', '#19d3c5', '#ff5fa2'), bottom: L('shorts', '#2b4c7e'), shoes: L('sandals', '#c98b4a'), accessory: L('sunglasses', '#222222', '#ff5fa2') },
-    dialog: ['よう、新入り！ ヴァイス・ベイへようこそ。', '←→で移動、Spaceでジャンプ、Xで攻撃だ。', 'ロープは↑↓で上り下り、↓+Spaceで足場から飛び降りられる。', '町の外（フィールド）にはモンスターがいる。ポータルの上で↑だ。', '町じゃスキルは使えねぇ。市民を殴ればサツが飛んでくるぞ。Mキーで地図も見られる。'] },
+    dialog: ['よう、新入り！ ヴァイス・ベイへようこそ。', '←→で移動、Spaceでジャンプ、Xで攻撃だ。', 'ロープは↑↓で上り下り、↓+Spaceで足場から飛び降りられる。', '町の外（フィールド）にはモンスターがいる。ポータルの上で↑だ。', 'スキルは町の中でも試し撃ちできるぜ。Mキーで地図も見られる。'] },
   sunny: { id: 'sunny', name: 'サニー', title: 'ライフガード兼売店',
     look: { body: 'f', skin: '#f5d0b0', hair: 'ponytail', hairColor: '#ffcc66', eyeColor: '#2a7de1' },
     equip: { hat: L('headphones', '#ff7a00', '#ffffff'), top: L('tank', '#ff3b3b', '#ffffff'), bottom: L('shorts', '#ff3b3b'), shoes: L('sandals', '#c98b4a'), accessory: L('sunglasses', '#222222', '#ff7a00') },
@@ -422,7 +422,7 @@ const NPC = {
   officer_kai: { id: 'officer_kai', name: 'カイ巡査', title: 'ヴァイス・ベイ市警',
     look: { body: 'm', skin: '#e0b090', hair: 'short', hairColor: '#2a1a10', eyeColor: '#1a2a4a' },
     equip: { hat: L('cap', '#1b2a4a', '#ffd166'), top: L('police', '#1b2a4a', '#ffd166'), bottom: L('suitPants', '#1b2a4a'), shoes: L('loafers', '#111111'), accessory: L('sunglasses', '#111111', '#ffd166') },
-    dialog: ['…何も見てない。俺は何も見てないぞ。', '手配度が上がったら町の外へ逃げろ。フィールドまでは追ってこない。'] },
+    dialog: ['…何も見てない。俺は何も見てないぞ。', '町の人には手を出すなよ。…まあ、お前らの拳は町の人には当たらねえがな。'] },
   ammo_shop: { id: 'ammo_shop', name: 'ブリック', title: '武器屋アモ・ストリート',
     look: { body: 'f', skin: '#d9a07a', hair: 'bob', hairColor: '#ff2e88', eyeColor: '#222' },
     equip: { hat: L('beanie', '#222', '#ff2e88'), top: L('armorVest', '#4b5320', '#222'), bottom: L('cargo', '#556b2f'), shoes: L('boots', '#222') },
@@ -431,7 +431,7 @@ const NPC = {
   dash_garage: { id: 'dash_garage', name: 'ダッシュ', title: 'ガレージ',
     look: { body: 'm', skin: '#8d5a3b', hair: 'spiky', hairColor: '#ffd166', eyeColor: '#222' },
     equip: { hat: L('cap', '#e63946', '#fff'), top: L('tracksuit', '#264653', '#e9c46a'), bottom: L('trackPants', '#264653'), shoes: L('sneakers', '#fff', '#e63946') },
-    dialog: ['車ならそこに停めてあるのを使いな。Eで乗れるぜ。', '乗ってる間は R でラジオ局を変えられる。'] },
+    dialog: ['この街じゃ車は通行止めさ。今は自分の足が一番速い。', 'ガレージは装備の手入れ専門だ。★上げは高くつくが、壊れはしねえよ。'] },
   dj_pulse: { id: 'dj_pulse', name: 'DJパルス', title: '地下レイブの主催',
     look: { body: 'f', skin: '#8d5a3b', hair: 'twin', hairColor: '#b04dff', eyeColor: '#19f0ff' },
     equip: { hat: L('headphones', '#19f0ff', '#ff2e88'), top: L('hoodie', '#1a1a2e', '#b04dff'), bottom: L('shorts', '#1a1a2e'), shoes: L('sneakers', '#ffffff', '#b04dff'), accessory: L('sunglasses', '#ff2e88', '#19f0ff') },
@@ -439,7 +439,7 @@ const NPC = {
   tank: { id: 'tank', name: 'タンク', title: '港のメカニック',
     look: { body: 'm', skin: '#6b4226', hair: 'short', hairColor: '#111', eyeColor: '#222' },
     equip: { hat: L('beanie', '#2a9d8f'), top: L('tank', '#3d405b', '#e76f51'), bottom: L('cargo', '#3d405b'), shoes: L('boots', '#222222'), accessory: L('goldChain', '#ffd166') },
-    dialog: ['車が要る？ そこのバイクを使いな。Eで乗れる。', '轢きすぎるとサツが飛んでくるぞ。'] },
+    dialog: ['港の機械なら何でも直してやる。', '足が欲しけりゃいいブーツを履きな。車より小回りが利くぜ。'] },
   sal_pawn: { id: 'sal_pawn', name: 'サル', title: '質屋',
     look: { body: 'm', skin: '#e0b48a', hair: 'bob', hairColor: '#777', eyeColor: '#333' },
     equip: { top: L('suit', '#5c4033', '#ffd166'), bottom: L('suitPants', '#5c4033'), shoes: L('loafers', '#3a2a1a'), accessory: L('sunglasses', '#111') },
@@ -592,7 +592,6 @@ const T = {
     right: 'beach_f1', mids: [{ to: 'beach_f3', x: 1750 }],
     plats: [[420, 870, 300], [900, 870, 320, true], [1300, 740, 300, true], [2150, 870, 300], [2250, 740, 260, true]],
     npcs: [npc('rico', 380), npc('sunny', 620), npc('night_marin', 1150), concierge('beach', 2400)],
-    vehicles: [{ kind: 'bike', x: 1000, color: '#ff5fa2' }, { kind: 'sports', x: 2300, color: '#19d3c5' }],
   }),
   downtown: town({
     id: 'downtown', name: 'ダウンタウン', region: 'downtown', variant: 0, width: 3200, lv: [10, 22], tiers: 3,
@@ -600,42 +599,36 @@ const T = {
     left: 'beach_f4', right: 'down_f3', mids: [{ to: 'down_f1', x: 1150 }, { to: 'down_f4', x: 2250 }],
     npcs: [npc('mama_rosa', 380), npc('night_noodle', 590), npc('officer_kai', 800), npc('night_fortune', 990), npc('shop_downtown', 1350), npc('ammo_shop', 1700),
       npc('job_velvet', 1900), npc('job_bull', 2050), npc('job_zero', 2450), npc('dash_garage', 2700), concierge('downtown', 2900)],
-    vehicles: [{ kind: 'sports', x: 2900, color: '#ff2e88' }, { kind: 'sports', x: 1400, color: '#19d3c5' }, { kind: 'bike', x: 600, color: '#ffd166' }],
   }),
   slums: town({
     id: 'slums', name: 'ポート・スラム', region: 'slums', variant: 0, width: 3000, lv: [20, 36], tiers: 3,
     desc: 'コンテナが積まれた港町。', bgColor: '#3b2b3a', world: { x: 7, y: 5 },
     left: 'slums_f1', right: 'slums_f4', mids: [{ to: 'slums_f2', x: 1650 }],
     npcs: [npc('dj_pulse', 380), npc('night_smuggler', 760), npc('sal_pawn', 1100), npc('job_lily', 1380), npc('job_byte', 1950), npc('tank', 2300), concierge('slums', 2620)],
-    vehicles: [{ kind: 'bike', x: 2500, color: '#e76f51' }, { kind: 'sports', x: 800, color: '#2a9d8f' }],
   }),
   swamp: town({
     id: 'swamp', name: 'グレイズ村', region: 'swamp', variant: 0, width: 2600, lv: [22, 45],
     desc: '湿地のほとりの小さな村。', bgColor: '#1f3b2c', world: { x: 5, y: 3 },
     left: 'swamp_f1', right: 'swamp_f4', mids: [{ to: 'swamp_f2', x: 1350 }],
     npcs: [npc('old_boone', 380), npc('night_fisher', 640), npc('voodoo_betty', 900), npc('job_croc', 1650), concierge('swamp', 2100)],
-    vehicles: [{ kind: 'bike', x: 1900, color: '#6b8f3a' }],
   }),
   casino: town({
     id: 'casino', name: 'ゴールデン・ストリップ', region: 'casino', variant: 0, width: 3200, lv: [42, 60], tiers: 3,
     desc: '黄金のカジノ街。', bgColor: '#3a0a3a', world: { x: 8, y: 3 },
     left: 'casino_f1', right: 'casino_f4', mids: [{ to: 'casino_f2', x: 1650 }],
     npcs: [npc('vivi', 380), npc('night_bartender', 760), npc('mr_chip', 1100), npc('job_diamond', 1900), npc('job_tiger', 2080), npc('don_caiman', 2400), concierge('casino', 2750)],
-    vehicles: [{ kind: 'sports', x: 2700, color: '#ffd166' }, { kind: 'sports', x: 700, color: '#ff2e88' }],
   }),
   rooftop: town({
     id: 'rooftop', name: 'ヴァイス・タワー', region: 'rooftop', variant: 0, width: 2400, lv: [58, 76], tiers: 3,
     desc: '摩天楼の中層ロビー兼屋上テラス。', bgColor: '#0d0b26', world: { x: 11, y: 3 },
     left: 'tower_f1', right: 'tower_f2',
     npcs: [npc('nova', 380), npc('job_cipher', 800), concierge('rooftop', 1300), npc('night_stargazer', 1800)],
-    vehicles: [],
   }),
   spaceport: town({
     id: 'spaceport', name: 'ルミナ宇宙港', region: 'spaceport', variant: 0, width: 2800, lv: [36, 100], tiers: 3,
     desc: 'ロケットが並ぶ近未来の宇宙港。', bgColor: '#0a1030', world: { x: 11, y: 5 },
     left: 'space_f2', right: 'space_f3',
     npcs: [npc('dr_stella', 400), npc('night_astro', 850), npc('ace_jet', 1300), npc('job_celes', 1700), npc('job_kaiser', 1880), npc('job_quasar', 2060), concierge('spaceport', 2450)],
-    vehicles: [{ kind: 'sports', x: 2000, color: '#e0e0ff' }],
     decor: [{ type: 'rocket', x: 700 }, { type: 'rocket', x: 2300 }, { type: 'satelliteDish', x: 1700 }],
   }),
 };

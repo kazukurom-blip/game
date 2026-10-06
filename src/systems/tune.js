@@ -1,5 +1,5 @@
 // ネオン・チューン（★強化。スターフォース相当）— REFERENCE_MAPLE_SYSTEMS §3 S-3
-//  - 成功率表・天井（連続失敗 N 回目は確定成功）・費用式は data/gear.js
+//  - 成功率表・天井（連続失敗 N 回目は確定成功）・費用式は data/gear.js（壊れない代わりに高い: 旧費用の約10倍〜★が上がるほど最大100倍）
 //  - 装備は壊れない・失敗しても★は下がらない（失敗は費用のみ。天井ゲージが貯まる）
 //  - サンデー・ネオン（日曜）: 費用 -30%
 //  - チューン・チケット（tune_ticket）: 1回だけ確定成功（タワー50階ごとの報酬）
@@ -95,12 +95,12 @@ export function tuneItem(game, itemRef, opts = {}) {
     stats.success++;
     inst.star = info.star + 1;
     inst.tunePity = 0;
-    game.events?.emit('tuneResult', { success: true, star: inst.star, item: it, uid: inst.uid, guaranteed });
+    game.events?.emit('tuneResult', { success: true, star: inst.star, item: it, uid: inst.uid, guaranteed, cost: info.cost });
     if (TUNE_MILESTONES.includes(inst.star)) game.events?.emit('tuneMilestone', { star: inst.star, item: it, uid: inst.uid });
     return { ok: true, success: true, star: inst.star, guaranteed, cost: info.cost, pity: 0, msg: `${guaranteed ? '天井で確定成功！ ' : '成功！ '}${it.name} ★${inst.star}` };
   }
   inst.tunePity = (inst.tunePity || 0) + 1;
-  game.events?.emit('tuneResult', { success: false, star: inst.star || 0, item: it, uid: inst.uid, pity: inst.tunePity });
+  game.events?.emit('tuneResult', { success: false, star: inst.star || 0, item: it, uid: inst.uid, pity: inst.tunePity, cost: info.cost });
   return {
     ok: true, success: false, star: inst.star || 0, guaranteed: false, cost: info.cost, pity: inst.tunePity,
     msg: `失敗…（★は下がりません。天井まであと ${info.pityMax - inst.tunePity} 回）`,

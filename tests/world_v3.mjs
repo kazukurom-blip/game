@@ -139,7 +139,7 @@ export default function register({ test, makeGame, step, fin }) {
       resetCooldowns(); for (let i = 0; i < 3; i++) step(g);
       assert.equal(useSkill(g, id), false, '空中ではホイールダッシュ不可');
     }
-    // --- 町でも移動のみ（攻撃判定なし）---
+    // --- 町でも移動スキル（住民は攻撃の対象外なので当たらない）---
     {
       const g = makeGame('jin', 'downtown'); const p = g.player; learn(g, MOVE_SKILLS.rush);
       g.enemies.length = 0; g.spawner.civT = 1e9;
@@ -148,7 +148,7 @@ export default function register({ test, makeGame, step, fin }) {
       assert.ok(useSkill(g, MOVE_SKILLS.rush), '町でも移動スキル');
       for (let i = 0; i < 20; i++) step(g);
       assert.ok(Math.abs(p.x - x0) > 100, '町で突進');
-      assert.equal(e.hp, hp0, '町では市民に当たらない');
+      assert.equal(e.hp, hp0, '住民には当たらない');
     }
   });
 
