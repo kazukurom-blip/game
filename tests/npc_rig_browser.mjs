@@ -117,7 +117,7 @@ function collect(page) {
       if (seen.has(d.id)) continue; seen.add(d.id);
       const n = new NPC(G, d);
       const i = info(n.look, n.equip);
-      out.npcs.push({ id: d.id, g: n.look.body, hair: n.look.hair, ...i, face: faceOf(i.head), hairArt: hairOf(i.head) });
+      out.npcs.push({ id: d.id, name: d.name || '', title: d.title || '', g: n.look.body, hair: n.look.hair, ...i, face: faceOf(i.head), hairArt: hairOf(i.head) });
     }
     for (const id of ['thug_punk', 'thug_skater', 'thug_hitman', 'boss_captain', 'cop_patrol', 'cop_detective', 'swat_trooper', 'swat_heavy', 'boss_don']) {
       const d = ENEMIES[id]; if (!d) continue;
@@ -342,7 +342,9 @@ async function main() {
     check('vil: 老人の NPC（ブーンじいさん）→ m_o01 / m_o02', /^m_o0[12]$/.test(N.old_boone.face), N.old_boone.face);
     const gran = D.civs.filter((c, i) => (i + 1) % 8 === 0);
     check('vil: おばあちゃんの市民 → f_o01', gran.length && gran.every((c) => c.face === 'f_o01'), gran.map((c) => c.face).join(','));
-    const vilInNpc = D.npcs.filter((n) => n.id !== 'don_caiman' && n.id !== 'old_boone' && /_(v|o)\d|don/.test(n.face || ''));
+    // 老人の NPC（id・名前・肩書きが老人。npcFace.js の判定と同じ）は老人の顔でよい
+    const OLDRX = /(^|_)old(_|$)|elder|gran|grandpa|granny|じいさん|じじ|ばあさん|ばあちゃん|おばあ|おじい|老/;
+    const vilInNpc = D.npcs.filter((n) => n.id !== 'don_caiman' && n.id !== 'old_boone' && (/_v\d|don/.test(n.face || '') || (/_o\d/.test(n.face || '') && !OLDRX.test(n.id + n.name + n.title))));
     check('vil: 普通の NPC は悪役・老人の顔を使わない', vilInNpc.length === 0, vilInNpc.map((n) => n.id + ':' + n.face).join(','));
     saveUrl('grid_vil', await drawGrid(page, '悪役・ドン・老人の顔あり（仮: 本物の顔の絵を別名で）', WHO));
     check('vil: 例外・コンソールエラーなし', errs.length === 0, errs.slice(0, 3).join(' | '));

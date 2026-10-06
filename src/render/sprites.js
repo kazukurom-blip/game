@@ -1105,6 +1105,22 @@ function stOf(s) { if (!s) return 0; const r = img(s); return r.st === 2 && !r.s
  * 顔 + 前髪 + 後ろ髪の重ね頭（paintAiHead / paintAiHeadBack に渡せる形。layered: true）。
  * look.face の顔の絵と hairs['<性別>_<look.hair>'] があり、読み込み済みなら返す。無い/読み込み中 → null（呼び出し側は heads → コードの頭）
  */
+/**
+ * 顔・髪の絵（look.face と hairs）がまだ読み込み中か（読み込みも始める）。
+ * 読み込み中に「コードの頭」を出すと旧い絵が一瞬見えるので、呼び出し側は代わりの絵（影だけ）を出す。失敗・無い → false
+ */
+export function faceHeadPending(look) {
+  try {
+    if (!MAN || MODE !== 'auto' || !look || !look.face) return false;
+    const F = MAN.faces[look.face];
+    const H = MAN.hairs[(look.gender || look.body || F?.g) + '_' + look.hair];
+    if (!F || !H) return false;
+    heroResolve(F, null); // 顔の先読み
+    const r = img(F.base);
+    const sts = [r.st, H.front ? stOf(H.front) : 2, H.back ? stOf(H.back) : 2];
+    return sts.some((v) => v === 0 || v === 1);
+  } catch { return false; }
+}
 export function faceHeadFor(look, expr, small) {
   try {
     if (!MAN || MODE !== 'auto' || !look || !look.face) return null;

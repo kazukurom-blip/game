@@ -11,9 +11,10 @@
 //          攻撃/被弾/死亡などの一過性の状態や大きな拡大表示はその場でベクター描画する。
 import { shade, rgba, mix, rng, clamp, lerp, OUTLINE } from './util.js';
 import { ITEMS } from '../data/items.js';
-import { spriteCharPlan, drawSpriteCharPlan, headFor, headBackOf, flashOf, faceHeadFor, layeredBackOf } from './sprites.js';
+import { spriteCharPlan, drawSpriteCharPlan, headFor, headBackOf, flashOf, faceHeadFor, faceHeadPending, layeredBackOf } from './sprites.js';
 import { RIG_PARTS, RIG_GROUP_PARTS, RIG_S, WPN_BOX, WPN_S, RIG_Y, RIG_LIMBS, RIG_CODE_HEAD, HEAD_BACK_PIVOT } from './rigLayout.js';
-import { rigPlanFor, rigCodePlanFor, rigView, rigNpcs } from './rig.js';
+import { rigPlanFor, rigCodePlanFor, rigView, rigNpcs, rigPending } from './rig.js';
+import { imagesInFlight } from './loadGate.js';
 import { npcHeadLook } from './npcFace.js';
 
 export const HERO_LOOKS = {
@@ -1308,6 +1309,11 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
   }
   // ---- リグ（パーツ式の着せ替え。manifest の rig に素体があり、必要な絵が読み込み済みのとき）。無ければ下の既存の経路
   const rig = A.rigCode ? rigCodePlanFor(look, equip) : !A.noSprite && !A.noRig ? rigPlanFor(look, equip) : null;
+  // 絵（素体・服・頭）がまだ読み込み中なら、コード描画の旧い絵を出さず、影と淡い光だけ（読み込みが済めば次のフレームから絵）
+  if (!A.rigCode && !A.noSprite && !A.noRig && !A.noPending && (rig ? faceHeadPending(look) : rigPending(look, equip) || faceHeadPending(look)) && pendingOk()) {
+    drawLoadingPlaceholder(ctx, x, y, s, A.t || 0, alpha);
+    return;
+  }
   const RENDER = rig
     ? (c, a2) => renderRig(c, look, equip, a2, state, ws, wk, rig)
     : (c, a2) => renderChar(c, look, equip, a2, state, ws, wk);
@@ -3995,6 +4001,23 @@ function staffGlow(ctx, c, P, t, w, tip = 30) {
   ctx.restore();
 }
 
+// 読み込み中の代わりを出してよいか: 画像がまだ届いている途中なら待つ。何も読み込んでいないのに「読み込み中」のまま
+// （どこかで止まった）なら、人が消えたままにならないようにコード描画に戻す
+function pendingOk() { try { return imagesInFlight() > 0; } catch { return false; } }
+/** 絵の読み込み中の代わり（足元の影と、ゆっくり明滅する淡い光の柱） */
+function drawLoadingPlaceholder(ctx, x, y, s, t, alpha) {
+  ctx.save();
+  ctx.translate(x, y); ctx.scale(s, s);
+  if (alpha < 1) ctx.globalAlpha *= alpha;
+  ctx.beginPath(); ctx.ellipse(0, 0, 13, 3.2, 0, 0, TAU);
+  ctx.fillStyle = 'rgba(20,0,30,0.28)'; ctx.fill();
+  const a = 0.10 + 0.06 * Math.sin(t * 4);
+  const gr = ctx.createLinearGradient(0, -84, 0, 0);
+  gr.addColorStop(0, 'rgba(255,208,234,0)'); gr.addColorStop(1, `rgba(255,208,234,${a.toFixed(3)})`);
+  ctx.fillStyle = gr;
+  ctx.beginPath(); ctx.ellipse(0, -40, 14, 42, 0, 0, TAU); ctx.fill();
+  ctx.restore();
+}
 /** リグで1人描く（原点=足元・右向き・scale 1）。plan = rig.js の rigPlanFor() */
 function renderRig(ctx, look, equip, anim, state, ws, wk, plan) {
   const dmg = clamp(anim.damage || 0, 0, 1);

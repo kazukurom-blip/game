@@ -540,6 +540,36 @@ const PLAN_MAX = 160;              // 画面の人型（主人公＋NPC・市民
 function find(keys) { for (const k of keys) { const r = SHEETS.get(k); if (r) return r; } return null; }
 const hex6 = (c) => (typeof c === 'string' && HEX.test(c) ? c.slice(1).toLowerCase() : null);
 /** 主人公（rig.npcs なら NPC・敵・市民も）の look・装備 → リグのプラン | null（リグ無し・素体が無い/読み込み中・必要な絵が読み込み中・spriteMode=procedural） */
+/**
+ * その人のリグの絵（素体・服・武器）がまだ読み込み中か。rigPlanFor の後に呼ぶ（読み込みは rigPlanFor が始める）。
+ * 読み込み中にコード描画へ戻すと旧い絵が一瞬見えるので、呼び出し側は代わりの絵を出す。素体が無い・失敗 → false
+ */
+export function rigPending(look, equip) {
+  if (!RM || !RM.enabled || !look) return false;
+  if ((look.villain || !look.classId) && !RM.npcs) return false;
+  equip = equip || {};
+  const g = look.body === 'm' ? 'm' : 'f';
+  const body = find(['body_' + g, 'body']);
+  if (!body) return false;
+  const wait = (r) => { if (r.st === 0) load(r); return r.st === 0 || r.st === 1; }; // 読み込みも始める（待ちきりにならないように）
+  if (wait(body)) return true;
+  if (body.st !== 2) return false;
+  for (const slot of RIG_SLOTS) {
+    let it = equip[slot];
+    if (!it && RM.defaultWear && RIG_DEFAULT_WEAR[slot]) it = RIG_DEFAULT_WEAR[slot](g);
+    if (!it || !it.style) continue;
+    const h = hex6(it.color);
+    const rec = find([h && `${slot}/${it.style}__${h}_${g}`, h && `${slot}/${it.style}__${h}`, `${slot}/${it.style}_${g}`, `${slot}/${it.style}`].filter(Boolean));
+    if (rec && wait(rec)) return true;
+  }
+  const wi = equip.weapon;
+  if (wi && wi.style) {
+    const h = hex6(wi.color);
+    const rec = find([h && `weapon/${wi.style}__${h}`, `weapon/${wi.style}`].filter(Boolean));
+    if (rec && wait(rec)) return true;
+  }
+  return false;
+}
 export function rigPlanFor(look, equip) {
   if (!RM || !RM.enabled || !SHEETS.size || !HAS || getSpriteMode() !== 'auto') return null;
   if (!look || ((look.villain || !look.classId) && !RM.npcs)) return null;
