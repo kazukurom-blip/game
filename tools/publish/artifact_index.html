@@ -61,7 +61,7 @@ html, body {
     }
   });
   // 使うときだけ切り出す pack（顔・髪。files[k] = [atlas, x, y, w, h, ox, oy, W, H]）
-  var LAZY = {}, LAZYP = {}, ATL = {};
+  var LAZY = {}, LAZYP = {}, ATL = {}, LAZYA = [];
   function lazyUrl(k){
     if (LAZYP[k]) return LAZYP[k];
     var e = LAZY[k];
@@ -74,8 +74,18 @@ html, body {
   }
   var lazyList = fetch('assets/packs/pack5.json').then(function(r){ return r.json(); }).then(function(j){
     for (var k in j.files) LAZY[k] = { e: j.files[k], a: j.atlases };
+    LAZYA = j.atlases;
   }).catch(function(e){ console.warn('pack5 読み込み失敗', e); });
-  function start(){ var s = document.createElement('script'); s.type = 'module'; s.src = 'src/main.js'; document.body.appendChild(s); }
+  function start(){
+    var s = document.createElement('script'); s.type = 'module'; s.src = 'src/main.js'; document.body.appendChild(s);
+    // 顔・髪のまとめ画像は、ゲームが始まったらすぐ裏で読み始める（キャラ選択で初めて要る時に待たないように。起動の読み込みとは取り合わない）
+    LAZYA.forEach(function(a){ ATL[a] = ATL[a] || loadImg(a); });
+  }
+  // ゲームが始まるまでの「読み込み中」（まとめ画像の読み込みを待つ間、画面が真っ暗にならないように）
+  try {
+    var cv = document.getElementById('game'), cx = cv && cv.getContext('2d');
+    if (cx) { cx.fillStyle = '#0b0614'; cx.fillRect(0, 0, cv.width, cv.height); cx.fillStyle = '#ffd0ea'; cx.font = "700 22px 'M PLUS Rounded 1c', sans-serif"; cx.textAlign = 'center'; cx.fillText('NEON VICE STORY  読み込み中…', cv.width / 2, cv.height / 2); }
+  } catch (e) { /* ignore */ }
   var lists = ['assets/packs/pack3.json', 'assets/packs/pack4.json'];
   function loadImg(u){ return new Promise(function(ok, ng){ var im = new Image(); im.onload = function(){ ok(im); }; im.onerror = ng; d.set.call(im, u); }); }
   function cut(im, e){ return new Promise(function(ok){ var c = document.createElement('canvas'); c.width = e[3]; c.height = e[4]; c.getContext('2d').drawImage(im, e[1], e[2], e[3], e[4], 0, 0, e[3], e[4]); c.toBlob(function(b){ ok(b); }, 'image/png'); }); }

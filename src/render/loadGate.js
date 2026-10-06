@@ -6,8 +6,8 @@
 import { spriteStats } from './sprites.js';
 import { artStats } from './artOverrides.js';
 
-// 最長の待ち時間（秒）。起動直後は全体の読み込みを待つので長め、マップ移動・画面切り替えは短め
-const MAX_WAIT_BOOT = 6, MAX_WAIT = 2;
+// 最長の待ち時間（秒）。起動直後は全体の読み込みを待つので長め、マップ移動・画面切り替えは短め（短すぎると、回線が遅い時にコード描画の旧い絵が一瞬見える）
+const MAX_WAIT_BOOT = 10, MAX_WAIT = 4;
 const G = { key: null, t0: 0, active: false, fade: 0, manifest: false, first: true };
 
 /** manifest.json の読み込みが終わった（成功・失敗どちらでも）ことを知らせる */
