@@ -12,7 +12,7 @@ const PI = Math.PI;
 const LW = 1024;
 
 // ================================================================ シーン解決
-export const REGIONS = ['beach', 'downtown', 'slums', 'swamp', 'casino', 'rooftop', 'spaceport'];
+export const REGIONS = ['beach', 'downtown', 'slums', 'swamp', 'casino', 'rooftop', 'spaceport', 'arkcity', 'cyberwild', 'abyss', 'zenith'];
 // SPEC_V2 のマップID → 地域内バリアント（ID が既知ならこちらを優先、未知なら map.variant）
 const ID_VARIANT = {
   beach_f1: 0, beach_f2: 1, beach_f3: 2, beach_f4: 3,
@@ -23,7 +23,7 @@ const ID_VARIANT = {
   tower_f1: 0, tower_f2: 1, tower_f3: 2,
   space_f1: 0, space_f2: 1, space_f3: 2, space_f4: 3,
 };
-const INDOOR = { 'downtown:1': 1, 'casino:1': 1, 'casino:2': 1, 'rooftop:2': 1, 'spaceport:2': 1, 'spaceport:3': 1 };
+const INDOOR = { 'downtown:1': 1, 'casino:1': 1, 'casino:2': 1, 'rooftop:2': 1, 'spaceport:2': 1, 'spaceport:3': 1, 'arkcity:3': 1, 'abyss:3': 1, 'zenith:3': 1 };
 const sceneMemo = new WeakMap();
 // 奥行きのもやの既定の強さ（0 = なし）
 export let BG_HAZE = 0.36;
@@ -112,6 +112,11 @@ const REGION_SKY = {
   casino: ['#0e0620', '#2a0b4a', '#6a1a6e', '#a02a7a'],
   rooftop: ['#07051a', '#1e1450', '#5a2d82', '#ff6f91'],
   spaceport: ['#0a1430', '#1c3a7a', '#4a7ab8', '#ffb07a'],
+  // v4: 第2ワールド
+  arkcity: ['#05031a', '#1a0a4a', '#4a1a7a', '#ff3dd2'],
+  cyberwild: ['#041a14', '#0a3a2a', '#1a6a4a', '#5cff9a'],
+  abyss: ['#0a2a5a', '#1a4a8a', '#2a7ab8', '#5ee8ff'],
+  zenith: ['#3a7ae0', '#7ab8ff', '#cfe6ff', '#fff6d0'],
 };
 // 色調補正（source-atop で背景レイヤーに重ねる）
 const TOD_TINT = { dawn: ['#ff9ac8', 0.2], day: ['#c4dcf4', 0.32], dusk: ['#ff6a3a', 0.12], night: ['#0a0e3a', 0.5] };
@@ -217,6 +222,7 @@ export function drawBackground(ctx, map, cam, W, H, time) {
   // 色調補正（描いた部分だけ）
   let [tc, ta] = weighted(TOD_TINT, w);
   if (S.indoor) ta *= 0.25;
+  if (S.tintK != null) ta *= S.tintK; // v4: シーンごとの色調補正の強さ（ネオンの色を残したい第2ワールドなど）
   if (ta > 0.01) { ctx.globalCompositeOperation = 'source-atop'; ctx.globalAlpha = Math.min(0.85, ta); ctx.fillStyle = tc; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
   // 奥行きのもや（描いた部分だけ）: 背景の色の濃さ・コントラストを少し落として、手前のキャラを見やすくする。
   //  昼は明るいもや、夜は暗いもや。強さは設定（game.settings.bgHaze 0〜1、既定 BG_HAZE）で変えられる
@@ -405,6 +411,11 @@ const TILE = {
   spaceport: { gk: 'spaceport', pk: 'beam', ground: '#5a6488', groundD: '#3a4060', top: '#a8b0c8', plat: '#6a7498', platE: '#c8d0e8', neon: '#3ee6d2', ladder: true, wall: '#5a6488' },
   moon: { gk: 'moon', pk: 'beam', ground: '#8a8aa0', groundD: '#5a5a70', top: '#b8b8cc', plat: '#7a7e98', platE: '#c8ccdc', neon: '#9ff6ff', ladder: true, wall: '#6a6a80' },
   alien: { gk: 'alien', pk: 'alien', ground: '#3a1450', groundD: '#1a0828', top: '#7a3a9a', plat: '#4a1a5a', platE: '#b45cff', neon: '#7cff6a', ladder: true, wall: '#3a1450' },
+  // v4: 第2ワールド（地域ごとの地面・足場の色）
+  arkcity: { gk: 'ark', pk: 'ark', ground: '#1a1840', groundD: '#0a0820', top: '#3a3470', plat: '#24204e', platE: '#19f0ff', neon: '#ff3dd2', ladder: true, wall: '#2a2458' },
+  cyberwild: { gk: 'wild', pk: 'wild', ground: '#1a2a1e', groundD: '#0a140e', top: '#2a6a40', plat: '#3a2a1e', platE: '#5cff9a', neon: '#5cff9a', ladder: false, wall: '#2a3a24' },
+  abyss: { gk: 'abyss', pk: 'abyss', ground: '#c8b088', groundD: '#2a3a58', top: '#e8d8b0', plat: '#ff7f9f', platE: '#5ee8ff', neon: '#5ee8ff', ladder: true, wall: '#1a3a6a' },
+  zenith: { gk: 'zenith', pk: 'cloud', ground: '#f2eee6', groundD: '#c8c0b0', top: '#ffffff', plat: '#ffffff', platE: '#e8c860', neon: '#ffd23f', ladder: true, wall: '#e8e0d0' },
 };
 // 地域×バリアントから床タイル種を選ぶ
 function tileTheme(sc) {
@@ -416,7 +427,7 @@ function tileTheme(sc) {
   if (r === 'casino') return v === 0 ? 'desert' : v === 1 ? 'vault' : 'casino';
   if (r === 'rooftop') return v === 1 ? 'garden' : 'rooftop';
   if (r === 'spaceport') return v === 2 ? 'moon' : v === 3 ? 'alien' : 'spaceport';
-  return TILE[r] ? r : 'beach';
+  return TILE[r] ? r : 'beach'; // v4: 第2ワールドは地域のタイル（arkcity / cyberwild / abyss / zenith）
 }
 
 function viewRange(ctx) {
@@ -544,6 +555,52 @@ function drawGround(ctx, map, S, theme, V, time) {
       ctx.stroke(); ctx.fillStyle = 'rgba(180,92,255,0.5)'; ctx.fillRect(x0, gy, x1 - x0, 2); ctx.restore();
       break;
     }
+    // ---- v4: 第2ワールド
+    case 'ark': { // 黒い金属の床＋ネオンの格子
+      ctx.fillStyle = S.top; ctx.fillRect(x0, gy, x1 - x0, 12);
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = rgba('#19f0ff', 0.6 + 0.2 * Math.sin(time * 2)); ctx.fillRect(x0, gy, x1 - x0, 2);
+      ctx.strokeStyle = 'rgba(255,61,210,0.22)'; ctx.lineWidth = 1; ctx.beginPath();
+      for (let i = i0; i <= i1; i++) { ctx.moveTo(i * step, gy + 12); ctx.lineTo(i * step, gy + 200); }
+      for (let y = gy + 44; y < gy + 200; y += 32) { ctx.moveTo(x0, y); ctx.lineTo(x1, y); }
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(25,240,255,0.5)'; for (let i = i0; i <= i1; i++) if (i % 3 === 0) ctx.fillRect(i * step + 20, gy + 5, 24, 3);
+      ctx.restore();
+      break;
+    }
+    case 'wild': { // 黒土＋光る根っこ
+      ctx.fillStyle = S.top; ctx.fillRect(x0, gy, x1 - x0, 7);
+      ctx.fillStyle = '#3a8a4a'; ctx.beginPath();
+      for (let i = i0 * 2; i <= i1 * 2; i++) { const x = i * 32, h = hashStr('wg' + i) % 8; ctx.moveTo(x, gy + 2); ctx.lineTo(x + 4, gy - 6 - h); ctx.lineTo(x + 7, gy + 2); }
+      ctx.fill();
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      ctx.strokeStyle = rgba('#5cff9a', 0.35 + 0.15 * Math.sin(time * 1.6)); ctx.lineWidth = 2; ctx.beginPath();
+      for (let i = i0; i <= i1; i++) { const h = hashStr('wr' + i); if (h % 2) continue; ctx.moveTo(i * step, gy + 10); ctx.quadraticCurveTo(i * step + 30, gy + 30 + h % 30, i * step + 64, gy + 20 + (h >>> 5) % 40); }
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255,61,210,0.6)'; for (let i = i0; i <= i1; i++) { const h = hashStr('wf' + i); if (h % 5 === 0) { ctx.beginPath(); ctx.arc(i * step + h % 60, gy - 3, 3, 0, PI * 2); ctx.fill(); } }
+      ctx.restore();
+      break;
+    }
+    case 'abyss': { // 海底の砂＋光る真珠と貝
+      ctx.fillStyle = S.top; ctx.fillRect(x0, gy, x1 - x0, 6);
+      ctx.fillStyle = 'rgba(42,58,88,0.35)';
+      for (let i = i0; i <= i1; i++) { const h = hashStr('ab' + i); ctx.fillRect(i * step + (h % 50), gy + 14 + (h >>> 8) % 60, 4, 2); }
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      for (let i = i0; i <= i1; i++) { const h = hashStr('ap' + i); if (h % 4) continue; ctx.fillStyle = rgba('#5ee8ff', 0.5 + 0.3 * Math.sin(time * 2 + i)); ctx.beginPath(); ctx.arc(i * step + 20 + h % 30, gy + 4, 3, 0, PI * 2); ctx.fill(); }
+      ctx.restore();
+      for (let i = i0; i <= i1; i += 3) { const h = hashStr('as' + i); if (h % 3 === 0) { ctx.save(); ctx.translate(i * step + 30, gy + 24); shell(ctx, h); ctx.restore(); } }
+      break;
+    }
+    case 'zenith': { // 白い大理石＋金の縁
+      ctx.fillStyle = S.top; ctx.fillRect(x0, gy, x1 - x0, 14);
+      ctx.fillStyle = '#e8c860'; ctx.fillRect(x0, gy + 14, x1 - x0, 4);
+      ctx.strokeStyle = 'rgba(184,170,140,0.5)'; ctx.lineWidth = 1; ctx.beginPath();
+      for (let i = i0; i <= i1; i++) { ctx.moveTo(i * step, gy + 18); ctx.lineTo(i * step, gy + 200); }
+      for (let i = i0; i <= i1; i++) { const h = hashStr('zm' + i); ctx.moveTo(i * step + h % 40, gy + 30); ctx.quadraticCurveTo(i * step + 32, gy + 40 + h % 20, i * step + 60, gy + 34); }
+      ctx.stroke();
+      ctx.fillStyle = '#e8c860'; for (let i = i0; i <= i1; i++) if (i % 2 === 0) { ctx.beginPath(); ctx.moveTo(i * step + 32, gy + 50); ctx.lineTo(i * step + 40, gy + 58); ctx.lineTo(i * step + 32, gy + 66); ctx.lineTo(i * step + 24, gy + 58); ctx.closePath(); ctx.fill(); }
+      break;
+    }
     case 'beach': {
       ctx.fillStyle = S.top; ctx.fillRect(x0, gy, x1 - x0, 6);
       ctx.fillStyle = 'rgba(214,154,92,0.6)';
@@ -654,6 +711,55 @@ function drawPlatform(ctx, p, S, theme, time) {
       ctx.restore();
       break;
     }
+    // ---- v4: 第2ワールド
+    case 'ark': { // ガラスのパネル＋ネオンの縁
+      ctx.beginPath(); rr(ctx, x, y, w, th, 3);
+      ctx.fillStyle = S.plat; ctx.fill(); ctx.strokeStyle = OUTLINE; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.fillStyle = 'rgba(160,220,255,0.18)'; for (let k = x + 10; k < x + w - 20; k += 60) ctx.fillRect(k, y + 3, 30, th - 6);
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      const pulse = 0.7 + Math.sin(time * 3 + x * 0.01) * 0.3;
+      ctx.strokeStyle = rgba(S.platE, 0.3 * pulse); ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(x + 2, y + 1); ctx.lineTo(x + w - 2, y + 1); ctx.stroke();
+      ctx.strokeStyle = rgba(S.platE, 0.95); ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = rgba(S.neon, 0.8); for (let k = x + 8; k < x + w - 4; k += 32) ctx.fillRect(k, y + th - 3, 10, 2);
+      ctx.restore();
+      break;
+    }
+    case 'wild': { // 太い枝＋光る苔＋垂れたツタ
+      ctx.beginPath(); rr(ctx, x, y, w, th, th / 2); ctx.fillStyle = S.plat; ctx.fill(); ctx.strokeStyle = OUTLINE; ctx.lineWidth = 2; ctx.stroke();
+      ctx.strokeStyle = 'rgba(20,12,8,0.5)'; ctx.lineWidth = 1; ctx.beginPath();
+      for (let k = x + 16; k < x + w - 10; k += 34) { ctx.moveTo(k, y + 6); ctx.lineTo(k + 20, y + 7); }
+      ctx.stroke();
+      grassTop(ctx, x, y, w, '#2a6a40', '#1f5a34');
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = rgba('#5cff9a', 0.55 + 0.25 * Math.sin(time * 2 + x * 0.02));
+      for (let k = x + 12; k < x + w - 6; k += 22) ctx.fillRect(k, y - 2, 6, 2);
+      ctx.restore();
+      ctx.strokeStyle = '#2f8a4a'; ctx.lineWidth = 2; ctx.beginPath();
+      for (let k = x + 24; k < x + w - 10; k += 52) { const l = 12 + (hashStr('wv' + k) % 16); const s = Math.sin(time * 1.4 + k) * 2; ctx.moveTo(k, y + th); ctx.quadraticCurveTo(k + s, y + th + l / 2, k + s * 1.5, y + th + l); }
+      ctx.stroke();
+      break;
+    }
+    case 'abyss': { // サンゴの棚
+      ctx.beginPath(); rr(ctx, x, y, w, th, 6);
+      const g = ctx.createLinearGradient(0, y, 0, y + th); g.addColorStop(0, '#ffb0c8'); g.addColorStop(1, S.plat);
+      ctx.fillStyle = g; ctx.fill(); ctx.strokeStyle = OUTLINE; ctx.lineWidth = 1.8; ctx.stroke();
+      ctx.fillStyle = 'rgba(122,40,80,0.35)'; for (let k = x + 10; k < x + w - 6; k += 18) { ctx.beginPath(); ctx.arc(k, y + th * 0.6, 3, 0, PI * 2); ctx.fill(); }
+      ctx.fillStyle = '#ff9a5c'; for (let k = x + 20; k < x + w - 10; k += 64) { ctx.beginPath(); ctx.moveTo(k, y); ctx.lineTo(k + 4, y - 9); ctx.lineTo(k + 8, y); ctx.fill(); }
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      ctx.strokeStyle = rgba(S.platE, 0.5 + 0.2 * Math.sin(time * 2 + x * 0.01)); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x + 4, y + 1); ctx.lineTo(x + w - 4, y + 1); ctx.stroke();
+      ctx.restore();
+      break;
+    }
+    case 'cloud': { // 雲の足場（もこもこ＋金の縁）
+      ctx.fillStyle = 'rgba(180,190,230,0.35)';
+      ctx.beginPath(); ctx.ellipse(x + w / 2, y + th + 4, w / 2, 6, 0, 0, PI * 2); ctx.fill();
+      ctx.fillStyle = S.plat;
+      ctx.beginPath(); rr(ctx, x, y + 2, w, th - 2, th / 2); ctx.fill();
+      for (let k = x + 14; k < x + w - 8; k += 28) { ctx.beginPath(); ctx.arc(k, y + 4, 10 + (hashStr('c' + k) % 5), PI, 0); ctx.fill(); }
+      ctx.strokeStyle = 'rgba(160,170,210,0.7)'; ctx.lineWidth = 1.5; ctx.beginPath(); rr(ctx, x, y + 2, w, th - 2, th / 2); ctx.stroke();
+      ctx.fillStyle = S.platE; ctx.fillRect(x + 8, y + th - 3, w - 16, 2);
+      break;
+    }
     case 'beach': {
       // 木の桟橋（板）＋草とヤシ葉の縁取り
       ctx.beginPath(); rr(ctx, x, y, w, th, 4); ctx.fillStyle = S.plat; ctx.fill();
@@ -735,7 +841,7 @@ function grassTop(ctx, x, y, w, c1, c2) {
 function drawRope(ctx, r, ladder, theme) {
   const top = r.top, bot = r.bottom;
   if (ladder) {
-    const c = theme === 'casino' ? '#ffd23f' : theme === 'slums' ? '#8a5a3a' : '#8e86b0';
+    const c = theme === 'casino' ? '#ffd23f' : theme === 'slums' ? '#8a5a3a' : theme === 'zenith' ? '#e8c860' : theme === 'arkcity' ? '#19f0ff' : theme === 'abyss' ? '#5ee8ff' : '#8e86b0';
     ctx.strokeStyle = OUTLINE; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(r.x - 10, top); ctx.lineTo(r.x - 10, bot); ctx.moveTo(r.x + 10, top); ctx.lineTo(r.x + 10, bot); ctx.stroke();
     ctx.strokeStyle = c; ctx.lineWidth = 3; ctx.stroke();
     ctx.lineWidth = 3; ctx.beginPath();
@@ -743,7 +849,7 @@ function drawRope(ctx, r, ladder, theme) {
     ctx.strokeStyle = OUTLINE; ctx.lineWidth = 5; ctx.stroke(); ctx.strokeStyle = c; ctx.lineWidth = 2.5; ctx.stroke();
   } else {
     ctx.strokeStyle = OUTLINE; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(r.x, top - 4); ctx.lineTo(r.x, bot); ctx.stroke();
-    ctx.strokeStyle = '#c8945a'; ctx.lineWidth = 4; ctx.stroke();
+    ctx.strokeStyle = theme === 'cyberwild' ? '#2f8a4a' : '#c8945a'; ctx.lineWidth = 4; ctx.stroke(); // v4: 電脳の密林はツタ
     ctx.strokeStyle = '#8a5a30'; ctx.lineWidth = 1.4; ctx.beginPath();
     for (let y = top; y < bot - 4; y += 8) { ctx.moveTo(r.x - 2, y); ctx.lineTo(r.x + 2, y + 5); }
     ctx.stroke();
@@ -765,7 +871,62 @@ function drawWall(ctx, w, S, theme) {
 }
 
 // ---------------------------------------------------------------- ポータル（メイプル風の光の渦）
+// v4: 次元ゲート（第2ワールドへの門）。p.locked（spawner が state.flags から毎フレーム入れる）で閉じた見た目
+function drawGate(ctx, p, time) {
+  const x = p.x, y = p.y, cy = y - 70;
+  const open = !p.locked;
+  ctx.save();
+  // 台座
+  ctx.fillStyle = '#2a2850'; ctx.beginPath(); rr(ctx, x - 78, y - 14, 156, 14, 4); ctx.fill();
+  ctx.strokeStyle = OUTLINE; ctx.lineWidth = 2; ctx.stroke();
+  // 枠（リング）
+  ctx.lineWidth = 16; ctx.strokeStyle = '#3a3870'; ctx.beginPath(); ctx.ellipse(x, cy, 52, 68, 0, 0, PI * 2); ctx.stroke();
+  ctx.lineWidth = 3; ctx.strokeStyle = OUTLINE; ctx.beginPath(); ctx.ellipse(x, cy, 60, 76, 0, 0, PI * 2); ctx.stroke(); ctx.beginPath(); ctx.ellipse(x, cy, 44, 60, 0, 0, PI * 2); ctx.stroke();
+  // 枠の光る目盛り
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 12; i++) {
+    const a = i / 12 * PI * 2 + (open ? time * 0.6 : 0);
+    const on = open ? 0.6 + 0.4 * Math.sin(time * 4 + i) : (i % 3 === 0 ? 0.6 : 0.15);
+    ctx.fillStyle = open ? rgba(i % 2 ? '#19f0ff' : '#ff3dd2', on) : rgba('#ff3d3d', on);
+    ctx.beginPath(); ctx.arc(x + Math.cos(a) * 52, cy + Math.sin(a) * 68, 4, 0, PI * 2); ctx.fill();
+  }
+  if (open) {
+    // 開いている: 渦
+    const cg = ctx.createRadialGradient(x, cy, 4, x, cy, 50);
+    cg.addColorStop(0, 'rgba(255,255,255,0.95)'); cg.addColorStop(0.4, 'rgba(25,240,255,0.6)'); cg.addColorStop(1, 'rgba(255,61,210,0.15)');
+    ctx.fillStyle = cg; ctx.beginPath(); ctx.ellipse(x, cy, 44, 60, 0, 0, PI * 2); ctx.fill();
+    for (let i = 0; i < 4; i++) {
+      const a0 = time * (3 + i * 0.6) + i * 1.5;
+      ctx.strokeStyle = i % 2 ? 'rgba(25,240,255,0.7)' : 'rgba(255,61,210,0.65)'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.ellipse(x, cy, 12 + i * 8, 18 + i * 11, 0, a0, a0 + PI * 1.3); ctx.stroke();
+    }
+    const fg = ctx.createRadialGradient(x, y - 4, 4, x, y - 4, 80);
+    fg.addColorStop(0, 'rgba(25,240,255,0.5)'); fg.addColorStop(1, 'rgba(25,240,255,0)');
+    ctx.fillStyle = fg; ctx.beginPath(); ctx.ellipse(x, y - 4, 80, 18, 0, 0, PI * 2); ctx.fill();
+  }
+  ctx.restore();
+  if (!open) {
+    // 閉じている: 暗い膜＋鍵の印
+    ctx.fillStyle = 'rgba(20,16,40,0.85)'; ctx.beginPath(); ctx.ellipse(x, cy, 44, 60, 0, 0, PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,61,61,0.55)'; ctx.lineWidth = 2;
+    for (let k = -2; k <= 2; k++) { ctx.beginPath(); ctx.moveTo(x - 40, cy + k * 18); ctx.lineTo(x + 40, cy + k * 18); ctx.stroke(); }
+    ctx.fillStyle = '#c8c0e0'; ctx.beginPath(); rr(ctx, x - 13, cy - 4, 26, 22, 4); ctx.fill();
+    ctx.strokeStyle = '#c8c0e0'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(x, cy - 6, 8, PI, 0); ctx.stroke();
+    ctx.fillStyle = '#2a1430'; ctx.fillRect(x - 2, cy + 4, 4, 8);
+  }
+  // ラベル
+  const label = open ? `次元ゲート → ${p.label || ''}` : '次元ゲート（封鎖中）';
+  ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const tw = ctx.measureText(label).width + 18;
+  const ly = y - 172 + Math.sin(time * 2) * 2;
+  ctx.fillStyle = open ? 'rgba(20,10,60,0.85)' : 'rgba(60,10,20,0.85)'; ctx.beginPath(); rr(ctx, x - tw / 2, ly - 11, tw, 22, 11); ctx.fill();
+  ctx.strokeStyle = open ? 'rgba(25,240,255,0.9)' : 'rgba(255,90,90,0.9)'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.fillStyle = '#ffffff'; ctx.fillText(label, x, ly + 1);
+  ctx.restore();
+}
+
 function drawPortal(ctx, p, time) {
+  if (p.gate) return drawGate(ctx, p, time);
   const x = p.x, y = p.y;
   const cy = y - 46;
   ctx.save();
@@ -814,6 +975,7 @@ function drawPortal(ctx, p, time) {
 const WALK = {
   beach: ['#f2e2d0', '#d8c0a8', '#ff9ab8'], slums: ['#8a8090', '#6a6070', '#b5523b'], swamp: ['#8a7a5a', '#6a5a3a', '#c9a13b'],
   casino: ['#e8dcc8', '#b89a5a', '#ffd23f'], rooftop: ['#6a6488', '#4a4468', '#b45cff'], spaceport: ['#d8e0f0', '#a8b4cc', '#3ee6d2'],
+  arkcity: ['#2a2860', '#1a1840', '#19f0ff'], cyberwild: ['#3a3a2a', '#2a2a1a', '#5cff9a'], abyss: ['#d8c8a0', '#a89870', '#5ee8ff'], zenith: ['#ffffff', '#e0d8c8', '#e8c860'],
 };
 function drawSidewalk(ctx, map, S, region, V) {
   const c = WALK[region]; if (!c) return;

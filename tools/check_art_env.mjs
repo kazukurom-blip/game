@@ -21,10 +21,11 @@ export const ENV_TH = {
   markerDyWarn: 0.04, markerDxWarn: 0.3, holeWarn: 0.6,
   wheelCenter: 10, wheelRound: 0.08, wheelSmall: 0.5,
 };
-export const REGION_IDS = ['beach', 'downtown', 'slums', 'swamp', 'casino', 'rooftop', 'spaceport'];
+// v4: 第2ワールド（CODEX_BATCH_04_WORLD2）の 4 地域も受け付ける
+export const REGION_IDS = ['beach', 'downtown', 'slums', 'swamp', 'casino', 'rooftop', 'spaceport', 'arkcity', 'cyberwild', 'abyss', 'zenith'];
 const SIZE = {
   bg: [2560, 720], ground: [512, 256], platform: [512, 96], icon: [256, 256], vehicle: [1024, 512], wheel: [256, 256],
-  title_art: [1920, 1080], logo: [1600, 600], world_map: [2048, 1152],
+  title_art: [1920, 1080], logo: [1600, 600], world_map: [2048, 1152], world_map_w2: [2048, 1152],
 };
 
 /** rel（assets/sprites/ からのパス）→ 種類。キャラ以外でなければ null */
@@ -40,7 +41,7 @@ export function classifyEnv(rel) {
   if ((m = /^vehicles\/([a-z]+)_wheel\.png$/.exec(rel))) return { kind: 'wheel', vehicle: m[1] };
   if ((m = /^vehicles\/([a-z]+)\.png$/.exec(rel))) return { kind: 'vehicle', vehicle: m[1] };
   if (/^vehicles\//.test(rel)) return { kind: 'vehicle', bad: true };
-  if ((m = /^ui\/(title_art|logo|world_map)\.png$/.exec(rel))) return { kind: 'ui', id: m[1] };
+  if ((m = /^ui\/(title_art|logo|world_map|world_map_w2)\.png$/.exec(rel))) return { kind: 'ui', id: m[1] };
   if (/^ui\//.test(rel)) return { kind: 'ui', bad: true };
   return null;
 }
@@ -162,7 +163,7 @@ export function checkEnv(r, im, info, cat, H) {
   if (info.bad) { r.add('NG', 'ファイルの場所・名前の形がゲームの決まりに合わない（bg/<地域>_<town|field>_<far|mid|lights>.png・tiles/<地域>_<ground|platform>.png・icons/<equip|item|skill>/…・vehicles/<種類>[_wheel].png・ui/<title_art|logo|world_map>.png）', '依頼書（CODEX_BATCH_03.md）の保存先のとおりにしてください'); return false; }
   const want = sizeOf(info);
   // ワールドマップは地図の枠いっぱいに伸ばして描くので、16:9 で横 1600px 以上なら大きさは問わない（依頼書は 1600×900 と書いた）
-  const flexOk = info.kind === 'ui' && info.id === 'world_map' && im.w >= 1600 && Math.abs(im.w / im.h - 16 / 9) < 0.01;
+  const flexOk = info.kind === 'ui' && (info.id === 'world_map' || info.id === 'world_map_w2') && im.w >= 1600 && Math.abs(im.w / im.h - 16 / 9) < 0.01;
   if (want && !flexOk && (im.w !== want[0] || im.h !== want[1])) { r.add('NG', `大きさが ${im.w}×${im.h}（${want[0]}×${want[1]} が正しい）`, `${want[0]}×${want[1]} で描き直してください（縮小・切り抜き・余白の追加はしない）`); return false; }
   if (info.kind === 'bg') {
     if (!im.hasAlpha) { r.add('NG', '透明の情報（アルファ）が無い RGB の画像（空が塗られている）', '空を透明にした RGBA の PNG で保存してください'); return false; }

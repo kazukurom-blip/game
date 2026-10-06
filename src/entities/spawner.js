@@ -3,7 +3,7 @@
 import { ENEMIES } from '../data/enemies.js';
 import { spawnEffect } from '../render/effects.js';
 import { Enemy } from './enemy.js';
-import { MAPS, buildTowerFloor, openTowerExit } from '../world/maps.js';
+import { MAPS, buildTowerFloor, openTowerExit, portalOpen } from '../world/maps.js';
 import { sysFn, nightNow } from '../world/sys.js';
 
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -30,7 +30,8 @@ export function habitatTypes(map) {
 
 /** ボス候補（boss:true かつ habitats に mapId）。無ければ Lv が最も近いボスで代替（行き止まりマップのみ） */
 export function habitatBosses(map) {
-  const all = Object.values(ENEMIES || {}).filter((e) => isBossDef(e) && !e.isCop && !e.civilian);
+  // v4: 第2形態（phaseOf）は出現表に入れない（第1形態を倒すとその場に出る）
+  const all = Object.values(ENEMIES || {}).filter((e) => isBossDef(e) && !e.isCop && !e.civilian && !e.phaseOf);
   const list = all.filter((e) => (e.habitats || []).includes(map.id));
   if (list.length) return list.map((e) => e.id);
   if (!map.levelRange || all.length === 0) return [];
@@ -181,9 +182,43 @@ export class Spawner {
     return e;
   }
 
+  /** v4: ボスの第2形態（def.phase2）。第1形態が倒れたら、その場に第2形態を出す。返り値: 出した敵 or null */
+  spawnPhase2(boss) {
+    const g = this.game;
+    const id = boss?.def?.phase2;
+    if (!id || !ENEMIES[id] || boss._phase2Done) return null;
+    boss._phase2Done = true;
+    const map = this.map;
+    const x = Math.max(200, Math.min(map.width - 200, boss.x));
+    const e = new Enemy(g, id, x, map.groundY, { x1: Math.max(40, x - 900), x2: Math.min(map.width - 40, x + 900) });
+    e.aggro = true;
+    if (boss.spawnIdx != null) e.spawnIdx = boss.spawnIdx; // ボス枠の数に入れる（第2形態がいる間は第1形態を出さない）
+    if (boss.instance) {
+      const m = this.inst?.mult || { hp: 1, atk: 1 };
+      scaleEnemy(e, m.hp, m.atk);
+      e.instance = boss.instance; e.bossMode = boss.bossMode;
+      if (this.inst) this.inst.spawned.push(e);
+    }
+    g.enemies.push(e);
+    spawnEffect(g, 'explosion', x, map.groundY - 80);
+    spawnEffect(g, 'portal', x, map.groundY - 40);
+    g.shake = Math.max(g.shake || 0, 14);
+    g.notify?.(`⚠ ${ENEMIES[id].name} — 第2形態！`, '#ff3dd2');
+    g.events?.emit('bossPhase2', { bossId: boss.defId || boss.def?.id, phase2: id });
+    return e;
+  }
+
   update(dt) {
     const g = this.game, map = this.map;
     if (!map || !g.player) return;
+    // v4: 次元ゲート（requireFlag つきポータル）の開閉の見た目（state.flags を読むだけ）
+    for (const p of map.portals || []) if (p.requireFlag) p.locked = !portalOpen(p, g.state);
+    // v4: ボスの第2形態
+    if (this.hasPhase2 !== map) {
+      this.hasPhase2 = map;
+      this.phase2Map = (map.spawns || []).some((s) => s.boss) || !!map.instance;
+    }
+    if (this.phase2Map) for (const e of g.enemies) if ((e.dead || e.hp <= 0) && e.def?.phase2 && !e._phase2Done && !e.summoned) this.spawnPhase2(e);
     if (map.instance) { this.updateInstance(dt); return; }
     // 昼になったら夜限定の敵は画面外で静かに退場
     this.nightT = (this.nightT || 0) - dt;
@@ -303,7 +338,12 @@ export class Spawner {
         if (inst.next <= 0) this.startArenaWave();
       }
     } else if (inst.type === 'boss') {
-      const b = inst.boss;
+      let b = inst.boss;
+      // v4: 第2形態があるボスは、第2形態を倒すまでクリアにしない
+      if (b && (b.dead || b.hp <= 0) && b.def?.phase2 && ENEMIES[b.def.phase2]) {
+        const p2 = g.enemies.find((e) => e.defId === b.def.phase2 && e.instance) || this.spawnPhase2(b);
+        if (p2) { inst.boss = b = p2; }
+      }
       if (b && !inst.cleared && (b.dead || b.hp <= 0)) {
         inst.cleared = true;
         const info = { bossId: inst.bossId, mode: inst.mode, time: inst.t, maxHit: g.bossMaxHit || 0 };
@@ -390,7 +430,7 @@ export function scaleEnemy(e, hpMult = 1, atkMult = 1, level) {
 }
 
 const monsters = () => Object.values(ENEMIES || {}).filter((e) => isMonster(e) && !isBossDef(e) && !e.night);
-const bosses = () => Object.values(ENEMIES || {}).filter((e) => isBossDef(e) && !e.isCop && !e.civilian);
+const bosses = () => Object.values(ENEMIES || {}).filter((e) => isBossDef(e) && !e.isCop && !e.civilian && !e.phaseOf);
 function nearLevel(list, lv, n) {
   return [...list].sort((a, b) => Math.abs((a.level || 1) - lv) - Math.abs((b.level || 1) - lv)).slice(0, n);
 }

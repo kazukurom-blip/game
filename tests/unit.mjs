@@ -6,7 +6,7 @@ import { ITEMS, STARTER_EQUIP, EQUIP_SLOTS, getItem } from '../src/data/items.js
 import { SKILLS, STARTER_SKILLS, skillsForHero } from '../src/data/skills.js';
 import { ENEMIES, ENEMIES_BY_MAP } from '../src/data/enemies.js';
 import { MISSIONS, MISSION_NPCS, MAP_IDS, turnInNpcOf } from '../src/data/missions.js';
-import { MAPS, MAP_ORDER, CONNECTIONS, TOWN_IDS, FIELD_IDS, reachability } from '../src/world/maps.js';
+import { MAPS, MAP_ORDER, CONNECTIONS, TOWN_IDS, FIELD_IDS, W2_TOWN_IDS, W2_FIELD_IDS, reachability } from '../src/world/maps.js';
 import { moveAndCollide, findRope, rectOverlap, entRect } from '../src/world/physics.js';
 import { newState, computeStats, expToNext, gainExp, setActiveBuffs, addStat, HERO_BASE } from '../src/systems/progression.js';
 import { addItem, addItemToState, removeItem, countItem, equip, unequip, useItem, getEquipLooks, MAX_SLOTS, buyItem, sellItem } from '../src/systems/inventory.js';
@@ -62,7 +62,7 @@ const HAIRS = ['twin', 'bob', 'long', 'spiky', 'short', 'ponytail', 'wolf'];
 const ARTS = ['slime', 'mushroom', 'flamingo', 'gator', 'thug', 'cop', 'drone', 'swat', 'bossGator', 'bossDon',
   'crab', 'jellyfish', 'seagull', 'rat', 'snake', 'mosquito', 'ghost', 'robot', 'alien', 'golem', 'civilian', 'bossAlien'];
 const AIS = ['walker', 'jumper', 'charger', 'shooter', 'flyer', 'cop', 'boss', 'civilian'];
-const THEMES = ['beach', 'downtown', 'slums', 'swamp', 'casino', 'rooftop', 'spaceport'];
+const THEMES = ['beach', 'downtown', 'slums', 'swamp', 'casino', 'rooftop', 'spaceport', 'arkcity', 'cyberwild', 'abyss', 'zenith'];
 // v2: spawns の types は省略可（spawner が habitats から解決）。解決済みの出現表で判定する
 const spawnTypesOf = (m) => resolveSpawns(m).flatMap((s) => s.types);
 const spawnsAt = (mapId, enemyId) => spawnTypesOf(MAPS[mapId]).includes(enemyId);
@@ -325,11 +325,13 @@ test('maps: 構造・ポータル・出現', () => {
   }
 });
 
-test('world v2: 34マップ・接続表・到達可能性・町/フィールドの出現ルール', () => {
-  assert.equal(Object.keys(MAPS).length, 34, 'マップ数');
+test('world v2: 34マップ（＋第2ワールド20）・接続表・到達可能性・町/フィールドの出現ルール', () => {
+  assert.equal(Object.values(MAPS).filter((m) => m.worldId !== 2).length, 34, '第1ワールドのマップ数');
+  assert.equal(Object.values(MAPS).filter((m) => m.worldId === 2).length, 20, '第2ワールドのマップ数');
   assert.equal(TOWN_IDS.length, 7); assert.equal(FIELD_IDS.length, 27);
-  for (const id of TOWN_IDS) assert.ok(MAPS[id]?.town === true && !MAPS[id].copSpawns, id + ' town（警察は廃止）');
-  for (const id of FIELD_IDS) {
+  assert.equal(W2_TOWN_IDS.length, 4); assert.equal(W2_FIELD_IDS.length, 16);
+  for (const id of [...TOWN_IDS, ...W2_TOWN_IDS]) assert.ok(MAPS[id]?.town === true && !MAPS[id].copSpawns, id + ' town（警察は廃止）');
+  for (const id of [...FIELD_IDS, ...W2_FIELD_IDS]) {
     const m = MAPS[id];
     assert.ok(m && m.town === false && m.copSpawns === false, id + ' field');
     assert.ok(Array.isArray(m.levelRange) && m.levelRange[0] <= m.levelRange[1], id + ' levelRange');
@@ -367,7 +369,7 @@ test('world v2: 34マップ・接続表・到達可能性・町/フィールド�
     }
   }
   // 出現表: フィールドは habitats から 3 種以上・警官/市民なし、町はモンスター枠なし
-  for (const id of FIELD_IDS) {
+  for (const id of [...FIELD_IDS, ...W2_FIELD_IDS]) {
     const areas = resolveSpawns(MAPS[id]);
     const normal = [...new Set(areas.filter((s) => !s.boss).flatMap((s) => s.types))];
     const hab = Object.values(ENEMIES).filter((e) => (e.habitats || []).includes(id) && !e.boss && !e.isCop && !e.civilian);
@@ -375,7 +377,7 @@ test('world v2: 34マップ・接続表・到達可能性・町/フィールド�
     assert.ok(normal.length >= 3, `${id}: 出現 ${normal.length} 種`);
     for (const t of areas.flatMap((s) => s.types)) assert.ok(!ENEMIES[t].isCop && !ENEMIES[t].civilian, `${id}: ${t} は出せない`);
   }
-  for (const id of TOWN_IDS) {
+  for (const id of [...TOWN_IDS, ...W2_TOWN_IDS]) {
     for (const t of spawnTypesOf(MAPS[id])) assert.ok(ENEMIES[t].civilian, `${id}: 町に ${t}`);
   }
 });
@@ -935,7 +937,7 @@ test('spawner: 全マップで敵が自動出現・ボス出現', () => {
   for (const mapId of Object.keys(MAPS)) {
     const g = makeGame('luna', mapId);
     g.debug.god = true;
-    g.state.level = 99;
+    g.state.level = MAPS[mapId].worldId === 2 ? 200 : 99; // 第2ワールドのボス枠は Lv100 超え
     g.changeMap(mapId);
     const initial = g.enemies.length;
     assert.ok(initial > 0, `${mapId}: 初期配置 0`);
@@ -1267,7 +1269,8 @@ test('v2 SNS: 自動投稿・フォロワー・節目報酬・称号', () => {
 
 test('v2 タクシー/訪問記録/ワールドグラフ', () => {
   // WORLD_GRAPH は SPEC の接続表（maps.js の CONNECTIONS と一致）
-  assert.equal(Object.keys(MAP_INFO).length, 34);
+  assert.equal(Object.values(MAP_INFO).filter((m) => m.world !== 2).length, 34);
+  assert.equal(Object.values(MAP_INFO).filter((m) => m.world === 2).length, 20, '第2ワールド');
   if (typeof CONNECTIONS !== 'undefined' && CONNECTIONS) {
     const key = (a, b) => [a, b].sort().join('|');
     assert.deepEqual(new Set(WORLD_EDGES.map(([a, b]) => key(a, b))), new Set(CONNECTIONS.map(([a, b]) => key(a, b))));
@@ -1597,6 +1600,8 @@ test('v3 classes: newState(classId, {name, gender, look}) と性別別の初期�
 (await import('./world_v3.mjs')).default({ test, makeGame, step, fin });
 // v3 デバッグ担当の回帰テスト（tests/debug_v3.mjs）
 (await import('./debug_v3.mjs')).default({ test, makeGame, step, fin });
+// v4 第2ワールド「ネオン・アーク」（tests/world2.mjs）
+(await import('./world2.mjs')).default({ test, makeGame, step, fin });
 
 // ------------------------------------------------------------ 実行
 const t0 = Date.now();

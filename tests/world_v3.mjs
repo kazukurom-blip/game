@@ -263,7 +263,7 @@ export default function register({ test, makeGame, step, fin }) {
   test('v3 world: タワー/アリーナ/ボス部屋（到達性・入口・進行）', async () => {
     await sysReady;
     // 列挙されない（既存の 34 マップ・接続表に影響しない）が MAPS[id] で引ける
-    assert.equal(Object.keys(MAPS).length, 34);
+    assert.equal(Object.values(MAPS).filter((m) => m.worldId !== 2).length, 34);
     for (const id of INSTANCE_IDS) {
       const m = MAPS[id];
       assert.ok(m && m.id === id && ['tower', 'arena', 'boss'].includes(m.instance), id);
@@ -340,6 +340,14 @@ export default function register({ test, makeGame, step, fin }) {
       assert.ok(m.hp > 1, 'ハードは HP 増');
       let done = null; gb.events.on('bossRoomCleared', (d) => { done = d; });
       b.hp = 0; b.dead = true; step(gb);
+      // v4: 第2形態のあるボス（ラスボス）は、第2形態を倒すまでクリアにならない
+      if (b.def.phase2) {
+        assert.ok(!done, id + ' 第1形態ではまだクリアにしない');
+        const p2 = gb.enemies.find((e) => e.defId === b.def.phase2 && !e.dead);
+        assert.ok(p2 && p2.instance === 'boss', id + ' 第2形態が出る');
+        assert.equal(p2.maxHp, Math.round(ENEMIES[b.def.phase2].hp * m.hp), id + ' 第2形態にも難易度の HP 倍率');
+        p2.hp = 0; p2.dead = true; step(gb);
+      }
       assert.ok(done && done.mode === 'hard', id + ' 討伐記録');
     }
     assert.equal(bossMapId('boss_gator'), 'boss_gator'); assert.equal(bossMapId('gator'), 'boss_gator');

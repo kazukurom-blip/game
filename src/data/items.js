@@ -283,3 +283,134 @@ export function itemGender(it) {
 /** canWearGender(item, gender) → その性別のキャラが装備できるか */
 export function canWearGender(it, gender) { const g = itemGender(it); return !g || !gender || g === gender; }
 export const GENDER_ONLY_LABEL = { f: '女性専用', m: '男性専用' };
+
+// ============================================================================================
+// v4: 第2ワールド「ネオン・アーク」の敵のドロップ用（素材・装備）。ワールド担当が追加（ぶつからないよう末尾にまとめる）
+//  - 素材: 地域ごとに 2 種＋ボス素材
+//  - 装備: 地域ごとに 2 セット（防具 5 部位＋武器 4 種）。W2_GEAR[region] に ID の一覧。ボスは神話級の武器・装飾
+//  - 能力の目安: 武器 atk ≒ 必要Lv×2（伝説）/ ×2.3（神話）、上着 def ≒ 必要Lv×0.8
+// ============================================================================================
+const W2_N0 = list.length;
+etc('ark_chip', 'アーク回路片', 'common', 'chip', 900, 'アーク・シティの機械から外れた回路。まだ温かい。');
+etc('holo_shard', 'ホロ結晶', 'rare', 'gem', 3200, '固まったホログラム。光にかざすと広告が流れる。');
+etc('ark_core', 'タイタン・コア', 'epic', 'chip', 30000, 'アーク・タイタンの動力炉。都市ひとつ分の電力。');
+etc('wild_seed', '電脳の種', 'common', 'gem', 1100, 'サイバー・ワイルドの植物の種。芽からWi-Fiが出る。');
+etc('vine_cable', 'ネオン蔦ケーブル', 'rare', 'chip', 3800, '光ファイバーのように光る蔦。');
+etc('wild_heart', 'カーネルの心臓', 'epic', 'gem', 36000, '密林の主の中枢。脈打つたびに森が光る。');
+etc('abyss_pearl', '深淵パール', 'common', 'gem', 1300, '深海でしか育たない、青く光る真珠。');
+etc('pressure_scale', '耐圧うろこ', 'rare', 'gem', 4400, '深海の水圧に耐える硬いうろこ。');
+etc('abyss_crown', '深淵の女王冠', 'epic', 'gem', 42000, 'ディープ・クイーンの王冠。中で小魚が泳いでいる。');
+etc('cloud_essence', '雲の精', 'common', 'gem', 1500, '天空の塔の雲を固めた物。ふわふわ。');
+etc('star_fragment', '星のかけら', 'rare', 'gem', 5200, 'ゼニス・タワーの上で拾える、本物の星のかけら。');
+etc('zenith_core', 'ソブリン・コア', 'mythic', 'gem', 80000, 'ゼニス・ソブリンの核。ふたつの世界をつなぐ鍵。');
+etc('origin_core', '起源のコア', 'mythic', 'gem', 200000, '真ゼニス・ソブリンが遺した、ネオン・アークの始まりの光。');
+
+// 地域ごとの装備セット（必要Lv R・レア度・色）
+const W2_SETS = [
+  { region: 'arkcity', key: 'ark', R: 100, rarity: 'epic', c: '#19f0ff', a: '#ff3dd2', name: 'アーク',
+    names: { hat: 'アーク・バイザー', top: 'アーク・コート', bottom: 'アーク・パンツ', shoes: 'アーク・ブーツ', accessory: 'アーク・グラス',
+      melee: 'アーク・ブレード', gun: 'アーク・ブラスター', magic: 'アーク・ロッド', katana: 'ホロ太刀' } },
+  { region: 'arkcity', key: 'ark2', R: 115, rarity: 'legendary', c: '#e8eef8', a: '#19f0ff', name: 'アーク・プライム',
+    names: { hat: 'プライム・クラウン', top: 'プライム・アーマー', bottom: 'プライム・グリーヴ', shoes: 'プライム・ブーツ', accessory: 'プライム・ヘイロー',
+      melee: 'プライム・セイバー', gun: 'プライム・レールガン', magic: 'プライム・スタッフ', katana: 'プライム太刀' } },
+  { region: 'cyberwild', key: 'wild', R: 130, rarity: 'epic', c: '#5cff9a', a: '#b04dff', name: 'ワイルド',
+    names: { hat: 'ネオン・リーフ帽', top: '電脳迷彩パーカー', bottom: '蔦のカーゴ', shoes: '根っこスニーカー', accessory: 'ホタルのマフラー',
+      melee: 'ヴァイン・ブレード', gun: 'シードショット', magic: 'ルート・ワンド', katana: '竹光・改' } },
+  { region: 'cyberwild', key: 'wild2', R: 142, rarity: 'legendary', c: '#b6ff3d', a: '#19f0ff', name: 'カーネル',
+    names: { hat: 'カーネル・クラウン', top: 'カーネル・アーマー', bottom: 'カーネル・グリーヴ', shoes: 'カーネル・ブーツ', accessory: 'カーネル・ヘイロー',
+      melee: 'カーネル・エッジ', gun: 'カーネル・ガトリング', magic: 'カーネル・ツリー', katana: '電脳刀・森羅' } },
+  { region: 'abyss', key: 'abyss', R: 155, rarity: 'epic', c: '#2e7bff', a: '#5ee8ff', name: 'アビス',
+    names: { hat: 'ダイバー・ヘルム', top: '耐圧スーツ', bottom: '耐圧パンツ', shoes: 'フィン・ブーツ', accessory: 'パールのネックレス',
+      melee: 'トライデント・ブレード', gun: 'ハープーン・ガン', magic: '珊瑚の杖', katana: '深海刀' } },
+  { region: 'abyss', key: 'abyss2', R: 167, rarity: 'legendary', c: '#1a2a6a', a: '#ff6fd8', name: 'ディープ',
+    names: { hat: 'ディープ・クラウン', top: 'ディープ・アーマー', bottom: 'ディープ・グリーヴ', shoes: 'ディープ・ブーツ', accessory: 'ディープ・ヘイロー',
+      melee: 'ディープ・セイバー', gun: 'ディープ・トーピード', magic: 'ディープ・スタッフ', katana: '深淵刀・海神' } },
+  { region: 'zenith', key: 'zen', R: 180, rarity: 'legendary', c: '#fff6d0', a: '#7ad8ff', name: 'ゼニス',
+    names: { hat: 'ゼニス・ティアラ', top: 'ゼニス・ローブ', bottom: 'ゼニス・パンツ', shoes: 'クラウド・ステップ', accessory: 'ゼニス・ウイング',
+      melee: 'ゼニス・ブレード', gun: 'ゼニス・ライフル', magic: 'ゼニス・セプター', katana: '天空刀' } },
+  { region: 'zenith', key: 'zen2', R: 192, rarity: 'mythic', c: '#ffd23f', a: '#fff6d0', name: 'セレスティアル',
+    names: { hat: 'セレスティアル・クラウン', top: 'セレスティアル・アーマー', bottom: 'セレスティアル・グリーヴ', shoes: 'セレスティアル・ブーツ', accessory: 'セレスティアル・ヘイロー',
+      melee: 'セレスティアル・エッジ', gun: 'セレスティアル・キャノン', magic: 'セレスティアル・オーブ', katana: '天刀・星詠' } },
+];
+const W2_RMUL = { epic: 0.88, legendary: 1, mythic: 1.15 };
+// 見た目: 今ある見た目の種類（look.style）の色違い
+const W2_LOOK = {
+  arkcity: { hat: 'helmet', top: 'leatherJacket', bottom: 'cargo', shoes: 'boots', accessory: 'sunglasses' },
+  cyberwild: { hat: 'beanie', top: 'hoodie', bottom: 'cargo', shoes: 'sneakers', accessory: 'scarf' },
+  abyss: { hat: 'helmet', top: 'armorVest', bottom: 'armorPants', shoes: 'boots', accessory: 'goldChain' },
+  zenith: { hat: 'crown', top: 'suit', bottom: 'suitPants', shoes: 'boots', accessory: 'wings' },
+};
+const W2_LOOK_PRIME = { hat: 'crown', top: 'armorVest', bottom: 'armorPants', shoes: 'boots', accessory: 'halo' };
+/** 地域ごとの装備 ID の一覧（第2ワールドの敵のドロップ表に使う） */
+export const W2_GEAR = { arkcity: [], cyberwild: [], abyss: [], zenith: [] };
+for (const S of W2_SETS) {
+  const R = S.R, k = W2_RMUL[S.rarity];
+  const prime = /2$/.test(S.key);
+  const lk = (slot) => (prime ? W2_LOOK_PRIME[slot] : W2_LOOK[S.region][slot]);
+  const stat = (n) => Math.round(n * k);
+  const ms = Math.round(R * 0.09 * k); // 主な能力値の加算
+  const ids = [];
+  const add = (slot, stats) => {
+    const id = `w2_${S.key}_${slot}`;
+    equip(id, S.names[slot], slot, S.rarity, R, stats, [lk(slot), S.c, S.a], { desc: `${S.name}の装備（ネオン・アーク）。`, world: 2 });
+    ids.push(id);
+  };
+  add('hat', { def: stat(R * 0.55), maxHp: stat(R * 3), str: ms, dex: ms, int: ms, luk: ms });
+  add('top', { def: stat(R * 0.8), maxHp: stat(R * 5), atk: stat(R * 0.12), str: ms, dex: ms });
+  add('bottom', { def: stat(R * 0.6), maxHp: stat(R * 3.5), int: ms, luk: ms });
+  add('shoes', { def: stat(R * 0.4), speed: Math.round(20 + R * 0.12), dex: ms, luk: ms });
+  add('accessory', { def: stat(R * 0.35), atk: stat(R * 0.25), str: ms, dex: ms, int: ms, luk: ms, crit: prime ? 5 : 3 });
+  const wpn = (sub, style, type, atkK, range, spd, extraStats) => {
+    const id = `w2_${S.key}_${sub}`;
+    weapon(id, S.names[sub], S.rarity, R, { atk: stat(R * atkK), crit: prime ? 9 : 6, ...extraStats }, [style, S.c, S.a], type, range, spd, { desc: `${S.name}の武器（ネオン・アーク）。`, world: 2 });
+    ids.push(id);
+  };
+  wpn('melee', 'neonSword', 'melee', 2.0, 155, 2.5, { str: ms + 4, dex: ms + 4 });
+  wpn('gun', 'smg', 'gun', 1.4, 580, 7.0, { dex: ms + 4, luk: ms });
+  wpn('magic', 'staff', 'magic', 1.45, 500, 2.1, { int: ms + 6, maxMp: stat(R * 3.5) });
+  wpn('katana', 'katana', 'melee', 1.85, 135, 2.3, { str: ms + 6 });
+  W2_GEAR[S.region].push(...ids);
+}
+// ボス専用（神話級）
+weapon('w2_titan_cannon', 'タイタン・キャノン', 'mythic', 128, { atk: 300, dex: 22, luk: 12, crit: 10 }, ['smg', '#19f0ff', '#ffd23f'], 'gun', 620, 7.5, { desc: 'アーク・タイタンの腕の砲身を外して持てるようにした。', world: 2 });
+equip('w2_titan_visor', 'タイタン・バイザー', 'hat', 'mythic', 128, { def: 90, atk: 26, str: 15, dex: 15, int: 15, luk: 15, maxHp: 700 }, ['helmet', '#19f0ff', '#ffd23f'], { desc: '都市の監視網が全部見える。見えすぎる。', world: 2 });
+weapon('w2_kernel_sword', 'カーネル・ルートソード', 'mythic', 152, { atk: 350, str: 24, dex: 24, crit: 11 }, ['neonSword', '#5cff9a', '#ffd23f'], 'melee', 160, 2.6, { desc: '密林の根を束ねた光の大剣。', world: 2 });
+equip('w2_kernel_scarf', '森羅のマフラー', 'accessory', 'mythic', 152, { def: 60, atk: 45, str: 20, dex: 20, int: 20, luk: 20, crit: 7 }, ['scarf', '#5cff9a', '#b04dff'], { desc: '巻くと森の声が聞こえる。', world: 2 });
+weapon('w2_queen_staff', '深淵の女王杖', 'mythic', 178, { atk: 300, int: 34, maxMp: 900, crit: 9 }, ['staff', '#5ee8ff', '#ff6fd8'], 'magic', 520, 2.2, { desc: '振ると周りに泡が舞う。', world: 2 });
+equip('w2_queen_crown', 'ディープ・クイーンの冠', 'hat', 'mythic', 178, { def: 120, atk: 34, str: 20, dex: 20, int: 20, luk: 20, maxHp: 1100 }, ['crown', '#5ee8ff', '#ff6fd8'], { desc: '深海の女王が被っていた冠。', world: 2 });
+weapon('w2_sovereign_blade', 'ソブリン・ブレード', 'mythic', 200, { atk: 470, str: 32, dex: 32, crit: 12 }, ['neonSword', '#fff6d0', '#ffd23f'], 'melee', 170, 2.7, { desc: 'ゼニス・タワーの頂で鍛えられた、ふたつの世界で最強の刃。', world: 2 });
+weapon('w2_sovereign_gun', 'ソブリン・レイ', 'mythic', 200, { atk: 330, dex: 34, luk: 18, crit: 12 }, ['pistol', '#fff6d0', '#ffd23f'], 'gun', 700, 3.6, { desc: '光そのものを撃つ銃。', world: 2 });
+weapon('w2_sovereign_staff', 'ソブリン・オラクル', 'mythic', 200, { atk: 320, int: 40, maxMp: 1200, crit: 9 }, ['staff', '#fff6d0', '#ffd23f'], 'magic', 540, 2.2, { desc: '星の運行を指先で操る杖。', world: 2 });
+equip('w2_sovereign_wings', 'ソブリンの光翼', 'accessory', 'mythic', 200, { def: 100, atk: 70, str: 30, dex: 30, int: 30, luk: 30, crit: 8, speed: 30 }, ['wings', '#fff6d0', '#ffd23f'], { desc: '真ゼニス・ソブリンの翼の光。', world: 2 });
+// フレーバーテキスト（lore.js の ITEM_LORE に無い物だけ足す。lore.js はクエスト担当の持ち物なので触らない）
+const W2_SET_LORE = {
+  ark: 'アーク・シティの工房で量産された標準品。ネオンの縫い目がほのかに光る。',
+  ark2: 'アーク・シティの上級市民だけが着られる試作品。表面をホロの膜が流れる。',
+  wild: '電脳の密林の素材で編んだ装備。葉脈が回路のように光る。',
+  wild2: 'ジャングル・カーネルの根から削り出した装備。持つと森のざわめきが聞こえる。',
+  abyss: '深海の水圧に耐えるよう作られた装備。少しだけ潮の香りがする。',
+  abyss2: 'ディープ・クイーンの宮廷の装備。暗い所で青く光る。',
+  zen: '雲の糸と星の粉で仕立てた天空の装備。羽のように軽い。',
+  zen2: 'ゼニス・タワーの頂でしか作れない、天の金で飾った装備。',
+};
+const W2_SLOT_LORE = {
+  hat: '頭にかぶると', top: '袖を通すと', bottom: 'はくと', shoes: '足を入れると', accessory: '身につけると',
+  melee: '振るうと', gun: '引き金を引くと', magic: '掲げると', katana: '抜くと',
+};
+const W2_SLOT_LORE2 = {
+  hat: '視界のすみに次元の地図が浮かぶ。', top: '体じゅうに薄い光の膜が張る。', bottom: '一歩ごとに足元がほのかに光る。', shoes: '段差がひとつ低く感じる。',
+  accessory: 'ふたつの世界の風が同時に吹く。', melee: '刃の跡が光の線になって残る。', gun: '弾の代わりに光の粒が飛ぶ。', magic: '周りの機械が一斉にこちらを向く。', katana: '鞘から光がこぼれる。',
+};
+for (const it of list.slice(W2_N0)) {
+  if (it.type !== 'equip' || ITEM_LORE[it.id]) continue;
+  const m = /^w2_([a-z]+2?)_([a-z]+)$/.exec(it.id);
+  if (m && W2_SET_LORE[m[1]]) ITEM_LORE[it.id] = `${W2_SET_LORE[m[1]]}${W2_SLOT_LORE[m[2]] || ''}${W2_SLOT_LORE2[m[2]] || ''}`;
+  else ITEM_LORE[it.id] = `${it.desc} ネオン・アークのボスだけが持つ、ひとつきりの品。`;
+}
+// 第2ワールドの分を ITEMS に登録（フレーバーテキストも付ける）
+for (const it of list.slice(W2_N0)) {
+  if (it.type === 'equip') it.lore = ITEM_LORE[it.id] || it.desc || `${it.name}。ネオン・アークで手に入れた一品。`;
+  ITEMS[it.id] = it;
+}
+/** 第2ワールドの素材・装備の ID */
+export const W2_ITEM_IDS = list.slice(W2_N0).map((it) => it.id);

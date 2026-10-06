@@ -5,7 +5,7 @@
 // boss: ボス（habitats は行き止まりマップ）。summon: ボスが呼ぶ手下
 // habitats: 出現フィールドの mapId 配列（SPEC_V2 のID）。region: 地域ID（図鑑・背景テーマと同じ）
 // civilian: 町を歩く住民（攻撃の対象外。経験値/図鑑なし）
-import { ITEMS, looksFromIds } from './items.js';
+import { ITEMS, looksFromIds, W2_GEAR } from './items.js';
 import { baseEnemyExp, expToNext, REGION_EXP_MULT } from './balance.js';
 import { ENEMY_LORE } from './lore.js';
 
@@ -31,6 +31,11 @@ export const REGION_PETS = {
   casino: ['pet_ghost'],
   rooftop: ['pet_dragon'],
   spaceport: ['pet_robot', 'pet_alien'],
+  // v4: 第2ワールド（今ある PET を地域に割り当て）
+  arkcity: ['pet_cat', 'pet_drone'],
+  cyberwild: ['pet_dragon'],
+  abyss: ['pet_dolphin'],
+  zenith: ['pet_ghost', 'pet_alien'],
 };
 export const PET_CHANCE = { normal: 0.0003, elite: 0.0005, boss: 0.0008 };
 
@@ -96,7 +101,10 @@ function mk(id, name, level, art, ai, region, habitats, o = {}) {
   if (o.title) def.title = o.title;
   if (o.summon) def.summon = o.summon;
   if (o.desc) def.desc = o.desc;
-  if (o.night) def.night = true; // v3: 夜（20〜5時）だけ出現。spawner は isNightNow(game) で判定
+  if (o.night) def.night = true;
+  if (o.world) def.world = o.world; // v4: 2 = 第2ワールド「ネオン・アーク」
+  if (o.phase2) def.phase2 = o.phase2; // v4: 倒すとこの ID の第2形態がその場に出る（spawner）
+  if (o.phaseOf) def.phaseOf = o.phaseOf; // v4: 第2形態（元のボスの ID）。ボス部屋・ボス一覧には出さない // v3: 夜（20〜5時）だけ出現。spawner は isNightNow(game) で判定
   def.lore = ENEMY_LORE[id] || o.desc || `${name}。ヴァイス・ベイの${o.civilian ? '住人' : '夜に潜む何か'}。`;
   return def;
 }
@@ -108,10 +116,107 @@ function bossStats(lv, hpX, o = {}) {
     hp: o.hp ?? Math.round(hpAt(lv) * hpX / 100) * 100,
     atk: Math.round(atkAt(lv) * (o.atkX ?? 1.6)),
     def: Math.round(defAt(lv) * 1.5),
-    exp: Math.round(expToNext(lv) * (o.expX ?? 0.45)),
+    exp: Math.round(expToNext(o.expBase ?? lv) * (o.expX ?? 0.45)), // expBase: Lv200（上限）は expToNext が Infinity なので 199 を使う
     money: moneyAt(lv, 30),
   };
 }
+
+// ---------------------------------------------------------------- v4: 第2ワールドの敵
+// 地域の素材 [よく落ちる, まれ]
+const W2_MAT = {
+  arkcity: ['ark_chip', 'holo_shard'], cyberwild: ['wild_seed', 'vine_cable'],
+  abyss: ['abyss_pearl', 'pressure_scale'], zenith: ['cloud_essence', 'star_fragment'],
+};
+/** 第2ワールドの伸びの補正: Lv100 で 1、Lv200 で 1 - a（HP 0.75・防御 0.7・攻撃 0.85 にする） */
+export const w2k = (lv, a) => 1 - a * Math.max(0, Math.min(100, lv - 100)) / 100;
+// 第2ワールドの装備から Lv に合う物（必要Lv が 敵Lv-30〜敵Lv+2。その地域の物を優先）を 3 つ（id ハッシュで決定的）
+const W2_GEAR_ALL = Object.values(W2_GEAR).flat();
+function w2GearDrops(id, region, lv, n = 3) {
+  const fit = (gid) => ITEMS[gid] && ITEMS[gid].reqLevel <= lv + 2 && ITEMS[gid].reqLevel >= lv - 30;
+  let cands = (W2_GEAR[region] || []).filter(fit);
+  if (cands.length < n) cands = [...cands, ...W2_GEAR_ALL.filter((g) => fit(g) && !cands.includes(g))];
+  const out = [];
+  let h = hash(id);
+  for (let i = 0; i < n && cands.length; i++) {
+    const it = ITEMS[cands.splice(h % cands.length, 1)[0]];
+    out.push({ id: it.id, chance: EQUIP_CHANCE[it.rarity] || 0.001 });
+    h = Math.imul(h ^ (h >>> 13), 2654435761) >>> 0;
+  }
+  return out;
+}
+/** w2(...) — mk と同じ引数。world:2 を付け、強さに w2 補正、ドロップに地域の素材・装備を入れる */
+function w2(id, name, level, art, ai, region, habitats, o = {}) {
+  const q = { ...o, world: 2 };
+  if (o.boss) {
+    q.atk = Math.round(o.atk * w2k(level, 0.15));
+    q.def = Math.round(o.def * w2k(level, 0.3));
+  } else {
+    q.hp = o.hp ?? Math.round(hpAt(level, o.hpM ?? o.m ?? 1) * w2k(level, 0.25));
+    q.def = o.def ?? Math.round(defAt(level, o.defM ?? 1) * w2k(level, 0.3));
+    q.atk = o.atk ?? Math.round(atkAt(level, o.atkM ?? 1) * w2k(level, 0.15));
+    if (!o.drops) {
+      const [m1, m2] = W2_MAT[region];
+      q.drops = [{ id: m1, chance: 0.5 }, { id: m2, chance: 0.08 }, ...POTS_HIGH, ...w2GearDrops(id, region, level), ...(o.extra || [])];
+    }
+  }
+  return mk(id, name, level, art, ai, region, habitats, q);
+}
+
+// v4: 第2ワールドの敵のフレーバーテキスト（lore.js の ENEMY_LORE に無い物だけ足す。lore.js はクエスト担当の持ち物なので触らない）
+const W2_ENEMY_LORE = {
+  ark_drone_patrol: 'アーク・シティの空を一晩中回る巡回機。違反者を見つけると光線で注意する（物理）。',
+  ark_slime_neon: '看板からこぼれたネオン液が固まって動き出した。触るとちょっと明るくなる。',
+  ark_rat_chrome: '全身をクロームでめっきしたネズミ。自分の姿に見とれて壁にぶつかる。',
+  ark_robot_guard: '摩天街の警備ボット。マニュアルが古く、侵入者に丁寧な挨拶をしてから殴る。',
+  ark_ghost_holo: '消し忘れたホログラムに魂が宿ったもの。ときどき昔の広告を口ずさむ。',
+  ark_jelly_ad: '空中に広告を映しながら漂うクラゲ。スキップボタンは付いていない。',
+  ark_golem_steel: 'データ・コアを守る鋼鉄の巨人。都市の古い鉄骨で組み上げられている。',
+  ark_alien_hacker: 'ネットの穴から入り込んだグレイ。指一本で街の信号を全部赤にできる。',
+  ark_robot_enforcer: '外縁ゲートの取り締まり役。罰金の請求書を常に 3 枚持っている。',
+  ark_drone_sniper: '外縁ゲートの塔から狙い撃つドローン。命中率は自称 120%。',
+  ark_ghost_midnight: '夜のアーク・シティにだけ出るホロの亡霊。終電を逃した誰かの記憶らしい。',
+  wild_mushroom_byte: 'データを養分に育つキノコ。胞子の代わりに 0 と 1 を撒く。',
+  wild_snake_wire: '光ファイバーの束が蛇になった。噛まれると回線が遅くなる気がする。',
+  wild_mosquito_glitch: '映像が乱れたような羽音の蚊。刺された跡にノイズが走る。',
+  wild_gator_cyber: '電脳の沼に棲むワニ。目がカメラになっていて、見た物を全部録画している。',
+  wild_crab_moss: '甲羅にネオン苔を生やしたカニ。苔のおかげで夜でも迷子にならない。',
+  wild_slime_virus: 'ウイルスに感染したスライム。増えるのが速い。とても速い。',
+  wild_golem_root: '巨木の根が絡み合ってできたゴーレム。歩くたびに地面からWi-Fiが出る。',
+  wild_alien_shaman: '密林の奥で電脳の神をまつる来訪者。祈りの言葉はほぼプログラム。',
+  wild_mosquito_queen: '電脳の蚊の女王。羽音で周りの機械を全部誤作動させる。',
+  wild_seagull_neon: '極楽鳥の電脳版。求愛のダンスでネオンを 7 色に光らせる。',
+  wild_snake_hydra: '首が何本にも分岐したコードの蛇。どの首が本体かは本人も知らない。',
+  wild_ghost_firefly: '夜の樹海に漂うホタルの霊。光の点滅はモールス信号だと言う学者もいる。',
+  abyss_jelly_lantern: '頭のちょうちんで獲物を誘うクラゲ。ドームの街灯と間違える人が多い。',
+  abyss_crab_pressure: '深海の水圧で鍛えられた甲羅。ハンマーで叩くとハンマーが欠ける。',
+  abyss_slime_brine: '深海の塩水がスライムになった。ちょっとしょっぱい。',
+  abyss_snake_eel: 'ドームの配電盤に住み着いたデンキウナギ。停電の原因はだいたいこいつ。',
+  abyss_robot_diver: 'ドームの外壁を点検する潜水ボット。仕事熱心すぎて侵入者も点検する。',
+  abyss_ghost_drowned: '沈んだ連絡船の乗客の亡霊。まだ切符を握りしめている。',
+  abyss_golem_coral: 'サンゴが何百年もかけて人の形に育った。体のあちこちに魚が住んでいる。',
+  abyss_alien_deep: '深海の向こう側から来た来訪者。光の届かない所でしか本気を出さない。',
+  abyss_gator_angler: 'アンコウとワニが合体したような深海の主。頭のちょうちんは実は懐中電灯。',
+  abyss_jelly_abyssal: '深淵に漂う巨大なメデューサ。触手の一本一本が別々に考えている。',
+  abyss_jelly_glow: '夜になるとドームの外に群れで現れる夜光クラゲ。見とれていると囲まれる。',
+  zen_seagull_sky: '雲より高く飛ぶカモメ。地上のポテトを恋しがっている。',
+  zen_slime_cloud: '雲がスライムになった。乗るとふかふかだが、乗られるのは嫌い。',
+  zen_golem_marble: '天空の塔の柱が動き出した。彫刻家のサインが背中に残っている。',
+  zen_ghost_seraph: '塔の鐘の音に宿った天使の残響。近づくと耳の奥で鐘が鳴る。',
+  zen_robot_angel: '天使の翼を付けた警備ロボ。羽ばたきはただの演出で、本当はジェットで飛ぶ。',
+  zen_drone_halo: '頭の輪を回して飛ぶドローン。輪は武器にも照明にもなる。',
+  zen_alien_oracle: '星の動きで未来を読む民。あなたが倒しに来ることも知っていた。',
+  zen_mushroom_star: '星の光を浴びて育ったキノコ。かさの模様が星座になっている。',
+  zen_jelly_aurora: 'オーロラをまとって漂うクラゲ。色が変わるたびに攻撃の種類も変わる。',
+  zen_golem_titan: '頂上の聖域の門番。雲の上に立ち続けて、もう千年になる。',
+  zen_robot_archon: 'ゼニス・ソブリンの近衛ロボ。忠誠心がプログラムの 9 割を占めている。',
+  zen_ghost_starlight: '星明かりの夜にだけ現れる亡霊。流れ星を数えながら漂っている。',
+  boss_ark_titan: 'アーク・シティの中枢を守る巨大機兵。都市の電力をまるごと背負って戦う。',
+  boss_wild_kernel: '電脳の密林の根っこ＝カーネル。森のすべてのデータはこの巨体を通っている。',
+  boss_abyss_queen: '深淵のドームを治める巨大なメデューサの女王。歌声で潮の流れを変える。',
+  boss_zenith: 'ゼニス・タワーの頂に座す主。ふたつの世界を見下ろし、次元ゲートを作った張本人。',
+  boss_zenith_true: '第1形態の殻を脱ぎ捨てた真の姿。ネオン・アークの起源そのものの光。',
+};
+for (const [k, v] of Object.entries(W2_ENEMY_LORE)) if (!ENEMY_LORE[k]) ENEMY_LORE[k] = v;
 
 // 人型の見た目ヘルパー
 const LK = (body, skin, hair, hairColor, eyeColor = '#222222') => ({ body, skin, hair, hairColor, eyeColor });
@@ -615,6 +720,185 @@ const list = [
     shoot: GUN_SHOT(760, 0.7, 800, 0.5),
     drops: [{ id: 'alien_core', chance: 1 }, { id: 'alien_crystal', chance: 1 }, { id: 'elixir', chance: 1 }, { id: 'diamond', chance: 0.5 }, { id: 'neon_sword_void', chance: 0.02 }, { id: 'smg_galaxy', chance: 0.02 }, { id: 'halo_cosmic', chance: 0.01 }, { id: 'cat_ears_cosmic', chance: 0.03 }, { id: 'jacket_nebula', chance: 0.03 }],
   }),
+  // =====================================================================
+  // v4: 第2ワールド「ネオン・アーク」（Lv100〜200）。見た目は今ある型の色違い・大きさ違い
+  //  強さ: Lv100 の敵と同じ式（hpAt/atkAt/defAt）から始め、Lv が上がるほど HP・防御・攻撃の伸びを少し抑える（w2 補正）
+  // =====================================================================
+  // ---------------- arkcity（アーク・シティ / Lv100〜130）夜の未来都市: ドローン・ロボ・ホロ
+  w2('ark_drone_patrol', 'ホロ巡回ドローン', 101, 'drone', 'flyer', 'arkcity', ['w2_arkcity_f1'], {
+    speed: 150, w: 46, h: 30, aggro: 460, color: '#19f0ff', accent: '#ff3dd2', shoot: GUN_SHOT(460, 1.6, 700, 0.5),
+  }),
+  w2('ark_slime_neon', 'ネオンゲル', 102, 'slime', 'jumper', 'arkcity', ['w2_arkcity_f1'], {
+    speed: 100, w: 50, h: 40, color: '#ff3dd2', accent: '#19f0ff', scale: 1.15,
+  }),
+  w2('ark_rat_chrome', 'クロームラット', 104, 'rat', 'charger', 'arkcity', ['w2_arkcity_f1', 'w2_arkcity_f2'], {
+    speed: 170, w: 46, h: 30, aggro: 320, color: '#c9ccd6', accent: '#19f0ff',
+  }),
+  w2('ark_robot_guard', 'アーク警備ボット', 107, 'robot', 'walker', 'arkcity', ['w2_arkcity_f2'], {
+    speed: 95, w: 48, h: 62, aggro: 380, color: '#2a2f4a', accent: '#19f0ff', hpM: 1.2,
+  }),
+  w2('ark_ghost_holo', 'ホロゴースト', 111, 'ghost', 'flyer', 'arkcity', ['w2_arkcity_f2', 'w2_arkcity_f3'], {
+    speed: 130, w: 46, h: 54, aggro: 420, color: '#7fe9ff', accent: '#ff3dd2',
+  }),
+  w2('ark_jelly_ad', '広告クラゲ', 110, 'jellyfish', 'flyer', 'arkcity', ['w2_arkcity_f2'], {
+    speed: 80, w: 48, h: 56, aggro: 360, color: '#ffd23f', accent: '#ff3dd2', scale: 1.3, shoot: GUN_SHOT(400, 2.2, 480, 0.5),
+  }),
+  w2('ark_golem_steel', '鋼鉄ゴーレム', 116, 'golem', 'walker', 'arkcity', ['w2_arkcity_f3'], {
+    speed: 70, w: 68, h: 94, aggro: 300, color: '#5a6488', accent: '#19f0ff', hpM: 1.6, defM: 1.5, expM: 1.3, scale: 1.25,
+  }),
+  w2('ark_alien_hacker', 'ゼロデイ・グレイ', 118, 'alien', 'shooter', 'arkcity', ['w2_arkcity_f3', 'w2_arkcity_f4'], {
+    speed: 95, w: 36, h: 58, aggro: 500, color: '#3dff8a', accent: '#16161e', shoot: GUN_SHOT(500, 1.5, 650, 0.55),
+  }),
+  w2('ark_robot_enforcer', 'エンフォーサー', 121, 'robot', 'charger', 'arkcity', ['w2_arkcity_f4'], {
+    speed: 160, w: 54, h: 66, aggro: 380, color: '#d8283c', accent: '#ffd23f', hpM: 1.35, scale: 1.1,
+  }),
+  w2('ark_drone_sniper', '狙撃ドローン', 124, 'drone', 'flyer', 'arkcity', ['w2_arkcity_f4'], {
+    speed: 170, w: 50, h: 32, aggro: 620, color: '#16161e', accent: '#ff3d3d', shoot: GUN_SHOT(620, 1.2, 900, 0.55),
+  }),
+  w2('ark_ghost_midnight', '真夜中のホロ亡霊', 112, 'ghost', 'flyer', 'arkcity', ['w2_arkcity_f2'], {
+    night: true, speed: 140, w: 48, h: 56, aggro: 440, color: '#b04dff', accent: '#19f0ff', hpM: 1.3, expM: 1.6, moneyM: 2,
+    extra: [{ id: 'chip_reroll', chance: 0.02 }, { id: 'holo_shard', chance: 0.05 }],
+  }),
+  // ---------------- cyberwild（サイバー・ワイルド / Lv125〜155）ネオンの電脳の密林
+  w2('wild_mushroom_byte', 'バイトマッシュ', 126, 'mushroom', 'jumper', 'cyberwild', ['w2_cyberwild_f1'], {
+    speed: 80, w: 48, h: 54, color: '#5cff9a', accent: '#ff3dd2',
+  }),
+  w2('wild_snake_wire', 'ワイヤースネーク', 128, 'snake', 'walker', 'cyberwild', ['w2_cyberwild_f1', 'w2_cyberwild_f2'], {
+    speed: 110, w: 52, h: 28, aggro: 300, color: '#19f0ff', accent: '#5cff9a',
+  }),
+  w2('wild_mosquito_glitch', 'グリッチモスキート', 129, 'mosquito', 'flyer', 'cyberwild', ['w2_cyberwild_f1'], {
+    speed: 170, w: 40, h: 34, aggro: 420, color: '#b6ff3d', accent: '#ff3dd2',
+  }),
+  w2('wild_gator_cyber', 'サイバーゲイター', 133, 'gator', 'charger', 'cyberwild', ['w2_cyberwild_f2'], {
+    speed: 150, w: 90, h: 40, aggro: 320, color: '#2a6a5a', accent: '#19f0ff', hpM: 1.3,
+  }),
+  w2('wild_crab_moss', 'コケガニ', 135, 'crab', 'walker', 'cyberwild', ['w2_cyberwild_f2'], {
+    speed: 90, w: 54, h: 40, aggro: 260, color: '#3a9a5a', accent: '#b6ff3d', defM: 1.4, scale: 1.2,
+  }),
+  w2('wild_slime_virus', 'ウイルススライム', 137, 'slime', 'jumper', 'cyberwild', ['w2_cyberwild_f2', 'w2_cyberwild_f3'], {
+    speed: 110, w: 52, h: 42, color: '#b04dff', accent: '#b6ff3d', scale: 1.2,
+  }),
+  w2('wild_golem_root', 'ルートゴーレム', 142, 'golem', 'walker', 'cyberwild', ['w2_cyberwild_f3'], {
+    speed: 70, w: 70, h: 96, aggro: 300, color: '#4a3a2a', accent: '#5cff9a', hpM: 1.6, defM: 1.5, expM: 1.3, scale: 1.3,
+  }),
+  w2('wild_alien_shaman', '電脳シャーマン', 145, 'alien', 'shooter', 'cyberwild', ['w2_cyberwild_f3', 'w2_cyberwild_f4'], {
+    speed: 95, w: 36, h: 58, aggro: 520, color: '#ff3dd2', accent: '#5cff9a', shoot: GUN_SHOT(520, 1.4, 680, 0.55),
+  }),
+  w2('wild_mosquito_queen', 'クイーン・バグ', 148, 'mosquito', 'flyer', 'cyberwild', ['w2_cyberwild_f4'], {
+    speed: 180, w: 50, h: 42, aggro: 480, color: '#ff8a00', accent: '#b6ff3d', hpM: 1.35, scale: 1.4,
+  }),
+  w2('wild_seagull_neon', 'ネオン極楽鳥', 150, 'seagull', 'flyer', 'cyberwild', ['w2_cyberwild_f4'], {
+    speed: 200, w: 50, h: 32, aggro: 440, color: '#ff3dd2', accent: '#ffd23f',
+  }),
+  w2('wild_snake_hydra', 'ハイドラ・コード', 151, 'snake', 'charger', 'cyberwild', ['w2_cyberwild_f4'], {
+    speed: 160, w: 60, h: 32, aggro: 360, color: '#16161e', accent: '#3dff8a', hpM: 1.2, scale: 1.3,
+  }),
+  w2('wild_ghost_firefly', '電脳ホタルの霊', 138, 'ghost', 'flyer', 'cyberwild', ['w2_cyberwild_f2'], {
+    night: true, speed: 140, w: 46, h: 54, aggro: 440, color: '#e8ffb0', accent: '#5cff9a', hpM: 1.3, expM: 1.6, moneyM: 2,
+    extra: [{ id: 'chip_reroll', chance: 0.02 }, { id: 'vine_cable', chance: 0.05 }],
+  }),
+  // ---------------- abyss（ネオン・アビス / Lv150〜180）深海のドーム都市
+  w2('abyss_jelly_lantern', 'チョウチンクラゲ', 151, 'jellyfish', 'flyer', 'abyss', ['w2_abyss_f1'], {
+    speed: 80, w: 46, h: 54, aggro: 360, color: '#5ee8ff', accent: '#ffd23f',
+  }),
+  w2('abyss_crab_pressure', '耐圧ガニ', 153, 'crab', 'charger', 'abyss', ['w2_abyss_f1', 'w2_abyss_f2'], {
+    speed: 140, w: 56, h: 42, aggro: 300, color: '#2e4a8a', accent: '#ff6fd8', defM: 1.4, scale: 1.2,
+  }),
+  w2('abyss_slime_brine', '深海スライム', 154, 'slime', 'jumper', 'abyss', ['w2_abyss_f1'], {
+    speed: 90, w: 52, h: 42, color: '#1a3a7a', accent: '#5ee8ff', scale: 1.2,
+  }),
+  w2('abyss_snake_eel', 'デンキウナギ', 157, 'snake', 'charger', 'abyss', ['w2_abyss_f2'], {
+    speed: 170, w: 60, h: 30, aggro: 340, color: '#ffd23f', accent: '#2e7bff', scale: 1.2,
+  }),
+  w2('abyss_robot_diver', '潜水ボット', 159, 'robot', 'walker', 'abyss', ['w2_abyss_f2'], {
+    speed: 85, w: 50, h: 62, aggro: 380, color: '#ffb000', accent: '#5ee8ff', hpM: 1.2,
+  }),
+  w2('abyss_ghost_drowned', '沈没船の亡霊', 162, 'ghost', 'flyer', 'abyss', ['w2_abyss_f2', 'w2_abyss_f3'], {
+    speed: 120, w: 48, h: 56, aggro: 440, color: '#9fd8c8', accent: '#2e7bff',
+  }),
+  w2('abyss_golem_coral', 'コーラルゴーレム', 167, 'golem', 'walker', 'abyss', ['w2_abyss_f3'], {
+    speed: 70, w: 70, h: 96, aggro: 300, color: '#ff6f7f', accent: '#5ee8ff', hpM: 1.6, defM: 1.5, expM: 1.3, scale: 1.3,
+  }),
+  w2('abyss_alien_deep', '深淵の来訪者', 170, 'alien', 'shooter', 'abyss', ['w2_abyss_f3', 'w2_abyss_f4'], {
+    speed: 95, w: 36, h: 58, aggro: 520, color: '#2e7bff', accent: '#ff6fd8', shoot: GUN_SHOT(520, 1.4, 650, 0.55),
+  }),
+  w2('abyss_gator_angler', 'アンコウゲイター', 173, 'gator', 'charger', 'abyss', ['w2_abyss_f4'], {
+    speed: 150, w: 96, h: 44, aggro: 360, color: '#1a2040', accent: '#ffd23f', hpM: 1.35, scale: 1.15,
+  }),
+  w2('abyss_jelly_abyssal', 'アビサル・メデューサ', 176, 'jellyfish', 'flyer', 'abyss', ['w2_abyss_f4'], {
+    speed: 90, w: 54, h: 62, aggro: 460, color: '#ff6fd8', accent: '#1a2a6a', scale: 1.5, shoot: GUN_SHOT(460, 1.8, 560, 0.55),
+  }),
+  w2('abyss_jelly_glow', '夜光クラゲの群れ', 163, 'jellyfish', 'flyer', 'abyss', ['w2_abyss_f2'], {
+    night: true, speed: 90, w: 48, h: 56, aggro: 400, color: '#bff6ff', accent: '#3dff8a', hpM: 1.3, expM: 1.6, moneyM: 2,
+    extra: [{ id: 'chip_reroll', chance: 0.02 }, { id: 'pressure_scale', chance: 0.05 }],
+  }),
+  // ---------------- zenith（ゼニス・タワー / Lv175〜200）雲の上の天空の塔
+  w2('zen_seagull_sky', '天空カモメ', 176, 'seagull', 'flyer', 'zenith', ['w2_zenith_f1'], {
+    speed: 210, w: 50, h: 32, aggro: 440, color: '#ffffff', accent: '#7ad8ff',
+  }),
+  w2('zen_slime_cloud', 'クラウドスライム', 177, 'slime', 'jumper', 'zenith', ['w2_zenith_f1'], {
+    speed: 100, w: 54, h: 44, color: '#f4f8ff', accent: '#ffd23f', scale: 1.25,
+  }),
+  w2('zen_golem_marble', '大理石ゴーレム', 180, 'golem', 'walker', 'zenith', ['w2_zenith_f1', 'w2_zenith_f2'], {
+    speed: 70, w: 70, h: 96, aggro: 300, color: '#e8e0d0', accent: '#ffd23f', hpM: 1.6, defM: 1.5, expM: 1.3, scale: 1.3,
+  }),
+  w2('zen_ghost_seraph', 'セラフの残響', 183, 'ghost', 'flyer', 'zenith', ['w2_zenith_f2'], {
+    speed: 140, w: 48, h: 56, aggro: 460, color: '#fff6d0', accent: '#ffd23f',
+  }),
+  w2('zen_robot_angel', 'エンジェル・ボット', 186, 'robot', 'shooter', 'zenith', ['w2_zenith_f2'], {
+    speed: 100, w: 50, h: 64, aggro: 560, color: '#ffffff', accent: '#ffd23f', hpM: 1.2, shoot: GUN_SHOT(560, 1.2, 820, 0.55),
+  }),
+  w2('zen_drone_halo', 'ヘイロードローン', 188, 'drone', 'flyer', 'zenith', ['w2_zenith_f2', 'w2_zenith_f3'], {
+    speed: 170, w: 50, h: 32, aggro: 560, color: '#ffd23f', accent: '#ffffff', shoot: GUN_SHOT(560, 1.1, 860, 0.5),
+  }),
+  w2('zen_alien_oracle', '星詠みの民', 190, 'alien', 'shooter', 'zenith', ['w2_zenith_f3'], {
+    speed: 100, w: 36, h: 58, aggro: 540, color: '#7ad8ff', accent: '#fff6d0', shoot: GUN_SHOT(540, 1.3, 700, 0.55),
+  }),
+  w2('zen_mushroom_star', 'スターマッシュ', 192, 'mushroom', 'jumper', 'zenith', ['w2_zenith_f3'], {
+    speed: 90, w: 50, h: 56, color: '#ffd23f', accent: '#7a3dff', scale: 1.2,
+  }),
+  w2('zen_jelly_aurora', 'オーロラ・クラゲ', 194, 'jellyfish', 'flyer', 'zenith', ['w2_zenith_f3', 'w2_zenith_f4'], {
+    speed: 90, w: 52, h: 60, aggro: 460, color: '#5cff9a', accent: '#b04dff', scale: 1.4, shoot: GUN_SHOT(460, 1.8, 560, 0.55),
+  }),
+  w2('zen_golem_titan', '天空の巨像', 197, 'golem', 'charger', 'zenith', ['w2_zenith_f4'], {
+    speed: 120, w: 76, h: 104, aggro: 340, color: '#c8d0e8', accent: '#ffd23f', hpM: 1.6, defM: 1.5, expM: 1.3, scale: 1.4,
+  }),
+  w2('zen_robot_archon', 'アルコン', 199, 'robot', 'charger', 'zenith', ['w2_zenith_f4'], {
+    speed: 170, w: 54, h: 68, aggro: 420, color: '#ffd23f', accent: '#16161e', hpM: 1.35, scale: 1.15,
+  }),
+  w2('zen_ghost_starlight', '星明かりの亡霊', 191, 'ghost', 'flyer', 'zenith', ['w2_zenith_f3'], {
+    night: true, speed: 150, w: 48, h: 56, aggro: 460, color: '#e0e0ff', accent: '#ffd23f', hpM: 1.3, expM: 1.6, moneyM: 2,
+    extra: [{ id: 'chip_reroll', chance: 0.025 }, { id: 'star_fragment', chance: 0.05 }],
+  }),
+  // ---------------- 第2ワールドのボス（各地域の行き止まりフィールド）
+  w2('boss_ark_titan', 'アーク・タイタン', 128, 'drone', 'boss', 'arkcity', ['w2_arkcity_f3'], {
+    ...bossStats(128, 26), speed: 130, w: 160, h: 106, scale: 3.4, color: '#19f0ff', accent: '#ff3dd2',
+    title: 'アーク・シティの守護機', summon: ['ark_robot_guard', 'ark_drone_patrol'], shoot: GUN_SHOT(720, 0.85, 760, 0.55),
+    drops: [{ id: 'ark_core', chance: 1 }, { id: 'holo_shard', chance: 1 }, { id: 'elixir', chance: 1 }, { id: 'w2_titan_cannon', chance: 0.03 }, { id: 'w2_titan_visor', chance: 0.03 }, { id: 'w2_ark2_melee', chance: 0.06 }, { id: 'w2_ark2_top', chance: 0.06 }],
+  }),
+  w2('boss_wild_kernel', 'ジャングル・カーネル', 152, 'bossGator', 'boss', 'cyberwild', ['w2_cyberwild_f3'], {
+    ...bossStats(152, 28), speed: 120, w: 230, h: 112, color: '#2a6a5a', accent: '#5cff9a',
+    title: '電脳の密林の主', summon: ['wild_snake_wire', 'wild_slime_virus'],
+    drops: [{ id: 'wild_heart', chance: 1 }, { id: 'vine_cable', chance: 1 }, { id: 'elixir', chance: 1 }, { id: 'w2_kernel_sword', chance: 0.03 }, { id: 'w2_kernel_scarf', chance: 0.03 }, { id: 'w2_wild2_magic', chance: 0.06 }, { id: 'w2_wild2_top', chance: 0.06 }],
+  }),
+  w2('boss_abyss_queen', 'ディープ・クイーン', 178, 'jellyfish', 'boss', 'abyss', ['w2_abyss_f3'], {
+    ...bossStats(178, 30), speed: 110, w: 150, h: 170, scale: 3.4, color: '#ff6fd8', accent: '#5ee8ff',
+    title: '深淵のドームの女王', summon: ['abyss_jelly_lantern', 'abyss_ghost_drowned'], shoot: GUN_SHOT(700, 0.9, 620, 0.55),
+    drops: [{ id: 'abyss_crown', chance: 1 }, { id: 'pressure_scale', chance: 1 }, { id: 'elixir', chance: 1 }, { id: 'w2_queen_staff', chance: 0.03 }, { id: 'w2_queen_crown', chance: 0.03 }, { id: 'w2_abyss2_gun', chance: 0.06 }, { id: 'w2_abyss2_top', chance: 0.06 }],
+  }),
+  // ラスボス: 第1形態を倒すと第2形態（phase2）がその場に現れる（spawner が出す）
+  w2('boss_zenith', 'ゼニス・ソブリン', 200, 'bossAlien', 'boss', 'zenith', ['w2_zenith_f4'], {
+    ...bossStats(200, 30, { expBase: 199, expX: 0.25 }), speed: 130, w: 180, h: 160, scale: 1.7, color: '#fff6d0', accent: '#ffd23f',
+    title: 'ゼニス・タワーの頂の主（ラスボス）', summon: ['zen_drone_halo', 'zen_ghost_seraph'], shoot: GUN_SHOT(780, 0.7, 820, 0.5),
+    phase2: 'boss_zenith_true',
+    drops: [{ id: 'zenith_core', chance: 1 }, { id: 'star_fragment', chance: 1 }, { id: 'elixir', chance: 1 }, { id: 'w2_zen2_top', chance: 0.05 }, { id: 'w2_zen2_hat', chance: 0.05 }],
+  }),
+  w2('boss_zenith_true', '真ゼニス・ソブリン', 200, 'bossAlien', 'boss', 'zenith', ['w2_zenith_f4'], {
+    ...bossStats(200, 40, { expBase: 199, expX: 0.45, atkX: 1.9 }), speed: 160, w: 200, h: 176, scale: 1.95, color: '#2a1a5c', accent: '#ff3dd2',
+    title: '第2形態・ネオン・アークの起源', summon: ['zen_golem_titan', 'zen_jelly_aurora'], shoot: GUN_SHOT(820, 0.55, 900, 0.5),
+    phaseOf: 'boss_zenith',
+    drops: [{ id: 'origin_core', chance: 1 }, { id: 'star_fragment', chance: 1 }, { id: 'elixir', chance: 1 }, { id: 'w2_sovereign_blade', chance: 0.02 }, { id: 'w2_sovereign_gun', chance: 0.02 }, { id: 'w2_sovereign_staff', chance: 0.02 }, { id: 'w2_sovereign_wings', chance: 0.01 }, { id: 'w2_zen2_melee', chance: 0.06 }, { id: 'w2_zen2_accessory', chance: 0.06 }],
+  }),
 ];
 
 export const ENEMIES = Object.fromEntries(list.map((e) => [e.id, e]));
@@ -625,10 +909,17 @@ export function getEnemy(id) { return ENEMIES[id] || null; }
 export const MONSTER_IDS = list.filter((e) => !e.civilian && !e.isCop).map((e) => e.id);
 export const CIVILIAN_IDS = list.filter((e) => e.civilian).map((e) => e.id);
 export const COP_IDS = list.filter((e) => e.isCop).map((e) => e.id);
-export const BOSS_IDS = list.filter((e) => e.boss).map((e) => e.id);
+// v4: 第2形態（phaseOf）はボス一覧に入れない（第1形態を倒すとその場に出る）
+export const BOSS_IDS = list.filter((e) => e.boss && !e.phaseOf).map((e) => e.id);
 /** v3: 夜だけ出現する敵 */
 export const NIGHT_ENEMY_IDS = list.filter((e) => e.night).map((e) => e.id);
 export const ENEMY_REGIONS = ['beach', 'downtown', 'slums', 'swamp', 'casino', 'rooftop', 'spaceport'];
+/** v4: 第2ワールド「ネオン・アーク」の地域（図鑑の分類にも使う） */
+export const W2_REGIONS = ['arkcity', 'cyberwild', 'abyss', 'zenith'];
+/** 全地域（第1→第2ワールドの順） */
+export const ALL_ENEMY_REGIONS = [...ENEMY_REGIONS, ...W2_REGIONS];
+/** v4: 第2ワールドの敵（ボス・第2形態を含む） */
+export const W2_ENEMY_IDS = list.filter((e) => e.world === 2).map((e) => e.id);
 
 /** enemiesForMap(mapId, {boss}) → そのマップを habitats に含む敵ID（spawner の自動選択用） */
 export function enemiesForMap(mapId, opts = {}) {

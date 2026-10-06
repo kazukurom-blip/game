@@ -1188,9 +1188,12 @@ function loopOff(name) {
 
 // ---------------------------------------------------------------------------
 // 選曲ロジック
+// v4: 第2ワールドの地域は、雰囲気の近い第1ワールドの曲を使う（専用曲ができるまで）
+const W2_MUSIC = { arkcity: 'downtown', cyberwild: 'swamp', abyss: 'slums', zenith: 'rooftop' };
 function regionOf(map) {
   const r = map?.region || map?.theme;
   if (r && REGIONS[r]) return r;
+  if (r && W2_MUSIC[r]) return W2_MUSIC[r];
   const id = String(map?.id || '');
   for (const k of REGION_IDS) if (id.startsWith(k)) return k;
   if (id.startsWith('down')) return 'downtown';

@@ -4,7 +4,7 @@
 import { ITEMS } from '../data/items.js';
 import { MISSIONS } from '../data/missions.js';
 import { ENEMIES } from '../data/enemies.js';
-import { MAPS, MAP_ORDER } from '../world/maps.js';
+import { MAPS, MAP_ORDER, W2_MAP_IDS } from '../world/maps.js';
 import { resolveSpawns, civilianTypes } from '../entities/spawner.js';
 import { entRect } from '../world/physics.js';
 import { Enemy } from '../entities/enemy.js';
@@ -44,6 +44,9 @@ export class DebugPanel {
       { id: 'killAll', label: () => '全敵撃破', key: 'F8', fn: () => this.killAll() },
       { id: 'warp', label: () => `ワープ ${Math.max(0, MAP_ORDER.indexOf(this.game.map?.id)) + 1}/${MAP_ORDER.length}`, key: 'F9', fn: () => this.warp() },
       { id: 'mission', label: () => 'ミッション即完了', key: 'F10', fn: () => this.completeMission() },
+      // v4: 第2ワールド（ネオン・アーク）。フラグを立てるのは本来クエストの報酬（reward.flags）
+      { id: 'world2', label: () => `第2ワールド ${this.game.state?.flags?.world2Unlocked ? '開いている' : '閉じている'}`, key: '', fn: () => this.toggleWorld2() },
+      { id: 'warp2', label: () => `ワープ(第2) ${Math.max(0, W2_MAP_IDS.indexOf(this.game.map?.id)) + 1}/${W2_MAP_IDS.length}`, key: '', fn: () => this.warp2() },
       { id: 'items', label: () => '全アイテム付与', key: '⇧F3', fn: () => this.giveAllItems() },
       { id: 'money', label: () => 'お金+10000', key: '⇧F4', fn: () => { this.game.state.money += 10000; return '+$10000'; } },
       // 旧「手配度+1/-1」の枠（警察制度は廃止）。★強化の費用が高くなったので確認用に大金・Lv+10 を置く
@@ -232,6 +235,24 @@ export class DebugPanel {
     const g = this.game;
     const order = (MAP_ORDER || Object.keys(MAPS)).filter((id) => MAPS[id]);
     const next = mapId || order[(order.indexOf(g.map?.id) + 1) % order.length];
+    g.changeMap(next);
+    return next;
+  }
+
+  /** 第2ワールドを開ける/閉じる（state.flags.world2Unlocked）。open を渡すとその値にする */
+  toggleWorld2(open) {
+    const st = this.game.state;
+    st.flags = st.flags || {};
+    const v = open == null ? !st.flags.world2Unlocked : !!open;
+    if (v) st.flags.world2Unlocked = true; else delete st.flags.world2Unlocked;
+    this.game.events?.emit('flagsChanged', { flag: 'world2Unlocked', value: v });
+    return v ? '次元ゲートが開いた' : '次元ゲートを閉じた';
+  }
+
+  /** 第2ワールドのマップを順にワープ（mapId を渡すとそこへ） */
+  warp2(mapId) {
+    const g = this.game;
+    const next = mapId || W2_MAP_IDS[(W2_MAP_IDS.indexOf(g.map?.id) + 1) % W2_MAP_IDS.length];
     g.changeMap(next);
     return next;
   }

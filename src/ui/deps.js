@@ -357,14 +357,22 @@ export const REGIONS = [
   { id: 'casino', name: 'カジノ', color: '#ffd447' },
   { id: 'rooftop', name: 'ヴァイス・タワー', color: '#b77bff' },
   { id: 'spaceport', name: 'ルミナ宇宙港', color: '#5ee8ff' },
+  // v4: 第2ワールド「ネオン・アーク」
+  { id: 'arkcity', name: 'アーク・シティ', color: '#19f0ff', world: 2 },
+  { id: 'cyberwild', name: 'サイバー・ワイルド', color: '#5cff9a', world: 2 },
+  { id: 'abyss', name: 'ネオン・アビス', color: '#4f8dff', world: 2 },
+  { id: 'zenith', name: 'ゼニス・タワー', color: '#ffe69a', world: 2 },
   { id: 'police', name: '警察', color: '#5f8cff', noMap: true },
 ];
 export const REGION_BY_ID = Object.fromEntries(REGIONS.map((r) => [r.id, r]));
 const PREFIX_REGION = { beach: 'beach', down: 'downtown', downtown: 'downtown', slums: 'slums', swamp: 'swamp', casino: 'casino', tower: 'rooftop', rooftop: 'rooftop', space: 'spaceport', spaceport: 'spaceport' };
+// v4: 第2ワールドの ID（w2_<地域>_...）
+const W2_PREFIX_REGION = { arkcity: 'arkcity', cyberwild: 'cyberwild', abyss: 'abyss', zenith: 'zenith' };
 export function regionOfMap(id) {
   const m = allMaps()[id];
   const mi = travelInfo(id);
-  return mi?.region || m?.region || PREFIX_REGION[String(id).split('_')[0]] || m?.theme || 'downtown';
+  const parts = String(id).split('_');
+  return mi?.region || m?.region || (parts[0] === 'w2' ? W2_PREFIX_REGION[parts[1]] : PREFIX_REGION[parts[0]]) || m?.theme || 'downtown';
 }
 export function regionColor(r) { return REGION_BY_ID[r]?.color || '#cfc8ff'; }
 

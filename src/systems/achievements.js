@@ -82,7 +82,7 @@ for (const [n, p] of [[7, 5], [28, 10], [100, 20]]) A('collection', `login_${n}`
 A('collection', 'pet_lv10', 'なかよし', 'PET の親密度を Lv.10 にする', 10, (st) => c(st, 'petLevel') >= 10);
 
 // ------------------------------------------------------------ ボス 15
-const BOSS_TITLES = { boss_don: 'ドンを倒した者', boss_alien: '来訪者を退けし者' };
+const BOSS_TITLES = { boss_don: 'ドンを倒した者', boss_alien: '来訪者を退けし者', boss_zenith: 'ゼニスの頂を踏んだ者' };
 for (const id of BOSS_IDS) A('boss', `boss_${id}`, `${ENEMIES[id].name} 撃破`, `${ENEMIES[id].name} を倒す`, ENEMIES[id].level >= 60 ? 20 : 10, (st) => (st.book?.[id] || 0) > 0, BOSS_TITLES[id] ? { title: BOSS_TITLES[id] } : {});
 A('boss', 'boss_hard', 'ハードモード', 'いずれかのボスをハードで倒す', 20, (st) => bossClears(st, 'hard') >= 1);
 A('boss', 'boss_chaos', 'カオスモード', 'いずれかのボスをカオスで倒す', 40, (st) => bossClears(st, 'chaos') >= 1, { title: 'カオスバスター' });

@@ -135,11 +135,18 @@ const DECOR_SETS = {
   casino: ['slotMachine', 'neonSign', 'palm', 'lamp', 'billboard', 'slotMachine', 'car'],
   rooftop: ['billboard', 'lamp', 'neonSign', 'crate', 'antenna', 'billboard'],
   spaceport: ['rocket', 'antenna', 'satelliteDish', 'lamp', 'crate', 'neonSign', 'antenna'],
+  // v4: 第2ワールド
+  arkcity: ['holoPillar', 'neonSign', 'lamp', 'vendingMachine', 'billboard', 'antenna', 'holoPillar'],
+  cyberwild: ['neonFern', 'neonFern', 'tree', 'lamp', 'antenna', 'neonSign', 'neonFern'],
+  abyss: ['coral', 'coral', 'lamp', 'crate', 'neonSign', 'coral', 'satelliteDish'],
+  zenith: ['cloudPillar', 'lamp', 'cloudPillar', 'antenna', 'neonSign', 'crate'],
 };
 const PLAT_DECOR = { // 足場の上に置ける小物
   beach: ['palm', 'lamp', 'crate', 'flamingoStatue'], downtown: ['neonSign', 'lamp', 'crate', 'billboard'],
   slums: ['crate', 'graffiti', 'lamp'], swamp: ['mangrove', 'crate'], casino: ['slotMachine', 'neonSign'],
   rooftop: ['lamp', 'antenna', 'crate', 'neonSign'], spaceport: ['antenna', 'satelliteDish', 'crate'],
+  arkcity: ['lamp', 'holoPillar', 'crate', 'antenna'], cyberwild: ['neonFern', 'lamp', 'neonFern'],
+  abyss: ['coral', 'lamp', 'crate'], zenith: ['cloudPillar', 'lamp', 'antenna'],
 };
 // style ごとに優先する decor（地域セットに混ぜる）
 const STYLE_DECOR = {
@@ -148,10 +155,15 @@ const STYLE_DECOR = {
   ship: ['crate', 'container', 'lamp'], rail: ['crate', 'graffiti', 'lamp'], vault: ['slotMachine', 'crate', 'lamp'],
   hall: ['slotMachine', 'neonSign', 'lamp'], tower: ['crate', 'lamp', 'billboard'], garden: ['palm', 'bench', 'lamp'],
   launch: ['rocket', 'antenna', 'satelliteDish'], moon: ['satelliteDish', 'antenna', 'rocket'], alienShip: ['antenna', 'neonSign', 'satelliteDish'],
+  // v4: 第2ワールドの style
+  skyway: ['billboard', 'lamp', 'holoPillar'], arcology: ['holoPillar', 'neonSign', 'antenna'], datacore: ['holoPillar', 'crate', 'lamp'],
+  canopy: ['neonFern', 'neonFern', 'lamp'], roots: ['neonFern', 'tree', 'lamp'], grove: ['neonFern', 'neonFern', 'tree'],
+  reef: ['coral', 'coral', 'lamp'], trench: ['coral', 'crate', 'lamp'], dome: ['coral', 'lamp', 'neonSign'],
+  cloud: ['cloudPillar', 'lamp'], spire: ['cloudPillar', 'lamp', 'antenna'], sanctum: ['cloudPillar', 'cloudPillar', 'lamp'],
 };
 
 // decor の半幅（概算, px）。ポータル前や大物同士の重なりを避けるのに使う
-const DECOR_HALF_W = { billboard: 120, container: 100, rocket: 70, car: 80, slotMachine: 34, neonSign: 75, mangrove: 70, palm: 40, satelliteDish: 45, antenna: 25, graffiti: 98, bench: 40 };
+const DECOR_HALF_W = { holoPillar: 30, neonFern: 40, coral: 44, cloudPillar: 34, tree: 60, vendingMachine: 30, billboard: 120, container: 100, rocket: 70, car: 80, slotMachine: 34, neonSign: 75, mangrove: 70, palm: 40, satelliteDish: 45, antenna: 25, graffiti: 98, bench: 40 };
 const halfW = (t) => DECOR_HALF_W[t] ?? 24;
 const BIG_DECOR = new Set(['billboard', 'container', 'rocket', 'car', 'slotMachine', 'neonSign', 'graffiti']);
 // 地面の decor を並べる（ポータルの前・大物同士の重なりを避ける）
@@ -186,7 +198,7 @@ function placeGroundDecor(R, set, portals, groundY, x0, x1, step, portalAll, exi
   return out;
 }
 // 宇宙系フィールドに地上のネオン看板などは置かない
-const STYLE_ONLY = { moon: true, alienShip: true };
+const STYLE_ONLY = { moon: true, alienShip: true, cloud: true, reef: true };
 
 // ------------------------------------------------------------ フィールド style プリセット
 // tiers: 段数, w: 足場幅, gap: 足場間隔, ropeP: 追加ロープ率, rowGap: 段差
@@ -211,6 +223,23 @@ const STYLES = {
   launch:    { width: 3800, tiers: 6, w: [240, 360], gap: [160, 300], groundY: 1400, ropeP: 0.45 },
   moon:      { width: 4000, tiers: 4, w: [220, 340], gap: [180, 340], gravity: 0.6, rowGap: 200 },
   alienShip: { width: 3600, tiers: 4, w: [260, 400], gap: [120, 240], ropeP: 0.3 },
+  // ---- v4: 第2ワールド（地域ごとに違う足場の組み方）
+  // arkcity: 長い空中道路 / 摩天楼の外壁を登る多段 / 天井の低いデータ中枢
+  skyway:    { width: 4200, tiers: 3, w: [460, 720], gap: [160, 300], ropeP: 0.25 },
+  arcology:  { width: 3400, tiers: 7, w: [220, 320], gap: [120, 240], groundY: 1400, ropeP: 0.35 },
+  datacore:  { width: 3600, tiers: 3, w: [280, 420], gap: [120, 220], ceiling: true, walls: { n: 4, h: [60, 90], w: [100, 180] } },
+  // cyberwild: 根っこの壁が並ぶ林道 / 枝を渡る高い樹海（ツタ＝ロープ多め）/ 沼のある巣
+  roots:     { width: 4000, tiers: 4, w: [200, 340], gap: [120, 260], walls: { n: 6, h: [50, 100], w: [80, 160] }, ropeP: 0.35 },
+  canopy:    { width: 3800, tiers: 6, w: [170, 270], gap: [100, 220], groundY: 1400, ropeP: 0.55 },
+  grove:     { width: 3600, tiers: 3, w: [240, 360], gap: [140, 260], water: true, ropeP: 0.3 },
+  // abyss: 水中（重力が軽く段差が高い）/ 天井と壁のあるサンゴの迷路 / 広いドーム
+  reef:      { width: 4000, tiers: 4, w: [260, 420], gap: [180, 320], gravity: 0.75, rowGap: 170, water: true, groundY: 1200 },
+  trench:    { width: 3800, tiers: 3, w: [300, 480], gap: [120, 240], gravity: 0.85, rowGap: 145, ceiling: true, walls: { n: 4, h: [60, 100], w: [100, 180] } },
+  dome:      { width: 3600, tiers: 3, w: [320, 520], gap: [140, 260], gravity: 0.85 },
+  // zenith: 雲の足場（重力 0.7・段差が大きい）/ 塔の外壁の螺旋（出口は最上段）/ 頂上の聖域
+  cloud:     { width: 4200, tiers: 5, w: [180, 300], gap: [160, 300], gravity: 0.7, rowGap: 190, groundY: 1400 },
+  spire:     { width: 3000, tiers: 11, w: [220, 340], gap: [120, 260], groundY: 1900, ropeP: 0.35, topExit: true },
+  sanctum:   { width: 3800, tiers: 3, w: [340, 560], gap: [160, 280], gravity: 0.85 },
 };
 
 /**
@@ -335,7 +364,7 @@ function field(cfg) {
     width, groundY, spawnX: 260, gravity: st.gravity ?? 1, water: !!st.water,
     ceilingY: st.ceiling ? groundY - rowGap * (tiers + 1) - 40 : undefined,
     platforms, ropes: map.ropes, walls: map.walls, portals, spawns, decor, vehicles, npcs: [],
-    world: cfg.world,
+    world: cfg.world, worldId: cfg.worldId ?? 1,
   });
 }
 
@@ -352,7 +381,7 @@ function town(cfg) {
   const portals = [];
   if (cfg.left) portals.push({ x: 90, to: cfg.left });
   if (cfg.right) portals.push({ x: width - 90, to: cfg.right });
-  for (const m of cfg.mids || []) portals.push({ x: m.x, to: m.to });
+  for (const m of cfg.mids || []) portals.push({ ...m, x: m.x, to: m.to }); // v4: 次元ゲートの requireFlag などもそのまま
 
   let platforms, ropes;
   if (cfg.plats) ({ platforms, ropes } = platsFrom(cfg.plats, groundY));
@@ -399,7 +428,7 @@ function town(cfg) {
     town: true, copSpawns: false, levelRange: cfg.lv, safe: !!cfg.safe, desc: cfg.desc,
     width, groundY, spawnX: cfg.spawnX ?? 260, gravity: 1,
     platforms, ropes, walls: [], portals, spawns: [], decor, npcs,
-    vehicles: [], bgColor: cfg.bgColor, world: cfg.world,
+    vehicles: [], bgColor: cfg.bgColor, world: cfg.world, worldId: cfg.worldId ?? 1,
   });
 }
 
@@ -628,6 +657,8 @@ const T = {
     id: 'spaceport', name: 'ルミナ宇宙港', region: 'spaceport', variant: 0, width: 2800, lv: [36, 100], tiers: 3,
     desc: 'ロケットが並ぶ近未来の宇宙港。', bgColor: '#0a1030', world: { x: 11, y: 5 },
     left: 'space_f2', right: 'space_f3',
+    // v4: 次元ゲート（第2ワールドへ）。state.flags.world2Unlocked が無いうちは閉じている
+    mids: [{ to: 'w2_arkcity', x: 1080, gate: 'world2', requireFlag: 'world2Unlocked', lockedMsg: '次元ゲートはまだ閉じている…（ゲートを開く方法を探そう）' }],
     npcs: [npc('dr_stella', 400), npc('night_astro', 850), npc('ace_jet', 1300), npc('job_celes', 1700), npc('job_kaiser', 1880), npc('job_quasar', 2060), concierge('spaceport', 2450)],
     decor: [{ type: 'rocket', x: 700 }, { type: 'rocket', x: 2300 }, { type: 'satelliteDish', x: 1700 }],
   }),
@@ -670,6 +701,108 @@ const F = [
   { id: 'space_f4', name: '謎の宇宙船', region: 'spaceport', variant: 0, lv: [85, 100], style: 'alienShip', left: 'space_f3', boss: true, world: { x: 11, y: 7 }, desc: '正体不明の宇宙船。裏ボスが潜む。' },
 ];
 
+
+// ============================================================ v4: 第2ワールド「ネオン・アーク」（SPEC_V4）
+// 4 地域（arkcity・cyberwild・abyss・zenith）× 町 1 ＋ フィールド 4。ルミナ宇宙港の「次元ゲート」から行く。
+// 次元ゲート（宇宙港のポータル）は state.flags.world2Unlocked が立つまで閉じている（player.tryPortal が読む）。
+export const WORLD2_FLAG = 'world2Unlocked';
+const W2_NPC_LOOK = {
+  guide: { body: 'f', skin: '#e8f0ff', hair: 'long', hairColor: '#19f0ff', eyeColor: '#ff3dd2' },
+  shopF: { body: 'f', skin: '#f2c7a5', hair: 'twin', hairColor: '#ff3dd2', eyeColor: '#19f0ff' },
+  shopM: { body: 'm', skin: '#c68e5e', hair: 'spiky', hairColor: '#5cff9a', eyeColor: '#222' },
+  diver: { body: 'm', skin: '#8d5a3b', hair: 'short', hairColor: '#2e7bff', eyeColor: '#5ee8ff' },
+  sky: { body: 'f', skin: '#fff0e0', hair: 'ponytail', hairColor: '#fff6d0', eyeColor: '#ffd23f' },
+  gate: { body: 'm', skin: '#d9e0ff', hair: 'wolf', hairColor: '#e8e8ff', eyeColor: '#ff3dd2' },
+};
+const W2_SHOP_POTS = ['potion_white', 'potion_mana', 'elixir', 'power_elixir', 'drink_tough', 'drink_lucky'];
+const w2Npc = (id, name, title, x, lookKey, equip, dialog, extra = {}) => ({ id, name, title, x, look: W2_NPC_LOOK[lookKey], equip, dialog, ...extra });
+const W2_GEAR_SHOP = (k) => [`w2_${k}_hat`, `w2_${k}_top`, `w2_${k}_bottom`, `w2_${k}_shoes`, `w2_${k}_melee`, `w2_${k}_gun`, `w2_${k}_magic`];
+
+const T2 = {
+  w2_arkcity: town({
+    id: 'w2_arkcity', name: 'アーク・シティ', region: 'arkcity', variant: 0, width: 3000, lv: [100, 130], tiers: 3, worldId: 2,
+    desc: '次元ゲートの向こうの未来都市。第2ワールドの最初の町。', bgColor: '#0a0830', world: { x: 30, y: 6 },
+    left: 'spaceport', mids: [{ to: 'w2_arkcity_f1', x: 1250 }], right: 'w2_arkcity_f4',
+    npcs: [
+      w2Npc('w2_gatekeeper', 'ゲートキーパー・ヴェガ', '次元ゲートの番人', 330, 'gate',
+        { hat: L('helmet', '#e8e8ff', '#ff3dd2'), top: L('suit', '#1a1a2e', '#ff3dd2'), bottom: L('suitPants', '#1a1a2e'), shoes: L('boots', '#e8e8ff'), accessory: L('halo', '#ff3dd2') },
+        ['ようこそ、ネオン・アークへ。ここはヴァイス・ベイの「上」にある世界だ。', '左の次元ゲートをくぐれば、ルミナ宇宙港へ戻れる。', 'この世界の敵は Lv100 を超える。気を抜くなよ。']),
+      w2Npc('w2_ark_guide', 'ナビAI・ルクス', 'アーク・シティ案内', 700, 'guide',
+        { hat: L('headphones', '#19f0ff', '#ff3dd2'), top: L('idolDress', '#19f0ff', '#ffffff'), bottom: L('skirt', '#1a1a2e'), shoes: L('heels', '#19f0ff') },
+        ['アーク・シティへようこそ！ 案内AIのルクスです。', '中央のポータルはホロ・ハイウェイ、右はアーク外縁ゲート。', '外縁ゲートの先は電脳の密林「サイバー・ワイルド」につながっています。']),
+      w2Npc('w2_ark_shop', 'メイ', 'アーク・マート', 1650, 'shopF',
+        { hat: L('catEars', '#ff3dd2', '#19f0ff'), top: L('hoodie', '#1a1a2e', '#ff3dd2'), bottom: L('shorts', '#1a1a2e'), shoes: L('sneakers', '#19f0ff') },
+        ['いらっしゃい！ アーク製の装備とポーション、そろってるよ。'], { shop: [...W2_SHOP_POTS, ...W2_GEAR_SHOP('ark')], shopName: 'アーク・マート' }),
+      concierge('w2_arkcity', 2200),
+    ],
+  }),
+  w2_cyberwild: town({
+    id: 'w2_cyberwild', name: 'サイバー・ワイルド', region: 'cyberwild', variant: 0, width: 2800, lv: [125, 155], worldId: 2,
+    desc: 'ネオンの電脳の密林にある、樹上の集落。', bgColor: '#06281e', world: { x: 34, y: 4 },
+    left: 'w2_cyberwild_f1', mids: [{ to: 'w2_cyberwild_f2', x: 1400 }], right: 'w2_cyberwild_f4',
+    npcs: [
+      w2Npc('w2_wild_elder', '長老シード', '電脳の森の長', 400, 'shopM',
+        { hat: L('beanie', '#2a6a5a', '#5cff9a'), top: L('hoodie', '#2a6a5a', '#b6ff3d'), bottom: L('cargo', '#2a3a2a'), shoes: L('boots', '#3a2a1a'), accessory: L('scarf', '#5cff9a') },
+        ['森がざわめいておる…。奥の「カーネルの巣」で主が目を覚ましたのじゃ。', '右の蔦の大回廊を抜ければ、深海の都「ネオン・アビス」じゃ。']),
+      w2Npc('w2_wild_shop', 'リーフ', '樹上の道具屋', 900, 'shopF',
+        { hat: L('catEars', '#5cff9a', '#b04dff'), top: L('tank', '#2a6a5a', '#5cff9a'), bottom: L('shorts', '#2a3a2a'), shoes: L('sandals', '#5a3a22') },
+        ['森の恵みで作った装備よ。光るけど、たぶん安全。'], { shop: [...W2_SHOP_POTS, ...W2_GEAR_SHOP('wild')], shopName: '樹上の道具屋' }),
+      concierge('w2_cyberwild', 2000),
+    ],
+  }),
+  w2_abyss: town({
+    id: 'w2_abyss', name: 'ネオン・アビス', region: 'abyss', variant: 0, width: 2800, lv: [150, 180], worldId: 2,
+    desc: '深海に沈んだドーム都市。窓の外を巨大な魚が泳ぐ。', bgColor: '#041030', world: { x: 38, y: 7 },
+    left: 'w2_abyss_f1', mids: [{ to: 'w2_abyss_f2', x: 1400 }], right: 'w2_abyss_f4',
+    npcs: [
+      w2Npc('w2_abyss_diver', 'ダイバー・ギル', 'ドームの潜水士', 420, 'diver',
+        { hat: L('helmet', '#ffb000', '#5ee8ff'), top: L('armorVest', '#2e4a8a', '#ffb000'), bottom: L('armorPants', '#2e4a8a'), shoes: L('boots', '#ffb000') },
+        ['ドームの外は水圧で潰れるぞ。足場はふわっと跳ねるから気をつけな。', '女王のドームの主「ディープ・クイーン」には近づくな。…行くんだろ？']),
+      w2Npc('w2_abyss_shop', 'マリーナ', '深海マーケット', 950, 'shopF',
+        { hat: L('headphones', '#5ee8ff', '#ff6fd8'), top: L('idolDress', '#2e7bff', '#5ee8ff'), bottom: L('skirt', '#1a2a6a'), shoes: L('heels', '#5ee8ff') },
+        ['深海パールで作った装備はいかが？'], { shop: [...W2_SHOP_POTS, ...W2_GEAR_SHOP('abyss')], shopName: '深海マーケット' }),
+      concierge('w2_abyss', 2000),
+    ],
+  }),
+  w2_zenith: town({
+    id: 'w2_zenith', name: 'ゼニス・タワー', region: 'zenith', variant: 0, width: 2600, lv: [175, 200], worldId: 2,
+    desc: '雲の上にそびえる天空の塔の中層。ネオン・アークの最上層。', bgColor: '#7ab8ff', world: { x: 42, y: 3 },
+    left: 'w2_zenith_f1', right: 'w2_zenith_f2',
+    npcs: [
+      w2Npc('w2_zenith_oracle', '星詠みのセレネ', 'ゼニスの巫女', 420, 'sky',
+        { hat: L('crown', '#fff6d0', '#7ad8ff'), top: L('idolDress', '#fff6d0', '#ffd23f'), bottom: L('skirt', '#ffffff'), shoes: L('heels', '#ffd23f'), accessory: L('wings', '#fff6d0') },
+        ['ここは世界のてっぺん、ゼニス・タワー。', '頂上の聖域で「ゼニス・ソブリン」が待っています。倒しても…もう一つの姿があると言われています。']),
+      w2Npc('w2_zenith_shop', 'アストラ', '天空の工房', 950, 'gate',
+        { hat: L('headphones', '#fff6d0', '#ffd23f'), top: L('suit', '#ffffff', '#ffd23f'), bottom: L('suitPants', '#ffffff'), shoes: L('loafers', '#ffd23f') },
+        ['雲と星で仕立てた装備です。お代は地上の倍ですが。'], { shop: [...W2_SHOP_POTS, ...W2_GEAR_SHOP('zen')], shopName: '天空の工房' }),
+      concierge('w2_zenith', 1800),
+    ],
+  }),
+};
+
+const F2 = [
+  // arkcity（夜の未来都市）
+  { id: 'w2_arkcity_f1', name: 'ホロ・ハイウェイ', region: 'arkcity', variant: 1, lv: [100, 106], style: 'skyway', left: 'w2_arkcity', right: 'w2_arkcity_f2', world: { x: 31, y: 5 }, desc: 'ホログラムの広告が流れる空中道路。' },
+  { id: 'w2_arkcity_f2', name: 'ネオン摩天街', region: 'arkcity', variant: 2, lv: [106, 113], style: 'arcology', left: 'w2_arkcity_f1', right: 'w2_arkcity_f3', world: { x: 32, y: 4 }, desc: '摩天楼の外壁を登っていく立体の街。' },
+  { id: 'w2_arkcity_f3', name: 'データ・コア', region: 'arkcity', variant: 3, lv: [114, 124], style: 'datacore', left: 'w2_arkcity_f2', boss: true, world: { x: 33, y: 3 }, desc: '都市の中枢。奥にアーク・タイタンが眠る。' },
+  { id: 'w2_arkcity_f4', name: 'アーク外縁ゲート', region: 'arkcity', variant: 1, lv: [118, 126], style: 'skyway', extra: { width: 4400 }, left: 'w2_arkcity', right: 'w2_cyberwild_f1', world: { x: 32, y: 6 } },
+  // cyberwild（ネオンの電脳の密林）
+  { id: 'w2_cyberwild_f1', name: '電脳の林道', region: 'cyberwild', variant: 1, lv: [125, 131], style: 'roots', left: 'w2_arkcity_f4', right: 'w2_cyberwild', world: { x: 33, y: 5 } },
+  { id: 'w2_cyberwild_f2', name: 'ネオン樹海', region: 'cyberwild', variant: 2, lv: [131, 139], style: 'canopy', left: 'w2_cyberwild', right: 'w2_cyberwild_f3', world: { x: 34, y: 3 }, desc: '光る巨木の枝を渡っていく樹海。' },
+  { id: 'w2_cyberwild_f3', name: 'カーネルの巣', region: 'cyberwild', variant: 3, lv: [140, 150], style: 'grove', left: 'w2_cyberwild_f2', boss: true, world: { x: 34, y: 2 }, desc: '密林の主ジャングル・カーネルの巣。' },
+  { id: 'w2_cyberwild_f4', name: '蔦の大回廊', region: 'cyberwild', variant: 1, lv: [143, 152], style: 'roots', extra: { width: 4200, tiers: 5 }, left: 'w2_cyberwild', right: 'w2_abyss_f1', world: { x: 35, y: 5 } },
+  // abyss（深海のドーム都市）
+  { id: 'w2_abyss_f1', name: '沈んだ連絡橋', region: 'abyss', variant: 1, lv: [150, 156], style: 'reef', left: 'w2_cyberwild_f4', right: 'w2_abyss', world: { x: 36, y: 6 }, desc: '水の中。重力 0.75G でふわりと跳べる。' },
+  { id: 'w2_abyss_f2', name: 'サンゴの迷宮', region: 'abyss', variant: 2, lv: [156, 164], style: 'trench', left: 'w2_abyss', right: 'w2_abyss_f3', world: { x: 38, y: 8 } },
+  { id: 'w2_abyss_f3', name: '女王のドーム', region: 'abyss', variant: 3, lv: [165, 175], style: 'dome', left: 'w2_abyss_f2', boss: true, world: { x: 38, y: 9 }, desc: 'ディープ・クイーンの待つガラスのドーム。' },
+  { id: 'w2_abyss_f4', name: '深海エレベーター', region: 'abyss', variant: 1, lv: [168, 177], style: 'reef', extra: { width: 4200, tiers: 5 }, left: 'w2_abyss', right: 'w2_zenith_f1', world: { x: 39, y: 6 } },
+  // zenith（雲の上の天空の塔）
+  { id: 'w2_zenith_f1', name: '雲海の参道', region: 'zenith', variant: 1, lv: [175, 182], style: 'cloud', left: 'w2_abyss_f4', right: 'w2_zenith', world: { x: 40, y: 4 }, desc: '雲の足場を渡る。重力 0.7G。' },
+  { id: 'w2_zenith_f2', name: '天空の螺旋', region: 'zenith', variant: 2, lv: [182, 189], style: 'spire', left: 'w2_zenith', right: 'w2_zenith_f3', world: { x: 42, y: 2 }, desc: '塔の外壁の螺旋。出口は最上段。' },
+  { id: 'w2_zenith_f3', name: '星の回廊', region: 'zenith', variant: 1, lv: [189, 195], style: 'cloud', extra: { tiers: 6 }, left: 'w2_zenith_f2', right: 'w2_zenith_f4', world: { x: 43, y: 1 } },
+  { id: 'w2_zenith_f4', name: '頂上の聖域', region: 'zenith', variant: 3, lv: [195, 200], style: 'sanctum', left: 'w2_zenith_f3', boss: true, world: { x: 44, y: 0 }, desc: 'ネオン・アークの頂。ゼニス・ソブリンが待つ。' },
+].map((f) => ({ ...f, worldId: 2 }));
+
 // ショップ品揃え: システム担当の提案（data/shops.js TOWN_SHOPS）を優先して適用
 const TOWN_SHOPS = SHOP_DATA.TOWN_SHOPS || {};
 for (const [mapId, shops] of Object.entries(TOWN_SHOPS || {})) {
@@ -698,6 +831,11 @@ for (const ns of Array.isArray(SHOP_DATA.NIGHT_SHOPS) ? SHOP_DATA.NIGHT_SHOPS : 
 
 export const MAPS = { ...T };
 for (const cfg of F) MAPS[cfg.id] = field(cfg);
+// v4: 第2ワールド
+Object.assign(MAPS, T2);
+for (const cfg of F2) MAPS[cfg.id] = field(cfg);
+// アーク・シティの左端 = 宇宙港へ戻る次元ゲート（いつでも通れる）
+for (const p of MAPS.w2_arkcity.portals) if (p.to === 'spaceport') p.gate = 'world1';
 
 // ------------------------------------------------------------ ポータル: label と到着位置を自動設定
 for (const m of Object.values(MAPS)) {
@@ -810,8 +948,10 @@ const ARENA = instanceMap({
   decor: [{ type: 'neonSign', x: 700 }, { type: 'lamp', x: 1100 }, { type: 'neonSign', x: 1700 }],
 });
 
-const BOSS_IDS_ALL = Object.values(ENEMIES || {}).filter((e) => e.boss && !e.isCop && !e.civilian).map((e) => e.id);
-const BOSS_HOME = { beach: 'beach', downtown: 'downtown', slums: 'slums', swamp: 'swamp', casino: 'casino', rooftop: 'rooftop', spaceport: 'spaceport' };
+// v4: 第2形態（phaseOf）はボス部屋を作らない（第1形態の部屋で続けて出る）
+const BOSS_IDS_ALL = Object.values(ENEMIES || {}).filter((e) => e.boss && !e.isCop && !e.civilian && !e.phaseOf).map((e) => e.id);
+const BOSS_HOME = { beach: 'beach', downtown: 'downtown', slums: 'slums', swamp: 'swamp', casino: 'casino', rooftop: 'rooftop', spaceport: 'spaceport',
+  arkcity: 'w2_arkcity', cyberwild: 'w2_cyberwild', abyss: 'w2_abyss', zenith: 'w2_zenith' };
 const shortBoss = (id) => String(id).replace(/^boss_/, '');
 /** ボスID（'boss_king_slime' / 'king_slime' どちらでも）→ ボス部屋マップID 'boss_king_slime' */
 export function bossMapId(bossId) { return 'boss_' + shortBoss(bossId); }
@@ -823,7 +963,7 @@ BOSS_IDS_ALL.forEach((bid, i) => {
   BOSS_MAPS[id] = instanceMap({
     id, instance: 'boss', bossId: bid, name: `ボス部屋: ${d.name}`, region, theme: region, variant: 3, bg: 'boss',
     width: 2000, groundY: GROUND, levelRange: [d.level, d.level], desc: `${d.name} との決戦の間。`,
-    world: { x: 1 + i * 1.5, y: 9 },
+    world: { x: 1 + i * 1.5, y: 9 }, worldId: d.world === 2 ? 2 : 1,
     ...platsFrom([[360, 870, 300], [1340, 870, 300]], GROUND),
     portals: [exitPortal(BOSS_HOME[d.region] || 'downtown')],
     bossX: 1400,
@@ -844,6 +984,17 @@ export function isInstanceMap(m) { return !!(typeof m === 'string' ? MAPS[m]?.in
 
 export const TOWN_IDS = ['beach', 'downtown', 'slums', 'swamp', 'casino', 'rooftop', 'spaceport'];
 export const FIELD_IDS = F.map((f) => f.id);
+// v4: 第2ワールド「ネオン・アーク」
+export const W2_TOWN_IDS = Object.keys(T2);
+export const W2_FIELD_IDS = F2.map((f) => f.id);
+export const W2_MAP_IDS = [...W2_TOWN_IDS, ...W2_FIELD_IDS];
+export const W2_REGION_IDS = ['arkcity', 'cyberwild', 'abyss', 'zenith'];
+/** マップのワールド番号（1 = ヴァイス・ベイ / 2 = ネオン・アーク）。インスタンスは 1 扱い */
+export function worldOf(m) { const map = typeof m === 'string' ? MAPS[m] : m; return map?.worldId === 2 ? 2 : 1; }
+/** 次元ゲートのポータルか（requireFlag つき） */
+export function isGatePortal(p) { return !!(p && p.requireFlag); }
+/** そのポータルを通れるか（requireFlag のフラグを state.flags から読むだけ） */
+export function portalOpen(p, state) { return !p?.requireFlag || state?.flags?.[p.requireFlag] === true; }
 // 進行順（デバッグのワープ一覧など）
 export const MAP_ORDER = [
   'beach', 'beach_f1', 'beach_f2', 'beach_f3', 'beach_f4',
@@ -853,6 +1004,11 @@ export const MAP_ORDER = [
   'casino_f1', 'casino', 'casino_f2', 'casino_f3', 'casino_f4',
   'tower_f1', 'rooftop', 'tower_f2', 'tower_f3',
   'space_f1', 'space_f2', 'spaceport', 'space_f3', 'space_f4',
+  // v4: 第2ワールド
+  'w2_arkcity', 'w2_arkcity_f1', 'w2_arkcity_f2', 'w2_arkcity_f3', 'w2_arkcity_f4',
+  'w2_cyberwild_f1', 'w2_cyberwild', 'w2_cyberwild_f2', 'w2_cyberwild_f3', 'w2_cyberwild_f4',
+  'w2_abyss_f1', 'w2_abyss', 'w2_abyss_f2', 'w2_abyss_f3', 'w2_abyss_f4',
+  'w2_zenith_f1', 'w2_zenith', 'w2_zenith_f2', 'w2_zenith_f3', 'w2_zenith_f4',
 ];
 // 接続表（SPEC_V2）。双方向
 export const CONNECTIONS = [
@@ -868,6 +1024,15 @@ export const CONNECTIONS = [
   ['casino', 'casino_f4'], ['casino_f4', 'tower_f1'], ['tower_f1', 'rooftop'],
   ['rooftop', 'tower_f2'], ['tower_f2', 'tower_f3'],
   ['spaceport', 'space_f3'], ['space_f3', 'space_f4'],
+  // v4: 次元ゲート（宇宙港 ⇄ アーク・シティ）と第2ワールド
+  ['spaceport', 'w2_arkcity'],
+  ['w2_arkcity', 'w2_arkcity_f1'], ['w2_arkcity_f1', 'w2_arkcity_f2'], ['w2_arkcity_f2', 'w2_arkcity_f3'],
+  ['w2_arkcity', 'w2_arkcity_f4'], ['w2_arkcity_f4', 'w2_cyberwild_f1'], ['w2_cyberwild_f1', 'w2_cyberwild'],
+  ['w2_cyberwild', 'w2_cyberwild_f2'], ['w2_cyberwild_f2', 'w2_cyberwild_f3'],
+  ['w2_cyberwild', 'w2_cyberwild_f4'], ['w2_cyberwild_f4', 'w2_abyss_f1'], ['w2_abyss_f1', 'w2_abyss'],
+  ['w2_abyss', 'w2_abyss_f2'], ['w2_abyss_f2', 'w2_abyss_f3'],
+  ['w2_abyss', 'w2_abyss_f4'], ['w2_abyss_f4', 'w2_zenith_f1'], ['w2_zenith_f1', 'w2_zenith'],
+  ['w2_zenith', 'w2_zenith_f2'], ['w2_zenith_f2', 'w2_zenith_f3'], ['w2_zenith_f3', 'w2_zenith_f4'],
 ];
 export function getMap(id) { return MAPS[id] || null; }
 export function neighbors(id) { return (MAPS[id]?.portals || []).map((p) => p.to); }
