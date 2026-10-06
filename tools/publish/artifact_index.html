@@ -1,0 +1,90 @@
+<title>NEON VICE STORY</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap">
+<style>
+:root{color-scheme:dark}
+html, body {
+  margin: 0; height: 100%; background: #0b0614; overflow: hidden;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  -webkit-user-select: none; user-select: none; touch-action: none;
+}
+#wrap { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
+#game {
+  display: block; outline: none;
+  width: min(100vw, calc(100vh * 16 / 9));
+  height: min(100vh, calc(100vw * 9 / 16));
+  image-rendering: auto;
+  box-shadow: 0 0 60px #ff5fa255, 0 0 120px #7b2ff733;
+}
+#touch { display: none; position: fixed; inset: 0; pointer-events: none; }
+#touch button {
+  pointer-events: auto; width: 54px; height: 54px; margin: 4px; border-radius: 50%;
+  border: 2px solid #ffffffaa; background: #1b0f2ccc; color: #fff; font: 700 18px 'M PLUS Rounded 1c', sans-serif;
+}
+#touch button.big { width: 74px; height: 74px; background: #ff5fa2cc; }
+#touch .pad { position: absolute; left: 12px; bottom: 12px; width: 190px; display: flex; flex-wrap: wrap; }
+#touch .acts { position: absolute; right: 12px; bottom: 12px; width: 260px; display: flex; flex-wrap: wrap; justify-content: flex-end; }
+#touch .menu { position: absolute; right: 12px; top: 12px; display: flex; }
+#touch .menu button { width: auto; height: 36px; border-radius: 18px; padding: 0 12px; font-size: 13px; }
+@media (pointer: coarse) { #touch { display: block; } }
+</style>
+
+  <div id="wrap">
+    <canvas id="game" width="1280" height="720" tabindex="0"></canvas>
+    <div id="touch" aria-hidden="true">
+      <div class="pad">
+        <button data-a="left">◀</button><button data-a="up">▲</button><button data-a="down">▼</button><button data-a="right">▶</button>
+      </div>
+      <div class="acts">
+        <button data-a="skill1">A</button><button data-a="skill2">S</button><button data-a="skill3">D</button><button data-a="skill4">F</button>
+        <button data-a="interact">E</button><button data-a="pickup">Z</button>
+        <button class="big" data-a="attack">攻</button><button class="big" data-a="jump">跳</button>
+      </div>
+      <div class="menu">
+        <button data-a="inventory">装備</button><button data-a="skillWin">スキル</button><button data-a="missionWin">任務</button><button data-a="statWin">能力</button><button data-a="mapWin">地図</button><button data-a="bookWin">図鑑</button><button data-a="phoneWin">スマホ</button>
+      </div>
+    </div>
+  </div>
+  <noscript>JavaScript を有効にしてください。</noscript>
+  <script>
+// 公開ページ専用: 画像をまとめた pack を読み、<img>.src をパック内の画像に差し替える（ファイル数上限の回避）
+(function(){
+  var MAP = {};
+  var d = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
+  Object.defineProperty(HTMLImageElement.prototype, 'src', {
+    configurable: true, enumerable: true,
+    get: function(){ return d.get.call(this); },
+    set: function(v){
+      var k = String(v).replace(/^\.\//, '').split('?')[0];
+      if (MAP[k]) { d.set.call(this, MAP[k]); return; }
+      if (LAZY[k]) { var self = this; lazyUrl(k).then(function(u){ d.set.call(self, u || v); }); return; }
+      d.set.call(this, v);
+    }
+  });
+  // 使うときだけ切り出す pack（顔・髪。files[k] = [atlas, x, y, w, h, ox, oy, W, H]）
+  var LAZY = {}, LAZYP = {}, ATL = {};
+  function lazyUrl(k){
+    if (LAZYP[k]) return LAZYP[k];
+    var e = LAZY[k];
+    ATL[e.a[e.e[0]]] = ATL[e.a[e.e[0]]] || loadImg(e.a[e.e[0]]);
+    return (LAZYP[k] = ATL[e.a[e.e[0]]].then(function(im){
+      return new Promise(function(ok){ var f = e.e, c = document.createElement('canvas'); c.width = f[7]; c.height = f[8];
+        c.getContext('2d').drawImage(im, f[1], f[2], f[3], f[4], f[5], f[6], f[3], f[4]);
+        c.toBlob(function(b){ ok(b ? (MAP[k] = URL.createObjectURL(b)) : null); }, 'image/png'); });
+    }).catch(function(){ return null; }));
+  }
+  var lazyList = fetch('assets/packs/pack5.json').then(function(r){ return r.json(); }).then(function(j){
+    for (var k in j.files) LAZY[k] = { e: j.files[k], a: j.atlases };
+  }).catch(function(e){ console.warn('pack5 読み込み失敗', e); });
+  function start(){ var s = document.createElement('script'); s.type = 'module'; s.src = 'src/main.js'; document.body.appendChild(s); }
+  var lists = ['assets/packs/pack3.json', 'assets/packs/pack4.json'];
+  function loadImg(u){ return new Promise(function(ok, ng){ var im = new Image(); im.onload = function(){ ok(im); }; im.onerror = ng; d.set.call(im, u); }); }
+  function cut(im, e){ return new Promise(function(ok){ var c = document.createElement('canvas'); c.width = e[3]; c.height = e[4]; c.getContext('2d').drawImage(im, e[1], e[2], e[3], e[4], 0, 0, e[3], e[4]); c.toBlob(function(b){ ok(b); }, 'image/png'); }); }
+  Promise.all(lists.map(function(u){
+    return fetch(u).then(function(r){ return r.json(); }).then(function(j){
+      return Promise.all(j.atlases.map(loadImg)).then(function(ims){
+        return Promise.all(Object.keys(j.files).map(function(k){ var e = j.files[k]; return cut(ims[e[0]], e).then(function(bl){ if (bl) MAP[k] = URL.createObjectURL(bl); }); }));
+      });
+    });
+  }).concat([lazyList])).catch(function(e){ console.warn('pack 読み込み失敗', e); }).then(start);
+})();
+</script>
