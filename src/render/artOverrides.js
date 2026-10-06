@@ -306,6 +306,15 @@ export function bgArt(sc) {
   return out.mid && !wait ? out : null;
 }
 
+/** 先読み用: そのシーンの背景（遠景・中景・あかり）と地面・足場の画像（manifest の相対パス） */
+export function artFilesForScene(sc) {
+  if (!MAN || !sc || sc.special) return [];
+  const out = [];
+  for (const layer of ['far', 'mid', 'lights']) { const k = bgKey(sc, layer); const E = k && entry('bg', k); if (E) out.push(E.file); }
+  for (const what of ['ground', 'platform']) { const k = tileKey(sc, what); const E = k && entry('tiles', k); if (E) out.push(E.file); }
+  return out;
+}
+
 // ================================================================ 地面・足場（tiles）
 // キー: <地域>_ground（512×256、上から surface=40px が歩く面）/ <地域>_platform（512×96、surface=16px が乗る面）。
 // 屋内のバリアントは <地域>_v<0-3>_ground 等がある時だけ。

@@ -142,6 +142,14 @@ function enemySheet(e, preferBoss) {
   const boss = preferBoss != null ? preferBoss : !!(def.boss || e.boss);
   return (boss && (MAN.bosses[id] || MAN.bosses[art])) || MAN.enemies[id] || (id && MAN.bosses[id]) || (art && MAN.enemies[art]) || null;
 }
+/** 先読み用: 敵（ボスも）のスプライトの画像（manifest の相対パス） */
+export function spriteFilesForEnemies(ids) {
+  if (!MAN || MODE !== 'auto') return [];
+  const out = [];
+  for (const id of ids || []) for (const s of [MAN.enemies[id], MAN.bosses[id]]) { if (!s) continue; out.push(s.file); if (s.phase2) out.push(s.phase2.file); }
+  return out;
+}
+export function spriteBaseUrl() { return BASE; }
 /** その敵のスプライトが読み込み済みか（未読込なら読み込みを始めて false） */
 export function spriteEnemyReady(e, boss) {
   const s = enemySheet(e, boss);

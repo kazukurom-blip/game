@@ -31,6 +31,7 @@ import { drawTitle, titleInput, _titleState } from './ui/title.js';
 
 import { DebugPanel } from './debug/debug.js';
 import * as Sprites from './render/sprites.js';
+import { prefetchNeighbors, prefetchStats } from './render/prefetch.js';
 import { updateLoadGate, drawLoadGate, markManifestSettled, loadGateState } from './render/loadGate.js';
 
 const W = 1280, H = 720;
@@ -119,7 +120,8 @@ game.debug = new DebugPanel(game);
 // 差し替えスプライト（assets/sprites/manifest.json。無い/壊れている → 全部コード描画のまま）
 game.sprites = Sprites;
 Sprites.loadSpriteManifest().catch(() => {}).finally(markManifestSettled);
-game.loadGate = loadGateState; // テスト用: 読み込み中の目隠しの状態
+game.loadGate = loadGateState;
+game.prefetch = prefetchStats; // テスト用: 隣のマップの先読みの状態
 game.saveSettings = () => { try { localStorage.setItem('nvs_settings', JSON.stringify(game.settings)); } catch { /* ignore */ } };
 // 永続的なイベント購読（各 attach は game.state を都度参照する）
 safe('attachAudio', () => attachAudio(game));
@@ -413,7 +415,9 @@ function frame(now) {
   safe('loadGate', () => {
     const ts = game.scene === 'title' ? _titleState() : null;
     const key = game.scene === 'play' ? 'play|' + (game.map?.id || '') : 'title|' + (ts?.screen || '') + '|' + (ts?.c?.step ?? '');
-    updateLoadGate(key, performance.now() / 1000); // 実時間（重い読み込み中は game.time が遅れるので）
+    const gated = updateLoadGate(key, performance.now() / 1000); // 実時間（重い読み込み中は game.time が遅れるので）
+    // そのマップの読み込みが落ち着いたら、隣のマップの画像を裏で先読み（移動した時の「読み込み中」を短く）
+    if (!gated && game.scene === 'play' && game.map && game._prefetched !== game.map.id) { game._prefetched = game.map.id; prefetchNeighbors(game.map); }
     drawLoadGate(ctx, W, H, performance.now() / 1000, dt);
   });
   if (game._saveReq) { game._saveReq = false; if (game.scene === 'play') safe('save', () => game.save()); }
