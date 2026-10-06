@@ -263,6 +263,21 @@ test('コード部品の描画（renderRigCode / renderRigWeapon）が全グル�
   assert.ok(c2.calls.includes('fill'));
 });
 
+test('職の攻撃モーション: 全系統にあり、どの武器・どの進みでも描ける', async () => {
+  const { JOB_BRANCHES } = await import('../src/data/jobs.js');
+  for (const b of Object.keys(JOB_BRANCHES)) assert.ok(C.JOB_MOTION_IDS.includes(b), '系統のモーションが無い: ' + b);
+  for (const m of C.JOB_MOTION_IDS) {
+    for (const w of [null, 'knife', 'bat', 'pistol', 'staff']) {
+      for (let i = 0; i <= 10; i++) {
+        const ctx = fakeCtx();
+        const eq = w ? { weapon: { style: w } } : {};
+        C.drawCharacter(ctx, 0, 0, hero(), eq, { state: 'attack', attackT: i / 10, motion: m, noCache: true });
+        assert.ok(ctx.calls.includes('fill'), `${m}/${w}/${i}`);
+      }
+    }
+  }
+});
+
 let pass = 0, fail = 0;
 for (const t of tests) {
   try { await t.fn(); pass++; console.log('✓ rig: ' + t.name); } catch (e) { fail++; console.log('✗ rig: ' + t.name + '\n   ' + (e && e.message)); }

@@ -682,7 +682,9 @@ export class Player {
     a.scale = 1;
     // 職のオーラ色（render/character.js が anim.aura を描画）・移動スキル種別（エフェクト用）
     let aura = null, tier = 1;
-    try { const j = currentJob(s); aura = j?.aura || null; tier = j?.tier || 1; } catch (e) { aura = null; }
+    let motion = null;
+    try { const j = currentJob(s); aura = j?.aura || null; tier = j?.tier || 1; motion = j?.tier >= 1 ? j.branch || null : null; } catch (e) { aura = null; }
+    a.motion = motion; // 転職後は職の系統ごとの攻撃モーション（character.js JOB_MOTIONS）
     a.aura = aura;
     a.auraTier = tier; // 職の段階（1〜4次）でオーラが強くなる（character.js drawAuraBack/Front）
     a.move = this.move ? this.move.type : null;

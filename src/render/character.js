@@ -408,6 +408,159 @@ const LOOPS = {
   idle: [LOOP, 24], walk: [0.6, 10], jump: [1.2, 8], climb: [0.9, 8], sit: [LOOP, 24], drive: [LOOP, 24], cheer: [1.2, 12],
 };
 
+// ---------------------------------------------------------------- 職の系統ごとの攻撃モーション
+//  キーフレーム（at = 攻撃の進み 0〜1）を easeInOut でつなぐ。腕 [肩, 肘]・脚 [股, 膝] の角度は makePose と同じ
+//  （腕: 0=真下, π/2=前へ水平, π=真上。脚: +=前）。wo = 剣の向きを前腕の向きからずらす量、wm = 杖の向き（絶対角）。
+const KF_NUM = ['tilt', 'twist', 'hx', 'bob', 'wo', 'wm', 'hl', 'hs', 'ht'];
+const KF_ARR = ['af', 'ab', 'lf', 'lb'];
+function kfPose(keys, at) {
+  let i = 0;
+  while (i < keys.length - 2 && at >= keys[i + 1].t) i++;
+  const A = keys[i], B = keys[i + 1];
+  const k = easeInOut(clamp((at - A.t) / Math.max(1e-6, B.t - A.t), 0, 1));
+  const o = {};
+  for (const n of KF_NUM) o[n] = lerp(A[n] ?? 0, B[n] ?? 0, k);
+  for (const n of KF_ARR) { const a = A[n] || [0, 0], b = B[n] || [0, 0]; o[n] = [lerp(a[0], b[0], k), lerp(a[1], b[1], k)]; }
+  if (A.wm == null && B.wm == null) o.wm = null;
+  return o;
+}
+function applyKf(P, o, wk) {
+  P.af = o.af; P.ab = o.ab; P.lf = o.lf; P.lb = o.lb;
+  P.tilt = o.tilt; P.twist = o.twist; P.hx = o.hx; P.bob = o.bob;
+  P.hairLift = o.hl; P.hairSway = o.hs; P.headTilt = o.ht;
+  if (wk === 'melee') P.wAng = PI / 2 - (o.af[0] + o.af[1]) + o.wo;
+  else if (wk === 'magic') P.wAng = o.wm != null ? o.wm : PI / 2 - (o.af[0] + o.af[1]);
+}
+const inR = (at, a, b) => at >= a && at < b;
+// 構え（各キーの始まりと終わり）。武器の種類で腕の位置が違う
+// 剣の構え（wAng -1.15）は前腕の向き（π/2 − 1.0）から -1.72 ずらした向き
+const restKey = (wk, t) => ({ t, af: wk === 'melee' ? [0.25, 0.75] : wk === 'gun' ? [0.45, 0.85] : [0.3, 0.6], ab: [-0.1, 0.25], lf: [0.08, 0.06], lb: [-0.08, 0.04], wo: wk === 'melee' ? -1.72 : 0, wm: wk === 'magic' ? -1.48 : null });
+const GUN_ARM = [PI / 2 + 0.05, 0];
+const JOB_MOTIONS = {
+  // ガンスリンガー系: ガンカタ。胸元へ引き込み → 両腕を伸ばして撃つ → 反動で銃口が跳ねる → 後ろの手を顔の横へ（決めポーズ）
+  gunslinger(P, at, wk) {
+    const arm = wk === 'gun' ? GUN_ARM : [PI / 2, 0];
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.14, af: [0.9, 1.5], ab: [0.6, 1.3], lf: [0.25, 0.5], lb: [-0.35, 0.6], tilt: 0.06, twist: -1.3, hx: -0.8, bob: 1.5, wm: -0.9 },
+      { t: 0.3, af: arm, ab: [PI / 2 - 0.12, 0.08], lf: [0.6, 0.2], lb: [-0.65, 0.12], tilt: -0.08, twist: 1.2, hx: 1.2, bob: 0, hs: 0.3, wm: -0.1 },
+      { t: 0.55, af: [arm[0] + 0.45, 0], ab: [PI / 2 - 0.05, 0.1], lf: [0.6, 0.2], lb: [-0.65, 0.12], tilt: -0.14, twist: 1, hx: 0.6, bob: -0.5, hs: 0.5, wm: -0.6 },
+      { t: 0.78, af: [arm[0] + 0.05, 0.05], ab: [2.2, 0.7], lf: [0.4, 0.15], lb: [-0.45, 0.1], tilt: -0.04, twist: 0.8, hx: 0.3, bob: 0, hs: 0.2, wm: -0.2 },
+      restKey(wk, 1),
+    ], at), wk);
+    P.handB = 'fist'; P.eyes = 'aim'; P.brow = 'angry'; P.mouth = at < 0.45 ? 'grit' : 'smirk';
+    P.muzzle = wk === 'gun' && (inR(at, 0.28, 0.4) || inR(at, 0.48, 0.56));
+    P.swoosh = null;
+  },
+  // ネオンダンサー系: ピルエット・キック。しゃがんで溜め → 跳んで一回転（背中を見せる）→ ハイキックと同時に振り下ろし → 片手を上げて決め
+  neondancer(P, at, wk) {
+    const kickArm = wk === 'gun' ? GUN_ARM : [2.4, 0.2];
+    const downArm = wk === 'gun' ? [PI / 2 + 0.2, 0] : [0.4, 0.2];
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.15, af: [0.6, 1.4], ab: [0.8, 1.2], lf: [0.2, 0.9], lb: [-0.2, 0.8], tilt: 0.05, twist: -1.5, hx: -0.5, bob: 2, wm: -1.2 },
+      { t: 0.3, af: [1.4, 0.3], ab: [1.4, 0.3], lf: [0.3, 1.2], lb: [-0.05, 0.2], twist: 0, bob: -4, hl: 0.8, hs: 0.8, wm: -0.6 },
+      { t: 0.44, af: [1.5, 0.3], ab: [1.5, 0.3], lf: [0.5, 1.3], lb: [-0.05, 0.2], twist: 0.6, bob: -5, hl: 1, hs: -0.8, wm: -0.6 },
+      { t: 0.58, af: kickArm, ab: [-0.9, 0.3], lf: [1.55, 0.15], lb: [-0.15, 0.1], tilt: -0.18, twist: 1.2, hx: 1, bob: -1, hl: 0.5, hs: -0.6, wm: -0.3 },
+      { t: 0.72, af: downArm, ab: [-0.6, 0.3], lf: [1.15, 0.4], lb: [-0.2, 0.1], tilt: -0.08, twist: 1.1, hx: 1.2, bob: 0, hs: -0.3, wm: -0.4 },
+      { t: 0.86, af: [0.35, 0.6], ab: [2.7, 0.3], lf: [0.15, 0.3], lb: [-0.2, 0.15], tilt: 0.02, twist: 0.6, hx: 0.5, bob: 0, hs: 0.2, wm: -1.3 },
+      restKey(wk, 1),
+    ], at), wk);
+    P.back = inR(at, 0.29, 0.43); P.showWeapon = !P.back;
+    P.handB = at > 0.8 ? 'open' : 'fist';
+    if (at > 0.8) { P.eyes = 'wink'; P.mouth = 'happy'; P.brow = 'up'; } else { P.eyes = 'fierce'; P.mouth = at < 0.5 ? 'o' : 'shout'; P.brow = 'angry'; }
+    P.muzzle = wk === 'gun' && inR(at, 0.56, 0.68);
+    P.swoosh = wk === 'melee' && inR(at, 0.56, 0.8)
+      ? { from: PI / 2 - (kickArm[0] + kickArm[1]), to: PI / 2 - (at < 0.72 ? lerp(kickArm[0], downArm[0], (at - 0.56) / 0.16) + 0.2 : downArm[0] + downArm[1]), alpha: at < 0.72 ? 1 : 1 - (at - 0.72) / 0.08 }
+      : null;
+  },
+  // ストリートファイター系: 素手・銃・杖は昇龍アッパー（深くしゃがむ → 跳び上がって真上へ突き上げ → 着地してガード）。
+  //  突き上げは奥の腕（3q では奥の腕が顔の前側に見える）。武器を持つ手前の腕は胸の前でガード。
+  //  剣・バットは両手の兜割り（跳んで振りかぶる → しゃがみ込みながら叩きつける）
+  streetfighter(P, at, wk) {
+    if (wk === 'melee') {
+      applyKf(P, kfPose([
+        restKey(wk, 0),
+        { t: 0.3, af: [3.3, 0.3], ab: [3.0, 0.4], lf: [0.45, 0.5], lb: [-0.3, 0.3], tilt: -0.14, twist: -0.6, hx: -0.5, bob: -5, hl: 0.6, hs: 0.4 },
+        { t: 0.5, af: [0.15, 0.15], ab: [0.35, 0.3], lf: [0.7, 1.2], lb: [-0.6, 0.9], tilt: 0.32, twist: 1, hx: 2, bob: 4, hs: -0.6 },
+        { t: 0.72, af: [0.15, 0.2], ab: [0.35, 0.35], lf: [0.65, 1.1], lb: [-0.55, 0.8], tilt: 0.28, twist: 0.9, hx: 2, bob: 3.5, hs: -0.3 },
+        restKey(wk, 1),
+      ], at), wk);
+      P.handB = 'grip';
+      P.swoosh = inR(at, 0.3, 0.62) ? { from: -1, to: PI / 2 - (at < 0.5 ? lerp(3.3, 0.15, (at - 0.3) / 0.2) + 0.3 : 0.3), alpha: at < 0.5 ? 1 : 1 - (at - 0.5) / 0.12 } : null;
+    } else {
+      applyKf(P, kfPose([
+        restKey(wk, 0),
+        { t: 0.22, af: [0.9, 1.5], ab: [-0.4, 1.7], lf: [0.55, 1.15], lb: [-0.45, 1.05], tilt: 0.18, twist: -1.4, hx: -0.6, bob: 4, wm: -1.0 },
+        { t: 0.42, af: [1.0, 1.6], ab: [2.3, 0.05], lf: [0.9, 1.5], lb: [-0.25, 0.15], tilt: -0.14, twist: 1.2, hx: 1.5, bob: -8, hl: 1, hs: 0.6, wm: -1.6 },
+        { t: 0.6, af: [1.0, 1.6], ab: [2.2, 0.15], lf: [0.8, 1.3], lb: [-0.25, 0.3], tilt: -0.1, twist: 1, hx: 1.5, bob: -6, hl: 0.8, hs: 0.3, wm: -1.6 },
+        { t: 0.85, af: [0.6, 1.2], ab: [0.4, 1.3], lf: [0.45, 0.6], lb: [-0.4, 0.5], tilt: 0.1, twist: 0.3, hx: 0.6, bob: 2, wm: -1.3 },
+        restKey(wk, 1),
+      ], at), wk);
+      if (wk === 'none') { P.handF = 'fist'; }
+      P.handB = 'fist'; P.punch = wk === 'none' && inR(at, 0.38, 0.6);
+      P.muzzle = wk === 'gun' && inR(at, 0.4, 0.52);
+      if (wk === 'magic') P.magicGlow = inR(at, 0.3, 0.7) ? 1 - Math.abs(at - 0.48) / 0.22 : 0;
+      P.swoosh = null;
+    }
+    P.eyes = 'fierce'; P.brow = 'angry'; P.mouth = at < 0.25 ? 'grit' : 'shout';
+  },
+  // ナイトレーサー系: ドリフト斬り。のけぞって溜め → 低く滑り込みながら水平に薙ぎ払う → 横滑りで止まる
+  nightracer(P, at, wk) {
+    const back = wk === 'gun' ? [1.2, 0.6] : wk === 'none' ? [0.2, 1.8] : [2.3, 0.2];
+    const sweep = wk === 'gun' ? GUN_ARM : wk === 'none' ? [PI / 2 - 0.2, 0.15] : [1.0, 0];
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.2, af: back, ab: [-0.5, 0.4], lf: [0.35, 0.4], lb: [-0.5, 0.3], tilt: -0.16, twist: -1.3, hx: -2, bob: 1.5, hs: 0.5, wm: -1.2 },
+      { t: 0.45, af: sweep, ab: [-1.0, 0.3], lf: [0.8, 1.0], lb: [-1.0, 0.1], tilt: 0.34, twist: 1.4, hx: 5, bob: 3, hs: -1, wm: -0.2 },
+      { t: 0.65, af: [sweep[0] - 0.3, sweep[1] + 0.1], ab: [-0.9, 0.4], lf: [0.75, 0.95], lb: [-0.95, 0.15], tilt: 0.28, twist: 1.2, hx: 4.5, bob: 3, hs: -0.8, wm: -0.3 },
+      restKey(wk, 1),
+    ], at), wk);
+    P.handB = 'fist'; if (wk === 'none') P.handF = 'fist';
+    P.punch = wk === 'none' && inR(at, 0.4, 0.6);
+    P.muzzle = wk === 'gun' && (inR(at, 0.4, 0.5) || inR(at, 0.54, 0.62));
+    if (wk === 'magic') P.magicGlow = inR(at, 0.3, 0.7) ? 1 - Math.abs(at - 0.48) / 0.22 : 0;
+    P.swoosh = wk === 'melee' && inR(at, 0.2, 0.62)
+      ? { from: PI / 2 - (back[0] + back[1]), to: PI / 2 - (at < 0.45 ? lerp(back[0], sweep[0], (at - 0.2) / 0.25) : sweep[0]), alpha: at < 0.45 ? 1 : 1 - (at - 0.45) / 0.17 }
+      : null;
+    P.eyes = 'fierce'; P.brow = 'det'; P.mouth = at < 0.4 ? 'grit' : 'grin';
+  },
+  // ネットランナー系: コード詠唱。両手を頭上へ掲げて浮かぶ → 両手を前へ突き出して放つ
+  netrunner(P, at, wk) {
+    const fwd = wk === 'gun' ? GUN_ARM : [PI / 2 + 0.1, 0];
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.28, af: [2.7, 0.25], ab: [2.5, 0.3], lf: [0.15, 0.3], lb: [-0.15, 0.35], tilt: -0.1, twist: -0.3, bob: -3, hl: 0.7, hs: 0.4, ht: -0.08, wm: -1.57, wo: -0.4 },
+      { t: 0.5, af: fwd, ab: [PI / 2 - 0.2, 0.05], lf: [0.3, 0.2], lb: [-0.3, 0.25], tilt: 0.12, twist: 1.1, hx: 1.2, bob: -2, hl: 0.5, hs: -0.4, wm: -0.25 },
+      { t: 0.72, af: [fwd[0] - 0.05, 0.05], ab: [PI / 2 - 0.25, 0.1], lf: [0.3, 0.2], lb: [-0.3, 0.25], tilt: 0.1, twist: 1, hx: 1, bob: -1.5, hl: 0.4, hs: -0.3, wm: -0.3 },
+      restKey(wk, 1),
+    ], at), wk);
+    P.handB = 'open';
+    P.magicGlow = wk === 'magic' ? (at < 0.5 ? clamp(at / 0.5, 0, 1) : clamp(1 - (at - 0.6) / 0.35, 0, 1)) : 0;
+    P.muzzle = wk === 'gun' && inR(at, 0.48, 0.6);
+    P.swoosh = wk === 'melee' && inR(at, 0.28, 0.6) ? { from: -1, to: PI / 2 - (at < 0.5 ? lerp(2.95, fwd[0], (at - 0.28) / 0.22) : fwd[0]), alpha: at < 0.5 ? 1 : 1 - (at - 0.5) / 0.1 } : null;
+    P.eyes = at > 0.25 && at < 0.75 ? 'aim' : 'fierce'; P.brow = 'det'; P.mouth = at < 0.4 ? 'o' : 'shout';
+  },
+  // ドローンマスター系: 指揮。杖（武器）を空へ高く掲げて合図 → 敵へまっすぐ振り下ろして「行け」と指す（後ろの手は胸の前で開く）
+  dronemaster(P, at, wk) {
+    const up = wk === 'gun' ? [2.6, 0.1] : [2.95, 0.05];
+    const point = wk === 'gun' ? GUN_ARM : [PI / 2 + 0.2, 0];
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.28, af: up, ab: [1.1, 1.0], lf: [0.3, 0.15], lb: [-0.35, 0.12], tilt: -0.1, twist: -0.5, hx: -0.4, bob: -1, ht: -0.12, hs: 0.3, hl: 0.3, wm: -1.57, wo: -0.1 },
+      { t: 0.5, af: point, ab: [PI / 2 - 0.3, 0.35], lf: [0.5, 0.25], lb: [-0.5, 0.1], tilt: 0.1, twist: 1, hx: 1.4, bob: 0.5, hs: -0.4, wm: -0.12 },
+      { t: 0.8, af: [point[0] - 0.05, 0.05], ab: [PI / 2 - 0.35, 0.4], lf: [0.5, 0.25], lb: [-0.5, 0.1], tilt: 0.08, twist: 0.9, hx: 1.2, bob: 0.3, hs: -0.2, wm: -0.18 },
+      restKey(wk, 1),
+    ], at), wk);
+    P.handB = 'open';
+    P.magicGlow = wk === 'magic' ? (inR(at, 0.15, 0.4) ? 0.6 : inR(at, 0.45, 0.75) ? 1 - Math.abs(at - 0.55) / 0.25 : 0) : 0;
+    P.muzzle = wk === 'gun' && inR(at, 0.48, 0.6);
+    P.swoosh = wk === 'melee' && inR(at, 0.28, 0.58) ? { from: -1, to: PI / 2 - (at < 0.5 ? lerp(up[0], point[0], (at - 0.28) / 0.22) : point[0]), alpha: at < 0.5 ? 1 : 1 - (at - 0.5) / 0.08 } : null;
+    P.eyes = 'aim'; P.brow = 'det'; P.mouth = at < 0.35 ? 'smirk' : 'shout';
+  },
+};
+export const JOB_MOTION_IDS = Object.keys(JOB_MOTIONS);
+
 function makePose(state, t, at, wk, ws, anim, w, f) {
   const P = {
     bob: 0, tilt: 0, hipY: 0, hx: 0, lb: [-0.06, 0], lf: [0.06, 0], ab: [-0.1, 0.25], af: [0.15, 0.45],
@@ -542,6 +695,11 @@ function makePose(state, t, at, wk, ws, anim, w, f) {
       else { P.lf = [0.14, 0.08]; P.lb = [-0.13, 0.04]; }
     }
   }
+  // 転職後の攻撃は職の系統ごとの専用モーション（anim.motion = 系統 ID。見習いは null で上の共通の振り）
+  if (anim.motion && (state === 'attack' || state === 'shoot') && JOB_MOTIONS[anim.motion]) {
+    JOB_MOTIONS[anim.motion](P, at, wk, ws, f);
+    P.mouth = P.mouth === 'n' ? 'shout' : P.mouth;
+  }
   // 慌て顔（市民が逃げる時など）: anim.panic=true
   if (anim.panic && state !== 'dead') {
     P.eyes = 'panic'; P.mouth = 'panic'; P.brow = 'worry'; P.panic = true; P.showWeapon = false; P.handF = P.handB = 'open';
@@ -660,7 +818,7 @@ function eqSig(e) {
   return s;
 }
 /** 装備からキャッシュ範囲（ローカル座標, scale 1）を見積もる */
-function boxOf(equip, look, state, ah, rig) {
+function boxOf(equip, look, state, ah, rig, motion) {
   let L = 34, R = 36, T = 98, Bm = 8;
   if (ah && ah.fit === false && ah.place) {
     // 配置図方式の頭（＋後ろ髪）: 頭の中心からの範囲（左右反転もあるので左右は同じ幅で）
@@ -689,6 +847,8 @@ function boxOf(equip, look, state, ah, rig) {
   }
   if (state === 'hurt') L = Math.max(L, 42);
   if (state === 'climb') T = Math.max(T, 104);
+  // 職の攻撃モーションは跳ぶ・踏み込む・腕を真上へ伸ばすので、上と左右を広めに取る
+  if (motion && (state === 'attack' || state === 'shoot')) { T = Math.max(T, ws ? 124 : 116); L = Math.max(L, 48); R = Math.max(R, ws ? R + 8 : 50); Bm = Math.max(Bm, 12); }
   return [L, R, T, Bm];
 }
 function dmgStage(d) { return d >= 0.9 ? 7 : d >= 0.85 ? 6 : d >= 0.75 ? 5 : d >= 0.7 ? 4 : d >= 0.6 ? 3 : d >= 0.5 ? 2 : d >= 0.25 ? 1 : 0; }
@@ -772,7 +932,7 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
       const dmg = clamp(A.damage || 0, 0, 1);
       const ds = dmgStage(dmg);
       const ah = aiHeadOf(look, A, state, repT, vil, R);
-      const key = state + fi + '|' + ds + '|' + R + '|' + (A.flash ? 1 : 0) + (A.panic ? 1 : 0) + (vil ? 1 : 0) + (A.face || '') + (A.rim || '') + '|' + lookSig(look) + '|' + eqSig(equip) + (ah ? '|H' + ah.file + (ah.back ? '+B' : '') : '') + (rig ? '|G' + rig.sig : '');
+      const key = state + fi + '|' + ds + '|' + R + '|' + (A.flash ? 1 : 0) + (A.panic ? 1 : 0) + (vil ? 1 : 0) + (A.face || '') + (A.rim || '') + '|' + (A.motion && (state === 'attack' || state === 'shoot') ? A.motion + '|' : '') + lookSig(look) + '|' + eqSig(equip) + (ah ? '|H' + ah.file + (ah.back ? '+B' : '') : '') + (rig ? '|G' + rig.sig : '');
       let ent = CACHE.get(key);
       if (ent) { CACHE.delete(key); CACHE.set(key, ent); CSTAT.hit++; }
       else {
@@ -780,7 +940,7 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
         if (now - buildWin > 12) { buildWin = now; builds = 0; }
         if (builds < MAX_BUILDS) {
           builds++; CSTAT.build++;
-          const bx = boxOf(equip, look, state, ah, !!rig);
+          const bx = boxOf(equip, look, state, ah, !!rig, A.motion);
           if (rig) { bx[0] += 6; bx[1] += 6; bx[2] += 6; bx[3] += 2; }
           const w = Math.ceil((bx[0] + bx[1]) * R), h = Math.ceil((bx[2] + bx[3]) * R);
           const cv = newCanvas(w, h);
@@ -789,7 +949,7 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
             oc.setTransform(1, 0, 0, 1, 0, 0); oc.clearRect(0, 0, w, h);
             oc.setTransform(R, 0, 0, R, bx[0] * R, bx[2] * R);
             oc.imageSmoothingEnabled = true; oc.imageSmoothingQuality = npcRig ? 'high' : 'low';   // プールの canvas の前の状態を残さない
-            const a2 = { state: A.state, t: repT, attackT: repAT, damage: DMG_REP[ds], flash: A.flash, panic: A.panic, face: A.face, headExpr: A.headExpr, rim: A.rim, villain: vil, facing: 1, scale: 1, noFx: true, headRes: R };
+            const a2 = { state: A.state, t: repT, attackT: repAT, damage: DMG_REP[ds], flash: A.flash, panic: A.panic, face: A.face, headExpr: A.headExpr, rim: A.rim, villain: vil, facing: 1, scale: 1, noFx: true, headRes: R, motion: A.motion };
             RENDER(oc, a2);
             ent = { cv, w, h, R, ox: bx[0] * R, oy: bx[2] * R, repT, repAT };
             CACHE.set(key, ent); cachePx += w * h;
