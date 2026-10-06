@@ -11,6 +11,8 @@ import {
   loadSettings, saveSettings, applySettings, DEFAULT_SETTINGS, BAR_KEYS,
 } from './v3deps.js';
 import { audio } from '../audio/audio.js';
+import { skillMotionOf } from '../data/skillMotions.js';
+import { drawSummon } from '../render/summons.js';
 
 const W = 1280, H = 720;
 export const V3_LAYOUT = {
@@ -23,7 +25,7 @@ export const V3_LAYOUT = {
   menu: { w: 420, h: 520, title: 'メニュー', key: 'Esc' },
   help: { w: 860, h: 560, title: '操作説明' },
 };
-const KIND = { melee: '近接', projectile: '遠距離', aoe: '範囲', buff: 'バフ', dash: 'ダッシュ', passive: 'パッシブ', move: '移動' };
+const KIND = { melee: '近接', projectile: '遠距離', aoe: '範囲', buff: 'バフ', dash: 'ダッシュ', passive: 'パッシブ', move: '移動', summon: '召喚' };
 const MOVE_NAME = { flashJump: 'フラッシュジャンプ', teleport: 'テレポート', rush: 'ラッシュ', glide: 'グライド', wheelDash: 'ホイールダッシュ' };
 export function kindLabel(sk) {
   if (!sk) return '';
@@ -1097,7 +1099,8 @@ function dummy(ctx, x, y, hitK, t) {
 }
 function dmgPop(ctx, x, y, k, n, col) {
   if (k <= 0 || k >= 1) return;
-  txt(ctx, n, x, y - k * 26, { size: 16, align: 'center', color: col, alpha: 1 - k, sw: 4, weight: 900 });
+  const pop = k < 0.12 ? 1.25 - k / 0.12 * 0.25 : 1;
+  txt(ctx, n, x, y - k * 18, { size: 15 * pop, align: 'center', color: col, alpha: k < 0.7 ? 1 : 1 - (k - 0.7) / 0.3, sw: 4, weight: 900 });
 }
 /** スキル窓で小さなキャラが実際の動きをループ再生する */
 export function drawSkillPreview(ctx, sk, r, t, look, equip, o = {}) {
@@ -1114,48 +1117,77 @@ export function drawSkillPreview(ctx, sk, r, t, look, equip, o = {}) {
   ctx.strokeStyle = 'rgba(25,211,197,0.18)'; ctx.lineWidth = 1;
   for (let i = 0; i < 12; i++) { ctx.beginPath(); ctx.moveTo(x + i * w / 11, gy); ctx.lineTo(x + i * w / 11 - 30, y + h); ctx.stroke(); }
   if (!sk) { ctx.restore(); return; }
-  const T = sk.kind === 'buff' || sk.kind === 'passive' ? 2.4 : 1.8;
+  // 実際のゲームと同じスキル専用モーション（data/skillMotions.js → render/character.js SKILL_MOTIONS）
+  const heroId = sk.hero && sk.hero !== 'both' ? sk.hero : (o.heroId || 'luna');
+  const smo = guard('pv.motion', () => skillMotionOf(sk, heroId), null);
+  const T = sk.kind === 'summon' ? 3.2 : sk.kind === 'buff' || sk.kind === 'passive' ? 2.4 : 1.8;
   const p = (t % T) / T;
   const sc = o.scale || 1.15;
   let cx = x + w * 0.26, cy = gy, state = 'idle', attackT = 0, alpha = 1, facing = 1;
   const tx = x + w * 0.76;
   let hitK = 0, hitAt = -1, hits = Math.max(1, sk.hits || 1);
   const after = [];
+  const pops = []; // ダメージの数字 {at: 出る時刻（サイクル位置）, row: 何段目}（多段はメイプル風に1つずつ上へ）
+  const GAP = 0.08 / T, POP_LIFE = 0.55 / T;
+  const popGroup = (at, n, row0 = 0) => { for (let i = 0; i < n; i++) pops.push({ at: at + i * GAP, row: row0 + i }); };
   const kind = sk.kind === 'move' ? 'move:' + (sk.move?.type || 'rush') : sk.kind;
   const seg = (a, b) => clamp((p - a) / (b - a), 0, 1);
+  // モーション再生: サイクル位置 pS から smo.duration 秒。戻り値 = 当たる瞬間（サイクル位置）。モーションが無い時は従来の振り
+  const motion = (pS, fallbackEnd, fallbackHit) => {
+    if (smo) {
+      const pe = pS + smo.duration / T;
+      if (p >= pS && p < pe) { state = sk.kind === 'projectile' ? 'shoot' : 'attack'; attackT = seg(pS, pe); }
+      return pS + smo.impact / T;
+    }
+    if (p > pS && p < fallbackEnd) { state = 'attack'; attackT = seg(pS, fallbackEnd); }
+    return fallbackHit;
+  };
   switch (kind) {
     case 'melee': {
       const k = seg(0.08, 0.3);
       cx += ease(k) * w * 0.26 - ease(seg(0.7, 0.95)) * w * 0.26;
-      if (p > 0.15 && p < 0.55) { state = 'attack'; attackT = seg(0.15, 0.55); }
-      hitAt = 0.32;
-      if (p > 0.22 && p < 0.5) {
+      const hp = motion(0.3, 0.55, 0.32);
+      popGroup(hp, hits);
+      const a0 = hp - 0.02, a1 = hp + 0.04 + Math.min(hits, 6) * GAP + 0.12;
+      if (p > a0 && p < a1) {
         ctx.save(); ctx.globalCompositeOperation = 'lighter';
-        ctx.strokeStyle = col; ctx.lineWidth = 6 * (1 - seg(0.22, 0.5)); ctx.shadowColor = col; ctx.shadowBlur = 12;
-        ctx.beginPath(); ctx.arc(cx + 20 * sc, cy - 34 * sc, 34 * sc, -1.2 + seg(0.22, 0.5) * 1.4, 0.9); ctx.stroke();
+        ctx.strokeStyle = col; ctx.lineWidth = 5; ctx.shadowColor = col; ctx.shadowBlur = 12;
+        // 連撃は斬撃の弧を回数ぶん（上下交互）
+        const n = Math.min(hits, 6);
+        for (let i = 0; i < n; i++) {
+          const kk = seg(a0 + i * GAP, a0 + i * GAP + 0.12);
+          if (kk <= 0 || kk >= 1) continue;
+          ctx.globalAlpha = 1 - kk;
+          const up = i % 2 === 0;
+          ctx.beginPath(); ctx.arc(cx + 24 * sc, cy - 34 * sc, (30 + (i % 3) * 5) * sc, up ? -1.2 + kk * 1.2 : 1.2 - kk * 1.2, up ? 0.9 : -0.6, !up); ctx.stroke();
+        }
         ctx.restore();
       }
       break;
     }
     case 'projectile': {
-      if (p > 0.1 && p < 0.4) { state = 'attack'; attackT = seg(0.1, 0.4); }
-      for (let i = 0; i < Math.min(hits, 4); i++) {
-        const k = seg(0.16 + i * 0.07, 0.42 + i * 0.07);
+      const hp = motion(0.1, 0.4, 0.16);
+      const n = Math.min(Math.max(1, sk.proj?.count || 1), 5);
+      const travel = 0.2;
+      for (let i = 0; i < n; i++) {
+        const st0 = smo?.shots && smo.shots.length === (sk.proj?.count || 1) ? 0.1 + smo.shots[i] / T : hp + i * 0.02;
+        const k = seg(st0, st0 + travel);
         if (k > 0 && k < 1) {
-          const bx = cx + 26 + (tx - cx - 26) * k, by = cy - 38 * sc + Math.sin(i) * 4;
+          const bx = cx + 26 + (tx - cx - 26) * k, by = cy - 38 * sc + (i - (n - 1) / 2) * 6;
           ctx.save(); ctx.globalCompositeOperation = 'lighter';
           ctx.fillStyle = col; ctx.shadowColor = col; ctx.shadowBlur = 14;
           ctx.beginPath(); ctx.ellipse(bx, by, 10, 4.5, 0, 0, Math.PI * 2); ctx.fill();
           ctx.fillStyle = rgba(col, 0.35); ctx.fillRect(bx - 30, by - 2, 24, 4);
           ctx.restore();
         }
+        popGroup(st0 + travel, hits, i * hits);
       }
-      hitAt = 0.42;
       break;
     }
     case 'aoe': {
-      if (p > 0.08 && p < 0.42) { state = 'attack'; attackT = seg(0.08, 0.42); }
-      const k = seg(0.2, 0.62);
+      const hp = motion(0.08, 0.42, 0.2);
+      popGroup(hp + 0.04, hits);
+      const k = seg(hp, hp + 0.42);
       if (k > 0 && k < 1) {
         ctx.save(); ctx.globalCompositeOperation = 'lighter';
         ctx.strokeStyle = rgba(col, 1 - k); ctx.lineWidth = 8 * (1 - k); ctx.shadowColor = col; ctx.shadowBlur = 18;
@@ -1169,21 +1201,60 @@ export function drawSkillPreview(ctx, sk, r, t, look, equip, o = {}) {
         }
         ctx.restore();
       }
-      hitAt = 0.4;
       break;
     }
     case 'dash': {
       const k = seg(0.12, 0.34);
       for (let i = 1; i <= 4; i++) after.push(cx + ease(Math.max(0, k - i * 0.08)) * w * 0.42);
       cx += ease(k) * w * 0.42 - ease(seg(0.72, 0.96)) * w * 0.42;
-      state = k > 0 && k < 1 ? 'walk' : p > 0.34 && p < 0.5 ? 'attack' : 'idle';
-      attackT = seg(0.34, 0.5);
-      hitAt = 0.3;
+      if (smo) motion(0.12, 0, 0); // ゲームと同じく、駆け抜ける間ずっとスキルのモーション
+      else { state = k > 0 && k < 1 ? 'walk' : p > 0.34 && p < 0.5 ? 'attack' : 'idle'; attackT = seg(0.34, 0.5); }
+      popGroup(0.26, hits);
+      break;
+    }
+    case 'summon': {
+      // 召喚: 呼び出しのモーション → 召喚獣が現れてそばに浮かび（砲台は前に置く）、案山子を自動で攻撃し続ける
+      const hp = motion(0.05, 0.25, 0.12);
+      const sm = sk.summon || {};
+      const stay = sm.follow !== false;
+      const k = seg(hp, hp + 0.06);
+      if (p >= hp) {
+        const sx = stay ? cx - 30 : cx + 62, sy = stay ? cy - 112 + Math.sin(t * 2.6) * 5 : gy;
+        const fx = [];
+        const iv = 0.24;
+        for (let a = hp + 0.1; a < 0.92; a += iv) {
+          const ak = (p - a) * T;
+          const ty2 = gy - 52;
+          const m = sm.attack || 'bolt';
+          if (ak >= 0 && ak < 0.45) {
+            if (m === 'zap' || m === 'beam') fx.push({ kind: m, x1: sx + 12, y1: sy - (stay ? 0 : 34), x2: m === 'beam' ? tx + 60 : tx, y2: ty2, t: ak, life: m === 'beam' ? 0.3 : 0.22, seed: a * 100 });
+            else if (m === 'pulse') fx.push({ kind: 'pulse', x1: sx, y1: sy + 40, x2: sx, y2: sy, t: ak, life: 0.45, w: (sm.area?.w || 460) * 0.6, h: (sm.area?.h || 260) * 0.6 });
+            else if (m === 'bomb') fx.push({ kind: 'bomb', x1: sx, y1: sy, x2: tx, y2: ty2, t: ak, life: 0.3 });
+          }
+          if (m === 'bolt') {
+            // 弾（bolt）は飛んでいく光弾。群れは各機が1発ずつ
+            const nb = sm.type === 'squadron' ? Math.max(1, sm.count || 4) : Math.max(1, sm.burst || 1);
+            for (let b = 0; b < nb; b++) {
+              const bk = seg(a + b * 0.09 / T, a + b * 0.09 / T + 0.1);
+              if (bk <= 0 || bk >= 1) continue;
+              const bx = sx + (tx - sx) * bk, by = sy + (ty2 - sy) * bk + (b - (nb - 1) / 2) * 5;
+              ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = col; ctx.shadowColor = col; ctx.shadowBlur = 12;
+              ctx.beginPath(); ctx.arc(bx, by, 5, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+            }
+            popGroup(a + 0.1, nb * hits);
+          } else popGroup(a + (m === 'bomb' ? 0.08 : 0.02), hits);
+        }
+        ctx.save(); ctx.globalAlpha = p > 0.92 ? 1 - seg(0.92, 1) : 1;
+        drawSummon(ctx, sm.type || 'drone', sx, sy, { t, color: col, facing: 1, count: sm.count, fx, spawnK: k, scale: 0.95 });
+        ctx.restore();
+      }
+      const dur = guard('pv.dur', () => (typeof sm.dur === 'function' ? sm.dur(Math.max(1, o.lv || 1)) : sm.dur || 30), 30);
+      txt(ctx, `召喚  ${Math.round(dur)}秒`, x + w * 0.66, y + 30, { size: 13, align: 'center', color: col, sw: 3 });
       break;
     }
     case 'buff': case 'passive': {
       const k = sk.kind === 'buff' ? seg(0.08, 0.6) : (p * 2) % 1;
-      if (sk.kind === 'buff' && p > 0.06 && p < 0.25) { state = 'attack'; attackT = seg(0.06, 0.25); }
+      if (sk.kind === 'buff') motion(0.06, 0.25, -1);
       ctx.save(); ctx.globalCompositeOperation = 'lighter';
       const gg = ctx.createRadialGradient(cx, cy - 36 * sc, 4, cx, cy - 36 * sc, 60 * sc);
       gg.addColorStop(0, rgba(col, (sk.kind === 'buff' ? 0.55 : 0.3) * (1 - k * 0.6))); gg.addColorStop(1, rgba(col, 0));
@@ -1274,15 +1345,19 @@ export function drawSkillPreview(ctx, sk, r, t, look, equip, o = {}) {
       break;
     }
     default: {
-      if (p > 0.15 && p < 0.5) { state = 'attack'; attackT = seg(0.15, 0.5); }
-      hitAt = 0.3;
+      popGroup(motion(0.15, 0.5, 0.3), hits);
     }
   }
-  if (hitAt >= 0) {
-    for (let i = 0; i < Math.min(hits, 4); i++) {
-      const hk = seg(hitAt + i * 0.07, hitAt + i * 0.07 + 0.35);
-      if (hk > 0 && hk < 1) { hitK = Math.max(hitK, 1 - hk); dmgPop(ctx, tx + (i % 2 ? 10 : -8), gy - 76 - i * 12, hk, String(Math.round((o.mult || 1) * (120 + i * 17))), i % 3 === 2 ? '#ffd23f' : '#fff'); }
-    }
+  if (hitAt >= 0) popGroup(hitAt, hits);
+  // ダメージの数字: 多段は1ヒットずつ、少し遅れて上へ積み重なる（ゲームと同じ出方。窓に収まるよう7段まで）
+  for (let i = 0; i < pops.length; i++) {
+    const q = pops[i];
+    const hk = seg(q.at, q.at + POP_LIFE);
+    if (hk <= 0 || hk >= 1) continue;
+    hitK = Math.max(hitK, 1 - hk * 2);
+    const row = q.row % 7;
+    const crit = (i * 7 + 3) % 5 === 0;
+    dmgPop(ctx, tx, gy - 76 - row * 12, hk, String(Math.round((o.mult || 1) * (118 + ((i * 37) % 23)) * (crit ? 1.5 : 1))), crit ? '#ff7ad9' : '#ffd36e');
   }
   if (!['buff', 'passive'].includes(sk.kind) && !(sk.kind === 'move' && sk.move?.type === 'teleport' && !o.arrival)) dummy(ctx, tx, gy, hitK, t);
   else if (sk.kind === 'move') dummy(ctx, x + w * 0.9, gy, hitK, t);
@@ -1293,7 +1368,8 @@ export function drawSkillPreview(ctx, sk, r, t, look, equip, o = {}) {
     ctx.restore();
   }
   ctx.save(); ctx.globalAlpha = alpha;
-  drawChar(ctx, cx, cy, look, equip, { facing, state, t, attackT, damage: 0, scale: sc });
+  const useMotion = smo && (state === 'attack' || state === 'shoot');
+  drawChar(ctx, cx, cy, look, equip, { facing, state, t, attackT, damage: 0, scale: sc, skillMotion: useMotion ? smo.id : null, skillHits: useMotion ? smo.hits : 0, motion: o.motion || null });
   ctx.restore();
   ctx.restore();
   ctx.save(); rrPath(ctx, x, y, w, h, 12); ctx.lineWidth = 1.5; ctx.strokeStyle = rgba(col, 0.8); ctx.stroke(); ctx.restore();

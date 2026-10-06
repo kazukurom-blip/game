@@ -483,6 +483,21 @@ function paintSkill(g, sk) {
       g.beginPath(); g.moveTo(-18, -7); g.lineTo(-6, -7); g.moveTo(-20, 0); g.lineTo(-4, 0); g.moveTo(-18, 7); g.lineTo(-6, 7); glyphStroke(2.2);
       break;
     }
+    case 'summon': {
+      // 召喚: 足元の魔法陣と、その上に浮かぶ相棒（ドローン系は小さなドローン、それ以外は光の精霊）
+      g.beginPath(); g.ellipse(0, 12, 16, 5, 0, 0, PI * 2); glyphStroke(2);
+      if (/^hd_/.test(id)) {
+        g.beginPath(); g.moveTo(-15, -6); g.lineTo(15, -6); glyphStroke(2.2);
+        g.beginPath(); g.ellipse(-15, -8, 6, 2, 0, 0, PI * 2); g.ellipse(15, -8, 6, 2, 0, 0, PI * 2); g.fillStyle = '#fff'; g.fill();
+        g.beginPath(); g.ellipse(0, -1, 9, 7, 0, 0, PI * 2); g.fillStyle = light; g.fill(); g.strokeStyle = OUTLINE; g.lineWidth = 2.2; g.stroke();
+        g.beginPath(); g.arc(3, -1, 2.6, 0, PI * 2); g.fillStyle = '#ff3d5a'; g.fill();
+      } else {
+        g.beginPath(); g.arc(0, -3, 9, 0, PI * 2); g.fillStyle = light; g.fill(); g.strokeStyle = OUTLINE; g.lineWidth = 2.2; g.stroke();
+        g.fillStyle = OUTLINE; g.beginPath(); g.arc(-3, -4, 1.6, 0, PI * 2); g.arc(3, -4, 1.6, 0, PI * 2); g.fill();
+        g.fillStyle = '#fff'; g.beginPath(); starPath(g, -13, -12, 3.4, 1.3); starPath(g, 13, -10, 3, 1.2); g.fill();
+      }
+      break;
+    }
     case 'passive': default: {
       g.beginPath();
       for (let i = 0; i < 16; i++) { const r = i % 2 ? 11 : 15, a = (i * PI) / 8; if (!i) g.moveTo(Math.cos(a) * r, Math.sin(a) * r); else g.lineTo(Math.cos(a) * r, Math.sin(a) * r); }

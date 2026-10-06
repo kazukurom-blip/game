@@ -4,7 +4,7 @@ import { SKILLS, STARTER_SKILLS, SKILL_BAR_SIZE } from '../data/skills.js';
 import { spawnEffect } from '../render/effects.js';
 import { expToNext, MAX_LEVEL } from '../data/balance.js';
 import { bookBonus } from './book.js';
-import { jobBonusOf, newJobState, jobStateOf, newSpByTier, addSp } from '../data/jobs.js';
+import { jobBonusOf, newJobState, jobStateOf, newSpByTier, addSp, jobLineage } from '../data/jobs.js';
 import { CLASSES, LEGACY_GENDER, GENDERS, defaultLook, defaultName } from '../data/classes.js';
 import { starBonus, mainStatOf, sumPotLines } from '../data/gear.js';
 import { normalizeInventory } from './inventory.js';
@@ -205,6 +205,10 @@ export function migrateState(state) {
       const i = state.skillBar.indexOf(null);
       if (i >= 0 && SKILLS[sid]?.kind !== 'passive' && !state.skillBar.includes(sid)) state.skillBar[i] = sid;
     }
+  }
+  // 後から職に追加されたスキル（召喚・連撃）: 転職済みの職のスキルが未習得なら Lv1 で補完（スキルバーは変えない）
+  for (const j of jobLineage(state.job.id)) {
+    for (const sid of j.skills || []) if (SKILLS[sid] && !(state.skills[sid] > 0)) state.skills[sid] = 1;
   }
   // v4: 装備インスタンス（旧セーブの装備エントリに uid/★/潜在を付与し、equippedInst を作る）・エンドコンテンツ
   const v4 = newV4Fields();

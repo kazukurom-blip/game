@@ -30,9 +30,13 @@ export const SKILL_MOTION_TABLE = {
   // ハッカー・ネットランナー系
   hn_logic_bomb: 'throwBomb', hn_data_spike: 'castThrust', hn_ddos_storm: 'castRaise', hn_overflow: 'hackType', hn_booster: 'hackType',
   hn_blackout: 'castRaise', hn_trojan_lance: 'castThrust', hn_singularity: 'castRaise', hn_god_mode: 'hackType',
+  hn_data_sprite: 'summonCall', hn_glitch_cat: 'summonCall', hn_phantom_daemon: 'summonCall', hn_oracle_eye: 'summonCall',
   // ハッカー・ドローンマスター系
   hd_drone_shot: 'command', hd_drone_bomb: 'command', hd_missile_pod: 'command', hd_shield_drone: 'hackType', hd_booster: 'hackType',
   hd_carpet_bomb: 'command', hd_rail_drone: 'command', hd_orbital_laser: 'castRaise', hd_full_deploy: 'command',
+  hd_attack_drone: 'command', hd_sentry_turret: 'hackType', hd_bomber_drone: 'command',
+  // 連撃（追加）
+  lj_gun_gatling_waltz: 'multiShot', lj_dance_prism_rush: 'flurry', jj_fight_hundred_fist: 'jabRush',
 };
 
 // モーションの長さ（秒）。連撃系は回数で伸ばす（最大 0.8 秒）
@@ -40,23 +44,23 @@ const DUR = {
   flurry: 0.5, spinKick: 0.6, heavySmash: 0.55, haymaker: 0.55, jabRush: 0.6, uppercut: 0.55, groundPunch: 0.6, tackle: 0.4,
   slideStep: 0.4, palmBlast: 0.5, revEngine: 0.6, meteor: 0.7, multiShot: 0.45, fanSweep: 0.5, snipe: 0.6, skyShot: 0.55,
   throwBomb: 0.5, stagePose: 0.65, castThrust: 0.5, castSweep: 0.5, castRaise: 0.6, command: 0.55, flex: 0.6, idolPose: 0.6,
-  hackType: 0.6, reload: 0.55, laceUp: 0.55,
+  hackType: 0.6, reload: 0.55, laceUp: 0.55, summonCall: 0.6,
 };
 // 当たる瞬間（モーションの進み 0〜1）。ダメージ・弾・爆発はこの瞬間に出す（ボタンを押した瞬間ではなく）
 const IMPACT = {
   flurry: 0.1, spinKick: 0.3, heavySmash: 0.5, haymaker: 0.5, jabRush: 0.14, uppercut: 0.42, groundPunch: 0.5, tackle: 0, slideStep: 0,
   palmBlast: 0.48, revEngine: 0.25, meteor: 0.6, multiShot: 0.18, fanSweep: 0.2, snipe: 0.52, skyShot: 0.25, throwBomb: 0.5,
   stagePose: 0.6, castThrust: 0.45, castSweep: 0.45, castRaise: 0.55, command: 0.5, flex: 0.55, idolPose: 0.5, hackType: 0.8,
-  reload: 0.6, laceUp: 0.65,
+  reload: 0.6, laceUp: 0.65, summonCall: 0.62,
 };
 // 当たった瞬間の手ごたえ（ヒットストップ・揺れの強さ 0〜1）。重い一撃ほど強く
 const WEIGHT = { heavySmash: 0.6, groundPunch: 0.65, meteor: 0.8, uppercut: 0.5, haymaker: 0.55, snipe: 0.5, palmBlast: 0.45, castRaise: 0.45, stagePose: 0.35, throwBomb: 0.35 };
 const HITS_SCALED = { flurry: 1, spinKick: 1, jabRush: 1, multiShot: 1 };
 
 const BY_KIND = {
-  luna: { melee: 'flurry', projectile: 'multiShot', aoe: 'stagePose', dash: 'slideStep', buff: 'idolPose' },
-  jin: { melee: 'heavySmash', projectile: 'palmBlast', aoe: 'groundPunch', dash: 'tackle', buff: 'flex' },
-  hacker: { melee: 'castThrust', projectile: 'castThrust', aoe: 'castRaise', dash: 'slideStep', buff: 'hackType' },
+  luna: { melee: 'flurry', projectile: 'multiShot', aoe: 'stagePose', dash: 'slideStep', buff: 'idolPose', summon: 'summonCall' },
+  jin: { melee: 'heavySmash', projectile: 'palmBlast', aoe: 'groundPunch', dash: 'tackle', buff: 'flex', summon: 'summonCall' },
+  hacker: { melee: 'castThrust', projectile: 'castThrust', aoe: 'castRaise', dash: 'slideStep', buff: 'hackType', summon: 'summonCall' },
 };
 
 /** skillMotionOf(skill, heroId) → { id, hits, duration } または null（モーション無し） */

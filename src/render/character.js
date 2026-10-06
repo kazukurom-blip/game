@@ -907,6 +907,23 @@ const SKILL_MOTIONS = {
     P.magicGlow = wk === 'magic' && at > 0.2 ? 0.5 : 0;
     P.swoosh = null; P.eyes = 'aim'; P.brow = 'det'; P.mouth = at > 0.78 ? 'smirk' : 'flat';
   },
+  // 召喚（ハッカー）: 両手を前に出して光の陣を描き → 両手を左右に大きく開いて呼び出す → 片手を前へ差し出して「行け」
+  summonCall(P, at, wk) {
+    const circ = Math.sin(at * 18) * 0.12;
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.18, af: [1.35, 0.5], ab: [1.25, 0.55], lf: [0.25, 0.2], lb: [-0.3, 0.2], tilt: 0.04, twist: 0.6, hx: 0.4, bob: 0.5, hs: 0.2, wm: -1.0 },
+      { t: 0.45, af: [1.5, 0.35], ab: [1.4, 0.4], lf: [0.25, 0.2], lb: [-0.3, 0.2], tilt: 0.02, twist: 0.6, hx: 0.6, bob: -0.5, hs: 0.1, wm: -1.0 },
+      { t: 0.6, af: [2.5, 0.15], ab: [-0.9, 0.2], lf: [0.4, 0.3], lb: [-0.45, 0.3], tilt: -0.12, twist: 0.2, hx: 0, bob: -3, hl: 0.8, hs: 0.5, ht: -0.12, wm: -1.4 },
+      { t: 0.82, af: [PI / 2 + 0.1, 0.05], ab: [-0.6, 0.3], lf: [0.4, 0.25], lb: [-0.4, 0.25], tilt: 0.08, twist: 0.9, hx: 1, bob: -1, hl: 0.4, hs: -0.3, wm: -0.3 },
+      restKey(wk, 1),
+    ], at), wk);
+    if (at > 0.18 && at < 0.45) { P.af = [P.af[0] + circ, P.af[1]]; P.ab = [P.ab[0] - circ, P.ab[1]]; }
+    P.handB = 'open'; if (wk === 'none') P.handF = 'open';
+    P.magicGlow = wk === 'magic' ? clamp(at < 0.55 ? at / 0.55 : 1 - (at - 0.65) / 0.3, 0, 1) : 0;
+    P.muzzle = false; P.swoosh = null;
+    P.eyes = at > 0.5 && at < 0.8 ? 'fierce' : 'aim'; P.brow = 'det'; P.mouth = at < 0.5 ? 'o' : at < 0.8 ? 'shout' : 'smirk';
+  },
   // 弾を込める（銃のバフ）: 銃を胸元へ引き寄せ、後ろの手でスライドを引いて、構え直す
   reload(P, at, wk) {
     applyKf(P, kfPose([

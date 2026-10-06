@@ -525,6 +525,7 @@ function drawSkills(ui, ctx, win) {
   drawSkillPreview(ctx, sel, { x: px, y: py, w: pw, h: 196 }, t - (win.pvT || 0), charLook(st), equipLooks(st), {
     mult: guard('pv.mult', () => (typeof sel?.mult === 'function' ? sel.mult(Math.max(1, st.skills?.[sel?.id] || 1)) : sel?.mult), 1) || 1,
     arrival: !!(sel?.kind === 'move' && moveParams(st, sel.id, Math.max(1, st.skills?.[sel.id] || 1))?.arrivalBlast),
+    lv: Math.max(1, st.skills?.[sel?.id] || 1), heroId: st.heroId,
   });
   txt(ctx, '▶ 動きのプレビュー', px + 10, py + 14, { size: 11, color: '#ffe3f0', sw: 2.5 });
   const dy = py + 206, dh = y + h - 96 - dy;

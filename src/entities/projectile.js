@@ -8,7 +8,8 @@ export class Projectile {
   /**
    * opts: {owner, x, y, vx, vy | (dir, speed), kind:'bullet'|'magic'|'orb'|'enemyBullet'|'beam'|'shell',
    *        dmg? (固定ダメージ) | atk+mult (calcDamage), crit?, critDmg?, color, range(px), life(s),
-   *        pierce(貫通数), gravity(0..1), w, h, knock, effect, hitEffect, onHit(enemy)}
+   *        pierce(貫通数), gravity(0..1), w, h, knock, effect, hitEffect, onHit(enemy),
+   *        multiHit(1体に当たった時のヒット数。2以上は atk+mult で1ヒットごとにダメージを計算し、数字を積み重ねる)}
    */
   constructor(game, opts = {}) {
     this.game = game;
@@ -35,6 +36,7 @@ export class Projectile {
     this.knock = opts.knock ?? 160;
     this.hitEffect = opts.hitEffect || opts.effect || (this.kind === 'magic' ? 'spark' : 'hit');
     this.onHit = opts.onHit || null;
+    this.multiHit = Math.max(1, opts.multiHit | 0);
     this.hits = new Set();
     this.traveled = 0;
     this.t = 0;
@@ -72,6 +74,20 @@ export class Projectile {
         if (e.dead || e.remove || this.hits.has(e) || e.hp <= 0 || isUntargetable(e)) continue; // 住民はすり抜ける
         if (!rectOverlap(r, entRect(e))) continue;
         this.hits.add(e);
+        if (this.multiHit > 1 && this.dmg == null) {
+          // 多段の弾: 1ヒットごとに計算（最後のヒットでノックバック）
+          let anyCrit = false;
+          for (let i = 0; i < this.multiHit && !e.dead; i++) {
+            const res = calcDamage(this.atk, this.mult, e.def?.def ?? 0, this.crit, this.critDmg);
+            anyCrit = anyCrit || res.crit;
+            damageEnemy(g, e, res.dmg, res.crit, i === this.multiHit - 1 ? Math.sign(this.vx) || 1 : 0, { stack: i, knock: this.knock });
+          }
+          spawnEffect(g, anyCrit ? 'critHit' : this.hitEffect, this.x, this.y, { color: this.color });
+          if (this.onHit) this.onHit(e);
+          if (!e.civilian) { const fa = sysFn('tryFinalAttack', g); if (fa) { try { fa(g, [e]); } catch (err) { /* noop */ } } }
+          if (this.pierce-- <= 0) return this.kill();
+          continue;
+        }
         let dmg = this.dmg, crit = false;
         if (dmg == null) {
           const res = calcDamage(this.atk, this.mult, e.def?.def ?? 0, this.crit, this.critDmg);
