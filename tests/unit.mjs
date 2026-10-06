@@ -67,7 +67,8 @@ const AIS = ['walker', 'jumper', 'charger', 'shooter', 'flyer', 'cop', 'boss', '
 const THEMES = ['beach', 'downtown', 'slums', 'swamp', 'casino', 'rooftop', 'spaceport', 'arkcity', 'cyberwild', 'abyss', 'zenith'];
 // v2: spawns の types は省略可（spawner が habitats から解決）。解決済みの出現表で判定する
 const spawnTypesOf = (m) => resolveSpawns(m).flatMap((s) => s.types);
-const spawnsAt = (mapId, enemyId) => spawnTypesOf(MAPS[mapId]).includes(enemyId);
+// v4: ボスの第2形態（phaseOf）は出現表に入らないが、第1形態が出るマップにその場で現れる
+const spawnsAt = (mapId, enemyId) => spawnTypesOf(MAPS[mapId]).includes(ENEMIES[enemyId]?.phaseOf || enemyId);
 const mapOfEnemy = (id) => {
   const d = ENEMIES[id];
   if (d.civilian || d.isCop) return 'downtown';
@@ -422,6 +423,7 @@ test('missions: 参照整合性・到達可能性', () => {
   }
   const spawnable = new Set();
   for (const m of Object.values(MAPS)) for (const t of spawnTypesOf(m)) spawnable.add(t);
+  for (const t of [...spawnable]) if (ENEMIES[t].phase2) spawnable.add(ENEMIES[t].phase2); // v4: ボスの第2形態
   const droppable = new Set();
   for (const id of spawnable) for (const d of ENEMIES[id].drops) droppable.add(d.id);
   for (const m of all) {
@@ -821,7 +823,12 @@ test('missions: 全メインストーリーを順にクリアできる（目的�
   const order = Object.values(MISSIONS).filter((m) => !m.daily && m.type !== 'job'); // 転職ミッションは 'jobs:' テストで検証
   let guard = 0;
   while (guard++ < 600) {
-    const m = order.find((x) => mm.canAccept(x.id));
+    let m = order.find((x) => mm.canAccept(x.id));
+    if (!m) {
+      // v4: 第2ワールド（Lv100〜200）は報酬の経験値だけでは届かないので、残りの中で一番低い必要Lv まで上げて続ける
+      const lv = Math.min(...order.filter((x) => !st.missions.completed.includes(x.id) && (x.reqLevel || 1) > st.level).map((x) => x.reqLevel));
+      if (Number.isFinite(lv)) { st.level = lv; m = order.find((x) => mm.canAccept(x.id)); }
+    }
     if (!m) break;
     // giver のマップへ行ってから受注（v4: 報酬の装備で持ち物があふれないよう毎回空ける）
     st.inventory = [];
@@ -1612,6 +1619,8 @@ test('v3 classes: newState(classId, {name, gender, look}) と性別別の初期�
 (await import('./debug_v3.mjs')).default({ test, makeGame, step, fin });
 // v4 クエスト担当（tests/quests_v4.mjs）
 (await import('./quests_v4.mjs')).default({ test, makeGame, step, fin });
+// v4 クエスト担当・2回目: 第2ワールドのクエスト（tests/quests_w2.mjs）
+(await import('./quests_w2.mjs')).default({ test, makeGame, step, fin });
 // v4 第2ワールド「ネオン・アーク」（tests/world2.mjs）
 (await import('./world2.mjs')).default({ test, makeGame, step, fin });
 // v4 5次転職・Lv100〜200 の強さの釣り合い（tests/balance_v4.mjs・tools/sim_balance.mjs）

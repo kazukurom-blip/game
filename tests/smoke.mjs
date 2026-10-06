@@ -1482,9 +1482,11 @@ async function runMission(arg) {
       if (!(await talk(o.target))) return res(false, `talk: ${o.target} が ${G.map.id} にいない`);
     } else if (o.type === 'kill' || o.type === 'boss' || o.type === 'collect') {
       // 対象の決定: kill/boss → 敵ID、collect → その item を落とす敵
-      const sources = o.type === 'collect'
+      const sources0 = o.type === 'collect'
         ? Object.values(E).filter((e) => !e.isCop && (e.drops || []).some((d) => d.id === o.target)).map((e) => e.id) // 警察ユニット（廃止）は出ない
         : [o.target];
+      // v4: ボスの第2形態（phaseOf）は出現表に無く、第1形態を倒すとその場に出る → 第1形態も倒す対象に入れる
+      const sources = [...new Set([...sources0, ...sources0.map((s) => E[s]?.phaseOf).filter(Boolean)])];
       if (sources.some((s) => E[s]?.isCop)) return res(false, `${o.type}:${o.target} は廃止した警察ユニットが対象`);
       let mapId = o.mapId;
       if (!mapId) mapId = Object.values(W.MAPS).find((mp) => !mp.town && sources.some((s) => (E[s].habitats || []).includes(mp.id)))?.id;

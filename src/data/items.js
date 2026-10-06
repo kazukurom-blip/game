@@ -541,3 +541,77 @@ for (const it of list.slice(W2_N0)) {
 }
 /** 第2ワールドの素材・装備の ID */
 export const W2_ITEM_IDS = list.slice(W2_N0).map((it) => it.id);
+
+// ============================================================================================
+// v4（クエスト担当・2回目）: 第2ワールドのクエストの報酬装備 qset_*（Lv100〜200）と、見た目だけのネタ装備 cosmetic
+//  - qset の強さは、同じ部位（武器は同じ武器種）で必要Lv 以下の、ボスの極レア（mythic）以外の一番強い装備（W2_GEAR を含む）の
+//    防御（武器は攻撃力）× 1.06 + 2 以上にする（上の W2_GEAR を見て自動で決める。tests/quests_w2.mjs が確かめる）。
+//  - cosmetic の色は、ほかのどの装備とも「部位/スタイル__色」がかぶらない色（専用の絵のキーになる）。
+//  - 説明は lore.js（ITEM_LORE）にも書く。一覧は QSET_IDS / COSMETIC_IDS に足す。
+// ============================================================================================
+const W2Q_N0 = list.length;
+function w2qset(id, name, slot, lv, look, desc, o = {}) {
+  const k = slot === 'weapon' ? 'atk' : 'def';
+  const wtype = slot === 'weapon' ? WPN_PARAM[o.wt || 'melee'][0] : null;
+  const pool = list.filter((x) => x.type === 'equip' && x.slot === slot && !x.questSet && !x.cosmetic && x.rarity !== 'mythic' && x.reqLevel <= lv && (!wtype || x.weaponType === wtype));
+  const best = Math.max(0, ...pool.map((x) => x.stats[k]));
+  const base = qsetStats(slot, lv, o.wt);
+  const bestAtk = Math.max(0, ...pool.map((x) => x.stats.atk)); // 防具でも、攻撃力の付く部位（上着・アクセ）は攻撃力も上回る
+  const extra = slot === 'weapon' ? {} : { maxHp: Math.round(lv * (slot === 'top' ? 5.5 : 3.5)), ...(bestAtk > 0 ? { atk: Math.max(base.atk || 0, Math.ceil(bestAtk * 1.06)) } : {}) };
+  qset(id, name, slot, lv, look, desc, { wt: o.wt, rarity: o.rarity || 'legendary', stats: { ...extra, ...(o.stats || {}), [k]: Math.max(base[k] || 0, Math.ceil(best * 1.06) + 2) } });
+}
+// ---- arkcity アーク・シティ
+w2qset('qset_courier_boots', '空の配達人ブーツ', 'shoes', 112, ['sneakers', '#19f0ff', '#ffb000'], 'ピコの予備の配達ブーツ。空の道でも転ばない。');
+w2qset('qset_memory_visor', '記憶屋のバイザー', 'hat', 122, ['helmet', '#b9a8ff', '#19f0ff'], '記憶屋ノアの目。見た物を、記憶ごと映す。');
+w2qset('qset_chrome_saber', 'ゴルドの鏡面セイバー', 'weapon', 117, ['neonSword', '#e8eef8', '#ff3dd2'], 'メッキ職人ゴルドの最高傑作。刃に自分が映る。', { wt: 'melee' });
+w2qset('qset_enforcer_coat', '守る側のコート', 'top', 126, ['leatherJacket', '#2a3a6a', '#ffb000'], 'エンフォーサーの制服を、屋台のマーサが仕立て直したコート。');
+// ---- cyberwild サイバー・ワイルド
+w2qset('qset_firefly_muffler', 'ホタル糸のマフラー', 'accessory', 138, ['scarf', '#d4ff4f', '#19f0ff'], '電脳ホタルたちが光る糸で編んだマフラー。');
+w2qset('qset_vaccine_rod', '樹医モスの杖', 'weapon', 148, ['staff', '#5cff9a', '#ffffff'], '森を治した薬（または焼け残った根）を込めた杖。', { wt: 'magic' });
+w2qset('qset_paradise_blaster', '極楽鳥のさえずり銃', 'weapon', 151, ['smg', '#ff3dd2', '#5cff9a'], '撃つたびにネオン極楽鳥のさえずりが鳴る連射銃。', { wt: 'smg' });
+w2qset('qset_gator_rider_cargo', 'ゲイター・ライダーのカーゴ', 'bottom', 139, ['cargo', '#3f8f3a', '#b6ff3d'], '密林グランプリの優勝者だけがはけるカーゴ。');
+// ---- abyss ネオン・アビス
+w2qset('qset_musicbox_coat', '方舟号の帆布コート', 'top', 174, ['leatherJacket', '#1e3a6a', '#e8c27a'], '三百年前の沈没船の帆布で仕立てたコート。');
+w2qset('qset_volta_blaster', 'ボルタ式デンキウナギ銃', 'weapon', 162, ['smg', '#2e7bff', '#fff06a'], 'ウナギの発電器を組み込んだ銃。撃つとビリッとくる（相手が）。', { wt: 'smg' });
+w2qset('qset_pearl_tiara', '深淵パールのティアラ', 'hat', 168, ['crown', '#e8f4ff', '#5ee8ff'], 'ジョナの首飾りの残りのパールで作ったティアラ。');
+w2qset('qset_angler_boots', 'アンコウ革のブーツ', 'shoes', 177, ['boots', '#3a2a5a', '#fff06a'], '足元がほんのり光るアンコウの革のブーツ。');
+// ---- zenith ゼニス・タワー
+w2qset('qset_seraph_saber', '天使の翼骨の剣', 'weapon', 196, ['neonSword', '#fff6d0', '#ff8ac8'], '壊れた天使の翼の骨組みを打ち直した剣。', { wt: 'melee' });
+w2qset('qset_marble_greaves', '雲大理石のグリーヴ', 'bottom', 186, ['armorPants', '#f0ece4', '#7ad8ff'], '重そうに見えて雲のように軽い、大理石のグリーヴ。');
+w2qset('qset_starmap_crown', '星図の冠', 'hat', 193, ['crown', '#1a2a5c', '#fff06a'], 'シリウス少年の星図が刻まれた冠。あなたの星も描いてある。');
+w2qset('qset_archon_scepter', '守護者の長の笏', 'weapon', 198, ['staff', '#fff6d0', '#7a3dff'], 'ゼニス・タワーの守護者の長だけが持つ笏。', { wt: 'magic' });
+// ---- 地域の記念・メインの最後
+w2qset('qset_memento_arkcity', '記念: アーク市民バッジ', 'accessory', 128, ['goldChain', '#19f0ff', '#ff3dd2'], 'アーク・シティの「今年の市民」の証。', { rarity: 'mythic' });
+w2qset('qset_memento_cyberwild', '記念: 森の主の種', 'accessory', 152, ['goldChain', '#5cff9a', '#fff06a'], 'どこにいても森の声が聞こえる、森の主の種の首飾り。', { rarity: 'mythic' });
+w2qset('qset_memento_abyss', '記念: 深海の英雄の大真珠', 'accessory', 178, ['goldChain', '#e8f4ff', '#2e7bff'], 'ドームのみんなで磨いた、一番大きな深淵パール。', { rarity: 'mythic' });
+w2qset('qset_memento_zenith', '記念: 天空の守り手の光輪', 'accessory', 199, ['halo', '#fff6d0', '#5cff9a'], 'ゼニス・タワーの全員の祈りを込めた光輪。', { rarity: 'mythic' });
+w2qset('qset_origin_halo', '起源の光輪', 'accessory', 198, ['halo', '#ff3dd2', '#fff6d0'], '真ゼニス・ソブリンを止めた者に宿る、方舟の最初の光。', { rarity: 'mythic', stats: { crit: 10, maxMp: 900, speed: 20 } });
+w2qset('qset_twin_neon_coat', 'ふたつの世界のコート', 'top', 198, ['suit', '#7a3dff', '#19f0ff'], 'ヴァイス・ベイとネオン・アーク、ふたつの世界の布で縫ったコート。', { rarity: 'mythic', stats: { atk: 60, crit: 6 } });
+// ---- 見た目だけのネタ装備（第2ワールド）
+cosmetic('cos_necktie_band', 'ネクタイはちまき', 'hat', ['bandana', '#7a2e3a', '#e8e0d0'], '忘年会の名残。締めると「部長」と呼ばれたくなる。');
+cosmetic('cos_heel_crushed_loafers', 'かかとを踏んだ革靴', 'shoes', ['loafers', '#4a3426', '#2a1e16'], '出張で履き潰した革靴。かかとは最初から踏んである。');
+cosmetic('cos_mass_suit', '量産型スーツ（異世界製）', 'top', ['suit', '#4a4f5e', '#9ab0d0'], 'アーク・シティの工場製。なぜかうっすら光る。');
+cosmetic('cos_umbrella_katana', '会社の置き傘', 'weapon', ['katana', '#2c3a7a', '#d0d4dc'], '宴会芸「傘の居合い斬り」用。返さなくていい。', { wt: 'melee' });
+cosmetic('cos_id_strap', 'ふたつの会社の社員証', 'accessory', ['goldChain', '#3a6ad0', '#ffffff'], 'どちらの世界の会社でも、もう窓際。');
+cosmetic('cos_wifi_cap', 'Wi-Fiマークの帽子', 'hat', ['cap', '#2a8ad8', '#ffffff'], 'かぶると電波がよくなる気がする。気がするだけ。');
+cosmetic('cos_lan_muffler', 'LANケーブルのマフラー', 'accessory', ['scarf', '#3a9ad0', '#f0f0f0'], '首を締めないように。抜くと切断される。');
+cosmetic('cos_one_leaf_shorts', '葉っぱ一枚パンツ', 'bottom', ['shorts', '#4ab04a', '#2a6a2a'], 'ログインボーナスのお詫びに届いた。百日分の重み。');
+cosmetic('cos_low_battery_wings', '残り1%の翼', 'accessory', ['wings', '#c8302a', '#3a3a3a'], 'ずっと充電中。ずっと残り1%。');
+cosmetic('cos_just_a_twig', 'ただの木の枝', 'weapon', ['woodSword', '#7a5a3a', '#4a8a3a'], '森で拾った。電波は出ない。それがいい。', { wt: 'melee' });
+cosmetic('cos_fish_hood', '魚の被り物', 'hat', ['helmet', '#5a9ac8', '#f0f0f0'], '口のところから顔が出る。目が合うと気まずい。');
+cosmetic('cos_snorkel_mask', 'シュノーケル', 'accessory', ['mask', '#ff7a3a', '#3ac8e8'], '人魚ではなく、海水浴のおじさんになれる。');
+cosmetic('cos_mermaid_tail', '人魚のしっぽ（二股）', 'bottom', ['armorPants', '#2ab0a0', '#a8f0e0'], '二股に仕立てた結果、とても歩きやすい。');
+cosmetic('cos_flipper_sandals', '足ひれサンダル', 'shoes', ['sandals', '#ffb81a', '#2a7ad0'], '歩くたびにペタペタ鳴る。陸ではうるさい。');
+cosmetic('cos_squid_wand', '干しイカの杖', 'weapon', ['staff', '#e8c890', '#b08850'], '海の王の杖（市場で買った）。噛むと味が出る。', { wt: 'magic' });
+cosmetic('cos_cloud_afro', '雲のアフロ', 'hat', ['beanie', '#f4f6fa', '#d0d8e8'], '売れ残りの雲で作った。湿気でふくらむ。');
+cosmetic('cos_raincloud_halo', '自分にだけ雨が降る雲', 'accessory', ['halo', '#7a8494', '#3a7ad0'], '返品された雨雲。頭の上でしとしと降る。');
+cosmetic('cos_cotton_candy_wand', 'わたあめの杖', 'weapon', ['staff', '#ffc8e8', '#ffffff'], '振ると甘い匂い。天空カモメに狙われる。', { wt: 'magic' });
+cosmetic('cos_damp_cloud_hoodie', 'しっとり雲パーカー', 'top', ['hoodie', '#e4ecf6', '#b0c0d8'], '雲なので乾かない。夏は涼しい。');
+cosmetic('cos_cherub_tights', '天使のタイツ', 'bottom', ['trackPants', '#fbf4e8', '#ffd23f'], '「天使も着てる」と宣伝したが、天使は服を着なかった。');
+for (const it of list.slice(W2Q_N0)) {
+  it.world = 2;
+  if (it.type === 'equip') it.lore = ITEM_LORE[it.id] || it.desc || `${it.name}。ネオン・アークで手に入れた一品。`;
+  ITEMS[it.id] = it;
+  if (it.cosmetic) COSMETIC_IDS.push(it.id);
+  if (it.questSet) QSET_IDS.push(it.id);
+}

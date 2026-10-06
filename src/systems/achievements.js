@@ -4,7 +4,7 @@
 //  称号: 実績・ストーリー分岐・タワーで入手。state.title に選択中の称号ID（HUD 名前横に表示: currentTitle(state)）。
 import { ENEMIES, BOSS_IDS, NIGHT_ENEMY_IDS, ENEMY_REGIONS } from '../data/enemies.js';
 import { ITEMS, PET_IDS } from '../data/items.js';
-import { MISSIONS, QUEST_TITLES } from '../data/missions.js';
+import { MISSIONS, QUEST_TITLES, QUEST_TITLES_W2 } from '../data/missions.js';
 import { WORLD_MAP_IDS, TOWN_IDS } from './travel.js';
 import { bookBonus, bookProgress, bookRank, BOOK_IDS } from './book.js';
 import { isNight } from '../data/balance.js';
@@ -125,6 +125,7 @@ export const EXTRA_TITLES = {
   t_new_don: { name: '新しいドン', source: 'ストーリー（最終話）', flag: 'title_new_don' },
   t_spire_100: { name: 'スパイアの頂', source: 'ヴァイス・スパイア 100階', flag: 'title_spire_100' },
   ...QUEST_TITLES, // v4（クエスト担当）: 連作・地域の記念・第2部の称号（data/questsW1.js）
+  ...QUEST_TITLES_W2, // v4（クエスト担当・2回目）: 第2ワールドの地域の記念・第2部の最終話と終章の称号（data/questsW2.js）
 };
 
 function ensure(state) {

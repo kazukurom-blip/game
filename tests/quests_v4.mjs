@@ -16,7 +16,7 @@ import { titleList } from '../src/systems/achievements.js';
 import { findNpc } from '../src/systems/guide.js';
 
 const OLD_IDS_COUNT = 61; // v4 以前のクエスト数（メイン15・サブ14・デイリー8・転職24）
-const isNew = (m) => m.id.startsWith('q_') || m.id.startsWith('m2_');
+const isNew = (m) => m.id.startsWith('q_') || m.id.startsWith('q2_') || m.id.startsWith('m2_'); // q2_ = 第2ワールド（tests/quests_w2.mjs）
 const NEW = () => Object.values(MISSIONS).filter(isNew);
 
 /** 目的をイベント・持ち物で満たす（unit.mjs の通しテストと同じやり方） */
