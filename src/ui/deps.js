@@ -10,6 +10,7 @@ import * as ProgM from '../systems/progression.js';
 import * as InvM from '../systems/inventory.js';
 import * as SkillS from '../systems/skills.js';
 import * as LootM from '../systems/loot.js';
+import * as CombatM from '../systems/combat.js';
 import { RARITY_FALLBACK, rrPath, txt, rgba } from './theme.js';
 
 const warned = new Set();
@@ -78,6 +79,71 @@ export function stats(game) {
 export function computeStatsRaw(state) {
   return guard('computeStats', () => (typeof ProgM.computeStats === 'function' ? ProgM.computeStats(state) : null), null);
 }
+// ---- ダメージの幅（能力画面・装備比較で使う） ----
+// 通常攻撃の倍率（entities/player.js startAttack と同じ: 魔法弾 1.1、それ以外 1）
+export function basicAttackMult(cs) { return cs?.weaponType === 'magic' ? 1.1 : 1; }
+/**
+ * dmgRange(cs, mult?) → {lo, hi, critLo, critHi, crit, critDmg}
+ * 防御0の相手に通常攻撃1発を当てたときのダメージの幅。
+ * 実際の計算（systems/combat.js calcDamage）を、乱数を最小（0）と最大（1 の手前）に固定して呼んで求める。
+ * calcDamage の式（atk × 倍率 × (0.9〜1.1) × クリ倍率 → 四捨五入）が変わっても表示がずれない。
+ */
+export function dmgRange(cs, mult) {
+  if (!cs) return null;
+  const atk = cs.atk || 0, m = mult ?? basicAttackMult(cs), cd = cs.critDmg || 1.5;
+  const calc = CombatM.calcDamage;
+  const fb = (r, c) => Math.max(1, Math.round(atk * m * (0.9 + r * 0.2) * (c ? cd : 1)));
+  const at = (r, c) => {
+    if (typeof calc !== 'function') return fb(r, c);
+    const rnd = Math.random;
+    Math.random = () => r; // 同期処理の間だけ乱数を固定（finally で必ず戻す）
+    try { return calc(atk, m, 0, c ? 1 : 0, cd).dmg; } catch { return fb(r, c); } finally { Math.random = rnd; }
+  };
+  const top = 1 - 1e-9;
+  return { lo: at(0, false), hi: at(top, false), critLo: at(0, true), critHi: at(top, true), crit: cs.crit || 0, critDmg: cd };
+}
+export function fmtRange(r, crit = false) {
+  if (!r) return '-';
+  const a = crit ? r.critLo : r.lo, b = crit ? r.critHi : r.hi;
+  return a === b ? a.toLocaleString('en-US') : `${a.toLocaleString('en-US')}〜${b.toLocaleString('en-US')}`;
+}
+/** 装備を付け替えたと仮定したステータス（inst は持ち物のエントリ。★・潜在も反映） */
+export function statsWithEquip(state, it, inst) {
+  if (!state || !it?.slot) return null;
+  const st2 = { ...state, equipped: { ...(state.equipped || {}), [it.slot]: it.id } };
+  if (state.equippedInst) st2.equippedInst = { ...state.equippedInst, [it.slot]: inst && inst.id === it.id ? inst : null };
+  return computeStatsRaw(st2);
+}
+/** AP を振ったと仮定したステータス（能力画面の＋ボタンのプレビュー） */
+export function statsWithAp(state, k, n = 1) {
+  if (!state) return null;
+  return computeStatsRaw({ ...state, stats: { ...(state.stats || {}), [k]: ((state.stats || {})[k] || 0) + n } });
+}
+
+// ---- 売却 ----
+/** 持ち物のエントリ s の売値（1個あたり。装備は ★・潜在込み） */
+export function sellPriceEntry(s) {
+  const it = getItemDef(s?.id);
+  if (!it) return 0;
+  if (s.uid && typeof InvM.sellPriceInst === 'function') { const v = guard('sellPriceInst', () => InvM.sellPriceInst(s), null); if (v != null) return v; }
+  return sellPriceOf(it);
+}
+/** doSell(game, s, qty) → {ok, msg, gain}。装備は uid でその1個を、消費・その他は個数ぶん売る */
+export function doSell(game, s, qty = 1) {
+  const st = game.state, it = getItemDef(s?.id);
+  if (!it) return { ok: false, msg: 'アイテムが見つかりません' };
+  const m0 = st.money || 0;
+  if (typeof InvM.sellItem === 'function') {
+    const r = guard('sellItem', () => InvM.sellItem(game, s.uid ? s.uid : s.id, s.uid ? 1 : qty), null);
+    if (r) return { ...r, gain: (st.money || 0) - m0 };
+  }
+  const n = s.uid ? 1 : qty;
+  if (doRemoveItem(st, s.uid || s.id, n) === false) return { ok: false, msg: '売却できませんでした' };
+  const gain = sellPriceEntry(s) * n;
+  st.money = m0 + gain;
+  return { ok: true, msg: `${it.name}${n > 1 ? ' x' + n : ''} を売却した（+$${gain}）`, gain };
+}
+
 export function expNeed(level) {
   return guard('expToNext', () => (typeof ProgM.expToNext === 'function' ? ProgM.expToNext(level) : null), null)
     ?? Math.floor(20 + 15 * Math.pow(level || 1, 1.7));

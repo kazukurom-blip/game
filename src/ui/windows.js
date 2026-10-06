@@ -6,6 +6,7 @@ import {
   guard, getItemDef, rarityInfo, stats, computeStatsRaw, drawChar, drawItemIco, drawSkillIco, heroLook, equipLooks,
   looksFrom, doEquip, doUnequip, doUseItem, doAddItem, doRemoveItem, allSkills, skillDef, skillMp, skillCd, doLearn,
   allMissions, missionDef, HERO_NAMES, expNeed, missionNpcName, turnInNpc, sellPriceOf, drawPetArt,
+  dmgRange, fmtRange, statsWithEquip, statsWithAp, sellPriceEntry, doSell,
 } from './deps.js';
 import {
   charLook, charName, currentJob, JOBS, skillsForHero, hasJob, jobLineage, jobLockOf, getSp, skillSpTier, moveParams, SKILL_BAR_SIZE, BAR_KEYS,
@@ -77,6 +78,14 @@ export function itemTip(game, it, o = {}) {
     L.push(line);
   }
   if (cur) L.push({ t: `▲▼ 装備中「${cur.name}」と比較`, c: COL.dim, size: 11.5 });
+  // 装備したときの通常攻撃ダメージ幅の変化（防御0の相手。★・潜在・ステータス込み）
+  if (it.slot && it.slot !== 'pet' && !o.equipped && o.compare !== false) {
+    const a = dmgRange(stats(game)), b = dmgRange(statsWithEquip(st, it, o.inst));
+    if (a && b) {
+      const d = (b.lo + b.hi) - (a.lo + a.hi);
+      L.push({ t: 'ダメージ', c: COL.orange, size: 12.5, r: `${fmtRange(a)} → ${fmtRange(b)}`, rc: d > 0 ? COL.good : d < 0 ? COL.bad : COL.sub });
+    }
+  }
   const inst = o.inst;
   if (inst && (inst.star || inst.pot)) {
     L.push({ sep: true });
@@ -99,7 +108,7 @@ export function itemTip(game, it, o = {}) {
   }
   if (it.desc) { L.push({ sep: true }); L.push({ t: it.desc, c: '#e6e0ff', size: 12.5, wrap: true }); }
   if (o.price === 'buy') L.push({ t: `価格  ${fmtMoney(it.price || 0)}`, c: (st.money || 0) >= (it.price || 0) ? COL.money : COL.bad, size: 14 });
-  if (o.price === 'sell' || (o.price == null && it.price)) L.push({ t: `売値  ${fmtMoney(sellPrice(it))}`, c: COL.gold, size: 12.5 });
+  if (o.price === 'sell' || (o.price == null && it.price)) L.push({ t: `売値  ${fmtMoney(o.inst ? sellPriceEntry(o.inst) : sellPrice(it))}`, c: COL.gold, size: 12.5 });
   return { lines: L, border: info.color };
 }
 
@@ -175,10 +184,10 @@ export function drawTooltipBox(ctx, tip, m, at) {
 }
 
 // ---------- 共通部品 ----------
-function tabs(ui, ctx, win, x, y, labels, tw = 100) {
+function tabs(ui, ctx, win, x, y, labels, tw = 100, key = 'tab') {
   labels.forEach((lab, i) => {
     const r = { x: x + i * (tw + 6), y, w: tw, h: 30 };
-    const on = win.tab === i, hov = ui.hover(win, r);
+    const on = (win[key] || 0) === i, hov = ui.hover(win, r);
     ctx.save();
     rrPath(ctx, r.x, r.y, r.w, r.h, 10);
     if (on) {
@@ -191,7 +200,7 @@ function tabs(ui, ctx, win, x, y, labels, tw = 100) {
     ctx.lineWidth = 1.5; ctx.strokeStyle = on ? '#fff' : 'rgba(200,180,255,0.5)'; ctx.stroke();
     ctx.restore();
     txt(ctx, lab, r.x + r.w / 2, r.y + 16, { size: 14, align: 'center', color: on ? '#fff' : COL.sub });
-    ui.hit(win, 'tab' + i, r, { onClick: () => { win.tab = i; win.sel = null; win.page = 0; } });
+    ui.hit(win, key + i, r, { onClick: () => { win[key] = i; win.sel = null; win.page = 0; } });
   });
 }
 
@@ -226,6 +235,45 @@ function slotBox(ctx, r, it, o = {}) {
     ctx.fillStyle = g; ctx.fill();
     ctx.restore();
   }
+}
+
+// 持ち物のエントリ（カテゴリ 0=装備 1=消費 2=その他）。i はインベントリの位置
+function invEntries(st, cat) {
+  return (st.inventory || []).map((s, i) => ({ s, i, it: s ? getItemDef(s.id) : null })).filter((e) => e.s && e.it && itemCat(e.it) === cat);
+}
+// 選択（{i, id, uid}）をリストから探し直す。売却などで位置がずれても uid → 位置 → id の順で追いかける
+function findSel(list, sel) {
+  if (!sel) return null;
+  return (sel.uid && list.find((e) => e.s.uid === sel.uid && !!e.equipped === !!sel.equipped))
+    || list.find((e) => e.i === sel.i && e.s.id === sel.id && !!e.equipped === !!sel.equipped)
+    || (!sel.uid ? list.find((e) => e.s.id === sel.id && !!e.equipped === !!sel.equipped) : null) || null;
+}
+const selOf = (e) => ({ i: e.i, id: e.s.id, uid: e.s.uid || null, equipped: !!e.equipped });
+/** グリッドの1マス（持ち物画面・売却画面で共通）: 枠・アイコン・個数・[1][2]登録・★・潜在の色・装備中の印 */
+function drawItemCell(ctx, st, r, e, o = {}) {
+  slotBox(ctx, r, e?.it, { hover: o.hover && e, sel: e && o.sel });
+  if (!e) return;
+  const cx = r.x + r.w / 2, cy = r.y + r.h / 2;
+  drawItemIco(ctx, e.it, cx, cy, r.w * 0.8);
+  if (o.dim) { ctx.save(); rrPath(ctx, r.x, r.y, r.w, r.h, 9); ctx.fillStyle = 'rgba(6,4,24,0.55)'; ctx.fill(); ctx.restore(); }
+  else if ((e.it.reqLevel || 0) > (st.level || 1) || !canWearGender(e.it, st.gender)) {
+    ctx.save(); rrPath(ctx, r.x, r.y, r.w, r.h, 9); ctx.fillStyle = 'rgba(255,40,70,0.22)'; ctx.fill(); ctx.restore();
+  }
+  if ((e.s.qty || 1) > 1) txt(ctx, e.s.qty, r.x + r.w - 4, r.y + r.h - 9, { size: 12, align: 'right', sw: 3 });
+  if (st.potionBar?.includes(e.s.id)) txt(ctx, '[' + (st.potionBar.indexOf(e.s.id) + 1) + ']', r.x + 4, r.y + 9, { size: 10, color: COL.pink, sw: 2.5 });
+  if (e.s.star) txt(ctx, '★' + e.s.star, r.x + 4, r.y + r.h - 9, { size: 10.5, color: COL.star, sw: 2.5 });
+  if (e.s.pot?.grade) {
+    const pc = V3.potential?.POT_GRADE_INFO?.[e.s.pot.grade]?.color || '#b04dff';
+    ctx.save(); ctx.beginPath(); ctx.arc(r.x + r.w - 8, r.y + 8, 4.5, 0, Math.PI * 2); ctx.fillStyle = pc; ctx.fill(); ctx.lineWidth = 1.2; ctx.strokeStyle = '#fff'; ctx.stroke(); ctx.restore();
+  }
+  if (e.equipped) {
+    ctx.save();
+    rrPath(ctx, r.x + 2, r.y + 2, 17, 14, 4);
+    ctx.fillStyle = COL.teal; ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = '#fff'; ctx.stroke();
+    ctx.restore();
+    txt(ctx, 'E', r.x + 10.5, r.y + 9.5, { size: 10, align: 'center', sw: 2, weight: 900 });
+  }
+  if (o.label) txt(ctx, o.label, cx, r.y + r.h - 8, { size: 9.5, align: 'center', color: COL.bad, sw: 2.5 });
 }
 
 // ======================= インベントリ =======================
@@ -324,39 +372,25 @@ function drawInventory(ui, ctx, win) {
   tabs(ui, ctx, win, gx, y + 48, ['装備', '消費', 'その他']);
   const inv = st.inventory || [];
   txt(ctx, `${inv.filter(Boolean).length} / 48`, x + w - 18, y + 63, { size: 13, align: 'right', color: COL.sub });
-  const list = inv.map((s, i) => ({ s, i, it: s ? getItemDef(s.id) : null })).filter((e) => e.s && e.it && itemCat(e.it) === win.tab);
+  const list = invEntries(st, win.tab || 0);
   // 選択の検証
-  let selE = null;
-  if (win.sel != null) {
-    selE = list.find((e) => e.i === win.sel.i && e.s.id === win.sel.id) || list.find((e) => e.s.id === win.sel.id) || null;
-    if (!selE) win.sel = null;
-  }
+  const selE = findSel(list, win.sel);
+  if (!selE) win.sel = null;
   const CELL = 54;
   for (let k = 0; k < 48; k++) {
     const r = { x: gx + (k % 8) * CELL, y: gy + Math.floor(k / 8) * CELL, w: 50, h: 50 };
     const e = list[k];
     const hov = ui.hover(win, r);
-    slotBox(ctx, r, e?.it, { hover: hov && e, sel: e && selE === e });
+    drawItemCell(ctx, st, r, e, { hover: hov, sel: selE === e });
     if (!e) continue;
-    drawItemIco(ctx, e.it, r.x + 25, r.y + 25, 40);
-    if ((e.it.reqLevel || 0) > (st.level || 1) || !canWearGender(e.it, st.gender)) {
-      ctx.save(); rrPath(ctx, r.x, r.y, r.w, r.h, 9); ctx.fillStyle = 'rgba(255,40,70,0.22)'; ctx.fill(); ctx.restore();
-    }
-    if ((e.s.qty || 1) > 1) txt(ctx, e.s.qty, r.x + r.w - 4, r.y + r.h - 9, { size: 12, align: 'right', sw: 3 });
-    if (st.potionBar?.includes(e.s.id)) txt(ctx, '[' + (st.potionBar.indexOf(e.s.id) + 1) + ']', r.x + 4, r.y + 9, { size: 10, color: COL.pink, sw: 2.5 });
-    if (e.s.star) txt(ctx, '★' + e.s.star, r.x + 4, r.y + r.h - 9, { size: 10.5, color: COL.star, sw: 2.5 });
-    if (e.s.pot?.grade) {
-      const pc = V3.potential?.POT_GRADE_INFO?.[e.s.pot.grade]?.color || '#b04dff';
-      ctx.save(); ctx.beginPath(); ctx.arc(r.x + r.w - 8, r.y + 8, 4.5, 0, Math.PI * 2); ctx.fillStyle = pc; ctx.fill(); ctx.lineWidth = 1.2; ctx.strokeStyle = '#fff'; ctx.stroke(); ctx.restore();
-    }
     if (hov) ui.setTip(itemTip(g, e.it, { inst: e.s }));
     const cons = e.it.type === 'consumable';
     ui.hit(win, 'it:' + k, r, {
-      onClick: () => { win.sel = { i: e.i, id: e.s.id }; },
+      onClick: () => { win.sel = selOf(e); },
       onDbl: () => activate(ui, win, e),
       onRight: () => {
         if (cons) { togglePotion(ui, e.s.id); return; }
-        win.sel = { i: e.i, id: e.s.id };
+        win.sel = selOf(e);
         if (!e.it.slot || e.it.slot === 'pet') return;
         const m = ui.mouse();
         const ref = e.s.uid ? { uid: e.s.uid } : { index: e.i };
@@ -409,7 +443,7 @@ function activate(ui, win, e) {
   const g = ui.game, it = e?.it;
   if (!it) return;
   if (it.slot || it.type === 'equip') {
-    const r = doEquip(g, it.id);
+    const r = doEquip(g, e.s?.uid || it.id); // 選んだその1個（★・潜在つき）を装備する
     if (r && r.ok === false) ui.notify(r.msg || '装備できません', COL.bad);
     else if (r === false) ui.notify('装備できません', COL.bad);
     else ui.notify(`${it.name} を装備した！`, rarityInfo(it.rarity).color);
@@ -606,23 +640,27 @@ function drawStats(ui, ctx, win) {
   ctx.restore();
   txt(ctx, `AP  ${st.ap || 0}`, x + w - 79, y + 61, { size: 16, align: 'center', color: COL.gold, glow: (st.ap || 0) > 0 ? COL.gold : null });
   const keys = ['str', 'dex', 'int', 'luk'];
+  let apHover = null;
   keys.forEach((k, i) => {
     const r = { x: x + 16, y: y + 84 + i * 54, w: w - 32, h: 48 };
     inset(ctx, r.x, r.y, r.w, r.h, { r: 10 });
     txt(ctx, k.toUpperCase(), r.x + 16, r.y + 17, { size: 18, color: [COL.pink, COL.teal, '#a98bff', COL.gold][i] });
     txt(ctx, STAT_DESC[k], r.x + 16, r.y + 36, { size: 11, color: COL.sub, sw: 2.5, weight: 700 });
     txt(ctx, st.stats?.[k] ?? 0, r.x + r.w - 62, r.y + r.h / 2, { size: 22, align: 'right' });
-    ui.btn(ctx, win, 'ap:' + k, { x: r.x + r.w - 46, y: r.y + 8, w: 34, h: 32 }, '+', () => {
+    const hovAp = ui.btn(ctx, win, 'ap:' + k, { x: r.x + r.w - 46, y: r.y + 8, w: 34, h: 32 }, '+', () => {
       if ((st.ap || 0) <= 0) return;
       st.stats = st.stats || {};
       st.stats[k] = (st.stats[k] || 0) + 1;
       st.ap--;
       refreshPlayerStats(g);
     }, { disabled: (st.ap || 0) <= 0, color: COL.orange, size: 20 });
+    if (hovAp && (st.ap || 0) > 0) apHover = k;
   });
-  // 詳細ステータス
   const cs = stats(g);
-  const dy = y + 84 + 4 * 54 + 6;
+  // 通常攻撃のダメージ幅（防御0の相手）
+  drawDmgBox(ui, ctx, win, x + 16, y + 84 + 4 * 54, w - 32, 58, cs, apHover);
+  // 詳細ステータス
+  const dy = y + 84 + 4 * 54 + 64;
   txt(ctx, '◆ 詳細ステータス', x + 20, dy + 10, { size: 14, color: COL.teal });
   const rows = [
     ['maxHp', '最大HP'], ['maxMp', '最大MP'], ['atk', '攻撃力'], ['def', '防御力'], ['speed', '移動速度'], ['jump', 'ジャンプ'],
@@ -648,6 +686,34 @@ function drawStats(ui, ctx, win) {
   const hist = Array.isArray(st.job?.history) ? st.job.history : [];
   const chain = ['見習い', ...hist.map((e) => `${JOBS[e.id]?.name || e.id}${e.level ? `(Lv${e.level})` : ''}`)].join(' → ');
   for (const [i, ln] of wrap(ctx, '転職履歴: ' + chain, w - 56, 11.5, 700).slice(0, 3).entries()) txt(ctx, ln, x + 28, jy + 38 + i * 16, { size: 11.5, color: COL.sub, weight: 700, sw: 2.5 });
+}
+// 能力画面: 通常攻撃1発のダメージ幅。値が変わったら差分を少しの間だけ出す。＋ボタンに乗せると振った後の値を予告
+function drawDmgBox(ui, ctx, win, bx, by, bw, bh, cs, apHover) {
+  const g = ui.game, st = g.state;
+  const r = dmgRange(cs);
+  if (!r) return;
+  const t = g.time || ui.frame / 60;
+  const prev = win._dmg;
+  if (prev && (prev.lo !== r.lo || prev.hi !== r.hi)) win._dmgFx = { d: r.lo - prev.lo, d2: r.hi - prev.hi, t0: t };
+  win._dmg = { lo: r.lo, hi: r.hi };
+  const fx = win._dmgFx && t - win._dmgFx.t0 < 2 ? win._dmgFx : null;
+  const k = fx ? 1 - (t - fx.t0) / 2 : 0;
+  inset(ctx, bx, by, bw, bh, { r: 10, fill: 'rgba(40,10,40,0.55)', stroke: fx ? rgba(fx.d >= 0 ? COL.good : COL.bad, 0.5 + 0.5 * k) : rgba(COL.orange, 0.6), lw: fx ? 2 : 1.5 });
+  txt(ctx, '◆ 通常攻撃ダメージ', bx + 12, by + 16, { size: 12.5, color: COL.orange, sw: 2.5 });
+  txt(ctx, '防御0の相手・1発', bx + 12, by + 38, { size: 10.5, color: COL.dim, sw: 2.5, weight: 700 });
+  const vx = bx + bw - 14;
+  txt(ctx, fmtRange(r), vx, by + 20, { size: 22, align: 'right', color: '#ffe7b0', glow: fx ? (fx.d >= 0 ? COL.good : COL.bad) : null, glowBlur: 10 * k });
+  txt(ctx, `クリティカル ${fmtRange(r, true)}（率 ${Math.round(r.crit * 100)}%）`, vx, by + 43, { size: 11.5, align: 'right', color: '#ff9ad5', sw: 2.5 });
+  // 差分 / ＋ボタンのプレビュー
+  let note = null;
+  if (apHover) {
+    const r2 = dmgRange(statsWithAp(st, apHover, 1));
+    if (r2) note = { s: `${apHover.toUpperCase()}+1 → ${fmtRange(r2)}`, c: r2.hi > r.hi || r2.lo > r.lo ? COL.good : COL.sub, a: 1 };
+  } else if (fx && (fx.d || fx.d2)) {
+    const sg = (v) => (v > 0 ? '+' : '') + v;
+    note = { s: `${sg(fx.d)}〜${sg(fx.d2)}`, c: fx.d + fx.d2 >= 0 ? COL.good : COL.bad, a: Math.min(1, k * 2) };
+  }
+  if (note) txt(ctx, note.s, bx + 150, by + 16, { size: 12, color: note.c, sw: 3, alpha: note.a, maxW: bw - 150 - 14 - measure(ctx, fmtRange(r), 22) - 8 });
 }
 function refreshPlayerStats(g) {
   const v = computeStatsRaw(g.state);
@@ -1045,40 +1111,53 @@ function drawDialog(ui, ctx, win) {
 }
 
 // ======================= ショップ =======================
+// 購入: 品物のリスト / 売却: 持ち物画面と同じグリッド（タブ・★・潜在・装備中の印）から選ぶ
 function drawShop(ui, ctx, win) {
   const g = ui.game, st = g.state;
   if (!st) return;
   const npc = npcOf(win);
-  const { x, y, w, h } = win;
+  const { x, y, w } = win;
   win.title = `${npc.name || ''} のショップ`;
   tabs(ui, ctx, win, x + 16, y + 46, ['購入', '売却']);
   txt(ctx, fmtMoney(st.money || 0), x + w - 20, y + 62, { size: 20, align: 'right', color: COL.money, stroke: COL.moneyShadow, sw: 4 });
-  let rows;
-  if (win.tab === 0) rows = (npc.shop || []).map((id) => getItemDef(id)).filter((it) => it && canWearGender(it, st.gender)).map((it) => ({ key: it.id, it, price: it.price || 0 }));
-  else rows = (st.inventory || []).map((s, i) => ({ s, i, it: s ? getItemDef(s.id) : null })).filter((e) => e.it && (e.it.price || e.it.sellPrice))
-    .map((e) => ({ key: e.i + ':' + e.s.id, it: e.it, s: e.s, price: sellPrice(e.it) }));
+  if (win.tab === 1) drawSellTab(ui, ctx, win);
+  else drawBuyTab(ui, ctx, win, npc);
+}
+
+// 右の詳細パネルの上半分（アイコンの光＋説明）。説明は高さ th で切る
+function drawDealInfo(ctx, it, tip, dx, dy, dw, th) {
+  const info = rarityInfo(it.rarity);
+  ctx.save();
+  const cg = ctx.createRadialGradient(dx + dw / 2, dy + 52, 4, dx + dw / 2, dy + 52, 50);
+  cg.addColorStop(0, rgba(info.color, 0.5)); cg.addColorStop(1, rgba(info.color, 0));
+  ctx.fillStyle = cg; ctx.fillRect(dx, dy, dw, 110);
+  ctx.restore();
+  drawItemIco(ctx, it, dx + dw / 2, dy + 52, 64);
+  tip.lines = tip.lines.filter((l) => !(l.t && /^(価格|売値)/.test(l.t)));
+  ctx.save();
+  ctx.beginPath(); ctx.rect(dx, dy + 96, dw, Math.max(0, th)); ctx.clip();
+  drawTooltipBox(ctx, tip, null, { x: dx, y: dy + 96, w: dw });
+  ctx.restore();
+}
+
+function drawBuyTab(ui, ctx, win, npc) {
+  const g = ui.game, st = g.state;
+  const { x, y, w, h } = win;
+  const rows = (npc.shop || []).map((id) => getItemDef(id)).filter((it) => it && canWearGender(it, st.gender)).map((it) => ({ key: it.id, it, price: it.price || 0 }));
   const PER = 8, RH = 48;
   const pages = Math.max(1, Math.ceil(rows.length / PER));
   win.page = clamp(win.page || 0, 0, pages - 1);
   pager(ui, ctx, win, x + 16 + 460 - 112, y + h - 40, pages);
   const lx = x + 16, ly = y + 86, lw = 460;
-  if (!rows.length) txt(ctx, win.tab === 0 ? '品切れ中…' : '売れるアイテムがありません', lx + lw / 2, ly + 120, { size: 15, align: 'center', color: COL.dim });
-  let selRow = rows.find((r) => r.key === win.sel) || null;
+  if (!rows.length) txt(ctx, '品切れ中…', lx + lw / 2, ly + 120, { size: 15, align: 'center', color: COL.dim });
+  const selRow = rows.find((r) => r.key === win.sel) || null;
   if (!selRow) win.sel = null;
-  const doDeal = (row) => {
+  const doBuy = (row) => {
     if (!row) return;
-    if (win.tab === 0) {
-      if ((st.money || 0) < row.price) { ui.notify('お金が足りません', COL.bad); return; }
-      if (!doAddItem(g, row.it.id, 1, { silent: true })) { ui.notify('インベントリがいっぱいです', COL.bad); return; }
-      st.money -= row.price;
-      ui.notify(`${row.it.name} を購入した（-${fmtMoney(row.price)}）`, COL.money);
-    } else {
-      const ok = doRemoveItem(st, row.it.id, 1);
-      if (ok === false) { ui.notify('売却できませんでした', COL.bad); return; }
-      st.money = (st.money || 0) + row.price;
-      ui.notify(`${row.it.name} を売却した（+${fmtMoney(row.price)}）`, COL.money);
-      if (!(st.inventory || []).some((s) => s && s.id === row.it.id)) win.sel = null;
-    }
+    if ((st.money || 0) < row.price) { ui.notify('お金が足りません', COL.bad); return; }
+    if (!doAddItem(g, row.it.id, 1, { silent: true })) { ui.notify('インベントリがいっぱいです', COL.bad); return; }
+    st.money -= row.price;
+    ui.notify(`${row.it.name} を購入した（-${fmtMoney(row.price)}）`, COL.money);
   };
   rows.slice(win.page * PER, win.page * PER + PER).forEach((row, k) => {
     const r = { x: lx, y: ly + k * RH, w: lw, h: RH - 5 };
@@ -1086,38 +1165,124 @@ function drawShop(ui, ctx, win) {
     const info = rarityInfo(row.it.rarity);
     inset(ctx, r.x, r.y, r.w, r.h, { r: 10, fill: on ? 'rgba(255,95,162,0.3)' : hov ? 'rgba(123,47,247,0.35)' : 'rgba(6,4,24,0.55)', stroke: on ? '#fff' : undefined, lw: on ? 2 : 1.5 });
     drawItemIco(ctx, row.it, r.x + 24, r.y + r.h / 2, 36);
-    txt(ctx, row.it.name + (row.s && (row.s.qty || 1) > 1 ? ` ×${row.s.qty}` : ''), r.x + 50, r.y + 14, { size: 14.5, color: info.color, maxW: 260 });
+    txt(ctx, row.it.name, r.x + 50, r.y + 14, { size: 14.5, color: info.color, maxW: 260 });
     const sub = row.it.slot ? `${SLOT_LABELS[row.it.slot]}  Lv${row.it.reqLevel || 1}` : row.it.type === 'consumable' ? '消費' : 'その他';
     txt(ctx, sub, r.x + 50, r.y + 31, { size: 11, color: (row.it.reqLevel || 0) > (st.level || 1) ? COL.bad : COL.sub, sw: 2.5, weight: 700 });
-    txt(ctx, fmtMoney(row.price), r.x + r.w - 14, r.y + r.h / 2, { size: 15, align: 'right', color: win.tab === 0 && (st.money || 0) < row.price ? COL.bad : COL.money });
-    ui.hit(win, 'row:' + row.key, r, { onClick: () => { win.sel = row.key; }, onDbl: () => doDeal(row) });
+    txt(ctx, fmtMoney(row.price), r.x + r.w - 14, r.y + r.h / 2, { size: 15, align: 'right', color: (st.money || 0) < row.price ? COL.bad : COL.money });
+    ui.hit(win, 'row:' + row.key, r, { onClick: () => { win.sel = row.key; }, onDbl: () => doBuy(row) });
   });
   // 詳細パネル
   const dx = lx + lw + 14, dw = x + w - 16 - dx, dy = ly, dh = y + h - 16 - dy;
   inset(ctx, dx, dy, dw, dh, { r: 12 });
   if (selRow) {
-    const it = selRow.it;
-    const info = rarityInfo(it.rarity);
-    ctx.save();
-    const cg = ctx.createRadialGradient(dx + dw / 2, dy + 52, 4, dx + dw / 2, dy + 52, 50);
-    cg.addColorStop(0, rgba(info.color, 0.5)); cg.addColorStop(1, rgba(info.color, 0));
-    ctx.fillStyle = cg; ctx.fillRect(dx, dy, dw, 110);
-    ctx.restore();
-    drawItemIco(ctx, it, dx + dw / 2, dy + 52, 64);
-    const tip = itemTip(g, it, { price: win.tab === 0 ? 'buy' : 'sell' });
-    tip.lines = tip.lines.filter((l) => !(l.t && /^(価格|売値)/.test(l.t)));
-    ctx.save();
-    ctx.beginPath(); ctx.rect(dx, dy + 96, dw, dh - 150); ctx.clip();
-    drawTooltipBox(ctx, tip, null, { x: dx, y: dy + 96, w: dw });
-    ctx.restore();
-    const label = win.tab === 0 ? `購入  ${fmtMoney(selRow.price)}` : `売却  +${fmtMoney(selRow.price)}`;
-    ui.btn(ctx, win, 'deal', { x: dx + 14, y: dy + dh - 48, w: dw - 28, h: 36 }, label, () => doDeal(selRow), {
-      color: win.tab === 0 ? COL.teal : COL.orange, disabled: win.tab === 0 && (st.money || 0) < selRow.price, size: 16,
+    drawDealInfo(ctx, selRow.it, itemTip(g, selRow.it, { price: 'buy', menuHint: false }), dx, dy, dw, dh - 150);
+    ui.btn(ctx, win, 'deal', { x: dx + 14, y: dy + dh - 48, w: dw - 28, h: 36 }, `購入  ${fmtMoney(selRow.price)}`, () => doBuy(selRow), {
+      color: COL.teal, disabled: (st.money || 0) < selRow.price, size: 16,
     });
   } else {
     txt(ctx, 'アイテムを選択', dx + dw / 2, dy + dh / 2 - 12, { size: 15, align: 'center', color: COL.dim });
-    txt(ctx, 'ダブルクリックで即取引', dx + dw / 2, dy + dh / 2 + 14, { size: 12, align: 'center', color: COL.dim });
+    txt(ctx, 'ダブルクリックで即購入', dx + dw / 2, dy + dh / 2 + 14, { size: 12, align: 'center', color: COL.dim });
   }
+}
+
+const SELL_COLS = 8, SELL_ROWS = 6, SELL_CELL = 54;
+// 売却のグリッドに並べるエントリ（装備タブは装備中のものを先頭に「E」付きで。装備中・値段0は売れない）
+function sellEntries(st, cat) {
+  const list = [];
+  if (cat === 0) {
+    for (const slot of ['weapon', 'hat', 'top', 'bottom', 'shoes', 'accessory', 'pet']) {
+      const id = st.equipped?.[slot], it = getItemDef(id);
+      if (!it) continue;
+      const inst = st.equippedInst?.[slot];
+      list.push({ s: inst && inst.id === id ? inst : { id, qty: 1 }, i: -1, it, equipped: true, slot });
+    }
+  }
+  for (const e of invEntries(st, cat)) list.push(e);
+  for (const e of list) e.price = sellPriceEntry(e.s);
+  return list;
+}
+function sellBlock(e) {
+  if (e.equipped) return '装備中は売れません（外してから）';
+  if (!(e.it.price || e.it.sellPrice) || !(e.price > 0)) return 'このアイテムは売れません';
+  return null;
+}
+function drawSellTab(ui, ctx, win) {
+  const g = ui.game, st = g.state;
+  const { x, y, w, h } = win;
+  const gx = x + 16, gy = y + 122;
+  tabs(ui, ctx, win, gx, y + 84, ['装備', '消費', 'その他'], 90, 'cat');
+  const cat = win.cat || 0;
+  const list = sellEntries(st, cat);
+  const per = SELL_COLS * SELL_ROWS;
+  const pages = Math.max(1, Math.ceil(list.length / per));
+  win.page = clamp(win.page || 0, 0, pages - 1);
+  const inv = st.inventory || [];
+  txt(ctx, `${inv.filter(Boolean).length} / 48`, gx + SELL_COLS * SELL_CELL - 4, y + 99, { size: 13, align: 'right', color: COL.sub });
+  const selE = findSel(list, win.sel);
+  if (!selE) win.sel = null;
+  const qKey = selE ? (selE.s.uid || selE.s.id) : null;
+  if (qKey !== win._qtyFor) { win._qtyFor = qKey; win.qty = 1; }
+  const maxQ = selE && !selE.s.uid ? Math.max(1, selE.s.qty || 1) : 1;
+  win.qty = clamp(win.qty || 1, 1, maxQ);
+  const doSellSel = (e, n) => {
+    if (!e) return;
+    const why = sellBlock(e);
+    if (why) { ui.notify(why, COL.bad); return; }
+    const r = doSell(g, e.s, n);
+    if (!r || r.ok === false) { ui.notify(r?.msg || '売却できませんでした', COL.bad); return; }
+    ui.notify(r.msg || `${e.it.name} を売却した（+${fmtMoney(r.gain || 0)}）`, COL.money);
+    win.qty = 1;
+  };
+  const shown = list.slice(win.page * per, win.page * per + per);
+  for (let k = 0; k < per; k++) {
+    const r = { x: gx + (k % SELL_COLS) * SELL_CELL, y: gy + Math.floor(k / SELL_COLS) * SELL_CELL, w: 50, h: 50 };
+    const e = shown[k];
+    const hov = ui.hover(win, r);
+    const block = e ? sellBlock(e) : null;
+    drawItemCell(ctx, st, r, e, { hover: hov, sel: e && selE === e, dim: !!block, label: e && !e.equipped && block ? '売れない' : null });
+    if (!e) continue;
+    if (hov) ui.setTip(itemTip(g, e.it, { inst: e.s, equipped: e.equipped, price: e.equipped ? 'none' : 'sell', menuHint: false, compare: false }));
+    ui.hit(win, 'sell:' + k, r, {
+      onClick: () => { win.sel = selOf(e); },
+      onDbl: () => { win.sel = selOf(e); doSellSel(e, 1); },
+    });
+  }
+  if (!list.length) txt(ctx, 'このタブに売れるアイテムはありません', gx + SELL_COLS * SELL_CELL / 2, gy + SELL_ROWS * SELL_CELL / 2, { size: 14, align: 'center', color: COL.dim });
+  const by = gy + SELL_ROWS * SELL_CELL + 6;
+  txt(ctx, 'クリックで選ぶ / ダブルクリックで1個売る', gx + 2, by + 13, { size: 11.5, color: COL.dim, sw: 2.5, weight: 700 });
+  pager(ui, ctx, win, gx + SELL_COLS * SELL_CELL - 4 - 112, by, pages);
+
+  // 詳細パネル: 値段と売るボタン（同じ消耗品はまとめて売れる）
+  const dx = gx + SELL_COLS * SELL_CELL + 10, dw = x + w - 16 - dx, dy = y + 86, dh = y + h - 16 - dy;
+  inset(ctx, dx, dy, dw, dh, { r: 12 });
+  win.onEnter = selE ? () => doSellSel(selE, win.qty) : null;
+  if (!selE) {
+    txt(ctx, '売るアイテムを選択', dx + dw / 2, dy + dh / 2 - 12, { size: 15, align: 'center', color: COL.dim });
+    txt(ctx, '選ぶと値段と売るボタンが出ます', dx + dw / 2, dy + dh / 2 + 14, { size: 12, align: 'center', color: COL.dim });
+    return;
+  }
+  const it = selE.it, block = sellBlock(selE);
+  const stack = maxQ > 1;
+  const foot = stack ? 140 : 100;
+  drawDealInfo(ctx, it, itemTip(g, it, { inst: selE.s, equipped: selE.equipped, price: selE.equipped ? 'none' : 'sell', menuHint: false, compare: false }), dx, dy, dw, dh - 96 - foot);
+  let fy = dy + dh - foot;
+  ctx.fillStyle = 'rgba(255,255,255,0.14)'; ctx.fillRect(dx + 12, fy, dw - 24, 1);
+  fy += 8;
+  txt(ctx, '売値', dx + 16, fy + 12, { size: 13, color: COL.sub });
+  txt(ctx, block ? '-' : `${fmtMoney(selE.price)}${stack ? ' / 1個' : ''}`, dx + dw - 16, fy + 12, { size: 15, align: 'right', color: block ? COL.dim : COL.money });
+  fy += 28;
+  if (stack) {
+    // 個数: − n ＋ / 全部
+    const n = win.qty;
+    ui.btn(ctx, win, 'q-', { x: dx + 14, y: fy, w: 34, h: 30 }, '−', () => { win.qty = Math.max(1, win.qty - 1); }, { disabled: n <= 1, size: 16, color: COL.purple });
+    inset(ctx, dx + 52, fy, 72, 30, { r: 8 });
+    txt(ctx, `${n} / ${maxQ}`, dx + 88, fy + 15, { size: 14, align: 'center' });
+    ui.btn(ctx, win, 'q+', { x: dx + 128, y: fy, w: 34, h: 30 }, '＋', () => { win.qty = Math.min(maxQ, win.qty + 1); }, { disabled: n >= maxQ, size: 16, color: COL.purple });
+    ui.btn(ctx, win, 'qAll', { x: dx + 168, y: fy, w: dw - 182, h: 30 }, `全部（${maxQ}）`, () => { win.qty = maxQ; }, { disabled: n >= maxQ, size: 13, color: '#7b4dc9' });
+  }
+  const n = stack ? win.qty : 1;
+  const label = block ? (selE.equipped ? '装備中は売れません' : '売れません') : `売却${n > 1 ? ` ×${n}` : ''}  +${fmtMoney(selE.price * n)}`;
+  ui.btn(ctx, win, 'deal', { x: dx + 14, y: dy + dh - 48, w: dw - 28, h: 36 }, label, () => doSellSel(selE, n), { color: COL.orange, disabled: !!block, size: 16 });
 }
 
 // ======================= 気絶 =======================
