@@ -23,7 +23,7 @@ S,assets/sprites/rig/body_m.png,素体,body,♂,素体（♂）,胴・後ろ腕�
 腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。"
-S,assets/sprites/rig/top/hoodie_f.png,上着,hoodie,♀,上着：パーカー（♀）,背中・胴・後ろ腕・前腕,#ff6fb5,#ffffff,サイバーパーカー・ピンクのパーカー,添付1: docs/art_handoff/rig/templates/top/hoodie_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+S,assets/sprites/rig/top/hoodie_f.png,上着,hoodie,♀,上着：パーカー（♀）,背中・胴・後ろ腕・前腕,#ff6fb5,#ffffff,サイバーパーカー・ピンクのパーカー・ホテルのバスローブ・電脳迷彩パーカー,添付1: docs/art_handoff/rig/templates/top/hoodie_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：パーカー（長袖・前にひも・お腹のポケット。フードは首の後ろ＝背中の枠）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
 描く枠：背中（体の後ろに出る物）、胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
 色：主色 #ff6fb5、アクセント #ffffff（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -36,7 +36,7 @@ S,assets/sprites/rig/top/hoodie_f.png,上着,hoodie,♀,上着：パーカー（
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-S,assets/sprites/rig/top/hoodie_m.png,上着,hoodie,♂,上着：パーカー（♂）,背中・胴・後ろ腕・前腕,#ff6fb5,#ffffff,サイバーパーカー・ピンクのパーカー,添付1: docs/art_handoff/rig/templates/top/hoodie_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+S,assets/sprites/rig/top/hoodie_m.png,上着,hoodie,♂,上着：パーカー（♂）,背中・胴・後ろ腕・前腕,#ff6fb5,#ffffff,サイバーパーカー・ピンクのパーカー・ホテルのバスローブ・電脳迷彩パーカー,添付1: docs/art_handoff/rig/templates/top/hoodie_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：パーカー（長袖・前にひも・お腹のポケット。フードは首の後ろ＝背中の枠）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：背中（体の後ろに出る物）、胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
 色：主色 #ff6fb5、アクセント #ffffff（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -49,7 +49,7 @@ S,assets/sprites/rig/top/hoodie_m.png,上着,hoodie,♂,上着：パーカー（
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-S,assets/sprites/rig/top/leatherJacket_f.png,上着,leatherJacket,♀,上着：革ジャン（♀）,胴・後ろ腕・前腕,#1d1d24,#c0c0c8,ブラックレザージャケット・ネビュラ・レザー,添付1: docs/art_handoff/rig/templates/top/leatherJacket_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+S,assets/sprites/rig/top/leatherJacket_f.png,上着,leatherJacket,♀,上着：革ジャン（♀）,胴・後ろ腕・前腕,#1d1d24,#c0c0c8,ブラックレザージャケット・ネビュラ・レザー・灯台守のピーコート・モリ船長のコート・ココのステージ・ジャケット・アーク・コート,添付1: docs/art_handoff/rig/templates/top/leatherJacket_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：革ジャン（長袖・ジッパー・襟）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
 描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
 色：主色 #1d1d24、アクセント #c0c0c8（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -62,7 +62,7 @@ S,assets/sprites/rig/top/leatherJacket_f.png,上着,leatherJacket,♀,上着：�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-S,assets/sprites/rig/top/leatherJacket_m.png,上着,leatherJacket,♂,上着：革ジャン（♂）,胴・後ろ腕・前腕,#1d1d24,#c0c0c8,ブラックレザージャケット・ネビュラ・レザー,添付1: docs/art_handoff/rig/templates/top/leatherJacket_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+S,assets/sprites/rig/top/leatherJacket_m.png,上着,leatherJacket,♂,上着：革ジャン（♂）,胴・後ろ腕・前腕,#1d1d24,#c0c0c8,ブラックレザージャケット・ネビュラ・レザー・灯台守のピーコート・モリ船長のコート・ココのステージ・ジャケット・アーク・コート,添付1: docs/art_handoff/rig/templates/top/leatherJacket_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：革ジャン（長袖・ジッパー・襟）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
 色：主色 #1d1d24、アクセント #c0c0c8（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -75,9 +75,9 @@ S,assets/sprites/rig/top/leatherJacket_m.png,上着,leatherJacket,♂,上着：�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-S,assets/sprites/rig/top/plainShirt_f.png,上着,plainShirt,♀,上着：plainShirt（♀）,背中・胴・後ろ腕・前腕,#a89a84,#6e6252,生成りのシャツ,添付1: docs/art_handoff/rig/templates/top/plainShirt_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+S,assets/sprites/rig/top/plainShirt_f.png,上着,plainShirt,♀,上着：plainShirt（♀）,胴・後ろ腕・前腕,#a89a84,#6e6252,生成りのシャツ,添付1: docs/art_handoff/rig/templates/top/plainShirt_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：undefined。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
-描く枠：背中（体の後ろに出る物）、胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
+描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
 色：主色 #a89a84、アクセント #6e6252（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
 服だけを描く（肌・頭・手は描かない）。腕の枠には袖だけ、脚の枠にはズボンの脚だけ。素体（添付2）の上に重ねてぴったり合う形と位置に。
 画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
@@ -88,9 +88,9 @@ S,assets/sprites/rig/top/plainShirt_f.png,上着,plainShirt,♀,上着：plainSh
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-S,assets/sprites/rig/top/plainShirt_m.png,上着,plainShirt,♂,上着：plainShirt（♂）,背中・胴・後ろ腕・前腕,#a89a84,#6e6252,生成りのシャツ,添付1: docs/art_handoff/rig/templates/top/plainShirt_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+S,assets/sprites/rig/top/plainShirt_m.png,上着,plainShirt,♂,上着：plainShirt（♂）,胴・後ろ腕・前腕,#a89a84,#6e6252,生成りのシャツ,添付1: docs/art_handoff/rig/templates/top/plainShirt_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：undefined。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
-描く枠：背中（体の後ろに出る物）、胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
+描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
 色：主色 #a89a84、アクセント #6e6252（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
 服だけを描く（肌・頭・手は描かない）。腕の枠には袖だけ、脚の枠にはズボンの脚だけ。素体（添付2）の上に重ねてぴったり合う形と位置に。
 画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
@@ -114,7 +114,7 @@ S,assets/sprites/rig/bottom/skirt_f.png,下,skirt,♀,下：プリーツスカ�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-S,assets/sprites/rig/bottom/trackPants_f.png,下,trackPants,♀,下：ジョガーパンツ（♀）,胴・後ろ脚・前脚,#2a2f38,#3dff8a,カーゴ・ジョガー・トラックパンツ,添付1: docs/art_handoff/rig/templates/bottom/trackPants_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+S,assets/sprites/rig/bottom/trackPants_f.png,下,trackPants,♀,下：ジョガーパンツ（♀）,胴・後ろ脚・前脚,#2a2f38,#3dff8a,カーゴ・ジョガー・トラックパンツ・蛍光ピンクのジャージ（下）,添付1: docs/art_handoff/rig/templates/bottom/trackPants_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：ジョガーパンツ（長ズボン・側面にライン・裾がしぼってある）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
 描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ脚（奥側の脚（まっすぐ下ろした形・股が上の十字））、前脚（手前の脚（まっすぐ下ろした形・股が上の十字））。
 色：主色 #2a2f38、アクセント #3dff8a（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -127,7 +127,7 @@ S,assets/sprites/rig/bottom/trackPants_f.png,下,trackPants,♀,下：ジョガ�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-S,assets/sprites/rig/bottom/trackPants_m.png,下,trackPants,♂,下：ジョガーパンツ（♂）,胴・後ろ脚・前脚,#2a2f38,#3dff8a,カーゴ・ジョガー・トラックパンツ,添付1: docs/art_handoff/rig/templates/bottom/trackPants_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+S,assets/sprites/rig/bottom/trackPants_m.png,下,trackPants,♂,下：ジョガーパンツ（♂）,胴・後ろ脚・前脚,#2a2f38,#3dff8a,カーゴ・ジョガー・トラックパンツ・蛍光ピンクのジャージ（下）,添付1: docs/art_handoff/rig/templates/bottom/trackPants_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：ジョガーパンツ（長ズボン・側面にライン・裾がしぼってある）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ脚（奥側の脚（まっすぐ下ろした形・股が上の十字））、前脚（手前の脚（まっすぐ下ろした形・股が上の十字））。
 色：主色 #2a2f38、アクセント #3dff8a（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -192,7 +192,7 @@ S,assets/sprites/rig/bottom/plainPants_m.png,下,plainPants,♂,下：plainPants
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-S,assets/sprites/rig/shoes/sneakers_f.png,靴,sneakers,♀,靴：スニーカー（♀）,後ろ足・前足,#f4f4f4,#ff6fb5,ホワイトスニーカー・ネオン・エアスニーカー,添付1: docs/art_handoff/rig/templates/shoes/sneakers_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+S,assets/sprites/rig/shoes/sneakers_f.png,靴,sneakers,♀,靴：スニーカー（♀）,後ろ足・前足,#f4f4f4,#ff6fb5,ホワイトスニーカー・ネオン・エアスニーカー・パークキーパー・スニーカー・根っこスニーカー,添付1: docs/art_handoff/rig/templates/shoes/sneakers_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：スニーカー（白い靴底・ひも）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
 描く枠：後ろ足（奥側の足（右向きの横から見た靴・足首が十字））、前足（手前の足（右向きの横から見た靴・足首が十字））。
 色：主色 #f4f4f4、アクセント #ff6fb5（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -205,7 +205,7 @@ S,assets/sprites/rig/shoes/sneakers_f.png,靴,sneakers,♀,靴：スニーカー
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-S,assets/sprites/rig/shoes/sneakers_m.png,靴,sneakers,♂,靴：スニーカー（♂）,後ろ足・前足,#f4f4f4,#ff6fb5,ホワイトスニーカー・ネオン・エアスニーカー,添付1: docs/art_handoff/rig/templates/shoes/sneakers_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+S,assets/sprites/rig/shoes/sneakers_m.png,靴,sneakers,♂,靴：スニーカー（♂）,後ろ足・前足,#f4f4f4,#ff6fb5,ホワイトスニーカー・ネオン・エアスニーカー・パークキーパー・スニーカー・根っこスニーカー,添付1: docs/art_handoff/rig/templates/shoes/sneakers_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：スニーカー（白い靴底・ひも）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：後ろ足（奥側の足（右向きの横から見た靴・足首が十字））、前足（手前の足（右向きの横から見た靴・足首が十字））。
 色：主色 #f4f4f4、アクセント #ff6fb5（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -218,7 +218,7 @@ S,assets/sprites/rig/shoes/sneakers_m.png,靴,sneakers,♂,靴：スニーカー
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-S,assets/sprites/rig/shoes/boots_f.png,靴,boots,♀,靴：エンジニアブーツ（♀）,後ろ足・前足,#2a2018,#8a8a8a,エンジニアブーツ・ニトロブーツ・ムーンウォーカー,添付1: docs/art_handoff/rig/templates/shoes/boots_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+S,assets/sprites/rig/shoes/boots_f.png,靴,boots,♀,靴：エンジニアブーツ（♀）,後ろ足・前足,#2a2018,#8a8a8a,エンジニアブーツ・ニトロブーツ・ムーンウォーカー・防護ブーツ・クリーンステップ・怪盗団のシャドウブーツ・アーク・ブーツ・プライム・ブーツ・カーネル・ブーツ・フィン・ブーツ・ディープ・ブーツ・クラウド・ステップ・セレスティアル・ブーツ,添付1: docs/art_handoff/rig/templates/shoes/boots_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：エンジニアブーツ（足首より上まで・ベルト）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
 描く枠：後ろ足（奥側の足（右向きの横から見た靴・足首が十字））、前足（手前の足（右向きの横から見た靴・足首が十字））。
 色：主色 #2a2018、アクセント #8a8a8a（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -231,7 +231,7 @@ S,assets/sprites/rig/shoes/boots_f.png,靴,boots,♀,靴：エンジニアブー
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-S,assets/sprites/rig/shoes/boots_m.png,靴,boots,♂,靴：エンジニアブーツ（♂）,後ろ足・前足,#2a2018,#8a8a8a,エンジニアブーツ・ニトロブーツ・ムーンウォーカー,添付1: docs/art_handoff/rig/templates/shoes/boots_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+S,assets/sprites/rig/shoes/boots_m.png,靴,boots,♂,靴：エンジニアブーツ（♂）,後ろ足・前足,#2a2018,#8a8a8a,エンジニアブーツ・ニトロブーツ・ムーンウォーカー・防護ブーツ・クリーンステップ・怪盗団のシャドウブーツ・アーク・ブーツ・プライム・ブーツ・カーネル・ブーツ・フィン・ブーツ・ディープ・ブーツ・クラウド・ステップ・セレスティアル・ブーツ,添付1: docs/art_handoff/rig/templates/shoes/boots_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：エンジニアブーツ（足首より上まで・ベルト）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：後ろ足（奥側の足（右向きの横から見た靴・足首が十字））、前足（手前の足（右向きの横から見た靴・足首が十字））。
 色：主色 #2a2018、アクセント #8a8a8a（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -283,7 +283,7 @@ S,assets/sprites/rig/hat/catEars_f.png,帽子,catEars,♀,帽子：ネコミミ�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-S,assets/sprites/rig/hat/headphones_f.png,帽子,headphones,♀,帽子：ヘッドホン（♀）,頭の物,#2b2b38,#3dff8a,ジャンク・ヘッドセット・ネオンヘッドホン,添付1: docs/art_handoff/rig/templates/hat/headphones_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+S,assets/sprites/rig/hat/headphones_f.png,帽子,headphones,♀,帽子：ヘッドホン（♀）,頭の物,#2b2b38,#3dff8a,ジャンク・ヘッドセット・ネオンヘッドホン・ノイズキャンセル・クラウン・アンテナつきヘッドホン,添付1: docs/art_handoff/rig/templates/hat/headphones_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：ヘッドホン（頭の上を通るバンドと、耳あて。片側にマイク付きでも可）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
 描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
 色：主色 #2b2b38、アクセント #3dff8a（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -296,7 +296,7 @@ S,assets/sprites/rig/hat/headphones_f.png,帽子,headphones,♀,帽子：ヘッ�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-S,assets/sprites/rig/hat/headphones_m.png,帽子,headphones,♂,帽子：ヘッドホン（♂）,頭の物,#2b2b38,#3dff8a,ジャンク・ヘッドセット・ネオンヘッドホン,添付1: docs/art_handoff/rig/templates/hat/headphones_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+S,assets/sprites/rig/hat/headphones_m.png,帽子,headphones,♂,帽子：ヘッドホン（♂）,頭の物,#2b2b38,#3dff8a,ジャンク・ヘッドセット・ネオンヘッドホン・ノイズキャンセル・クラウン・アンテナつきヘッドホン,添付1: docs/art_handoff/rig/templates/hat/headphones_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：ヘッドホン（頭の上を通るバンドと、耳あて。片側にマイク付きでも可）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
 色：主色 #2b2b38、アクセント #3dff8a（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -309,7 +309,7 @@ S,assets/sprites/rig/hat/headphones_m.png,帽子,headphones,♂,帽子：ヘッ�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-S,assets/sprites/rig/hat/cap_m.png,帽子,cap,♂,帽子：キャップ（♂）,頭の物,#2b2b38,#ff3d7f,ストリートキャップ,添付1: docs/art_handoff/rig/templates/hat/cap_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+S,assets/sprites/rig/hat/cap_m.png,帽子,cap,♂,帽子：キャップ（♂）,頭の物,#2b2b38,#ff3d7f,ストリートキャップ・砂の城の守り帽,添付1: docs/art_handoff/rig/templates/hat/cap_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：キャップ（つばが右＝前向き、正面にワッペン）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
 色：主色 #2b2b38、アクセント #ff3d7f（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -322,7 +322,7 @@ S,assets/sprites/rig/hat/cap_m.png,帽子,cap,♂,帽子：キャップ（♂）
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-S,assets/sprites/rig/top/hoodie__1d2b24_f.png,上着,hoodie,♀,上着：サイバーパーカー（ハッカーの初期装備の色違い専用）（♀）,背中・胴・後ろ腕・前腕,#1d2b24,#3dff8a,サイバーパーカー・ピンクのパーカー,添付1: docs/art_handoff/rig/templates/top/hoodie_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+S,assets/sprites/rig/top/hoodie__1d2b24_f.png,上着,hoodie,♀,上着：サイバーパーカー（ハッカーの初期装備の色違い専用）（♀）,背中・胴・後ろ腕・前腕,#1d2b24,#3dff8a,サイバーパーカー・ピンクのパーカー・ホテルのバスローブ・電脳迷彩パーカー,添付1: docs/art_handoff/rig/templates/top/hoodie_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：サイバーパーカー（ハッカーの初期装備の色違い専用）：パーカー（長袖・前にひも・お腹のポケット。フードは首の後ろ＝背中の枠）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
 描く枠：背中（体の後ろに出る物）、胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
 色：主色 #1d2b24、アクセント #3dff8a（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -335,7 +335,7 @@ S,assets/sprites/rig/top/hoodie__1d2b24_f.png,上着,hoodie,♀,上着：サイ�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-S,assets/sprites/rig/top/hoodie__1d2b24_m.png,上着,hoodie,♂,上着：サイバーパーカー（ハッカーの初期装備の色違い専用）（♂）,背中・胴・後ろ腕・前腕,#1d2b24,#3dff8a,サイバーパーカー・ピンクのパーカー,添付1: docs/art_handoff/rig/templates/top/hoodie_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+S,assets/sprites/rig/top/hoodie__1d2b24_m.png,上着,hoodie,♂,上着：サイバーパーカー（ハッカーの初期装備の色違い専用）（♂）,背中・胴・後ろ腕・前腕,#1d2b24,#3dff8a,サイバーパーカー・ピンクのパーカー・ホテルのバスローブ・電脳迷彩パーカー,添付1: docs/art_handoff/rig/templates/top/hoodie_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：サイバーパーカー（ハッカーの初期装備の色違い専用）：パーカー（長袖・前にひも・お腹のポケット。フードは首の後ろ＝背中の枠）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：背中（体の後ろに出る物）、胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
 色：主色 #1d2b24、アクセント #3dff8a（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -357,7 +357,7 @@ S,assets/sprites/rig/weapon/knife.png,武器,knife,共通,武器：ポケット�
 画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
 見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
 全年齢向け。実在の銃・製品に似せない。"
-S,assets/sprites/rig/weapon/bat.png,武器,bat,共通,武器：木製バット,武器の枠,#b98a52,#5a3a22,ウッドバット・釘バット,添付1: docs/art_handoff/rig/templates/weapon/bat.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクターが手に持つ武器の画像を1枚描いてください（着せ替えパーツ）。添付1は配置図の下絵です。
+S,assets/sprites/rig/weapon/bat.png,武器,bat,共通,武器：木製バット,武器の枠,#b98a52,#5a3a22,ウッドバット・釘バット・冷凍マグロ,添付1: docs/art_handoff/rig/templates/weapon/bat.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクターが手に持つ武器の画像を1枚描いてください（着せ替えパーツ）。添付1は配置図の下絵です。
 描くもの：木製バット（持ち手にグリップテープ）。
 色：主色 #b98a52、アクセント #5a3a22（主色はこの色ちょうどで。陰影は同じ色の濃淡）。
 画像は添付1と同じ 1024×512（横長）。武器は右向きに水平（刃・銃口が右）。握る所（手で持つ所）を桃色の十字の位置に、大きさは薄い下絵と同じに。
@@ -366,7 +366,7 @@ S,assets/sprites/rig/weapon/bat.png,武器,bat,共通,武器：木製バット,�
 画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
 見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
 全年齢向け。実在の銃・製品に似せない。"
-S,assets/sprites/rig/weapon/staff.png,武器,staff,共通,武器：杖型のデバイス,武器の枠,#3dff8a,#1d1d24,グリッチ・ワンド・ネオンスタッフ・ムーンライト・ワンド・スターゲイザー・スパイア・オラクル,添付1: docs/art_handoff/rig/templates/weapon/staff.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクターが手に持つ武器の画像を1枚描いてください（着せ替えパーツ）。添付1は配置図の下絵です。
+S,assets/sprites/rig/weapon/staff.png,武器,staff,共通,武器：杖型のデバイス,武器の枠,#3dff8a,#1d1d24,グリッチ・ワンド・ネオンスタッフ・ムーンライト・ワンド・スターゲイザー・スパイア・オラクル・ジャックポット・ワンド・王家の笏（ネギ）・自撮り棒・アーク・ロッド・プライム・スタッフ・ルート・ワンド・カーネル・ツリー・珊瑚の杖・ディープ・スタッフ・ゼニス・セプター・セレスティアル・オーブ・深淵の女王杖・ソブリン・オラクル,添付1: docs/art_handoff/rig/templates/weapon/staff.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクターが手に持つ武器の画像を1枚描いてください（着せ替えパーツ）。添付1は配置図の下絵です。
 描くもの：杖型のデバイス（長い柄、先に光る六角形のコアと爪）。
 色：主色 #3dff8a、アクセント #1d1d24（主色はこの色ちょうどで。陰影は同じ色の濃淡）。
 画像は添付1と同じ 1024×512（横長）。武器は右向きに水平（刃・銃口が右）。握る所（手で持つ所）を桃色の十字の位置に、大きさは薄い下絵と同じに。
@@ -375,7 +375,7 @@ S,assets/sprites/rig/weapon/staff.png,武器,staff,共通,武器：杖型のデ�
 画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
 見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
 全年齢向け。実在の銃・製品に似せない。"
-S,assets/sprites/rig/weapon/woodSword.png,武器,woodSword,共通,武器：woodSword,武器の枠,#b98a52,#6a4a2a,木剣,添付1: docs/art_handoff/rig/templates/weapon/woodSword.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクターが手に持つ武器の画像を1枚描いてください（着せ替えパーツ）。添付1は配置図の下絵です。
+S,assets/sprites/rig/weapon/woodSword.png,武器,woodSword,共通,武器：woodSword,武器の枠,#b98a52,#6a4a2a,木剣・バゲット・ソード,添付1: docs/art_handoff/rig/templates/weapon/woodSword.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクターが手に持つ武器の画像を1枚描いてください（着せ替えパーツ）。添付1は配置図の下絵です。
 描くもの：undefined。
 色：主色 #b98a52、アクセント #6a4a2a（主色はこの色ちょうどで。陰影は同じ色の濃淡）。
 画像は添付1と同じ 1024×512（横長）。武器は右向きに水平（刃・銃口が右）。握る所（手で持つ所）を桃色の十字の位置に、大きさは薄い下絵と同じに。
@@ -384,7 +384,7 @@ S,assets/sprites/rig/weapon/woodSword.png,武器,woodSword,共通,武器：woodS
 画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
 見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
 全年齢向け。実在の銃・製品に似せない。"
-A,assets/sprites/rig/top/tshirt_f.png,上着,tshirt,♀,上着：Tシャツ（♀）,胴・後ろ腕・前腕,#f4f4f4,#ff3d7f,ホワイトTシャツ,添付1: docs/art_handoff/rig/templates/top/tshirt_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+A,assets/sprites/rig/top/tshirt_f.png,上着,tshirt,♀,上着：Tシャツ（♀）,胴・後ろ腕・前腕,#f4f4f4,#ff3d7f,ホワイトTシャツ・タキシード柄Tシャツ,添付1: docs/art_handoff/rig/templates/top/tshirt_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：Tシャツ（半袖・丸首・胸にハートのロゴ）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
 描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
 色：主色 #f4f4f4、アクセント #ff3d7f（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -397,7 +397,7 @@ A,assets/sprites/rig/top/tshirt_f.png,上着,tshirt,♀,上着：Tシャツ（�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/top/tshirt_m.png,上着,tshirt,♂,上着：Tシャツ（♂）,胴・後ろ腕・前腕,#f4f4f4,#ff3d7f,ホワイトTシャツ,添付1: docs/art_handoff/rig/templates/top/tshirt_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+A,assets/sprites/rig/top/tshirt_m.png,上着,tshirt,♂,上着：Tシャツ（♂）,胴・後ろ腕・前腕,#f4f4f4,#ff3d7f,ホワイトTシャツ・タキシード柄Tシャツ,添付1: docs/art_handoff/rig/templates/top/tshirt_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：Tシャツ（半袖・丸首・胸にハートのロゴ）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
 色：主色 #f4f4f4、アクセント #ff3d7f（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -436,7 +436,7 @@ A,assets/sprites/rig/top/tank_m.png,上着,tank,♂,上着：タンクトップ�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/top/hawaiian_f.png,上着,hawaiian,♀,上着：アロハシャツ（♀）,胴・後ろ腕・前腕,#ff8a00,#19d3a0,サンセット・アロハ,添付1: docs/art_handoff/rig/templates/top/hawaiian_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+A,assets/sprites/rig/top/hawaiian_f.png,上着,hawaiian,♀,上着：アロハシャツ（♀）,胴・後ろ腕・前腕,#ff8a00,#19d3a0,サンセット・アロハ・値札つきアロハ,添付1: docs/art_handoff/rig/templates/top/hawaiian_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：アロハシャツ（半袖・開襟・花柄）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
 描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
 色：主色 #ff8a00、アクセント #19d3a0（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -449,7 +449,7 @@ A,assets/sprites/rig/top/hawaiian_f.png,上着,hawaiian,♀,上着：アロハ�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/top/hawaiian_m.png,上着,hawaiian,♂,上着：アロハシャツ（♂）,胴・後ろ腕・前腕,#ff8a00,#19d3a0,サンセット・アロハ,添付1: docs/art_handoff/rig/templates/top/hawaiian_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+A,assets/sprites/rig/top/hawaiian_m.png,上着,hawaiian,♂,上着：アロハシャツ（♂）,胴・後ろ腕・前腕,#ff8a00,#19d3a0,サンセット・アロハ・値札つきアロハ,添付1: docs/art_handoff/rig/templates/top/hawaiian_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：アロハシャツ（半袖・開襟・花柄）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
 色：主色 #ff8a00、アクセント #19d3a0（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -462,7 +462,7 @@ A,assets/sprites/rig/top/hawaiian_m.png,上着,hawaiian,♂,上着：アロハ�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/top/tracksuit_f.png,上着,tracksuit,♀,上着：ジャージの上着（♀）,胴・後ろ腕・前腕,#1fae5b,#ffffff,グリーンジャージ,添付1: docs/art_handoff/rig/templates/top/tracksuit_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+A,assets/sprites/rig/top/tracksuit_f.png,上着,tracksuit,♀,上着：ジャージの上着（♀）,胴・後ろ腕・前腕,#1fae5b,#ffffff,グリーンジャージ・ルミナ訓練生ジャージ・蛍光ピンクのジャージ,添付1: docs/art_handoff/rig/templates/top/tracksuit_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：ジャージの上着（長袖・ジッパー・袖に2本線）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
 描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
 色：主色 #1fae5b、アクセント #ffffff（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -475,10 +475,62 @@ A,assets/sprites/rig/top/tracksuit_f.png,上着,tracksuit,♀,上着：ジャー
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/top/tracksuit_m.png,上着,tracksuit,♂,上着：ジャージの上着（♂）,胴・後ろ腕・前腕,#1fae5b,#ffffff,グリーンジャージ,添付1: docs/art_handoff/rig/templates/top/tracksuit_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+A,assets/sprites/rig/top/tracksuit_m.png,上着,tracksuit,♂,上着：ジャージの上着（♂）,胴・後ろ腕・前腕,#1fae5b,#ffffff,グリーンジャージ・ルミナ訓練生ジャージ・蛍光ピンクのジャージ,添付1: docs/art_handoff/rig/templates/top/tracksuit_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：ジャージの上着（長袖・ジッパー・袖に2本線）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
 色：主色 #1fae5b、アクセント #ffffff（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
+服だけを描く（肌・頭・手は描かない）。腕の枠には袖だけ、脚の枠にはズボンの脚だけ。素体（添付2）の上に重ねてぴったり合う形と位置に。
+画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
+見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
+画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
+使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
+腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
+向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
+全年齢向け。既存のゲームやキャラクターに似せない。
+※添付2（素体）と同じ絵柄・同じ線の太さで。"
+A,assets/sprites/rig/top/suit_f.png,上着,suit,♀,上着：スーツのジャケット（♀）,胴・後ろ腕・前腕,#15151b,#d8283c,マフィアスーツ・ゴールデン・ボススーツ・ヴァイス・キングスーツ・キングの白いジャンプスーツ・ゼニス・ローブ,添付1: docs/art_handoff/rig/templates/top/suit_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+描くもの：スーツのジャケット（長袖・ネクタイ・白いシャツの襟）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
+描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
+色：主色 #15151b、アクセント #d8283c（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
+服だけを描く（肌・頭・手は描かない）。腕の枠には袖だけ、脚の枠にはズボンの脚だけ。素体（添付2）の上に重ねてぴったり合う形と位置に。
+画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
+見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
+画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
+使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
+腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
+向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
+全年齢向け。既存のゲームやキャラクターに似せない。
+※添付2（素体）と同じ絵柄・同じ線の太さで。"
+A,assets/sprites/rig/top/suit_m.png,上着,suit,♂,上着：スーツのジャケット（♂）,胴・後ろ腕・前腕,#15151b,#d8283c,マフィアスーツ・ゴールデン・ボススーツ・ヴァイス・キングスーツ・キングの白いジャンプスーツ・ゼニス・ローブ,添付1: docs/art_handoff/rig/templates/top/suit_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+描くもの：スーツのジャケット（長袖・ネクタイ・白いシャツの襟）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
+描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
+色：主色 #15151b、アクセント #d8283c（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
+服だけを描く（肌・頭・手は描かない）。腕の枠には袖だけ、脚の枠にはズボンの脚だけ。素体（添付2）の上に重ねてぴったり合う形と位置に。
+画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
+見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
+画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
+使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
+腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
+向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
+全年齢向け。既存のゲームやキャラクターに似せない。
+※添付2（素体）と同じ絵柄・同じ線の太さで。"
+A,assets/sprites/rig/top/armorVest_f.png,上着,armorVest,♀,上着：タクティカルベスト（♀）,胴・後ろ腕・前腕,#3b4231,#9aa07a,タクティカルベスト・アストロアーマー・段ボールの鎧・プライム・アーマー・カーネル・アーマー・耐圧スーツ・ディープ・アーマー・セレスティアル・アーマー,添付1: docs/art_handoff/rig/templates/top/armorVest_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+描くもの：タクティカルベスト（防弾ベスト。下に半袖の黒いインナー）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
+描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
+色：主色 #3b4231、アクセント #9aa07a（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
+服だけを描く（肌・頭・手は描かない）。腕の枠には袖だけ、脚の枠にはズボンの脚だけ。素体（添付2）の上に重ねてぴったり合う形と位置に。
+画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
+見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
+画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
+使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
+腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
+向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
+全年齢向け。既存のゲームやキャラクターに似せない。
+※添付2（素体）と同じ絵柄・同じ線の太さで。"
+A,assets/sprites/rig/top/armorVest_m.png,上着,armorVest,♂,上着：タクティカルベスト（♂）,胴・後ろ腕・前腕,#3b4231,#9aa07a,タクティカルベスト・アストロアーマー・段ボールの鎧・プライム・アーマー・カーネル・アーマー・耐圧スーツ・ディープ・アーマー・セレスティアル・アーマー,添付1: docs/art_handoff/rig/templates/top/armorVest_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+描くもの：タクティカルベスト（防弾ベスト。下に半袖の黒いインナー）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
+描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
+色：主色 #3b4231、アクセント #9aa07a（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
 服だけを描く（肌・頭・手は描かない）。腕の枠には袖だけ、脚の枠にはズボンの脚だけ。素体（添付2）の上に重ねてぴったり合う形と位置に。
 画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
 見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
@@ -501,7 +553,7 @@ A,assets/sprites/rig/bottom/skirt_m.png,下,skirt,♂,下：プリーツスカ�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/bottom/shorts_f.png,下,shorts,♀,下：短パン（♀）,胴・後ろ脚・前脚,#4d6fb5,#ffffff,ビーチショーツ,添付1: docs/art_handoff/rig/templates/bottom/shorts_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+A,assets/sprites/rig/bottom/shorts_f.png,下,shorts,♀,下：短パン（♀）,胴・後ろ脚・前脚,#4d6fb5,#ffffff,ビーチショーツ・王子のかぼちゃパンツ,添付1: docs/art_handoff/rig/templates/bottom/shorts_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：短パン（ひざ上まで）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
 描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ脚（奥側の脚（まっすぐ下ろした形・股が上の十字））、前脚（手前の脚（まっすぐ下ろした形・股が上の十字））。
 色：主色 #4d6fb5、アクセント #ffffff（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -514,7 +566,7 @@ A,assets/sprites/rig/bottom/shorts_f.png,下,shorts,♀,下：短パン（♀）
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/bottom/shorts_m.png,下,shorts,♂,下：短パン（♂）,胴・後ろ脚・前脚,#4d6fb5,#ffffff,ビーチショーツ,添付1: docs/art_handoff/rig/templates/bottom/shorts_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+A,assets/sprites/rig/bottom/shorts_m.png,下,shorts,♂,下：短パン（♂）,胴・後ろ脚・前脚,#4d6fb5,#ffffff,ビーチショーツ・王子のかぼちゃパンツ,添付1: docs/art_handoff/rig/templates/bottom/shorts_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：短パン（ひざ上まで）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ脚（奥側の脚（まっすぐ下ろした形・股が上の十字））、前脚（手前の脚（まっすぐ下ろした形・股が上の十字））。
 色：主色 #4d6fb5、アクセント #ffffff（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -527,7 +579,7 @@ A,assets/sprites/rig/bottom/shorts_m.png,下,shorts,♂,下：短パン（♂）
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/bottom/cargo_f.png,下,cargo,♀,下：カーゴパンツ（♀）,胴・後ろ脚・前脚,#8a7a52,#4a4232,カーゴパンツ,添付1: docs/art_handoff/rig/templates/bottom/cargo_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+A,assets/sprites/rig/bottom/cargo_f.png,下,cargo,♀,下：カーゴパンツ（♀）,胴・後ろ脚・前脚,#8a7a52,#4a4232,カーゴパンツ・オービット・シェフのカーゴ・アーク・パンツ・蔦のカーゴ,添付1: docs/art_handoff/rig/templates/bottom/cargo_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：カーゴパンツ（長ズボン・太ももにポケット）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
 描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ脚（奥側の脚（まっすぐ下ろした形・股が上の十字））、前脚（手前の脚（まっすぐ下ろした形・股が上の十字））。
 色：主色 #8a7a52、アクセント #4a4232（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -540,7 +592,7 @@ A,assets/sprites/rig/bottom/cargo_f.png,下,cargo,♀,下：カーゴパンツ�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/bottom/cargo_m.png,下,cargo,♂,下：カーゴパンツ（♂）,胴・後ろ脚・前脚,#8a7a52,#4a4232,カーゴパンツ,添付1: docs/art_handoff/rig/templates/bottom/cargo_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+A,assets/sprites/rig/bottom/cargo_m.png,下,cargo,♂,下：カーゴパンツ（♂）,胴・後ろ脚・前脚,#8a7a52,#4a4232,カーゴパンツ・オービット・シェフのカーゴ・アーク・パンツ・蔦のカーゴ,添付1: docs/art_handoff/rig/templates/bottom/cargo_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：カーゴパンツ（長ズボン・太ももにポケット）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ脚（奥側の脚（まっすぐ下ろした形・股が上の十字））、前脚（手前の脚（まっすぐ下ろした形・股が上の十字））。
 色：主色 #8a7a52、アクセント #4a4232（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -553,7 +605,7 @@ A,assets/sprites/rig/bottom/cargo_m.png,下,cargo,♂,下：カーゴパンツ�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/shoes/sandals_f.png,靴,sandals,♀,靴：ビーチサンダル（♀）,後ろ足・前足,#ffd23f,#19d3a0,ビーチサンダル,添付1: docs/art_handoff/rig/templates/shoes/sandals_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+A,assets/sprites/rig/shoes/sandals_f.png,靴,sandals,♀,靴：ビーチサンダル（♀）,後ろ足・前足,#ffd23f,#19d3a0,ビーチサンダル・公衆トイレのスリッパ・ワニのスリッパ,添付1: docs/art_handoff/rig/templates/shoes/sandals_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：ビーチサンダル（素足が見える・鼻緒）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
 描く枠：後ろ足（奥側の足（右向きの横から見た靴・足首が十字））、前足（手前の足（右向きの横から見た靴・足首が十字））。
 色：主色 #ffd23f、アクセント #19d3a0（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -566,7 +618,7 @@ A,assets/sprites/rig/shoes/sandals_f.png,靴,sandals,♀,靴：ビーチサン�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/shoes/sandals_m.png,靴,sandals,♂,靴：ビーチサンダル（♂）,後ろ足・前足,#ffd23f,#19d3a0,ビーチサンダル,添付1: docs/art_handoff/rig/templates/shoes/sandals_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+A,assets/sprites/rig/shoes/sandals_m.png,靴,sandals,♂,靴：ビーチサンダル（♂）,後ろ足・前足,#ffd23f,#19d3a0,ビーチサンダル・公衆トイレのスリッパ・ワニのスリッパ,添付1: docs/art_handoff/rig/templates/shoes/sandals_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：ビーチサンダル（素足が見える・鼻緒）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：後ろ足（奥側の足（右向きの横から見た靴・足首が十字））、前足（手前の足（右向きの横から見た靴・足首が十字））。
 色：主色 #ffd23f、アクセント #19d3a0（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -579,7 +631,7 @@ A,assets/sprites/rig/shoes/sandals_m.png,靴,sandals,♂,靴：ビーチサン�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/shoes/loafers_f.png,靴,loafers,♀,靴：ローファー（♀）,後ろ足・前足,#5a3a22,#c9a26a,ブラウンローファー,添付1: docs/art_handoff/rig/templates/shoes/loafers_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+A,assets/sprites/rig/shoes/loafers_f.png,靴,loafers,♀,靴：ローファー（♀）,後ろ足・前足,#5a3a22,#c9a26a,ブラウンローファー・バレーキングのローファー・ピエロの靴,添付1: docs/art_handoff/rig/templates/shoes/loafers_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：ローファー（革靴・甲に飾り）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
 描く枠：後ろ足（奥側の足（右向きの横から見た靴・足首が十字））、前足（手前の足（右向きの横から見た靴・足首が十字））。
 色：主色 #5a3a22、アクセント #c9a26a（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -592,7 +644,7 @@ A,assets/sprites/rig/shoes/loafers_f.png,靴,loafers,♀,靴：ローファー�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/shoes/loafers_m.png,靴,loafers,♂,靴：ローファー（♂）,後ろ足・前足,#5a3a22,#c9a26a,ブラウンローファー,添付1: docs/art_handoff/rig/templates/shoes/loafers_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+A,assets/sprites/rig/shoes/loafers_m.png,靴,loafers,♂,靴：ローファー（♂）,後ろ足・前足,#5a3a22,#c9a26a,ブラウンローファー・バレーキングのローファー・ピエロの靴,添付1: docs/art_handoff/rig/templates/shoes/loafers_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：ローファー（革靴・甲に飾り）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：後ろ足（奥側の足（右向きの横から見た靴・足首が十字））、前足（手前の足（右向きの横から見た靴・足首が十字））。
 色：主色 #5a3a22、アクセント #c9a26a（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -644,7 +696,7 @@ A,assets/sprites/rig/hat/catEars_m.png,帽子,catEars,♂,帽子：ネコミミ�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/hat/cap_f.png,帽子,cap,♀,帽子：キャップ（♀）,頭の物,#2b2b38,#ff3d7f,ストリートキャップ,添付1: docs/art_handoff/rig/templates/hat/cap_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+A,assets/sprites/rig/hat/cap_f.png,帽子,cap,♀,帽子：キャップ（♀）,頭の物,#2b2b38,#ff3d7f,ストリートキャップ・砂の城の守り帽,添付1: docs/art_handoff/rig/templates/hat/cap_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：キャップ（つばが右＝前向き、正面にワッペン）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
 描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
 色：主色 #2b2b38、アクセント #ff3d7f（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -657,7 +709,7 @@ A,assets/sprites/rig/hat/cap_f.png,帽子,cap,♀,帽子：キャップ（♀）
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/hat/beanie_f.png,帽子,beanie,♀,帽子：ニット帽（♀）,頭の物,#7a7f8c,#c9ccd6,グレーのビーニー,添付1: docs/art_handoff/rig/templates/hat/beanie_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+A,assets/sprites/rig/hat/beanie_f.png,帽子,beanie,♀,帽子：ニット帽（♀）,頭の物,#7a7f8c,#c9ccd6,グレーのビーニー・アルミホイルの帽子・ネオン・リーフ帽,添付1: docs/art_handoff/rig/templates/hat/beanie_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：ニット帽（ビーニー。折り返しのリブとてっぺんのポンポン）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
 描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
 色：主色 #7a7f8c、アクセント #c9ccd6（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -670,7 +722,7 @@ A,assets/sprites/rig/hat/beanie_f.png,帽子,beanie,♀,帽子：ニット帽（
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/hat/beanie_m.png,帽子,beanie,♂,帽子：ニット帽（♂）,頭の物,#7a7f8c,#c9ccd6,グレーのビーニー,添付1: docs/art_handoff/rig/templates/hat/beanie_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+A,assets/sprites/rig/hat/beanie_m.png,帽子,beanie,♂,帽子：ニット帽（♂）,頭の物,#7a7f8c,#c9ccd6,グレーのビーニー・アルミホイルの帽子・ネオン・リーフ帽,添付1: docs/art_handoff/rig/templates/hat/beanie_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：ニット帽（ビーニー。折り返しのリブとてっぺんのポンポン）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
 色：主色 #7a7f8c、アクセント #c9ccd6（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -683,7 +735,7 @@ A,assets/sprites/rig/hat/beanie_m.png,帽子,beanie,♂,帽子：ニット帽（
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/hat/bandana_f.png,帽子,bandana,♀,帽子：バンダナ（♀）,頭の物,#d8283c,#ffffff,レッドバンダナ,添付1: docs/art_handoff/rig/templates/hat/bandana_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+A,assets/sprites/rig/hat/bandana_f.png,帽子,bandana,♀,帽子：バンダナ（♀）,頭の物,#d8283c,#ffffff,レッドバンダナ・ウメの割烹バンダナ,添付1: docs/art_handoff/rig/templates/hat/bandana_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：バンダナ（頭に巻き、後ろで結んだ端が2本）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
 描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
 色：主色 #d8283c、アクセント #ffffff（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -696,7 +748,7 @@ A,assets/sprites/rig/hat/bandana_f.png,帽子,bandana,♀,帽子：バンダナ�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/hat/bandana_m.png,帽子,bandana,♂,帽子：バンダナ（♂）,頭の物,#d8283c,#ffffff,レッドバンダナ,添付1: docs/art_handoff/rig/templates/hat/bandana_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+A,assets/sprites/rig/hat/bandana_m.png,帽子,bandana,♂,帽子：バンダナ（♂）,頭の物,#d8283c,#ffffff,レッドバンダナ・ウメの割烹バンダナ,添付1: docs/art_handoff/rig/templates/hat/bandana_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：バンダナ（頭に巻き、後ろで結んだ端が2本）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
 色：主色 #d8283c、アクセント #ffffff（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -709,7 +761,59 @@ A,assets/sprites/rig/hat/bandana_m.png,帽子,bandana,♂,帽子：バンダナ�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/accessory/sunglasses_f.png,アクセサリ,sunglasses,♀,アクセサリ：サングラス（♀）,頭の物,#2a2a2a,#ffd23f,アビエーターサングラス・ネオンシェード,添付1: docs/art_handoff/rig/templates/accessory/sunglasses_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+A,assets/sprites/rig/hat/helmet_f.png,帽子,helmet,♀,帽子：バイクのヘルメット（♀）,頭の物,#16161e,#ff8a00,バイカーヘルメット・アストロヘルメット・スカイウォーカー・ヘルメット・ムーンエコー・ヘルメット・バナナのヘルメット・アーク・バイザー・ダイバー・ヘルム・タイタン・バイザー,添付1: docs/art_handoff/rig/templates/hat/helmet_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+描くもの：バイクのヘルメット（右＝前にバイザー）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
+描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
+色：主色 #16161e、アクセント #ff8a00（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
+頭・顔・髪は描かない（薄い灰色の頭は位置の目安。帽子・アクセサリだけ）。
+画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
+見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
+画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
+使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
+腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
+向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
+全年齢向け。既存のゲームやキャラクターに似せない。
+※添付2（素体）と同じ絵柄・同じ線の太さで。"
+A,assets/sprites/rig/hat/helmet_m.png,帽子,helmet,♂,帽子：バイクのヘルメット（♂）,頭の物,#16161e,#ff8a00,バイカーヘルメット・アストロヘルメット・スカイウォーカー・ヘルメット・ムーンエコー・ヘルメット・バナナのヘルメット・アーク・バイザー・ダイバー・ヘルム・タイタン・バイザー,添付1: docs/art_handoff/rig/templates/hat/helmet_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+描くもの：バイクのヘルメット（右＝前にバイザー）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
+描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
+色：主色 #16161e、アクセント #ff8a00（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
+頭・顔・髪は描かない（薄い灰色の頭は位置の目安。帽子・アクセサリだけ）。
+画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
+見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
+画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
+使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
+腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
+向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
+全年齢向け。既存のゲームやキャラクターに似せない。
+※添付2（素体）と同じ絵柄・同じ線の太さで。"
+A,assets/sprites/rig/hat/crown_f.png,帽子,crown,♀,帽子：王冠（♀）,頭の物,#ffd23f,#ff3d7f,ベイの王冠・ネオン・エンペラー・ドンの黒王冠・カモメ王の紙の王冠・カエルの王冠・プライム・クラウン・カーネル・クラウン・ディープ・クラウン・ゼニス・ティアラ・セレスティアル・クラウン・ディープ・クイーンの冠,添付1: docs/art_handoff/rig/templates/hat/crown_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+描くもの：王冠（頭の上に少し傾けて乗せる、宝石付き）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
+描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
+色：主色 #ffd23f、アクセント #ff3d7f（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
+頭・顔・髪は描かない（薄い灰色の頭は位置の目安。帽子・アクセサリだけ）。
+画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
+見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
+画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
+使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
+腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
+向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
+全年齢向け。既存のゲームやキャラクターに似せない。
+※添付2（素体）と同じ絵柄・同じ線の太さで。"
+A,assets/sprites/rig/hat/crown_m.png,帽子,crown,♂,帽子：王冠（♂）,頭の物,#ffd23f,#ff3d7f,ベイの王冠・ネオン・エンペラー・ドンの黒王冠・カモメ王の紙の王冠・カエルの王冠・プライム・クラウン・カーネル・クラウン・ディープ・クラウン・ゼニス・ティアラ・セレスティアル・クラウン・ディープ・クイーンの冠,添付1: docs/art_handoff/rig/templates/hat/crown_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+描くもの：王冠（頭の上に少し傾けて乗せる、宝石付き）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
+描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
+色：主色 #ffd23f、アクセント #ff3d7f（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
+頭・顔・髪は描かない（薄い灰色の頭は位置の目安。帽子・アクセサリだけ）。
+画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
+見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
+画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
+使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
+腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
+向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
+全年齢向け。既存のゲームやキャラクターに似せない。
+※添付2（素体）と同じ絵柄・同じ線の太さで。"
+A,assets/sprites/rig/accessory/sunglasses_f.png,アクセサリ,sunglasses,♀,アクセサリ：サングラス（♀）,頭の物,#2a2a2a,#ffd23f,アビエーターサングラス・ネオンシェード・スクープ・シェード・タッドの探検ゴーグル・鼻メガネ・もみあげ付きサングラス・アーク・グラス,添付1: docs/art_handoff/rig/templates/accessory/sunglasses_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：サングラス（顔の目の位置。頭の枠）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
 描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
 色：主色 #2a2a2a、アクセント #ffd23f（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -722,7 +826,7 @@ A,assets/sprites/rig/accessory/sunglasses_f.png,アクセサリ,sunglasses,♀,�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/accessory/sunglasses_m.png,アクセサリ,sunglasses,♂,アクセサリ：サングラス（♂）,頭の物,#2a2a2a,#ffd23f,アビエーターサングラス・ネオンシェード,添付1: docs/art_handoff/rig/templates/accessory/sunglasses_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+A,assets/sprites/rig/accessory/sunglasses_m.png,アクセサリ,sunglasses,♂,アクセサリ：サングラス（♂）,頭の物,#2a2a2a,#ffd23f,アビエーターサングラス・ネオンシェード・スクープ・シェード・タッドの探検ゴーグル・鼻メガネ・もみあげ付きサングラス・アーク・グラス,添付1: docs/art_handoff/rig/templates/accessory/sunglasses_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：サングラス（顔の目の位置。頭の枠）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
 色：主色 #2a2a2a、アクセント #ffd23f（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -735,7 +839,7 @@ A,assets/sprites/rig/accessory/sunglasses_m.png,アクセサリ,sunglasses,♂,�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/accessory/scarf_f.png,アクセサリ,scarf,♀,アクセサリ：スカーフ（♀）,胴・背中,#d8283c,#ffffff,レッドスカーフ,添付1: docs/art_handoff/rig/templates/accessory/scarf_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+A,assets/sprites/rig/accessory/scarf_f.png,アクセサリ,scarf,♀,アクセサリ：スカーフ（♀）,胴・背中,#d8283c,#ffffff,レッドスカーフ・記念: サンセット・スカーフ・記念: グレイズの霧スカーフ・「店長」と書いたたすき・ホタルのマフラー・森羅のマフラー,添付1: docs/art_handoff/rig/templates/accessory/scarf_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：スカーフ（首元に巻いた部分＝胴の枠、背中になびく端＝背中の枠）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
 描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、背中（体の後ろに出る物）。
 色：主色 #d8283c、アクセント #ffffff（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -748,7 +852,7 @@ A,assets/sprites/rig/accessory/scarf_f.png,アクセサリ,scarf,♀,アクセ�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/accessory/scarf_m.png,アクセサリ,scarf,♂,アクセサリ：スカーフ（♂）,胴・背中,#d8283c,#ffffff,レッドスカーフ,添付1: docs/art_handoff/rig/templates/accessory/scarf_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+A,assets/sprites/rig/accessory/scarf_m.png,アクセサリ,scarf,♂,アクセサリ：スカーフ（♂）,胴・背中,#d8283c,#ffffff,レッドスカーフ・記念: サンセット・スカーフ・記念: グレイズの霧スカーフ・「店長」と書いたたすき・ホタルのマフラー・森羅のマフラー,添付1: docs/art_handoff/rig/templates/accessory/scarf_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：スカーフ（首元に巻いた部分＝胴の枠、背中になびく端＝背中の枠）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、背中（体の後ろに出る物）。
 色：主色 #d8283c、アクセント #ffffff（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -761,7 +865,7 @@ A,assets/sprites/rig/accessory/scarf_m.png,アクセサリ,scarf,♂,アクセ�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/accessory/goldChain_f.png,アクセサリ,goldChain,♀,アクセサリ：金のチェーンネックレス（♀）,胴,#ffd23f,#fff4b0,ゴールドチェーン・ヘビーゴールドチェーン,添付1: docs/art_handoff/rig/templates/accessory/goldChain_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+A,assets/sprites/rig/accessory/goldChain_f.png,アクセサリ,goldChain,♀,アクセサリ：金のチェーンネックレス（♀）,胴,#ffd23f,#fff4b0,ゴールドチェーン・ヘビーゴールドチェーン・ぷるぷる迷子札・ラッキー・ルーの幸運チェーン・記念: ダウンタウン・チェーン・記念: 港のアンカーチェーン・記念: ハイローラーの金鎖・パールのネックレス,添付1: docs/art_handoff/rig/templates/accessory/goldChain_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：金のチェーンネックレス（首元〜胸。胴の枠）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
 描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））。
 色：主色 #ffd23f、アクセント #fff4b0（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -774,7 +878,7 @@ A,assets/sprites/rig/accessory/goldChain_f.png,アクセサリ,goldChain,♀,ア
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/accessory/goldChain_m.png,アクセサリ,goldChain,♂,アクセサリ：金のチェーンネックレス（♂）,胴,#ffd23f,#fff4b0,ゴールドチェーン・ヘビーゴールドチェーン,添付1: docs/art_handoff/rig/templates/accessory/goldChain_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+A,assets/sprites/rig/accessory/goldChain_m.png,アクセサリ,goldChain,♂,アクセサリ：金のチェーンネックレス（♂）,胴,#ffd23f,#fff4b0,ゴールドチェーン・ヘビーゴールドチェーン・ぷるぷる迷子札・ラッキー・ルーの幸運チェーン・記念: ダウンタウン・チェーン・記念: 港のアンカーチェーン・記念: ハイローラーの金鎖・パールのネックレス,添付1: docs/art_handoff/rig/templates/accessory/goldChain_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：金のチェーンネックレス（首元〜胸。胴の枠）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））。
 色：主色 #ffd23f、アクセント #fff4b0（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -787,7 +891,85 @@ A,assets/sprites/rig/accessory/goldChain_m.png,アクセサリ,goldChain,♂,ア
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-A,assets/sprites/rig/weapon/pistol.png,武器,pistol,共通,武器：ピストル,武器の枠,#2a2a30,#8a8a8a,9mmピストル・ゴールデン・デザート・ラスト・サンセット・レイガン Mk-II・スパイア・リボルバー,添付1: docs/art_handoff/rig/templates/weapon/pistol.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクターが手に持つ武器の画像を1枚描いてください（着せ替えパーツ）。添付1は配置図の下絵です。
+A,assets/sprites/rig/accessory/mask_f.png,アクセサリ,mask,♀,アクセサリ：スカルのフェイスマスク（♀）,頭の物,#e8e8e8,#16161e,スカルマスク・ベティの鬼火マスク・宇宙人のお面,添付1: docs/art_handoff/rig/templates/accessory/mask_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+描くもの：スカルのフェイスマスク（口元〜あごを覆う。頭の枠）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
+描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
+色：主色 #e8e8e8、アクセント #16161e（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
+頭・顔・髪は描かない（薄い灰色の頭は位置の目安。帽子・アクセサリだけ）。
+画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
+見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
+画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
+使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
+腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
+向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
+全年齢向け。既存のゲームやキャラクターに似せない。
+※添付2（素体）と同じ絵柄・同じ線の太さで。"
+A,assets/sprites/rig/accessory/mask_m.png,アクセサリ,mask,♂,アクセサリ：スカルのフェイスマスク（♂）,頭の物,#e8e8e8,#16161e,スカルマスク・ベティの鬼火マスク・宇宙人のお面,添付1: docs/art_handoff/rig/templates/accessory/mask_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+描くもの：スカルのフェイスマスク（口元〜あごを覆う。頭の枠）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
+描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
+色：主色 #e8e8e8、アクセント #16161e（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
+頭・顔・髪は描かない（薄い灰色の頭は位置の目安。帽子・アクセサリだけ）。
+画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
+見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
+画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
+使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
+腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
+向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
+全年齢向け。既存のゲームやキャラクターに似せない。
+※添付2（素体）と同じ絵柄・同じ線の太さで。"
+A,assets/sprites/rig/accessory/wings_f.png,アクセサリ,wings,♀,アクセサリ：天使の翼（♀）,背中,#ffffff,#bff6ff,エンジェルウィング・ネオン・セラフ・空中庭園のリーフウィング・ネオン・フェニックスの翼・シャボン玉の翼・ヌマカの羽・ゼニス・ウイング・ソブリンの光翼,添付1: docs/art_handoff/rig/templates/accessory/wings_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+描くもの：天使の翼（背中の小さな白い翼2枚。背中の枠）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
+描く枠：背中（体の後ろに出る物）。
+色：主色 #ffffff、アクセント #bff6ff（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
+頭・顔・髪は描かない（薄い灰色の頭は位置の目安。帽子・アクセサリだけ）。
+画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
+見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
+画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
+使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
+腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
+向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
+全年齢向け。既存のゲームやキャラクターに似せない。
+※添付2（素体）と同じ絵柄・同じ線の太さで。"
+A,assets/sprites/rig/accessory/wings_m.png,アクセサリ,wings,♂,アクセサリ：天使の翼（♂）,背中,#ffffff,#bff6ff,エンジェルウィング・ネオン・セラフ・空中庭園のリーフウィング・ネオン・フェニックスの翼・シャボン玉の翼・ヌマカの羽・ゼニス・ウイング・ソブリンの光翼,添付1: docs/art_handoff/rig/templates/accessory/wings_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+描くもの：天使の翼（背中の小さな白い翼2枚。背中の枠）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
+描く枠：背中（体の後ろに出る物）。
+色：主色 #ffffff、アクセント #bff6ff（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
+頭・顔・髪は描かない（薄い灰色の頭は位置の目安。帽子・アクセサリだけ）。
+画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
+見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
+画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
+使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
+腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
+向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
+全年齢向け。既存のゲームやキャラクターに似せない。
+※添付2（素体）と同じ絵柄・同じ線の太さで。"
+A,assets/sprites/rig/accessory/halo_f.png,アクセサリ,halo,♀,アクセサリ：天使の輪（♀）,頭の物,#fff06a,#ffffff,天使の輪・コズミック・ヘイロー・ゾグの灯台・記念: 摩天楼のヘイロー・記念: ルミナ・オービット・次元の鍵「アーク・キー」・浮き輪ヘイロー・ドーナツの輪・手作りUFOの輪・プライム・ヘイロー・カーネル・ヘイロー・ディープ・ヘイロー・セレスティアル・ヘイロー,添付1: docs/art_handoff/rig/templates/accessory/halo_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+描くもの：天使の輪（頭の上に浮く光る輪。頭の枠）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
+描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
+色：主色 #fff06a、アクセント #ffffff（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
+頭・顔・髪は描かない（薄い灰色の頭は位置の目安。帽子・アクセサリだけ）。
+画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
+見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
+画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
+使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
+腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
+向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
+全年齢向け。既存のゲームやキャラクターに似せない。
+※添付2（素体）と同じ絵柄・同じ線の太さで。"
+A,assets/sprites/rig/accessory/halo_m.png,アクセサリ,halo,♂,アクセサリ：天使の輪（♂）,頭の物,#fff06a,#ffffff,天使の輪・コズミック・ヘイロー・ゾグの灯台・記念: 摩天楼のヘイロー・記念: ルミナ・オービット・次元の鍵「アーク・キー」・浮き輪ヘイロー・ドーナツの輪・手作りUFOの輪・プライム・ヘイロー・カーネル・ヘイロー・ディープ・ヘイロー・セレスティアル・ヘイロー,添付1: docs/art_handoff/rig/templates/accessory/halo_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+描くもの：天使の輪（頭の上に浮く光る輪。頭の枠）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
+描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
+色：主色 #fff06a、アクセント #ffffff（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
+頭・顔・髪は描かない（薄い灰色の頭は位置の目安。帽子・アクセサリだけ）。
+画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
+見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
+画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
+使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
+腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
+向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
+全年齢向け。既存のゲームやキャラクターに似せない。
+※添付2（素体）と同じ絵柄・同じ線の太さで。"
+A,assets/sprites/rig/weapon/pistol.png,武器,pistol,共通,武器：ピストル,武器の枠,#2a2a30,#8a8a8a,9mmピストル・ゴールデン・デザート・ラスト・サンセット・レイガン Mk-II・スパイア・リボルバー・ルーク兄弟のツインホーク・水鉄砲 ポンプアクション・ソブリン・レイ,添付1: docs/art_handoff/rig/templates/weapon/pistol.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクターが手に持つ武器の画像を1枚描いてください（着せ替えパーツ）。添付1は配置図の下絵です。
 描くもの：ピストル（銃口が右。握りは下へ）。
 色：主色 #2a2a30、アクセント #8a8a8a（主色はこの色ちょうどで。陰影は同じ色の濃淡）。
 画像は添付1と同じ 1024×512（横長）。武器は右向きに水平（刃・銃口が右）。握る所（手で持つ所）を桃色の十字の位置に、大きさは薄い下絵と同じに。
@@ -796,7 +978,7 @@ A,assets/sprites/rig/weapon/pistol.png,武器,pistol,共通,武器：ピスト�
 画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
 見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
 全年齢向け。実在の銃・製品に似せない。"
-A,assets/sprites/rig/weapon/katana.png,武器,katana,共通,武器：刀,武器の枠,#dfe4ee,#d8283c,スチールカタナ・紅月の太刀・プラズマ太刀,添付1: docs/art_handoff/rig/templates/weapon/katana.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクターが手に持つ武器の画像を1枚描いてください（着せ替えパーツ）。添付1は配置図の下絵です。
+A,assets/sprites/rig/weapon/katana.png,武器,katana,共通,武器：刀,武器の枠,#dfe4ee,#d8283c,スチールカタナ・紅月の太刀・プラズマ太刀・沼の主の牙刀・ゴム製の剣・ホロ太刀・プライム太刀・竹光・改・電脳刀・森羅・深海刀・深淵刀・海神・天空刀・天刀・星詠,添付1: docs/art_handoff/rig/templates/weapon/katana.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクターが手に持つ武器の画像を1枚描いてください（着せ替えパーツ）。添付1は配置図の下絵です。
 描くもの：刀（つか・つば・反った刃）。
 色：主色 #dfe4ee、アクセント #d8283c（主色はこの色ちょうどで。陰影は同じ色の濃淡）。
 画像は添付1と同じ 1024×512（横長）。武器は右向きに水平（刃・銃口が右）。握る所（手で持つ所）を桃色の十字の位置に、大きさは薄い下絵と同じに。
@@ -805,7 +987,7 @@ A,assets/sprites/rig/weapon/katana.png,武器,katana,共通,武器：刀,武器�
 画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
 見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
 全年齢向け。実在の銃・製品に似せない。"
-A,assets/sprites/rig/weapon/smg.png,武器,smg,共通,武器：サブマシンガン,武器の枠,#1d1d24,#ff8a00,コンパクトSMG・ネオン・ストーム・ギャラクシー・ストーム,添付1: docs/art_handoff/rig/templates/weapon/smg.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクターが手に持つ武器の画像を1枚描いてください（着せ替えパーツ）。添付1は配置図の下絵です。
+A,assets/sprites/rig/weapon/smg.png,武器,smg,共通,武器：サブマシンガン,武器の枠,#1d1d24,#ff8a00,コンパクトSMG・ネオン・ストーム・ギャラクシー・ストーム・リナ特製ジャンク・ブラスター・アーク・ブラスター・プライム・レールガン・シードショット・カーネル・ガトリング・ハープーン・ガン・ディープ・トーピード・ゼニス・ライフル・セレスティアル・キャノン・タイタン・キャノン,添付1: docs/art_handoff/rig/templates/weapon/smg.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクターが手に持つ武器の画像を1枚描いてください（着せ替えパーツ）。添付1は配置図の下絵です。
 描くもの：サブマシンガン（銃口が右。握りとマガジンが下へ）。
 色：主色 #1d1d24、アクセント #ff8a00（主色はこの色ちょうどで。陰影は同じ色の濃淡）。
 画像は添付1と同じ 1024×512（横長）。武器は右向きに水平（刃・銃口が右）。握る所（手で持つ所）を桃色の十字の位置に、大きさは薄い下絵と同じに。
@@ -814,7 +996,7 @@ A,assets/sprites/rig/weapon/smg.png,武器,smg,共通,武器：サブマシン�
 画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
 見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
 全年齢向け。実在の銃・製品に似せない。"
-A,assets/sprites/rig/weapon/guitar.png,武器,guitar,共通,武器：エレキギター,武器の枠,#d8283c,#f4f4f4,エレキギター・サンダー・フライングV,添付1: docs/art_handoff/rig/templates/weapon/guitar.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクターが手に持つ武器の画像を1枚描いてください（着せ替えパーツ）。添付1は配置図の下絵です。
+A,assets/sprites/rig/weapon/guitar.png,武器,guitar,共通,武器：エレキギター,武器の枠,#d8283c,#f4f4f4,エレキギター・サンダー・フライングV・ヴァイス・ナイト・フライングV・ウクレレ,添付1: docs/art_handoff/rig/templates/weapon/guitar.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクターが手に持つ武器の画像を1枚描いてください（着せ替えパーツ）。添付1は配置図の下絵です。
 描くもの：エレキギター（ネックを握って振る。ボディは右＝先の方）。
 色：主色 #d8283c、アクセント #f4f4f4（主色はこの色ちょうどで。陰影は同じ色の濃淡）。
 画像は添付1と同じ 1024×512（横長）。武器は右向きに水平（刃・銃口が右）。握る所（手で持つ所）を桃色の十字の位置に、大きさは薄い下絵と同じに。
@@ -840,32 +1022,6 @@ B,assets/sprites/rig/top/police_m.png,上着,police,♂,上着：警官の制服
 描くもの：警官の制服シャツ（半袖・胸のバッジ・ベルト）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
 色：主色 #20335c、アクセント #ffd23f（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
-服だけを描く（肌・頭・手は描かない）。腕の枠には袖だけ、脚の枠にはズボンの脚だけ。素体（添付2）の上に重ねてぴったり合う形と位置に。
-画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
-見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
-画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
-使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
-腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
-向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
-全年齢向け。既存のゲームやキャラクターに似せない。
-※添付2（素体）と同じ絵柄・同じ線の太さで。"
-B,assets/sprites/rig/top/suit_f.png,上着,suit,♀,上着：スーツのジャケット（♀）,胴・後ろ腕・前腕,#15151b,#d8283c,マフィアスーツ・ゴールデン・ボススーツ・ヴァイス・キングスーツ,添付1: docs/art_handoff/rig/templates/top/suit_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
-描くもの：スーツのジャケット（長袖・ネクタイ・白いシャツの襟）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
-描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
-色：主色 #15151b、アクセント #d8283c（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
-服だけを描く（肌・頭・手は描かない）。腕の枠には袖だけ、脚の枠にはズボンの脚だけ。素体（添付2）の上に重ねてぴったり合う形と位置に。
-画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
-見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
-画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
-使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
-腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
-向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
-全年齢向け。既存のゲームやキャラクターに似せない。
-※添付2（素体）と同じ絵柄・同じ線の太さで。"
-B,assets/sprites/rig/top/suit_m.png,上着,suit,♂,上着：スーツのジャケット（♂）,胴・後ろ腕・前腕,#15151b,#d8283c,マフィアスーツ・ゴールデン・ボススーツ・ヴァイス・キングスーツ,添付1: docs/art_handoff/rig/templates/top/suit_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
-描くもの：スーツのジャケット（長袖・ネクタイ・白いシャツの襟）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
-描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
-色：主色 #15151b、アクセント #d8283c（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
 服だけを描く（肌・頭・手は描かない）。腕の枠には袖だけ、脚の枠にはズボンの脚だけ。素体（添付2）の上に重ねてぴったり合う形と位置に。
 画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
 見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
@@ -901,33 +1057,7 @@ B,assets/sprites/rig/top/idolDress_m.png,上着,idolDress,♂,上着：アイド
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-B,assets/sprites/rig/top/armorVest_f.png,上着,armorVest,♀,上着：タクティカルベスト（♀）,胴・後ろ腕・前腕,#3b4231,#9aa07a,タクティカルベスト・アストロアーマー,添付1: docs/art_handoff/rig/templates/top/armorVest_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
-描くもの：タクティカルベスト（防弾ベスト。下に半袖の黒いインナー）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
-描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
-色：主色 #3b4231、アクセント #9aa07a（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
-服だけを描く（肌・頭・手は描かない）。腕の枠には袖だけ、脚の枠にはズボンの脚だけ。素体（添付2）の上に重ねてぴったり合う形と位置に。
-画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
-見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
-画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
-使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
-腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
-向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
-全年齢向け。既存のゲームやキャラクターに似せない。
-※添付2（素体）と同じ絵柄・同じ線の太さで。"
-B,assets/sprites/rig/top/armorVest_m.png,上着,armorVest,♂,上着：タクティカルベスト（♂）,胴・後ろ腕・前腕,#3b4231,#9aa07a,タクティカルベスト・アストロアーマー,添付1: docs/art_handoff/rig/templates/top/armorVest_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
-描くもの：タクティカルベスト（防弾ベスト。下に半袖の黒いインナー）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
-描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ腕（奥側の腕（まっすぐ下ろした形・肩が上の十字））、前腕（手前の腕（まっすぐ下ろした形・肩が上の十字））。
-色：主色 #3b4231、アクセント #9aa07a（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
-服だけを描く（肌・頭・手は描かない）。腕の枠には袖だけ、脚の枠にはズボンの脚だけ。素体（添付2）の上に重ねてぴったり合う形と位置に。
-画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
-見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
-画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
-使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
-腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
-向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
-全年齢向け。既存のゲームやキャラクターに似せない。
-※添付2（素体）と同じ絵柄・同じ線の太さで。"
-B,assets/sprites/rig/bottom/suitPants_f.png,下,suitPants,♀,下：スーツのズボン（♀）,胴・後ろ脚・前脚,#15151b,#5a5a66,スーツパンツ,添付1: docs/art_handoff/rig/templates/bottom/suitPants_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+B,assets/sprites/rig/bottom/suitPants_f.png,下,suitPants,♀,下：スーツのズボン（♀）,胴・後ろ脚・前脚,#15151b,#5a5a66,スーツパンツ・ゼニス・パンツ,添付1: docs/art_handoff/rig/templates/bottom/suitPants_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：スーツのズボン（長ズボン・細身）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
 描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ脚（奥側の脚（まっすぐ下ろした形・股が上の十字））、前脚（手前の脚（まっすぐ下ろした形・股が上の十字））。
 色：主色 #15151b、アクセント #5a5a66（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -940,7 +1070,7 @@ B,assets/sprites/rig/bottom/suitPants_f.png,下,suitPants,♀,下：スーツの
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-B,assets/sprites/rig/bottom/suitPants_m.png,下,suitPants,♂,下：スーツのズボン（♂）,胴・後ろ脚・前脚,#15151b,#5a5a66,スーツパンツ,添付1: docs/art_handoff/rig/templates/bottom/suitPants_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+B,assets/sprites/rig/bottom/suitPants_m.png,下,suitPants,♂,下：スーツのズボン（♂）,胴・後ろ脚・前脚,#15151b,#5a5a66,スーツパンツ・ゼニス・パンツ,添付1: docs/art_handoff/rig/templates/bottom/suitPants_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：スーツのズボン（長ズボン・細身）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ脚（奥側の脚（まっすぐ下ろした形・股が上の十字））、前脚（手前の脚（まっすぐ下ろした形・股が上の十字））。
 色：主色 #15151b、アクセント #5a5a66（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -953,7 +1083,7 @@ B,assets/sprites/rig/bottom/suitPants_m.png,下,suitPants,♂,下：スーツの
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-B,assets/sprites/rig/bottom/armorPants_f.png,下,armorPants,♀,下：タクティカルパンツ（♀）,胴・後ろ脚・前脚,#3b4231,#9aa07a,タクティカルパンツ・アストロパンツ,添付1: docs/art_handoff/rig/templates/bottom/armorPants_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+B,assets/sprites/rig/bottom/armorPants_f.png,下,armorPants,♀,下：タクティカルパンツ（♀）,胴・後ろ脚・前脚,#3b4231,#9aa07a,タクティカルパンツ・アストロパンツ・プライム・グリーヴ・カーネル・グリーヴ・耐圧パンツ・ディープ・グリーヴ・セレスティアル・グリーヴ,添付1: docs/art_handoff/rig/templates/bottom/armorPants_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：タクティカルパンツ（長ズボン・ひざ当て）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
 描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ脚（奥側の脚（まっすぐ下ろした形・股が上の十字））、前脚（手前の脚（まっすぐ下ろした形・股が上の十字））。
 色：主色 #3b4231、アクセント #9aa07a（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -966,7 +1096,7 @@ B,assets/sprites/rig/bottom/armorPants_f.png,下,armorPants,♀,下：タクテ�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-B,assets/sprites/rig/bottom/armorPants_m.png,下,armorPants,♂,下：タクティカルパンツ（♂）,胴・後ろ脚・前脚,#3b4231,#9aa07a,タクティカルパンツ・アストロパンツ,添付1: docs/art_handoff/rig/templates/bottom/armorPants_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+B,assets/sprites/rig/bottom/armorPants_m.png,下,armorPants,♂,下：タクティカルパンツ（♂）,胴・後ろ脚・前脚,#3b4231,#9aa07a,タクティカルパンツ・アストロパンツ・プライム・グリーヴ・カーネル・グリーヴ・耐圧パンツ・ディープ・グリーヴ・セレスティアル・グリーヴ,添付1: docs/art_handoff/rig/templates/bottom/armorPants_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：タクティカルパンツ（長ズボン・ひざ当て）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：胴（首の付け根〜腰（スカート・ドレスの裾も））、後ろ脚（奥側の脚（まっすぐ下ろした形・股が上の十字））、前脚（手前の脚（まっすぐ下ろした形・股が上の十字））。
 色：主色 #3b4231、アクセント #9aa07a（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -979,7 +1109,7 @@ B,assets/sprites/rig/bottom/armorPants_m.png,下,armorPants,♂,下：タクテ�
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-B,assets/sprites/rig/hat/cowboy_f.png,帽子,cowboy,♀,帽子：カウボーイハット（♀）,頭の物,#8a5a2b,#e8c27a,デザートカウボーイ,添付1: docs/art_handoff/rig/templates/hat/cowboy_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
+B,assets/sprites/rig/hat/cowboy_f.png,帽子,cowboy,♀,帽子：カウボーイハット（♀）,頭の物,#8a5a2b,#e8c27a,デザートカウボーイ・グレイズ・レンジャーハット,添付1: docs/art_handoff/rig/templates/hat/cowboy_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
 描くもの：カウボーイハット（広いつば・帽子の帯）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
 描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
 色：主色 #8a5a2b、アクセント #e8c27a（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -992,7 +1122,7 @@ B,assets/sprites/rig/hat/cowboy_f.png,帽子,cowboy,♀,帽子：カウボーイ
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-B,assets/sprites/rig/hat/cowboy_m.png,帽子,cowboy,♂,帽子：カウボーイハット（♂）,頭の物,#8a5a2b,#e8c27a,デザートカウボーイ,添付1: docs/art_handoff/rig/templates/hat/cowboy_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
+B,assets/sprites/rig/hat/cowboy_m.png,帽子,cowboy,♂,帽子：カウボーイハット（♂）,頭の物,#8a5a2b,#e8c27a,デザートカウボーイ・グレイズ・レンジャーハット,添付1: docs/art_handoff/rig/templates/hat/cowboy_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
 描くもの：カウボーイハット（広いつば・帽子の帯）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
 描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
 色：主色 #8a5a2b、アクセント #e8c27a（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
@@ -1005,137 +1135,7 @@ B,assets/sprites/rig/hat/cowboy_m.png,帽子,cowboy,♂,帽子：カウボーイ
 向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
 全年齢向け。既存のゲームやキャラクターに似せない。
 ※添付2（素体）と同じ絵柄・同じ線の太さで。"
-B,assets/sprites/rig/hat/helmet_f.png,帽子,helmet,♀,帽子：バイクのヘルメット（♀）,頭の物,#16161e,#ff8a00,バイカーヘルメット・アストロヘルメット,添付1: docs/art_handoff/rig/templates/hat/helmet_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
-描くもの：バイクのヘルメット（右＝前にバイザー）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
-描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
-色：主色 #16161e、アクセント #ff8a00（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
-頭・顔・髪は描かない（薄い灰色の頭は位置の目安。帽子・アクセサリだけ）。
-画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
-見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
-画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
-使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
-腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
-向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
-全年齢向け。既存のゲームやキャラクターに似せない。
-※添付2（素体）と同じ絵柄・同じ線の太さで。"
-B,assets/sprites/rig/hat/helmet_m.png,帽子,helmet,♂,帽子：バイクのヘルメット（♂）,頭の物,#16161e,#ff8a00,バイカーヘルメット・アストロヘルメット,添付1: docs/art_handoff/rig/templates/hat/helmet_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
-描くもの：バイクのヘルメット（右＝前にバイザー）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
-描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
-色：主色 #16161e、アクセント #ff8a00（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
-頭・顔・髪は描かない（薄い灰色の頭は位置の目安。帽子・アクセサリだけ）。
-画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
-見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
-画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
-使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
-腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
-向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
-全年齢向け。既存のゲームやキャラクターに似せない。
-※添付2（素体）と同じ絵柄・同じ線の太さで。"
-B,assets/sprites/rig/hat/crown_f.png,帽子,crown,♀,帽子：王冠（♀）,頭の物,#ffd23f,#ff3d7f,ベイの王冠・ネオン・エンペラー・ドンの黒王冠,添付1: docs/art_handoff/rig/templates/hat/crown_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
-描くもの：王冠（頭の上に少し傾けて乗せる、宝石付き）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
-描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
-色：主色 #ffd23f、アクセント #ff3d7f（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
-頭・顔・髪は描かない（薄い灰色の頭は位置の目安。帽子・アクセサリだけ）。
-画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
-見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
-画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
-使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
-腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
-向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
-全年齢向け。既存のゲームやキャラクターに似せない。
-※添付2（素体）と同じ絵柄・同じ線の太さで。"
-B,assets/sprites/rig/hat/crown_m.png,帽子,crown,♂,帽子：王冠（♂）,頭の物,#ffd23f,#ff3d7f,ベイの王冠・ネオン・エンペラー・ドンの黒王冠,添付1: docs/art_handoff/rig/templates/hat/crown_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
-描くもの：王冠（頭の上に少し傾けて乗せる、宝石付き）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
-描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
-色：主色 #ffd23f、アクセント #ff3d7f（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
-頭・顔・髪は描かない（薄い灰色の頭は位置の目安。帽子・アクセサリだけ）。
-画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
-見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
-画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
-使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
-腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
-向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
-全年齢向け。既存のゲームやキャラクターに似せない。
-※添付2（素体）と同じ絵柄・同じ線の太さで。"
-B,assets/sprites/rig/accessory/mask_f.png,アクセサリ,mask,♀,アクセサリ：スカルのフェイスマスク（♀）,頭の物,#e8e8e8,#16161e,スカルマスク,添付1: docs/art_handoff/rig/templates/accessory/mask_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
-描くもの：スカルのフェイスマスク（口元〜あごを覆う。頭の枠）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
-描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
-色：主色 #e8e8e8、アクセント #16161e（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
-頭・顔・髪は描かない（薄い灰色の頭は位置の目安。帽子・アクセサリだけ）。
-画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
-見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
-画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
-使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
-腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
-向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
-全年齢向け。既存のゲームやキャラクターに似せない。
-※添付2（素体）と同じ絵柄・同じ線の太さで。"
-B,assets/sprites/rig/accessory/mask_m.png,アクセサリ,mask,♂,アクセサリ：スカルのフェイスマスク（♂）,頭の物,#e8e8e8,#16161e,スカルマスク,添付1: docs/art_handoff/rig/templates/accessory/mask_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
-描くもの：スカルのフェイスマスク（口元〜あごを覆う。頭の枠）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
-描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
-色：主色 #e8e8e8、アクセント #16161e（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
-頭・顔・髪は描かない（薄い灰色の頭は位置の目安。帽子・アクセサリだけ）。
-画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
-見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
-画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
-使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
-腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
-向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
-全年齢向け。既存のゲームやキャラクターに似せない。
-※添付2（素体）と同じ絵柄・同じ線の太さで。"
-B,assets/sprites/rig/accessory/wings_f.png,アクセサリ,wings,♀,アクセサリ：天使の翼（♀）,背中,#ffffff,#bff6ff,エンジェルウィング・ネオン・セラフ,添付1: docs/art_handoff/rig/templates/accessory/wings_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
-描くもの：天使の翼（背中の小さな白い翼2枚。背中の枠）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
-描く枠：背中（体の後ろに出る物）。
-色：主色 #ffffff、アクセント #bff6ff（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
-頭・顔・髪は描かない（薄い灰色の頭は位置の目安。帽子・アクセサリだけ）。
-画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
-見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
-画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
-使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
-腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
-向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
-全年齢向け。既存のゲームやキャラクターに似せない。
-※添付2（素体）と同じ絵柄・同じ線の太さで。"
-B,assets/sprites/rig/accessory/wings_m.png,アクセサリ,wings,♂,アクセサリ：天使の翼（♂）,背中,#ffffff,#bff6ff,エンジェルウィング・ネオン・セラフ,添付1: docs/art_handoff/rig/templates/accessory/wings_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
-描くもの：天使の翼（背中の小さな白い翼2枚。背中の枠）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
-描く枠：背中（体の後ろに出る物）。
-色：主色 #ffffff、アクセント #bff6ff（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
-頭・顔・髪は描かない（薄い灰色の頭は位置の目安。帽子・アクセサリだけ）。
-画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
-見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
-画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
-使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
-腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
-向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
-全年齢向け。既存のゲームやキャラクターに似せない。
-※添付2（素体）と同じ絵柄・同じ線の太さで。"
-B,assets/sprites/rig/accessory/halo_f.png,アクセサリ,halo,♀,アクセサリ：天使の輪（♀）,頭の物,#fff06a,#ffffff,天使の輪・コズミック・ヘイロー・ゾグの灯台,添付1: docs/art_handoff/rig/templates/accessory/halo_f.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♀用）です。
-描くもの：天使の輪（頭の上に浮く光る輪。頭の枠）。女の子の体型（小顔・細い首・くびれ・脚長め）に合う形。
-描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
-色：主色 #fff06a、アクセント #ffffff（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
-頭・顔・髪は描かない（薄い灰色の頭は位置の目安。帽子・アクセサリだけ）。
-画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
-見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
-画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
-使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
-腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
-向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
-全年齢向け。既存のゲームやキャラクターに似せない。
-※添付2（素体）と同じ絵柄・同じ線の太さで。"
-B,assets/sprites/rig/accessory/halo_m.png,アクセサリ,halo,♂,アクセサリ：天使の輪（♂）,頭の物,#fff06a,#ffffff,天使の輪・コズミック・ヘイロー・ゾグの灯台,添付1: docs/art_handoff/rig/templates/accessory/halo_m.png / 添付2: 最初に作った素体 assets/sprites/rig/body_m.png（絵柄・体の位置をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクター（主人公）の着せ替えパーツを1枚描いてください。添付1は配置図の下絵（♂用）です。
-描くもの：天使の輪（頭の上に浮く光る輪。頭の枠）。男の子の体型（肩幅が広い・胸板・がっしり）に合う形。
-描く枠：頭の物（頭の上に重ねる物だけ（頭そのものは描かない））。
-色：主色 #fff06a、アクセント #ffffff（主色はこの色ちょうどで塗る。陰影は同じ色の濃淡。ゲームが色違いを自動で作ります）。
-頭・顔・髪は描かない（薄い灰色の頭は位置の目安。帽子・アクセサリだけ）。
-画風：添付の見本（style/luna_f_reference.png）と同じちびアニメ調（頭が背丈の約4割・大きな靴）、太めの濃い紫（#2A1430）の輪郭線、セル塗り2段＋ツヤのハイライト、かわいい・かっこいい。世界観はネオン×夕焼けのリゾート都市のストリート系。
-見本（style/luna_f_reference.png）は絵柄と品質の基準です。見本は正面寄り・腕を曲げたポーズですが、パーツは「右向きの斜め前・腕と脚はまっすぐ下」で描いてください（見本のポーズ・ネコミミ・鈴はまねしない）。
-画像は添付1と同じ 1024×1024（正方形）。添付1の「青い点線の枠」の位置と大きさをそのまま守り、枠の中の薄い下絵を、同じ位置・同じ大きさで描き直してください。肩・股・足首の位置は桃色の十字にぴったり合わせる（ゲームは位置を直さずにそのまま組み立てます）。
-使わない枠・枠の外には何も描かない。青い点線の枠・桃色の十字・文字・灰色の参考シルエットは描かない（完成画像には残さない）。
-腕と脚は「まっすぐ下に下ろした形」のまま（曲げない。ゲームが関節で曲げます）。各パーツは離ればなれのままにする（つなげない）。
-向きは右向き（体はやや右を向いた斜め前）。背景は真っ白（#FFFFFF）か透明。影・地面・枠線なし。
-全年齢向け。既存のゲームやキャラクターに似せない。
-※添付2（素体）と同じ絵柄・同じ線の太さで。"
-B,assets/sprites/rig/weapon/neonSword.png,武器,neonSword,共通,武器：ネオンソード,武器の枠,#19f0ff,#ffffff,ネオンソード・覇王ネオンブレード・ヴォイド・ネオンブレード・スパイア・ブレード,添付1: docs/art_handoff/rig/templates/weapon/neonSword.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクターが手に持つ武器の画像を1枚描いてください（着せ替えパーツ）。添付1は配置図の下絵です。
+B,assets/sprites/rig/weapon/neonSword.png,武器,neonSword,共通,武器：ネオンソード,武器の枠,#19f0ff,#ffffff,ネオンソード・覇王ネオンブレード・ヴォイド・ネオンブレード・スパイア・ブレード・看板職人のネオン管ソード・アーク・ブレード・プライム・セイバー・ヴァイン・ブレード・カーネル・エッジ・トライデント・ブレード・ディープ・セイバー・ゼニス・ブレード・セレスティアル・エッジ・カーネル・ルートソード・ソブリン・ブレード,添付1: docs/art_handoff/rig/templates/weapon/neonSword.png / 添付2: 最初に作った素体 assets/sprites/rig/body_f.png（絵柄をそろえる） / 見本: docs/art_handoff/style/luna_f_reference.png（絵柄と品質の基準。毎回添付）,"ゲームのキャラクターが手に持つ武器の画像を1枚描いてください（着せ替えパーツ）。添付1は配置図の下絵です。
 描くもの：ネオンソード（持ち手と、光る刃）。
 色：主色 #19f0ff、アクセント #ffffff（主色はこの色ちょうどで。陰影は同じ色の濃淡）。
 画像は添付1と同じ 1024×512（横長）。武器は右向きに水平（刃・銃口が右）。握る所（手で持つ所）を桃色の十字の位置に、大きさは薄い下絵と同じに。

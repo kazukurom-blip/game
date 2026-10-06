@@ -138,6 +138,18 @@
     "armB",
     "armF"
    ]
+  },
+  "plainShirt": {
+   "f": [
+    "torso",
+    "armB",
+    "armF"
+   ],
+   "m": [
+    "torso",
+    "armB",
+    "armF"
+   ]
   }
  },
  "bottom": {
@@ -224,6 +236,18 @@
     "legB",
     "legF"
    ]
+  },
+  "plainPants": {
+   "f": [
+    "torso",
+    "legB",
+    "legF"
+   ],
+   "m": [
+    "torso",
+    "legB",
+    "legF"
+   ]
   }
  },
  "shoes": {
@@ -268,6 +292,16 @@
    ]
   },
   "heels": {
+   "f": [
+    "footB",
+    "footF"
+   ],
+   "m": [
+    "footB",
+    "footF"
+   ]
+  },
+  "oldShoes": {
    "f": [
     "footB",
     "footF"
