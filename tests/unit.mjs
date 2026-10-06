@@ -1625,6 +1625,8 @@ test('v3 classes: newState(classId, {name, gender, look}) と性別別の初期�
 (await import('./world2.mjs')).default({ test, makeGame, step, fin });
 // v4 5次転職・Lv100〜200 の強さの釣り合い（tests/balance_v4.mjs・tools/sim_balance.mjs）
 { const bal = await import('./balance_v4.mjs'); bal.default({ test, makeGame, step, fin }); bal.registerEngine({ test, makeGame, step, fin }); }
+// v5 4次転職より後の難しさ・第2ワールドの壁・ボスの大当たり装備（tests/balance_v5.mjs・tools/sim_balance.mjs --v5）
+(await import('./balance_v5.mjs')).default({ test, makeGame, step, fin });
 
 // ------------------------------------------------------------ 会話の窓（dialogMaple.js）: 強調の書き方・最初の画面・受注・選択肢
 const DialogM = await import('../src/ui/dialogMaple.js');

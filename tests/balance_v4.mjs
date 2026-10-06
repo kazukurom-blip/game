@@ -7,7 +7,7 @@ import { ENEMIES } from '../src/data/enemies.js';
 import { Enemy } from '../src/entities/enemy.js';
 import { useSkill, onBasicAttack, resetCooldowns, flushSkillHits } from '../src/systems/skills.js';
 import {
-  BRANCHES, makeChar, dpsOf, normalEnemy, mainSkillOf, useDamage, takenOf, bossRow, killsPerLevelAt,
+  BRANCHES, makeChar, dpsOf, normalEnemy, mainSkillOf, useDamage, takenOf, killsPerLevelAt, forceReqAtLevel,
 } from '../tools/sim_balance.mjs';
 
 const avg = (a) => a.reduce((s, x) => s + x, 0) / a.length;
@@ -17,6 +17,8 @@ export default function register({ test }) {
   // キャラは作るのに少し時間がかかるので、使い回す
   const cache = new Map();
   const ch = (b, L) => { const k = b + L; if (!cache.has(k)) cache.set(k, makeChar(b, L)); return cache.get(k); };
+  // v5: 雑魚の発数・画面全体攻撃は、育ち方「ふつう」（★5・レアの潜在・その場の適性。docs/BALANCE_V5.md）で見る
+  const chN = (b, L) => { const k = 'n' + b + L; if (!cache.has(k)) cache.set(k, makeChar(b, L, { tier: 'normal', R: forceReqAtLevel(L) })); return cache.get(k); };
 
   test('balance v4: 6 系統の火力の差は ±20% 以内（Lv120〜200 のふつうの敵・Lv125〜200 のボス。召喚獣込み）', () => {
     for (const L of [120, 125, 150, 180, 200]) {
@@ -32,27 +34,29 @@ export default function register({ test }) {
     }
   });
 
-  test('balance v4: ふつうの敵は 5次の主力スキル 2〜4 発（系統の平均）・どの系統も 1.5〜5 発', () => {
+  // v5 で目安が変わった（4次転職より後は難しく）: 2〜4 発 → 育ち方「ふつう」で 3〜6 発（tests/balance_v5.mjs も見る）
+  test('balance v4→v5: ふつうの敵は 5次の主力スキル 3〜6 発（育ち方「ふつう」・系統の平均）・どの系統も 2.5〜7 発', () => {
     for (const L of [120, 135, 150, 165, 180, 200]) {
       const e = normalEnemy(L);
-      const hits = BRANCHES.map((b) => e.hp / useDamage(ch(b, L), mainSkillOf(ch(b, L)), e));
+      const hits = BRANCHES.map((b) => e.hp / useDamage(chN(b, L), mainSkillOf(chN(b, L)), e));
       const a = avg(hits);
-      assert.ok(a >= 2 && a <= 4, `Lv${L} 平均 ${a.toFixed(2)} 発`);
-      for (let i = 0; i < hits.length; i++) assert.ok(hits[i] >= 1.5 && hits[i] <= 5, `Lv${L} ${BRANCHES[i]} ${hits[i].toFixed(2)} 発`);
+      assert.ok(a >= 3 && a <= 6, `Lv${L} 平均 ${a.toFixed(2)} 発`);
+      for (let i = 0; i < hits.length; i++) assert.ok(hits[i] >= 2.5 && hits[i] <= 7, `Lv${L} ${BRANCHES[i]} ${hits[i].toFixed(2)} 発`);
       for (const b of BRANCHES) assert.equal(mainSkillOf(ch(b, L)).reqJob, ch(b, L).job.id, `Lv${L} ${b}: 主力は 5次のスキル`);
     }
   });
 
-  test('balance v4: 画面全体攻撃は ふつうの敵を一掃でき（強い敵もほぼ）、1 体への威力は ふだんの火力の 6〜10 秒分', () => {
+  // v5 で敵が固くなった分、一掃の倍率の目安を下げた（ふつうの敵 2 倍 → 1.5 倍、強い敵 1 倍 → 0.75 倍。育ち方「ふつう」）
+  test('balance v4→v5: 画面全体攻撃は ふつうの敵を一掃でき（強い敵もほぼ）、1 体への威力は ふだんの火力の 6〜10 秒分', () => {
     for (const L of [160, 180, 200]) {
       for (const b of BRANCHES) {
-        const c = ch(b, L);
+        const c = chN(b, L);
         const e = normalEnemy(L), el = normalEnemy(L, 2, true);
         const ult = c.job.skills.map((id) => SKILLS[id]).find((s) => s.screen);
         assert.equal(c.state.skills[ult.id], ult.maxLevel, `${b} Lv${L} 画面全体攻撃は最大 Lv`);
         const d = useDamage(c, ult, e);
-        assert.ok(d >= e.hp * 2, `${b} Lv${L}: ふつうの敵 ${(d / e.hp).toFixed(2)} 倍`);
-        assert.ok(useDamage(c, ult, el) >= el.hp, `${b} Lv${L}: 強い敵 ${(useDamage(c, ult, el) / el.hp).toFixed(2)} 倍`);
+        assert.ok(d >= e.hp * 1.5, `${b} Lv${L}: ふつうの敵 ${(d / e.hp).toFixed(2)} 倍`);
+        assert.ok(useDamage(c, ult, el) >= el.hp * 0.75, `${b} Lv${L}: 強い敵 ${(useDamage(c, ult, el) / el.hp).toFixed(2)} 倍`);
         const sec = d / dpsOf(c, e).dps;
         assert.ok(sec >= 6 && sec <= 10, `${b} Lv${L}: ${sec.toFixed(1)} 秒分`);
       }
@@ -81,16 +85,7 @@ export default function register({ test }) {
     }
   });
 
-  test('balance v4: ボスにかかる時間（地域のボス 1〜3 分・ラスボスは 2 形態で 3〜5 分）', () => {
-    for (const id of ['boss_ark_titan', 'boss_wild_kernel', 'boss_abyss_queen', 'boss_zenith']) {
-      const last = id === 'boss_zenith';
-      for (const b of BRANCHES) {
-        const r = bossRow(ENEMIES[id], b);
-        const [lo, hi] = last ? [180, 300] : [60, 180];
-        assert.ok(r.sec >= lo && r.sec <= hi, `${id} ${b}: ${r.sec.toFixed(0)} 秒`);
-      }
-    }
-  });
+  // ボスにかかる時間（v4: 1〜3 分）は v5 で目安が変わった（ふつう 約60分・しっかり 30〜40分・強化しまくり 約20分）→ tests/balance_v5.mjs
 
   test('balance v4: 1 Lv に倒す数（Lv100〜109: 150〜300 体・Lv190〜199: 500〜900 体）', () => {
     for (let L = 100; L < 110; L++) { const k = killsPerLevelAt(L); assert.ok(k >= 150 && k <= 300, `Lv${L} ${k.toFixed(0)}`); }

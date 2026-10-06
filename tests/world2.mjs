@@ -79,9 +79,11 @@ export default function register({ test, makeGame, step }) {
       assert.ok(e.drops.some((d) => W2_ITEM_IDS.includes(d.id)), id + ' 第2ワールドの素材/装備を落とす');
       assert.ok(Number.isFinite(e.exp) && e.exp > 0, id + ' exp');
     }
-    // Lv100 の敵との連続性: 第1ワールドの Lv96 と第2ワールドの Lv101 の強さが 2 倍以上離れない
+    // Lv100 の敵との連続性: 第1ワールドの Lv96 と第2ワールドの Lv101 の攻撃・経験値は 2 倍以上離れない。
+    //  v5: HP は 4次転職より後の難しさで跳ね上がる（第2ワールドの入口で 20〜60 倍。ふつうの育ち方で主力スキル 3〜6 発。docs/BALANCE_V5.md）
     const a = ENEMIES.ghost_astral, b = ENEMIES.ark_drone_patrol;
-    for (const k of ['hp', 'atk', 'exp']) assert.ok(b[k] / a[k] > 0.6 && b[k] / a[k] < 1.6, `連続性 ${k} ${a[k]} → ${b[k]}`);
+    for (const k of ['atk', 'exp']) assert.ok(b[k] / a[k] > 0.6 && b[k] / a[k] < 1.6, `連続性 ${k} ${a[k]} → ${b[k]}`);
+    assert.ok(b.hp / a.hp >= 20 && b.hp / a.hp <= 60, `v5: 入口の HP の跳ね上がり ${a.hp} → ${b.hp}`);
     // Lv が上がるほど強い（地域の平均）
     const avg = (r, k) => { const L = W2_ENEMY_IDS.filter((id) => ENEMIES[id].region === r && !ENEMIES[id].boss); return L.reduce((s, id) => s + ENEMIES[id][k], 0) / L.length; };
     for (const k of ['hp', 'atk', 'exp']) for (let i = 1; i < 4; i++) assert.ok(avg(W2_REGION_IDS[i], k) > avg(W2_REGION_IDS[i - 1], k), `${k} が地域ごとに増える`);
@@ -209,11 +211,11 @@ export default function register({ test, makeGame, step }) {
     const b = new Enemy(g, 'boss_ark_titan', 900, g.map.groundY);
     assert.equal(b.mapId, 'w2_arkcity_f3', 'ボス部屋のボスは w2_arkcity_f3 で倒した扱い');
     assert.ok(ENEMIES.boss_ark_titan.boss && ENEMIES.boss_ark_titan.habitats[0].startsWith('w2_arkcity'));
-    // HP・防御の目安（docs/BALANCE_V4.md で合わせ直した表: Lv120 ≒ 16 万/120, 150 ≒ 38 万/150, 180 ≒ 52 万/180, 200 ≒ 64 万/200、
-    //  ラスボス ≒ 2,200 万＋2,400 万）
+    // HP・防御の目安（docs/BALANCE_V5.md で合わせ直した表: Lv120 ≒ 34.5 万/120, 150 ≒ 80 万/150, 180 ≒ 92 万/180, 200 ≒ 107 万/200、
+    //  ラスボス ≒ 4.0 億＋4.4 億。ふつうの育ち方で約 60 分）
     const rough = (v, t) => v > t * 0.7 && v < t * 1.4;
-    assert.ok(rough(ENEMIES.wild_seagull_neon.hp, 380000) && ENEMIES.wild_seagull_neon.def === 150, 'Lv150');
-    assert.ok(rough(ENEMIES.boss_zenith.hp + ENEMIES.boss_zenith_true.hp, 4.6e7) && rough(ENEMIES.boss_zenith.hp, 2.2e7), 'ラスボス');
+    assert.ok(rough(ENEMIES.wild_seagull_neon.hp, 800000) && ENEMIES.wild_seagull_neon.def === 150, 'Lv150');
+    assert.ok(rough(ENEMIES.boss_zenith.hp + ENEMIES.boss_zenith_true.hp, 8.4e8) && rough(ENEMIES.boss_zenith.hp, 4.0e8), 'ラスボス');
   });
 
   test('w2 debug: ワープの一覧と第2ワールドのワープ', () => {

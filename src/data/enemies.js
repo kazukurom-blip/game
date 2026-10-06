@@ -5,7 +5,7 @@
 // boss: ボス（habitats は行き止まりマップ）。summon: ボスが呼ぶ手下
 // habitats: 出現フィールドの mapId 配列（SPEC_V2 のID）。region: 地域ID（図鑑・背景テーマと同じ）
 // civilian: 町を歩く住民（攻撃の対象外。経験値/図鑑なし）
-import { ITEMS, looksFromIds, W2_GEAR } from './items.js';
+import { ITEMS, looksFromIds, W2_GEAR, V5_BOSS_GEAR } from './items.js';
 import { baseEnemyExp, expToNext, REGION_EXP_MULT } from './balance.js';
 import { ENEMY_LORE } from './lore.js';
 
@@ -43,7 +43,7 @@ export const PET_CHANCE = { normal: 0.0003, elite: 0.0005, boss: 0.0008 };
 const EQUIP_CHANCE = { common: 0.02, rare: 0.008, epic: 0.003, legendary: 0.001, mythic: 0.0003 };
 function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
 function equipPool(id, lv, n = 3) {
-  const cands = Object.values(ITEMS).filter((it) => it.type === 'equip' && it.slot !== 'pet' && it.reqLevel <= lv + 2 && it.reqLevel >= lv - 16);
+  const cands = Object.values(ITEMS).filter((it) => it.type === 'equip' && it.slot !== 'pet' && !it.bossV5 && it.reqLevel <= lv + 2 && it.reqLevel >= lv - 16);
   if (!cands.length) return [];
   const out = [];
   let h = hash(id);
@@ -144,10 +144,12 @@ function w2GearDrops(id, region, lv, n = 3) {
   }
   return out;
 }
-// 第2ワールドの HP・防御の目安（間は直線でつなぐ）。docs/BALANCE_V4.md（tools/sim_balance.mjs）で、
-//  そのレベルのキャラの主力スキル 2〜4 発（5次転職の後）で倒せるように合わせた。入口（Lv100〜104）は第1ワールドから続く
-//  Lv100: 第1ワールドの式の値 / Lv110: 7 万 / Lv120: 16 万 / Lv150: 38 万 / Lv180: 52 万 / Lv200: 64 万。防御は Lv と同じ（120〜200）
-const W2_HP_KNOTS = [[100, hpAt(100)], [102, 7000], [110, 70000], [120, 160000], [130, 240000], [150, 380000], [180, 520000], [200, 640000]];
+// 第2ワールドの HP・防御の目安（間は直線でつなぐ）。
+//  v5（docs/BALANCE_V5.md・tools/sim_balance.mjs --v5）: 4次転職より後は難しく。育ち方「ふつう」（★5・レアの潜在・その時点の適性）で
+//  主力スキル 3〜6 発（平均 4.5 発）になるように合わせた。第2ワールドは入口（Lv101）から第1ワールドより大きく跳ね上がる（v4 は 2〜4 発で第1ワールドから続いていた）
+//  Lv101: 19 万 / Lv110: 31 万 / Lv120: 34.5 万 / Lv130: 60 万 / Lv150: 80 万 / Lv180: 92 万 / Lv200: 107 万。防御は Lv と同じ（120〜200）
+const W2_HP_KNOTS = [[100, 177000], [102, 214000], [104, 250000], [108, 296000], [110, 314000], [116, 330000], [120, 345000], [125, 478000], [130, 600000],
+  [140, 700000], [150, 800000], [160, 830000], [170, 890000], [180, 920000], [190, 960000], [200, 1070000]];
 const W2_DEF_KNOTS = [[100, defAt(100)], [120, 120], [150, 150], [180, 180], [200, 200]];
 function knots(K, lv) {
   if (lv <= K[0][0]) return K[0][1];
@@ -162,7 +164,7 @@ export const w2Def = (lv) => Math.round(knots(W2_DEF_KNOTS, lv));
 const W2_ATK_KNOTS = [[100, 1], [102, 1.25], [110, 2.0], [120, 2.75], [150, 2.8], [180, 3.0], [200, 3.4]];
 /** 第2ワールドの敵の攻撃の倍率（atkAt に掛ける。ボスも同じ） */
 export const w2AtkK = (lv) => Math.round(knots(W2_ATK_KNOTS, lv) * 1000) / 1000;
-/** 第2ワールドのボスの HP（通常の敵 × 倍率。ラスボス第1形態 ≒ 2,240 万・第2形態 ≒ 2,430 万） */
+/** 第2ワールドのボスの HP の元の式（通常の敵 × 倍率）。v5 のボスは下の V5_BOSS_HP で上書きする（docs/BALANCE_V5.md） */
 export const w2BossHp = (lv, x = 35) => Math.round(w2Hp(lv) * x / 1000) * 1000;
 
 /** w2(...) — mk と同じ引数。world:2 を付け、強さに w2 補正、ドロップに地域の素材・装備を入れる */
@@ -922,6 +924,38 @@ const list = [
     drops: [{ id: 'origin_core', chance: 1 }, { id: 'star_fragment', chance: 1 }, { id: 'elixir', chance: 1 }, { id: 'w2_sovereign_blade', chance: 0.02 }, { id: 'w2_sovereign_gun', chance: 0.02 }, { id: 'w2_sovereign_staff', chance: 0.02 }, { id: 'w2_sovereign_wings', chance: 0.01 }, { id: 'w2_zen2_melee', chance: 0.06 }, { id: 'w2_zen2_accessory', chance: 0.06 }],
   }),
 ];
+
+// =====================================================================
+// v5: 4次転職より後のボス（docs/BALANCE_V5.md・tools/sim_balance.mjs --v5）
+//  - HP: 育ち方「ふつう」で約 60 分・「しっかり」で 30〜40 分・「強化しまくり」で約 20 分（当てられる時間 75%・その場の適性で）。
+//    第2ワールドのボスはネオン適性（src/data/forceReq.js）が足りていればこの時間。足りないと与えるダメージが 0.1〜0.4 倍になり倒せない
+//  - 攻撃は今のまま（体当たりで最大 HP の 2〜17%。ポーションを使えば耐えられる。1 発で倒されない）
+//  - ボス部屋の制限時間は bossTimeX 倍（systems/bosses.js の bossTimeLimit。ノーマル 10 分 → 90 分）
+//  - ドロップ: 大当たり（そのボス専用の mythic の組）3%・当たり（legendary の組）10%。1 回倒すごとにそれぞれ 1 回、組から 1 つ（部位・武器種はランダム）
+//    ラスボスは第2形態（真ゼニス・ソブリン）が落とす（2 形態で 1 回）
+// =====================================================================
+export const V5_BOSS_HP = {
+  boss_alien: 90000000, boss_ark_titan: 395000000, boss_wild_kernel: 635000000, boss_abyss_queen: 715000000,
+  boss_zenith: 404000000, boss_zenith_true: 438000000,
+};
+export const V5_BOSS_TIME_X = 9;
+export const V5_DROP_CHANCE = { jackpot: 0.03, hit: 0.1 };
+/** v5 の大当たり・当たりのドロップ（{id: 代表, pool: 組, chance, v5}。systems/loot.js が組から 1 つ選ぶ） */
+export function v5BossDrops(bossId) {
+  const g = V5_BOSS_GEAR[bossId];
+  if (!g) return [];
+  return [
+    { id: g.jackpot[0], pool: [...g.jackpot], chance: V5_DROP_CHANCE.jackpot, v5: 'jackpot' },
+    { id: g.hit[0], pool: [...g.hit], chance: V5_DROP_CHANCE.hit, v5: 'hit' },
+  ];
+}
+for (const e of list) {
+  if (!(e.id in V5_BOSS_HP)) continue;
+  e.hp = V5_BOSS_HP[e.id];
+  e.v5Boss = true;
+  if (!e.phaseOf) e.bossTimeX = V5_BOSS_TIME_X;
+  e.drops = [...e.drops, ...v5BossDrops(e.id)];
+}
 
 export const ENEMIES = Object.fromEntries(list.map((e) => [e.id, e]));
 

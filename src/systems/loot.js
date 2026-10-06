@@ -48,6 +48,11 @@ export function rollDrops(enemyDef, luck = 0, rng = Math.random, opts = {}) {
     } else if (amount > 0) out.push({ money: amount });
   }
   for (const d of enemyDef.drops || []) {
+    // v5: 組の抽選（ボスの大当たり・当たり）。chance × ドロップ率で 1 回だけ抽選し、当たれば組から 1 つ（LUK の補正なし）
+    if (Array.isArray(d.pool) && d.pool.length) {
+      if (rng() < Math.min(1, d.chance * dm)) { const id = d.pool[Math.floor(rng() * d.pool.length) % d.pool.length]; if (ITEMS[id]) out.push({ id }); }
+      continue;
+    }
     const it = ITEMS[d.id];
     if (!it) continue;
     // PET は LUK で微増（効果半分）、装備は強め、その他は弱め

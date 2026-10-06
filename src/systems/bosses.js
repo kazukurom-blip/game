@@ -29,6 +29,12 @@ export const BOSS_EXCHANGE = [
   { id: 'suit_vice', cost: 60 }, { id: 'crown_caiman', cost: 240 }, { id: 'halo_zog', cost: 480 },
 ];
 
+/** v5: その ボス×難易度 の制限時間（秒）。4次転職より後の長いボス（enemies.js の bossTimeX）は倍率を掛ける（docs/BALANCE_V5.md） */
+export function bossTimeLimit(bossId, mode) {
+  const m = BOSS_MODES[mode];
+  if (!m) return Infinity;
+  return m.timeLimit * (ENEMIES[bossId]?.bossTimeX || 1);
+}
 const short = (id) => String(id).replace(/^boss_/, '');
 /** ボス部屋のマップID（無ければボスのいるフィールド） */
 export function bossRoomId(bossId) {
@@ -105,7 +111,7 @@ export function bossClears(state, now = Date.now()) {
       modes[mode] = {
         name: m.name, unlocked: u.ok, reason: u.reason || '', stock: bossStock(state, id, mode, now), cap: m.period ? TICKET_CAP : Infinity,
         period: m.period, clears: r.clears, best: { ...r.best }, money: bossRewardMoney(id, mode), trophies: m.reward,
-        hpMult: m.hpMult, atkMult: m.atkMult, recLevel: def.level + m.levelAdd, timeLimit: m.timeLimit, lives: m.lives,
+        hpMult: m.hpMult, atkMult: m.atkMult, recLevel: def.level + m.levelAdd, timeLimit: bossTimeLimit(id, mode), lives: m.lives,
       };
     }
     return { bossId: id, name: def.name, level: def.level, title: def.title || '', roomId: bossRoomId(id), fieldId: bossFieldId(id), modes };
@@ -129,10 +135,11 @@ export function bossEntry(game, bossId, mode = 'normal', opts = {}) {
   game.bossMaxHit = 0;
   const cur = game.map?.id || st.mapId;
   const returnMap = MAPS[cur] && !MAPS[cur].instance ? cur : (game.lastTownId && MAPS[game.lastTownId] ? game.lastTownId : bossFieldId(bossId));
-  game.bossRun = { bossId, mode, t0: game.time || 0, deaths: 0, lives: m.lives, timeLimit: m.timeLimit, returnMap, roomId: room, cleared: false, failed: false };
+  const timeLimit = bossTimeLimit(bossId, mode);
+  game.bossRun = { bossId, mode, t0: game.time || 0, deaths: 0, lives: m.lives, timeLimit, returnMap, roomId: room, cleared: false, failed: false };
   game.events?.emit('bossEnter', { bossId, mode });
   game.changeMap(room);
-  game.notify?.(`${ENEMIES[bossId].name}（${m.name}）に挑戦！${Number.isFinite(m.timeLimit) ? ` 制限 ${Math.round(m.timeLimit / 60)}分` : ''}`, '#ff4d6d');
+  game.notify?.(`${ENEMIES[bossId].name}（${m.name}）に挑戦！${Number.isFinite(timeLimit) ? ` 制限 ${Math.round(timeLimit / 60)}分` : ''}`, '#ff4d6d');
   return { ok: true, msg: '' };
 }
 
@@ -175,7 +182,8 @@ export function bossCleared(game, bossId, mode, info = {}) {
     give('chip_reroll', { normal: 1, hard: 3, chaos: 6 }[mode]);
     if (mode === 'chaos') give('chip_lock', 1);
     if (mode === 'hard' || mode === 'chaos') {
-      const eqs = (def.drops || []).filter((d) => ITEMS[d.id]?.type === 'equip' && ITEMS[d.id].slot !== 'pet');
+      // v5: 大当たり・当たりの組（pool）は報酬の確定装備に入れない（ドロップの抽選だけで出る）
+      const eqs = (def.drops || []).filter((d) => !d.pool && ITEMS[d.id]?.type === 'equip' && ITEMS[d.id].slot !== 'pet');
       if (eqs.length && (mode === 'chaos' || Math.random() < 0.3)) give(eqs[Math.floor(Math.random() * eqs.length)].id);
       const rare = CHAOS_RARE[bossId];
       if (mode === 'chaos' && rare && Math.random() < rare.chance) give(rare.id);

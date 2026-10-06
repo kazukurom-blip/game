@@ -157,7 +157,8 @@ export default function register({ test, makeGame }) {
     const rewardOf = new Set(W2Q().flatMap((m) => m.reward.items));
     for (const it of [...qs, ...cs]) assert.ok(rewardOf.has(it.id), `${it.id} は第2ワールドのクエストの報酬`);
     for (const it of qs) {
-      const pool = Object.values(ITEMS).filter((x) => x.type === 'equip' && x.slot === it.slot && !x.questSet && !x.cosmetic && x.rarity !== 'mythic' && x.reqLevel <= it.reqLevel && (it.slot !== 'weapon' || x.weaponType === it.weaponType));
+      // v5: ボスの当たり（bossV5。qset と同じくらいの強さ）は比べる相手に入れない（docs/BALANCE_V5.md）
+      const pool = Object.values(ITEMS).filter((x) => x.type === 'equip' && x.slot === it.slot && !x.questSet && !x.cosmetic && !x.bossV5 && x.rarity !== 'mythic' && x.reqLevel <= it.reqLevel && (it.slot !== 'weapon' || x.weaponType === it.weaponType));
       assert.ok(pool.some((x) => x.world === 2), `${it.id}: 比べる W2_GEAR がある`);
       const keys = it.slot === 'weapon' ? ['atk'] : ['def', 'atk'];
       for (const k of keys) { const best = Math.max(0, ...pool.map((x) => x.stats[k])); assert.ok(it.stats[k] >= best, `${it.id}: ${k} ${it.stats[k]} < 同じ帯の ${best}`); }
