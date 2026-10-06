@@ -51,6 +51,33 @@ const BASE_INFO = {
   space_f4:   { name: '謎の宇宙船',              region: 'spaceport', town: false, levelRange: [85, 100], grid: [8, 0], deadEnd: true, boss: 'boss_alien' },
 };
 
+// v4: 第2ワールド「ネオン・アーク」（world: 2）。grid は第2ワールドの地図（7×6）上の位置
+export const W2_TOWN_IDS = ['w2_arkcity', 'w2_cyberwild', 'w2_abyss', 'w2_zenith'];
+const W2_INFO = {
+  w2_arkcity:      { name: 'アーク・シティ',     region: 'arkcity',   town: true,  levelRange: [100, 130], grid: [1, 4] },
+  w2_arkcity_f1:   { name: 'ホロ・ハイウェイ',   region: 'arkcity',   town: false, levelRange: [100, 106], grid: [0, 3] },
+  w2_arkcity_f2:   { name: 'ネオン摩天街',       region: 'arkcity',   town: false, levelRange: [106, 113], grid: [0, 2] },
+  w2_arkcity_f3:   { name: 'データ・コア',       region: 'arkcity',   town: false, levelRange: [114, 124], grid: [1, 2], deadEnd: true, boss: 'boss_ark_titan' },
+  w2_arkcity_f4:   { name: 'アーク外縁ゲート',   region: 'arkcity',   town: false, levelRange: [118, 126], grid: [2, 4] },
+  w2_cyberwild_f1: { name: '電脳の林道',         region: 'cyberwild', town: false, levelRange: [125, 131], grid: [3, 4] },
+  w2_cyberwild:    { name: 'サイバー・ワイルド', region: 'cyberwild', town: true,  levelRange: [125, 155], grid: [3, 3] },
+  w2_cyberwild_f2: { name: 'ネオン樹海',         region: 'cyberwild', town: false, levelRange: [131, 139], grid: [2, 2] },
+  w2_cyberwild_f3: { name: 'カーネルの巣',       region: 'cyberwild', town: false, levelRange: [140, 150], grid: [2, 1], deadEnd: true, boss: 'boss_wild_kernel' },
+  w2_cyberwild_f4: { name: '蔦の大回廊',         region: 'cyberwild', town: false, levelRange: [143, 152], grid: [4, 3] },
+  w2_abyss_f1:     { name: '沈んだ連絡橋',       region: 'abyss',     town: false, levelRange: [150, 156], grid: [4, 4] },
+  w2_abyss:        { name: 'ネオン・アビス',     region: 'abyss',     town: true,  levelRange: [150, 180], grid: [5, 5] },
+  w2_abyss_f2:     { name: 'サンゴの迷宮',       region: 'abyss',     town: false, levelRange: [156, 164], grid: [4, 5] },
+  w2_abyss_f3:     { name: '女王のドーム',       region: 'abyss',     town: false, levelRange: [165, 175], grid: [3, 5], deadEnd: true, boss: 'boss_abyss_queen' },
+  w2_abyss_f4:     { name: '深海エレベーター',   region: 'abyss',     town: false, levelRange: [168, 177], grid: [6, 4] },
+  w2_zenith_f1:    { name: '雲海の参道',         region: 'zenith',    town: false, levelRange: [175, 182], grid: [6, 3] },
+  w2_zenith:       { name: 'ゼニス・タワー',     region: 'zenith',    town: true,  levelRange: [175, 200], grid: [5, 2] },
+  w2_zenith_f2:    { name: '天空の螺旋',         region: 'zenith',    town: false, levelRange: [182, 189], grid: [6, 1] },
+  w2_zenith_f3:    { name: '星の回廊',           region: 'zenith',    town: false, levelRange: [189, 195], grid: [5, 0] },
+  w2_zenith_f4:    { name: '頂上の聖域',         region: 'zenith',    town: false, levelRange: [195, 200], grid: [4, 0], deadEnd: true, boss: 'boss_zenith' },
+};
+for (const b of Object.values(W2_INFO)) b.world = 2;
+const GRID2_W = 7, GRID2_H = 6;
+
 // 接続（ポータル。双方向）
 export const WORLD_EDGES = [];
 const CHAINS = [
@@ -67,16 +94,36 @@ const CHAINS = [
   ['casino', 'casino_f4', 'tower_f1', 'rooftop'],
   ['rooftop', 'tower_f2', 'tower_f3'],
   ['spaceport', 'space_f3', 'space_f4'],
+  // v4: 次元ゲート（宇宙港 ⇄ アーク・シティ）と第2ワールド
+  ['spaceport', 'w2_arkcity'],
+  ['w2_arkcity', 'w2_arkcity_f1', 'w2_arkcity_f2', 'w2_arkcity_f3'],
+  ['w2_arkcity', 'w2_arkcity_f4', 'w2_cyberwild_f1', 'w2_cyberwild'],
+  ['w2_cyberwild', 'w2_cyberwild_f2', 'w2_cyberwild_f3'],
+  ['w2_cyberwild', 'w2_cyberwild_f4', 'w2_abyss_f1', 'w2_abyss'],
+  ['w2_abyss', 'w2_abyss_f2', 'w2_abyss_f3'],
+  ['w2_abyss', 'w2_abyss_f4', 'w2_zenith_f1', 'w2_zenith'],
+  ['w2_zenith', 'w2_zenith_f2', 'w2_zenith_f3', 'w2_zenith_f4'],
 ];
 for (const c of CHAINS) for (let i = 0; i < c.length - 1; i++) WORLD_EDGES.push([c[i], c[i + 1]]);
 
 /** WORLD_GRAPH = {mapId: [隣接mapId]} */
 export const WORLD_GRAPH = {};
-for (const id of Object.keys(BASE_INFO)) WORLD_GRAPH[id] = [];
+for (const id of [...Object.keys(BASE_INFO), ...Object.keys(W2_INFO)]) WORLD_GRAPH[id] = [];
 for (const [a, b] of WORLD_EDGES) { WORLD_GRAPH[a].push(b); WORLD_GRAPH[b].push(a); }
 
+// 第1ワールド（ヴァイス・ベイ）のマップ（実績「完全踏破」などはこちら）
 export const WORLD_MAP_IDS = Object.keys(BASE_INFO);
 export const FIELD_IDS = WORLD_MAP_IDS.filter((id) => !BASE_INFO[id].town);
+// v4: 第2ワールドのマップ / 両方
+export const W2_MAP_IDS = Object.keys(W2_INFO);
+export const ALL_MAP_IDS = [...WORLD_MAP_IDS, ...W2_MAP_IDS];
+/** ワールド番号（1 = ヴァイス・ベイ / 2 = ネオン・アーク） */
+export function worldOfMap(id) {
+  if (W2_INFO[id]) return 2;
+  const m = worldMap(id);
+  return m?.worldId === 2 ? 2 : 1;
+}
+export const WORLD_NAMES = { 1: 'ヴァイス・ベイ', 2: 'ネオン・アーク' };
 const GRID_W = 9, GRID_H = 8;
 
 function worldMap(id) {
@@ -85,11 +132,12 @@ function worldMap(id) {
 
 /** MAP_INFO = {id: {id, name, region, town, levelRange, deadEnd?, boss?, pos:{x,y}, neighbors}}（name は maps.js 優先） */
 export const MAP_INFO = {};
-for (const [id, b] of Object.entries(BASE_INFO)) {
+for (const [id, b] of [...Object.entries(BASE_INFO), ...Object.entries(W2_INFO)]) {
+  const gw = b.world === 2 ? GRID2_W : GRID_W, gh = b.world === 2 ? GRID2_H : GRID_H;
   const info = {
     id, region: b.region, town: b.town, levelRange: b.levelRange,
-    deadEnd: !!b.deadEnd, boss: b.boss || null,
-    pos: { x: (b.grid[0] + 0.5) / GRID_W, y: (b.grid[1] + 0.5) / GRID_H },
+    deadEnd: !!b.deadEnd, boss: b.boss || null, world: b.world || 1,
+    pos: { x: (b.grid[0] + 0.5) / gw, y: (b.grid[1] + 0.5) / gh },
     neighbors: WORLD_GRAPH[id],
     baseName: b.name,
   };
@@ -201,6 +249,8 @@ export function canTaxi(game, mapId) {
   if (!isVisited(st, mapId)) return { ok: false, msg: 'まだ訪れていない町だ' };
   if (from === mapId) return { ok: false, msg: 'もうここにいる' };
   if (!worldMap(mapId)) return { ok: false, msg: 'その町への道は工事中だ' };
+  // v4: ワールドをまたぐタクシーは無し（次元ゲートを通る）
+  if (from && worldOfMap(from) !== worldOfMap(mapId)) return { ok: false, msg: '別のワールドへはタクシーで行けない（次元ゲートを通ろう）' };
   const fare = taxiFare(game, mapId);
   if (fare == null) return { ok: false, msg: 'そこへの道がない' };
   if ((st.money || 0) < fare) return { ok: false, msg: `お金が足りない（$${fare}）`, fare };

@@ -12,6 +12,11 @@ const SIGN_WORDS = {
   casino: ['LUCKY 7', 'CASINO', 'JACKPOT', 'PAWN', 'POKER', 'CHAPEL'],
   rooftop: ['SKY BAR', 'LOUNGE', 'PENTHOUSE', 'SUSHI', 'JEWELRY'],
   spaceport: ['SPACE CAFE', 'ROCKET SHOP', 'ORBIT BAR', 'ASTRO MART', 'UFO ARCADE'],
+  // v4: 第2ワールド
+  arkcity: ['ARK', 'HOLO', 'NEO 24H', 'SKY TAXI', 'DATA BAR', 'VR CAFE'],
+  cyberwild: ['SEED', 'ROOT BAR', 'BUG LAB', 'GLOW TEA', 'WILD'],
+  abyss: ['PEARL', 'DIVE BAR', 'SUB DOCK', 'KELP CAFE', 'DEEP'],
+  zenith: ['STAR', 'HALO', 'ORACLE', 'SKY TEA', 'ZENITH'],
 };
 const SIGN_WORDS_STYLE = {
   moon: ['MOON BASE', 'ORBIT BAR', 'ASTRO MART'],
@@ -26,6 +31,8 @@ const STREET_NAMES = {
   slums: ['DOCK ST', 'RAIL RD', 'PORT AVE'], swamp: ['GATOR RD', 'BAYOU LN', 'MOSS RD'],
   casino: ['STRIP BLVD', 'LUCKY AVE', 'GOLD ST'], rooftop: ['TOWER PL', 'SKY AVE', 'VICE BLVD'],
   spaceport: ['LUMINA WAY', 'ORBIT RD', 'LAUNCH AVE'],
+  arkcity: ['ARK AVE', 'HOLO WAY', 'NEO ST'], cyberwild: ['ROOT RD', 'VINE LN', 'SEED ST'],
+  abyss: ['PEARL WAY', 'DEEP ST', 'KELP RD'], zenith: ['STAR WAY', 'HALO RD', 'SKY ST'],
 };
 
 export function drawDecor(ctx, d, theme, time, style) {
@@ -62,6 +69,11 @@ export function drawDecor(ctx, d, theme, time, style) {
     case 'fuelTank': decoFuelTank(ctx, d, h); break;
     case 'goldPile': decoGoldPile(ctx, time); break;
     case 'streetSign': decoStreetSign(ctx, d, h, theme); break;
+    // v4: 第2ワールド
+    case 'holoPillar': decoHoloPillar(ctx, h, time); break;
+    case 'neonFern': decoNeonFern(ctx, h, time); break;
+    case 'coral': decoCoral(ctx, h, time); break;
+    case 'cloudPillar': decoCloudPillar(ctx, h, time); break;
     default: break;
   }
   ctx.restore();
@@ -538,4 +550,56 @@ function decoStreetSign(ctx, d, h, region) {
   ctx.beginPath(); rr(ctx, -4, -126, w, 20, 3); oFill(ctx, d.color || '#2e8a4a', 1.8);
   ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1; ctx.strokeRect(-1, -123, w - 6, 14);
   ctx.fillStyle = '#ffffff'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(text, 4, -115.5);
+}
+
+// ---------------------------------------------------------------- v4: 第2ワールドの小物
+// アーク・シティ: ホログラムの柱（光る広告が回る）
+function decoHoloPillar(ctx, h, time) {
+  const col = ['#19f0ff', '#ff3dd2', '#ffd23f'][h % 3];
+  ctx.beginPath(); rr(ctx, -12, -8, 24, 8, 2); oFill(ctx, '#24204e', 1.5);
+  ctx.beginPath(); ctx.rect(-4, -120, 8, 112); oFill(ctx, '#2a2458', 1.5);
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  const a = 0.5 + 0.3 * Math.sin(time * 3 + h);
+  const g = ctx.createLinearGradient(0, -130, 0, -8); g.addColorStop(0, rgba(col, 0)); g.addColorStop(0.5, rgba(col, 0.35 * a)); g.addColorStop(1, rgba(col, 0.05));
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(-26, -130); ctx.lineTo(26, -130); ctx.lineTo(10, -8); ctx.lineTo(-10, -8); ctx.closePath(); ctx.fill();
+  const k = (time * 0.8 + h * 0.13) % 1;
+  ctx.fillStyle = rgba(col, 0.75); ctx.fillRect(-18, -128 + k * 90, 36, 14);
+  ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.fillRect(-12, -124 + k * 90, 24, 2); ctx.fillRect(-12, -119 + k * 90, 16, 2);
+  ctx.restore();
+}
+// サイバー・ワイルド: 光るシダ
+function decoNeonFern(ctx, h, time) {
+  const col = ['#5cff9a', '#19f0ff', '#b6ff3d'][h % 3];
+  const sw = Math.sin(time * 1.4 + h) * 3;
+  ctx.strokeStyle = '#1f5a34'; ctx.lineWidth = 3;
+  for (let i = -3; i <= 3; i++) {
+    const tx = i * 14 + sw, ty = -50 - (3 - Math.abs(i)) * 14;
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(i * 6, ty * 0.6, tx, ty); ctx.stroke();
+  }
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  ctx.fillStyle = rgba(col, 0.6 + 0.3 * Math.sin(time * 2 + h));
+  for (let i = -3; i <= 3; i++) { ctx.beginPath(); ctx.arc(i * 14 + sw, -50 - (3 - Math.abs(i)) * 14, 3.2, 0, PI * 2); ctx.fill(); }
+  ctx.restore();
+}
+// ネオン・アビス: サンゴ
+function decoCoral(ctx, h, time) {
+  const col = ['#ff6f9f', '#ff9a5c', '#c86fff', '#5ee8ff'][h % 4];
+  ctx.strokeStyle = OUTLINE; ctx.lineWidth = 9;
+  const br = (s) => { ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -40); ctx.moveTo(0, -24); ctx.lineTo(-22, -58); ctx.moveTo(0, -32); ctx.lineTo(20, -70); ctx.moveTo(-22, -58); ctx.lineTo(-30, -74); ctx.stroke(); void s; };
+  br(); ctx.strokeStyle = col; ctx.lineWidth = 6; br();
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  ctx.fillStyle = rgba('#ffffff', 0.4 + 0.3 * Math.sin(time * 2 + h));
+  for (const [px, py] of [[0, -40], [20, -70], [-30, -74]]) { ctx.beginPath(); ctx.arc(px, py, 3, 0, PI * 2); ctx.fill(); }
+  ctx.restore();
+}
+// ゼニス・タワー: 雲の上の白い柱
+function decoCloudPillar(ctx, h, time) {
+  ctx.beginPath(); ctx.rect(-12, -150, 24, 150); oFill(ctx, '#f2eee6', 2);
+  ctx.fillStyle = '#d8d0c0'; ctx.fillRect(6, -150, 6, 150);
+  ctx.beginPath(); rr(ctx, -18, -160, 36, 12, 3); oFill(ctx, '#e8c860', 2);
+  ctx.beginPath(); rr(ctx, -18, -10, 36, 10, 3); oFill(ctx, '#e8c860', 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  const d = Math.sin(time * 0.8 + h) * 4;
+  ctx.beginPath(); ctx.ellipse(-16 + d, -2, 26, 9, 0, 0, PI * 2); ctx.ellipse(14 + d, 0, 22, 8, 0, 0, PI * 2); ctx.fill();
+  ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = rgba('#ffd23f', 0.5 + 0.3 * Math.sin(time * 2 + h)); ctx.beginPath(); ctx.arc(0, -168, 4, 0, PI * 2); ctx.fill(); ctx.restore();
 }

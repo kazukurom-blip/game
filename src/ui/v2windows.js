@@ -33,13 +33,76 @@ const LAYOUT = {
   casino_f1: [318, 72], casino: [440, 105], casino_f2: [470, 212], casino_f3: [565, 205], casino_f4: [560, 85],
   // tower（北東）
   tower_f1: [655, 118], rooftop: [748, 168], tower_f2: [752, 62], tower_f3: [848, 52],
+  // ---- v4: 第2ワールド「ネオン・アーク」（別の地図。同じ 1000×560 の仮想座標）
+  // arkcity（南西の未来都市の島）
+  w2_arkcity: [170, 430], w2_arkcity_f1: [80, 330], w2_arkcity_f2: [110, 210], w2_arkcity_f3: [230, 140], w2_arkcity_f4: [300, 470],
+  // cyberwild（中央の密林）
+  w2_cyberwild_f1: [420, 450], w2_cyberwild: [470, 330], w2_cyberwild_f2: [390, 220], w2_cyberwild_f3: [430, 110], w2_cyberwild_f4: [590, 380],
+  // abyss（南東の深海）
+  w2_abyss_f1: [690, 470], w2_abyss: [800, 500], w2_abyss_f2: [880, 420], w2_abyss_f3: [950, 520], w2_abyss_f4: [760, 340],
+  // zenith（北東の天空）
+  w2_zenith_f1: [700, 240], w2_zenith: [800, 190], w2_zenith_f2: [880, 120], w2_zenith_f3: [760, 70], w2_zenith_f4: [620, 50],
 };
+// v4: マップのワールド番号（1 = ヴァイス・ベイ / 2 = ネオン・アーク）
+const W2_PREFIX = 'w2_';
+function worldNo(id) {
+  const mi = OPT.travel?.MAP_INFO?.[id];
+  if (mi && mi.world) return mi.world;
+  const m = allMaps()[id];
+  if (m && m.worldId) return m.worldId;
+  return String(id).startsWith(W2_PREFIX) ? 2 : 1;
+}
+const WORLD_TABS = [
+  { no: 1, name: 'ヴァイス・ベイ', sub: 'NEORIDA STATE · VICE BAY', title: 'ワールドマップ  —  ネオリダ州 ヴァイス・ベイ' },
+  { no: 2, name: 'ネオン・アーク', sub: 'NEON ARK · 第2ワールド', title: 'ワールドマップ  —  第2ワールド ネオン・アーク' },
+];
+/** 第2ワールドの地図の下絵（画像 ui.world_map_w2 が無いのでコードで描く簡単な地図: 4 つの地域の島） */
+function drawW2MapBase(ctx, ax, ay, aw, ah, t) {
+  const sx = aw / 1000, sy = ah / 560;
+  const X = (v) => ax + v * sx, Y = (v) => ay + v * sy;
+  ctx.save();
+  const bg = ctx.createLinearGradient(0, ay, 0, ay + ah);
+  bg.addColorStop(0, '#120a3a'); bg.addColorStop(0.55, '#0a1440'); bg.addColorStop(1, '#03122e');
+  ctx.fillStyle = bg; ctx.fillRect(ax, ay, aw, ah);
+  // 次元のすき間（流れる光の線）
+  ctx.strokeStyle = 'rgba(255,61,210,0.08)'; ctx.lineWidth = 1;
+  for (let k = 0; k < 14; k++) { const yy = ay + ((k * 47 + t * 8) % ah); ctx.beginPath(); ctx.moveTo(ax, yy); ctx.bezierCurveTo(ax + aw * 0.3, yy - 20, ax + aw * 0.7, yy + 20, ax + aw, yy); ctx.stroke(); }
+  // 地域ごとの島（色つきの不定形）
+  const blob = (cx, cy, rx, ry, col, n = 9, seed = 1) => {
+    ctx.beginPath();
+    for (let i = 0; i <= n; i++) {
+      const a = i / n * Math.PI * 2, r = 1 + 0.18 * Math.sin(a * 3 + seed) + 0.1 * Math.cos(a * 5 + seed * 2);
+      const px = X(cx) + Math.cos(a) * rx * sx * r, py = Y(cy) + Math.sin(a) * ry * sy * r;
+      if (i) ctx.lineTo(px, py); else ctx.moveTo(px, py);
+    }
+    ctx.closePath(); ctx.fillStyle = col; ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,0.18)'; ctx.stroke();
+  };
+  blob(185, 320, 170, 190, 'rgba(25,240,255,0.10)', 10, 1);   // arkcity
+  blob(480, 300, 150, 230, 'rgba(92,255,154,0.10)', 10, 2);   // cyberwild
+  blob(830, 450, 180, 120, 'rgba(46,123,255,0.16)', 10, 3);   // abyss
+  blob(760, 130, 200, 120, 'rgba(255,246,208,0.10)', 10, 4);  // zenith
+  // 未来都市のビル（arkcity）
+  ctx.fillStyle = 'rgba(25,240,255,0.18)';
+  for (let i = 0; i < 9; i++) { const bx = X(90 + i * 22), bh = (30 + (i * 37) % 50) * sy; ctx.fillRect(bx, Y(520) - bh, 12 * sx, bh); }
+  // 密林の木（cyberwild）
+  ctx.fillStyle = 'rgba(92,255,154,0.16)';
+  for (let i = 0; i < 8; i++) { ctx.beginPath(); ctx.arc(X(380 + (i % 4) * 60), Y(160 + Math.floor(i / 4) * 260), 16 * sx, 0, Math.PI * 2); ctx.fill(); }
+  // 深海のドーム（abyss）
+  ctx.strokeStyle = 'rgba(94,232,255,0.3)'; ctx.lineWidth = 2;
+  for (const [cx, r] of [[790, 40], [900, 30]]) { ctx.beginPath(); ctx.ellipse(X(cx), Y(540), r * sx, r * sy * 1.4, 0, Math.PI, 0); ctx.stroke(); }
+  // 雲と塔（zenith）
+  ctx.fillStyle = 'rgba(255,255,255,0.12)';
+  for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.ellipse(X(600 + i * 60), Y(160 + (i % 2) * 20), 50 * sx, 14 * sy, 0, 0, Math.PI * 2); ctx.fill(); }
+  ctx.fillStyle = 'rgba(255,210,63,0.25)'; ctx.fillRect(X(838), Y(20), 8 * sx, 100 * sy);
+  ctx.restore();
+}
 
 // 地域名ウォーターマーク: 各地域のノード群の重心から近い順に探し、ノード（名前・Lv 表記込み）と
 // 他の地域名に重ならない最初の位置に置く（決定論的。レイアウトと表示領域が同じならキャッシュ）
 let labelCache = { key: '', pos: null };
-function placeRegionLabels(ctx, ids, P, area, cur) {
-  const key = ids.length + '|' + area.x + ',' + area.y + ',' + area.w + ',' + area.h + '|' + cur + '|' + layoutCache.key;
+function placeRegionLabels(ctx, ids, P, area, cur, wno = 1) {
+  const key = wno + '|' + ids.length + '|' + area.x + ',' + area.y + ',' + area.w + ',' + area.h + '|' + cur + '|' + layoutCache.key;
   if (labelCache.key === key) return labelCache.pos;
   // 障害物: ノード＋名前＋Lv 表記、現在地マーカー（YOU）、コンパス、左上の州名
   const obst = ids.map((id) => {
@@ -49,7 +112,7 @@ function placeRegionLabels(ctx, ids, P, area, cur) {
   });
   if (cur && ids.includes(cur)) { const p = P(cur); obst.push({ x: p.x - 24, y: p.y - 72, w: 70, h: 50 }); }
   obst.push({ x: area.x + area.w - 80, y: area.y + 10, w: 66, h: 70 });
-  obst.push({ x: area.x + 10, y: area.y + 6, w: 190, h: 26 });
+  obst.push({ x: area.x + 10, y: area.y + 6, w: 340, h: 56 }); // ワールドの切り替えタブ＋地域の英字
   const hit = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
   const out = {};
   const placed = [];
@@ -152,7 +215,16 @@ export function drawWorldMap(ui, ctx, win) {
   const pos = computeLayout(adj);
   const visited = visitedSet(g);
   const cur = st.mapId || g.map?.id;
-  const ids = Object.keys(adj);
+  // v4: 表示するワールド（第1 / 第2）。開いた時は今いるワールド（クエストの行き先があればその側）
+  if (win.world == null) {
+    const fm = (win.data?.focus?.dest || (win.data?.focus?.maps || [])[0]);
+    win.world = fm && adj[fm] ? worldNo(fm) : (cur && adj[cur] ? worldNo(cur) : (g.map?.worldId === 2 ? 2 : 1));
+  }
+  const WSEL = win.world === 2 ? 2 : 1;
+  const WT = WORLD_TABS[WSEL - 1];
+  win.title = WT.title;
+  const ids = Object.keys(adj).filter((id) => worldNo(id) === WSEL);
+  const idSet = new Set(ids);
   const state = {};
   for (const id of ids) {
     if (visited.has(id)) state[id] = 'seen';
@@ -177,8 +249,10 @@ export function drawWorldMap(ui, ctx, win) {
   ctx.fillStyle = sea; ctx.fill();
   ctx.clip();
   // 下絵（manifest の ui.world_map。2048×1152 の鳥瞰図を地図の枠いっぱいに伸ばし、少し暗くして地名・印を読みやすく）
-  const wmArt = guard('worldMapArt', () => uiArt('world_map'), null);
-  if (wmArt) {
+  const wmArt = guard('worldMapArt', () => uiArt(WSEL === 2 ? 'world_map_w2' : 'world_map'), null);
+  if (!wmArt && WSEL === 2) {
+    drawW2MapBase(ctx, ax, ay, aw, ah, t);
+  } else if (wmArt) {
     ctx.drawImage(wmArt.img, ax, ay, aw, ah);
     ctx.fillStyle = 'rgba(10,6,40,0.28)'; ctx.fillRect(ax, ay, aw, ah);
   } else {
@@ -199,7 +273,7 @@ export function drawWorldMap(ui, ctx, win) {
     ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2); ctx.fill();
   }
   // 地域名
-  const labelPos = placeRegionLabels(ctx, ids, P, { x: ax, y: ay, w: aw, h: ah }, cur);
+  const labelPos = placeRegionLabels(ctx, ids, P, { x: ax, y: ay, w: aw, h: ah }, cur, WSEL);
   for (const R of REGIONS) {
     if (R.noMap) continue;
     const members = ids.filter((i) => mapInfo(i).region === R.id);
@@ -214,7 +288,7 @@ export function drawWorldMap(ui, ctx, win) {
   const drawn = new Set();
   for (const a of ids) for (const b of adj[a]) {
     const k = a < b ? a + '|' + b : b + '|' + a;
-    if (drawn.has(k) || !pos[b]) continue;
+    if (drawn.has(k) || !pos[b] || !idSet.has(b)) continue; // 別のワールドへの線（次元ゲート）は引かない
     drawn.add(k);
     const sa = state[a], sb = state[b];
     if (sa === 'hidden' || sb === 'hidden') continue;
@@ -364,6 +438,7 @@ export function drawWorldMap(ui, ctx, win) {
           if (s !== 'seen') { ui.notify('まだ訪れていないエリアです', COL.dim); return; }
           if (id === cur) { ui.notify('ここが現在地です', COL.gold); return; }
           if (!mi.town) { ui.notify('タクシーは訪問済みの「町」にだけ行けます', COL.bad); return; }
+          if (cur && worldNo(cur) !== worldNo(id)) { ui.notify('別のワールドへはタクシーで行けない（次元ゲートを通ろう）', COL.bad); return; }
           if (g.player?.inVehicle) { /* 乗車中でもOK */ }
           win.confirm = { id, t: 0 };
         },
@@ -381,8 +456,31 @@ export function drawWorldMap(ui, ctx, win) {
   ctx.beginPath(); ctx.moveTo(cx0, cy0 + 20); ctx.lineTo(cx0 + 6, cy0); ctx.lineTo(cx0 - 6, cy0); ctx.closePath(); ctx.fill();
   ctx.restore();
   txt(ctx, 'N', cx0, cy0 - 32, { size: 12, align: 'center', color: '#fff', sw: 2.5 });
-  txt(ctx, 'NEORIDA STATE · VICE BAY', ax + 18, ay + 18, { size: 12, color: 'rgba(255,255,255,0.4)', stroke: false });
+  txt(ctx, WT.sub, ax + 18, ay + 52, { size: 12, color: 'rgba(255,255,255,0.4)', stroke: false });
+  // v4: 次元ゲートの印（第1 = 宇宙港 / 第2 = アーク・シティ）。押すと反対のワールドの地図へ
+  const gateId = WSEL === 1 ? 'spaceport' : 'w2_arkcity';
+  if (pos[gateId] && state[gateId] && state[gateId] !== 'hidden') {
+    const gp = P(gateId);
+    const right = gp.x + 160 < ax + aw; // 右端に近い時は印と文字を左側に出す
+    const gx = gp.x + (right ? 34 : -34), gy = gp.y - 30;
+    ctx.save();
+    ctx.lineWidth = 3; ctx.strokeStyle = `rgba(255,61,210,${0.6 + 0.3 * Math.sin(t * 3)})`; ctx.shadowColor = '#ff3dd2'; ctx.shadowBlur = 12;
+    ctx.beginPath(); ctx.ellipse(gx, gy, 9, 13, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+    txt(ctx, WSEL === 1 ? '⇄ ネオン・アーク' : '⇄ ヴァイス・ベイ', gx + (right ? 14 : -14), gy, { size: 11, color: '#ff9ad5', sw: 2.5, align: right ? 'left' : 'right' });
+  }
   ctx.restore(); // clip
+  // v4: ワールドの切り替えタブ（マップ領域の左上）
+  const w2Known = (st.flags && st.flags.world2Unlocked === true) || [...visited].some((id) => worldNo(id) === 2);
+  WORLD_TABS.forEach((T, i) => {
+    const r = { x: ax + 12 + i * 168, y: ay + 8, w: 160, h: 28 };
+    const sel = WSEL === T.no;
+    const locked = T.no === 2 && !w2Known;
+    ui.btn(ctx, win, 'wtab:' + T.no, r, locked ? '??? 🔒' : T.name, () => {
+      if (locked) { ui.notify('まだ知らない世界だ…（宇宙港の次元ゲートが開くと行ける）', COL.dim); return; }
+      win.world = T.no; win.confirm = null;
+    }, { color: sel ? (T.no === 2 ? '#ff3dd2' : COL.purple) : 'rgba(40,30,90,0.9)', size: 13 });
+  });
   ctx.save(); rrPath(ctx, ax, ay, aw, ah, 12); ctx.lineWidth = 1.5; ctx.strokeStyle = 'rgba(190,170,255,0.45)'; ctx.stroke(); ctx.restore();
 
   // 凡例・情報バー
@@ -565,8 +663,10 @@ export function drawBook(ui, ctx, win) {
   const { x, y, w, h } = win;
   const t = g.time || ui.frame / 60;
   const all = bookList(st);
-  const SHORT = { rooftop: 'タワー', spaceport: '宇宙港', slums: 'スラム', downtown: 'ダウン\nタウン' };
-  const tabsDef = [{ id: null, name: '全て' }, ...REGIONS.filter((r) => !r.noMap || all.some((e) => e.region === r.id)).map((r) => ({ id: r.id, name: SHORT[r.id] || r.name }))];
+  const SHORT = { rooftop: 'タワー', spaceport: '宇宙港', slums: 'スラム', downtown: 'ダウン\nタウン', arkcity: 'アーク', cyberwild: 'ワイルド', abyss: 'アビス', zenith: 'ゼニス' };
+  // v4: 第2ワールドの地域のタブは、ゲートが開くか第2ワールドの敵を 1 体でも登録してから出す
+  const w2Seen = st.flags?.world2Unlocked === true || all.some((e) => REGION_BY_ID[e.region]?.world === 2 && bookKills(st, e.id) > 0);
+  const tabsDef = [{ id: null, name: '全て' }, ...REGIONS.filter((r) => (!r.noMap || all.some((e) => e.region === r.id)) && (r.world !== 2 || w2Seen)).map((r) => ({ id: r.id, name: SHORT[r.id] || r.name }))];
   // タブ
   tabsDef.forEach((tb, i) => {
     const tw = Math.min(92, Math.floor((w - 32) / tabsDef.length));

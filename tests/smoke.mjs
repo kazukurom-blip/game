@@ -2,7 +2,7 @@
 // http-server でプロジェクトをサーブ → chromium headless でロード → 一通り操作 → tests/screenshots/ に保存
 // console error / pageerror / game.lastError / UI ガード警告 を収集し、0 件であることを検証する。
 // 実行: node tests/smoke.mjs   (PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers)
-//   --only=luna,jin,maps,bosses,v1save,story,chars,jobs,v3,oldsaves  で一部だけ実行（既定は全部）
+//   --only=luna,jin,maps,bosses,v1save,story,chars,jobs,v3,world2,oldsaves  で一部だけ実行（既定は全部）
 import { createRequire } from 'node:module';
 import { spawn } from 'node:child_process';
 import http from 'node:http';
@@ -702,7 +702,7 @@ async function main() {
   }
   if (want('jin') || want('maps')) {
     const order = await g(() => import('./src/world/maps.js').then((m) => m.MAP_ORDER));
-    await check('34 マップ（町7 + フィールド27）', await g(() => import('./src/world/maps.js').then((m) => Object.keys(m.MAPS).length === 34 && m.TOWN_IDS.every((id) => m.MAPS[id].town) && Object.values(m.MAPS).filter((x) => x.town).length === 7)));
+    await check('54 マップ（第1: 町7 + フィールド27 / 第2: 町4 + フィールド16）', await g(() => import('./src/world/maps.js').then((m) => Object.keys(m.MAPS).length === 54 && m.TOWN_IDS.every((id) => m.MAPS[id].town) && m.W2_TOWN_IDS.every((id) => m.MAPS[id].town) && Object.values(m.MAPS).filter((x) => x.town).length === 11)));
     const bad = [];
     for (const id of order) {
       await warp(id, 900);
@@ -719,7 +719,7 @@ async function main() {
       if (cs.cop || cs.police || cs.cars) bad.push(`${id}: 警察/乗り物 ${JSON.stringify(cs)}`);
       info(`map ${id.padEnd(10)} ${r.town ? 'TOWN ' : 'field'} ${r.region}/${r.variant} mon=${cs.mon} civ=${cs.civ} frame avg ${r.avg.toFixed(1)}ms max ${r.max.toFixed(1)}ms fps≈${r.fps.toFixed(0)}`);
     }
-    await check('34 マップ全ワープ（町=住民のみ / フィールド=モンスターのみ / 警察・乗り物なし）', bad.length === 0, bad.join(' | '));
+    await check('54 マップ全ワープ（町=住民のみ / フィールド=モンスターのみ / 警察・乗り物なし）', bad.length === 0, bad.join(' | '));
     const slow = perfRows.filter((r) => r.avg > 1000 / 45);
     await check('全マップで 1フレーム処理 < 22ms（>45fps 相当）', slow.length === 0, slow.map((r) => `${r.id}:${r.avg.toFixed(1)}ms`).join(', '));
     await check('ワールドマップ: 全マップ訪問で全て名前表示', await g(() => import('./src/systems/travel.js').then((t) => Object.keys(t.MAP_INFO).every((id) => ['visited', 'current'].includes(t.mapVisibility(window.game.state, id))))));
@@ -739,7 +739,9 @@ async function main() {
   }
   if (want('jin') || want('bosses')) {
     // ボス 7 体
-    const bosses = [['beach_f3', 'boss_king_slime'], ['down_f2', 'boss_rat_king'], ['slums_f3', 'boss_captain'], ['swamp_f3', 'boss_gator'], ['casino_f3', 'boss_mecha'], ['tower_f3', 'boss_don'], ['space_f4', 'boss_alien']];
+    const bosses = [['beach_f3', 'boss_king_slime'], ['down_f2', 'boss_rat_king'], ['slums_f3', 'boss_captain'], ['swamp_f3', 'boss_gator'], ['casino_f3', 'boss_mecha'], ['tower_f3', 'boss_don'], ['space_f4', 'boss_alien'],
+      // v4: 第2ワールド
+      ['w2_arkcity_f3', 'boss_ark_titan'], ['w2_cyberwild_f3', 'boss_wild_kernel'], ['w2_abyss_f3', 'boss_abyss_queen'], ['w2_zenith_f4', 'boss_zenith']];
     for (const [mapId, boss] of bosses) {
       await warp(mapId, 300);
       await quiet();
@@ -1246,6 +1248,115 @@ async function main() {
     const tension = await g(() => import('./src/audio/audio.js').then((m) => m.audio.stats().tension));
     const wanted4 = await g(() => window.game.wanted);
     await check('手配度は上がらず BGM も緊迫しない（警察なし）', !tension && wanted4 === 0 && !(await g(() => window.game.enemies.some((e) => e.fromWanted || e.def?.isCop))), `tension=${tension} wanted=${wanted4}`);
+    await g(() => { window.game.debug.god = false; });
+  }
+
+  // ===================================================== v4: 第2ワールド「ネオン・アーク」
+  // 次元ゲート（閉じている/開いている/帰り道）・20 マップ全部（敵・住民・フレーム時間・昼/夜）・ボス 4 体（ラスボスの第2形態）・ワールドマップの切り替え
+  //   W2_SHOTS=<dir> を付けると、この節のスクショをそのフォルダにも保存する
+  if (want('world2')) {
+    console.log('--- WORLD2');
+    const W2_DIR = process.env.W2_SHOTS || null;
+    if (W2_DIR) fs.mkdirSync(W2_DIR, { recursive: true });
+    const shot2 = async (name, clip) => { const f = await shot('w2_' + name, clip); if (W2_DIR) fs.copyFileSync(f, path.join(W2_DIR, name + '.png')); return f; };
+    await startHero('luna');
+    await g(() => { const d = window.game.debug; d.god = true; d.setLevel(130); window.game.state.money = 1e8; });
+    // 次元ゲート: フラグが無いと閉じている
+    await warp('spaceport', 700);
+    await g(() => window.game.debug.run('clock_noon'));
+    const gate = await g(() => { const p = window.game.map.portals.find((q) => q.to === 'w2_arkcity'); return p && { x: p.x, flag: p.requireFlag }; });
+    await check('宇宙港に次元ゲート（requireFlag=world2Unlocked）', gate && gate.flag === 'world2Unlocked', JSON.stringify(gate));
+    await teleport(gate.x); await page.waitForTimeout(300);
+    await g(() => { window.game.ui.toasts.length = 0; window.__gateLocked = 0; window.game.events.on('gateLocked', () => { window.__gateLocked++; }); });
+    await press('ArrowUp'); await page.waitForTimeout(400);
+    await shot2('gate_locked');
+    await check('次元ゲート: フラグ無しでは通れず「閉じている」と出る', (await g(() => window.game.map.id)) === 'spaceport' && (await toastHas(/閉じている/)) && (await g(() => window.__gateLocked > 0)));
+    await g(() => window.game.debug.run('world2'));
+    await page.waitForTimeout(500);
+    await shot2('gate_open');
+    await teleport(gate.x); await page.waitForTimeout(200);
+    await press('ArrowUp'); await page.waitForTimeout(900);
+    await check('次元ゲート: フラグありで アーク・シティ へ', (await g(() => window.game.map.id)) === 'w2_arkcity');
+    await shot2('arkcity_arrive');
+    const back = await g(() => window.game.map.portals.find((q) => q.to === 'spaceport')?.x);
+    await teleport(back); await page.waitForTimeout(200);
+    await press('ArrowUp'); await page.waitForTimeout(800);
+    await check('帰り道: アーク・シティ → 宇宙港', (await g(() => window.game.map.id)) === 'spaceport');
+    // 20 マップ全部（昼）＋ 町と各地域のフィールド 1 つは夜も
+    const ids = await g(() => import('./src/world/maps.js').then((m) => m.W2_MAP_IDS));
+    const bad2 = [], rows2 = [];
+    const NIGHT = new Set(['w2_arkcity', 'w2_cyberwild', 'w2_abyss', 'w2_zenith', 'w2_arkcity_f1', 'w2_cyberwild_f2', 'w2_abyss_f1', 'w2_zenith_f1']);
+    for (const id of ids) {
+      await warp(id, 900);
+      await g(() => window.game.debug.run('clock_noon'));
+      await g(() => window.game.perf.reset());
+      await page.waitForTimeout(1500);
+      const r = await g(() => ({ id: window.game.map.id, town: !!window.game.map.town, region: window.game.map.region, variant: window.game.map.variant, fps: window.game.debug.fps, avg: window.game.perf.sum / Math.max(1, window.game.perf.n), max: window.game.perf.max, n: window.game.perf.n }));
+      const cs = await census();
+      rows2.push({ ...r, ...cs });
+      perfRows.push({ ...r, ...cs });
+      if (r.id !== id) bad2.push(`${id}: warp失敗`);
+      if (r.town && (cs.mon > 0 || cs.civ < 3)) bad2.push(`${id}: 町 mon=${cs.mon} civ=${cs.civ}`);
+      if (!r.town && (cs.mon === 0 || cs.civ > 0)) bad2.push(`${id}: フィールド mon=${cs.mon} civ=${cs.civ}`);
+      await shot2(`${id}_day`);
+      info(`w2 ${id.padEnd(16)} ${r.town ? 'TOWN ' : 'field'} ${r.region}/${r.variant} mon=${cs.mon} civ=${cs.civ} frame avg ${r.avg.toFixed(1)}ms max ${r.max.toFixed(1)}ms`);
+      if (NIGHT.has(id)) {
+        await g(() => window.game.debug.run('clock_night'));
+        await g(() => window.game.perf.reset());
+        await page.waitForTimeout(1200);
+        const rn = await g(() => ({ avg: window.game.perf.sum / Math.max(1, window.game.perf.n) }));
+        perfRows.push({ ...r, id: id + '(夜)', avg: rn.avg });
+        await shot2(`${id}_night`);
+      }
+    }
+    await check('第2ワールド 20 マップ全ワープ（町=住民のみ / フィールド=モンスターのみ）', bad2.length === 0, bad2.join(' | '));
+    const slow2 = perfRows.filter((r) => String(r.id).startsWith('w2_') && r.avg > 1000 / 45);
+    await check('第2ワールドの全マップ（昼・夜）で 1フレーム処理 < 22ms', slow2.length === 0, slow2.map((r) => `${r.id}:${r.avg.toFixed(1)}ms`).join(', '));
+    // ボス 4 体（ラスボスは第2形態まで）
+    for (const [mapId, boss] of [['w2_arkcity_f3', 'boss_ark_titan'], ['w2_cyberwild_f3', 'boss_wild_kernel'], ['w2_abyss_f3', 'boss_abyss_queen'], ['w2_zenith_f4', 'boss_zenith']]) {
+      await warp(mapId, 400);
+      await g(() => window.game.debug.run('clock_night'));
+      await quiet();
+      const inTable = await g((b) => window.game.spawner.areas.some((a) => a.boss && a.types.includes(b)), boss);
+      await g((b) => window.game.debug.spawnEnemy(b), boss);
+      await page.waitForTimeout(1200);
+      await shot2(`boss_${boss}`);
+      const alive = await g((b) => window.game.enemies.some((e) => e.defId === b && !e.dead), boss);
+      await g((b) => { const gm = window.game; const e = gm.enemies.find((q) => q.defId === b && !q.dead); return import('./src/systems/combat.js').then((c) => c.damageEnemy(gm, e, e.hp + 10, false, 1)); }, boss);
+      await page.waitForTimeout(600);
+      const dead = await g((b) => (window.game.state.book?.[b] || 0) > 0, boss);
+      await check(`第2ワールドのボス ${boss}（${mapId}）が出現表にあり、出て、倒せる`, inTable && alive && dead);
+      if (boss === 'boss_zenith') {
+        await page.waitForTimeout(600);
+        const p2 = await g(() => window.game.enemies.some((e) => e.defId === 'boss_zenith_true' && !e.dead));
+        await shot2('boss_zenith_phase2');
+        await check('ラスボスを倒すと第2形態「真ゼニス・ソブリン」が出る', p2);
+        await g(() => { const gm = window.game; const e = gm.enemies.find((q) => q.defId === 'boss_zenith_true' && !q.dead); return import('./src/systems/combat.js').then((c) => c.damageEnemy(gm, e, e.hp + 10, false, 1)); });
+        await page.waitForTimeout(800);
+        await check('第2形態も倒せる（図鑑に登録）', await g(() => (window.game.state.book?.boss_zenith_true || 0) > 0));
+      }
+    }
+    // ワールドマップ: 第1 / 第2 の切り替え
+    await warp('w2_cyberwild', 500);
+    await g(() => window.game.debug.run('visitAll'));
+    await press('KeyM'); await page.waitForTimeout(500);
+    await shot2('worldmap_w2');
+    const t2 = await g(() => window.game.ui.wins.worldmap?.world);
+    await clickHit('worldmap:wtab:1'); await page.waitForTimeout(300);
+    await shot2('worldmap_w1');
+    const t1 = await g(() => window.game.ui.wins.worldmap?.world);
+    await clickHit('worldmap:wtab:2'); await page.waitForTimeout(300);
+    const t2b = await g(() => window.game.ui.wins.worldmap?.world);
+    await check('ワールドマップ: 第2ワールドで開き、タブで第1 ⇄ 第2 を切り替えられる', t2 === 2 && t1 === 1 && t2b === 2, `${t2} ${t1} ${t2b}`);
+    // 第2ワールドの町へタクシー
+    await clickHit('worldmap:node:w2_zenith'); await page.waitForTimeout(200);
+    await press('Enter'); await page.waitForTimeout(800);
+    await check('ワールドマップから第2ワールドの町へタクシー', (await g(() => window.game.map.id)) === 'w2_zenith');
+    if (await g(() => window.game.ui.isOpen('worldmap'))) await press('KeyM');
+    // 図鑑（第2ワールドのタブ）
+    await press('KeyB'); await page.waitForTimeout(400);
+    await shot2('book');
+    await press('KeyB');
     await g(() => { window.game.debug.god = false; });
   }
 

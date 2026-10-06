@@ -1,7 +1,7 @@
 // モンスター図鑑: state.book[enemyId] = 撃破数
 // 初撃破で登録（events 'bookNew'）。撃破数 10/50/100 でランク 1/2/3（events 'bookRank'）。
 // 登録数・ランク・地域コンプで永続ボーナス → progression.computeStats に反映。
-import { ENEMIES, ENEMY_REGIONS } from '../data/enemies.js';
+import { ENEMIES, ALL_ENEMY_REGIONS } from '../data/enemies.js';
 import { ITEMS } from '../data/items.js';
 
 export const BOOK_RANKS = [10, 50, 100];
@@ -9,6 +9,8 @@ export const BOOK_RANK_NAMES = ['', 'ブロンズ', 'シルバー', 'ゴール�
 export const REGION_NAMES = {
   beach: 'ビーチ', downtown: 'ダウンタウン', slums: 'ポート・スラム', swamp: 'スワンプ',
   casino: 'カジノ', rooftop: 'ヴァイス・タワー', spaceport: 'ルミナ宇宙港',
+  // v4: 第2ワールド「ネオン・アーク」
+  arkcity: 'アーク・シティ', cyberwild: 'サイバー・ワイルド', abyss: 'ネオン・アビス', zenith: 'ゼニス・タワー',
 };
 // 地域コンプ（その地域のモンスター＋ボスを全種登録）ボーナス
 export const REGION_COMPLETE_BONUS = {
@@ -19,6 +21,11 @@ export const REGION_COMPLETE_BONUS = {
   casino: { luk: 6, crit: 0.01 },
   rooftop: { atk: 10, def: 10 },
   spaceport: { atk: 12, maxHp: 200, crit: 0.02 },
+  // v4: 第2ワールド
+  arkcity: { atk: 15, def: 15, maxHp: 300 },
+  cyberwild: { maxHp: 500, maxMp: 300 },
+  abyss: { def: 30, maxHp: 400 },
+  zenith: { atk: 25, crit: 0.03, luk: 10 },
 };
 
 /** 図鑑に載る敵（住民と、廃止した警察ユニット isCop を除く） */
@@ -26,7 +33,7 @@ export function isBookTarget(def) { return !!def && !def.civilian && !def.isCop;
 export const BOOK_IDS = Object.values(ENEMIES).filter(isBookTarget)
   .sort((a, b) => regionOrder(a.region) - regionOrder(b.region) || (a.boss - b.boss) || a.level - b.level)
   .map((e) => e.id);
-function regionOrder(r) { const i = ENEMY_REGIONS.indexOf(r); return i < 0 ? 99 : i; }
+function regionOrder(r) { const i = ALL_ENEMY_REGIONS.indexOf(r); return i < 0 ? 99 : i; }
 
 export function bookRank(kills) {
   let r = 0;

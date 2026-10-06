@@ -2,6 +2,7 @@
 // glow には窓明かり・ネオンだけを描き、夜ほど強く加算合成される（background.js が再生）。
 import { shade, rgba, rng, hashStr, rr, lerp, mix } from './util.js';
 import { PI, LW, wrap, neonText, palmSil, cypress, mangroveSil, treeSil, rocketSil, lattice, NEON_COLS } from './bgkit.js';
+import { drawWorld2Scene } from './bgWorld2.js';
 
 export const bottomAt = (gS, H, f, base) => lerp(H * base, gS, f);
 const pick = (R, a) => a[(R() * a.length) | 0];
@@ -1190,6 +1191,7 @@ function bgAlienShip(ctx, S) {
 
 // ================================================================ ディスパッチ
 export function drawScene(ctx, S) {
+  if (drawWorld2Scene(ctx, S)) return; // v4: 第2ワールド（bgWorld2.js）
   switch (S.region) {
     case 'downtown': return bgDowntown(ctx, S);
     case 'slums': return bgSlums(ctx, S);

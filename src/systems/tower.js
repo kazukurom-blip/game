@@ -81,7 +81,9 @@ export function towerBest(state) {
 
 export function weeklyMutatorId(wi) { return MUT_IDS[((wi % MUT_IDS.length) + MUT_IDS.length) % MUT_IDS.length]; }
 
-const mobPool = () => Object.values(ENEMIES).filter((e) => !e.boss && !e.civilian && !e.isCop && !e.night && e.habitats?.length);
+// v4: 第2ワールドの敵（world:2）はスパイアには出さない（今までの階の顔ぶれを変えない）
+const mobPool = () => Object.values(ENEMIES).filter((e) => !e.boss && !e.civilian && !e.isCop && !e.night && e.habitats?.length && e.world !== 2);
+const SPIRE_BOSSES = BOSS_IDS.filter((id) => ENEMIES[id].world !== 2);
 
 /**
  * towerFloorDef(floor, gameOrWeek?) → {floor, name, label, level, displayLevel, enemies:[{id, level, count}], count,
@@ -125,7 +127,7 @@ export function towerFloorDef(floor = 1, gameOrWeek) {
   // ボス（10階ごと）・ミニボス（5階ごと）
   let boss = null, bossHpMult = null, miniBoss = null;
   if (floor % 10 === 0) {
-    boss = BOSS_IDS[(floor / 10 - 1) % BOSS_IDS.length];
+    boss = SPIRE_BOSSES[(floor / 10 - 1) % SPIRE_BOSSES.length];
     bossHpMult = Math.max(0.05, (hpTarget * 15) / ENEMIES[boss].hp) * mprod('hpMult');
   } else if (floor % 5 === 0 || mutators.some((m) => m.eliteCount)) {
     miniBoss = { id: chosen[0]?.id, hpMult: hpMult * 6, elite: true };

@@ -43,6 +43,9 @@ export class Enemy {
     this.defId = defId;
     this.def = ENEMIES[defId] || Object.values(ENEMIES)[0];
     const d = this.def;
+    // v4: 倒された場所（クエストの killAny が使う）。ボス部屋ではそのボスのいるフィールド（例 w2_arkcity_f3）として数える
+    const m0 = game.map;
+    this.mapId = m0?.instance === 'boss' && d.habitats?.length ? d.habitats[0] : (m0?.id || game.state?.mapId || null);
     this.id = d.id;
     this.name = d.name;
     this.level = d.level;

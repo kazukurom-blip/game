@@ -740,9 +740,10 @@ function drawMapTitle(ctx, game, s, dt) {
   if (s.mapId !== map.id) {
     s.mapId = map.id;
     const region = guard('regionOfMap', () => regionOfMap(map.id), null) || map.region;
-    const town = allMaps()[region];
-    // フィールドは地域の町の名前、町そのものは都市名（ネオリダ州 ヴァイス・ベイ）
-    const sub = town && town.id !== map.id ? town.name : (map.town || town ? 'ヴァイス・ベイ' : (mapInfo(map.id)?.regionName || ''));
+    const town = allMaps()[region] || allMaps()['w2_' + region]; // v4: 第2ワールドの町の ID は w2_<地域>
+    // フィールドは地域の町の名前、町そのものは都市名（ネオリダ州 ヴァイス・ベイ / 第2ワールド ネオン・アーク）
+    const city = map.worldId === 2 ? 'ネオン・アーク' : 'ヴァイス・ベイ';
+    const sub = town && town.id !== map.id ? town.name : (map.town || town ? city : (mapInfo(map.id)?.regionName || ''));
     s.mapTitle = { name: map.name || '', sub: sub || '', col: regionColor(region), t: 0 };
   }
   const mt = s.mapTitle;

@@ -189,6 +189,12 @@ export class Player {
     for (const p of g.map.portals || []) {
       if (p.hidden) continue; // タワーの「次の階」ポータルは全滅まで非表示
       if (Math.abs(this.x - p.x) < 44 && Math.abs(this.y - p.y) < 90) {
+        // v4: 次元ゲート（requireFlag つき）。フラグ（state.flags）が無いうちは通さない
+        if (p.requireFlag && g.state?.flags?.[p.requireFlag] !== true) {
+          const now = g.time || 0;
+          if (!(this._gateMsgT > now)) { this._gateMsgT = now + 1.5; g.notify?.(p.lockedMsg || 'ゲートはまだ閉じている', '#ff8a8a'); g.events?.emit('gateLocked', { to: p.to }); }
+          return true;
+        }
         spawnEffect(g, 'portal', this.x, this.y - 40);
         if (p.towerNext) {
           const next = (g.towerFloor || 1) + 1;
