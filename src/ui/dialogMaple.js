@@ -344,8 +344,15 @@ function reportQuest(ui, win, m) {
   const g = ui.game;
   if (m.choices?.length && !chosenOf(g, m.id)) { askMissionChoice(ui, win, m); return; }
   const res = guard('turnIn', () => g.missions?.turnIn?.(m.id), null);
-  if (res === false) { ui.notify('まだ報告できません', COL.bad); return; } // 成功通知は MissionManager 側
+  if (res === false) { if (!fullBag(ui, win, g)) ui.notify('まだ報告できません', COL.bad); return; } // 成功通知は MissionManager 側
   say(ui, win, linesOf(g, m, 'done') || ['よくやってくれた！'], () => rewardScreen(ui, win, m, m.reward || {}));
+}
+/** 報告のときに持ち物がいっぱいだった → NPC が「N 枠空けて」と言う（true = 言った） */
+function fullBag(ui, win, g) {
+  const f = g.missions?.lastFail;
+  if (!f || f.reason !== 'full') return false;
+  say(ui, win, [`おっと、#r持ち物がいっぱい#k みたいだな。報酬を渡すには、あと #r${f.short} 枠#k 空けてから来てくれ。`], () => menu(ui, win));
+  return true;
 }
 function rewardScreen(ui, win, m, rw) {
   say(ui, win, [''], null, {
@@ -367,7 +374,10 @@ function askMissionChoice(ui, win, m) {
       if (r === false || r?.ok === false) { ui.notify(r?.msg || '選べませんでした', COL.bad); menu(ui, win); return; }
       if (r == null && g.state) (g.state.storyChoices ||= {})[m.id] = c.id; // choose 未実装時の保険
       const stillActive = (g.state?.missions?.active || []).includes(m.id);
-      if (stillActive && guard('isComplete', () => g.missions?.isComplete?.(m.id), false)) guard('turnIn', () => g.missions?.turnIn?.(m.id), null);
+      if (stillActive && guard('isComplete', () => g.missions?.isComplete?.(m.id), false)) {
+        const tr = guard('turnIn', () => g.missions?.turnIn?.(m.id), null);
+        if (tr === false && fullBag(ui, win, g)) return; // 選んだ結果は残る。空けてから報告し直す
+      }
       say(ui, win, c.dialog?.length ? c.dialog : (m.dialog?.done?.length ? m.dialog.done : ['……そうか。それがお前の答えか。']), () => {
         const R = m.reward || {}, C = c.reward || {};
         rewardScreen(ui, win, m, { ...R, money: (R.money || 0) + (C.money || 0), items: [...(R.items || []), ...(C.items || [])] });

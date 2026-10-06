@@ -2,7 +2,7 @@
 import { MISSIONS, MISSION_NPCS, turnInNpcOf } from '../data/missions.js';
 import { ENEMIES } from '../data/enemies.js';
 import { ITEMS } from '../data/items.js';
-import { countItem, removeItem, addItem } from './inventory.js';
+import { countItem, removeItem, addItem, freeSlots, MAX_STACK } from './inventory.js';
 import { gainExp } from './progression.js';
 import { canTakeJobMission, advanceJob } from './jobs.js';
 import { addSp } from '../data/jobs.js';
@@ -250,6 +250,41 @@ export class MissionManager {
     return m.objectives.every((o, i) => vals[i] >= o.count || (o.type === 'talk' && o.target === turnInNpc));
   }
 
+  /**
+   * 報告で受け取るアイテムに要る空き枠 → { need, free }。
+   * 集めたアイテム（collect）を渡して空く枠も数える。装備は 1 個 1 枠、消耗品・素材は同じ物の束に入れば 0 枠。
+   * 分岐のあるクエストは、選んだ（未選択なら最初の）選択肢の報酬も入れる。
+   */
+  rewardRoom(id) {
+    const m = MISSIONS[id];
+    const st = this.game.state;
+    const inv = (st.inventory || []).filter(Boolean).map((e) => ({ id: e.id, qty: e.qty || 1 }));
+    for (const o of m?.objectives || []) {
+      if (o.type !== 'collect') continue;
+      let left = o.count;
+      for (const e of inv) { if (left <= 0) break; if (e.id === o.target) { const t = Math.min(left, e.qty); e.qty -= t; left -= t; } }
+    }
+    const items = [...(m?.reward?.items || [])];
+    if (m?.choices?.length) {
+      const cid = st.storyChoices?.[id] || m.choices[0].id;
+      const c = m.choices.find((x) => x.id === cid) || m.choices[0];
+      items.push(...(c.reward?.items || []));
+    }
+    const left = inv.filter((e) => e.qty > 0);
+    let need = 0;
+    for (const itemId of items) {
+      const it = ITEMS[itemId];
+      if (!it) continue;
+      if (it.type === 'equip') { need++; continue; }
+      const stack = left.find((e) => e.id === itemId && e.qty < MAX_STACK);
+      if (stack) { stack.qty++; continue; }
+      left.push({ id: itemId, qty: 1 });
+      need++;
+    }
+    const free = freeSlots({ inventory: left });
+    return { need, free };
+  }
+
   /** turnIn(id) → reward | false */
   turnIn(id) {
     if (!this.isComplete(id)) return false;
@@ -257,7 +292,14 @@ export class MissionManager {
     const g = this.game;
     const st = g.state;
     const ms = this.ms;
-    // 報酬アイテムの空き確認（足りなくても報告は可能、溢れた分は通知）
+    // 報酬アイテムの空き確認（MapleStory と同じく、足りなければ報告できない。NPC が「N 枠空けて」と言う）
+    const room = this.rewardRoom(id);
+    this.lastFail = null;
+    if (room.need > room.free) {
+      this.lastFail = { reason: 'full', need: room.need, free: room.free, short: room.need - room.free };
+      g.notify?.(`持ち物の空きが足りません（あと ${room.need - room.free} 枠）`, '#ff5555');
+      return false;
+    }
     for (const o of m.objectives) if (o.type === 'collect') removeItem(st, o.target, o.count);
     ms.active.splice(ms.active.indexOf(id), 1);
     delete ms.objProgress[id];

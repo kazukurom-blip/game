@@ -183,6 +183,25 @@ export default function register({ test, makeGame }) {
     for (const id of COSMETIC_IDS) assert.deepEqual(owners[key(ITEMS[id])], [id], `${id} の専用の絵が他の装備にも出てしまう: ${owners[key(ITEMS[id])]}`);
   });
 
+  test('v4 quests: 持ち物がいっぱいだと報告できない（N 枠空けて）・集めた物を渡して空く枠は数える', () => {
+    const g = makeGame('luna', 'beach');
+    const id = Object.keys(MISSIONS).find((k) => { const m = MISSIONS[k]; return !m.choices?.length && (m.reward?.items || []).some((i) => ITEMS[i]?.type === 'equip') && m.objectives.every((o) => o.type === 'kill'); });
+    assert.ok(id, '装備を報酬に持つ kill のクエスト');
+    const m = MISSIONS[id];
+    g.missions.ms.active.push(id);
+    const pr = g.missions._prog(id);
+    m.objectives.forEach((o, i) => { pr[i] = o.count; });
+    assert.ok(g.missions.isComplete(id), 'complete ' + id);
+    const filler = Object.keys(ITEMS).find((k) => ITEMS[k].type === 'equip' && ITEMS[k].slot === 'hat');
+    while ((g.state.inventory || []).filter(Boolean).length < 48) addItemToState(g.state, filler, 1);
+    assert.equal(g.missions.turnIn(id), false);
+    assert.equal(g.missions.lastFail?.reason, 'full');
+    assert.ok(g.state.missions.active.includes(id), 'まだ進行中のまま');
+    g.state.inventory.splice(0, g.missions.lastFail.short);
+    assert.notEqual(g.missions.turnIn(id), false);
+    assert.ok(g.state.missions.completed.includes(id));
+  });
+
   test('v4 quests: 派生（A 編・B 編）の分かれ方と、前の結果で変わるセリフ', () => {
     const g = makeGame('luna', 'beach');
     const st = g.state, mm = g.missions;
