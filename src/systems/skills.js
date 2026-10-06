@@ -6,7 +6,7 @@ import { Projectile } from '../entities/projectile.js';
 import { rectOverlap, entRect } from '../world/physics.js';
 import { spawnEffect, impact } from '../render/effects.js';
 import { computeStats, addBuff, getBuffs, tickBuffs } from './progression.js';
-import { playerAttackArea, calcDamage, newAttackId, setPlayerInvuln } from './combat.js';
+import { playerAttackArea, newAttackId, setPlayerInvuln } from './combat.js';
 import { updateCombo } from './combo.js';
 import { updateContent } from './content.js';
 import { spawnSummon, updateSummons } from './summons.js';
@@ -117,14 +117,14 @@ export function useSkill(game, skillId) {
         const ox = p.x + f * 26, oy = p.y - p.h * 0.55;
         if (i === 0 || single) spawnEffect(game, 'muzzle', ox, oy, { color: sk.color, facing: f });
         const k = n === 1 ? 0 : i / (n - 1) - 0.5;
-        const r = calcDamage(stats.atk, mult, 0, stats.crit, stats.critDmg);
-        // 多段の弾（hits >= 2）は当たった時に1ヒットずつ計算する（数字が1つずつ積み重なる）
-        const multi = (sk.hits || 1) >= 2 ? { damage: null, atk: stats.atk, mult, crit: stats.crit, critDmg: stats.critDmg, multiHit: sk.hits } : null;
+        // ダメージは当たった時に敵ごとに計算する（敵の防御が効く。v4 までは 1 ヒットの弾だけ防御を無視していた）
+        // 多段の弾（hits >= 2）は1ヒットずつ計算する（数字が1つずつ積み重なる）
         game.projectiles.push(new Projectile(game, {
           owner: 'player', x: ox - f * (single ? 0 : i * (n <= 3 ? 18 : 0)), y: oy + (n <= 3 && !single ? (i - (n - 1) / 2) * 10 : 0),
           vx: f * pr.speed, vy: k * (pr.spread || 0),
-          damage: r.dmg, crit: r.crit, life: pr.life, kind: pr.kind, pierce: pr.pierce ?? 0,
-          w: pr.w, h: pr.h, color: sk.color, skillId, ...(multi || {}),
+          damage: null, atk: stats.atk, mult, crit: stats.crit, critDmg: stats.critDmg, multiHit: Math.max(1, sk.hits || 1),
+          life: pr.life, kind: pr.kind, pierce: pr.pierce ?? 0,
+          w: pr.w, h: pr.h, color: sk.color, skillId,
         }));
       };
       // 連射のモーションは、反動のコマに合わせて1発ずつ。それ以外は撃つ瞬間にまとめて
@@ -254,6 +254,10 @@ export function onBasicAttack(game) {
   const p = game?.player;
   if (!b || !p) return false;
   const em = b.empower;
+  // 追撃は em.interval 秒に 1 回まで（攻撃速度の速い銃で、通常攻撃のたびに大技が出ないように）
+  const t = typeof game.time === 'number' ? game.time : performance.now() / 1000;
+  if (em.interval > 0 && b._empT != null && t - b._empT < em.interval && t >= b._empT) return false;
+  b._empT = t;
   const f = p.facing || 1;
   _pending.push({ t: 0.06, map: game.map?.id, fn: () => {
     const cy = p.y - (p.h || 70) * 0.55;

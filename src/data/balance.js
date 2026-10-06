@@ -21,17 +21,18 @@ export function killsPerLevel(level) {
 /** 地域ごとの経験値倍率（先の地域ほど効率が良い） */
 export const REGION_EXP_MULT = {
   beach: 0.85, downtown: 1.1, slums: 1.2, swamp: 1.25, casino: 1.35, rooftop: 1.45, spaceport: 1.5,
-  // v4: 第2ワールド「ネオン・アーク」
-  arkcity: 1.55, cyberwild: 1.6, abyss: 1.65, zenith: 1.7,
+  // v4: 第2ワールド「ネオン・アーク」（敵が固いぶん 1 体の経験値を多めに。docs/BALANCE_V4.md）
+  arkcity: 2.15, cyberwild: 2.25, abyss: 2.35, zenith: 2.45,
 };
 
 /**
- * v4: Lv100 以降（第2ワールド）の「1レベルに要る適正敵の撃破数」。360 体から 1 体/Lv ずつ増える。
- * 目安: Lv100→150 ≈ 1.9 万体・Lv150→200 ≈ 2.2 万体（Lv60→100 ≈ 1.1 万体の 1.8 倍・2.0 倍）
+ * v4: Lv100 以降（第2ワールド）の「1レベルに要る適正敵の撃破数」。248 体から 3.8 体/Lv ずつ増える（docs/BALANCE_V4.md）。
+ * 目安: Lv100〜109 で 250〜290 体・Lv150 で 440 体・Lv190 台で 590〜620 体。
+ *       合計は Lv100→150 ≈ 1.7 万体・Lv150→200 ≈ 2.7 万体（Lv60→100 ≈ 1.1 万体の 1.6 倍・2.5 倍）
  */
-export function killsPerLevelW2(level) { return 360 + Math.max(0, level - 100); }
-/** v4: 第2ワールドの経験値倍率の目安（地域の倍率 1.55〜1.7 を Lv でならした値） */
-export function w2ExpMult(level) { return 1.55 + 0.0015 * Math.max(0, level - 100); }
+export function killsPerLevelW2(level) { return 248 + 3.8 * Math.max(0, level - 100); }
+/** v4: 第2ワールドの経験値倍率の目安（地域の倍率 2.15〜2.45 を Lv でならした値。Lv100 で expToNext が Lv99 より小さくならない値） */
+export function w2ExpMult(level) { return 2.22 + 0.0025 * Math.max(0, level - 100); }
 
 /**
  * expToNext(level) — 単調増加。
