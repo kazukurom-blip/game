@@ -1,6 +1,6 @@
 // HUD: メイプル風の常駐 UI（hudMaple.js: EXP バー / 下中央ステータス / 右下クイックスロット・メニュー / 左下の取得ログ /
 //      左上ミニマップ / 地名 / コンボ）＋ 右上 バフ・召喚獣の残り時間 / 右クエストトラッカー
-//      レアドロップバナー / レベルアップ演出 / 低HPビネット / 警官接近フラッシュ
+//      レアドロップバナー / 低HPビネット / 警官接近フラッシュ
 import {
   COL, FONT, font, panel, txt, rrPath, starPath, rgba, clamp, ease, rarityFill, measure,
   getClock, clockStr, clockPhase, drawPhaseIcon, PHASE_INFO, rainbowGrad, RAINBOW,
@@ -50,7 +50,7 @@ export function drawHUD(ctx, game, _internal = false) {
     ['buffs', drawBuffBar], ['tracker', drawTracker], ['clock', drawClockBadge],
     ['radio', drawRadio], ['bookNew', drawBookToasts],
     ...maplePartsFront(),
-    ['levelUp', drawLevelUp], ['banner', drawBanner], ['petFx', drawPetFx],
+    ['banner', drawBanner], ['petFx', drawPetFx],
   ];
   const prof = game.debug?.profile ? (game.debug.hudProf ||= {}) : null; // デバッグ: 部位ごとの描画時間(ms, EMA)
   for (const [tag, fn] of parts) {
@@ -352,54 +352,7 @@ function drawBanner(ctx, game) {
   ctx.restore();
 }
 
-// ---------- レベルアップ演出 ----------
-function drawLevelUp(ctx, game) {
-  const fx = game.ui?.levelFx;
-  if (!fx || game.ui?.petFx) return; // PET 入手演出中は待たせる（重ねない）
-  const t = fx.t, life = fx.life || 3;
-  if (t > life) return;
-  const a = clamp(t / 0.15, 0, 1) * (1 - clamp((t - life + 0.6) / 0.6, 0, 1));
-  const pop = t < 0.35 ? 0.4 + ease(t / 0.35) * 0.8 : 1.2 - Math.min(0.2, (t - 0.35) * 0.6);
-  const cx = W / 2, cy = 300;
-  const time = game.time || 0;
-  ctx.save();
-  ctx.globalAlpha = a;
-  // 放射光
-  ctx.save();
-  ctx.translate(cx, cy); ctx.rotate(time * 0.4);
-  ctx.globalCompositeOperation = 'lighter';
-  for (let i = 0; i < 16; i++) {
-    ctx.rotate(Math.PI / 8);
-    const gg = ctx.createLinearGradient(0, 0, 360, 0);
-    gg.addColorStop(0, 'rgba(255,210,63,0.35)'); gg.addColorStop(1, 'rgba(255,95,162,0)');
-    ctx.fillStyle = gg;
-    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(360, -18); ctx.lineTo(360, 18); ctx.closePath(); ctx.fill();
-  }
-  ctx.restore();
-  ctx.translate(cx, cy); ctx.scale(pop, pop);
-  ctx.font = font(72, 900); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.lineJoin = 'round';
-  ctx.lineWidth = 12; ctx.strokeStyle = '#2A0B3D'; ctx.strokeText('LEVEL UP!', 0, 0);
-  ctx.lineWidth = 5; ctx.strokeStyle = '#fff'; ctx.strokeText('LEVEL UP!', 0, 0);
-  const g = ctx.createLinearGradient(0, -34, 0, 34);
-  g.addColorStop(0, '#fff7b0'); g.addColorStop(0.45, COL.gold); g.addColorStop(0.55, COL.orange); g.addColorStop(1, COL.pink);
-  ctx.fillStyle = g; ctx.shadowColor = COL.pink; ctx.shadowBlur = 24;
-  ctx.fillText('LEVEL UP!', 0, 0);
-  ctx.restore();
-  txt(ctx, `Lv.${fx.level}  到達！`, cx, cy + 60, { size: 28, align: 'center', color: '#fff', glow: COL.teal, alpha: a, sw: 5 });
-  txt(ctx, 'SP +3   AP +5   HP/MP 全回復', cx, cy + 94, { size: 16, align: 'center', color: COL.gold, alpha: a });
-  // SNS風ポップ（架空）
-  if (t > 0.5) {
-    const k = clamp((t - 0.5) / 0.3, 0, 1);
-    const likes = (1.2 + (fx.level % 7) * 0.7).toFixed(1);
-    ctx.save(); ctx.globalAlpha = a * k;
-    const px = cx + 230, py = cy - 70 - k * 10;
-    rrPath(ctx, px - 70, py - 18, 140, 36, 18);
-    ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.fill();
-    ctx.restore();
-    txt(ctx, `♥ ${likes}K  #ViceBay`, px, cy - 70 - k * 10 + 1, { size: 14, align: 'center', color: COL.pink, stroke: false, alpha: a * k });
-  }
-}
+// （レベルアップの演出は render 側がキャラの頭上に「LEVEL UP!!」と光の柱で出す。画面中央の大きな文字は二重になるので出さない）
 
 // ---------- 時計＋エリアバッジ（ミニマップ右） ----------
 function drawClockBadge(ctx, game) {
@@ -471,7 +424,7 @@ function drawRadio(ctx, game) {
   if (!r || r.t > r.life) return;
   const a = clamp(r.t / 0.25, 0, 1) * (1 - clamp((r.t - r.life + 0.6) / 0.6, 0, 1));
   if (a <= 0) return;
-  const cx = W / 2, cy = 50;
+  const cx = W / 2, cy = 76; // 上端 y 6〜46 はボスの HP バーが使う
   const name = r.name || 'RADIO OFF';
   const slide = (1 - ease(r.t / 0.35)) * 30;
   ctx.save();

@@ -754,6 +754,7 @@ function drawMapTitle(ctx, game, s, dt) {
   if (mt.t > LIFE) { s.mapTitle = null; return; }
   const a = ease(clamp(mt.t / 0.4, 0, 1)) * (1 - clamp((mt.t - LIFE + 0.7) / 0.7, 0, 1));
   if (a <= 0) return;
+  // 上端 y 6〜46・中央 ±310 はボスの HP バー（render 側の BOSS_BAR_RECT）が使うので、帯は y 74 より下に置く
   const cx = W / 2, cy = 128 - (1 - ease(clamp(mt.t / 0.5, 0, 1))) * 10;
   ctx.save();
   ctx.globalAlpha = a;
