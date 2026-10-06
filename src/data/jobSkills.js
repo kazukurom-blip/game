@@ -56,20 +56,24 @@ const SDUR = (b, per) => (lv) => b + per * (Math.max(1, lv) - 1);
 /** ハイパーバフ（4次・長CT） */
 const Hyper = (job, o) => Bf(job, { mp: 100, cd: 120, tag: 'ハイパー', ...o });
 /**
- * 5次: 画面全体攻撃（screen:true）。画面に映っている敵すべてに hits 回当たる（maxTargets 無制限）。長CT（60〜120秒）。
+ * 5次: 画面全体攻撃（screen:true）。画面に映っている敵すべてに hits 回当たる（maxTargets 無制限）。長CT（60〜120秒）。最大 Lv20。
+ *  威力の目安（docs/BALANCE_V4.md）: 1 回で、適正 Lv のふつうの敵を一掃でき（強い敵もほぼ）、1 体への威力はふだんの火力の 8〜12 秒分
  *  演出（暗転・カットイン・系統の大きな演出）は systems/skills.js の useSkill → render/fxUlt.js の ult5Dark / ult5Burst。
  *  ult.delay = ボタンを押してから当たるまでの秒（暗転とカットインの間に溜める）
  */
 const Ult = (job, o) => { const { m, cd, ...rest } = o; return base(job, {
-  kind: 'aoe', screen: true, maxLevel: 10, effect: 'explosion', knock: 280, launch: 420, maxTargets: 999, range: { w: 1280, h: 720 },
+  kind: 'aoe', screen: true, maxLevel: 20, effect: 'explosion', knock: 280, launch: 420, maxTargets: 999, range: { w: 1280, h: 720 },
   tag: '画面全体・奥義', ult: { delay: 1.0 }, ...rest, mult: M(m), mp: MP(240), cooldown: CD(cd) }); };
 /** 5次: 覚醒（長CTの強力なバフ） */
 const Awk = (job, o) => Bf(job, { mp: 150, cd: 180, tag: '覚醒', ...o });
 /**
  * 5次: 通常攻撃強化（バフ）。持続中、通常攻撃のたびに buff.empower の追撃が出る（systems/skills.js の onBasicAttack）
- *  empower = {mult, hits, w, h, kind:'beam'|'wave', color}（color は他のスキルと重ならない色にする: 演出の逆引きで別スキルと間違えないため）
+ *  empower = {mult, hits, w, h, kind:'beam'|'wave', color, interval}（color は他のスキルと重ならない色にする: 演出の逆引きで別スキルと間違えないため）
+ *  interval = 追撃が出る最短の間隔（秒）。攻撃速度の速い銃でも 1 秒に 1/interval 回まで
  */
-const Emp = (job, o) => Bf(job, { mp: 120, cd: 90, tag: '通常攻撃強化', ...o });
+const Emp = (job, o) => Bf(job, { mp: 120, cd: 90, maxLevel: 20, tag: '通常攻撃強化', ...o });
+/** 5次のマスタリー（最大 Lv20） */
+const Mas5 = (job, o) => P(job, { maxLevel: 20, ...o });
 
 export const JOB_SKILL_LIST = [
   // ================= ガンスリンガー系 =================
@@ -102,9 +106,9 @@ export const JOB_SKILL_LIST = [
     desc: 'リコイル・ジャンプ強化: 跳躍距離+30%、反動弾の威力アップ、着地まで移動速度アップ。',
     enhance: (lv) => ({ distancePct: R(0.03 * lv), powerPct: R(0.02 * lv), afterBuff: { duration: 3, speedPct: R(0.1 + 0.01 * lv) }, backShotMult: R(1 + 0.1 * lv) }) }),
   FA('luna_trigger_maestro', 'lj_gun_follow_shot', 'フォロー・ショット', '#ff2a6d', '撃ち漏らしは許さない。'),
-  A('luna_galaxy_outlaw', { id: 'lj_gun_supernova', name: 'スーパーノヴァ・バースト', kind: 'projectile', m: 9.9, mp: 110, cd: 3,
-    desc: '超新星の輝きを12発の星弾にして扇状に乱射する。', range: { w: 900, h: 400 }, effect: 'spark', color: '#ffd23f',
-    proj: { speed: 1400, life: 0.8, count: 12, spread: 700, pierce: 99, kind: 'star', w: 34, h: 34 } }),
+  A('luna_galaxy_outlaw', { id: 'lj_gun_supernova', name: 'スーパーノヴァ・バースト', kind: 'projectile', m: 1.9, mp: 110, cd: 3, hits: 2,
+    desc: '超新星の輝きを8発の星弾にして扇状に乱射する。星弾は全てを貫き、当たるたびに2回炸裂する。', range: { w: 900, h: 400 }, effect: 'spark', color: '#ffd23f',
+    proj: { speed: 1400, life: 0.8, count: 8, spread: 600, pierce: 99, kind: 'star', w: 34, h: 34 } }),
   P('luna_galaxy_outlaw', { id: 'lj_gun_outlaw_soul', name: 'アウトロー・ソウル', maxLevel: 20, color: '#ffd23f',
     desc: '銀河一の賞金首の魂。攻撃力・クリティカル率・クリティカルダメージが大きく上昇し、ファイナルアタックが強化される。',
     passive: (lv) => ({ atkAdd: 6 * lv, critAdd: R(0.008 * lv), critDmgAdd: R(0.04 * lv) }),
@@ -141,9 +145,9 @@ export const JOB_SKILL_LIST = [
     desc: 'ネオン・ブリンク強化: 距離アップ・無敵+0.3秒・CT短縮。移動先で七色の小爆発（威力120%）。',
     enhance: (lv) => ({ distancePct: R(0.02 * lv), invulnAdd: 0.3, cooldownCut: R(0.02 * lv), arrivalBlast: { mult: 1.2, w: 200, h: 140, color: '#c77dff' } }) }),
   FA('luna_prism_idol', 'lj_dance_echo_step', 'エコー・ステップ', '#c77dff', '残像がワンテンポ遅れて同じ技を踊る。'),
-  A('luna_cosmo_star', { id: 'lj_dance_galaxy_stage', name: 'ギャラクシー・ステージ', kind: 'aoe', m: 3.4, mp: 120, cd: 8,
+  A('luna_cosmo_star', { id: 'lj_dance_galaxy_stage', name: 'ギャラクシー・ステージ', kind: 'aoe', m: 4.2, mp: 120, cd: 8,
     desc: '足元に銀河のステージを展開。画面中の敵を8回打ち据えるフィナーレ。', hits: 8, range: { w: 900, h: 380 }, knock: 260, launch: 260, effect: 'explosion', color: '#7df9ff', maxTargets: 20 }),
-  A('luna_cosmo_star', { id: 'lj_dance_starlight_combo', name: 'スターライト・コンボ', kind: 'melee', m: 2.3, mp: 70, cd: 0.9, maxLevel: 20,
+  A('luna_cosmo_star', { id: 'lj_dance_starlight_combo', name: 'スターライト・コンボ', kind: 'melee', m: 3.1, mp: 70, cd: 0.9, maxLevel: 20,
     desc: '流星のような10連撃。前方の敵をまとめて切り刻む。ファイナルアタックが強化される。', hits: 10, range: { w: 280, h: 150 }, knock: 180, effect: 'slash', color: '#7df9ff', maxTargets: 10 }),
   Hyper('luna_cosmo_star', { id: 'lj_dance_world_tour', name: 'ワールド・ツアー', color: '#7df9ff',
     desc: '銀河ツアー開幕。攻撃力・移動速度・防御力が大幅に上昇。',
@@ -177,7 +181,7 @@ export const JOB_SKILL_LIST = [
     desc: 'ショルダー・ラッシュ強化: 突進距離アップ、突進中は無敵、使用後に防御力アップ。',
     enhance: (lv) => ({ distancePct: R(0.03 * lv), invulnAdd: 0.3, afterBuff: { duration: 4, defPct: R(0.1 + 0.02 * lv) }, pushMult: R(1 + 0.1 * lv) }) }),
   FA('jin_dragon_fist', 'jj_fight_combo_follow', 'コンボ・フォロー', '#ff3b3b', '拳が止まらない。'),
-  A('jin_vice_legend', { id: 'jj_fight_haoh_quake', name: '覇王・天地崩し', kind: 'aoe', m: 6.3, mp: 130, cd: 8,
+  A('jin_vice_legend', { id: 'jj_fight_haoh_quake', name: '覇王・天地崩し', kind: 'aoe', m: 7.2, mp: 130, cd: 8,
     desc: '大地を割る覇王の一撃。画面中の敵を5回打ち砕き、天高く吹き飛ばす。', hits: 5, range: { w: 960, h: 340 }, knock: 500, launch: 700, effect: 'explosion', color: '#ffd23f', maxTargets: 20 }),
   P('jin_vice_legend', { id: 'jj_fight_legend_aura', name: 'レジェンド・オーラ', maxLevel: 20, color: '#ffd23f',
     desc: '伝説の覇気。攻撃力・クリティカルダメージ・被ダメージ軽減が大きく上昇し、ファイナルアタックが強化される。',
@@ -213,10 +217,10 @@ export const JOB_SKILL_LIST = [
     desc: 'ホイール・ダッシュ強化: 走行距離+30%・CT短縮、走行後に移動速度アップ。',
     enhance: (lv) => ({ distancePct: R(0.03 * lv), powerPct: R(0.02 * lv), cooldownCut: R(0.03 * lv), afterBuff: { duration: 4, speedPct: R(0.12 + 0.01 * lv) } }) }),
   FA('jin_nitro_ace', 'jj_race_tailgate', 'テールゲート', '#a24dff', '逃げる敵にぴったり張りつく。'),
-  A('jin_warp_rider', { id: 'jj_race_warp_drive', name: 'ワープ・ドライブ', kind: 'dash', m: 4.8, mp: 80, cd: 2.6,
+  A('jin_warp_rider', { id: 'jj_race_warp_drive', name: 'ワープ・ドライブ', kind: 'dash', m: 8.5, mp: 80, cd: 2.6,
     desc: '時空を跳ぶ超長距離ダッシュ。通過した敵を4回跳ね飛ばす。', hits: 4, range: { w: 110, h: 130 }, knock: 600, effect: 'dash', color: '#19f0ff',
     dash: { dist: (lv) => 600 + lv * 15, time: 0.3, invuln: 0.6 } }),
-  A('jin_warp_rider', { id: 'jj_race_meteor_crash', name: 'メテオ・クラッシュ', kind: 'aoe', m: 5.5, mp: 130, cd: 8,
+  A('jin_warp_rider', { id: 'jj_race_meteor_crash', name: 'メテオ・クラッシュ', kind: 'aoe', m: 9.5, mp: 130, cd: 8,
     desc: '大気圏外から隕石のように蹴り込む一撃。画面中の敵を6回粉砕する。ファイナルアタックが強化される。', hits: 6, range: { w: 960, h: 360 }, knock: 520, launch: 600, effect: 'explosion', color: '#19f0ff', maxTargets: 20 }),
   Hyper('jin_warp_rider', { id: 'jj_race_hyperdrive', name: 'ハイパードライブ', color: '#19f0ff',
     desc: 'リミッター解除。攻撃力・移動速度・攻撃速度が大幅に上昇。',
@@ -316,96 +320,98 @@ export const JOB_SKILL_LIST = [
     buff: (lv) => ({ duration: 40 + lv * 2, atkPct: R(0.25 + 0.02 * lv), defPct: 0.3, attackSpeedPct: 0.2 }) }),
 
   // ================= 5次（Lv120）: 画面全体攻撃・多段の強攻撃・専用スキル・覚醒・マスタリー =================
+  // 最大 Lv: 画面全体攻撃 20・主力（多段の強攻撃）30・専用スキル 20〜30・覚醒 10・マスタリー 20（5次の SP を Lv155 ごろまで使い切れる）
+  // 威力は docs/BALANCE_V4.md の表（tools/sim_balance.mjs）で 6 系統の火力の差が ±20% 以内になるように合わせた
   // ---- ガンスリンガー系: ディメンション・デスペラード ----
-  Ult('luna_dimension_desperado', { id: 'lj_gun_dimension_barrage', name: 'ディメンション・バレットストーム', m: 7.5, hits: 14, cd: 90, color: '#ff4fd8',
+  Ult('luna_dimension_desperado', { id: 'lj_gun_dimension_barrage', name: 'ディメンション・バレットストーム', m: 20.5, hits: 14, cd: 90, color: '#ff4fd8',
     desc: '次元の裂け目から無数の銃口を呼び出し、画面に映るすべての敵を14回撃ち抜く。' }),
-  A('luna_dimension_desperado', { id: 'lj_gun_quasar_rail', name: 'クェーサー・レールガン', kind: 'projectile', m: 4.6, mp: 140, cd: 2.5, hits: 8,
+  A('luna_dimension_desperado', { id: 'lj_gun_quasar_rail', name: 'クェーサー・レールガン', kind: 'projectile', m: 3.4, mp: 140, cd: 2.5, hits: 8, maxLevel: 30,
     desc: 'クェーサーの光を圧縮した極太のレールガン。画面の端まで全てを貫き、撃ち抜いた敵に8回ダメージ。', range: { w: 1200, h: 60 }, effect: 'muzzle', color: '#ff6ad5',
     proj: { speed: 2400, life: 0.55, count: 1, spread: 0, pierce: 99, kind: 'beam', w: 120, h: 26 } }),
   Emp('luna_dimension_desperado', { id: 'lj_gun_desperado_mode', name: 'デスペラード・モード', color: '#ff8ae0',
-    desc: '一定時間、通常攻撃のたびに次元弾が前方の敵を貫いて3回撃ち抜く（威力220%〜）。攻撃速度も上昇。',
-    buff: (lv) => ({ duration: 30 + lv * 3, attackSpeedPct: 0.1, empower: { mult: R(2.2 * (1 + 0.05 * (lv - 1))), hits: 3, w: 900, h: 70, kind: 'beam', color: '#ff9ae6' } }) }),
+    desc: '一定時間、通常攻撃に合わせて次元弾が前方の敵を貫いて3回撃ち抜く（0.3秒に1回まで・威力170%〜）。攻撃速度も上昇。',
+    buff: (lv) => ({ duration: 30 + Math.round(lv * 1.5), attackSpeedPct: 0.1, empower: { mult: R(1.7 * (1 + 0.05 * (lv - 1))), hits: 3, w: 900, h: 70, kind: 'beam', color: '#ff9ae6', interval: 0.3 } }) }),
   Awk('luna_dimension_desperado', { id: 'lj_gun_bullet_awaken', name: 'バレット・アウェイクン', color: '#ffc2f0',
     desc: '覚醒。賞金首の本能を解き放ち、攻撃力・クリティカル率・攻撃速度が極大まで上昇する。',
     buff: (lv) => ({ duration: 45 + Math.round(lv * 1.5), atkPct: R(0.35 + 0.015 * lv), critAdd: 0.15, attackSpeedPct: 0.15 }) }),
-  P('luna_dimension_desperado', { id: 'lj_gun_desperado_mastery', name: 'デスペラード・マスタリー', color: '#ff4fc0',
+  Mas5('luna_dimension_desperado', { id: 'lj_gun_desperado_mastery', name: 'デスペラード・マスタリー', color: '#ff4fc0',
     desc: '次元をまたぐ早撃ち。攻撃力・クリティカル率・クリティカルダメージが上昇する。',
-    passive: (lv) => ({ atkAdd: 8 * lv, critAdd: R(0.005 * lv), critDmgAdd: R(0.05 * lv) }) }),
+    passive: (lv) => ({ atkAdd: 4 * lv, critAdd: R(0.0025 * lv), critDmgAdd: R(0.02 * lv) }) }),
 
   // ---- ネオンダンサー系: ハイパー・アイコン ----
-  Ult('luna_hyper_icon', { id: 'lj_dance_hyper_finale', name: 'ハイパー・グランドフィナーレ', m: 6.8, hits: 15, cd: 90, color: '#9ffcff',
+  Ult('luna_hyper_icon', { id: 'lj_dance_hyper_finale', name: 'ハイパー・グランドフィナーレ', m: 42, hits: 15, cd: 90, color: '#9ffcff',
     desc: '全次元に生配信する最後のステージ。画面を光の舞台に変え、映っている敵すべてを15回打ち据える。' }),
-  A('luna_hyper_icon', { id: 'lj_dance_prism_cyclone', name: 'プリズム・サイクロン', kind: 'melee', m: 3.0, mp: 120, cd: 1.6, hits: 12,
+  A('luna_hyper_icon', { id: 'lj_dance_prism_cyclone', name: 'プリズム・サイクロン', kind: 'melee', m: 4.7, mp: 120, cd: 1.6, hits: 12, maxLevel: 30,
     desc: '七色の竜巻のように回転しながら12連撃。周りの敵をまとめて切り刻む。', range: { w: 380, h: 190 }, knock: 160, effect: 'slash', color: '#7ff0ff', maxTargets: 12 }),
-  A('luna_hyper_icon', { id: 'lj_dance_stardust_runway', name: 'スターダスト・ランウェイ', kind: 'dash', m: 2.4, mp: 110, cd: 3.5, hits: 8,
+  A('luna_hyper_icon', { id: 'lj_dance_stardust_runway', name: 'スターダスト・ランウェイ', kind: 'dash', m: 3.8, mp: 110, cd: 3.5, hits: 8, maxLevel: 30,
     desc: '星屑のランウェイを一気に駆け抜ける超長距離ステップ。通過した敵を8回斬る。移動中は無敵。', range: { w: 120, h: 160 }, knock: 240, effect: 'dash', color: '#b8f6ff',
-    dash: { dist: (lv) => 680 + lv * 10, time: 0.32, invuln: 0.75 } }),
+    dash: { dist: (lv) => 680 + lv * 8, time: 0.32, invuln: 0.75 } }),
   Awk('luna_hyper_icon', { id: 'lj_dance_icon_awaken', name: 'アイコン・アウェイクン', color: '#d6fdff',
     desc: '覚醒。全次元の歓声を浴びて、攻撃力・移動速度・攻撃速度・防御力が大幅に上昇する。',
-    buff: (lv) => ({ duration: 45 + Math.round(lv * 1.5), atkPct: R(0.3 + 0.015 * lv), speedPct: 0.2, attackSpeedPct: 0.15, defPct: 0.3 }) }),
-  P('luna_hyper_icon', { id: 'lj_dance_icon_mastery', name: 'アイコン・マスタリー', color: '#6fe8ff',
-    desc: '誰より速く、誰より美しく。攻撃力・移動速度・被ダメージ軽減が上昇する。',
-    passive: (lv) => ({ atkAdd: 7 * lv, speedAdd: 2 * lv, dmgReduce: R(0.006 * lv), critDmgAdd: R(0.03 * lv) }) }),
+    buff: (lv) => ({ duration: 45 + Math.round(lv * 1.5), atkPct: R(0.35 + 0.015 * lv), speedPct: 0.2, attackSpeedPct: 0.15, defPct: 0.3 }) }),
+  Mas5('luna_hyper_icon', { id: 'lj_dance_icon_mastery', name: 'アイコン・マスタリー', color: '#6fe8ff',
+    desc: '誰より速く、誰より美しく。攻撃力・移動速度・被ダメージ軽減・クリティカルダメージが上昇する。',
+    passive: (lv) => ({ atkAdd: 4 * lv, speedAdd: lv, dmgReduce: R(0.003 * lv), critDmgAdd: R(0.02 * lv) }) }),
 
   // ---- ストリートファイター系: ネオン天帝 ----
-  Ult('jin_neon_emperor', { id: 'jj_fight_heaven_fall', name: '天帝・天界崩落', m: 9.0, hits: 12, cd: 100, color: '#ffb347',
+  Ult('jin_neon_emperor', { id: 'jj_fight_heaven_fall', name: '天帝・天界崩落', m: 36.5, hits: 12, cd: 100, color: '#ffb347',
     desc: '天帝の拳で空を殴り割り、天界ごと落とす。画面に映るすべての敵を12回打ち砕く。' }),
-  A('jin_neon_emperor', { id: 'jj_fight_thousand_fist', name: '千手覇王拳', kind: 'melee', m: 2.8, mp: 120, cd: 1.8, hits: 14,
+  A('jin_neon_emperor', { id: 'jj_fight_thousand_fist', name: '千手覇王拳', kind: 'melee', m: 3.3, mp: 120, cd: 1.8, hits: 14, maxLevel: 30,
     desc: '千の残像の拳で前方を14連打する。最後の一撃で敵を吹き飛ばす。', range: { w: 280, h: 160 }, knock: 300, effect: 'hit', color: '#ff9a3c', maxTargets: 10 }),
   Emp('jin_neon_emperor', { id: 'jj_fight_emperor_fist', name: '天帝拳', color: '#ffc46b',
-    desc: '一定時間、通常攻撃のたびに拳圧の衝撃波が前方へ走り、敵を4回打つ（威力180%〜）。攻撃速度も上昇。',
-    buff: (lv) => ({ duration: 30 + lv * 3, attackSpeedPct: 0.1, empower: { mult: R(1.8 * (1 + 0.05 * (lv - 1))), hits: 4, w: 460, h: 150, kind: 'wave', color: '#ffd08a' } }) }),
+    desc: '一定時間、通常攻撃に合わせて拳圧の衝撃波が前方へ走り、敵を4回打つ（0.3秒に1回まで・威力300%〜）。攻撃速度も上昇。',
+    buff: (lv) => ({ duration: 30 + Math.round(lv * 1.5), attackSpeedPct: 0.1, empower: { mult: R(3 * (1 + 0.05 * (lv - 1))), hits: 4, w: 460, h: 150, kind: 'wave', color: '#ffd08a', interval: 0.3 } }) }),
   Awk('jin_neon_emperor', { id: 'jj_fight_emperor_awaken', name: '天帝覚醒', color: '#ffe0a8',
     desc: '覚醒。天帝の気を全身にまとい、攻撃力と防御力が極大まで上昇する。',
-    buff: (lv) => ({ duration: 45 + Math.round(lv * 1.5), atkPct: R(0.38 + 0.015 * lv), defPct: 0.5, attackSpeedPct: 0.1 }) }),
-  P('jin_neon_emperor', { id: 'jj_fight_emperor_mastery', name: '天帝の器', color: '#ff9f1c',
+    buff: (lv) => ({ duration: 45 + Math.round(lv * 1.5), atkPct: R(0.35 + 0.015 * lv), defPct: 0.5, attackSpeedPct: 0.1 }) }),
+  Mas5('jin_neon_emperor', { id: 'jj_fight_emperor_mastery', name: '天帝の器', color: '#ff9f1c',
     desc: '次元を殴り抜いた肉体。攻撃力・最大HP・クリティカルダメージ・被ダメージ軽減が上昇する。',
-    passive: (lv) => ({ atkAdd: 8 * lv, maxHpPct: R(0.015 * lv), critDmgAdd: R(0.04 * lv), dmgReduce: R(0.006 * lv) }) }),
+    passive: (lv) => ({ atkAdd: 4 * lv, maxHpPct: R(0.0075 * lv), critDmgAdd: R(0.02 * lv), dmgReduce: R(0.003 * lv) }) }),
 
   // ---- ナイトレーサー系: ディメンション・レーサー ----
-  Ult('jin_dimension_racer', { id: 'jj_race_dimension_overdrive', name: 'ディメンション・オーバードライブ', m: 7.8, hits: 13, cd: 90, color: '#9d7bff',
+  Ult('jin_dimension_racer', { id: 'jj_race_dimension_overdrive', name: 'ディメンション・オーバードライブ', m: 46, hits: 13, cd: 90, color: '#9d7bff',
     desc: '次元のハイウェイを全開で一周し、時空の轍で画面に映るすべての敵を13回はね飛ばす。' }),
-  A('jin_dimension_racer', { id: 'jj_race_photon_burnout', name: 'フォトン・バーンアウト', kind: 'aoe', m: 3.4, mp: 120, cd: 2.5, hits: 10,
+  A('jin_dimension_racer', { id: 'jj_race_photon_burnout', name: 'フォトン・バーンアウト', kind: 'aoe', m: 4.4, mp: 120, cd: 2.5, hits: 10, maxLevel: 30,
     desc: '光子のタイヤスモークを撒き散らし、周り一帯の敵を10回焼く。', range: { w: 760, h: 320 }, knock: 300, launch: 300, effect: 'smoke', color: '#8a6bff', maxTargets: 16 }),
-  A('jin_dimension_racer', { id: 'jj_race_lightspeed_run', name: 'ライトスピード・ラン', kind: 'dash', m: 4.0, mp: 110, cd: 3, hits: 6,
+  A('jin_dimension_racer', { id: 'jj_race_lightspeed_run', name: 'ライトスピード・ラン', kind: 'dash', m: 5.3, mp: 110, cd: 3, hits: 6, maxLevel: 30,
     desc: '光速で前方へ突っ切る。通過した敵を6回はね飛ばす。移動中は無敵。', range: { w: 130, h: 150 }, knock: 620, effect: 'dash', color: '#b9a6ff',
-    dash: { dist: (lv) => 760 + lv * 12, time: 0.3, invuln: 0.7 } }),
+    dash: { dist: (lv) => 760 + lv * 8, time: 0.3, invuln: 0.7 } }),
   Awk('jin_dimension_racer', { id: 'jj_race_limit_break', name: 'リミット・ブレイク', color: '#d4c8ff',
     desc: '覚醒。エンジンの限界を壊す。攻撃力・移動速度・攻撃速度が極大まで上昇する。',
     buff: (lv) => ({ duration: 45 + Math.round(lv * 1.5), atkPct: R(0.35 + 0.015 * lv), speedPct: 0.3, attackSpeedPct: 0.2 }) }),
-  P('jin_dimension_racer', { id: 'jj_race_dimension_engine', name: 'ディメンション・エンジン', color: '#7d5cff',
-    desc: '次元を走るエンジン。攻撃力・移動速度・クリティカル率・被ダメージ軽減が上昇する。',
-    passive: (lv) => ({ atkAdd: 8 * lv, speedAdd: 2 * lv, critAdd: R(0.005 * lv), dmgReduce: R(0.006 * lv) }) }),
+  Mas5('jin_dimension_racer', { id: 'jj_race_dimension_engine', name: 'ディメンション・エンジン', color: '#7d5cff',
+    desc: '次元を走るエンジン。攻撃力・移動速度・クリティカル率・クリティカルダメージ・被ダメージ軽減が上昇する。',
+    passive: (lv) => ({ atkAdd: 4 * lv, speedAdd: lv, critAdd: R(0.0025 * lv), critDmgAdd: R(0.02 * lv), dmgReduce: R(0.003 * lv) }) }),
 
   // ---- ネットランナー系: デミウルゴス・コード ----
-  Ult('hk_demiurge', { id: 'hn_world_rewrite', name: 'ワールド・リライト', m: 7.0, hits: 15, cd: 100, color: '#3dffc8',
+  Ult('hk_demiurge', { id: 'hn_world_rewrite', name: 'ワールド・リライト', m: 22, hits: 15, cd: 100, color: '#3dffc8',
     desc: '世界の原初のコードを書き換える。画面に映るすべての敵の存在データを15回消去する。' }),
-  A('hk_demiurge', { id: 'hn_kernel_panic', name: 'カーネル・パニック', kind: 'projectile', m: 4.0, mp: 130, cd: 2.4, hits: 9,
+  A('hk_demiurge', { id: 'hn_kernel_panic', name: 'カーネル・パニック', kind: 'projectile', m: 2.6, mp: 130, cd: 2.4, hits: 9, maxLevel: 30,
     desc: '世界のカーネルを暴走させる巨大なコード弾。全てを貫通し、当たった敵に9回ダメージ。', range: { w: 1100, h: 90 }, effect: 'spark', color: '#5cffd6',
     proj: { speed: 1500, life: 0.75, count: 1, spread: 0, pierce: 99, kind: 'magic', w: 80, h: 80 } }),
-  Sm('hk_demiurge', { id: 'hn_demiurge_avatar', name: 'デミウルゴス・アバター', m: 1.8, mp: 160, cd: 60, hits: 6, color: '#8affdf', maxTargets: 12, maxLevel: 10,
-    desc: '原初のコードの化身を呼び出す。敵の方へ世界を貫く光線を放ち、並んだ敵を6回焼く（持続 60〜78秒）。',
+  Sm('hk_demiurge', { id: 'hn_demiurge_avatar', name: 'デミウルゴス・アバター', m: 1, mp: 160, cd: 60, hits: 6, color: '#8affdf', maxTargets: 12, maxLevel: 20,
+    desc: '原初のコードの化身を呼び出す。敵の方へ世界を貫く光線を放ち、並んだ敵を6回焼く（持続 60〜98秒）。',
     summon: { type: 'daemon', dur: SDUR(60, 2), interval: 1.4, attack: 'beam', reach: { w: 1000, h: 340 } } }),
   Awk('hk_demiurge', { id: 'hn_root_awaken', name: 'ルート・アウェイクン', color: '#b8ffe9',
     desc: '覚醒。世界のルート権限を得る。攻撃力・クリティカル率・攻撃速度が極大まで上昇する。',
     buff: (lv) => ({ duration: 45 + Math.round(lv * 1.5), atkPct: R(0.35 + 0.015 * lv), critAdd: 0.12, attackSpeedPct: 0.15 }) }),
-  P('hk_demiurge', { id: 'hn_demiurge_core', name: 'デミウルゴス・コア', color: '#2be8b0',
+  Mas5('hk_demiurge', { id: 'hn_demiurge_core', name: 'デミウルゴス・コア', color: '#2be8b0',
     desc: '世界を演算する中枢。攻撃力・クリティカル率・クリティカルダメージが上昇する。',
-    passive: (lv) => ({ atkAdd: 8 * lv, critAdd: R(0.005 * lv), critDmgAdd: R(0.05 * lv) }) }),
+    passive: (lv) => ({ atkAdd: 4 * lv, critAdd: R(0.0025 * lv), critDmgAdd: R(0.02 * lv) }) }),
 
   // ---- ドローンマスター系: スターフリート・アドミラル ----
-  Ult('hk_star_admiral', { id: 'hd_fleet_barrage', name: 'スターフリート・一斉砲撃', m: 7.2, hits: 14, cd: 90, color: '#ffcf3d',
+  Ult('hk_star_admiral', { id: 'hd_fleet_barrage', name: 'スターフリート・一斉砲撃', m: 26, hits: 14, cd: 90, color: '#ffcf3d',
     desc: '星間艦隊に一斉砲撃を命じる。空を埋め尽くす艦隊が、画面に映るすべての敵を14回撃ち抜く。' }),
-  A('hk_star_admiral', { id: 'hd_carrier_gatling', name: 'キャリア・ガトリング', kind: 'projectile', m: 2.2, mp: 120, cd: 1.8, hits: 4,
+  A('hk_star_admiral', { id: 'hd_carrier_gatling', name: 'キャリア・ガトリング', kind: 'projectile', m: 1.9, mp: 130, cd: 2.3, hits: 4, maxLevel: 30,
     desc: '空母ドローンのガトリング砲で4発の重粒子弾を撃つ。弾は3体まで貫通し、当たるたびに4回撃ち抜く。', range: { w: 900, h: 200 }, effect: 'muzzle', color: '#ffd966',
     proj: { speed: 1300, life: 0.75, count: 4, spread: 140, pierce: 3, kind: 'orb', w: 30, h: 30 } }),
-  Sm('hk_star_admiral', { id: 'hd_mothership', name: 'マザーシップ', m: 1.9, mp: 160, cd: 60, hits: 5, color: '#ffe38a', maxTargets: 12, maxLevel: 10,
-    desc: '星間艦隊の母艦を呼ぶ。敵の真上から重爆弾を落とし、広い範囲の敵を5回焼く（持続 60〜78秒）。',
+  Sm('hk_star_admiral', { id: 'hd_mothership', name: 'マザーシップ', m: 1.3, mp: 160, cd: 60, hits: 5, color: '#ffe38a', maxTargets: 12, maxLevel: 20,
+    desc: '星間艦隊の母艦を呼ぶ。敵の真上から重爆弾を落とし、広い範囲の敵を5回焼く（持続 60〜98秒）。',
     summon: { type: 'bomber', dur: SDUR(60, 2), interval: 1.6, attack: 'bomb', reach: { w: 1000, h: 420 }, area: { w: 420, h: 260 } } }),
   Awk('hk_star_admiral', { id: 'hd_admiral_order', name: '提督命令・総員突撃', color: '#fff0b8',
     desc: '覚醒。全艦隊に総攻撃を命じる。攻撃力・防御力・攻撃速度が極大まで上昇する。',
     buff: (lv) => ({ duration: 45 + Math.round(lv * 1.5), atkPct: R(0.35 + 0.015 * lv), defPct: 0.35, attackSpeedPct: 0.2 }) }),
-  P('hk_star_admiral', { id: 'hd_fleet_mastery', name: 'フリート・マスタリー', color: '#ffbf1f',
+  Mas5('hk_star_admiral', { id: 'hd_fleet_mastery', name: 'フリート・マスタリー', color: '#ffbf1f',
     desc: '艦隊の完全な統制。攻撃力・最大HP・クリティカルダメージが上昇する。',
-    passive: (lv) => ({ atkAdd: 8 * lv, maxHpPct: R(0.012 * lv), critDmgAdd: R(0.04 * lv) }) }),
+    passive: (lv) => ({ atkAdd: 4 * lv, maxHpPct: R(0.006 * lv), critDmgAdd: R(0.02 * lv) }) }),
 ];

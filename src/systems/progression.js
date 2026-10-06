@@ -229,6 +229,9 @@ export function migrateState(state) {
   return state;
 }
 
+/** v4: Lv100 を超えた 1 Lv ごとの攻撃力の伸び（割合） */
+export const LV_ATK_PCT_W2 = 0.005;
+
 // バフのデフォルト供給源（systems/skills.js の updateSkills が毎フレーム設定する）
 let _globalBuffs = [];
 export function setActiveBuffs(buffs) { _globalBuffs = buffs || []; }
@@ -303,7 +306,9 @@ export function computeStats(state, buffs) {
 
   const maxHp = Math.round((base.hp + base.hpPerLv * (L - 1) + str * 2 + eq.maxHp + bk.maxHp + jb.maxHp) * (1 + pas.maxHpPct + (pot.maxHpPct || 0) + lb.maxHpPct));
   const maxMp = Math.round((base.mp + base.mpPerLv * (L - 1) + int * 3 + eq.maxMp + bk.maxMp + jb.maxMp) * (1 + lb.maxMpPct));
-  const atk = Math.max(1, Math.round((5 + 1.5 * L + eq.atk + statAtk + pas.atkAdd + bk.atk + jb.atk) * (1 + bf.atkPct + (pot.atkPct || 0))));
+  // v4: Lv100 を超えると、Lv が 1 上がるごとに攻撃力 +0.5%（Lv200 で +50%。第2ワールドで Lv を上げた分だけ強くなる。docs/BALANCE_V4.md）
+  const lvAtkPct = L > 100 ? LV_ATK_PCT_W2 * (Math.min(L, 200) - 100) : 0;
+  const atk = Math.max(1, Math.round((5 + 1.5 * L + eq.atk + statAtk + pas.atkAdd + bk.atk + jb.atk) * (1 + bf.atkPct + (pot.atkPct || 0) + lvAtkPct)));
   const def = Math.round((base.def + eq.def + str * 0.2 + L * 0.5 + pas.defAdd + bk.def + jb.def) * (1 + bf.defPct + (pot.defPct || 0)));
   const speed = Math.min(450, Math.round((base.speed + eq.speed + (pot.speed || 0) + dex * 0.3 + pas.speedAdd + jb.speed) * (1 + bf.speedPct)));
   const jump = Math.min(1000, base.jump + Math.min(60, eq.speed * 0.5));

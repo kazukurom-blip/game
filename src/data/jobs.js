@@ -150,7 +150,7 @@ const list = [
     skills: ['lj_gun_dimension_barrage', 'lj_gun_quasar_rail', 'lj_gun_desperado_mode', 'lj_gun_bullet_awaken', 'lj_gun_desperado_mastery'], title: '次元のデスペラード', aura: '#ff4fd8', sp: 5, instructor: 'job_nyx' }),
   J({ id: 'luna_hyper_icon', name: 'ハイパー・アイコン', hero: 'luna', tier: 5, branch: 'neondancer', from: 'luna_cosmo_star',
     desc: 'ネオン・アークの全次元ネットで同時配信される究極のスター。ひとたび踊れば、画面の向こうまで光の舞台になる。',
-    statBonus: { dex: 42, luk: 20, atk: 54, speed: 30, maxMp: 300, crit: 0.05, dmgReduce: 0.05 },
+    statBonus: { dex: 42, luk: 20, atk: 64, speed: 30, maxMp: 300, crit: 0.05, dmgReduce: 0.05 },
     skills: ['lj_dance_hyper_finale', 'lj_dance_prism_cyclone', 'lj_dance_stardust_runway', 'lj_dance_icon_awaken', 'lj_dance_icon_mastery'], title: '全次元のアイコン', aura: '#9ffcff', sp: 5, instructor: 'job_nyx' }),
   J({ id: 'jin_neon_emperor', name: 'ネオン天帝', hero: 'jin', tier: 5, branch: 'streetfighter', from: 'jin_vice_legend',
     desc: '覇王の拳で次元の壁すら殴り抜けた者。方舟都市の空を割り、天そのものを落とす。',

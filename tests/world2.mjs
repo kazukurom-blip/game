@@ -185,13 +185,16 @@ export default function register({ test, makeGame, step }) {
     for (const id of W2_TOWN_IDS) assert.ok(MAP_INFO[id].town, id);
   });
 
-  test('w2 exp: Lv100〜200 の曲線（Lv100→150 / 150→200 は Lv60→100 の 1.5〜2.1 倍の撃破数）', () => {
+  test('w2 exp: Lv100〜200 の曲線（1 Lv に倒す数: Lv100 台前半 150〜300 体・Lv190 台 500〜900 体。docs/BALANCE_V4.md）', () => {
     assert.equal(MAX_LEVEL, 200);
     const mult = (L) => L < 76 ? 1.45 : L < 100 ? 1.5 : L < 128 ? REGION_EXP_MULT.arkcity : L < 153 ? REGION_EXP_MULT.cyberwild : L < 178 ? REGION_EXP_MULT.abyss : REGION_EXP_MULT.zenith;
-    const kills = (a, b) => { let k = 0; for (let L = a; L < b; L++) k += expToNext(L) / (baseEnemyExp(L) * mult(L)); return k; };
+    const per = (L) => expToNext(L) / (baseEnemyExp(L) * mult(L));
+    const kills = (a, b) => { let k = 0; for (let L = a; L < b; L++) k += per(L); return k; };
+    for (let L = 100; L < 110; L++) assert.ok(per(L) >= 150 && per(L) <= 300, `Lv${L} ${per(L).toFixed(0)} 体`);
+    for (let L = 190; L < 200; L++) assert.ok(per(L) >= 500 && per(L) <= 900, `Lv${L} ${per(L).toFixed(0)} 体`);
     const base = kills(60, 100), k1 = kills(100, 150), k2 = kills(150, 200);
-    assert.ok(k1 / base >= 1.5 && k1 / base <= 2.1, `100→150 ${(k1 / base).toFixed(2)} 倍`);
-    assert.ok(k2 / base >= 1.5 && k2 / base <= 2.1, `150→200 ${(k2 / base).toFixed(2)} 倍`);
+    assert.ok(k1 / base >= 1.3 && k1 / base <= 2.2, `100→150 ${(k1 / base).toFixed(2)} 倍`);
+    assert.ok(k2 / base >= 2.0 && k2 / base <= 3.0, `150→200 ${(k2 / base).toFixed(2)} 倍`);
     let prev = 0;
     for (let L = 1; L < 200; L++) { assert.ok(expToNext(L) > prev, 'Lv' + L); prev = expToNext(L); }
     assert.equal(expToNext(200), Infinity);
@@ -206,10 +209,11 @@ export default function register({ test, makeGame, step }) {
     const b = new Enemy(g, 'boss_ark_titan', 900, g.map.groundY);
     assert.equal(b.mapId, 'w2_arkcity_f3', 'ボス部屋のボスは w2_arkcity_f3 で倒した扱い');
     assert.ok(ENEMIES.boss_ark_titan.boss && ENEMIES.boss_ark_titan.habitats[0].startsWith('w2_arkcity'));
-    // HP・防御の目安（Lv120 ≒ 8,000/120, 150 ≒ 14,000/150, 180 ≒ 20,000/180, 200 ≒ 26,000/200、ボス Lv200 ≒ 100 万）
+    // HP・防御の目安（docs/BALANCE_V4.md で合わせ直した表: Lv120 ≒ 16 万/120, 150 ≒ 38 万/150, 180 ≒ 52 万/180, 200 ≒ 64 万/200、
+    //  ラスボス ≒ 2,200 万＋2,400 万）
     const rough = (v, t) => v > t * 0.7 && v < t * 1.4;
-    assert.ok(rough(ENEMIES.wild_seagull_neon.hp, 14000) && ENEMIES.wild_seagull_neon.def === 150, 'Lv150');
-    assert.ok(rough(ENEMIES.boss_zenith.hp + ENEMIES.boss_zenith_true.hp, 2.1e6) && rough(ENEMIES.boss_zenith.hp, 1e6), 'ラスボス');
+    assert.ok(rough(ENEMIES.wild_seagull_neon.hp, 380000) && ENEMIES.wild_seagull_neon.def === 150, 'Lv150');
+    assert.ok(rough(ENEMIES.boss_zenith.hp + ENEMIES.boss_zenith_true.hp, 4.6e7) && rough(ENEMIES.boss_zenith.hp, 2.2e7), 'ラスボス');
   });
 
   test('w2 debug: ワープの一覧と第2ワールドのワープ', () => {
