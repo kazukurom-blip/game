@@ -829,9 +829,11 @@ async function main() {
     await startHero('luna');
     await g(() => { window.game.debug.god = true; });
     const story = await g(() => import('./src/data/missions.js').then((m) => {
-      const main = Object.values(m.MISSIONS).filter((x) => x.category === 'main').map((x) => x.id);
+      const main = Object.values(m.MISSIONS).filter((x) => x.category === 'main' && !x.id.startsWith('m2_')).map((x) => x.id);
       const sp = Object.values(m.MISSIONS).filter((x) => /^sp\d/.test(x.id)).map((x) => x.id);
-      return [...main, ...sp];
+      // v4: 第2部 m2_*（ドンと裏ボスの後。最後に world2Unlocked が立つ）
+      const m2 = Object.values(m.MISSIONS).filter((x) => x.id.startsWith('m2_')).map((x) => x.id);
+      return [...main, ...sp, ...m2];
     }));
     info(`story: ${story.join(' → ')}`);
     const choiceOf = await g(() => import('./src/data/missions.js').then((m) => Object.fromEntries(Object.values(m.MISSIONS).filter((x) => x.choices?.length).map((x) => [x.id, x.choices.at(-1)]))));
@@ -860,6 +862,7 @@ async function main() {
     if (later) await check('分岐の flag（sideStreet）で後のセリフが変わる', later.ok, JSON.stringify(later));
     await shot('story_final');
     await check('メインストーリー完了フラグ', await g(() => window.game.state.missions.completed.includes('m15_don')));
+    await check('第2部 序章の完了で次元ゲートのフラグ（world2Unlocked）', await g(() => window.game.state.flags?.world2Unlocked === true));
   }
 
 

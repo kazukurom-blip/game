@@ -302,3 +302,65 @@ look/equip は `L(style, c1, c2)` 形式（maps.js の既存 NPC と同じ）の
 
 ### コンテンツ受付（ワールド担当の `concierge_<town>`, service:'content'）
 UI のコンテンツ窓（U）から: `towerEnter(game, floor)` / `arenaEnter(game, stageId)` / `bossEntry(game, bossId, mode)`。一覧データは `towerBest(state)` / `arenaInfo(state)` / `bossClears(state)`。
+
+## v4: 連作クエストの NPC（クエスト担当。`src/data/questNpcs.js` → maps.js の町の npcs の末尾）
+
+見た目は今の NPC と同じ組み合わせ（`look` = 体・肌・髪・目、`equip` = `L(style, 色, 差し色)`）。顔・髪の絵は `render/npcFace.js` が id から選ぶ（`old_*` / 「じいさん」「ばあちゃん」は老人の顔）。
+置く位置は、同じ町の NPC と 140px 以上・ポータルと 90px 以上離した（`tests/quests_v4.mjs` で確認）。ダウンタウンは満員なので、ウメばあちゃんは港・トニーは浜に住んでいる。
+
+| npcId | 名前 | 町 | x | 役割 | 見た目 | あいさつ（dialog[0]） | 依頼するクエスト |
+|---|---|---|---|---|---|---|---|
+| `mel` | メル | `beach` | 860 | 砂の城職人の少女。毎晩城を壊されて困っている。 | 女・twin・髪#ffb36b／hat:cap top:tank bottom:shorts shoes:sandals | 「砂の城はね、波が来る前に完成させるのがコツなの！」 | `q_sandcastle_1`, `q_sandcastle_2`, `q_sandcastle_3`, `q_sandcastle_4a`, `q_sandcastle_4b` |
+| `old_gus` | ガスじいさん | `beach` | 1400 | ピア桟橋の灯台守。亡き妻の灯りを守り続けている。 | 男・short・髪#e8e8e8／hat:beanie top:leatherJacket bottom:cargo shoes:boots | 「ピア桟橋の先に灯台があるじゃろう。わしはあれを五十年守っとる。」 | `q_lighthouse_1`, `q_lighthouse_2`, `q_lighthouse_3`, `q_lighthouse_4`, `q_lighthouse_5` |
+| `popo` | ポップコーン屋ポポ | `beach` | 2020 | [ネタ] カモメに売り物を全部取られる発明好きの屋台主。 | 男・spiky・髪#ff3d7f／hat:cap top:tshirt bottom:shorts shoes:sneakers | 「へいらっしゃい！ 今日のポップコーンは…カモメが全部持っていきました！」 | `q_popcorn_1`, `q_popcorn_2`, `q_popcorn_3`, `q_popcorn_4` |
+| `kiki` | キキ | `beach` | 2600 | 迷子のペット「ポチ」を探す観光客。 | 女・bob・髪#7a3dff／hat:catEars top:hoodie bottom:jeans shoes:sneakers | 「ポチ〜！ どこ〜！？」 | `q_lostdog_1`, `q_lostdog_2`, `q_lostdog_3` |
+| `lyra` | 語り部リラ | `beach` | 1620 | [地域をまたぐ連作] 街の伝説「ネオン・フェニックス」を追う吟遊詩人。 | 女・long・髪#ff8a00／hat:cowboy top:hawaiian bottom:cargo shoes:boots accessory:scarf weapon:guitar | 「「街が闇に沈むとき、ネオンの不死鳥が夜を焼き払う」…この街の古い歌よ。」 | `q_legend_1`, `q_legend_2`, `q_legend_3`, `q_legend_4`, `q_legend_5`, `q_legend_6`, `q_legend_7` |
+| `pierre` | ピエール | `downtown` | 200 | [ネタ] 一言もしゃべらないパントマイマー。 | 男・short・髪#16161e／hat:beanie top:tshirt bottom:suitPants shoes:loafers accessory:scarf | 「……（見えない壁を、両手でぺたぺた触っている）」 | `q_mime_1`, `q_mime_2`, `q_mime_3`, `q_mime_4` |
+| `mika` | 記者ミカ | `downtown` | 1525 | ヴァイス・ベイ新報の記者。「地下鉄の怪物」を追う。 | 女・ponytail・髪#3a2a1a／hat:cap top:leatherJacket bottom:jeans shoes:sneakers accessory:sunglasses | 「ヴァイス・ベイ新報のミカよ。ネタがあったら教えて！」 | `q_scoop_1`, `q_scoop_2`, `q_scoop_3`, `q_scoop_4a`, `q_scoop_5a`, `q_scoop_4b`, `q_scoop_5b` |
+| `granny_ume` | ウメばあちゃん | `slums` | 1520 | 港の長屋に住むおばあちゃん。亡き夫のレシピ帳を探す。実はママ・ローザの母。 | 女・bob・髪#dddddd／hat:bandana top:hoodie bottom:cargo shoes:loafers accessory:scarf | 「おや、いい顔してるねえ。ちゃんとご飯食べてるかい？」 | `q_ume_1`, `q_ume_2`, `q_ume_3`, `q_ume_4` |
+| `tony` | スケーターのトニー | `beach` | 1850 | ボードウォークのスケーター。ダウンタウンのセントラル公園のスケボー場を守りたい。 | 男・wolf・髪#ffb000／hat:cap top:hoodie bottom:cargo shoes:sneakers | 「ヨー！ 板に乗ってると、街が全部パークに見えるんだ。」 | `q_skate_1`, `q_skate_2`, `q_skate_3`, `q_skate_4` |
+| `old_mori` | モリ船長 | `slums` | 570 | 陸に上がった元船長。幽霊船の噂を追う。 | 男・long・髪#cccccc／hat:cap top:leatherJacket bottom:cargo shoes:boots | 「霧の夜は、昔の船の汽笛が聞こえる気がするんじゃ。」 | `q_ghostship_1`, `q_ghostship_2`, `q_ghostship_3`, `q_ghostship_4a`, `q_ghostship_5a`, `q_ghostship_4b`, `q_ghostship_5b` |
+| `rina` | リナ | `slums` | 930 | タンクの弟子。自分だけの相棒ロボを作りたい。 | 女・ponytail・髪#ff8a00／hat:headphones top:tank bottom:cargo shoes:boots accessory:goldChain | 「タンクさんの弟子のリナです！ 油まみれですみません！」 | `q_junkrobot_1`, `q_junkrobot_2`, `q_junkrobot_3`, `q_junkrobot_4`, `q_junkrobot_5` |
+| `dan_sweeper` | 清掃員ダン | `slums` | 1800 | 港の清掃員（三十年）。黒い排水の出どころを探る。 | 男・short・髪#555555／hat:helmet top:armorVest bottom:cargo shoes:boots | 「港がきれいなら、人の心もちっとはきれいになるもんさ。」 | `q_toxic_1`, `q_toxic_2`, `q_toxic_3`, `q_toxic_4` |
+| `bubbles` | シャボンおじさん | `slums` | 2130 | [ネタ] 港を包む巨大シャボン玉を作りたいおじさん。 | 男・spiky・髪#bff6ff／hat:beanie top:hawaiian bottom:shorts shoes:sandals | 「ぷく〜。シャボン玉は、割れる瞬間が一番きれいなんだよ。」 | `q_bubbles_1`, `q_bubbles_2`, `q_bubbles_3`, `q_bubbles_4` |
+| `barney` | レコード屋バーニー | `slums` | 2780 | [地域をまたぐ連作] 幻のレコード「ヴァイス・ナイト」を追う中古盤屋。 | 男・wolf・髪#16161e／hat:headphones top:suit bottom:jeans shoes:loafers accessory:sunglasses | 「いらっしゃい。針を落とす前に、盤の匂いを嗅ぐのが通ってもんだ。」 | `q_record_1`, `q_record_2`, `q_record_3`, `q_record_4`, `q_record_5a`, `q_record_5b`, `q_record_6` |
+| `sue` | レンジャーのスー | `swamp` | 1130 | グレイズ自然保護区のレンジャー。密猟者を追う。 | 女・ponytail・髪#3a2a1a／hat:cowboy top:armorVest bottom:cargo shoes:boots | 「沼は怖いところじゃない。怖いのは、沼を荒らす人間よ。」 | `q_ranger_1`, `q_ranger_2`, `q_ranger_3`, `q_ranger_4`, `q_ranger_5` |
+| `geko` | ゲコ様 | `swamp` | 1880 | [ネタ] 自称・呪いで人間のおじさんにされたカエルの王子。 | 男・short・髪#3f8f3a／hat:crown top:suit bottom:shorts shoes:sandals accessory:scarf | 「ゲコッ。わしはカエル王国の王子じゃ。今は呪いで人間のおじさんの姿をしておる。」 | `q_geko_1`, `q_geko_2`, `q_geko_3`, `q_geko_4`, `q_geko_5` |
+| `tad` | 少年タッド | `swamp` | 2330 | 伝説の白いワニを見たい村の少年。 | 男・spiky・髪#c98b4a／hat:cap top:tshirt bottom:shorts shoes:sneakers | 「ぼく、白いワニを探してるんだ！ 伝説なんだよ！」 | `q_tad_1`, `q_tad_2`, `q_tad_3` |
+| `lou` | ラッキー・ルー | `casino` | 570 | 一度も勝ったことがないギャンブラー。父の亡霊を追う。 | 男・bob・髪#5a3a22／hat:cowboy top:suit bottom:suitPants shoes:loafers accessory:goldChain | 「へへ…ラッキー・ルーってのは皮肉さ。」 | `q_lou_1`, `q_lou_2`, `q_lou_3`, `q_lou_4a`, `q_lou_5a`, `q_lou_4b`, `q_lou_5b` |
+| `coco` | ショーガールのココ | `casino` | 1300 | ネオン・パレスの踊り子。盗まれた衣装を探す。 | 女・long・髪#ff3dd2／hat:crown top:idolDress bottom:skirt shoes:heels accessory:goldChain | 「ショーは毎晩九時から！ 見に来てね！」 | `q_coco_1`, `q_coco_2`, `q_coco_3`, `q_coco_4`, `q_coco_5` |
+| `ken_valet` | 駐車係ケン | `casino` | 1480 | ロボに仕事を奪われた元バレー。 | 男・short・髪#16161e／hat:cap top:suit bottom:suitPants shoes:loafers | 「お客様のお車、責任を持って…いや、今はロボの仕事だったな。」 | `q_valet_1`, `q_valet_2`, `q_valet_3`, `q_valet_4` |
+| `king_bob` | 「キング」ボブ | `casino` | 2230 | [ネタ] ものまね芸人。正体はコンビニの店長。 | 男・wolf・髪#16161e／top:suit bottom:suitPants shoes:loafers accessory:sunglasses | 「サンキュー、ベリーマッチ。」 | `q_bob_1`, `q_bob_2`, `q_bob_3`, `q_bob_4` |
+| `hound` | 探偵ハウンド | `casino` | 2950 | [地域をまたぐ連作] ネオン怪盗団を追う私立探偵。 | 男・short・髪#5a3a22／hat:cowboy top:suit bottom:suitPants shoes:loafers accessory:scarf | 「…私の鼻は嘘をつかない。この街には、まだ匂う事件がある。」 | `q_phantom_1`, `q_phantom_2`, `q_phantom_3`, `q_phantom_4`, `q_phantom_5`, `q_phantom_6`, `q_phantom_7a`, `q_phantom_7b` |
+| `jo_window` | 窓拭きのジョー | `rooftop` | 590 | 地上300mの窓拭き職人。勝手に動く足場に悩む。 | 男・short・髪#ffb000／hat:helmet top:armorVest bottom:cargo shoes:boots | 「高いところは平気さ。下を見なけりゃな。」 | `q_window_1`, `q_window_2`, `q_window_3`, `q_window_4` |
+| `ivy` | 庭師アイビー | `rooftop` | 1050 | 空中庭園の庭師。枯れていく木を救いたい。 | 女・long・髪#5cff9a／hat:cowboy top:hoodie bottom:cargo shoes:boots accessory:scarf | 「空の上でも、木はちゃんと育つんですよ。」 | `q_ivy_1`, `q_ivy_2`, `q_ivy_3`, `q_ivy_4`, `q_ivy_5` |
+| `rook` | 元傭兵ルーク | `rooftop` | 1550 | ビルの管理人。ドン親衛隊に残る弟を連れ戻したい。 | 男・wolf・髪#3a3a46／hat:beanie top:armorVest bottom:armorPants shoes:boots accessory:mask | 「…今は管理人だ。銃は引き出しの奥にしまってある。」 | `q_rook_1`, `q_rook_2`, `q_rook_3`, `q_rook_4a`, `q_rook_5a`, `q_rook_4b`, `q_rook_5b` |
+| `yui` | ユイ | `rooftop` | 2050 | [ネタ] フォロワー3人の自撮りインフルエンサー。 | 女・twin・髪#ff2fd0／hat:catEars top:tracksuit bottom:skirt shoes:sneakers accessory:sunglasses | 「はい、チーズ☆ …あ、勝手に撮っちゃった。」 | `q_yui_1`, `q_yui_2`, `q_yui_3`, `q_yui_4` |
+| `pip` | 訓練生ピップ | `spaceport` | 620 | パイロット訓練生。試験に三回落ちている。 | 男・bob・髪#ffd166／hat:helmet top:tracksuit bottom:trackPants shoes:sneakers | 「ぼく、いつか宇宙を飛ぶんだ！ …試験に受かったら。」 | `q_cadet_1`, `q_cadet_2`, `q_cadet_3`, `q_cadet_4`, `q_cadet_5` |
+| `chef_orbit` | シェフ・オービット | `spaceport` | 1080 | 「うまい宇宙食」を作りたい宇宙食シェフ。 | 男・short・髪#ffffff／hat:beanie top:suit bottom:cargo shoes:boots | 「宇宙食はまずい？ その常識、今日で終わりにしてやる！」 | `q_spacefood_1`, `q_spacefood_2`, `q_spacefood_3`, `q_spacefood_4` |
+| `tanaka` | ギャラクシー田中 | `spaceport` | 1500 | [ネタ] UFOを呼ぶ男。 | 男・bob・髪#5a5a62／hat:beanie top:hoodie bottom:trackPants shoes:sneakers accessory:sunglasses | 「…しっ。いま宇宙からの電波を受信しています。」 | `q_ufo_1`, `q_ufo_2`, `q_ufo_3`, `q_ufo_4`, `q_ufo_5` |
+| `gate_vega` | ゲート技師ベガ | `spaceport` | 2250 | [第2部] 次元ゲートを研究する技師。m2 の連作の中心人物。 | 女・bob・髪#7a3dff／hat:headphones top:armorVest bottom:armorPants shoes:boots accessory:halo | 「次元ゲート？ 夢物語だって笑われるわ。…でも私は、本気よ。」 | `m2_03_parts`, `m2_04_moon`, `m2_07_rift`, `m2_08_gate` |
+
+### 今いる NPC で、v4 から依頼をするようになった NPC（`MISSION_NPCS` に追加）
+
+| npcId | 名前 | 町 | 役割 | 依頼するクエスト |
+|---|---|---|---|---|
+| `dash_garage` | ダッシュ | `downtown` | ガレージの主。副業でネオン看板も直している。 | `q_neonsign_1`, `q_neonsign_2`, `q_neonsign_3`, `q_neonsign_4`, `q_neonsign_5` |
+| `shop_downtown` | ミミ | `downtown` | ネオン・ブティックの店員。…その正体は？ | - |
+| `sal_pawn` | サル | `slums` | 港の質屋。盗品の行方を知っている。 | - |
+| `voodoo_betty` | ブードゥー・ベティ | `swamp` | 沼の魔女の薬屋。霧の鬼火の正体を知っている。 | `q_voodoo_1`, `q_voodoo_2`, `q_voodoo_3`, `q_voodoo_4a`, `q_voodoo_5a`, `q_voodoo_4b`, `q_voodoo_5b` |
+| `mr_chip` | ミスター・チップ | `casino` | 景品交換所の主。景品の在庫が消えて困っている。 | `q_chip_1`, `q_chip_2`, `q_chip_3`, `q_chip_4` |
+
+### 今いるミッション NPC が依頼する v4 のクエスト
+
+| npcId | 依頼するクエスト |
+|---|---|
+| `rico` | `q_memento_beach` |
+| `mama_rosa` | `q_memento_downtown` |
+| `dj_pulse` | `q_dockrave_1`, `q_dockrave_2`, `q_dockrave_3`, `q_dockrave_4` |
+| `tank` | `q_memento_slums` |
+| `old_boone` | `q_legacy_1`, `q_legacy_2`, `q_legacy_3`, `q_legacy_4`, `q_memento_swamp` |
+| `vivi` | `q_memento_casino` |
+| `nova` | `q_memento_rooftop`, `m2_06_legacy` |
+| `dr_stella` | `q_memento_spaceport`, `m2_01_signal`, `m2_02_vega` |
+| `ace_jet` | `q_moonecho_1`, `q_moonecho_2`, `q_moonecho_3`, `q_moonecho_4`, `q_moonecho_5`, `m2_05_code` |

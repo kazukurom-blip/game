@@ -139,6 +139,23 @@
    - `cancelText: false` でやめる項目を出さない。選んだ結果は `onPick` で返る（`dialogChoice` も出る）。
 - ほかに `game.ui.open('dialog', { npc, lines: [...], onDone })` で、決まったセリフだけを話させることもできる。
 
+#### クエストのデータの書き方（v4。クエスト担当が追記）
+
+今の書き方（`dialog.offer` / `dialog.done` / `objectives` / `reward` / `choices` / `dialogByFlag`）はそのまま。次を足した。
+
+- **派生（A 編・B 編）**: 分かれ道の話に `choicePrompt` と `choices: [{id:'a'|'b', text, flag:'qc_<連作>_<選択>', dialog, flags?, reward?}]`（v3 の形と同じ。報告のときに選ぶ → `choose` → `turnIn`）。
+  - 続きの話は `reqChoice: {mission, choice}`。選んだ側だけが受けられる（`MissionManager.canAccept` が見る）。
+  - 分かれたあと合流する話は `prereqAny: [[A の最後, B の最後]]`（各グループのどれか 1 つが完了していれば良い）。
+  - `reqFlags: [flag]` で、フラグが立っているときだけ受けられる話も書ける。
+- **前の結果でセリフが変わる**: 選択肢の `flag` を `dialogByFlag: {qc_..: {offer?, done?}}` で読む。受注のセリフも `game.missions.dialog(id, 'offer')` を通す（会話の窓は `linesOf` で対応済み）。
+- **報酬でフラグを立てる**: `reward.flags: ['world2Unlocked', 'title_...']` → `state.flags[f] = true`（古いセーブで `state.flags` が無くても作る）。選択肢にも `flags: [...]` を書ける。
+  - 第2ワールドの入口は `m2_08_gate` の報酬で `world2Unlocked` が立つ。世界担当は `state.flags.world2Unlocked === true` を読むだけ。
+- **称号**: `reward.flags` の `title_*` は `achievements.js` の `EXTRA_TITLES`（`QUEST_TITLES` を足している）で称号になる。
+- **連作の目印**（窓の表示用・任意で使える）: `series`（連作のキー）・`seriesName`・`episode`（'1'・'4a' など）・`region`・`questKind`（'story' | 'joke' | 'cross' | 'memento' | 'main2'）・`seriesLast`（最後の話）。
+- **装備の印**: 連作の報酬装備は `questSet: true`（ID は `qset_*`）、見た目だけのネタ装備は `cosmetic: true`（持ち物の窓で「見た目専用」の印を出してほしい）。一覧は `items.js` の `QSET_IDS` / `COSMETIC_IDS`。
+- **強調の印**: クエストのセリフ・`choicePrompt`・選択肢の `dialog` には、人名 `#d`・地名 `#g`・アイテム `#b`・敵 `#r` を `questsW1.js` の `hl()` が自動で付ける。`desc` と選択肢の `text` は J の窓や通知にも出るので平文のまま。
+- データは `src/data/questsW1.js`（`missions.js` の「v4 クエスト」区画が読み込む）、新しい NPC の見た目と置き場所は `src/data/questNpcs.js`（`maps.js` の町の `npcs` の末尾で `...questNpcsFor(町)`）。一覧は `docs/QUESTS.md`。
+
 ## 担当の境目
 
 | 担当 | 主に触るファイル | 触らない |
