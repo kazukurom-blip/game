@@ -9,6 +9,7 @@ import { computeStats, addBuff, getBuffs, tickBuffs } from './progression.js';
 import { playerAttackArea, calcDamage, newAttackId, setPlayerInvuln } from './combat.js';
 import { updateCombo } from './combo.js';
 import { updateContent } from './content.js';
+import { spawnSummon, updateSummons } from './summons.js';
 
 const cds = {};       // skillId → {left, total}
 let _dash = null;     // 進行中のダッシュ
@@ -69,6 +70,8 @@ export function useSkill(game, skillId) {
   const cd = cds[skillId];
   if (cd && cd.left > 0) { warn(game, `${sk.name} はクールダウン中（${cd.left.toFixed(1)}秒）`); return false; }
   if (_dash && sk.kind === 'dash') return false;
+  // 召喚は町では不可（市民・警官を巻き込まないため。町に入ると召喚獣も消える）
+  if (sk.kind === 'summon' && game.map?.town) { warn(game, '町では召喚できない'); return false; }
   const mp = sk.mp(lv);
   if (st.mp < mp) { warn(game, 'MPが足りない！'); return false; }
 
@@ -114,11 +117,13 @@ export function useSkill(game, skillId) {
         if (i === 0 || single) spawnEffect(game, 'muzzle', ox, oy, { color: sk.color, facing: f });
         const k = n === 1 ? 0 : i / (n - 1) - 0.5;
         const r = calcDamage(stats.atk, mult, 0, stats.crit, stats.critDmg);
+        // 多段の弾（hits >= 2）は当たった時に1ヒットずつ計算する（数字が1つずつ積み重なる）
+        const multi = (sk.hits || 1) >= 2 ? { damage: null, atk: stats.atk, mult, crit: stats.crit, critDmg: stats.critDmg, multiHit: sk.hits } : null;
         game.projectiles.push(new Projectile(game, {
           owner: 'player', x: ox - f * (single ? 0 : i * (n <= 3 ? 18 : 0)), y: oy + (n <= 3 && !single ? (i - (n - 1) / 2) * 10 : 0),
           vx: f * pr.speed, vy: k * (pr.spread || 0),
           damage: r.dmg, crit: r.crit, life: pr.life, kind: pr.kind, pierce: pr.pierce ?? 0,
-          w: pr.w, h: pr.h, color: sk.color, skillId,
+          w: pr.w, h: pr.h, color: sk.color, skillId, ...(multi || {}),
         }));
       };
       // 連射のモーションは、反動のコマに合わせて1発ずつ。それ以外は撃つ瞬間にまとめて
@@ -155,6 +160,14 @@ export function useSkill(game, skillId) {
       game.notify?.(`${sk.name}！`, sk.color);
       break;
     }
+    case 'summon': {
+      // 召喚獣（systems/summons.js）。同じスキルは重ねがけで残り時間が戻る。buff(lv) を持つものはバフも同時に
+      anim('magic');
+      if (typeof sk.buff === 'function') addBuff(game, { id: sk.id, name: sk.name, color: sk.color, ...sk.buff(lv) });
+      at(hitT, () => { spawnSummon(game, sk, lv); spawnEffect(game, 'buff', p.x, p.y, { color: sk.color }); });
+      game.notify?.(`${sk.name}！`, sk.color);
+      break;
+    }
     case 'move': {
       // 実際の動き（物理）は entities/player.js の doMoveSkill(skill, lv, params) が担当（無ければ何もしない）
       p.doMoveSkill?.(sk, lv, mv);
@@ -183,6 +196,8 @@ export function updateSkills(game, dt) {
     cds[k].left = Math.max(0, cds[k].left - dt);
   }
   tickBuffs(game, dt);
+  // 召喚獣（寿命・追従・自動攻撃・マップ移動/死亡/町の扱い）
+  try { updateSummons(game, dt); } catch (e) { if (!game._summonErr) { game._summonErr = true; console.warn('[updateSummons]', e); } }
   // 当たる瞬間を待っている処理（倒れた・車に乗った・マップが変わった時は取り消す）
   if (_pending.length) {
     const p = game.player;

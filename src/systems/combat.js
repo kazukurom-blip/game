@@ -109,7 +109,9 @@ export function damageEnemy(game, enemy, dmg, crit = false, knockDir = 0, opts =
     game.bossMaxHit = dmg;
     game.events?.emit('bossHit', { dmg, bossId: enemy.def.id });
   }
-  spawnDamageNumber(game, enemy.x, enemy.y - enemy.h - 8 - stack * 30, dmg, { crit });
+  // 多段攻撃（stack = 何ヒット目か）: 1ヒット目の数字の上へ、少しずつ遅れて1つずつ積み重ねる（render/effects.js）
+  const num = spawnDamageNumber(game, enemy.x, enemy.y - enemy.h - 8, dmg, { crit, seqOf: stack > 0 && enemy._dmgHead ? enemy._dmgHead : null, seq: stack });
+  if (stack === 0) enemy._dmgHead = num || null;
   if (crit && stack === 0) spawnEffect(game, 'critHit', enemy.x, enemy.y - enemy.h / 2);
 
   const def = enemy.def || {};

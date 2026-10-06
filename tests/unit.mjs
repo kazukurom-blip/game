@@ -35,6 +35,9 @@ import { JOBS, JOB_TIERS, JOB_BRANCHES, jobsFor, jobBonusOf, BEGINNER_ID } from 
 import { JOB_MISSIONS } from '../src/data/missions.js';
 import { attachJobs, jobOffer, acceptJobMission, advanceJob, currentJob, jobBonus, canTakeJobMission } from '../src/systems/jobs.js';
 import { moveParams, jobLockOf, finalAttackOf, tryFinalAttack } from '../src/systems/skills.js';
+import { flushSkillHits } from '../src/systems/skills.js';
+import { spawnSummon, clearSummons, summonUnits, MAX_SUMMONS } from '../src/systems/summons.js';
+import { SUMMON_TYPES } from '../src/render/summons.js';
 import { addSp, getSp } from '../src/data/jobs.js';
 import { CLASSES, CLASS_IDS, DEFAULT_LOOKS } from '../src/data/classes.js';
 import { attachTravel, taxiFare, taxiTravel, WORLD_GRAPH, WORLD_EDGES, MAP_INFO, FIELD_IDS as SPEC_FIELDS, TOWN_IDS as SPEC_TOWNS, mapVisibility } from '../src/systems/travel.js';
@@ -70,7 +73,7 @@ const mapOfEnemy = (id) => {
   return Object.keys(MAPS).find((m) => spawnsAt(m, id));
 };
 const ICONS = ['potionRed', 'potionBlue', 'elixir', 'cash', 'gem', 'chip'];
-const SKILL_KINDS = ['melee', 'projectile', 'aoe', 'buff', 'dash', 'passive', 'move'];
+const SKILL_KINDS = ['melee', 'projectile', 'aoe', 'buff', 'dash', 'passive', 'move', 'summon'];
 const OBJ_TYPES = ['kill', 'collect', 'reach', 'wanted', 'drive', 'boss', 'talk'];
 const fin = (v) => typeof v === 'number' && Number.isFinite(v);
 
@@ -644,6 +647,133 @@ test('skills: 初期スキル使用・クールダウン・習得', () => {
   }
 });
 
+// ------------------------------------------------------------ 召喚獣（systems/summons.js）
+const tough = (g, id, x, y) => { const e = Object.assign(new Enemy(g, id, x, y), { spawnT: 0 }); e.hp = e.maxHp = 1e9; g.enemies.push(e); return e; };
+test('召喚: ハッカー系は各段階の職に召喚スキルがあり、定義がそろっている', () => {
+  for (const branch of ['netrunner', 'dronemaster']) {
+    for (const j of Object.values(JOBS).filter((jj) => jj.branch === branch)) {
+      const sm = j.skills.map((id) => SKILLS[id]).filter((s) => s.kind === 'summon');
+      assert.ok(sm.length >= 1, j.id + ' に召喚スキルが無い');
+    }
+  }
+  for (const s of Object.values(SKILLS).filter((ss) => ss.kind === 'summon')) {
+    assert.ok(s.summon && SUMMON_TYPES.includes(s.summon.type), s.id + ' type');
+    assert.ok(['bolt', 'zap', 'beam', 'pulse', 'bomb'].includes(s.summon.attack), s.id + ' attack');
+    for (let lv = 1; lv <= s.maxLevel; lv++) assert.ok(s.summon.dur(lv) > 0 && fin(s.mult(lv)) && s.mult(lv) > 0, s.id + ' dur/mult');
+    assert.ok(s.summon.interval > 0, s.id + ' interval');
+  }
+});
+
+test('召喚: 寿命・重ねがけ・上限・game.summons の形', () => {
+  const g = makeGame('hacker', 'beach_f1');
+  const st = g.state;
+  st.job = { id: 'hk_netrunner', tier: 1, history: [] };
+  st.skills.hn_data_sprite = 1; st.mp = 1e5;
+  assert.ok(useSkill(g, 'hn_data_sprite'), '召喚スキルを使える');
+  flushSkillHits(); // モーションの当たる瞬間まで待たずに召喚
+  assert.ok(Array.isArray(g.summons) && g.summons.length === 1, 'game.summons に1体');
+  const it = g.summons[0];
+  assert.deepEqual(Object.keys(it).sort(), ['color', 'dur', 'id', 'left', 'name', 'skillId']);
+  assert.equal(it.skillId, 'hn_data_sprite'); assert.equal(it.name, SKILLS.hn_data_sprite.name);
+  assert.ok(typeof it.id === 'string' && /^#[0-9a-f]{6}$/i.test(it.color));
+  assert.equal(it.dur, SKILLS.hn_data_sprite.summon.dur(1)); assert.equal(it.left, it.dur);
+  // 時間が減る
+  for (let i = 0; i < 120; i++) step(g);
+  assert.ok(g.summons[0].left < it.dur - 1.9 && g.summons[0].left > it.dur - 2.1, 'left が減る ' + g.summons[0].left);
+  // 重ねがけで時間が戻る（増えない）
+  resetCooldowns(); assert.ok(useSkill(g, 'hn_data_sprite')); flushSkillHits();
+  assert.equal(g.summons.length, 1, '同じスキルは1体のまま');
+  assert.equal(g.summons[0].left, g.summons[0].dur, '重ねがけで全体に戻る');
+  // 上限: 別の召喚を 4 種類出しても MAX_SUMMONS まで。消えるのは残りが一番短いもの
+  spawnSummon(g, 'hn_glitch_cat', 1); for (let i = 0; i < 30; i++) step(g);
+  spawnSummon(g, 'hn_phantom_daemon', 1); for (let i = 0; i < 30; i++) step(g);
+  spawnSummon(g, 'hn_oracle_eye', 1);
+  assert.equal(g.summons.length, MAX_SUMMONS, '上限 ' + MAX_SUMMONS);
+  assert.ok(!g.summons.some((s) => s.skillId === 'hn_data_sprite'), '残り時間が一番短いものが消える');
+  // 寿命: 時間が過ぎると消える
+  for (const u of summonUnits(g)) u.info.left = 0.05;
+  for (let i = 0; i < 10; i++) step(g);
+  assert.equal(g.summons.length, 0, '持続時間が過ぎたら消える');
+  assert.equal(summonUnits(g).length, 0);
+});
+
+test('召喚: 敵を自動で攻撃（市民は狙わない）・マップ移動でついてくる・町/死亡で消える・町では使えない', () => {
+  const g = makeGame('hacker', 'beach_f1');
+  const p = g.player;
+  for (const id of ['hd_attack_drone', 'hd_sentry_turret', 'hn_glitch_cat', 'hn_phantom_daemon', 'hn_oracle_eye', 'hd_bomber_drone', 'hd_full_deploy']) {
+    clearSummons(g);
+    g.enemies.length = 0; g.projectiles.length = 0;
+    const e = tough(g, 'slime_green', p.x + 160, p.y);
+    spawnSummon(g, id, 1);
+    for (let i = 0; i < 240 && e.hp === e.maxHp; i++) { e.x = p.x + 160; e.vx = 0; step(g); }
+    assert.ok(e.hp < e.maxHp, id + ' が敵を攻撃する');
+  }
+  clearSummons(g); g.enemies.length = 0; g.projectiles.length = 0;
+  const civ = Object.assign(new Enemy(g, CIVILIAN_IDS[0], p.x + 120, p.y), { spawnT: 0 }); g.enemies.push(civ);
+  const hp0 = civ.hp;
+  spawnSummon(g, 'hn_glitch_cat', 1);
+  for (let i = 0; i < 180; i++) step(g);
+  assert.equal(civ.hp, hp0, '市民は狙わない');
+  // 別のフィールドへ: ついてくる
+  g.changeMap('beach_f2');
+  for (let i = 0; i < 5; i++) step(g);
+  assert.equal(g.summons.length, 1, 'フィールド間の移動ではついてくる');
+  assert.equal(summonUnits(g)[0].mapId, 'beach_f2');
+  assert.ok(Math.abs(summonUnits(g)[0].x - p.x) < 200, 'プレイヤーの近くへ並び直す');
+  // 町へ: 消える
+  g.changeMap('beach'); step(g);
+  assert.equal(g.summons.length, 0, '町に入ると消える');
+  // 町では召喚スキルを使えない
+  g.state.job = { id: 'hk_drone_pilot', tier: 1, history: [] }; g.state.skills.hd_attack_drone = 1; g.state.mp = 1e5;
+  assert.equal(useSkill(g, 'hd_attack_drone'), false, '町では召喚できない');
+  // 倒れたら消える
+  g.changeMap('beach_f1');
+  spawnSummon(g, 'hd_attack_drone', 1); step(g);
+  assert.equal(g.summons.length, 1);
+  p.dead = true; step(g); p.dead = false;
+  assert.equal(g.summons.length, 0, '倒れたら消える');
+  // 別のキャラ（state が変わった）: 消える
+  spawnSummon(g, 'hd_attack_drone', 1);
+  g.state = { ...g.state }; step(g);
+  assert.equal(g.summons.length, 0, 'キャラが変わったら消える');
+});
+
+test('多段の数字: hits 回ぶん別々の数字が時間差で積み重なる・まとめ表示は1つ', () => {
+  const g = makeGame('hacker', 'beach_f1');
+  const p = g.player;
+  const dmgNums = () => g.effects.filter((e) => e.type === 'dmg' && !e.toPlayer);
+  const e = tough(g, 'slime_green', p.x + 60, p.y);
+  playerAttackArea(g, entRect(e), 1, { hits: 5, maxTargets: 1 });
+  let ds = dmgNums();
+  assert.equal(ds.length, 5, '5ヒット → 数字5つ');
+  assert.deepEqual(ds.map((d) => d.stack), [0, 1, 2, 3, 4], '1段ずつ上へ');
+  for (let i = 1; i < 5; i++) assert.ok(ds[i].t < ds[i - 1].t, '後のヒットほど遅れて出る');
+  assert.ok(ds.every((d) => d.baseY === ds[0].baseY && d.x === ds[0].x), '同じ場所から積む');
+  // 単発は1つ
+  g.effects.length = 0; g.time += 1;
+  playerAttackArea(g, entRect(e), 1, { hits: 1, maxTargets: 1 });
+  assert.equal(dmgNums().length, 1);
+  // 多段の弾（multiHit）
+  g.effects.length = 0; g.time += 1;
+  const s = computeStats(g.state);
+  const pr = new Projectile(g, { owner: 'player', x: e.x - 30, y: e.y - e.h / 2, vx: 600, vy: 0, atk: s.atk, mult: 1, crit: 0, critDmg: 1.5, multiHit: 3, life: 1 });
+  g.projectiles.push(pr);
+  for (let i = 0; i < 10; i++) pr.update(1 / 60);
+  assert.equal(dmgNums().length, 3, '多段の弾 → 3つ');
+  // 多段スキル（hits >= 2 の弾）を実際に使う
+  g.effects.length = 0; g.projectiles.length = 0; g.time += 1;
+  g.state.job = { id: 'hk_netrunner', tier: 1, history: [] }; g.state.skills.hn_data_spike = 1; g.state.mp = 1e5;
+  e.x = p.x + 120; e.h = 90; p.facing = 1; // 弾の高さに届く大きさ
+  assert.ok(useSkill(g, 'hn_data_spike')); flushSkillHits();
+  for (let i = 0; i < 30; i++) for (const q of g.projectiles) q.update(1 / 60);
+  assert.equal(dmgNums().length, SKILLS.hn_data_spike.hits, 'データ・スパイク → hits 個');
+  // まとめ表示（dmgCompact）なら1つ
+  g.effects.length = 0; g.time += 1; g.settings = { dmgCompact: true };
+  playerAttackArea(g, entRect(e), 1, { hits: 5, maxTargets: 1 });
+  ds = dmgNums();
+  assert.equal(ds.length, 1, 'まとめ表示は1つ'); assert.equal(ds[0].hitsN, 5);
+});
+
 test('missions: m01 受注 → 撃破 → 報告', () => {
   const g = makeGame('luna');
   const mm = g.missions;
@@ -1212,7 +1342,7 @@ test('v3 jobs: データ整合性（24職・系統・スキル・ミッション
     assert.ok(JOBS[j.from] && JOBS[j.from].tier === j.tier - 1, j.id + ' from');
     if (j.tier > 1) assert.equal(JOBS[j.from].branch, j.branch, j.id + ' branch');
     assert.ok(j.name && j.desc && j.title && /^#[0-9a-f]{6}$/i.test(j.aura) && j.sp > 0, j.id);
-    assert.ok(j.skills.length >= 2 && j.skills.length <= 4, j.id + ' skills');
+    assert.ok(j.skills.length >= 2 && j.skills.length <= 5, j.id + ' skills'); // 召喚・連撃スキルの追加で最大5
     for (const sid of j.skills) { const s = SKILLS[sid]; assert.ok(s && s.reqJob === j.id && s.hero === j.hero && s.reqLevel <= j.reqLevel, sid); }
     const m = MISSIONS[JOB_MISSIONS[j.id]];
     assert.ok(m && m.type === 'job' && m.jobId === j.id && m.id === j.mission, j.id + ' mission');

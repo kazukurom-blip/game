@@ -87,6 +87,10 @@ export function impact(game, power = 0.5, color) {
 }
 
 // メイプル風ダメージ数字
+/** 多段攻撃の数字の時間差（秒）。2ヒット目以降はこの間隔で1つずつ現れて上へ積み重なる */
+export const DMG_SEQ_GAP = 0.08;
+/** 数字1段の高さ（px） */
+const DMG_ROW = 30;
 export function spawnDamageNumber(game, x, y, value, opts = {}) {
   if (!game) return null;
   const list = ensure(game);
@@ -108,14 +112,20 @@ export function spawnDamageNumber(game, x, y, value, opts = {}) {
     }
   }
   // 同じ場所に短時間で出た数字は縦に積む
+  //  多段攻撃（opts.seqOf = 1ヒット目の数字, opts.seq = 何ヒット目か）: 1ヒット目の真上へ1段ずつ、DMG_SEQ_GAP 秒ずつ遅れて出す（メイプル風）
+  const head = opts.seqOf && opts.seqOf.type === 'dmg' && list.includes(opts.seqOf) ? opts.seqOf : null;
+  const seq = head ? Math.max(1, opts.seq | 0) : 0;
   let stack = 0;
-  for (const o of list) {
-    if (o.type === 'dmg' && o.t < 0.35 && Math.abs(o.x - x) < 50 && Math.abs(o.baseY - y) < 50 && !!o.toPlayer === !!opts.toPlayer) stack = Math.max(stack, o.stack + 1);
+  if (head) { stack = head.stack + seq; x = head.x; y = head.baseY; }
+  else {
+    for (const o of list) {
+      if (o.type === 'dmg' && o.t < 0.35 && Math.abs(o.x - x) < 50 && Math.abs(o.baseY - y) < 50 && !!o.toPlayer === !!opts.toPlayer) stack = Math.max(stack, o.stack + 1);
+    }
   }
   const v = Math.max(0, Math.round(Number(value) || 0));
   const text = opts.miss ? 'MISS' : String(v);
   const e = {
-    kind: 'dmg', type: 'dmg', x, y, baseY: y, t: 0, life: opts.crit ? 1.05 : 0.95,
+    kind: 'dmg', type: 'dmg', x, y, baseY: y, t: head ? head.t - seq * DMG_SEQ_GAP : 0, life: opts.crit ? 1.05 : 0.95, seq,
     text, value: v, stack, crit: !!opts.crit, toPlayer: !!opts.toPlayer, heal: !!opts.heal, miss: !!opts.miss, mp: !!opts.mp,
     clv: enemyDmg ? clv : 0,
     seed: seedCounter++,
@@ -572,10 +582,11 @@ const DMG_STYLE = {
 
 
 function drawDmg(ctx, e) {
+  if (e.t < 0) return; // 多段攻撃の順番待ち（まだ出ていない）
   const st = e.miss ? DMG_STYLE.miss : e.heal ? (e.mp ? DMG_STYLE.mp : DMG_STYLE.heal) : e.toPlayer ? DMG_STYLE.toPlayer : e.crit ? (e.clv >= 2 ? DMG_STYLE.critHi : DMG_STYLE.crit) : e.clv >= 3 ? DMG_STYLE.combo3 : e.clv >= 1 ? DMG_STYLE.combo1 : DMG_STYLE.normal;
   const k = e.t / e.life;
   const rise = Math.min(1, e.t / 0.8) * 40;
-  const y = e.baseY - 26 * e.stack - rise - 20;
+  const y = e.baseY - DMG_ROW * e.stack - rise - 20;
   const pop = e.t < 0.1 ? 1.4 - (e.t / 0.1) * 0.4 : 1;
   const alpha = k < 0.6 ? 1 : Math.max(0, 1 - (k - 0.6) / 0.4);
   const size = st.size + (e.clv || 0) * 2 + (e.hitsN > 1 ? Math.min(8, e.hitsN) : 0);

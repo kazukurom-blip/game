@@ -5,6 +5,9 @@
 //   enhances:'<moveSkillId>' + enhance(lv) → {distancePct, powerPct, cooldownCut, invulnAdd, afterBuff, arrivalBlast}
 //   finalAttack(lv) → {chance, mult}（ファイナルアタック。攻撃スキル命中時に確率で追撃。最大値を採用）
 //   buff/passive の attackSpeedPct = ブースター（攻撃速度）
+//   kind:'summon'  summon:{type, dur(lv), interval, attack, reach, ...}（systems/summons.js）。mult = 召喚獣の1回の攻撃の倍率、hits = 1回の攻撃のヒット数
+//                  buff(lv) があれば召喚と同時にバフもかかる
+//   hits >= 2 の弾（kind:'projectile'）は1体に当たるたびに hits 回ダメージ（数字は1ヒットずつ積み重なる）
 import { JOBS } from './jobs.js';
 
 const R = (v) => Math.round(v * 100) / 100;
@@ -47,6 +50,9 @@ const FA = (job, id, name, color, flavor) => P(job, {
 const Mv = (job, o) => { const { mp, cd, ...rest } = o; return base(job, { ...NONE, maxLevel: 10, kind: 'move', townOk: true, effect: 'dash', ...rest, tag: '移動', mp: () => mp, cooldown: (lv) => R(Math.max(cd * 0.6, cd - 0.03 * (lv - 1))) }); };
 /** 移動スキル強化（3次） */
 const Enh = (job, o) => P(job, { tag: '移動強化', passive: () => ({}), ...o });
+/** 召喚スキル: m=1回の攻撃の倍率, mp=基本MP, cd=基本CT。持続 = summon.dur(lv) 秒 */
+const Sm = (job, o) => { const { m, mp, cd, ...rest } = o; return base(job, { hits: 1, effect: 'buff', tag: '召喚', ...rest, kind: 'summon', mult: M(m), mp: MP(mp), cooldown: CD(cd) }); };
+const SDUR = (b, per) => (lv) => b + per * (Math.max(1, lv) - 1);
 /** ハイパーバフ（4次・長CT） */
 const Hyper = (job, o) => Bf(job, { mp: 100, cd: 120, tag: 'ハイパー', ...o });
 
@@ -65,14 +71,17 @@ export const JOB_SKILL_LIST = [
   Bf('luna_sharpshooter', { id: 'lj_gun_hot_cartridge', name: 'ホット・カートリッジ', mp: 35, cd: 50, color: '#ff5fa2',
     desc: '灼熱の特製弾を装填。攻撃力とクリティカル率が大きく上昇。',
     buff: (lv) => ({ duration: 60 + lv * 6, atkPct: R(0.15 + 0.015 * lv), critAdd: R(0.05 + 0.005 * lv) }) }),
+  A('luna_sharpshooter', { id: 'lj_gun_gatling_waltz', name: 'ガトリング・ワルツ', kind: 'projectile', m: 0.75, mp: 22, cd: 0.9, hits: 2,
+    desc: '二丁拳銃をワルツのリズムで3連射。弾は3体まで貫通し、1発ごとに2回撃ち抜く（最大6ヒット）。', range: { w: 620, h: 40 }, effect: 'muzzle', color: '#ff4f8f',
+    proj: { speed: 1250, life: 0.55, count: 3, spread: 24, pierce: 2, kind: 'bullet', w: 30, h: 12 } }),
   Boost('luna_sharpshooter', 'lj_gun_booster', 'ガン・ブースター', '#ff7fae', '銃のスライドを高速化。'),
   Mv('luna_sharpshooter', { id: 'lj_gun_recoil_jump', name: 'リコイル・ジャンプ', mp: 7, cd: 0.4, color: '#ff5fa2',
     desc: '空中で真後ろへ撃ち、その反動で前方へ大きく跳ぶ（フラッシュジャンプ）。後方の敵にも弾が当たる。',
     move: { type: 'flashJump', power: 640, distance: 300, perLv: 12, lift: 380, airOnly: true, backShot: { mult: 1.0, w: 260, h: 40 } } }),
   A('luna_trigger_maestro', { id: 'lj_gun_bullet_rain', name: 'バレット・レイン', kind: 'aoe', m: 2.5, mp: 55, cd: 6,
     desc: '空へ撃ち上げた無数の弾丸が周囲一帯に降り注ぐ。', hits: 6, range: { w: 640, h: 300 }, knock: 160, effect: 'spark', color: '#ff2a6d', maxTargets: 15 }),
-  A('luna_trigger_maestro', { id: 'lj_gun_heart_magnum', name: 'ハート・マグナム', kind: 'projectile', m: 8.4, mp: 60, cd: 2.2,
-    desc: 'ありったけの想いを込めた特大ハート弾。全てを貫き、撃ち抜かれた者は二度と忘れない。', range: { w: 900, h: 70 }, effect: 'muzzle', color: '#ff2a6d',
+  A('luna_trigger_maestro', { id: 'lj_gun_heart_magnum', name: 'ハート・マグナム', kind: 'projectile', m: 2.4, mp: 60, cd: 2.2, hits: 4,
+    desc: 'ありったけの想いを込めた特大ハート弾。全てを貫き、撃ち抜かれた者には4回ときめきが走る。', range: { w: 900, h: 70 }, effect: 'muzzle', color: '#ff2a6d',
     proj: { speed: 1100, life: 0.85, count: 1, spread: 0, pierce: 99, kind: 'heart', w: 60, h: 52 } }),
   Enh('luna_trigger_maestro', { id: 'lj_gun_recoil_master', name: 'リコイル・マスター', color: '#ff2a6d', enhances: 'lj_gun_recoil_jump',
     desc: 'リコイル・ジャンプ強化: 跳躍距離+30%、反動弾の威力アップ、着地まで移動速度アップ。',
@@ -108,6 +117,8 @@ export const JOB_SKILL_LIST = [
   A('luna_prism_idol', { id: 'lj_dance_prism_step', name: 'プリズム・ステップ', kind: 'dash', m: 2.8, mp: 40, cd: 2.4,
     desc: '七色の残像を連れて長距離ステップ。通過した敵を4回斬る。', hits: 4, range: { w: 90, h: 120 }, knock: 200, effect: 'dash', color: '#c77dff',
     dash: { dist: (lv) => 420 + lv * 12, time: 0.26, invuln: 0.55 } }),
+  A('luna_prism_idol', { id: 'lj_dance_prism_rush', name: 'プリズム・ラッシュ', kind: 'melee', m: 1.1, mp: 38, cd: 0.8, hits: 8,
+    desc: '七色の残像と一緒に踊るように8連続で斬りつける。', range: { w: 230, h: 130 }, knock: 160, effect: 'slash', color: '#d48cff', maxTargets: 6 }),
   P('luna_prism_idol', { id: 'lj_dance_encore', name: 'アンコール', maxLevel: 20, color: '#c77dff',
     desc: '鳴りやまない歓声が力になる。移動速度・クリティカル率・被ダメージ軽減が上昇。',
     passive: (lv) => ({ speedAdd: 3 * lv, critAdd: R(0.005 * lv), dmgReduce: R(0.008 * lv), atkAdd: 3 * lv }) }),
@@ -142,6 +153,8 @@ export const JOB_SKILL_LIST = [
     move: { type: 'rush', power: 1100, distance: 260, perLv: 10, time: 0.24, push: { mult: 1.5, knock: 420 } } }),
   A('jin_dragon_fist', { id: 'jj_fight_dragon_upper', name: '昇龍アッパー', kind: 'melee', m: 4.4, mp: 50, cd: 1.1,
     desc: 'ネオンの龍が天へ昇る。敵を3回殴り、遥か上空へ打ち上げる。', hits: 3, range: { w: 170, h: 220 }, knock: 120, launch: 900, effect: 'critHit', color: '#ff3b3b', maxTargets: 8 }),
+  A('jin_dragon_fist', { id: 'jj_fight_hundred_fist', name: '百裂ネオン拳', kind: 'melee', m: 1.5, mp: 45, cd: 0.9, hits: 9,
+    desc: 'ネオンの残光を引く拳を目にも止まらぬ速さで9連打する。', range: { w: 170, h: 110 }, knock: 160, effect: 'hit', color: '#ff6a3b', maxTargets: 5 }),
   A('jin_dragon_fist', { id: 'jj_fight_dragon_wave', name: '龍撃波', kind: 'projectile', m: 8.9, mp: 60, cd: 2.6,
     desc: '龍の咆哮を拳圧に乗せて放つ。巨大な衝撃波が全てを貫く。', range: { w: 900, h: 130 }, effect: 'smoke', color: '#ff3b3b',
     proj: { speed: 900, life: 1.0, count: 1, spread: 0, pierce: 99, kind: 'shockwave', w: 110, h: 130 } }),
@@ -162,12 +175,12 @@ export const JOB_SKILL_LIST = [
   // ================= ナイトレーサー系 =================
   A('jin_racer', { id: 'jj_race_burnout', name: 'バーンアウト', kind: 'aoe', m: 1.2, mp: 14, cd: 3,
     desc: 'その場でタイヤを空転させ、灼熱のスモークで周囲の敵を3回焼く。', hits: 3, range: { w: 360, h: 160 }, knock: 240, effect: 'smoke', color: '#7b5cff', maxTargets: 10 }),
-  A('jin_racer', { id: 'jj_race_drift_dash', name: 'ドリフト・ダッシュ', kind: 'dash', m: 2.1, mp: 15, cd: 2.6,
-    desc: '低い姿勢でドリフトしながら突っ込む。進路上の敵を跳ね飛ばす。', hits: 1, range: { w: 80, h: 80 }, knock: 520, effect: 'dash', color: '#7b5cff',
+  A('jin_racer', { id: 'jj_race_drift_dash', name: 'ドリフト・ダッシュ', kind: 'dash', m: 0.8, mp: 15, cd: 2.6,
+    desc: '低い姿勢でドリフトしながら突っ込む。進路上の敵をタイヤで3回はね飛ばす。', hits: 3, range: { w: 80, h: 80 }, knock: 520, effect: 'dash', color: '#7b5cff',
     dash: { dist: (lv) => 360 + lv * 12, time: 0.26, invuln: 0.45 } }),
   Mastery('jin_racer', 'jj_race_mastery', 'ドライビング・マスタリー', '#7b5cff', 'アクセルワークを体で覚える。', (lv) => ({ speedAdd: 2 * lv })),
-  A('jin_drifter', { id: 'jj_race_exhaust_flame', name: 'エキゾースト・フレイム', kind: 'projectile', m: 2.3, mp: 28, cd: 1.2,
-    desc: 'マフラーから噴き出す炎の塊を3発撃ち出す。敵を貫通する。', range: { w: 650, h: 120 }, effect: 'explosion', color: '#5c7cff',
+  A('jin_drifter', { id: 'jj_race_exhaust_flame', name: 'エキゾースト・フレイム', kind: 'projectile', m: 1.25, mp: 28, cd: 1.2, hits: 2,
+    desc: 'マフラーから噴き出す炎の塊を3発撃ち出す。敵を貫通し、当たるたびに2回焼く。', range: { w: 650, h: 120 }, effect: 'explosion', color: '#5c7cff',
     proj: { speed: 850, life: 0.75, count: 3, spread: 160, pierce: 3, kind: 'orb', w: 34, h: 34 } }),
   Bf('jin_drifter', { id: 'jj_race_turbo', name: 'ターボチャージ', mp: 35, cd: 45, color: '#5c7cff',
     desc: 'ブースト全開。移動速度と攻撃力が大きく上昇する。',
@@ -197,12 +210,18 @@ export const JOB_SKILL_LIST = [
   // ================= ネットランナー系（hacker） =================
   A('hk_netrunner', { id: 'hn_logic_bomb', name: 'ロジック・ボム', kind: 'aoe', m: 1.3, mp: 14, cd: 2,
     desc: '周囲のネットワークに論理爆弾を仕掛け、3回連続でショートさせる。', hits: 3, range: { w: 340, h: 180 }, knock: 160, effect: 'spark', color: '#3dff8a', maxTargets: 10 }),
-  A('hk_netrunner', { id: 'hn_data_spike', name: 'データ・スパイク', kind: 'projectile', m: 2.0, mp: 10, cd: 0.6,
-    desc: '圧縮したデータの槍を撃ち出す。3体まで貫通する。', range: { w: 700, h: 30 }, effect: 'spark', color: '#3dff8a',
+  A('hk_netrunner', { id: 'hn_data_spike', name: 'データ・スパイク', kind: 'projectile', m: 0.75, mp: 10, cd: 0.6, hits: 3,
+    desc: '圧縮したデータの槍を撃ち出す。3体まで貫通し、当たった敵に3回突き刺さる。', range: { w: 700, h: 30 }, effect: 'spark', color: '#3dff8a',
     proj: { speed: 1100, life: 0.65, count: 1, spread: 0, pierce: 3, kind: 'beam', w: 50, h: 12 } }),
+  Sm('hk_netrunner', { id: 'hn_data_sprite', name: 'データ・スプライト', m: 0.9, mp: 16, cd: 3, color: '#3dff8a',
+    desc: '0と1でできた小さな精霊を呼び出す。そばに浮かび、近くの敵へ光弾を撃つ（持続 30〜49秒）。',
+    summon: { type: 'sprite', dur: SDUR(30, 1), interval: 1.1, attack: 'bolt', reach: { w: 760, h: 340 }, proj: 'magic' } }),
   Mastery('hk_netrunner', 'hn_code_mastery', 'コード・マスタリー', '#3dff8a', '最適化されたコードは速い。', (lv) => ({ critAdd: R(0.005 * lv) })),
   A('hk_code_breaker', { id: 'hn_ddos_storm', name: 'DDoSストーム', kind: 'aoe', m: 1.4, mp: 32, cd: 4,
     desc: '大量のパケットを叩きつけ、周囲の敵を6回フリーズさせる。', hits: 6, range: { w: 520, h: 260 }, knock: 80, effect: 'spark', color: '#5cffb0', maxTargets: 14 }),
+  Sm('hk_code_breaker', { id: 'hn_glitch_cat', name: 'グリッチ・キャット', m: 0.75, mp: 28, cd: 3, hits: 3, color: '#5cffb0',
+    desc: 'バグから生まれた電子の猫を呼び出す。近くの敵に電撃を飛ばし、3回痺れさせる（持続 40〜59秒）。',
+    summon: { type: 'familiar', dur: SDUR(40, 1), interval: 1.5, attack: 'zap', reach: { w: 720, h: 340 } } }),
   Bf('hk_code_breaker', { id: 'hn_overflow', name: 'オーバーフロー', mp: 35, cd: 50, color: '#5cffb0',
     desc: '演算リミッターを外す。攻撃力とクリティカル率が上昇。',
     buff: (lv) => ({ duration: 60 + lv * 6, atkPct: R(0.15 + 0.015 * lv), critAdd: R(0.04 + 0.004 * lv) }) }),
@@ -215,12 +234,18 @@ export const JOB_SKILL_LIST = [
   A('hk_ghost_protocol', { id: 'hn_trojan_lance', name: 'トロイの槍', kind: 'projectile', m: 8.6, mp: 60, cd: 2.4,
     desc: '敵の防壁ごと貫く巨大なトロイの木馬コード。全てを貫通する。', range: { w: 1000, h: 60 }, effect: 'spark', color: '#00ffa3',
     proj: { speed: 1500, life: 0.7, count: 1, spread: 0, pierce: 99, kind: 'magic', w: 56, h: 56 } }),
+  Sm('hk_ghost_protocol', { id: 'hn_phantom_daemon', name: 'ファントム・デーモン', m: 1.0, mp: 45, cd: 4, hits: 4, color: '#00ffa3', maxTargets: 6,
+    desc: 'ネットの深層に棲む幽霊デーモンを呼び出す。敵の方へ貫く光線を放ち、並んだ敵を4回焼く（持続 40〜59秒）。',
+    summon: { type: 'daemon', dur: SDUR(40, 1), interval: 1.8, attack: 'beam', reach: { w: 860, h: 300 } } }),
   Enh('hk_ghost_protocol', { id: 'hn_ghost_shift', name: 'ゴースト・シフト', color: '#00ffa3', enhances: 'hn_packet_shift',
     desc: 'パケット・シフト強化: 距離アップ・CT短縮・無敵+0.3秒。移動先にグリッチを残す（威力120%）。',
     enhance: (lv) => ({ distancePct: R(0.03 * lv), cooldownCut: R(0.02 * lv), invulnAdd: 0.3, arrivalBlast: { mult: 1.2, w: 180, h: 140, color: '#00ffa3' } }) }),
   FA('hk_ghost_protocol', 'hn_echo_code', 'エコー・コード', '#00ffa3', '実行したコードが自動で再実行される。'),
   A('hk_cyber_oracle', { id: 'hn_singularity', name: 'シンギュラリティ', kind: 'aoe', m: 4.2, mp: 130, cd: 8,
     desc: '演算の特異点を生み出し、画面中の敵を7回データの海に沈める。', hits: 7, range: { w: 960, h: 380 }, knock: 120, launch: 300, effect: 'explosion', color: '#b6ff3d', maxTargets: 20 }),
+  Sm('hk_cyber_oracle', { id: 'hn_oracle_eye', name: 'オラクル・アイ', m: 1.5, mp: 70, cd: 5, hits: 5, color: '#b6ff3d', maxTargets: 12,
+    desc: '未来を見通す電脳の眼を呼び出す。周りに演算の波動を放ち、範囲の敵を5回打つ（持続 45〜64秒）。',
+    summon: { type: 'oracle', dur: SDUR(45, 1), interval: 2.2, attack: 'pulse', reach: { w: 700, h: 360 }, area: { w: 560, h: 300 } } }),
   P('hk_cyber_oracle', { id: 'hn_omniscience', name: 'オムニサイエンス', maxLevel: 20, color: '#b6ff3d',
     desc: '全てを演算する。攻撃力・クリティカル率・クリティカルダメージが上昇し、ファイナルアタックが強化される。',
     passive: (lv) => ({ atkAdd: 6 * lv, critAdd: R(0.006 * lv), critDmgAdd: R(0.04 * lv) }),
@@ -235,10 +260,16 @@ export const JOB_SKILL_LIST = [
     proj: { speed: 1000, life: 0.65, count: 3, spread: 60, pierce: 1, kind: 'orb', w: 20, h: 20 } }),
   A('hk_drone_pilot', { id: 'hd_drone_bomb', name: 'ドローン・ボム', kind: 'aoe', m: 1.6, mp: 13, cd: 2,
     desc: '小型ドローンを周囲に投下して自爆させる。', hits: 2, range: { w: 360, h: 180 }, knock: 300, effect: 'explosion', color: '#ffb000', maxTargets: 10 }),
+  Sm('hk_drone_pilot', { id: 'hd_attack_drone', name: 'アタック・ドローン', m: 0.6, mp: 15, cd: 3, color: '#ffb000',
+    desc: '自作の攻撃ドローンを飛ばす。そばに浮かび、近くの敵へ光弾を2連射する（持続 30〜49秒）。',
+    summon: { type: 'drone', dur: SDUR(30, 1), interval: 1.3, attack: 'bolt', burst: 2, reach: { w: 760, h: 340 }, proj: 'orb', speed: 1000 } }),
   Mastery('hk_drone_pilot', 'hd_drone_mastery', 'ドローン・マスタリー', '#ffb000', 'ドローンの制御精度アップ。', (lv) => ({ maxHpPct: R(0.01 * lv) })),
   A('hk_swarm_commander', { id: 'hd_missile_pod', name: 'ミサイル・ポッド', kind: 'projectile', m: 1.8, mp: 30, cd: 1.4,
     desc: 'ドローン編隊から6発のマイクロミサイルを一斉発射。', range: { w: 700, h: 260 }, effect: 'explosion', color: '#ffc94d',
     proj: { speed: 900, life: 0.8, count: 6, spread: 300, pierce: 2, kind: 'orb', w: 24, h: 24 } }),
+  Sm('hk_swarm_commander', { id: 'hd_sentry_turret', name: 'セントリー・タレット', m: 0.6, mp: 26, cd: 3, hits: 4, color: '#ffc94d',
+    desc: '足元に自動砲台を設置する。射程に入った敵を4連射で撃ち抜く（持続 40〜59秒。離れすぎると付いてくる）。',
+    summon: { type: 'turret', dur: SDUR(40, 1), interval: 1.3, attack: 'zap', reach: { w: 900, h: 300 }, follow: false } }),
   Bf('hk_swarm_commander', { id: 'hd_shield_drone', name: 'シールド・ドローン', mp: 35, cd: 50, color: '#ffc94d',
     desc: 'シールド発生ドローンを展開。防御力と攻撃力が上昇。',
     buff: (lv) => ({ duration: 60 + lv * 6, defPct: R(0.25 + 0.02 * lv), atkPct: R(0.1 + 0.01 * lv) }) }),
@@ -248,9 +279,12 @@ export const JOB_SKILL_LIST = [
     move: { type: 'glide', power: 650, distance: 420, perLv: 15, time: 0.65, gravityScale: 0.15 } }),
   A('hk_mecha_architect', { id: 'hd_carpet_bomb', name: 'カーペット・ボム', kind: 'aoe', m: 2.4, mp: 55, cd: 6,
     desc: '爆撃ドローン編隊が一帯を絨毯爆撃。6回の爆発が敵を焼く。', hits: 6, range: { w: 720, h: 300 }, knock: 300, launch: 200, effect: 'explosion', color: '#ff8a3d', maxTargets: 16 }),
-  A('hk_mecha_architect', { id: 'hd_rail_drone', name: 'レール・ドローン', kind: 'projectile', m: 8.4, mp: 60, cd: 2.4,
-    desc: 'レールガン搭載ドローンが超高速弾を発射。全てを貫通する。', range: { w: 1100, h: 30 }, effect: 'muzzle', color: '#ff8a3d',
+  A('hk_mecha_architect', { id: 'hd_rail_drone', name: 'レール・ドローン', kind: 'projectile', m: 2.3, mp: 60, cd: 2.4, hits: 4,
+    desc: 'レールガン搭載ドローンが超高速弾を発射。全てを貫通し、当たった敵を4回撃ち抜く。', range: { w: 1100, h: 30 }, effect: 'muzzle', color: '#ff8a3d',
     proj: { speed: 2200, life: 0.55, count: 1, spread: 0, pierce: 99, kind: 'beam', w: 80, h: 14 } }),
+  Sm('hk_mecha_architect', { id: 'hd_bomber_drone', name: 'ボマー・ドローン', m: 1.1, mp: 42, cd: 4, hits: 3, color: '#ff8a3d', maxTargets: 8,
+    desc: '爆撃ドローンを呼ぶ。敵の真上から爆弾を落とし、爆発で周りの敵を3回焼く（持続 40〜59秒）。',
+    summon: { type: 'bomber', dur: SDUR(40, 1), interval: 2.0, attack: 'bomb', reach: { w: 820, h: 380 }, area: { w: 240, h: 170 } } }),
   Enh('hk_mecha_architect', { id: 'hd_lift_tuning', name: 'リフト・チューニング', color: '#ff8a3d', enhances: 'hd_drone_lift',
     desc: 'ドローン・リフト強化: 滑空距離+30%・CT短縮、滑空後に移動速度アップ。',
     enhance: (lv) => ({ distancePct: R(0.03 * lv), powerPct: R(0.02 * lv), cooldownCut: R(0.03 * lv), afterBuff: { duration: 4, speedPct: R(0.12 + 0.01 * lv) } }) }),
@@ -261,7 +295,8 @@ export const JOB_SKILL_LIST = [
     desc: '全ドローンと意識を同期。攻撃力・最大HP・被ダメージ軽減が上昇し、ファイナルアタックが強化される。',
     passive: (lv) => ({ atkAdd: 6 * lv, maxHpPct: R(0.01 * lv), dmgReduce: R(0.008 * lv), critDmgAdd: R(0.03 * lv) }),
     finalAttack: (lv) => ({ chance: R(0.4 + 0.01 * lv), mult: R(1.0 + 0.05 * lv) }) }),
-  Hyper('hk_orbital_master', { id: 'hd_full_deploy', name: 'フル・デプロイ', color: '#ffe14d',
-    desc: '全ドローン出撃。攻撃力・防御力・攻撃速度が大幅に上昇。',
+  Sm('hk_orbital_master', { id: 'hd_full_deploy', name: 'フル・デプロイ', m: 1.0, mp: 100, cd: 120, maxLevel: 10, color: '#ffe14d', tag: 'ハイパー・召喚',
+    desc: '全ドローン出撃。4機のドローン編隊が周りを飛び、近くの敵を一斉に撃つ。出撃中は攻撃力・防御力・攻撃速度も大幅に上昇。',
+    summon: { type: 'squadron', count: 4, dur: (lv) => 40 + lv * 2, interval: 1.0, attack: 'bolt', reach: { w: 860, h: 380 }, proj: 'orb', speed: 1100 },
     buff: (lv) => ({ duration: 40 + lv * 2, atkPct: R(0.25 + 0.02 * lv), defPct: 0.3, attackSpeedPct: 0.2 }) }),
 ];

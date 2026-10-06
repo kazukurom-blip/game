@@ -12,6 +12,7 @@ import { getItem } from '../data/items.js';
 import { moveAndCollide, findRope, entRect, rectOverlap } from '../world/physics.js';
 import { Projectile } from './projectile.js';
 import { syncPet } from './pet.js';
+import { drawSummons } from '../systems/summons.js';
 
 const CLIMB_SPEED = 190;
 const BASE_SPEED = 240;
@@ -704,12 +705,13 @@ export class Player {
 
   draw(ctx) {
     if (this.game.pet) this.game.pet.draw(ctx);
-    if (this.inVehicle) return; // 車側で描画（driver=true）
+    if (this.inVehicle) { drawSummons(ctx, this.game); return; } // 車側で描画（driver=true）
     const s = this.game.state;
     if (!s) return;
     const look = heroLookOf(s);
     const equip = getEquipLooks(s);
     drawCharacter(ctx, this.x, this.y, look, equip, this.anim);
+    drawSummons(ctx, this.game); // 召喚獣（キャラの手前に浮かぶ）
   }
 
   rect() { return entRect(this); }
