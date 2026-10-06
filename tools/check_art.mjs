@@ -17,6 +17,7 @@
 //     依頼書（docs/art_handoff/CODEX_BATCH_01.md）の基準色を rig.parts の base / accent に書く。
 //     --root <dir> で入れる先のリポジトリを変えられる（テスト用）。
 //   - --no-video: 動画・コマ並べを作らない（速い）。
+//   - --redraw: 描き直しの依頼の検査（今の絵と形がほぼ同じ＝加工だけなら NG・輪郭のなめらかさ・後ろ髪の横幅）。
 //   - 終了コード: NG が1枚でもあれば 1、無ければ 0（エラーは 2）。
 //
 // 検査（閾値は下の TH）:
@@ -598,7 +599,7 @@ function checkHairOnFace(r, hairIm, faceIm, faceName, ov) {
 
 // ---------------------------------------------------------------- 本体
 function parseArgs(argv) {
-  const a = { input: null, out: null, install: false, video: true, root: ROOT, quiet: false };
+  const a = { input: null, out: null, install: false, video: true, root: ROOT, quiet: false, redraw: false };
   for (let i = 0; i < argv.length; i++) {
     const v = argv[i];
     if (v === '--out') a.out = argv[++i];
@@ -606,11 +607,45 @@ function parseArgs(argv) {
     else if (v === '--no-video') a.video = false;
     else if (v === '--root') a.root = path.resolve(argv[++i]);
     else if (v === '--quiet') a.quiet = true;
+    else if (v === '--redraw') a.redraw = true;
     else if (!a.input) a.input = v;
   }
   return a;
 }
 const loadPng = (f) => readPng(fs.readFileSync(f));
+/**
+ * 絵の質の検査（描き直しの依頼で、加工だけの納品や、なめらかさの無い輪郭を見つける）
+ *  - 輪郭のなめらかさ: 透明と接する画素のうち、半透明（アンチエイリアス）の割合。低いとギザギザ
+ *  - （--redraw のときだけ）今の絵と形（アルファ）がほとんど同じなら「描き直していない」。後ろ髪の横幅の上限
+ */
+function checkQuality(r, im, info, old) {
+  const { w, h, data } = im;
+  let edge = 0, soft = 0;
+  for (let y = 1; y < h - 1; y += 1) for (let x = 1; x < w - 1; x += 1) {
+    const a = data[(y * w + x) * 4 + 3];
+    if (!a) continue;
+    const n = data[(y * w + x - 1) * 4 + 3] && data[(y * w + x + 1) * 4 + 3] && data[((y - 1) * w + x) * 4 + 3] && data[((y + 1) * w + x) * 4 + 3];
+    if (n) continue;
+    edge++; if (a < 250) soft++;
+  }
+  const aa = edge ? soft / edge : 1;
+  r.metrics.edgeAA = +(aa * 100).toFixed(1);
+  if (edge > 200 && aa < 0.25) r.add('注意', `輪郭がギザギザ（透明との境目のなめらかな画素 ${(aa * 100).toFixed(1)}%）`, '色を減らすときも、輪郭の外側 1〜2px の半透明（アンチエイリアス）は残してください');
+  if (old && old.w === w && old.h === h) {
+    let both = 0, any = 0;
+    for (let i = 3; i < data.length; i += 4) { const A = data[i] > 40, B = old.data[i] > 40; if (A || B) any++; if (A && B) both++; }
+    const iou = any ? both / any : 1;
+    r.metrics.sameShapeIoU = +(iou * 100).toFixed(2);
+    if (iou >= 0.97) r.add('NG', `今の絵と形がほとんど同じ（IoU ${(iou * 100).toFixed(1)}%）。描き直しではなく加工になっている`, '今の絵は形と位置の目安にだけ使い、見本の絵柄で一から描き直してください');
+  }
+  if (old && info.kind === 'hair' && info.back) {
+    let x0 = w, x1 = -1;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (data[(y * w + x) * 4 + 3] > 40) { if (x < x0) x0 = x; if (x > x1) x1 = x; }
+    const bw = x1 - x0 + 1;
+    r.metrics.backHairWidth = bw;
+    if (bw > 600) r.add('注意', `後ろ髪の横幅が ${bw}px（目安 560px 以内）`, '毛先を控えめにして、横幅を今の 7 割くらいにしてください');
+  }
+}
 const safeName = (rel) => rel.replace(/\.png$/i, '').replace(/[\\/]/g, '_');
 
 export async function checkArt(args) {
@@ -662,6 +697,7 @@ export async function checkArt(args) {
       const H = info.kind === 'weapon' ? WPN_H : info.kind === 'face' || info.kind === 'hair' || info.kind === 'head' ? HEAD_H : 1024;
       checkSizeAlpha(r, im, W, H);
       if (im.w !== W || im.h !== H) continue;
+      if (args.redraw) checkQuality(r, im, info, (() => { try { const p = path.join(repoSpr, f.rel); return fs.existsSync(p) ? loadPng(p) : null; } catch { return null; } })());
       let ov = null;
       if (info.kind === 'body' || info.kind === 'wear') {
         const body = info.kind === 'wear' ? get(`rig/body_${info.g}.png`) : null;
