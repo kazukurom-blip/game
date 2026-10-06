@@ -1,5 +1,5 @@
 // レベル・経験値・ステータス計算
-import { ITEMS, STARTER_EQUIP, starterEquipFor } from '../data/items.js';
+import { ITEMS, STARTER_EQUIP, starterEquipFor, canWearGender } from '../data/items.js';
 import { SKILLS, STARTER_SKILLS, SKILL_BAR_SIZE } from '../data/skills.js';
 import { spawnEffect } from '../render/effects.js';
 import { expToNext, MAX_LEVEL } from '../data/balance.js';
@@ -180,6 +180,17 @@ export function migrateState(state) {
   state.look = state.look && typeof state.look === 'object' ? { ...defaultLook(state.heroId, state.gender), ...state.look } : defaultLook(state.heroId, state.gender);
   tagHeroLook(state.look, state.heroId, state.gender);
   if (typeof state.name !== 'string' || !state.name.trim()) state.name = defaultName(state.heroId, state.gender);
+  // 男女専用の装備: 旧セーブで性別に合わない物を着ていたら外して持ち物へ戻す
+  if (state.equipped && typeof state.equipped === 'object') {
+    for (const slot of Object.keys(state.equipped)) {
+      const id = state.equipped[slot];
+      if (!id || !ITEMS[id] || canWearGender(ITEMS[id], state.gender)) continue;
+      const inst = state.equippedInst?.[slot]?.id === id ? state.equippedInst[slot] : { id };
+      if (Array.isArray(state.inventory)) state.inventory.push(inst);
+      state.equipped[slot] = null;
+      if (state.equippedInst) state.equippedInst[slot] = null;
+    }
+  }
   // v3 SP プール
   const sbt = state.spByTier && typeof state.spByTier === 'object' ? state.spByTier : {};
   state.spByTier = { ...newSpByTier() };

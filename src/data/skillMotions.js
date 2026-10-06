@@ -1,0 +1,63 @@
+// スキルごとの攻撃モーション（render/character.js の SKILL_MOTIONS）と、そのモーションの長さ（秒）。
+// 表に無いスキルは種類（kind）とキャラから決める（skillMotionOf）。移動スキル（kind: 'move'）は物理で動くので無し。
+export const SKILL_MOTION_TABLE = {
+  // ルナ（基本）
+  luna_neon_rush: 'flurry', luna_pink_bullet: 'multiShot', luna_hiphop_step: 'slideStep', luna_party_bomb: 'throwBomb',
+  luna_idol_aura: 'idolPose', luna_star_shower: 'fanSweep',
+  // ジン（基本）
+  jin_heavy_smash: 'heavySmash', jin_street_upper: 'uppercut', jin_nitro_dash: 'tackle', jin_ground_quake: 'groundPunch',
+  jin_boss_dignity: 'flex', jin_v8_cannon: 'palmBlast',
+  // ハッカー（基本）
+  hk_data_bolt: 'castThrust', hk_glitch_wave: 'castRaise', hk_packet_dash: 'slideStep', hk_virus_bomb: 'throwBomb',
+  hk_firewall: 'hackType', hk_cyber_storm: 'castSweep',
+  street_dash: 'laceUp',
+  // ルナ・ガンスリンガー系
+  lj_gun_double_tap: 'multiShot', lj_gun_spread_shot: 'fanSweep', lj_gun_rail_snipe: 'snipe', lj_gun_hot_cartridge: 'reload',
+  lj_gun_booster: 'reload', lj_gun_bullet_rain: 'skyShot', lj_gun_heart_magnum: 'snipe', lj_gun_supernova: 'fanSweep',
+  lj_gun_bounty_hunter: 'reload',
+  // ルナ・ネオンダンサー系
+  lj_dance_spin_turn: 'spinKick', lj_dance_glide: 'slideStep', lj_dance_strobe: 'stagePose', lj_dance_groove: 'idolPose',
+  lj_dance_booster: 'idolPose', lj_dance_prism_step: 'slideStep', lj_dance_galaxy_stage: 'stagePose', lj_dance_starlight_combo: 'spinKick',
+  lj_dance_world_tour: 'idolPose',
+  // ジン・ストリートファイター系
+  jj_fight_jab_rush: 'jabRush', jj_fight_haymaker: 'haymaker', jj_fight_knuckle_bomb: 'groundPunch', jj_fight_fighting_spirit: 'flex',
+  jj_fight_booster: 'flex', jj_fight_dragon_upper: 'uppercut', jj_fight_dragon_wave: 'palmBlast', jj_fight_haoh_quake: 'meteor',
+  jj_fight_haoh_spirit: 'flex',
+  // ジン・ナイトレーサー系
+  jj_race_burnout: 'revEngine', jj_race_drift_dash: 'tackle', jj_race_exhaust_flame: 'revEngine', jj_race_turbo: 'revEngine',
+  jj_race_booster: 'revEngine', jj_race_nitro_burst: 'groundPunch', jj_race_warp_drive: 'tackle', jj_race_meteor_crash: 'meteor',
+  jj_race_hyperdrive: 'flex',
+  // ハッカー・ネットランナー系
+  hn_logic_bomb: 'throwBomb', hn_data_spike: 'castThrust', hn_ddos_storm: 'castRaise', hn_overflow: 'hackType', hn_booster: 'hackType',
+  hn_blackout: 'castRaise', hn_trojan_lance: 'castThrust', hn_singularity: 'castRaise', hn_god_mode: 'hackType',
+  // ハッカー・ドローンマスター系
+  hd_drone_shot: 'command', hd_drone_bomb: 'command', hd_missile_pod: 'command', hd_shield_drone: 'hackType', hd_booster: 'hackType',
+  hd_carpet_bomb: 'command', hd_rail_drone: 'command', hd_orbital_laser: 'castRaise', hd_full_deploy: 'command',
+};
+
+// モーションの長さ（秒）。連撃系は回数で伸ばす（最大 0.8 秒）
+const DUR = {
+  flurry: 0.5, spinKick: 0.6, heavySmash: 0.55, haymaker: 0.55, jabRush: 0.6, uppercut: 0.55, groundPunch: 0.6, tackle: 0.4,
+  slideStep: 0.4, palmBlast: 0.5, revEngine: 0.6, meteor: 0.7, multiShot: 0.45, fanSweep: 0.5, snipe: 0.6, skyShot: 0.55,
+  throwBomb: 0.5, stagePose: 0.65, castThrust: 0.5, castSweep: 0.5, castRaise: 0.6, command: 0.55, flex: 0.6, idolPose: 0.6,
+  hackType: 0.6, reload: 0.55, laceUp: 0.55,
+};
+const HITS_SCALED = { flurry: 1, spinKick: 1, jabRush: 1, multiShot: 1 };
+
+const BY_KIND = {
+  luna: { melee: 'flurry', projectile: 'multiShot', aoe: 'stagePose', dash: 'slideStep', buff: 'idolPose' },
+  jin: { melee: 'heavySmash', projectile: 'palmBlast', aoe: 'groundPunch', dash: 'tackle', buff: 'flex' },
+  hacker: { melee: 'castThrust', projectile: 'castThrust', aoe: 'castRaise', dash: 'slideStep', buff: 'hackType' },
+};
+
+/** skillMotionOf(skill, heroId) → { id, hits, duration } または null（モーション無し） */
+export function skillMotionOf(sk, heroId) {
+  if (!sk || sk.kind === 'move' || sk.kind === 'passive') return null;
+  const id = SKILL_MOTION_TABLE[sk.id] || (BY_KIND[heroId] || BY_KIND.luna)[sk.kind];
+  if (!id) return null;
+  const hits = id === 'multiShot' ? (sk.proj?.count || 1) : (sk.hits || 1);
+  let duration = DUR[id] || 0.5;
+  if (HITS_SCALED[id]) duration = Math.min(0.8, duration + Math.max(0, hits - 3) * 0.06);
+  if (sk.kind === 'dash' && sk.dash) duration = Math.max(duration, (sk.dash.time || 0) + 0.12);
+  return { id, hits, duration };
+}

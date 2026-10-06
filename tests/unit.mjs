@@ -136,6 +136,21 @@ function step(game, dt = 1 / 60) {
 }
 
 // ============================================================ データ整合性
+test('装備: 女性専用（スカート・ドレス・ヒール）は男性キャラが装備できず、女性はできる。初期装備は性別に合う', () => {
+  const m = newState('jin', { gender: 'm' }), gm = { state: m };
+  for (const id of ['skirt_pink', 'idol_dress', 'heels_red']) {
+    addItem(gm, id, 1);
+    assert.equal(equip(gm, id).ok, false, id);
+  }
+  const f = newState('luna', { gender: 'f' }), gf = { state: f };
+  addItem(gf, 'skirt_pink', 1);
+  assert.equal(equip(gf, 'skirt_pink').ok, true);
+  for (const cls of ['luna', 'jin', 'hacker']) {
+    const s = newState(cls, { gender: 'm' });
+    for (const id of Object.values(s.equipped)) if (id) assert.ok(!['skirt', 'idolDress', 'heels'].includes(ITEMS[id].look?.style), cls + ' の男性の初期装備に ' + id);
+  }
+});
+
 test('items: 必須フィールドとスタイル', () => {
   const ids = Object.keys(ITEMS);
   assert.ok(ids.length > 0);

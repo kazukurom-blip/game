@@ -278,6 +278,22 @@ test('職の攻撃モーション: 全系統にあり、どの武器・どの進
   }
 });
 
+test('スキルのモーション: 全アクティブスキルに割り当てがあり、どの武器・どの進みでも描ける', async () => {
+  const { SKILLS } = await import('../src/data/skills.js');
+  const { skillMotionOf } = await import('../src/data/skillMotions.js');
+  for (const sk of Object.values(SKILLS)) {
+    const m = skillMotionOf(sk, sk.hero === 'both' ? 'luna' : sk.hero);
+    if (sk.kind === 'passive' || sk.kind === 'move') { assert.equal(m, null, sk.id); continue; }
+    assert.ok(m && C.SKILL_MOTION_IDS.includes(m.id), 'モーションが無い: ' + sk.id);
+    assert.ok(m.duration >= 0.3 && m.duration <= 0.9, sk.id + ' の長さ ' + m.duration);
+  }
+  for (const id of C.SKILL_MOTION_IDS) for (const w of [null, 'knife', 'pistol', 'staff']) for (let i = 0; i <= 8; i++) {
+    const ctx = fakeCtx();
+    C.drawCharacter(ctx, 0, 0, hero(), w ? { weapon: { style: w } } : {}, { state: 'attack', attackT: i / 8, skillMotion: id, skillHits: 5, noCache: true });
+    assert.ok(ctx.calls.includes('fill'), `${id}/${w}/${i}`);
+  }
+});
+
 let pass = 0, fail = 0;
 for (const t of tests) {
   try { await t.fn(); pass++; console.log('✓ rig: ' + t.name); } catch (e) { fail++; console.log('✗ rig: ' + t.name + '\n   ' + (e && e.message)); }

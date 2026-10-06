@@ -116,7 +116,7 @@ export class Player {
     if (this.attackLeft > 0) {
       this.attackLeft -= dt;
       this.attackT = this.attackDur > 0 ? Math.min(1, 1 - this.attackLeft / this.attackDur) : 1;
-      if (this.attackLeft <= 0) { this.attackKind = null; this.attackT = 0; }
+      if (this.attackLeft <= 0) { this.attackKind = null; this.attackT = 0; this.skillMotion = null; }
     }
     // HP/MP 上限
     if (st.maxHp && s.hp > st.maxHp) s.hp = st.maxHp;
@@ -616,8 +616,10 @@ export class Player {
 
     if (kind !== 'basic') {
       this.attackKind = (kind === 'shoot' || kind === 'gun' || kind === 'projectile') ? 'shoot' : 'attack';
+      this.skillMotion = opts.motion || null; this.skillHits = opts.hits || 0;
       return true;
     }
+    this.skillMotion = null;
     this.attackCd = 1 / aps;
     if (wt === 'gun') {
       this.attackKind = 'shoot';
@@ -684,6 +686,7 @@ export class Player {
     let aura = null, tier = 1;
     let motion = null;
     try { const j = currentJob(s); aura = j?.aura || null; tier = j?.tier || 1; motion = j?.tier >= 1 ? j.branch || null : null; } catch (e) { aura = null; }
+    a.skillMotion = this.attackLeft > 0 ? this.skillMotion || null : null; a.skillHits = this.skillHits || 0;
     a.motion = motion; // 転職後は職の系統ごとの攻撃モーション（character.js JOB_MOTIONS）
     a.aura = aura;
     a.auraTier = tier; // 職の段階（1〜4次）でオーラが強くなる（character.js drawAuraBack/Front）

@@ -14,6 +14,7 @@ import {
 import { drawSkillPreview, kindLabel } from './v3windows.js';
 import { mapInfo } from './deps.js';
 import * as SpriteM from '../render/sprites.js';
+import { itemGender, canWearGender, GENDER_ONLY_LABEL } from '../data/items.js';
 
 const W = 1280, H = 720;
 const WT = { melee: '近接', gun: '銃', magic: '魔法' };
@@ -44,6 +45,7 @@ export function itemTip(game, it, o = {}) {
   const cat = it.slot ? (SLOT_LABELS[it.slot] || it.slot) : it.type === 'consumable' ? '消費アイテム' : 'その他';
   L.push({ t: `${info.name}  ・  ${cat}`, c: COL.sub, size: 12 });
   if (it.reqLevel) L.push({ t: `必要Lv ${it.reqLevel}`, c: (st.level || 1) >= it.reqLevel ? '#ffffff' : COL.bad, size: 13 });
+  if (itemGender(it)) L.push({ t: GENDER_ONLY_LABEL[itemGender(it)], c: canWearGender(it, st.gender) ? '#ffd6f5' : COL.bad, size: 13 });
   if (it.slot === 'pet' || it.pet) {
     const pt = it.pet || {};
     L.push({ sep: true });
@@ -337,7 +339,7 @@ function drawInventory(ui, ctx, win) {
     slotBox(ctx, r, e?.it, { hover: hov && e, sel: e && selE === e });
     if (!e) continue;
     drawItemIco(ctx, e.it, r.x + 25, r.y + 25, 40);
-    if ((e.it.reqLevel || 0) > (st.level || 1)) {
+    if ((e.it.reqLevel || 0) > (st.level || 1) || !canWearGender(e.it, st.gender)) {
       ctx.save(); rrPath(ctx, r.x, r.y, r.w, r.h, 9); ctx.fillStyle = 'rgba(255,40,70,0.22)'; ctx.fill(); ctx.restore();
     }
     if ((e.s.qty || 1) > 1) txt(ctx, e.s.qty, r.x + r.w - 4, r.y + r.h - 9, { size: 12, align: 'right', sw: 3 });
@@ -1051,7 +1053,7 @@ function drawShop(ui, ctx, win) {
   tabs(ui, ctx, win, x + 16, y + 46, ['購入', '売却']);
   txt(ctx, fmtMoney(st.money || 0), x + w - 20, y + 62, { size: 20, align: 'right', color: COL.money, stroke: COL.moneyShadow, sw: 4 });
   let rows;
-  if (win.tab === 0) rows = (npc.shop || []).map((id) => getItemDef(id)).filter(Boolean).map((it) => ({ key: it.id, it, price: it.price || 0 }));
+  if (win.tab === 0) rows = (npc.shop || []).map((id) => getItemDef(id)).filter((it) => it && canWearGender(it, st.gender)).map((it) => ({ key: it.id, it, price: it.price || 0 }));
   else rows = (st.inventory || []).map((s, i) => ({ s, i, it: s ? getItemDef(s.id) : null })).filter((e) => e.it && (e.it.price || e.it.sellPrice))
     .map((e) => ({ key: e.i + ':' + e.s.id, it: e.it, s: e.s, price: sellPrice(e.it) }));
   const PER = 8, RH = 48;

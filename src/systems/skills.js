@@ -1,4 +1,5 @@
 // スキル使用・クールダウン・バフ・習得
+import { skillMotionOf } from '../data/skillMotions.js';
 import { SKILLS, jobSkillUnlocked } from '../data/skills.js';
 import { JOBS, hasJob, skillSpTier, getSp, addSp } from '../data/jobs.js';
 import { Projectile } from '../entities/projectile.js';
@@ -82,10 +83,13 @@ export function useSkill(game, skillId) {
   cds[skillId] = { left: total, total };
   const f = p.facing || 1;
   const mult = sk.mult(lv);
+  // スキルごとの専用モーション（通常攻撃の振りとは別）
+  const smo = skillMotionOf(sk, game.state?.heroId);
+  const anim = (kind) => p.startAttack?.(kind, smo ? { motion: smo.id, hits: smo.hits, duration: smo.duration } : {});
 
   switch (sk.kind) {
     case 'melee': {
-      p.startAttack?.('melee');
+      anim('melee');
       const rect = frontRect(p, sk.range.w, sk.range.h);
       spawnEffect(game, 'slash', p.x + f * sk.range.w * 0.45, p.y - p.h / 2, { color: sk.color, facing: f, w: sk.range.w, h: sk.range.h, hits: sk.hits });
       const hit = playerAttackArea(game, rect, mult, { hits: sk.hits, knock: sk.knock ?? 200, launch: sk.launch, effect: sk.effect, color: sk.color, maxTargets: sk.maxTargets ?? 6, knockDir: f });
@@ -93,7 +97,7 @@ export function useSkill(game, skillId) {
       break;
     }
     case 'projectile': {
-      p.startAttack?.('gun');
+      anim('gun');
       const pr = sk.proj;
       const n = pr.count || 1;
       const ox = p.x + f * 26, oy = p.y - p.h * 0.55;
@@ -111,7 +115,7 @@ export function useSkill(game, skillId) {
       break;
     }
     case 'aoe': {
-      p.startAttack?.('melee');
+      anim('melee');
       const rect = { x: p.x - sk.range.w / 2, y: p.y - p.h / 2 - sk.range.h / 2, w: sk.range.w, h: sk.range.h };
       spawnEffect(game, sk.effect || 'explosion', p.x, p.y - p.h / 2, { color: sk.color, radius: sk.range.w / 2, w: sk.range.w, h: sk.range.h });
       const hit = playerAttackArea(game, rect, mult, { hits: sk.hits, knock: sk.knock ?? 300, launch: sk.launch, effect: 'hit', color: sk.color, maxTargets: sk.maxTargets ?? 10 });
@@ -119,7 +123,7 @@ export function useSkill(game, skillId) {
       break;
     }
     case 'dash': {
-      p.startAttack?.('melee');
+      anim('melee');
       const d = sk.dash;
       const dist = typeof d.dist === 'function' ? d.dist(lv) : d.dist;
       _dash = { skill: sk, dir: f, speed: dist / d.time, t: d.time, mult, attackId: newAttackId(), faDone: false };
@@ -129,7 +133,7 @@ export function useSkill(game, skillId) {
       break;
     }
     case 'buff': {
-      p.startAttack?.('magic');
+      anim('magic');
       const b = sk.buff(lv);
       addBuff(game, { id: sk.id, name: sk.name, color: sk.color, ...b });
       spawnEffect(game, 'buff', p.x, p.y, { color: sk.color });

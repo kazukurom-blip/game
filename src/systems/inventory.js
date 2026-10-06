@@ -7,7 +7,7 @@
 //     - {slot:'weapon'} … 装備中のインスタンス
 //     - 数値 / {index} … インベントリの添字
 //     - itemId 文字列 … 装備中を優先、なければインベントリ内で★・潜在が最も良いもの（equip はインベントリのみ）
-import { ITEMS, EQUIP_SLOTS, WEAR_SLOTS } from '../data/items.js';
+import { ITEMS, EQUIP_SLOTS, WEAR_SLOTS, canWearGender, itemGender, GENDER_ONLY_LABEL } from '../data/items.js';
 import { gradeIndex } from '../data/gear.js';
 import { computeStats, clampVitals, addBuff } from './progression.js';
 import { spawnEffect, spawnDamageNumber } from '../render/effects.js';
@@ -301,6 +301,7 @@ export function equip(game, itemRef) {
   const it = ITEMS[inst.id];
   if (!it || it.type !== 'equip') return { ok: false, msg: '装備できないアイテムです' };
   if ((it.reqLevel || 0) > st.level) return { ok: false, msg: `Lv.${it.reqLevel} 以上が必要です` };
+  if (!canWearGender(it, st.gender)) return { ok: false, msg: `${GENDER_ONLY_LABEL[itemGender(it)]}の装備です` };
   const slot = it.slot;
   const prev = equippedInstOf(st, slot);
   st.inventory.splice(r.index, 1);

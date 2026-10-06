@@ -27,10 +27,11 @@ const { spawnEffect, updateEffects, drawEffects } = FX;
 
 import { UIManager } from './ui/ui.js';
 import { drawHUD } from './ui/hud.js';
-import { drawTitle, titleInput } from './ui/title.js';
+import { drawTitle, titleInput, _titleState } from './ui/title.js';
 
 import { DebugPanel } from './debug/debug.js';
 import * as Sprites from './render/sprites.js';
+import { updateLoadGate, drawLoadGate, markManifestSettled, loadGateState } from './render/loadGate.js';
 
 const W = 1280, H = 720;
 function loadSettings() {
@@ -117,7 +118,8 @@ game.ui = new UIManager(game);
 game.debug = new DebugPanel(game);
 // 差し替えスプライト（assets/sprites/manifest.json。無い/壊れている → 全部コード描画のまま）
 game.sprites = Sprites;
-Sprites.loadSpriteManifest().catch(() => {});
+Sprites.loadSpriteManifest().catch(() => {}).finally(markManifestSettled);
+game.loadGate = loadGateState; // テスト用: 読み込み中の目隠しの状態
 game.saveSettings = () => { try { localStorage.setItem('nvs_settings', JSON.stringify(game.settings)); } catch { /* ignore */ } };
 // 永続的なイベント購読（各 attach は game.state を都度参照する）
 safe('attachAudio', () => attachAudio(game));
@@ -407,6 +409,13 @@ function frame(now) {
     phase('update');
     drawPlay();
   }
+  // 画面が切り替わった直後は、差し替え画像の読み込みが終わるまで「読み込み中」で覆う（旧い絵が一瞬見えないように）
+  safe('loadGate', () => {
+    const ts = game.scene === 'title' ? _titleState() : null;
+    const key = game.scene === 'play' ? 'play|' + (game.map?.id || '') : 'title|' + (ts?.screen || '') + '|' + (ts?.c?.step ?? '');
+    updateLoadGate(key, performance.now() / 1000); // 実時間（重い読み込み中は game.time が遅れるので）
+    drawLoadGate(ctx, W, H, performance.now() / 1000, dt);
+  });
   if (game._saveReq) { game._saveReq = false; if (game.scene === 'play') safe('save', () => game.save()); }
   phase('save');
   const pf = game.perf, ms = performance.now() - t0;

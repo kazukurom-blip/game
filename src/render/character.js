@@ -561,6 +561,379 @@ const JOB_MOTIONS = {
 };
 export const JOB_MOTION_IDS = Object.keys(JOB_MOTIONS);
 
+// ---------------------------------------------------------------- スキルごとのモーション
+//  anim.skillMotion = モーション名（data/skillMotions.js でスキルに割り当て）、anim.skillHits = 連撃の回数。
+//  通常攻撃・職の攻撃モーションより優先。キーフレームの書き方は JOB_MOTIONS と同じ。
+const swingArc = (P, at, a0, a1, t0, t1, wk) => {
+  P.swoosh = wk === 'melee' && inR(at, t0, t1) ? { from: PI / 2 - Math.max(a0, a1) - 0.2, to: PI / 2 - Math.min(a0, a1) + 0.1, alpha: 1 - (at - t0) / (t1 - t0) * 0.6 } : null;
+};
+const fistOrGrip = (P, wk) => { if (wk === 'none') P.handF = 'fist'; P.handB = 'fist'; };
+const shootArm = (wk) => (wk === 'gun' ? GUN_ARM : [PI / 2 - 0.05, 0.05]);
+const SKILL_MOTIONS = {
+  // 連続斬り: 上下に素早く振り分けながら少しずつ踏み込む（回数 = hits）
+  flurry(P, at, wk, f, n) {
+    n = clamp(n || 4, 2, 6);
+    const keys = [restKey(wk, 0)];
+    for (let i = 0; i < n; i++) {
+      const hi = i % 2 === 0, t = 0.08 + (i / n) * 0.78;
+      keys.push({ t, af: hi ? [2.6, 0.3] : [0.2, 0.5], ab: [-0.5, 0.6], lf: [0.35 + i * 0.04, 0.3], lb: [-0.4, 0.2], tilt: hi ? -0.06 : 0.14, twist: hi ? -0.6 : 1.2, hx: 0.6 + i * 0.5, bob: hi ? 0 : 1.5, hs: hi ? 0.4 : -0.4, wo: hi ? -0.2 : 0.4, wm: hi ? -1.3 : -0.3 });
+    }
+    keys.push(restKey(wk, 1));
+    applyKf(P, kfPose(keys, at), wk);
+    fistOrGrip(P, wk);
+    const seg = Math.floor(clamp((at - 0.08) / 0.78, 0, 0.999) * n);
+    if (wk === 'melee' && at > 0.08 && at < 0.9) P.swoosh = { from: -1, to: PI / 2 - 0.2, alpha: 0.7 + 0.3 * (seg % 2) };
+    P.punch = wk === 'none' && at > 0.1 && at < 0.88;
+    P.eyes = 'fierce'; P.brow = 'angry'; P.mouth = 'shout';
+  },
+  // 回し蹴り: 回転（背中が見える）を回数ぶん繰り返し、最後に高い蹴り
+  spinKick(P, at, wk, f, n) {
+    n = clamp(Math.round((n || 4) / 2), 1, 4);
+    const keys = [restKey(wk, 0)];
+    for (let i = 0; i < n; i++) {
+      const t = 0.06 + (i / n) * 0.7, dt = 0.7 / n;
+      keys.push({ t, af: [1.5, 0.2], ab: [1.5, 0.2], lf: [1.3, 0.2], lb: [-0.1, 0.1], tilt: -0.12, twist: 1.3, hx: 0.5 + i * 0.4, bob: -1, hs: -0.7, hl: 0.4, wm: -0.5 });
+      keys.push({ t: t + dt * 0.5, af: [1.6, 0.2], ab: [1.6, 0.2], lf: [0.4, 0.6], lb: [-0.1, 0.2], tilt: 0, twist: -0.6, hx: 0.7 + i * 0.4, bob: -2, hs: 0.7, hl: 0.6, wm: -0.5 });
+    }
+    keys.push({ t: 0.84, af: [2.3, 0.2], ab: [-0.7, 0.3], lf: [1.6, 0.1], lb: [-0.2, 0.1], tilt: -0.2, twist: 1.3, hx: 1.6, bob: -1, hs: -0.6, wm: -0.4 });
+    keys.push(restKey(wk, 1));
+    applyKf(P, kfPose(keys, at), wk);
+    const ph = ((clamp(at - 0.06, 0, 0.7) / 0.7) * n) % 1;
+    P.back = at > 0.06 && at < 0.76 && ph > 0.35 && ph < 0.65; P.showWeapon = !P.back;
+    P.eyes = 'fierce'; P.mouth = 'shout'; P.brow = 'angry';
+  },
+  // 渾身の振り下ろし: 大きく振りかぶって跳び、着地と同時に叩きつける
+  heavySmash(P, at, wk) {
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.32, af: [3.4, 0.4], ab: [3.1, 0.4], lf: [0.3, 0.6], lb: [-0.4, 0.4], tilt: -0.18, twist: -0.4, hx: -0.8, bob: -6, hl: 0.8, hs: 0.5, wm: -1.8 },
+      { t: 0.5, af: [0.2, 0.1], ab: [0.4, 0.3], lf: [0.8, 1.3], lb: [-0.7, 1.0], tilt: 0.36, twist: 1.2, hx: 2.5, bob: 5, hs: -0.8, wm: -0.1 },
+      { t: 0.75, af: [0.2, 0.15], ab: [0.4, 0.35], lf: [0.75, 1.2], lb: [-0.65, 0.9], tilt: 0.32, twist: 1.1, hx: 2.4, bob: 4.5, hs: -0.4, wm: -0.15 },
+      restKey(wk, 1),
+    ], at), wk);
+    fistOrGrip(P, wk); P.punch = wk === 'none' && inR(at, 0.45, 0.7);
+    swingArc(P, at, 3.4, 0.2, 0.32, 0.6, wk);
+    P.eyes = 'fierce'; P.brow = 'angry'; P.mouth = at < 0.3 ? 'grit' : 'shout';
+  },
+  // 大振りのフック: 体ごと大きく後ろへひねって溜め、横殴りに振り抜く
+  haymaker(P, at, wk) {
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.35, af: [0.4, 1.9], ab: [1.2, 1.2], lf: [0.2, 0.4], lb: [-0.6, 0.5], tilt: -0.14, twist: -1.8, hx: -2, bob: 1.5, hs: 0.6, wm: -1.2 },
+      { t: 0.52, af: [PI / 2 + 0.1, 0.1], ab: [-0.9, 0.5], lf: [0.7, 0.3], lb: [-0.7, 0.1], tilt: 0.24, twist: 1.8, hx: 3, bob: 0.5, hs: -0.9, wm: -0.2 },
+      { t: 0.78, af: [1.3, 0.3], ab: [-0.8, 0.6], lf: [0.65, 0.3], lb: [-0.65, 0.12], tilt: 0.18, twist: 1.5, hx: 2.6, bob: 0.5, hs: -0.5, wm: -0.3 },
+      restKey(wk, 1),
+    ], at), wk);
+    fistOrGrip(P, wk); P.punch = wk === 'none' && inR(at, 0.48, 0.7);
+    swingArc(P, at, 2.3, 1.6, 0.4, 0.62, wk);
+    P.eyes = 'fierce'; P.brow = 'angry'; P.mouth = at < 0.35 ? 'grit' : 'shout';
+  },
+  // ジャブの連打 → 最後に体重を乗せたストレート
+  jabRush(P, at, wk, f, n) {
+    n = clamp(n || 5, 3, 6);
+    const keys = [restKey(wk, 0), { t: 0.06, af: [0.9, 1.6], ab: [0.9, 1.6], lf: [0.4, 0.3], lb: [-0.4, 0.3], tilt: 0.04, twist: 0.2, hx: 0, bob: 1.5 }];
+    for (let i = 0; i < n; i++) {
+      const t = 0.1 + (i / n) * 0.55, hand = i % 2 === 0;
+      keys.push({ t, af: hand ? [PI / 2, 0.05] : [0.9, 1.6], ab: hand ? [0.9, 1.6] : [PI / 2 - 0.1, 0.05], lf: [0.4, 0.3], lb: [-0.4, 0.3], tilt: 0.06, twist: hand ? 0.8 : -0.2, hx: 0.3 + i * 0.25, bob: 1.5, hs: 0.2 });
+      keys.push({ t: t + 0.55 / n * 0.5, af: [0.9, 1.6], ab: [0.9, 1.6], lf: [0.4, 0.3], lb: [-0.4, 0.3], tilt: 0.04, twist: 0.3, hx: 0.3 + i * 0.25, bob: 1.5 });
+    }
+    keys.push({ t: 0.75, af: [PI / 2 + 0.05, 0], ab: [0.6, 1.5], lf: [0.75, 0.3], lb: [-0.75, 0.1], tilt: 0.22, twist: 1.6, hx: 3, bob: 0.5, hs: -0.7 });
+    keys.push(restKey(wk, 1));
+    applyKf(P, kfPose(keys, at), wk);
+    fistOrGrip(P, wk); P.punch = wk === 'none' && at > 0.1 && at < 0.85;
+    if (wk === 'melee' && inR(at, 0.7, 0.82)) P.swoosh = { from: -0.4, to: 0.4, alpha: 1 };
+    P.eyes = 'fierce'; P.brow = 'angry'; P.mouth = 'shout';
+  },
+  // アッパーカット: 深くしゃがんで溜め、跳び上がりながら奥の腕で真上へ突き上げる（武器は手前の手で振り上げる）
+  uppercut(P, at, wk) {
+    const melee = wk === 'melee';
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.25, af: melee ? [0.2, 0.3] : [0.9, 1.5], ab: [-0.4, 1.7], lf: [0.55, 1.2], lb: [-0.45, 1.1], tilt: 0.2, twist: -1.3, hx: -0.5, bob: 5, wm: -1.0 },
+      { t: 0.45, af: melee ? [3.0, 0.1] : [1.0, 1.6], ab: melee ? [-0.6, 1.0] : [2.3, 0.05], lf: [0.9, 1.5], lb: [-0.25, 0.15], tilt: -0.16, twist: 1.2, hx: 1.5, bob: -11, hl: 1, hs: 0.7, wm: -1.6 },
+      { t: 0.68, af: melee ? [2.8, 0.2] : [1.0, 1.6], ab: melee ? [-0.5, 1.0] : [2.2, 0.15], lf: [0.8, 1.3], lb: [-0.25, 0.3], tilt: -0.1, twist: 1, hx: 1.5, bob: -7, hl: 0.8, hs: 0.4, wm: -1.6 },
+      restKey(wk, 1),
+    ], at), wk);
+    fistOrGrip(P, wk); P.punch = wk === 'none' && inR(at, 0.38, 0.65);
+    swingArc(P, at, 0.2, 3.0, 0.27, 0.5, wk);
+    P.eyes = 'fierce'; P.brow = 'angry'; P.mouth = at < 0.25 ? 'grit' : 'shout';
+  },
+  // 地面を殴る: 跳び上がって両こぶしを振りかぶり、しゃがみ込みながら地面へ叩きつける
+  groundPunch(P, at, wk) {
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.3, af: [3.0, 0.5], ab: [3.0, 0.5], lf: [0.5, 1.0], lb: [-0.3, 0.8], tilt: -0.14, twist: 0, hx: 0, bob: -9, hl: 1, hs: 0.6, wm: -1.8 },
+      { t: 0.5, af: [0.1, 0.1], ab: [0.05, 0.1], lf: [0.9, 1.6], lb: [-0.8, 1.4], tilt: 0.42, twist: 0.8, hx: 1.5, bob: 9, hs: -0.8, wm: 0.2 },
+      { t: 0.78, af: [0.15, 0.15], ab: [0.1, 0.15], lf: [0.85, 1.5], lb: [-0.75, 1.3], tilt: 0.38, twist: 0.7, hx: 1.5, bob: 8, hs: -0.4, wm: 0.1 },
+      restKey(wk, 1),
+    ], at), wk);
+    fistOrGrip(P, wk); P.punch = wk === 'none' && inR(at, 0.46, 0.75);
+    swingArc(P, at, 3.0, 0.1, 0.3, 0.55, wk);
+    P.eyes = 'fierce'; P.brow = 'angry'; P.mouth = at < 0.3 ? 'grit' : 'shout';
+  },
+  // ショルダータックル: 低く前へ倒れ込み、肩から突っ込む（突進スキル）
+  tackle(P, at, wk) {
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.15, af: [0.6, 1.6], ab: [-0.6, 1.2], lf: [0.9, 0.5], lb: [-1.0, 0.3], tilt: 0.48, twist: 1.6, hx: 3, bob: 4, hs: -1.2, hl: 0.5, wm: -0.2 },
+      { t: 0.85, af: [0.6, 1.6], ab: [-0.7, 1.2], lf: [0.95, 0.6], lb: [-1.05, 0.3], tilt: 0.5, twist: 1.6, hx: 3.5, bob: 4, hs: -1.3, hl: 0.5, wm: -0.2 },
+      restKey(wk, 1),
+    ], at), wk);
+    fistOrGrip(P, wk); P.swoosh = null;
+    P.eyes = 'fierce'; P.brow = 'angry'; P.mouth = 'shout';
+  },
+  // ダンスのステップ: 片足を滑らせ、両腕を広げて滑るように進む（突進スキル）
+  slideStep(P, at, wk) {
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.15, af: [1.8, 0.2], ab: [-1.2, 0.2], lf: [1.0, 0.15], lb: [-0.7, 0.4], tilt: -0.1, twist: 0.8, hx: 2, bob: 2, hs: -1, hl: 0.4, wm: -0.6 },
+      { t: 0.5, af: [2.0, 0.3], ab: [-1.4, 0.2], lf: [-0.3, 0.6], lb: [0.6, 0.2], tilt: -0.06, twist: 0.4, hx: 2.5, bob: -1, hs: -1.1, hl: 0.5, wm: -0.6 },
+      { t: 0.85, af: [1.8, 0.2], ab: [-1.2, 0.2], lf: [1.0, 0.15], lb: [-0.7, 0.4], tilt: -0.1, twist: 0.8, hx: 2.5, bob: 2, hs: -1, hl: 0.4, wm: -0.6 },
+      restKey(wk, 1),
+    ], at), wk);
+    P.handB = 'open'; if (wk === 'none') P.handF = 'open'; P.swoosh = null;
+    P.eyes = at > 0.7 ? 'wink' : 'fierce'; P.mouth = 'happy'; P.brow = 'up';
+  },
+  // 気弾・衝撃波: 両手を腰に引いて溜め、両手のひらを前へ突き出す（反動でのけぞる）
+  palmBlast(P, at, wk) {
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.35, af: [-0.3, 1.9], ab: [-0.4, 1.9], lf: [0.5, 0.6], lb: [-0.6, 0.5], tilt: -0.08, twist: -1.2, hx: -1.5, bob: 3, hs: 0.5, wm: -1.2 },
+      { t: 0.5, af: [PI / 2, 0], ab: [PI / 2 - 0.1, 0.05], lf: [0.7, 0.4], lb: [-0.8, 0.2], tilt: 0.18, twist: 1, hx: 2.5, bob: 2, hs: -0.9, hl: 0.5, wm: -0.1 },
+      { t: 0.78, af: [PI / 2 + 0.15, 0], ab: [PI / 2, 0.05], lf: [0.6, 0.4], lb: [-0.7, 0.25], tilt: -0.04, twist: 0.8, hx: 1.5, bob: 2, hs: -0.5, wm: -0.2 },
+      restKey(wk, 1),
+    ], at), wk);
+    P.handB = 'open'; if (wk === 'none') P.handF = 'open';
+    if (wk === 'magic') P.magicGlow = inR(at, 0.3, 0.8) ? 1 : 0;
+    P.muzzle = wk === 'gun' && inR(at, 0.48, 0.58); P.swoosh = null;
+    P.eyes = 'fierce'; P.brow = 'angry'; P.mouth = at < 0.35 ? 'grit' : 'shout';
+  },
+  // 空ぶかし: 腰を落としてハンドルを握る構えで小刻みに震え、最後に拳を振り下ろす（炎・スモーク系）
+  revEngine(P, at, wk) {
+    const s = Math.sin(at * 60) * 0.06;
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.15, af: [1.2, 0.9], ab: [1.1, 0.9], lf: [0.6, 0.9], lb: [-0.6, 0.8], tilt: 0.12, twist: 0.3, hx: 0, bob: 5, hs: -0.3, wm: -0.6 },
+      { t: 0.7, af: [1.2, 0.9], ab: [1.1, 0.9], lf: [0.6, 0.9], lb: [-0.6, 0.8], tilt: 0.12, twist: 0.3, hx: 0, bob: 5, hs: -0.6, wm: -0.6 },
+      { t: 0.82, af: [2.9, 0.3], ab: [-0.5, 0.6], lf: [0.5, 0.5], lb: [-0.5, 0.3], tilt: -0.1, twist: 0.8, hx: 0.5, bob: 1, hs: 0.5, hl: 0.5, wm: -1.5 },
+      restKey(wk, 1),
+    ], at), wk);
+    if (at > 0.15 && at < 0.7) { P.tilt += s; P.hx += s * 10; P.bob += Math.abs(s) * 8; }
+    fistOrGrip(P, wk); P.swoosh = null;
+    P.eyes = 'fierce'; P.brow = 'det'; P.mouth = 'grin';
+  },
+  // 隕石の一撃: 高く跳び上がってから、前へ斜めに急降下して叩きつける
+  meteor(P, at, wk) {
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.18, af: [0.2, 0.4], ab: [0.2, 0.4], lf: [0.6, 1.4], lb: [-0.5, 1.3], tilt: 0.2, bob: 7 },
+      { t: 0.42, af: [3.2, 0.3], ab: [2.9, 0.4], lf: [1.2, 1.6], lb: [0.6, 1.6], tilt: -0.3, twist: 0, hx: -1, bob: -16, hl: 1, hs: 1, wm: -1.8 },
+      { t: 0.6, af: [1.0, 0.2], ab: [0.8, 0.3], lf: [0.9, 1.2], lb: [-0.7, 1.1], tilt: 0.5, twist: 1.3, hx: 4, bob: 8, hs: -1, wm: -0.2 },
+      { t: 0.82, af: [0.6, 0.3], ab: [0.5, 0.4], lf: [0.85, 1.2], lb: [-0.7, 1.0], tilt: 0.4, twist: 1.1, hx: 4, bob: 8, hs: -0.5, wm: -0.3 },
+      restKey(wk, 1),
+    ], at), wk);
+    fistOrGrip(P, wk); P.punch = wk === 'none' && inR(at, 0.55, 0.8);
+    swingArc(P, at, 3.2, 1.0, 0.42, 0.62, wk);
+    P.eyes = 'fierce'; P.brow = 'angry'; P.mouth = 'shout';
+  },
+  // 連射: 腕を伸ばして構え、回数ぶん反動で銃口が跳ねる
+  multiShot(P, at, wk, f, n) {
+    n = clamp(n || 3, 1, 5);
+    const arm = shootArm(wk);
+    const keys = [restKey(wk, 0), { t: 0.12, af: arm, ab: [PI / 2 - 0.15, 0.1], lf: [0.4, 0.15], lb: [-0.45, 0.12], tilt: -0.04, twist: 0.9, hx: 0.5, wm: -0.1 }];
+    for (let i = 0; i < n; i++) {
+      const t = 0.18 + (i / n) * 0.62;
+      keys.push({ t, af: [arm[0] + 0.35, arm[1]], ab: [PI / 2 + 0.1, 0.1], lf: [0.4, 0.15], lb: [-0.45, 0.12], tilt: -0.1, twist: 0.8, hx: 0.1, wm: 0.2 });
+      keys.push({ t: t + 0.62 / n * 0.6, af: arm, ab: [PI / 2 - 0.15, 0.1], lf: [0.4, 0.15], lb: [-0.45, 0.12], tilt: -0.04, twist: 0.9, hx: 0.5, wm: -0.1 });
+    }
+    keys.push(restKey(wk, 1));
+    applyKf(P, kfPose(keys, at), wk);
+    const ph = ((clamp(at - 0.18, 0, 0.62) / 0.62) * n) % 1;
+    P.muzzle = wk === 'gun' && at > 0.18 && at < 0.8 && ph < 0.3;
+    if (wk === 'magic') P.magicGlow = at > 0.18 && at < 0.8 ? 1 - ph : 0;
+    P.handB = wk === 'gun' ? 'grip' : 'open'; P.swoosh = null; P.eyes = 'aim'; P.brow = 'angry'; P.mouth = 'smirk';
+  },
+  // 扇状にばらまく: 腕を上から下へ払いながら撃ち続ける
+  fanSweep(P, at, wk) {
+    const arm = shootArm(wk);
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.15, af: [arm[0] + 0.7, 0], ab: [-0.6, 0.4], lf: [0.45, 0.2], lb: [-0.5, 0.15], tilt: -0.12, twist: 0.9, hx: 0.5, hs: 0.3, wm: 0.3 },
+      { t: 0.75, af: [arm[0] - 0.7, 0], ab: [-0.6, 0.4], lf: [0.45, 0.2], lb: [-0.5, 0.15], tilt: 0.1, twist: 1.1, hx: 1, hs: -0.5, wm: -0.9 },
+      restKey(wk, 1),
+    ], at), wk);
+    P.muzzle = wk === 'gun' && at > 0.15 && at < 0.75 && Math.floor(at * 40) % 3 === 0;
+    if (wk === 'magic') P.magicGlow = inR(at, 0.15, 0.75) ? 1 : 0;
+    if (wk === 'melee' && inR(at, 0.15, 0.75)) P.swoosh = { from: PI / 2 - arm[0] - 0.7, to: PI / 2 - (arm[0] + 0.7 - 1.4 * (at - 0.15) / 0.6), alpha: 0.8 };
+    else P.swoosh = null;
+    P.handB = 'open'; P.eyes = 'aim'; P.brow = 'angry'; P.mouth = 'grin';
+  },
+  // 狙撃: 片膝をついて両手で構え、狙いを定めて一発（大きな反動）
+  snipe(P, at, wk) {
+    const arm = shootArm(wk);
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.3, af: arm, ab: [PI / 2 - 0.1, 0.15], lf: [0.9, 1.5], lb: [-0.3, 1.6], tilt: 0.05, twist: 1, hx: 0.5, bob: 7, wm: -0.1 },
+      { t: 0.5, af: arm, ab: [PI / 2 - 0.1, 0.15], lf: [0.9, 1.5], lb: [-0.3, 1.6], tilt: 0.05, twist: 1, hx: 0.5, bob: 7, wm: -0.1 },
+      { t: 0.58, af: [arm[0] + 0.6, 0], ab: [PI / 2 + 0.2, 0.2], lf: [0.9, 1.5], lb: [-0.3, 1.6], tilt: -0.14, twist: 0.8, hx: -1.5, bob: 7, hs: 0.8, wm: 0.4 },
+      { t: 0.8, af: arm, ab: [PI / 2 - 0.1, 0.15], lf: [0.85, 1.4], lb: [-0.3, 1.5], tilt: 0, twist: 0.9, hx: 0, bob: 6.5, wm: -0.1 },
+      restKey(wk, 1),
+    ], at), wk);
+    P.muzzle = wk === 'gun' && inR(at, 0.5, 0.6);
+    if (wk === 'magic') P.magicGlow = inR(at, 0.3, 0.62) ? 1 : 0;
+    P.handB = 'grip'; P.swoosh = null; P.eyes = 'aim'; P.brow = 'angry'; P.mouth = at < 0.5 ? 'flat' : 'smirk';
+  },
+  // 真上へ撃ち上げる（弾の雨）
+  skyShot(P, at, wk) {
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.2, af: [PI - 0.1, 0], ab: [PI - 0.3, 0.1], lf: [0.3, 0.2], lb: [-0.35, 0.15], tilt: -0.14, twist: 0.2, hx: -0.3, bob: 0.5, ht: -0.15, hs: 0.3, wm: -1.57 },
+      { t: 0.8, af: [PI - 0.05, 0], ab: [PI - 0.25, 0.1], lf: [0.3, 0.2], lb: [-0.35, 0.15], tilt: -0.14, twist: 0.2, hx: -0.3, bob: 0.5, ht: -0.15, hs: 0.3, wm: -1.57 },
+      restKey(wk, 1),
+    ], at), wk);
+    if (at > 0.2 && at < 0.8) { const k = Math.sin(at * 50) * 0.12; P.af = [P.af[0] + k, P.af[1]]; }
+    P.muzzle = wk === 'gun' && at > 0.2 && at < 0.8 && Math.floor(at * 30) % 2 === 0;
+    if (wk === 'magic') P.magicGlow = inR(at, 0.2, 0.8) ? 1 : 0;
+    P.handB = 'open'; P.swoosh = null; P.eyes = 'fierce'; P.brow = 'angry'; P.mouth = 'grin';
+  },
+  // 投げる: 後ろへ大きく振りかぶって、上から放り投げる（爆弾系）
+  throwBomb(P, at, wk) {
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.35, af: [0.6, 0.4], ab: [3.0, 0.9], lf: [0.5, 0.3], lb: [-0.5, 0.3], tilt: -0.16, twist: -1.2, hx: -1.2, bob: 1, hs: 0.5, wm: -1.2 },
+      { t: 0.52, af: [0.4, 0.4], ab: [1.7, 0.1], lf: [0.65, 0.3], lb: [-0.6, 0.15], tilt: 0.18, twist: 1.3, hx: 1.8, bob: 1, hs: -0.7 },
+      { t: 0.8, af: [0.5, 0.4], ab: [1.2, 0.3], lf: [0.6, 0.3], lb: [-0.6, 0.15], tilt: 0.12, twist: 1.1, hx: 1.5, bob: 0.5, hs: -0.3 },
+      restKey(wk, 1),
+    ], at), wk);
+    P.handB = at < 0.5 ? 'fist' : 'open'; P.swoosh = null;
+    P.eyes = at < 0.5 ? 'fierce' : 'happy'; P.brow = 'up'; P.mouth = at < 0.5 ? 'grin' : 'happy';
+  },
+  // ステージの決めポーズ: その場で一回転して、両腕を上へ広げる（ダンサーの範囲技）
+  stagePose(P, at, wk) {
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.2, af: [1.5, 0.2], ab: [1.5, 0.2], lf: [0.2, 0.9], lb: [-0.2, 0.8], tilt: 0, twist: -1, bob: 2, hs: 0.6, wm: -0.6 },
+      { t: 0.42, af: [1.6, 0.2], ab: [1.6, 0.2], lf: [0.3, 1.1], lb: [-0.05, 0.2], twist: 1, bob: -5, hl: 1, hs: -0.8, wm: -0.6 },
+      { t: 0.62, af: [2.7, 0.2], ab: [2.7, 0.2], lf: [0.3, 0.2], lb: [-0.35, 0.15], tilt: -0.08, twist: 0.4, bob: -1, hl: 0.6, hs: 0.2, wm: -1.5 },
+      { t: 0.85, af: [2.6, 0.25], ab: [2.6, 0.25], lf: [0.3, 0.2], lb: [-0.35, 0.15], tilt: -0.06, twist: 0.3, bob: 0, hl: 0.4, wm: -1.5 },
+      restKey(wk, 1),
+    ], at), wk);
+    P.back = inR(at, 0.26, 0.4); P.showWeapon = !P.back;
+    P.handB = 'open'; if (wk === 'none') P.handF = 'open';
+    if (wk === 'magic') P.magicGlow = inR(at, 0.55, 0.9) ? 1 : 0;
+    P.swoosh = null; P.eyes = at > 0.55 ? 'wink' : 'happy'; P.mouth = 'happy'; P.brow = 'up';
+  },
+  // 杖を前へ突き出して撃つ（光弾・槍）。溜めの間は杖を引いて光らせる
+  castThrust(P, at, wk) {
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.3, af: [0.4, 1.4], ab: [0.9, 1.3], lf: [0.3, 0.3], lb: [-0.45, 0.3], tilt: -0.06, twist: -0.8, hx: -1, bob: 1, hs: 0.4, wm: -0.25 },
+      { t: 0.45, af: [PI / 2 - 0.05, 0], ab: [PI / 2 - 0.4, 0.4], lf: [0.65, 0.3], lb: [-0.7, 0.15], tilt: 0.16, twist: 1.3, hx: 2.5, bob: 0.5, hs: -0.7, wm: -0.05 },
+      { t: 0.78, af: [PI / 2 - 0.05, 0.05], ab: [PI / 2 - 0.45, 0.45], lf: [0.6, 0.3], lb: [-0.65, 0.15], tilt: 0.12, twist: 1.2, hx: 2.2, bob: 0.5, hs: -0.4, wm: -0.08 },
+      restKey(wk, 1),
+    ], at), wk);
+    P.magicGlow = wk === 'magic' ? clamp(at < 0.45 ? at / 0.45 : 1 - (at - 0.6) / 0.3, 0, 1) : 0;
+    P.muzzle = wk === 'gun' && inR(at, 0.44, 0.55);
+    if (wk === 'melee' && inR(at, 0.42, 0.55)) P.swoosh = { from: -0.3, to: 0.3, alpha: 1 }; else P.swoosh = null;
+    P.handB = 'open'; P.eyes = 'aim'; P.brow = 'det'; P.mouth = at < 0.4 ? 'flat' : 'shout';
+  },
+  // 杖を横に大きく払って、扇状に放つ
+  castSweep(P, at, wk) {
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.25, af: [2.6, 0.2], ab: [-0.4, 0.5], lf: [0.3, 0.2], lb: [-0.4, 0.2], tilt: -0.14, twist: -0.6, hx: -0.5, hs: 0.5, wm: -1.2 },
+      { t: 0.6, af: [0.4, 0.1], ab: [-0.5, 0.5], lf: [0.6, 0.3], lb: [-0.6, 0.2], tilt: 0.2, twist: 1.4, hx: 2, hs: -0.7, wm: 0.6 },
+      { t: 0.82, af: [0.5, 0.15], ab: [-0.5, 0.5], lf: [0.55, 0.3], lb: [-0.55, 0.2], tilt: 0.15, twist: 1.2, hx: 1.8, hs: -0.3, wm: 0.5 },
+      restKey(wk, 1),
+    ], at), wk);
+    P.magicGlow = wk === 'magic' && inR(at, 0.2, 0.8) ? 1 : 0;
+    swingArc(P, at, 2.6, 0.4, 0.25, 0.62, wk);
+    P.handB = 'open'; P.eyes = 'fierce'; P.brow = 'det'; P.mouth = 'shout';
+  },
+  // 両手を天へ掲げて溜め、地面へ振り下ろして一帯に放つ（範囲の電脳魔法）
+  castRaise(P, at, wk) {
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.4, af: [2.95, 0.05], ab: [2.85, 0.1], lf: [0.2, 0.2], lb: [-0.25, 0.2], tilt: -0.12, twist: 0, hx: 0, bob: -4, hl: 1, hs: 0.5, ht: -0.15, wm: -1.57 },
+      { t: 0.55, af: [0.9, 0.1], ab: [0.8, 0.1], lf: [0.5, 0.7], lb: [-0.5, 0.6], tilt: 0.24, twist: 0.6, hx: 1, bob: 4, hs: -0.7, wm: -0.6 },
+      { t: 0.82, af: [0.9, 0.15], ab: [0.8, 0.15], lf: [0.45, 0.6], lb: [-0.45, 0.5], tilt: 0.2, twist: 0.5, hx: 1, bob: 3.5, hs: -0.3, wm: -0.6 },
+      restKey(wk, 1),
+    ], at), wk);
+    P.magicGlow = wk === 'magic' ? clamp(at < 0.4 ? at / 0.4 : 1 - (at - 0.6) / 0.3, 0, 1) : 0;
+    swingArc(P, at, 2.95, 0.9, 0.4, 0.6, wk);
+    P.handB = 'open'; if (wk === 'none') P.handF = 'open';
+    P.eyes = at > 0.3 && at < 0.6 ? 'aim' : 'fierce'; P.brow = 'det'; P.mouth = at < 0.4 ? 'o' : 'shout';
+  },
+  // ドローンへ指令: 杖（武器）を空へ掲げて合図し、敵へ振り下ろして「行け」と指す（職のドローンマスターの攻撃と同じ形）
+  command(P, at, wk, f) { JOB_MOTIONS.dronemaster(P, at, wk, null, f); },
+  // 気合いを入れる（ジン）: こぶしを腰に引いてしゃがみ、両腕を曲げて力こぶを見せる
+  flex(P, at, wk) {
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.3, af: [-0.3, 1.8], ab: [-0.3, 1.8], lf: [0.4, 0.9], lb: [-0.4, 0.8], tilt: 0.14, twist: 0, bob: 5, hs: -0.3, wm: -1.2 },
+      { t: 0.55, af: [1.7, 1.9], ab: [1.7, 1.9], lf: [0.3, 0.2], lb: [-0.35, 0.15], tilt: -0.06, twist: 0.2, bob: -1, hl: 0.8, hs: 0.5, wm: -1.2 },
+      { t: 0.85, af: [1.65, 1.95], ab: [1.65, 1.95], lf: [0.3, 0.2], lb: [-0.35, 0.15], tilt: -0.05, twist: 0.2, bob: -0.5, hl: 0.6, hs: 0.3, wm: -1.2 },
+      restKey(wk, 1),
+    ], at), wk);
+    fistOrGrip(P, wk); P.swoosh = null;
+    P.eyes = 'fierce'; P.brow = 'angry'; P.mouth = at < 0.4 ? 'grit' : 'shout';
+  },
+  // アイドルの決めポーズ（ルナ）: くるっと回ってウインク、片手でピース・もう片手は腰
+  idolPose(P, at, wk) {
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.25, af: [1.4, 0.3], ab: [1.4, 0.3], lf: [0.2, 0.6], lb: [-0.1, 0.3], twist: -1, bob: -2, hl: 0.6, hs: 0.8, wm: -0.6 },
+      { t: 0.5, af: wk === 'none' ? [2.6, 1.2] : [0.5, 0.8], ab: [2.7, 1.3], lf: [0.25, 0.1], lb: [-0.15, 0.5], tilt: -0.1, twist: 0.6, bob: 0, hs: -0.3, ht: 0.12, wm: -1.3 },
+      { t: 0.85, af: wk === 'none' ? [2.55, 1.25] : [0.5, 0.8], ab: [2.65, 1.35], lf: [0.25, 0.1], lb: [-0.15, 0.5], tilt: -0.08, twist: 0.5, bob: 0, hs: -0.1, ht: 0.12, wm: -1.3 },
+      restKey(wk, 1),
+    ], at), wk);
+    P.back = inR(at, 0.16, 0.3); P.showWeapon = !P.back;
+    P.handB = 'open'; if (wk === 'none') P.handF = 'open';
+    P.swoosh = null; P.eyes = at > 0.4 ? 'wink' : 'happy'; P.mouth = 'happy'; P.brow = 'up';
+  },
+  // 空中のキーボードを叩く（ハッカー）: 両手を胸の前に出して素早く打ち込み、最後に決定キー
+  hackType(P, at, wk) {
+    const s = Math.sin(at * 70);
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.2, af: [1.3, 0.6], ab: [1.25, 0.6], lf: [0.25, 0.15], lb: [-0.3, 0.12], tilt: 0.08, twist: 0.3, bob: 0.5, ht: 0.12, wm: -1.1 },
+      { t: 0.7, af: [1.3, 0.6], ab: [1.25, 0.6], lf: [0.25, 0.15], lb: [-0.3, 0.12], tilt: 0.08, twist: 0.3, bob: 0.5, ht: 0.12, wm: -1.1 },
+      { t: 0.8, af: [1.3, 0.6], ab: [2.1, 0.9], lf: [0.25, 0.15], lb: [-0.3, 0.12], tilt: -0.04, twist: 0.3, bob: -0.5, hl: 0.5, wm: -1.1 },
+      { t: 0.86, af: [1.3, 0.6], ab: [1.2, 0.4], lf: [0.25, 0.15], lb: [-0.3, 0.12], tilt: 0.1, twist: 0.3, bob: 1, wm: -1.1 },
+      restKey(wk, 1),
+    ], at), wk);
+    if (at > 0.2 && at < 0.7) { P.af = [P.af[0] + s * 0.06, P.af[1]]; P.ab = [P.ab[0] - s * 0.06, P.ab[1]]; }
+    P.handB = 'open'; if (wk === 'none') P.handF = 'open';
+    P.magicGlow = wk === 'magic' && at > 0.2 ? 0.5 : 0;
+    P.swoosh = null; P.eyes = 'aim'; P.brow = 'det'; P.mouth = at > 0.78 ? 'smirk' : 'flat';
+  },
+  // 弾を込める（銃のバフ）: 銃を胸元へ引き寄せ、後ろの手でスライドを引いて、構え直す
+  reload(P, at, wk) {
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.25, af: [1.0, 1.3], ab: [1.0, 1.3], lf: [0.25, 0.15], lb: [-0.3, 0.12], tilt: 0.06, twist: 0.4, ht: 0.12, wm: -0.8 },
+      { t: 0.45, af: [1.0, 1.3], ab: [0.7, 1.0], lf: [0.25, 0.15], lb: [-0.3, 0.12], tilt: 0.04, twist: 0.4, ht: 0.12, wm: -0.8 },
+      { t: 0.6, af: [2.6, 0.4], ab: [-0.3, 0.6], lf: [0.3, 0.15], lb: [-0.35, 0.12], tilt: -0.1, twist: 0.6, ht: -0.08, hs: 0.3, wm: -1.4 },
+      { t: 0.85, af: [2.5, 0.45], ab: [-0.3, 0.6], lf: [0.3, 0.15], lb: [-0.35, 0.12], tilt: -0.08, twist: 0.6, ht: -0.06, wm: -1.4 },
+      restKey(wk, 1),
+    ], at), wk);
+    P.handB = at < 0.5 ? 'grip' : 'open'; P.swoosh = null;
+    P.eyes = at > 0.55 ? 'wink' : 'aim'; P.brow = 'det'; P.mouth = 'smirk';
+  },
+  // 靴紐を締め直して駆け出す: しゃがんで手を足元へ → 立ち上がって軽く跳ねる
+  laceUp(P, at, wk) {
+    applyKf(P, kfPose([
+      restKey(wk, 0),
+      { t: 0.25, af: [0.6, 0.9], ab: [0.5, 0.9], lf: [0.9, 1.6], lb: [-0.3, 1.7], tilt: 0.5, twist: 0.3, hx: 1, bob: 8, hs: -0.5, ht: 0.2, wm: -0.5 },
+      { t: 0.5, af: [0.6, 0.9], ab: [0.5, 0.9], lf: [0.9, 1.6], lb: [-0.3, 1.7], tilt: 0.5, twist: 0.3, hx: 1, bob: 8, hs: -0.5, ht: 0.2, wm: -0.5 },
+      { t: 0.7, af: [-0.6, 0.4], ab: [0.8, 0.6], lf: [0.5, 0.6], lb: [-0.4, 0.5], tilt: 0.08, twist: 0.6, hx: 0.5, bob: -3, hl: 0.6, hs: -0.3 },
+      restKey(wk, 1),
+    ], at), wk);
+    P.handB = 'fist'; P.swoosh = null; P.eyes = at > 0.6 ? 'happy' : 'n'; P.brow = 'up'; P.mouth = at > 0.6 ? 'grin' : 'n';
+  },
+};
+export const SKILL_MOTION_IDS = Object.keys(SKILL_MOTIONS);
+
 function makePose(state, t, at, wk, ws, anim, w, f) {
   const P = {
     bob: 0, tilt: 0, hipY: 0, hx: 0, lb: [-0.06, 0], lf: [0.06, 0], ab: [-0.1, 0.25], af: [0.15, 0.45],
@@ -696,7 +1069,9 @@ function makePose(state, t, at, wk, ws, anim, w, f) {
     }
   }
   // 転職後の攻撃は職の系統ごとの専用モーション（anim.motion = 系統 ID。見習いは null で上の共通の振り）
-  if (anim.motion && (state === 'attack' || state === 'shoot') && JOB_MOTIONS[anim.motion]) {
+  if (anim.skillMotion && (state === 'attack' || state === 'shoot') && SKILL_MOTIONS[anim.skillMotion]) {
+    SKILL_MOTIONS[anim.skillMotion](P, at, wk, f, anim.skillHits || 0);
+  } else if (anim.motion && (state === 'attack' || state === 'shoot') && JOB_MOTIONS[anim.motion]) {
     JOB_MOTIONS[anim.motion](P, at, wk, ws, f);
     P.mouth = P.mouth === 'n' ? 'shout' : P.mouth;
   }
@@ -848,7 +1223,7 @@ function boxOf(equip, look, state, ah, rig, motion) {
   if (state === 'hurt') L = Math.max(L, 42);
   if (state === 'climb') T = Math.max(T, 104);
   // 職の攻撃モーションは跳ぶ・踏み込む・腕を真上へ伸ばすので、上と左右を広めに取る
-  if (motion && (state === 'attack' || state === 'shoot')) { T = Math.max(T, ws ? 124 : 116); L = Math.max(L, 48); R = Math.max(R, ws ? R + 8 : 50); Bm = Math.max(Bm, 12); }
+  if (motion && (state === 'attack' || state === 'shoot')) { T = Math.max(T, ws ? 134 : 126); L = Math.max(L, 48); R = Math.max(R, ws ? R + 8 : 50); Bm = Math.max(Bm, 12); }
   return [L, R, T, Bm];
 }
 function dmgStage(d) { return d >= 0.9 ? 7 : d >= 0.85 ? 6 : d >= 0.75 ? 5 : d >= 0.7 ? 4 : d >= 0.6 ? 3 : d >= 0.5 ? 2 : d >= 0.25 ? 1 : 0; }
@@ -932,7 +1307,7 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
       const dmg = clamp(A.damage || 0, 0, 1);
       const ds = dmgStage(dmg);
       const ah = aiHeadOf(look, A, state, repT, vil, R);
-      const key = state + fi + '|' + ds + '|' + R + '|' + (A.flash ? 1 : 0) + (A.panic ? 1 : 0) + (vil ? 1 : 0) + (A.face || '') + (A.rim || '') + '|' + (A.motion && (state === 'attack' || state === 'shoot') ? A.motion + '|' : '') + lookSig(look) + '|' + eqSig(equip) + (ah ? '|H' + ah.file + (ah.back ? '+B' : '') : '') + (rig ? '|G' + rig.sig : '');
+      const key = state + fi + '|' + ds + '|' + R + '|' + (A.flash ? 1 : 0) + (A.panic ? 1 : 0) + (vil ? 1 : 0) + (A.face || '') + (A.rim || '') + '|' + ((A.skillMotion || A.motion) && (state === 'attack' || state === 'shoot') ? (A.skillMotion ? 'S' + A.skillMotion + (A.skillHits || 0) : A.motion) + '|' : '') + lookSig(look) + '|' + eqSig(equip) + (ah ? '|H' + ah.file + (ah.back ? '+B' : '') : '') + (rig ? '|G' + rig.sig : '');
       let ent = CACHE.get(key);
       if (ent) { CACHE.delete(key); CACHE.set(key, ent); CSTAT.hit++; }
       else {
@@ -940,7 +1315,7 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
         if (now - buildWin > 12) { buildWin = now; builds = 0; }
         if (builds < MAX_BUILDS) {
           builds++; CSTAT.build++;
-          const bx = boxOf(equip, look, state, ah, !!rig, A.motion);
+          const bx = boxOf(equip, look, state, ah, !!rig, A.skillMotion || A.motion);
           if (rig) { bx[0] += 6; bx[1] += 6; bx[2] += 6; bx[3] += 2; }
           const w = Math.ceil((bx[0] + bx[1]) * R), h = Math.ceil((bx[2] + bx[3]) * R);
           const cv = newCanvas(w, h);
@@ -949,7 +1324,7 @@ export function drawCharacter(ctx, x, y, look, equip, anim) {
             oc.setTransform(1, 0, 0, 1, 0, 0); oc.clearRect(0, 0, w, h);
             oc.setTransform(R, 0, 0, R, bx[0] * R, bx[2] * R);
             oc.imageSmoothingEnabled = true; oc.imageSmoothingQuality = npcRig ? 'high' : 'low';   // プールの canvas の前の状態を残さない
-            const a2 = { state: A.state, t: repT, attackT: repAT, damage: DMG_REP[ds], flash: A.flash, panic: A.panic, face: A.face, headExpr: A.headExpr, rim: A.rim, villain: vil, facing: 1, scale: 1, noFx: true, headRes: R, motion: A.motion };
+            const a2 = { state: A.state, t: repT, attackT: repAT, damage: DMG_REP[ds], flash: A.flash, panic: A.panic, face: A.face, headExpr: A.headExpr, rim: A.rim, villain: vil, facing: 1, scale: 1, noFx: true, headRes: R, motion: A.motion, skillMotion: A.skillMotion, skillHits: A.skillHits };
             RENDER(oc, a2);
             ent = { cv, w, h, R, ox: bx[0] * R, oy: bx[2] * R, repT, repAT };
             CACHE.set(key, ent); cachePx += w * h;

@@ -270,3 +270,16 @@ export function looksFromIds(ids) {
   for (const [slot, id] of Object.entries(ids || {})) o[slot] = id && ITEMS[id] ? ITEMS[id].look : null;
   return o;
 }
+
+// ---- 男女専用の装備
+// 見た目が女性向けの装備（スカート・アイドルドレス・ヒール）は女性キャラ専用。item.gender（'f' | 'm'）で個別にも指定できる
+export const FEMALE_ONLY_STYLES = new Set(['skirt', 'idolDress', 'heels']);
+/** itemGender(item) → 'f' | 'm' | null（null = 男女どちらも装備できる） */
+export function itemGender(it) {
+  if (!it) return null;
+  if (it.gender === 'f' || it.gender === 'm') return it.gender;
+  return it.look && FEMALE_ONLY_STYLES.has(it.look.style) ? 'f' : null;
+}
+/** canWearGender(item, gender) → その性別のキャラが装備できるか */
+export function canWearGender(it, gender) { const g = itemGender(it); return !g || !gender || g === gender; }
+export const GENDER_ONLY_LABEL = { f: '女性専用', m: '男性専用' };
