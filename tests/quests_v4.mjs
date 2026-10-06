@@ -160,8 +160,9 @@ export default function register({ test, makeGame }) {
       assert.ok(rewardOf.has(id), `${id} はどこかのクエストの報酬`);
       assert.ok(ITEM_LORE[id], id + ' lore');
       // そのレベル帯の、ボスの極レア（mythic）以外の同じ部位の装備より強い（武器は同じ武器種）
+      // v5: ボスの当たり（bossV5。qset と同じくらいの強さで、qset より後に作る）は比べる相手に入れない（docs/BALANCE_V5.md）
       const k = it.slot === 'weapon' ? 'atk' : 'def';
-      const pool = Object.values(ITEMS).filter((x) => x.type === 'equip' && x.slot === it.slot && !x.questSet && !x.cosmetic && x.rarity !== 'mythic' && x.reqLevel <= it.reqLevel && (it.slot !== 'weapon' || x.weaponType === it.weaponType));
+      const pool = Object.values(ITEMS).filter((x) => x.type === 'equip' && x.slot === it.slot && !x.questSet && !x.cosmetic && !x.bossV5 && x.rarity !== 'mythic' && x.reqLevel <= it.reqLevel && (it.slot !== 'weapon' || x.weaponType === it.weaponType));
       const best = Math.max(0, ...pool.map((x) => x.stats[k]));
       assert.ok(it.stats[k] >= best, `${id}: ${k} ${it.stats[k]} < 同じ帯の ${best}`);
     }

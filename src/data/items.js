@@ -620,3 +620,104 @@ for (const it of list.slice(W2Q_N0)) {
   if (it.cosmetic) COSMETIC_IDS.push(it.id);
   if (it.questSet) QSET_IDS.push(it.id);
 }
+
+// ============================================================================================
+// v5 ボス装備（強さ担当）: 4次転職より後の難しくなったボスの「大当たり」（mythic）と「当たり」（legendary）。docs/BALANCE_V5.md
+//  - 1 体のボスにつき、防具 5 部位＋武器 6 種（6 系統: 拳銃・連射銃・光剣・刀・杖・ドローン杖）を 2 組（大当たり・当たり）。
+//  - ドロップは enemies.js のボスの drops に {id: 代表の 1 つ, pool: [その組の ID], chance} で入る（systems/loot.js が組から 1 つ選ぶ）。
+//    大当たり 3%・当たり 10%。1 回倒すごとに、それぞれ 1 回抽選（LUK の補正は掛けない）。
+//  - 強さ（同じ部位、武器は同じ武器種で、必要Lv ≦ そのボスの Lv の装備と比べて自動で決める）:
+//      当たり   … qset と同じ決め方（mythic・qset・ネタ装備・v5 ボス装備を除いた一番強い物 × 1.06 + 2）＝ qset と同じくらい
+//      大当たり … 全部（mythic・qset・当たりを含む）の一番強い物 × 1.08 + 4 ＝ 同じ Lv 帯で一番強い
+//  - 見た目は今ある look.style の色違い（ネタ装備の色とはかぶらない色。tests/quests_v4.mjs）。
+//  - bossV5: 'hit' | 'jackpot'（雑魚の装備ドロップ・qset の比べる相手には入れない）、bossOf: 落とすボスの ID
+// ============================================================================================
+const V5_N0 = list.length;
+/** ボスごとの組（boss = 敵 ID、lv = 必要Lv、c = [大当たりの色, 差し色, 当たりの色, 差し色]） */
+const V5_BOSS_SETS = [
+  { boss: 'boss_alien', key: 'zog', lv: 100, name: 'オーバーロード', hitName: 'ゾグ親衛隊',
+    look: { hat: 'helmet', top: 'armorVest', bottom: 'armorPants', shoes: 'boots', accessory: 'halo' }, c: ['#2bffb0', '#8a2cff', '#2f8f6c', '#c9a6ff'] },
+  { boss: 'boss_ark_titan', key: 'titan', lv: 128, name: 'タイタン・オーバーライド', hitName: 'タイタン整備班',
+    look: { hat: 'helmet', top: 'leatherJacket', bottom: 'cargo', shoes: 'sneakers', accessory: 'sunglasses' }, c: ['#00b8ff', '#ff2fb0', '#4a6f9a', '#9ff3ff'] },
+  { boss: 'boss_wild_kernel', key: 'kernel', lv: 152, name: 'ルート・カーネル', hitName: '森番',
+    look: { hat: 'beanie', top: 'hoodie', bottom: 'cargo', shoes: 'boots', accessory: 'scarf' }, c: ['#7dff2b', '#ff7a1a', '#3c7a2a', '#e6ff9a'] },
+  { boss: 'boss_abyss_queen', key: 'queen', lv: 178, name: 'アビサル・クイーン', hitName: '女王の近衛',
+    look: { hat: 'crown', top: 'suit', bottom: 'suitPants', shoes: 'loafers', accessory: 'goldChain' }, c: ['#ff4fc8', '#3fe0ff', '#6a3a8a', '#ffc0ea'] },
+  { boss: 'boss_zenith_true', key: 'origin', lv: 200, name: 'オリジン', hitName: 'ゼニス近衛',
+    look: { hat: 'crown', top: 'armorVest', bottom: 'armorPants', shoes: 'boots', accessory: 'wings' }, c: ['#fff2a8', '#ff2f6f', '#b8c4dc', '#ffe08a'] },
+];
+// 6 系統の武器: [sub, 名前, style, weaponType, 射程, 攻撃速度, 攻撃力の倍率, 主な能力 2 つ]
+const V5_WEAPONS = [
+  ['pistol', 'リボルバー', 'pistol', 'gun', 680, 3.5, 1.08, ['dex', 'luk']],
+  ['smg', 'マシンガン', 'smg', 'gun', 590, 7.2, 1.0, ['dex', 'luk']],
+  ['sword', 'ブレード', 'neonSword', 'melee', 165, 2.6, 1.0, ['str', 'dex']],
+  ['katana', '太刀', 'katana', 'melee', 145, 2.4, 0.98, ['str', 'str']],
+  ['staff', 'スタッフ', 'staff', 'magic', 530, 2.2, 1.0, ['int', 'luk']],
+  ['drone', 'ドローン・ロッド', 'staff', 'magic', 550, 2.1, 0.98, ['int', 'int']],
+];
+const V5_SLOT_NAMES = { hat: 'ヘッド', top: 'アーマー', bottom: 'グリーヴ', shoes: 'ブーツ', accessory: 'チャーム' };
+const v5Pool = (slot, lv, wtype, all) => list.filter((x) => x.type === 'equip' && x.slot === slot && !x.cosmetic && x.reqLevel <= lv &&
+  !x.bossV5 && (!wtype || x.weaponType === wtype) && (all || (!x.questSet && x.rarity !== 'mythic')));
+const v5Best = (pool, k) => Math.max(0, ...pool.map((x) => x.stats[k] || 0));
+/** ボスの ID → その組の ID の一覧 { hit: [...], jackpot: [...], lv } */
+export const V5_BOSS_GEAR = {};
+for (const S of V5_BOSS_SETS) {
+  const out = (V5_BOSS_GEAR[S.boss] = { hit: [], jackpot: [], lv: S.lv });
+  // 当たり（legendary）を先に作り、大当たり（mythic）は当たりも含めた一番強い物より上にする
+  for (const tier of ['hit', 'jackpot']) {
+    const jp = tier === 'jackpot';
+    const [col, acc] = jp ? [S.c[0], S.c[1]] : [S.c[2], S.c[3]];
+    const rarity = jp ? 'mythic' : 'legendary';
+    const nm = jp ? S.name : S.hitName;
+    const hitOf = (id, k) => (jp ? list.find((x) => x.id === id.replace('_jackpot_', '_hit_'))?.stats[k] || 0 : 0);
+    // 大当たりは当たりの 1.2 倍以上にもする（当たりは mythic を除いて決めるので、当たりより弱くならないように）
+    const up = (best, id, k) => (jp ? Math.max(Math.ceil(best * 1.08) + 4, Math.ceil(hitOf(id, k) * 1.2)) : Math.ceil(best * 1.06) + 2);
+    const ms = Math.round(S.lv * (jp ? 0.14 : 0.1)); // 4 つの能力値
+    const extra = { bossV5: tier, bossOf: S.boss, ...(S.boss === 'boss_alien' ? {} : { world: 2 }) };
+    const desc = `${jp ? '大当たり' : '当たり'}: 4次転職より後の強いボスが${jp ? 'ごくまれに' : 'ときどき'}落とす装備。`;
+    const ids = [];
+    for (const slot of ['hat', 'top', 'bottom', 'shoes', 'accessory']) {
+      const pool = v5Pool(slot, S.lv, null, jp);
+      const id = `v5_${S.key}_${tier}_${slot}`;
+      const stats = { def: up(v5Best(pool, 'def'), id, 'def'), maxHp: Math.round(S.lv * (slot === 'top' ? 5.5 : 3.5) * (jp ? 1.3 : 1)), str: ms, dex: ms, int: ms, luk: ms };
+      const bestAtk = v5Best(pool, 'atk');
+      if (bestAtk > 0) stats.atk = up(bestAtk, id, 'atk');
+      if (slot === 'accessory') stats.crit = jp ? 8 : 6;
+      if (slot === 'shoes') stats.speed = jp ? 35 : 25;
+      equip(id, `${nm}・${V5_SLOT_NAMES[slot]}`, slot, rarity, S.lv, stats, [S.look[slot], col, acc], { desc, ...extra });
+      ids.push(id);
+    }
+    for (const [sub, wname, style, wtype, range, aps, k, [m1, m2]] of V5_WEAPONS) {
+      const id = `v5_${S.key}_${tier}_${sub}`;
+      const best = v5Best(v5Pool('weapon', S.lv, wtype, jp), 'atk');
+      const stats = { atk: jp ? Math.max(Math.round((Math.ceil(best * 1.08) + 4) * k), Math.ceil(hitOf(id, 'atk') * 1.2)) : Math.round(up(best) * k), crit: jp ? 12 : 9, [m1]: ms + 8 };
+      stats[m2] = (stats[m2] || 0) + ms;
+      if (wtype === 'magic') stats.maxMp = Math.round(S.lv * (jp ? 5 : 4));
+      weapon(id, `${nm}・${wname}`, rarity, S.lv, stats, [style, col, sub === 'drone' ? '#ffffff' : acc], wtype, range, aps, { desc, ...extra });
+      ids.push(id);
+    }
+    out[tier] = ids;
+  }
+}
+// フレーバーテキスト（ボス × 大当たり/当たり × 部位で 1 つずつ）
+const V5_BOSS_LORE = {
+  zog: ['オーバーロード・ゾグの宇宙船の装甲から削り出した。', 'ゾグの親衛隊の制式装備。宇宙船の格納庫で量産されていた。'],
+  titan: ['アーク・タイタンの動力炉の熱が、まだ芯に残っている。', 'タイタンを整備していた技師たちの作業着の改造品。'],
+  kernel: ['ジャングル・カーネルの根の最も深い所で育った結晶でできている。', '密林を見回る森番たちの装備。葉脈が回路のように光る。'],
+  queen: ['ディープ・クイーンの宝物庫に沈んでいた、深海の王族の品。', '女王の近衛兵の装備。水圧に耐える真珠の殻で縫ってある。'],
+  origin: ['真ゼニス・ソブリンの起源の光を、そのまま形にした物。', 'ゼニス・タワーの頂を守る近衛の装備。雲の糸で織られている。'],
+};
+const V5_PART_LORE = {
+  hat: '頭にのせると、ボスの見ていた景色が少しだけ見える。', top: '袖を通すと、体の周りに薄い光の膜が張る。', bottom: '一歩ごとに足元の影がゆらめく。',
+  shoes: '地面を蹴るたびに、かすかな火花が散る。', accessory: '身につけると、遠くの戦いの音が聞こえる気がする。',
+  pistol: '一発ごとに、撃った跡が光の線になって残る。', smg: '引き金を引くと、光の粒が雨のように飛ぶ。', sword: '振るうと刃の跡が空中にしばらく残る。',
+  katana: '鞘から抜くと、周りの音が一瞬だけ消える。', staff: '掲げると、周りの機械が一斉にこちらを向く。', drone: '先端の小さなドローンが、持ち主の肩の上を回る。',
+};
+for (const it of list.slice(V5_N0)) {
+  const m = /^v5_([a-z]+)_(hit|jackpot)_([a-z]+)$/.exec(it.id);
+  if (m) ITEM_LORE[it.id] = `${V5_BOSS_LORE[m[1]][m[2] === 'jackpot' ? 0 : 1]}${V5_PART_LORE[m[3]] || ''}`;
+  it.lore = ITEM_LORE[it.id] || `${it.desc} ボスの力が宿っている。`;
+  ITEMS[it.id] = it;
+}
+/** v5 ボス装備の ID の一覧 */
+export const V5_GEAR_IDS = list.slice(V5_N0).map((it) => it.id);
