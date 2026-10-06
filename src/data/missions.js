@@ -14,7 +14,9 @@
 import { expToNext } from './balance.js';
 import { WORLD_MAP_IDS } from '../systems/travel.js';
 import { QUESTS_W1, QUEST_NPCS } from './questsW1.js';
+import { QUESTS_W2, QUEST_NPCS_W2 } from './questsW2.js';
 export { QUEST_SERIES, QUEST_TITLES, M2_IDS } from './questsW1.js';
+export { QUEST_SERIES_W2, QUEST_TITLES_W2, M2W2_IDS } from './questsW2.js';
 
 // npcId → {name, mapId, role}（ワールド担当が maps.js の npcs に配置する）
 export const MISSION_NPCS = {
@@ -667,6 +669,10 @@ list.push(...jobMissions);
 // 連作の exp は questsW1.js 側で expFixed 済み。m2_* は category 'main' なので下の係数（0.8）で自動算出。
 Object.assign(MISSION_NPCS, QUEST_NPCS);
 list.push(...QUESTS_W1);
+// v4（クエスト担当・2回目）: 第2ワールド「ネオン・アーク」のクエスト（q2_* の連作・q2_memento_*・m2_09〜m2_28）。データは data/questsW2.js。
+//  exp は questsW2.js 側で expFixed 済み（Lv198 以上でも有限になるよう expToNext(199) で止めてある）。
+Object.assign(MISSION_NPCS, QUEST_NPCS_W2);
+list.push(...QUESTS_W2);
 
 const REWARD_EXP_FACTOR = { main: 0.8, sub: 0.5, daily: 0.3, job: 0.5 };
 for (const m of list) {

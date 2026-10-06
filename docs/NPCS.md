@@ -364,3 +364,47 @@ UI のコンテンツ窓（U）から: `towerEnter(game, floor)` / `arenaEnter(g
 | `nova` | `q_memento_rooftop`, `m2_06_legacy` |
 | `dr_stella` | `q_memento_spaceport`, `m2_01_signal`, `m2_02_vega` |
 | `ace_jet` | `q_moonecho_1`, `q_moonecho_2`, `q_moonecho_3`, `q_moonecho_4`, `q_moonecho_5`, `m2_05_code` |
+
+## v4（2回目）: 第2ワールド「ネオン・アーク」のクエストの NPC（クエスト担当。`src/data/questNpcs.js` → maps.js の第2ワールドの町の npcs の末尾）
+
+同じ町の NPC（5 次転職の教官 `job_nyx` / `job_garo` / `job_akasha` を含む）と 140px 以上・ポータルと 90px 以上離した（`tests/quests_w2.mjs` で確認）。セリフには会話の窓の強調の書き方（`#b` `#r` `#d` `#g` `#k`）を使う。
+
+| npcId | 名前 | 町 | x | 役割 | 見た目 | あいさつ（dialog[0]） | 依頼するクエスト |
+|---|---|---|---|---|---|---|---|
+| `ark_io` | 記録係イオ | `w2_arkcity` | 1100 | [第2部] アーク・シティの記録係。「灯守（ともしもり）」の一員。第2部の案内役。 | 女・bob・髪#8ad8ff／hat:headphones top:hoodie bottom:skirt shoes:boots accessory:halo | 「記録係のイオ。この街のネオンが、どこから来たのか…全部、記録してある。」 | `m2_11_archive`, `m2_12_core`, `m2_13_titan`, `m2_14_wild` |
+| `ark_pico` | 配達人ピコ | `w2_arkcity` | 180 | 空飛ぶ配達ドローン乗りの少年。荷物を落とした。 | 男・spiky・髪#ffb000／hat:helmet top:tracksuit bottom:shorts shoes:sneakers | 「お届け物でーす！ …あれ、届け先どこだっけ。」 | `q2_courier_1`, `q2_courier_2`, `q2_courier_3`, `q2_courier_4` |
+| `ark_noa` | 記憶屋ノア | `w2_arkcity` | 515 | [派生] ホログラムになった人の記憶を預かる店の主。 | 女・long・髪#b9a8ff／top:idolDress bottom:skirt shoes:heels accessory:scarf | 「いらっしゃい。ここでは、あなたの思い出をホログラムにして預かれるの。」 | `q2_memory_1`, `q2_memory_2`, `q2_memory_3`, `q2_memory_4a`, `q2_memory_4b`, `q2_memory_5` |
+| `ark_gordo` | メッキ職人ゴルド | `w2_arkcity` | 1400 | 街じゅうのクロームを磨く職人。めっきを盗まれて困っている。 | 男・short・髪#e8e8e8／hat:bandana top:armorVest bottom:cargo shoes:boots | 「この街のクロームは、ぜんぶわしが磨いとる。」 | `q2_chrome_1`, `q2_chrome_2`, `q2_chrome_3`, `q2_chrome_4` |
+| `ark_martha` | 屋台のマーサ | `w2_arkcity` | 2650 | 外縁ゲートの屋台の女将。エンフォーサーに罰金を取られ続けている。 | 女・ponytail・髪#ff8a3d／hat:bandana top:tshirt bottom:cargo shoes:sandals | 「焼きホロまん、ひとついかが？ 中身は光るあんこよ。」 | `q2_fine_1`, `q2_fine_2`, `q2_fine_3`, `q2_fine_4`, `q2_fine_5` |
+| `ark_yamada` | 山田課長 | `w2_arkcity` | 2050 | [ネタ] 出張で次元ゲートをくぐってしまった、ヴァイス・ベイの会社員。 | 男・short・髪#2a2a2a／top:suit bottom:suitPants shoes:loafers accessory:sunglasses | 「あっ、どうも。わたくし、ヴァイス・ベイ から出張で参りました山田です。」 | `q2_salaryman_1`, `q2_salaryman_2`, `q2_salaryman_3`, `q2_salaryman_4`, `q2_salaryman_5` |
+| `wild_rumi` | ルミ | `w2_cyberwild` | 200 | 電脳ホタルを育てる森の少女。 | 女・twin・髪#d4ff4f／hat:catEars top:tank bottom:shorts shoes:sandals | 「夜になると、電脳ホタル が森を光らせるの。」 | `q2_firefly_1`, `q2_firefly_2`, `q2_firefly_3`, `q2_firefly_4` |
+| `wild_moss` | ドクター・モス | `w2_cyberwild` | 600 | [派生] 森の木を診る樹医。森に広がるウイルスを追う。 | 男・long・髪#4a8a5a／hat:beanie top:suit bottom:cargo shoes:boots accessory:sunglasses | 「木も咳をする。聞こえないのは、聞こうとしないからだ。」 | `q2_virus_1`, `q2_virus_2`, `q2_virus_3`, `q2_virus_4a`, `q2_virus_4b`, `q2_virus_5` |
+| `wild_pete` | 鳥類学者ピート | `w2_cyberwild` | 1100 | ネオン極楽鳥の歌を録音したい学者。 | 男・bob・髪#c98b4a／hat:cowboy top:hawaiian bottom:cargo shoes:boots accessory:sunglasses | 「しっ…今、ネオン極楽鳥 が鳴きそうなんだ。」 | `q2_songbird_1`, `q2_songbird_2`, `q2_songbird_3`, `q2_songbird_4` |
+| `wild_gab` | ゲイター乗りガブ | `w2_cyberwild` | 1550 | サイバーゲイターでレースをする森の走り屋。 | 男・wolf・髪#b6ff3d／hat:cap top:leatherJacket bottom:trackPants shoes:sneakers accessory:goldChain | 「よう！ サイバーゲイター に乗ったことあるか？ 最高だぜ！」 | `q2_gator_1`, `q2_gator_2`, `q2_gator_3`, `q2_gator_4` |
+| `wild_haru` | ハル | `w2_cyberwild` | 2200 | [ネタ] Wi-Fi の出る種を求めて森に住みついたネット中毒の青年。 | 男・bob・髪#3a3a46／hat:headphones top:hoodie bottom:trackPants shoes:sandals | 「…あ、すみません、いま動画が止まってて。」 | `q2_wifi_1`, `q2_wifi_2`, `q2_wifi_3`, `q2_wifi_4`, `q2_wifi_5` |
+| `abyss_shell` | オルゴール職人シェル | `w2_abyss` | 200 | [派生] 沈没船のオルゴールを直したい職人。 | 女・long・髪#e8c27a／hat:beanie top:leatherJacket bottom:skirt shoes:boots accessory:scarf | 「オルゴールはね、ふたを閉じても、中で曲が続いてるの。」 | `q2_musicbox_1`, `q2_musicbox_2`, `q2_musicbox_3`, `q2_musicbox_4a`, `q2_musicbox_4b`, `q2_musicbox_5` |
+| `abyss_volta` | 技師ボルタ | `w2_abyss` | 650 | ドームの発電所の技師。デンキウナギで発電している。 | 男・spiky・髪#fff06a／hat:helmet top:armorVest bottom:armorPants shoes:boots | 「ドームの明かりは、デンキウナギ が作っとる。ウナギに感謝せい。」 | `q2_eel_1`, `q2_eel_2`, `q2_eel_3`, `q2_eel_4` |
+| `abyss_jonah` | 潜水士ジョナ | `w2_abyss` | 1150 | 深淵パールでプロポーズしたい若い潜水士。 | 男・short・髪#2a4a8a／hat:helmet top:tracksuit bottom:trackPants shoes:boots | 「…マリーナさんの店、今日も素敵だなあ。」 | `q2_pearl_1`, `q2_pearl_2`, `q2_pearl_3`, `q2_pearl_4`, `q2_pearl_5` |
+| `abyss_anne` | ランタン売りのアン | `w2_abyss` | 1600 | アンコウの灯りでランタンを作る売り子。 | 女・ponytail・髪#3a2a5a／hat:cap top:hoodie bottom:shorts shoes:sneakers | 「ランタンいかが？ 灯りの中身はアンコウゲイター の提灯だよ！」 | `q2_lantern_1`, `q2_lantern_2`, `q2_lantern_3`, `q2_lantern_4` |
+| `abyss_gyogyo` | ギョギョおじさん | `w2_abyss` | 2200 | [ネタ] 人魚になりたい中年男性。 | 男・short・髪#5a5a62／hat:beanie top:hawaiian bottom:shorts shoes:sandals | 「ギョギョッ！ おじさんはね、人魚 になるんだ。」 | `q2_mermaid_1`, `q2_mermaid_2`, `q2_mermaid_3`, `q2_mermaid_4`, `q2_mermaid_5` |
+| `zen_kyrie` | 修理工キリエ | `w2_zenith` | 650 | [派生] 落ちてきたエンジェル・ボットを拾った修理工。 | 女・bob・髪#ff8ac8／hat:headphones top:armorVest bottom:cargo shoes:boots | 「壊れた物を直すのが好き。…直したら、勝手に動き出すこともあるけど。」 | `q2_angel_1`, `q2_angel_2`, `q2_angel_3`, `q2_angel_4a`, `q2_angel_4b`, `q2_angel_5` |
+| `zen_michele` | 彫刻家ミケーレ | `w2_zenith` | 1150 | 大理石ゴーレムを彫った（失敗作が動き出した）彫刻家。 | 男・wolf・髪#f0ece4／hat:beanie top:suit bottom:suitPants shoes:loafers accessory:scarf | 「完璧な形は、石の中にもう眠っている。私は余計な所を削るだけ…のはずでした。」 | `q2_sculptor_1`, `q2_sculptor_2`, `q2_sculptor_3`, `q2_sculptor_4` |
+| `zen_sirius` | シリウス少年 | `w2_zenith` | 1350 | 消えた星座を描き直したい少年。 | 男・spiky・髪#1a2a5c／hat:cap top:hoodie bottom:shorts shoes:sneakers | 「ぼくの星図、見る？ まだ途中だけど。」 | `q2_starmap_1`, `q2_starmap_2`, `q2_starmap_3`, `q2_starmap_4` |
+| `zen_galahad` | 老騎士ガラハ | `w2_zenith` | 2050 | ゼニス・タワー最後の人間の守護者。 | 男・long・髪#e8e8e8／hat:helmet top:armorVest bottom:armorPants shoes:boots accessory:scarf | 「…わしはガラハ。この塔の、最後の人間の騎士だ。」 | `q2_guardian_1`, `q2_guardian_2`, `q2_guardian_3`, `q2_guardian_4`, `q2_guardian_5` |
+| `zen_moku` | 雲屋モクモク | `w2_zenith` | 1550 | [ネタ] 雲を袋に詰めて売る男。 | 男・bob・髪#f4f6fa／hat:beanie top:tshirt bottom:shorts shoes:sandals | 「いらっしゃい！ とれたての雲の精、袋詰めで売ってますよ！」 | `q2_cloudshop_1`, `q2_cloudshop_2`, `q2_cloudshop_3`, `q2_cloudshop_4`, `q2_cloudshop_5` |
+
+### 世界担当が置いた第2ワールドの NPC で、クエストの依頼・報告をするようになった NPC（`MISSION_NPCS` に追加。見た目・置き場所は maps.js のまま）
+
+| npcId | 名前 | 町 | 役割 | 依頼するクエスト |
+|---|---|---|---|---|
+| `w2_gatekeeper` | ゲートキーパー・ヴェガ | `w2_arkcity` | [第2部] 次元ゲートの番人。ゲート技師ベガの「こちら側」の同一人物。 | `m2_10_blackout` |
+| `w2_ark_guide` | ナビAI・ルクス | `w2_arkcity` | アーク・シティの案内AI。アーク・シティの記念クエスト。 | `q2_memento_arkcity` |
+| `w2_ark_shop` | メイ | `w2_arkcity` | アーク・マートの店員。 | - |
+| `w2_wild_elder` | 長老シード | `w2_cyberwild` | [第2部] 電脳の森の長。サイバー・ワイルドの記念クエスト。 | `q2_memento_cyberwild`, `m2_15_seeds`, `m2_16_shaman`, `m2_17_kernel`, `m2_18_deep` |
+| `w2_wild_shop` | リーフ | `w2_cyberwild` | 樹上の道具屋。 | - |
+| `w2_abyss_diver` | ダイバー・ギル | `w2_abyss` | [第2部] ドームの潜水士。ネオン・アビスの記念クエスト。 | `q2_memento_abyss`, `m2_19_dome`, `m2_20_coral`, `m2_21_queen`, `m2_22_ascend` |
+| `w2_abyss_shop` | マリーナ | `w2_abyss` | 深海マーケットの店主。 | - |
+| `w2_zenith_oracle` | 星詠みのセレネ | `w2_zenith` | [第2部] ゼニスの巫女。ゼニス・タワーの記念クエスト。 | `q2_memento_zenith`, `m2_23_oracle`, `m2_24_stars`, `m2_25_summit`, `m2_26_sovereign`, `m2_27_origin`, `m2_28_epilogue` |
+| `w2_zenith_shop` | アストラ | `w2_zenith` | 天空の工房の職人。 | - |
+
+第1ワールドの `gate_vega`（ゲート技師ベガ）は `m2_09_arrival` を依頼し、`m2_28_epilogue` の報告先になる。

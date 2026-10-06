@@ -749,7 +749,7 @@ const T2 = {
         ['いらっしゃい！ アーク製の装備とポーション、そろってるよ。'], { shop: [...W2_SHOP_POTS, ...W2_GEAR_SHOP('ark')], shopName: 'アーク・マート' }),
       // v4: 5次転職の教官（見た目・セリフは NPC 表。5次転職担当）
       npc('job_nyx', 950), npc('job_garo', 1900), npc('job_akasha', 2500),
-      concierge('w2_arkcity', 2200),
+      concierge('w2_arkcity', 2200), ...questNpcsFor('w2_arkcity'), // v4（クエスト担当）: 第2ワールドの連作の NPC
     ],
   }),
   w2_cyberwild: town({
@@ -763,7 +763,7 @@ const T2 = {
       w2Npc('w2_wild_shop', 'リーフ', '樹上の道具屋', 900, 'shopF',
         { hat: L('catEars', '#5cff9a', '#b04dff'), top: L('tank', '#2a6a5a', '#5cff9a'), bottom: L('shorts', '#2a3a2a'), shoes: L('sandals', '#5a3a22') },
         ['森の恵みで作った装備よ。光るけど、たぶん安全。'], { shop: [...W2_SHOP_POTS, ...W2_GEAR_SHOP('wild')], shopName: '樹上の道具屋' }),
-      concierge('w2_cyberwild', 2000),
+      concierge('w2_cyberwild', 2000), ...questNpcsFor('w2_cyberwild'), // v4（クエスト担当）: 第2ワールドの連作の NPC
     ],
   }),
   w2_abyss: town({
@@ -777,7 +777,7 @@ const T2 = {
       w2Npc('w2_abyss_shop', 'マリーナ', '深海マーケット', 950, 'shopF',
         { hat: L('headphones', '#5ee8ff', '#ff6fd8'), top: L('idolDress', '#2e7bff', '#5ee8ff'), bottom: L('skirt', '#1a2a6a'), shoes: L('heels', '#5ee8ff') },
         ['深海パールで作った装備はいかが？'], { shop: [...W2_SHOP_POTS, ...W2_GEAR_SHOP('abyss')], shopName: '深海マーケット' }),
-      concierge('w2_abyss', 2000),
+      concierge('w2_abyss', 2000), ...questNpcsFor('w2_abyss'), // v4（クエスト担当）: 第2ワールドの連作の NPC
     ],
   }),
   w2_zenith: town({
@@ -791,7 +791,7 @@ const T2 = {
       w2Npc('w2_zenith_shop', 'アストラ', '天空の工房', 950, 'gate',
         { hat: L('headphones', '#fff6d0', '#ffd23f'), top: L('suit', '#ffffff', '#ffd23f'), bottom: L('suitPants', '#ffffff'), shoes: L('loafers', '#ffd23f') },
         ['雲と星で仕立てた装備です。お代は地上の倍ですが。'], { shop: [...W2_SHOP_POTS, ...W2_GEAR_SHOP('zen')], shopName: '天空の工房' }),
-      concierge('w2_zenith', 1800),
+      concierge('w2_zenith', 1800), ...questNpcsFor('w2_zenith'), // v4（クエスト担当）: 第2ワールドの連作の NPC
     ],
   }),
 };

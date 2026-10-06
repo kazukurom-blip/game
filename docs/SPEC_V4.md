@@ -155,6 +155,8 @@
 - **装備の印**: 連作の報酬装備は `questSet: true`（ID は `qset_*`）、見た目だけのネタ装備は `cosmetic: true`（持ち物の窓で「見た目専用」の印を出してほしい）。一覧は `items.js` の `QSET_IDS` / `COSMETIC_IDS`。
 - **強調の印**: クエストのセリフ・`choicePrompt`・選択肢の `dialog` には、人名 `#d`・地名 `#g`・アイテム `#b`・敵 `#r` を `questsW1.js` の `hl()` が自動で付ける。`desc` と選択肢の `text` は J の窓や通知にも出るので平文のまま。
 - データは `src/data/questsW1.js`（`missions.js` の「v4 クエスト」区画が読み込む）、新しい NPC の見た目と置き場所は `src/data/questNpcs.js`（`maps.js` の町の `npcs` の末尾で `...questNpcsFor(町)`）。一覧は `docs/QUESTS.md`。
+- 第2ワールドのクエスト（2回目）は `src/data/questsW2.js`（`q2_<連作>_<番号>`・`q2_memento_<region>`・メインの続き `m2_09`〜`m2_28`。一覧 `QUEST_SERIES_W2`・`M2W2_IDS`・称号 `QUEST_TITLES_W2`）。報酬の装備は `items.js` 末尾の `w2qset()`（同じ帯の `W2_GEAR` を見て強さを自動で決める）と `cosmetic()`。テストは `tests/quests_w2.mjs`。
+  - ラスボスの第2形態（`boss_zenith_true`。出現表には無く、第1形態を倒すとその場に出る）も `boss` の目的に書ける。
 
 ## 担当の境目
 
