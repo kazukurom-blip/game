@@ -367,6 +367,16 @@ function paintConsumable(g, icon, item) {
       if (icon === 'elixir') { g.fillStyle = '#ffe066'; g.beginPath(); starPath(g, 3, 8, 4, 1.8); g.fill(); }
       break;
     }
+    case 'scroll': { // 巻物（帰還の書＝青い紐・町移動の書＝金の紐）
+      const tie = item && item.id === 'scroll_town' ? '#ffd23f' : '#3a8bff';
+      g.rotate(-0.35);
+      g.fillStyle = '#f3e3bf'; g.strokeStyle = '#7a5a2e'; g.lineWidth = 1.6;
+      g.beginPath(); g.rect(-11, -7, 22, 14); g.fill(); g.stroke();
+      for (const x of [-12, 12]) { g.beginPath(); g.ellipse(x, 0, 3.2, 8.5, 0, 0, Math.PI * 2); g.fillStyle = '#d9b77a'; g.fill(); g.stroke(); }
+      g.strokeStyle = '#b89a66'; g.lineWidth = 1; g.beginPath(); g.moveTo(-6, -3); g.lineTo(6, -3); g.moveTo(-6, 1); g.lineTo(4, 1); g.stroke();
+      g.fillStyle = tie; g.fillRect(-2, -7.5, 4, 15);
+      break;
+    }
     case 'cash': {
       for (let i = 2; i >= 0; i--) {
         g.save(); g.translate(i * 2 - 2, -i * 3 + 2); g.rotate(-0.12);

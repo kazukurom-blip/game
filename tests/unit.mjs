@@ -74,7 +74,7 @@ const mapOfEnemy = (id) => {
   if (d.civilian || d.isCop) return 'downtown';
   return Object.keys(MAPS).find((m) => spawnsAt(m, id));
 };
-const ICONS = ['potionRed', 'potionBlue', 'elixir', 'cash', 'gem', 'chip'];
+const ICONS = ['potionRed', 'potionBlue', 'elixir', 'cash', 'gem', 'chip', 'scroll'];
 const SKILL_KINDS = ['melee', 'projectile', 'aoe', 'buff', 'dash', 'passive', 'move', 'summon'];
 // 旧 wanted（手配度）/ drive（車で走る）は警察・乗り物の廃止で使わない
 const OBJ_TYPES = ['kill', 'collect', 'reach', 'boss', 'talk', 'killAny'];
@@ -200,7 +200,7 @@ test('items: 必須フィールドとスタイル', () => {
       assert.equal(it.slot, null, id);
       assert.ok(ICONS.includes(it.icon), `${id} icon ${it.icon}`);
     }
-    if (it.type === 'consumable') assert.ok(it.effect && (it.effect.hp || it.effect.mp || it.effect.hpPct || it.effect.mpPct || it.effect.buff), id + ' effect');
+    if (it.type === 'consumable') assert.ok(it.use || (it.effect && (it.effect.hp || it.effect.mp || it.effect.hpPct || it.effect.mpPct || it.effect.buff)), id + ' effect');
   }
   assert.ok(equipN >= 40, `装備は40種以上 (${equipN})`);
   for (const r of ['legendary', 'mythic']) assert.ok(Object.values(ITEMS).some((i) => i.rarity === r), r);
@@ -1621,6 +1621,8 @@ test('v3 classes: newState(classId, {name, gender, look}) と性別別の初期�
 (await import('./quests_v4.mjs')).default({ test, makeGame, step, fin });
 // v4 クエスト担当・2回目: 第2ワールドのクエスト（tests/quests_w2.mjs）
 (await import('./quests_w2.mjs')).default({ test, makeGame, step, fin });
+// 移動の書（tests/scrolls.mjs）
+(await import('./scrolls.mjs')).default({ test, makeGame, step, fin });
 // v4 第2ワールド「ネオン・アーク」（tests/world2.mjs）
 (await import('./world2.mjs')).default({ test, makeGame, step, fin });
 // v4 5次転職・Lv100〜200 の強さの釣り合い（tests/balance_v4.mjs・tools/sim_balance.mjs）

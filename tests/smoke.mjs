@@ -1282,6 +1282,16 @@ async function main() {
     await teleport(back); await page.waitForTimeout(200);
     await press('ArrowUp'); await page.waitForTimeout(800);
     await check('帰り道: アーク・シティ → 宇宙港', (await g(() => window.game.map.id)) === 'spaceport');
+    // 移動の書（帰還の書・町移動の書）
+    await warp('w2_arkcity_f1', 600);
+    await g(() => import('./src/systems/inventory.js').then((m) => { const st = window.game.state; m.addItemToState(st, 'scroll_return', 1); m.addItemToState(st, 'scroll_town', 1); st.level = Math.max(st.level, 30); for (const t of ['w2_cyberwild', 'w2_abyss']) if (!st.visited.includes(t)) st.visited.push(t); return m.useItem(window.game, 'scroll_return'); }));
+    await page.waitForTimeout(800);
+    await check('帰還の書: アーク・シティのフィールドから町へ', (await g(() => window.game.map.id)) === 'w2_arkcity');
+    await g(() => import('./src/systems/inventory.js').then((m) => m.useItem(window.game, 'scroll_town')));
+    await page.waitForTimeout(700);
+    await shot2('scroll_town_choice');
+    await check('町移動の書: 行き先を選ぶ窓が出る', await g(() => window.game.ui.isOpen('dialog')));
+    await press('Escape'); await page.waitForTimeout(300);
     // 20 マップ全部（昼）＋ 町と各地域のフィールド 1 つは夜も
     const ids = await g(() => import('./src/world/maps.js').then((m) => m.W2_MAP_IDS));
     const bad2 = [], rows2 = [];

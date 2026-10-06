@@ -2,10 +2,10 @@
 // 地域の Lv 帯に合わせて「消費アイテム＋その地域で使う装備」を並べる。PET・ミシックは売らない。
 export const TOWN_SHOPS = {
   beach: [
-    { npcId: 'sunny', name: 'サニーのビーチ売店', items: ['potion_red', 'potion_blue', 'potion_orange', 'pet_food', 'sandals_beach', 'shorts_beach', 'tshirt_white', 'cap_street', 'sunglasses_aviator', 'pistol_9mm', 'knife_basic', 'bat_wood', 'cat_ears_pink', 'hoodie_pink', 'skirt_pink', 'sneakers_white', 'leather_jacket', 'jeans_blue', 'boots_black', 'headphones_cyber', 'hoodie_cyber', 'pants_cyber'] },
+    { npcId: 'sunny', name: 'サニーのビーチ売店', items: ['potion_red', 'scroll_return', 'scroll_town', 'potion_blue', 'potion_orange', 'pet_food', 'sandals_beach', 'shorts_beach', 'tshirt_white', 'cap_street', 'sunglasses_aviator', 'pistol_9mm', 'knife_basic', 'bat_wood', 'cat_ears_pink', 'hoodie_pink', 'skirt_pink', 'sneakers_white', 'leather_jacket', 'jeans_blue', 'boots_black', 'headphones_cyber', 'hoodie_cyber', 'pants_cyber'] },
   ],
   downtown: [
-    { npcId: 'mama_rosa', name: 'ママ・ローザの食堂', items: ['potion_red', 'potion_orange', 'potion_blue', 'drink_energy', 'drink_tough'] },
+    { npcId: 'mama_rosa', name: 'ママ・ローザの食堂', items: ['potion_red', 'scroll_return', 'scroll_town', 'potion_orange', 'potion_blue', 'drink_energy', 'drink_tough'] },
     { npcId: 'shop_downtown', name: 'ネオン・ブティック', items: ['beanie_gray', 'bandana_red', 'tank_black', 'hawaiian_shirt', 'cargo_khaki', 'loafers_brown', 'scarf_red', 'katana_steel', 'bat_nail', 'knife_butterfly'] },
   ],
   slums: [
@@ -31,7 +31,7 @@ export const TOWN_SHOPS = {
  * 夜限定の目玉として チップ類を置く（maps.js 側の shop に追加を提案）。判定は systems/night.js isOpenAt / npcAvailableNow
  */
 export const NIGHT_SHOPS = [
-  { npcId: 'night_marin', mapId: 'beach', hours: [20, 5], name: '焚き火ビーチバー', items: ['drink_energy', 'drink_tough', 'potion_red', 'potion_blue', 'pet_food'] },
+  { npcId: 'night_marin', mapId: 'beach', hours: [20, 5], name: '焚き火ビーチバー', items: ['drink_energy', 'drink_tough', 'potion_red', 'scroll_return', 'scroll_town', 'potion_blue', 'pet_food'] },
   { npcId: 'night_noodle', mapId: 'downtown', hours: [21, 5], name: 'ネオン屋台', items: ['potion_orange', 'potion_white', 'drink_energy', 'drink_tough'] },
   { npcId: 'night_smuggler', mapId: 'slums', hours: [22, 4], name: 'カラスの闇市', items: ['potion_white', 'potion_mana', 'smg_compact', 'mask_skull', 'drink_lucky', 'chip_reroll', 'chip_lock'] },
   { npcId: 'night_bartender', mapId: 'casino', hours: [20, 5], name: 'VIPラウンジ', items: ['drink_lucky', 'power_elixir', 'elixir', 'sunglasses_neon', 'chip_reroll'] },

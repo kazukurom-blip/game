@@ -728,7 +728,7 @@ const W2_NPC_LOOK = {
   sky: { body: 'f', skin: '#fff0e0', hair: 'ponytail', hairColor: '#fff6d0', eyeColor: '#ffd23f' },
   gate: { body: 'm', skin: '#d9e0ff', hair: 'wolf', hairColor: '#e8e8ff', eyeColor: '#ff3dd2' },
 };
-const W2_SHOP_POTS = ['potion_white', 'potion_mana', 'elixir', 'power_elixir', 'drink_tough', 'drink_lucky'];
+const W2_SHOP_POTS = ['scroll_return', 'scroll_town', 'potion_white', 'potion_mana', 'elixir', 'power_elixir', 'drink_tough', 'drink_lucky'];
 const w2Npc = (id, name, title, x, lookKey, equip, dialog, extra = {}) => ({ id, name, title, x, look: W2_NPC_LOOK[lookKey], equip, dialog, ...extra });
 const W2_GEAR_SHOP = (k) => [`w2_${k}_hat`, `w2_${k}_top`, `w2_${k}_bottom`, `w2_${k}_shoes`, `w2_${k}_melee`, `w2_${k}_gun`, `w2_${k}_magic`];
 

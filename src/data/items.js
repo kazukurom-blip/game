@@ -165,6 +165,11 @@ consumable('power_elixir', 'ハーフエリクサー', 'rare', { hpPct: 0.5, mpP
 consumable('drink_energy', 'ネオン・エナジー', 'rare', { buff: { id: 'drink_energy', name: 'エナジー', duration: 120, atkPct: 0.15, speedPct: 0.1, color: '#19f0ff' } }, 'potionBlue', 500, '120秒間 攻撃+15% 移動速度+10%。');
 consumable('drink_tough', 'アイアン・ミルク', 'rare', { buff: { id: 'drink_tough', name: 'アイアン', duration: 120, defPct: 0.3, color: '#ffd23f' } }, 'potionRed', 500, '120秒間 防御+30%。');
 consumable('drink_lucky', 'ラッキー・ソーダ', 'epic', { buff: { id: 'drink_lucky', name: 'ラッキー', duration: 180, luckAdd: 100, critAdd: 0.05, color: '#ff3dd2' } }, 'elixir', 1200, '180秒間 ドロップ率UP・クリティカル+5%。');
+// 移動の書（使うと町へ。src/systems/scrolls.js）
+consumable('scroll_return', '帰還の書', 'common', {}, 'scroll', 120, '今いる地域の町へすぐに戻る。ボス戦・塔・闘技場の中では使えない。');
+list[list.length - 1].use = 'returnScroll';
+consumable('scroll_town', '町移動の書', 'rare', {}, 'scroll', 1500, '行ったことのある町を選んで飛べる（同じワールドの町だけ）。Lv30 から使える。');
+Object.assign(list[list.length - 1], { use: 'townScroll', reqLevel: 30 });
 
 // ============ etc 素材 ============
 etc('slime_jelly', 'スライムゼリー', 'common', 'gem', 5, 'ぷるぷる。ほんのりソーダ味。');

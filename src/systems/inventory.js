@@ -13,6 +13,7 @@ import { computeStats, clampVitals, addBuff } from './progression.js';
 import { spawnEffect, spawnDamageNumber } from '../render/effects.js';
 import { maybePotential } from './potential.js';
 import { feedPet } from './petSkills.js';
+import { useReturnScroll, useTownScroll } from './scrolls.js';
 
 export const MAX_SLOTS = 48;
 export const MAX_STACK = 999;
@@ -357,6 +358,8 @@ export function useItem(game, id) {
     return r.ok;
   }
   if (it.use === 'petFood') return feedPet(game, it.id).ok;
+  if (it.use === 'returnScroll') return useReturnScroll(game, it.id);
+  if (it.use === 'townScroll') return useTownScroll(game, it.id);
   if (it.type !== 'consumable') return false;
   if (countItem(st, id) <= 0) { game.notify?.(`${it.name} を持っていません`, '#ff5555'); return false; }
   if (st.hp <= 0) return false;
