@@ -151,6 +151,22 @@ test('装備: 女性専用（スカート・ドレス・ヒール）は男性キ
   }
 });
 
+test('画像: 軽い WebP の対応表（webp.json）が今の PNG と一致（PNG を差し替えたら python3 tools/make_webp.py）', async () => {
+  const fs = await import('node:fs'); const crypto = await import('node:crypto');
+  const dir = new URL('../assets/sprites/', import.meta.url);
+  const mapUrl = new URL('webp.json', dir);
+  if (!fs.existsSync(mapUrl)) return;
+  const map = JSON.parse(fs.readFileSync(mapUrl, 'utf8'));
+  const bad = [];
+  for (const [rel, h] of Object.entries(map)) {
+    const png = new URL(rel, dir), webp = new URL(rel.replace(/\.png$/, '.webp'), dir);
+    if (!fs.existsSync(png) || !fs.existsSync(webp)) { bad.push(rel + '（ファイルが無い）'); continue; }
+    const m = crypto.createHash('md5').update(fs.readFileSync(png)).digest('hex').slice(0, 8);
+    if (m !== h) bad.push(rel + '（PNG が変わったのに WebP が古い）');
+  }
+  assert.deepEqual(bad.slice(0, 10), []);
+});
+
 test('items: 必須フィールドとスタイル', () => {
   const ids = Object.keys(ITEMS);
   assert.ok(ids.length > 0);

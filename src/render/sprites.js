@@ -4,6 +4,7 @@
 //  - drawEnemy / drawPet / drawCharacter の入口から呼ばれ、描けたら true（呼び出し側はコード描画をしない）。
 //  - spriteMode: 'auto'（スプライトがあれば使う）| 'procedural'（常にコード描画）。デバッグパネル（F2）で切替。
 //  - パスはすべて相対（公開ページ・サブディレクトリ配信でも動く）。
+import { assetUrl, setWebpMap } from './assetUrl.js';
 import { charHeadPose, itemColors, SPRITE_LAYER_ORDER, aiHeadOf, paintAiHead, paintAiHeadBack } from './character.js';
 import { setRigManifest, rigStats, rigPreload } from './rig.js';
 import { HEAD_W, HEAD_S, HEAD_PX, HEAD_PY } from './rigLayout.js';
@@ -45,12 +46,16 @@ export function hasSpriteManifest() { return !!MAN; }
 export async function loadSpriteManifest(url = SPRITE_BASE + 'manifest.json') {
   try {
     if (typeof fetch !== 'function') throw new Error('fetch なし');
+    // 軽い WebP の対応表（無くてもよい。読めなければ PNG のまま）
+    const base0 = url.slice(0, url.lastIndexOf('/') + 1);
+    const wp = fetch(base0 + 'webp.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
     const r = await fetch(url, { cache: 'no-cache' });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const txt = await r.text();
     let j;
     try { j = JSON.parse(txt); } catch (e) { STATS.manifest = 'broken'; note('manifest.json の JSON が壊れています: ' + e.message); MAN = null; return false; }
     const base = url.slice(0, url.lastIndexOf('/') + 1);
+    setWebpMap(await wp);
     return setSpriteManifest(j, base);
   } catch (e) {
     MAN = null; STATS.manifest = 'none'; setRigManifest(null);
@@ -526,7 +531,7 @@ function img(s) {
       for (const f of r.wait.splice(0)) f();
     };
     im.onerror = () => { r.st = 3; STATS.failed++; note('画像を読めません: ' + s.file); REV++; for (const f of r.wait.splice(0)) f(); };
-    im.src = BASE + s.file;
+    im.src = assetUrl(BASE, s.file);
   } catch (e) { r.st = 3; STATS.failed++; note('画像の読み込みに失敗: ' + s.file + ' ' + e.message); }
   return r;
 }

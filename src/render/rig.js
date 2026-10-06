@@ -15,6 +15,7 @@
 //  - 絵の背景は透明か単色（自動で透明化）。枠の中の不透明部分を自動検出し、今のコード描画の同じパーツの範囲に合わせる（多少ずれてもよい）。
 //  - 色: スタイルごとの基準色（rigLayout.js の RIG_BASE。manifest の base/accent で上書き）→ アイテムの色へ、色相回転＋彩度・明度補正（陰影は残す）。
 // 仕様: docs/SPEC_SPRITES.md「リグ（パーツ式）」
+import { assetUrl } from './assetUrl.js';
 import {
   RIG_PARTS, RIG_W, RIG_H, RIG_S, RIG_R, RIG_GROUP_PARTS, RIG_BASE, RIG_SKIN_BASE, RIG_DEFAULT_WEAR, RIG_SLOTS, RIG_ACC_PARTS,
   WPN_W, WPN_H, WPN_S, WPN_R, WPN_BOX, RIG_PARTS_V1, RIG_LIMBS,
@@ -149,7 +150,7 @@ function load(rec) {
       done(ok);
     });
     im.onerror = () => { warn('rig: 画像を読めません ' + rec.file); done(false); };
-    im.src = BASE + rec.file;
+    im.src = assetUrl(BASE, rec.file);
   } catch (e) { warn('rig: 読み込みに失敗 ' + rec.file + ' ' + e.message); done(false); }
   return rec;
 }

@@ -3,6 +3,7 @@
 //  - 画像は最初に必要になった時に読み込む（遅延）。読み込み中・失敗・spriteMode='procedural' の間は null を返し、呼び出し側は今のコードの絵を描く。
 //  - 読み込み時の前処理: 乗り物はマゼンタ #FF00FF の印からタイヤの位置を読んで印を消す／タイヤは円の中心と半径／地面は下端の色。
 //  - 装備アイコンはスタイルごとの1枚を、基準色（そのスタイルの最初のアイテムの色）→ アイテムの色へ recolor.js で塗り替える。
+import { assetUrl } from './assetUrl.js';
 import { getSpriteMode } from './sprites.js';
 import { colorInfo, effectiveColor, recolorData, HEX6, sameColor, rgbHsl } from './recolor.js';
 import { ITEMS } from '../data/items.js';
@@ -97,7 +98,7 @@ function load(E, kind) {
       if (typeof im.decode === 'function') im.decode().then(() => done(true), () => done(true));
       else done(true);
     };
-    im.src = BASE + E.file;
+    im.src = assetUrl(BASE, E.file);
   } catch (e) { r.st = 3; ST.failed++; note('画像の読み込みに失敗: ' + E.file + ' ' + e.message); }
   return r;
 }

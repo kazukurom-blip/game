@@ -911,6 +911,11 @@ function install({ results, files, root, cat, log }) {
   }
   fs.writeFileSync(manPath, JSON.stringify(man, null, 2) + '\n');
   log(`組み込み: ${copied.length} 枚コピー、NG で除外 ${skipped.length} 枚`);
+  // 読み込み用の軽い WebP を作り直す（PNG を差し替えたら必ず。tests/unit.mjs が食い違いを検査）
+  if (copied.length) {
+    const r = spawnSync('python3', [path.join(path.dirname(fileURLToPath(import.meta.url)), 'make_webp.py')], { encoding: 'utf8' });
+    log(r.status === 0 ? (r.stdout || '').trim() : 'WebP の作り直しに失敗しました。python3 tools/make_webp.py を手で流してください: ' + (r.stderr || '').trim().slice(0, 200));
+  }
   return { copied, skipped, rigManifest, faces, hairs, bases, env };
 }
 

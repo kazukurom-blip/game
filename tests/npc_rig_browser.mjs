@@ -73,6 +73,7 @@ async function openGame(browser, mode) {
   for (const [k, v] of Object.entries(man.faces || {})) if (v && v.__src) { alias[`heads/face/${k}.png`] = v.__src; delete v.__src; }
   if (man.hairs && man.hairs.m_slick) { alias['heads/hair/m_slick.png'] = REAL.hairs.m_short.file; alias['heads/hair/m_slick_back.png'] = REAL.hairs.m_short.back; }
   await page.route('**/assets/sprites/**', async (route) => {
+    if (/webp\.json$/.test(route.request().url())) return route.fulfill({ status: 404, body: '' }); // 偽の manifest の時は WebP を使わない（PNG を差し替えて試すため）
     const rel = decodeURIComponent(new URL(route.request().url()).pathname.split('/assets/sprites/')[1] || '');
     if (rel === 'manifest.json') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(man) });
     if (alias[rel]) return route.fulfill({ status: 200, contentType: 'image/png', body: fs.readFileSync(path.join(ROOT, 'assets', 'sprites', alias[rel])) });

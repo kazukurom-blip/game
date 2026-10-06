@@ -53,6 +53,7 @@ function envManifest() {
 const MAN = { good: envManifest(), none: REAL, fail: envManifest() };
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.json': 'application/json' };
 function serveSprites(kind, rel, res) {
+  if (rel === 'webp.json') { res.writeHead(404); res.end(); return; } // 仮の画像（PNG）で試すので、WebP の対応表は渡さない
   if (rel === 'manifest.json') { res.writeHead(200, { 'Content-Type': MIME['.json'] }); res.end(JSON.stringify(MAN[kind])); return; }
   if (IMGS[rel]) {
     if (kind === 'fail') { res.writeHead(404); res.end(); return; }
@@ -223,6 +224,7 @@ try {
   page.on('console', (m) => { if (m.type() === 'error' && !IGNORE.some((re) => re.test(m.text()))) errs.push('console: ' + m.text()); });
   page.on('pageerror', (e) => errs.push('pageerror: ' + (e.stack || e.message)));
   await page.route('**/assets/sprites/**', async (route) => {
+    if (/webp\.json$/.test(route.request().url())) return route.fulfill({ status: 404, body: '' }); // 偽の manifest の時は WebP を使わない（PNG を差し替えて試すため）
     const u = new URL(route.request().url());
     if (u.pathname.startsWith('/__')) return route.continue();
     const rel = decodeURIComponent(u.pathname.split('/assets/sprites/')[1] || '');

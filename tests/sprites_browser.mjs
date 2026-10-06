@@ -51,6 +51,7 @@ async function openGame(browser, mode) {
   page.on('console', (m) => { if (m.type() === 'error' && !IGNORE.some((re) => re.test(m.text()))) errs.push('console: ' + m.text()); });
   page.on('pageerror', (e) => errs.push('pageerror: ' + (e.stack || e.message)));
   await page.route('**/assets/sprites/**', async (route) => {
+    if (/webp\.json$/.test(route.request().url())) return route.fulfill({ status: 404, body: '' }); // 偽の manifest の時は WebP を使わない（PNG を差し替えて試すため）
     const u = new URL(route.request().url());
     const rel = decodeURIComponent(u.pathname.split('/assets/sprites/')[1] || '');
     if (mode === 'none') return route.fulfill({ status: 404, body: '' });
