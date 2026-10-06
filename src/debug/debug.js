@@ -10,7 +10,7 @@ import { entRect } from '../world/physics.js';
 import { Enemy } from '../entities/enemy.js';
 import { computeStats, gainExp, expToNext } from '../systems/progression.js';
 import { addItem, countItem, freeSlots, equip } from '../systems/inventory.js';
-import { damageEnemy, setWantedLevel, TEAR_THRESHOLDS } from '../systems/combat.js';
+import { damageEnemy, isUntargetable, TEAR_THRESHOLDS } from '../systems/combat.js';
 import { spawnEffect } from '../render/effects.js';
 import { getSpriteMode, toggleSpriteMode, spriteStats } from '../render/sprites.js';
 
@@ -46,8 +46,9 @@ export class DebugPanel {
       { id: 'mission', label: () => 'ミッション即完了', key: 'F10', fn: () => this.completeMission() },
       { id: 'items', label: () => '全アイテム付与', key: '⇧F3', fn: () => this.giveAllItems() },
       { id: 'money', label: () => 'お金+10000', key: '⇧F4', fn: () => { this.game.state.money += 10000; return '+$10000'; } },
-      { id: 'wantedUp', label: () => '手配度+1', key: '⇧F5', fn: () => this.wanted(+1) },
-      { id: 'wantedDown', label: () => '手配度-1', key: '⇧F6', fn: () => this.wanted(-1) },
+      // 旧「手配度+1/-1」の枠（警察制度は廃止）。★強化の費用が高くなったので確認用に大金・Lv+10 を置く
+      { id: 'moneyBig', label: () => 'お金+1000万', key: '⇧F5', fn: () => { this.game.state.money += 10000000; return '+$10,000,000'; } },
+      { id: 'level10', label: () => 'Lv+10', key: '⇧F6', fn: () => { for (let i = 0; i < 10; i++) this.levelUp(); return `Lv.${this.game.state.level}`; } },
       { id: 'hpFull', label: () => 'HP/MP全快', key: '⇧F7', fn: () => this.heal() },
       { id: 'clearInv', label: () => 'インベントリ整理', key: '⇧F8', fn: () => this.clearInventory() },
       { id: 'pet', label: () => `PET付与 ${this.game.state?.equipped?.pet ? '(次)' : ''}`, key: '⇧F9', fn: () => this.givePet() },
@@ -161,13 +162,6 @@ export class DebugPanel {
     return types;
   }
 
-  wanted(d) {
-    const g = this.game;
-    setWantedLevel(g, (g.wanted || 0) + d);
-    const note = d > 0 && !g.map?.town ? '（フィールドでは警察は出ない。町で確認）' : '';
-    return `★${g.wanted}${note}`;
-  }
-
   // PET を順番に付与して装備（インベントリが満杯なら直接装備スロットへ）
   givePet() {
     const g = this.game, st = g.state;
@@ -227,7 +221,7 @@ export class DebugPanel {
     const g = this.game;
     let n = 0;
     for (const e of [...g.enemies]) {
-      if (e.dead || e.hp <= 0) continue;
+      if (e.dead || e.hp <= 0 || isUntargetable(e)) continue; // 住民は攻撃の対象外
       damageEnemy(g, e, e.hp + 1, false, 0);
       n++;
     }
@@ -298,12 +292,12 @@ export class DebugPanel {
     const lines = [];
     lines.push(`FPS ${this.fps.toFixed(0)}  frame ${(g.perf?.avg ?? 0).toFixed(1)}ms  t ${g.time.toFixed(0)}s`);
     lines.push(`enemies ${g.enemies.length}  drops ${g.drops.length}  proj ${g.projectiles.length}  fx ${g.effects.length}`);
-    lines.push(`npcs ${g.npcs.length}  vehicles ${g.vehicles.length}`);
+    lines.push(`npcs ${g.npcs.length}`);
     if (p && st) {
       lines.push(`map ${g.map?.id}  ${MAP_ORDER.indexOf(g.map?.id) + 1}/${MAP_ORDER.length}`);
       lines.push(`pos ${p.x.toFixed(0)}, ${p.y.toFixed(0)}  v ${p.vx.toFixed(0)}, ${p.vy.toFixed(0)}`);
-      lines.push(`${p.anim?.state || '?'} ${p.onGround ? 'ground' : 'air'}${p.climbing ? ' rope' : ''}${p.inVehicle ? ' car' : ''}${p.dead ? ' DEAD' : ''}`);
-      lines.push(`Lv${st.level} HP ${st.hp} MP ${st.mp} $${st.money} ★${g.wanted} heat ${(g.wantedHeat || 0).toFixed(1)}`);
+      lines.push(`${p.anim?.state || '?'} ${p.onGround ? 'ground' : 'air'}${p.climbing ? ' rope' : ''}${p.dead ? ' DEAD' : ''}`);
+      lines.push(`Lv${st.level} HP ${st.hp} MP ${st.mp} $${st.money}`);
       lines.push(`damage ${(p.anim?.damage ?? 0).toFixed(2)}  inv ${st.inventory.length}/48  missions ${st.missions.active.length}`);
       const ck = g.clock ?? st.clock ?? 0;
       lines.push(`${g.map?.town ? 'TOWN' : 'FIELD'} ${g.map?.region || '-'}  clock ${String(Math.floor(ck)).padStart(2, '0')}:${String(Math.floor((ck % 1) * 60)).padStart(2, '0')}  pet ${st.equipped?.pet || '-'}`);
@@ -409,7 +403,6 @@ export class DebugPanel {
       ctx.strokeRect(r.x, r.y, r.w, r.h);
     };
     for (const n of g.npcs) box(n, '#19d3c5');
-    for (const v of g.vehicles) box(v, '#4da6ff');
     for (const d of g.drops) box(d, '#7cfc00');
     for (const e of g.enemies) {
       box(e, e.dead ? '#555' : '#ff3d3d');

@@ -9,7 +9,7 @@ import { ENEMY_LORE, ITEM_LORE } from '../src/data/lore.js';
 import { NIGHT_SHOPS, TOWN_SHOPS } from '../src/data/shops.js';
 import { MAPS } from '../src/world/maps.js';
 import {
-  TUNE_RATES, TUNE_PITY, TUNE_EXPECTED, maxStarFor, tuneCost, starBonus, POT_UPGRADE, POT_LINES, POT_GRADES, potLinePool, potRateTable,
+  TUNE_RATES, TUNE_PITY, TUNE_EXPECTED, maxStarFor, tuneCost, tuneBaseCost, tuneCostMultFor, starBonus, POT_UPGRADE, POT_LINES, POT_GRADES, potLinePool, potRateTable,
 } from '../src/data/gear.js';
 import { makeRng } from '../src/systems/rng.js';
 import { newState, migrateState, computeStats, STATE_VERSION, setActiveBuffs } from '../src/systems/progression.js';
@@ -159,9 +159,17 @@ export default function register({ test, makeGame, step, fin }) {
     TUNE_EXPECTED.forEach((e, i) => assert.ok(Math.abs(e - ref[i]) < 0.006, `期待試行 ★${i} ${e}`));
     const total = TUNE_EXPECTED.reduce((a, b) => a + b, 0);
     assert.ok(Math.abs(total - 127) < 1, `★0→25 合計 ${total}`);
-    assert.deepEqual([0, 5, 9].map((s) => tuneCost(s, 30)), [70, 380, 770]);
-    assert.deepEqual([0, 10, 19].map((s) => tuneCost(s, 100)), [250, 7310, 17850]);
-    assert.equal(tuneCost(24, 150), 51670);
+    // 費用: 旧費用（基準額）× 10^(1 + (s/24)^1.5)。★0 で約10倍 → ★24 で100倍（壊れない代わりに高い）
+    assert.deepEqual([0, 5, 9].map((s) => tuneCost(s, 30)), [730, 4790, 13100]);
+    assert.deepEqual([0, 10, 19].map((s) => tuneCost(s, 100)), [2490, 135800, 903900]);
+    assert.equal(tuneCost(24, 150), 5167300);
+    assert.ok(Math.abs(tuneCostMultFor(0) - 10) < 1e-9 && Math.abs(tuneCostMultFor(24) - 100) < 1e-9);
+    for (let s = 1; s < 25; s++) assert.ok(tuneCostMultFor(s) > tuneCostMultFor(s - 1), `倍率は★とともに上がる ★${s}`);
+    for (const L of [0, 10, 30, 60, 100, 150]) for (let s = 0; s < 25; s++) {
+      const r = tuneCost(s, L) / tuneBaseCost(s, L);
+      assert.ok(r >= 9.5 && r <= 101, `Lv${L} ★${s} 倍率 ${r}`);
+      if (s) assert.ok(tuneCost(s, L) >= tuneCost(s - 1, L), `Lv${L} ★${s} 単調`);
+    }
     assert.equal(maxStarFor('knife_basic'), 5); assert.equal(maxStarFor('helmet_moto'), 10); assert.equal(maxStarFor('katana_plasma'), 15);
     assert.equal(maxStarFor('crown_caiman'), 20); assert.equal(maxStarFor('halo_zog'), 25); assert.equal(maxStarFor('pet_cat'), 0);
     assert.equal(tuneRateTable().length, 25);
@@ -616,6 +624,33 @@ export default function register({ test, makeGame, step, fin }) {
     resetSharedForTest();
   });
 
+  test('v3 sys: 実績は警察・手配度・乗り物・市民攻撃を前提にしない（置き換えた実績が解除できる）', () => {
+    resetSharedForTest();
+    for (const a of Object.values(ACHIEVEMENTS)) {
+      if (a.id === 'route_police') continue; // ストーリー分岐の選択（警察側に付く）は物語の要素として残す
+      assert.ok(!/手配|警察|警官|SWAT|パトカー|乗車|車で|市民を/.test(a.name + a.desc + (a.title || '')), `${a.id}: ${a.name} ${a.desc}`);
+    }
+    for (const id of ['wanted_1', 'wanted_3', 'wanted_5', 'cops_10', 'cops_100', 'civ_50']) assert.ok(!ACHIEVEMENTS[id], `${id} が残っている`);
+    const g = makeGame('jin', 'beach');
+    const st = g.state;
+    attachAchievements(g);
+    // 町めぐり
+    st.visited = ['beach', 'downtown', 'slums', 'swamp', 'casino', 'rooftop', 'spaceport'];
+    evaluateAchievements(g);
+    assert.ok(st.achv.done.towns_all, '7つの町');
+    // 強化への投資（tuneResult の cost を累計）
+    for (let i = 0; i < 4; i++) g.events.emit('tuneResult', { success: false, star: 5, cost: 300000 });
+    assert.ok(st.achv.done.tune_spent_1m, 'チューンに $1,000,000');
+    // デイリー 30 回
+    for (let i = 0; i < 30; i++) g.events.emit('missionComplete', { id: 'd01_beach_patrol' });
+    assert.ok(st.achv.done.daily_30, 'デイリー 30 回');
+    // 町でスキル 100 回
+    for (let i = 0; i < 100; i++) g.events.emit('skillUsed', { id: 'street_dash' });
+    evaluateAchievements(g); // skillUsed は高頻度イベントなので判定がまとめて遅れる
+    assert.ok(st.achv.done.town_skill_100, '町でスキル 100 回');
+    resetSharedForTest();
+  });
+
   // ============================================================ デイリー / ログイン
   test('v3 sys: 日次/週次リセット(5:00/月曜)・持ち越し2周期・時計巻き戻し・ログインカレンダー・曜日イベント', () => {
     const d = new Date(2026, 9, 5, 4, 59).getTime(); // 月曜 4:59 → まだ日曜扱い
@@ -748,7 +783,7 @@ export default function register({ test, makeGame, step, fin }) {
       for (const id of ['m01_welcome', 'm02_jelly', 'm03_flamingo', 'm04_rosa', 'm05_protection']) st.missions.completed.push(id);
       assert.ok(g.missions.accept('m06_dirty_badge'));
       g.missions._prog('m06_dirty_badge').fill(99);
-      addItemToState(st, 'cop_badge', 3);
+      addItemToState(st, 'drone_chip', 5);
       assert.ok(g.missions.isComplete('m06_dirty_badge'));
       assert.ok(g.missions.needsChoice('m06_dirty_badge'));
       if (choiceId) assert.ok(g.missions.choose('m06_dirty_badge', choiceId).ok);

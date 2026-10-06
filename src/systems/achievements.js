@@ -5,7 +5,7 @@
 import { ENEMIES, BOSS_IDS, NIGHT_ENEMY_IDS, ENEMY_REGIONS } from '../data/enemies.js';
 import { ITEMS, PET_IDS } from '../data/items.js';
 import { MISSIONS } from '../data/missions.js';
-import { WORLD_MAP_IDS } from './travel.js';
+import { WORLD_MAP_IDS, TOWN_IDS } from './travel.js';
 import { bookBonus, bookProgress, bookRank, BOOK_IDS } from './book.js';
 import { isNight } from '../data/balance.js';
 import { sharedAchievements, recordSharedAchievement } from './shared.js';
@@ -94,18 +94,21 @@ A('boss', 'trophy_50', 'トロフィー 50', 'ボス・トロフィーを累計 
 A('boss', 'chaos_zog', '銀河の果ての勝利', 'カオスのオーバーロード・ゾグを倒す', 40, (st) => (st.bosses?.boss_alien?.chaos?.clears || 0) >= 1, { title: 'ネオンの守護者' });
 
 // ------------------------------------------------------------ GTA 10
-for (const [n, p, title] of [[1, 5], [3, 10], [5, 20, '最重要指名手配']]) A('gta', `wanted_${n}`, `手配度 ★${n}`, `手配度 ★${n} に到達`, p, (st) => c(st, 'maxWanted') >= n, title ? { title } : {});
-A('gta', 'cops_10', 'お巡りさんこちら', '警察ユニットを 10 体倒す', 10, (st) => c(st, 'copKills') >= 10);
-A('gta', 'cops_100', '警察の天敵', '警察ユニットを 100 体倒す', 20, (st) => c(st, 'copKills') >= 100);
+// （旧: 手配度★1/★3/★5・警察ユニット撃破。警察制度の廃止で、町めぐり・デイリー・強化への投資に置き換え）
+A('gta', 'towns_all', 'ヴァイス・ベイの顔', '7つの町をすべて訪れる', 5, (st) => TOWN_IDS.every((id) => (st.visited || []).includes(id)));
+A('gta', 'daily_30', '常連さん', 'デイリーミッションを累計 30 回クリア', 10, (st) => c(st, 'dailyDone') >= 30);
+A('gta', 'tune_spent_1m', 'チューンの常連', 'ネオン・チューンに累計 $1,000,000 使う', 10, (st) => Math.max(st.tuneStats?.spent || 0, c(st, 'tuneSpent')) >= 1000000);
+A('gta', 'tune_spent_100m', 'ネオンの投資家', 'ネオン・チューンに累計 $100,000,000 使う', 20, (st) => Math.max(st.tuneStats?.spent || 0, c(st, 'tuneSpent')) >= 100000000, { title: 'ネオンの投資家' });
 A('gta', 'taxi_10', 'お得意様', 'タクシーに 10 回乗る', 5, (st) => c(st, 'taxi') >= 10);
 A('gta', 'followers_1000', 'ちょっと有名人', 'NeonGram のフォロワー 1,000 人', 10, (st) => (st.sns?.followers || 0) >= 1000);
 A('gta', 'followers_100000', 'インフルエンサー', 'NeonGram のフォロワー 100,000 人', 40, (st) => (st.sns?.followers || 0) >= 100000, { title: 'ネオンのインフルエンサー' });
 A('gta', 'money_100k', '小金持ち', '所持金 $100,000', 10, (st) => Math.max(st.money || 0, c(st, 'moneyMax')) >= 100000);
+A('gta', 'money_1m', 'ミリオネア', '所持金 $1,000,000', 20, (st) => Math.max(st.money || 0, c(st, 'moneyMax')) >= 1000000);
 A('gta', 'money_10m', 'ベイの大富豪', '所持金 $10,000,000', 40, (st) => Math.max(st.money || 0, c(st, 'moneyMax')) >= 10000000, { title: '大富豪' });
 
 // ------------------------------------------------------------ 隠し 5
 A('hidden', 'deaths_10', '七転び八起き', '10 回倒れる', 5, (st) => c(st, 'deaths') >= 10, { hidden: true });
-A('hidden', 'civ_50', 'マナーの悪い観光客', '市民を 50 回殴る', 5, (st) => c(st, 'civHits') >= 50, { hidden: true, title: '迷惑系' });
+A('hidden', 'town_skill_100', 'ストリート・パフォーマー', '町でスキルを 100 回使う', 5, (st) => c(st, 'townSkills') >= 100, { hidden: true, title: 'ストリート・パフォーマー' });
 A('hidden', 'route_police', 'バッジの側', 'ストーリーで警察側の選択を3回する', 20, (st) => Object.values(st.storyChoices || {}).filter((v) => v === 'police').length >= 3, { hidden: true, title: 'VBPDの英雄' });
 A('hidden', 'route_gang', 'ストリートの側', 'ストーリーでストリート側の選択を3回する', 20, (st) => Object.values(st.storyChoices || {}).filter((v) => v === 'street').length >= 3, { hidden: true, title: '裏通りの王' });
 A('hidden', 'arena_50', 'アリーナの主', 'ネオン・アリーナを 50 回クリア', 20, (st) => (st.arena?.clears || 0) >= 50, { hidden: true });
@@ -228,7 +231,7 @@ export function attachAchievements(game) {
   const st = () => game.state;
   // 高頻度イベント（撃破・スキル・ヒット・コンボ）は判定を 0.25 秒に1回へまとめる（大技で多数撃破した時の1フレームの負荷対策）。
   // まとめた分は最後に必ず1回判定する（取りこぼしなし）。それ以外のイベントは即時判定。
-  const FREQ = new Set(['enemyKilled', 'skillUsed', 'bossHit', 'comboTier', 'civilianHit']);
+  const FREQ = new Set(['enemyKilled', 'skillUsed', 'bossHit', 'comboTier']);
   let lastEval = -1e9, pending = null;
   const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
   const evalNow = () => { lastEval = now(); if (pending) { clearTimeout(pending); pending = null; } evaluateAchievements(game); };
@@ -240,22 +243,19 @@ export function attachAchievements(game) {
   on('enemyKilled', (d) => {
     const def = d.enemy?.def || ENEMIES[d.enemy?.defId];
     if (!def) return;
-    if (def.isCop) addCounter(st(), 'copKills');
     if (def.civilian || def.isCop) return;
     if (isNight(game.clock ?? st().clock)) addCounter(st(), 'nightKills');
     if (ENEMY_REGIONS.includes(def.region)) addCounter(st(), 'regionKills_' + def.region);
   });
   on('levelUp', () => {});
   on('jobAdvanced', () => {});
-  on('missionComplete', () => {});
+  on('missionComplete', (d) => { if (MISSIONS[d.id]?.daily) addCounter(st(), 'dailyDone'); });
   on('bookNew', () => {}); on('bookRank', () => {}); on('bookComplete', () => {});
   on('rareDrop', () => {}); on('petDrop', () => {});
-  on('wantedChanged', (d) => setCounterMax(st(), 'maxWanted', d.level ?? game.wanted ?? 0));
   on('taxiTravel', () => addCounter(st(), 'taxi'));
-  on('skillUsed', () => addCounter(st(), 'skillUses'));
-  on('civilianHit', () => addCounter(st(), 'civHits'));
+  on('skillUsed', () => { addCounter(st(), 'skillUses'); if (game.map?.town) addCounter(st(), 'townSkills'); });
   on('playerDied', () => addCounter(st(), 'deaths'));
-  on('tuneResult', (d) => { if (d.success) setCounterMax(st(), 'maxStar', d.star || 0); });
+  on('tuneResult', (d) => { if (d.success) setCounterMax(st(), 'maxStar', d.star || 0); if (d.cost > 0) addCounter(st(), 'tuneSpent', d.cost); });
   on('chipUsed', () => {}); on('chipApplied', () => {});
   on('potentialGradeUp', (d) => setCounterMax(st(), 'bestPot', GRADE_ORDER[d.grade] || 0));
   on('comboTier', (d) => setCounterMax(st(), 'maxCombo', d.count || 0));

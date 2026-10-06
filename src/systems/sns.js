@@ -111,11 +111,6 @@ const T = {
     `【速報】${def.name}、討伐完了。街のみんな、もう安心して🔥 #ボス撃破 #ヒーロー`,
     `${def.name} 戦、ギリギリだった…でも勝った！ #死闘 #ボス撃破`,
   ]),
-  wanted: (st, lv) => pick([
-    `パトカーのサイレンが鳴りやまない🚨 手配度★${lv}… #逃走中 #ヴァイスベイ`,
-    `★${lv}とかマジ？ ヘリまで飛んでるんだけど #逃走中 #映画じゃない`,
-    `今、街で一番有名な二人組です（悪い意味で）★${lv} #指名手配 #逃走中`,
-  ]),
   mission: (st, m) => pick([
     `「${m.name}」完了！ この街での評判、また一段上がったかも #ミッション達成`,
     `仕事終わり〜。${m.name}、なかなかハードだった #ミッション達成 #ヴァイスベイ`,
@@ -130,7 +125,7 @@ const T = {
 /**
  * attachSNS(game) — events を購読して自動投稿する。戻り値: 購読解除関数（二重 attach しない）
  *  rareDrop(エピック以上) / petDrop / levelUp(Lv5ごと・序盤は毎回) / enemyKilled(ボスのみ) /
- *  wantedChanged(★3以上に上がった時) / missionComplete / bookNew(10種ごと)
+ *  missionComplete / bookNew(10種ごと)
  */
 export function attachSNS(game) {
   if (game._snsUnsub) return game._snsUnsub;
@@ -139,7 +134,6 @@ export function attachSNS(game) {
   if (game.state) ensure(game.state);
   const offs = [];
   const on = (n, fn) => offs.push(ev.on(n, fn));
-  let lastWanted = game.wanted || 0;
 
   on('rareDrop', (d) => {
     const it = d?.item;
@@ -161,11 +155,6 @@ export function attachSNS(game) {
     const def = d?.enemy?.def || ENEMIES[d?.enemy?.defId];
     if (!def?.boss) return;
     snsPost(game, T.boss(game.state, def), { gain: Math.round(40 + def.level * 6), kind: 'boss', tags: ['ボス撃破'] });
-  });
-  on('wantedChanged', (d) => {
-    const lv = d?.level ?? 0;
-    if (lv >= 3 && lv > lastWanted) snsPost(game, T.wanted(game.state, lv), { gain: lv * 12, kind: 'wanted', tags: ['逃走中'] });
-    lastWanted = lv;
   });
   on('missionComplete', (d) => {
     const m = MISSIONS[d?.id];

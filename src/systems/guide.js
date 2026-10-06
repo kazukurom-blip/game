@@ -11,7 +11,7 @@ import { MISSIONS, MISSION_NPCS, turnInNpcOf } from '../data/missions.js';
 import { ENEMIES } from '../data/enemies.js';
 import { ITEMS } from '../data/items.js';
 import { MAPS } from '../world/maps.js';
-import { WORLD_GRAPH, MAP_INFO, mapName, TOWN_IDS } from './travel.js';
+import { WORLD_GRAPH, MAP_INFO, mapName } from './travel.js';
 
 function neighbors(id) {
   const g = WORLD_GRAPH[id];
@@ -58,7 +58,6 @@ function nearestOf(from, ids) {
   for (const id of ids) { const d = hops(from, id); if (d < bd) { bd = d; best = id; } }
   return best || ids[0] || null;
 }
-function nearestTown(from) { return MAP_INFO[from]?.town ? from : nearestOf(from, TOWN_IDS); }
 
 /** 目的の行き先マップ */
 function objectiveMap(o, from) {
@@ -68,22 +67,18 @@ function objectiveMap(o, from) {
   if (o.type === 'kill' || o.type === 'boss') {
     const e = ENEMIES[o.target];
     if (e?.habitats?.length) return nearestOf(from, e.habitats);
-    if (e?.isCop || e?.civilian) return nearestTown(from);
     return null;
   }
   if (o.type === 'collect') {
     const maps = [];
-    let cop = false;
     for (const e of Object.values(ENEMIES)) {
       if (!(e.drops || []).some((d) => d.id === o.target)) continue;
-      if (e.isCop) cop = true;
       maps.push(...(e.habitats || []));
     }
     if (maps.length) return nearestOf(from, [...new Set(maps)]);
-    return cop ? nearestTown(from) : null;
+    return null;
   }
-  if (o.type === 'wanted') return nearestTown(from);
-  return null; // drive: どこでも
+  return null;
 }
 
 function targetNameOf(o) {
@@ -92,8 +87,6 @@ function targetNameOf(o) {
     case 'collect': return ITEMS[o.target]?.name || o.target;
     case 'talk': return MISSION_NPCS[o.target]?.name || findNpc(o.target)?.name || o.target;
     case 'reach': return mapName(o.target);
-    case 'wanted': return `手配度★${o.target}`;
-    case 'drive': return '車で走る';
     default: return String(o.target ?? '');
   }
 }

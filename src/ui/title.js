@@ -361,7 +361,7 @@ function drawTitleScreen(ctx, game, t) {
     txt(ctx, 'Enter ・ Space ・ クリック でスタート', W / 2, r.y + r.h + 18, { size: 13, align: 'center', color: '#ffe3f0', alpha: 0.55 + pulse * 0.45, sw: 3 });
     txt(ctx, sub, W / 2, r.y + r.h + 42, { size: 12, align: 'center', color: COL.sub, sw: 3 });
   }
-  helpBar(ctx, '←→ 移動  Space ジャンプ  X 攻撃  A S D F Q W G H スキル  V 会話  E 乗車  ↑ ポータル  I/K/J/T 窓  M 地図  U コンテンツ  O 実績  Esc メニュー');
+  helpBar(ctx, '←→ 移動  Space ジャンプ  X 攻撃  A S D F Q W G H スキル  V/E 会話  ↑ ポータル  I/K/J/T 窓  M 地図  U コンテンツ  O 実績  Esc メニュー');
   txt(ctx, '© NEON VICE STORY  —  ネオリダ州ヴァイス・ベイ市（架空）', W - 16, 16, { size: 10, align: 'right', color: 'rgba(255,255,255,0.45)', stroke: false });
 }
 function helpBar(ctx, s) {

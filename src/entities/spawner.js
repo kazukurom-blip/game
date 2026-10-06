@@ -1,30 +1,13 @@
-// 自動出現 + 手配度（GTA風）による警官 / SWAT / ドローン / パトカー出現
-import { ENEMIES, COP_UNITS_BY_WANTED } from '../data/enemies.js';
-import * as combat from '../systems/combat.js';
+// 自動出現（フィールドのモンスター・町を歩く住民・インスタンス）
+// ※ 警察制度（手配度による警官 / SWAT / ドローン / パトカーの出現）は廃止した。
+import { ENEMIES } from '../data/enemies.js';
 import { spawnEffect } from '../render/effects.js';
 import { Enemy } from './enemy.js';
-import { Vehicle } from './vehicle.js';
 import { MAPS, buildTowerFloor, openTowerExit } from '../world/maps.js';
 import { sysFn, nightNow } from '../world/sys.js';
 
 const rand = (a, b) => a + Math.random() * (b - a);
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
-
-// 手配度ごとの出現上限 {cop, swat, drone, car}
-const WANTED_TABLE = [
-  { cop: 0, swat: 0, drone: 0, car: 0 },
-  { cop: 1, swat: 0, drone: 0, car: 0 },
-  { cop: 3, swat: 0, drone: 0, car: 1 },
-  { cop: 3, swat: 2, drone: 0, car: 1 },
-  { cop: 3, swat: 3, drone: 2, car: 2 },
-  { cop: 5, swat: 5, drone: 4, car: 2 },
-];
-
-function findByArt(art) {
-  const list = Object.values(ENEMIES || {}).filter((e) => e.art === art && !e.boss);
-  list.sort((a, b) => (a.level || 0) - (b.level || 0));
-  return list;
-}
 
 // ---------------------------------------------------------------- 出現テーブル
 const isMonster = (e) => e && !e.isCop && !e.civilian && e.ai !== 'civilian' && e.ai !== 'cop';
@@ -64,7 +47,7 @@ export function civilianTypes() {
 
 /**
  * マップの出現エリア表を解決する（types 省略時は habitats から自動、ボス枠は boss:true）。
- * 町ではモンスター枠を作らない（市民は Spawner が別管理）。フィールドでは警官・市民を除外。
+ * 町ではモンスター枠を作らない（住民は Spawner が別管理）。警官（廃止）・住民はフィールドに出さない。
  */
 export function resolveSpawns(map) {
   if (!map) return [];
@@ -102,25 +85,8 @@ export class Spawner {
     this.map = null;
     this.areas = [];
     this.timers = [];
-    this.wantedT = 0;
-    this.decayHold = 0;
-    this._ids = null;
     this.civT = 0;
     this.civTarget = 8;
-  }
-
-  // 警察系の敵ID（ENEMIES から art/isCop で解決）
-  get ids() {
-    if (this._ids) return this._ids;
-    const cops = findByArt('cop').filter((e) => !e.civilian);
-    const fallbackCop = Object.values(ENEMIES || {}).filter((e) => e.isCop && e.art !== 'swat' && e.art !== 'drone');
-    this._ids = {
-      cop: (cops.length ? cops : fallbackCop).map((e) => e.id),
-      swat: findByArt('swat').map((e) => e.id),
-      drone: findByArt('drone').filter((e) => e.isCop || /police|cop|swat/i.test(e.id)).map((e) => e.id),
-    };
-    if (!this._ids.drone.length) this._ids.drone = findByArt('drone').filter((e) => e.isCop).map((e) => e.id);
-    return this._ids;
   }
 
   reset(map) {
@@ -130,14 +96,13 @@ export class Spawner {
     if (map && map.town && !map.instance) g0.lastTownId = map.id;
     if (map && map.instance) {
       this.areas = []; this.timers = [];
-      this.wantedT = 1.5; this.civT = 0;
+      this.civT = 0;
       this.resetInstance(map);
       return;
     }
     this.areas = resolveSpawns(map);
     // ボス枠（max<=1）は入場 ~15 秒後に初回出現。他はランダム位相
     this.timers = this.areas.map((s) => (s.max <= 1 ? Math.max(0, (s.interval || 5) - 15) : rand(0, s.interval || 5)));
-    this.wantedT = 1.5;
     this.civT = 0;
     this.civTarget = 6 + Math.floor(Math.random() * 5);
     const g = this.game;
@@ -198,7 +163,7 @@ export class Spawner {
     return e;
   }
 
-  // 町の市民（左右に歩く・殴られると逃げる）。画面外の地面/足場に出現
+  // 町の住民（左右に歩くだけ。攻撃の対象にはならない）。画面外の地面/足場に出現
   spawnCivilian(initial = false) {
     const g = this.game, map = this.map, p = g.player;
     const types = civilianTypes();
@@ -237,7 +202,7 @@ export class Spawner {
         this.spawnInArea(i);
       } else this.timers[i] = (s.interval || 5) * 0.5;
     });
-    // --- 市民（町のみ, 常時 6〜10 人） ---
+    // --- 住民（町のみ, 常時 6〜10 人） ---
     if (map.town) {
       this.civT -= dt;
       if (this.civT <= 0) {
@@ -247,7 +212,6 @@ export class Spawner {
         if (Math.random() < 0.05) this.civTarget = 6 + Math.floor(Math.random() * 5);
       }
     }
-    this.updateWanted(dt);
   }
 
   // ---------------- v3: インスタンス（タワー / アリーナ / ボス部屋） ----------------
@@ -394,106 +358,6 @@ export class Spawner {
     g.notify?.(`⚔ WAVE ${inst.wave}`, '#19f0ff');
     g.events?.emit('arenaWave', { wave: inst.wave });
   }
-
-  // ---------------- 手配度 ----------------
-  updateWanted(dt) {
-    const g = this.game, p = g.player;
-    // 警官に見られているか
-    const law = g.enemies.filter((e) => !e.dead && !e.remove && (e.isCop || e.def?.isCop));
-    const seen = law.some((e) => Math.abs(e.x - p.x) < 650 && Math.abs(e.y - p.y) < 260);
-    const town = !!map(g).town;
-    if (typeof combat.updateWanted === 'function') {
-      // フィールド（警察なし）の素早い減衰は combat.updateWanted 側が map.town を見て行う
-      combat.updateWanted(g, dt, { seen: town && seen });
-    } else if (g.wantedHeat > 0) {
-      // 自然減衰（警官に見られていない時のみ。見られていてもゆっくり）
-      const rate = !town ? 2.5 + g.wantedHeat * 0.12 : seen ? 0 : 0.6 + g.wantedHeat * 0.03;
-      g.wantedHeat = Math.max(0, g.wantedHeat - rate * dt);
-      const lv = heatToLevel(g.wantedHeat);
-      if (lv !== g.wanted) { g.wanted = lv; g.events.emit('wantedChanged', { level: lv }); }
-    }
-
-    // 警察（パトカー含む）は町のみ
-    if (!town || map(g).copSpawns === false || !(g.wanted > 0)) return;
-    this.wantedT -= dt;
-    if (this.wantedT > 0) return;
-    this.wantedT = g.wanted >= 5 ? 1.2 : 2.5;
-    const lv = Math.min(5, Math.max(0, Math.floor(g.wanted)));
-    const tab = WANTED_TABLE[lv];
-    const all = this.ids;
-    // ★ごとの出現ユニット表（enemies.js の COP_UNITS_BY_WANTED）に絞る。表に無い種別は出さない
-    const allow = COP_UNITS_BY_WANTED?.[lv];
-    const only = (list) => (allow ? list.filter((id) => allow.includes(id)) : list);
-    const ids = { cop: only(all.cop), swat: only(all.swat), drone: only(all.drone) };
-    const count = (list) => g.enemies.filter((e) => !e.dead && !e.remove && e.fromWanted && list.includes(e.defId)).length;
-    if (ids.cop.length && count(ids.cop) < tab.cop) return this.spawnLaw(this.leveled(ids.cop));
-    if (ids.swat.length && count(ids.swat) < tab.swat) return this.spawnLaw(this.leveled(ids.swat));
-    if (ids.drone.length && count(ids.drone) < tab.drone) return this.spawnLaw(this.leveled(ids.drone), true);
-    const cars = g.vehicles.filter((v) => v.policeSpawned && v.driverType === 'cop').length;
-    if (all.cop.length && cars < tab.car && !p.inVehicle) this.spawnPoliceCar();
-  }
-
-  // プレイヤーLvに見合った（Lv+6 以下で最も強い）ユニットを選ぶ。一定確率で弱い方も混ぜる
-  leveled(list) {
-    const lv = this.game.state?.level || 1;
-    const ok = list.filter((id) => (ENEMIES[id].level || 1) <= lv + 6);
-    if (!ok.length) return list[0];
-    return Math.random() < 0.7 ? ok[ok.length - 1] : pick(ok);
-  }
-
-  edgeX() {
-    const g = this.game, p = g.player, map = this.map;
-    let side = Math.random() < 0.5 ? -1 : 1;
-    let x = side < 0 ? g.cam.x - 120 : g.cam.x + g.W + 120;
-    if (x < 40 || x > map.width - 40) { side = -side; x = side < 0 ? g.cam.x - 120 : g.cam.x + g.W + 120; }
-    x = Math.max(40, Math.min(map.width - 40, x));
-    if (Math.abs(x - p.x) < 300) x = p.x + (x < p.x ? -1 : 1) * 300;
-    return Math.max(40, Math.min(map.width - 40, x));
-  }
-
-  spawnLaw(id, air = false) {
-    const g = this.game;
-    if (!this.map || !this.map.town || !id) return null;
-    const x = this.edgeX();
-    const y = air ? g.player.y - 200 : this.map.groundY;
-    const e = new Enemy(g, id, x, y, { fromWanted: true, x1: 0, x2: this.map.width });
-    e.aggro = true;
-    g.enemies.push(e);
-    return e;
-  }
-
-  spawnPoliceCar() {
-    const g = this.game;
-    if (!this.map || !this.map.town) return;
-    const x = this.edgeX();
-    const v = new Vehicle(g, { kind: 'police', x, color: '#16213e', facing: x < g.player.x ? 1 : -1 });
-    v.driver = true; v.driverType = 'cop'; v.policeSpawned = true;
-    v.onCopExit = (car) => {
-      const ids = this.ids;
-      if (!ids.cop.length) return;
-      for (let i = 0; i < 2; i++) {
-        const e = new Enemy(g, this.leveled(ids.cop), car.x + (i ? 40 : -40), car.y, { fromWanted: true, x1: 0, x2: this.map.width });
-        e.aggro = true;
-        g.enemies.push(e);
-      }
-      spawnEffect(g, 'smoke', car.x, car.y - 20);
-    };
-    // 放置されたパトカーが溜まりすぎないよう古いものを消す
-    const parked = g.vehicles.filter((c) => c.policeSpawned && !c.driverType);
-    for (let i = 0; i < parked.length - 2; i++) parked[i].remove = true;
-    g.vehicles.push(v);
-  }
-}
-
-function map(g) { return g.map || {}; }
-
-// combat.js に updateWanted がない場合のフォールバック（heat → ★。combat.WANTED_HEAT と同じ閾値）
-export function heatToLevel(h) {
-  if (typeof combat.wantedLevelFor === 'function') return combat.wantedLevelFor(h);
-  const T = [0, 1, 5, 12, 22, 35];
-  let lv = 0;
-  for (let i = 1; i < T.length; i++) if (h >= T[i]) lv = i;
-  return lv;
 }
 
 // ---------------------------------------------------------------- v3 インスタンス用ヘルパー

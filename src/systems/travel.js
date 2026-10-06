@@ -200,8 +200,6 @@ export function canTaxi(game, mapId) {
   if (!isTownMap(mapId)) return { ok: false, msg: 'タクシーは町にしか行けない' };
   if (!isVisited(st, mapId)) return { ok: false, msg: 'まだ訪れていない町だ' };
   if (from === mapId) return { ok: false, msg: 'もうここにいる' };
-  if ((game.wanted || 0) > 0) return { ok: false, msg: '手配中はタクシーが止まってくれない！' };
-  if (game.player?.inVehicle) return { ok: false, msg: '車を降りてからタクシーを呼ぼう' };
   if (!worldMap(mapId)) return { ok: false, msg: 'その町への道は工事中だ' };
   const fare = taxiFare(game, mapId);
   if (fare == null) return { ok: false, msg: 'そこへの道がない' };

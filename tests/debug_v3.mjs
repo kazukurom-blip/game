@@ -1,5 +1,5 @@
 // デバッグ担当 v3: 通し検証で見つけて直したバグの回帰テスト
-//  - E（interact）で NPC より近い車に乗れる（m07「乗車できない」）
+//  - （乗り物の廃止後）E（interact）は会話だけ。町に車は置かれない
 //  - PET の取得範囲・速度は petStats（親密度・range スキル込み）を使う
 //  - 図鑑ボーナスのキャッシュ（JSON.stringify をやめた）が正しく更新される
 //  - 実績の判定まとめ（高頻度イベント）でも取りこぼさない
@@ -18,28 +18,19 @@ import { advanceJob } from '../src/systems/jobs.js';
 import { JOBS } from '../src/data/jobs.js';
 
 export default function register({ test, makeGame, step }) {
-  test('debug v3: E は近い方（車 > NPC）— NPC の横に停めた車にも乗れる', () => {
+  test('debug v3: 乗り物は廃止 — 町に車がなく、E（interact）と V（talk）はどちらも会話', () => {
     const g = makeGame('jin', 'beach');
-    const car = g.vehicles.find((v) => !v.driverType);
-    assert.ok(car, 'beach に車');
+    assert.equal(g.vehicles.length, 0, 'beach に車がある');
     const p = g.player;
-    // 車の真上・NPC を車から 60px に置く（どちらも会話/乗車範囲内）
     const npc = g.npcs[0];
-    npc.x = car.x + 60; npc.y = car.y;
-    p.x = car.x; p.y = car.y; p.vx = 0; p.vy = 0;
-    p.interact();
-    assert.ok(p.inVehicle === car, '車の方が近いので乗車');
-    car.exit(p); p.inVehicle = null;
-    // NPC の方が近ければ会話
-    p.x = npc.x - 5;
+    p.x = npc.x - 5; p.y = npc.y; p.vx = 0; p.vy = 0;
     g.uiOpened.length = 0;
     p.interact();
-    assert.ok(!p.inVehicle, 'NPC が近いので乗らない');
-    assert.ok(g.uiOpened.some((o) => o.name === 'dialog' || o.name === 'content'), '会話窓');
-    // V（talk）は車が近くても会話
-    p.x = car.x; g.uiOpened.length = 0;
-    npc.x = car.x + 30;
+    assert.ok(!p.inVehicle);
+    assert.ok(g.uiOpened.some((o) => o.name === 'dialog' || o.name === 'content'), 'E で会話窓');
+    g.uiOpened.length = 0;
     assert.ok(p.talk(), 'V は会話');
+    assert.ok(g.uiOpened.some((o) => o.name === 'dialog' || o.name === 'content'), 'V で会話窓');
     assert.ok(!p.inVehicle);
   });
 

@@ -137,7 +137,7 @@ async function main() {
     const civ = es.filter((e) => e.civilian || e.def?.civilian);
     const cop = es.filter((e) => e.isCop || e.def?.isCop);
     const mon = es.filter((e) => !(e.civilian || e.def?.civilian) && !(e.isCop || e.def?.isCop));
-    return { civ: civ.length, cop: cop.length, mon: mon.length, police: window.game.vehicles.filter((v) => v.policeSpawned).length, types: [...new Set(mon.map((e) => e.defId))] };
+    return { civ: civ.length, cop: cop.length, mon: mon.length, police: window.game.vehicles.filter((v) => v.policeSpawned).length, cars: window.game.vehicles.length, types: [...new Set(mon.map((e) => e.defId))] };
   });
   const playerScreenClip = async (pad = 90) => {
     const r = await g(() => { const { player: p, cam } = window.game; return { x: p.x - cam.x, y: p.y - cam.y }; });
@@ -363,18 +363,18 @@ async function main() {
     let c = await census();
     await check('町: モンスターがいない', c.mon === 0, JSON.stringify(c));
     await check('町: 市民が歩いている (6〜10)', c.civ >= 6 && c.civ <= 10, `civ=${c.civ}`);
-    await check('町: 警察は手配なしでは出ない', c.cop === 0 && c.police === 0, JSON.stringify(c));
-    // 町: スキル不可
+    await check('町: 警察・パトカーがいない', c.cop === 0 && c.police === 0, JSON.stringify(c));
+    // 町: スキルが使える（攻撃は空振り）
     const mp0 = await g(() => window.game.state.mp);
     await press('KeyA', 40);
-    await sleep(100);
+    await sleep(150);
     const mp1 = await g(() => window.game.state.mp);
-    await check('町: スキル(A) は使えない（MP消費なし）', mp1 === mp0, `MP ${mp0} → ${mp1}`);
-    await check('町: 「町ではスキル」通知', await toastHas(/町/));
-    await shot('luna_town_skill_blocked');
-    // 町: 市民を通常攻撃 → 手配度 → 警察
-    let hits = 0;
-    for (let i = 0; i < 12 && (await g(() => window.game.wanted)) < 1; i++) {
+    await check('町: スキル(A) が使える（MP を消費）', mp1 < mp0, `MP ${mp0} → ${mp1}`);
+    await check('町: 「町ではスキル」通知が出ない', !(await toastHas(/町ではスキル/)));
+    await shot('luna_town_skill');
+    // 町: 住民は通常攻撃・スキルの対象外（ダメージなし・手配度なし・警察なし）
+    let civTries = 0, civHurt = 0;
+    for (let i = 0; i < 6; i++) {
       const ok = await g(() => {
         const gm = window.game, p = gm.player;
         const e = gm.enemies.find((x) => !x.dead && (x.civilian || x.def?.civilian));
@@ -382,16 +382,20 @@ async function main() {
         e.x = p.x + 40 * p.facing; e.y = p.y; e.vx = 0; window.__civ = e; window.__civHp = e.hp; return true;
       });
       if (!ok) { await sleep(500); continue; }
+      civTries++;
       await hold('KeyX', 120);
+      await g(() => import('./src/systems/skills.js').then((m) => m.resetCooldowns()));
+      await press('KeyA', 40);
       await page.waitForTimeout(300);
-      if (await g(() => window.__civ.hp < window.__civHp || window.__civ.dead)) hits++;
+      if (await g(() => window.__civ.hp < window.__civHp || window.__civ.dead)) civHurt++;
     }
     const wl = await g(() => [window.game.wanted, window.game.wantedHeat]);
-    await check('町: 市民に通常攻撃が当たる', hits > 0, `hits=${hits}`);
-    await check('町: 市民を殴ると手配度が上がる', wl[0] >= 1, JSON.stringify(wl));
-    await check('町: 手配度で警察が出現', await waitFor(() => window.game.enemies.some((e) => e.fromWanted && (e.isCop || e.def?.isCop)), 6000));
-    await shot('luna_town_police');
-    await g(() => { window.game.debug.run('wantedDown'); window.game.debug.run('wantedDown'); window.game.debug.run('wantedDown'); window.game.debug.run('wantedDown'); window.game.debug.run('wantedDown'); window.game.enemies = window.game.enemies.filter((e) => !e.fromWanted); });
+    await check('町: 住民に攻撃が当たらない', civTries > 0 && civHurt === 0, `tries=${civTries} hurt=${civHurt}`);
+    await check('町: 手配度は上がらない', wl[0] === 0 && wl[1] === 0, JSON.stringify(wl));
+    await page.waitForTimeout(1500);
+    c = await census();
+    await check('町: 住民を叩いても警察が来ない', c.cop === 0 && c.police === 0 && !(await g(() => window.game.enemies.some((e) => e.fromWanted))), JSON.stringify(c));
+    await shot('luna_town_no_police');
 
     // ウィンドウ（v1 + v2）
     for (const [k, n] of [['KeyI', 'inventory'], ['KeyK', 'skills'], ['KeyJ', 'missions'], ['KeyT', 'stats'], ['KeyM', 'worldmap'], ['KeyB', 'book'], ['KeyP', 'phone']]) {
@@ -419,22 +423,12 @@ async function main() {
       for (let i = 0; i < 6 && (await g(() => window.game.ui.isOpen('dialog'))); i++) { await press('Escape'); await page.waitForTimeout(150); }
       await check('dialog を閉じる', !(await g(() => window.game.ui.isOpen('dialog'))));
     }
-    // 車 + カーラジオ(R) + ミュート(N)
-    const car = await g(() => { const v = window.game.vehicles.find((x) => !x.driverType); return v && { x: v.x, y: v.y }; });
-    await check('beach に車がある', !!car);
-    if (car) {
-      await teleport(car.x, car.y); await frames(5);
-      await press('KeyE');
-      await check('乗車', await g(() => !!window.game.player.inVehicle));
-      await hold('ArrowRight', 900);
-      const sp = await g(() => Math.abs(window.game.player.inVehicle?.vx || 0));
-      await check('車で走る', sp > 150, `vx=${sp.toFixed(0)}`);
-      const r0 = await g(() => import('./src/audio/audio.js').then((m) => m.audio.radioIndex));
-      await press('KeyR'); await page.waitForTimeout(200);
-      const r1 = await g(() => import('./src/audio/audio.js').then((m) => m.audio.radioIndex));
-      await press('KeyR'); await press('KeyR');
-      await check('カーラジオ (R) で局切替', r1 !== r0, `${r0} → ${r1}`);
-      await shot('luna_drive_radio');
+    // 乗り物は廃止（町に車がない・E で乗れない）+ ミュート(N)
+    await check('beach に車がない', await g(() => window.game.vehicles.length === 0 && !(window.game.map.vehicles || []).length));
+    await teleport(1000, await g(() => window.game.map.groundY)); await frames(5);
+    await press('KeyE');
+    await check('E で乗車しない', !(await g(() => window.game.player.inVehicle)));
+    {
       const m0 = await g(() => import('./src/audio/audio.js').then((m) => m.audio.muted));
       await press('KeyN');
       const m1 = await g(() => import('./src/audio/audio.js').then((m) => m.audio.muted));
@@ -443,9 +437,7 @@ async function main() {
       await check('ミュート (N) 切替', m1 === !m0 && m2 === m0, `${m0} → ${m1} → ${m2}`);
       const ast = await g(() => import('./src/audio/audio.js').then((m) => m.audio.stats()));
       info(`audio ${JSON.stringify(ast)}`);
-      await press('KeyE');
-      await check('降車', !(await g(() => window.game.player.inVehicle)));
-      await press('KeyR'); // 降車中の R（通知のみ・例外なし）
+      await press('KeyR'); // R（ラジオは乗車中のみ。今は何も起きない・例外なし）
       await lastError('radio');
     }
 
@@ -475,14 +467,11 @@ async function main() {
     // 経験値（序盤は少なめ）
     const expInfo = await g(() => import('./src/data/enemies.js').then((m) => ['slime_green', 'crab_sand', 'slime_pink'].map((id) => m.ENEMIES[id].exp)));
     await check('序盤の敵の経験値は少なめ (≤8)', expInfo.every((x) => x <= 8), expInfo.join(','));
-    // フィールド: 手配度 → 警察は出ない・素早く減衰
-    await g(() => { window.game.debug.run('wantedUp'); window.game.debug.run('wantedUp'); window.game.debug.run('wantedUp'); });
-    const w0 = await g(() => window.game.wanted);
-    await page.waitForTimeout(3000);
+    // フィールド: 警察は出ない・手配度は 0 のまま
+    await page.waitForTimeout(1500);
     c = await census();
-    const w1 = await g(() => window.game.wanted);
-    await check('フィールド: 手配★3 でも警察が出ない', c.cop === 0 && c.police === 0, JSON.stringify(c));
-    await check('フィールド: 手配度が素早く減衰', w1 < w0, `★${w0} → ★${w1}`);
+    await check('フィールド: 警察が出ない', c.cop === 0 && c.police === 0, JSON.stringify(c));
+    await check('フィールド: 手配度 0', (await g(() => window.game.wanted)) === 0);
     // ドロップ（撃破→拾う Z）
     await g(() => window.game.debug.run('killAll'));
     await page.waitForTimeout(900);
@@ -709,18 +698,12 @@ async function main() {
       perfRows.push({ ...r, ...cs });
       if (r.id !== id) bad.push(`${id}: warp失敗`);
       if (r.town && (cs.mon > 0 || cs.civ < 3)) bad.push(`${id}: 町 mon=${cs.mon} civ=${cs.civ}`);
-      if (!r.town && (cs.mon === 0 || cs.civ > 0 || cs.cop > 0)) bad.push(`${id}: フィールド mon=${cs.mon} civ=${cs.civ} cop=${cs.cop}`);
-      // フィールドで手配★5 にしても警察が出ない（全フィールド）
-      if (!r.town) {
-        await g(() => import('./src/systems/combat.js').then((c) => c.setWantedLevel(window.game, 5)));
-        await page.waitForTimeout(400);
-        const c2 = await census();
-        if (c2.cop || c2.police) bad.push(`${id}: フィールドに警察 ${JSON.stringify(c2)}`);
-        await g(() => import('./src/systems/combat.js').then((c) => c.setWantedLevel(window.game, 0)));
-      }
+      if (!r.town && (cs.mon === 0 || cs.civ > 0)) bad.push(`${id}: フィールド mon=${cs.mon} civ=${cs.civ}`);
+      // 警察・パトカー・乗り物はどのマップにも出ない
+      if (cs.cop || cs.police || cs.cars) bad.push(`${id}: 警察/乗り物 ${JSON.stringify(cs)}`);
       info(`map ${id.padEnd(10)} ${r.town ? 'TOWN ' : 'field'} ${r.region}/${r.variant} mon=${cs.mon} civ=${cs.civ} frame avg ${r.avg.toFixed(1)}ms max ${r.max.toFixed(1)}ms fps≈${r.fps.toFixed(0)}`);
     }
-    await check('34 マップ全ワープ（町=市民のみ / フィールド=モンスターのみ / フィールドに警察なし）', bad.length === 0, bad.join(' | '));
+    await check('34 マップ全ワープ（町=住民のみ / フィールド=モンスターのみ / 警察・乗り物なし）', bad.length === 0, bad.join(' | '));
     const slow = perfRows.filter((r) => r.avg > 1000 / 45);
     await check('全マップで 1フレーム処理 < 22ms（>45fps 相当）', slow.length === 0, slow.map((r) => `${r.id}:${r.avg.toFixed(1)}ms`).join(', '));
     await check('ワールドマップ: 全マップ訪問で全て名前表示', await g(() => import('./src/systems/travel.js').then((t) => Object.keys(t.MAP_INFO).every((id) => ['visited', 'current'].includes(t.mapVisibility(window.game.state, id))))));
@@ -1001,12 +984,8 @@ async function main() {
     await press('KeyV'); await page.waitForTimeout(250);
     await check('V で会話窓が開く', await g(() => window.game.ui.isOpen('dialog')));
     await g(() => window.game.ui.close('dialog'));
-    // E は近くの車を優先（NPC と車が両方近いとき近い方）
-    const car = await g(() => { const v = window.game.vehicles.find((x) => !x.driverType); return v && { x: v.x, y: v.y }; });
-    await teleport(car.x, car.y); await frames(3);
-    await press('KeyE');
-    await check('E で乗車（V 会話追加後も乗れる）', await g(() => !!window.game.player.inVehicle));
-    await press('KeyE');
+    // 乗り物は廃止: 町に車がなく、E でも乗車しない
+    await check('町に車がない（E は会話だけ）', await g(() => window.game.vehicles.length === 0 && !window.game.player.inVehicle));
     // クエスト詳細・ナビ
     await g(() => window.game.missions.accept('m01_welcome'));
     await g(() => window.game.ui.closeAll());
@@ -1239,14 +1218,14 @@ async function main() {
       return { skills: st?.skills, range: st?.pickRange, petRange: G.pet?.pickRange, hp: G.state.hp };
     });
     await check('PET: 取得範囲は petStats を使う・自動HPポーション', petSk.range === petSk.petRange && (!(petSk.skills || []).includes('autoHp') || petSk.hp > 1), JSON.stringify(petSk));
-    // 手配度で BGM が緊迫
+    // 手配度は廃止: 旧 API で★4 にしようとしても手配度・BGM の緊迫度は 0 のまま、警察も来ない
     await warp('downtown', 300);
     await g(() => import('./src/systems/combat.js').then((c) => c.setWantedLevel(window.game, 4)));
     await page.waitForTimeout(1200);
     const tension = await g(() => import('./src/audio/audio.js').then((m) => m.audio.stats().tension));
-    await g(() => import('./src/systems/combat.js').then((c) => c.setWantedLevel(window.game, 0)));
-    await check('手配度★4 で BGM の緊迫度が上がる', tension > 0, `tension=${tension}`);
-    await g(() => { window.game.enemies = window.game.enemies.filter((e) => !e.fromWanted); window.game.debug.god = false; });
+    const wanted4 = await g(() => window.game.wanted);
+    await check('手配度は上がらず BGM も緊迫しない（警察なし）', !tension && wanted4 === 0 && !(await g(() => window.game.enemies.some((e) => e.fromWanted || e.def?.isCop))), `tension=${tension} wanted=${wanted4}`);
+    await g(() => { window.game.debug.god = false; });
   }
 
   // ===================================================== 旧セーブ v2 / v3 形式（スロット）から起動
@@ -1312,7 +1291,7 @@ async function main() {
 
 // ---------------------------------------------------------------- ページ内で1ミッションを通す
 // 依頼NPC が依頼マップにいる → 受注 → 各目的（討伐対象はそのマップの出現表から実際に湧いたものを倒す /
-// 収集はそのマップの敵のドロップを拾う / reach / talk は報告NPCに話しかける / wanted / drive は実際に乗車）
+// 収集はそのマップの敵のドロップを拾う / reach / talk は報告NPCに話しかける。旧 wanted / drive は廃止）
 // → 報告NPC が報告マップにいる → 報告。Lv はデバッグで reqLevel まで上げる。
 async function runMission(arg) {
   // arg: missionId | {id, skipAccept（UI で受注済み）, stopBeforeReport（報告NPCの前で止める＝UIで報告する）}
@@ -1351,7 +1330,6 @@ async function runMission(arg) {
   if (!m) return res(false, 'mission not found');
   if ((G.state.level || 1) < (m.reqLevel || 1)) G.debug.setLevel(m.reqLevel || 1);
   G.debug.run('hpFull');
-  C.setWantedLevel(G, 0);
   // 依頼
   if (!opt.skipAccept) {
     await go(npcMap(m.giver));
@@ -1370,65 +1348,31 @@ async function runMission(arg) {
       await go(npcMap(o.target));
       if (o.target === turnNpc) continue; // 報告時に満たされる
       if (!(await talk(o.target))) return res(false, `talk: ${o.target} が ${G.map.id} にいない`);
-    } else if (o.type === 'wanted') {
-      await go(npcMap(m.giver));
-      C.setWantedLevel(G, o.target);
-      await wait(3);
-      C.setWantedLevel(G, 0);
-    } else if (o.type === 'drive') {
-      const town = W.MAPS[npcMap(m.giver)].vehicles?.length ? npcMap(m.giver) : 'beach';
-      await go(town);
-      const v = G.vehicles.find((x) => !x.driverType);
-      if (!v) return res(false, `drive: ${town} に車がない`);
-      const p = G.player; p.x = v.x; p.y = v.y; await wait(2);
-      p.interact(); await wait(2);
-      if (!p.inVehicle) return res(false, 'drive: 乗車できない');
-      let dir = 1;
-      for (let k = 0; k < 600 && val(i) < o.count; k++) {
-        const car = p.inVehicle;
-        car.x += dir * 150;
-        if (car.x > G.map.width - 200 || car.x < 200) dir = -dir;
-        await wait(1);
-      }
-      p.inVehicle.exit?.(p); await wait(2);
-      if (p.inVehicle) p.inVehicle = null;
     } else if (o.type === 'kill' || o.type === 'boss' || o.type === 'collect') {
       // 対象の決定: kill/boss → 敵ID、collect → その item を落とす敵
       const sources = o.type === 'collect'
-        ? Object.values(E).filter((e) => (e.drops || []).some((d) => d.id === o.target)).map((e) => e.id)
+        ? Object.values(E).filter((e) => !e.isCop && (e.drops || []).some((d) => d.id === o.target)).map((e) => e.id) // 警察ユニット（廃止）は出ない
         : [o.target];
-      const cop = sources.some((s) => E[s]?.isCop);
+      if (sources.some((s) => E[s]?.isCop)) return res(false, `${o.type}:${o.target} は廃止した警察ユニットが対象`);
       let mapId = o.mapId;
-      if (!mapId) {
-        if (cop) mapId = npcMap(m.giver);
-        else mapId = Object.values(W.MAPS).find((mp) => !mp.town && sources.some((s) => (E[s].habitats || []).includes(mp.id)))?.id;
-      }
+      if (!mapId) mapId = Object.values(W.MAPS).find((mp) => !mp.town && sources.some((s) => (E[s].habitats || []).includes(mp.id)))?.id;
       if (!mapId) return res(false, `${o.type}:${o.target} の出現マップがない`);
       await go(mapId);
       const areaIdx = G.spawner.areas.map((a, k) => (a.types.some((t) => sources.includes(t)) ? k : -1)).filter((k) => k >= 0);
-      if (cop) {
-        if (!G.map.town) return res(false, `警官 ${o.target} の目標なのに ${mapId} は町でない`);
-      } else if (!areaIdx.length) return res(false, `${o.target} の対象 (${sources.join('/')}) が ${mapId} の出現表にない: ${G.spawner.areas.map((a) => a.types.join('/')).join(' | ')}`);
+      if (!areaIdx.length) return res(false, `${o.target} の対象 (${sources.join('/')}) が ${mapId} の出現表にない: ${G.spawner.areas.map((a) => a.types.join('/')).join(' | ')}`);
       const killed = new Set();
       let spawned = 0;
       for (let k = 0; k < 1500 && val(i) < o.count; k++) {
         freeInv();
-        if (cop) {
-          const lv = sources.includes('cop_patrol') ? 2 : 4;
-          if (G.wanted < lv) C.setWantedLevel(G, lv);
-          G.spawner.wantedT = 0;
-        } else {
-          for (const a of areaIdx) {
-            const alive = G.enemies.filter((e) => e.spawnIdx === a && !e.dead && !e.remove).length;
-            if (alive < (G.spawner.areas[a].max || 3)) { if (G.spawner.spawnInArea(a)) spawned++; }
-          }
+        for (const a of areaIdx) {
+          const alive = G.enemies.filter((e) => e.spawnIdx === a && !e.dead && !e.remove).length;
+          if (alive < (G.spawner.areas[a].max || 3)) { if (G.spawner.spawnInArea(a)) spawned++; }
         }
         // 対象を倒す（対象外は枠を空けるため消す）
         for (const e of G.enemies) {
           if (e.dead || e.remove) continue;
           if (sources.includes(e.defId)) { killed.add(e.defId); C.damageEnemy(G, e, e.hp + 1, false, 0); }
-          else if (!cop && e.spawnIdx != null && areaIdx.includes(e.spawnIdx)) e.remove = true;
-          else if (cop && e.fromWanted && k % 60 === 59) e.remove = true; // 対象外の警察が枠を塞がないように
+          else if (e.spawnIdx != null && areaIdx.includes(e.spawnIdx)) e.remove = true;
         }
         await wait(1);
         // 対象アイテムのドロップを拾う
@@ -1436,11 +1380,9 @@ async function runMission(arg) {
       }
       if (val(i) < o.count) return res(false, `${o.type}:${o.target} が ${mapId} で ${val(i)}/${o.count}（spawned ${spawned}, killed ${[...killed].join('/')}）`);
       notes.push(`${o.type}:${o.target} @${mapId} OK (倒した種類 ${[...killed].join('/')})`);
-      if (cop) { C.setWantedLevel(G, 0); G.enemies = G.enemies.filter((e) => !e.fromWanted); }
     } else return res(false, `未対応の目的 ${o.type}`);
   }
   // 報告
-  C.setWantedLevel(G, 0);
   await go(npcMap(turnNpc));
   if (!npcHere(turnNpc)) return res(false, `報告NPC ${turnNpc} が ${G.map.id} にいない`);
   if (opt.stopBeforeReport) {

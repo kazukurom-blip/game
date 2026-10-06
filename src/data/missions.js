@@ -5,8 +5,7 @@
 //   collect: target=アイテムID, count=所持数（報告時に消費）
 //   reach  : target=マップID（そのマップに入る）, count=1
 //   talk   : target=NPC ID（talkNpc イベント）, count=1
-//   wanted : target=手配度★(1〜5) に到達, count=1
-//   drive  : target='any'（車で走る）, count=距離m（10px=1m）
+//   ※ 旧 wanted（手配度）/ drive（車で走る）は警察・乗り物の廃止にともない使わない
 // 追加フィールド: category 'main'|'sub'|'daily', turnIn?: 報告先NPC（省略時 giver）, daily?: true（1日1回繰り返し）
 // v2: 町にはモンスターが出ないため kill/collect の mapId はフィールドID（SPEC_V2）。
 //     reward.exp は expToNext(reqLevel+2) × 係数（main 0.8 / sub 0.5 / daily 0.3）で自動算出（expFixed で固定可）。
@@ -20,7 +19,7 @@ export const MISSION_NPCS = {
   mama_rosa:   { name: 'ママ・ローザ',  mapId: 'downtown', role: 'ダウンタウンの食堂店主。ポーション屋。' },
   officer_kai: { name: 'カイ巡査',      mapId: 'downtown', role: '金で動く汚職警官。' },
   dj_pulse:    { name: 'DJパルス',      mapId: 'slums',    role: '港の倉庫で地下レイブを仕切るDJ。' },
-  tank:        { name: 'タンク',        mapId: 'slums',    role: '港のメカニック。車の手配屋。' },
+  tank:        { name: 'タンク',        mapId: 'slums',    role: '港のメカニック。装備と機械の修理屋。' },
   old_boone:   { name: 'ブーンじいさん', mapId: 'swamp',   role: 'スワンプのワニ猟師。' },
   vivi:        { name: 'ヴィヴィ',      mapId: 'casino',   role: 'カジノ「ネオン・パレス」のディーラー。内通者。' },
   don_caiman:  { name: 'ドン・カイマン', mapId: 'casino',  role: '街を牛耳るカジノ王（黒幕）。ボス戦は tower_f3 の boss_don。' },
@@ -112,14 +111,14 @@ const list = [
   },
   {
     id: 'm06_dirty_badge', name: '第6話 汚れたバッジ', category: 'main', giver: 'officer_kai', reqLevel: 14, prereq: ['m05_protection'],
-    desc: '汚職警官カイの依頼。署の目を引きつけ、その隙に証拠品を「処分」する。',
+    desc: '汚職警官カイの依頼。裏通りのドローンが録った「証拠映像」を回収する。',
     dialog: {
-      offer: ['お前らが噂の二人組か。俺はカイ。ちょっとした取引だ。', '街で派手に騒いで手配度★2まで上げろ。俺がその隙に動く。', 'ついでに巡回中の連中のバッジも頂いてこい。'],
-      done: ['ハッ、いい陽動だった。これで俺たちは共犯だな。'],
+      offer: ['お前らが噂の二人組か。俺はカイ。ちょっとした取引だ。', '裏通りの「のぞき見ドローン」どもが、署の汚い取引を録画しちまってる。', '全部叩き落として、中のメモリーチップを持ってこい。'],
+      done: ['ハッ、いい仕事だ。これで俺たちは共犯だな。'],
     },
     objectives: [
-      { type: 'wanted', target: 2, count: 1, text: '手配度★2に到達' },
-      { type: 'collect', target: 'cop_badge', count: 3, text: '警官バッジを集める' },
+      { type: 'kill', target: 'drone_peeping', count: 12, mapId: 'down_f1', text: 'ネオン裏通りでのぞき見ドローンを落とす' },
+      { type: 'collect', target: 'drone_chip', count: 5, text: 'ドローンのチップを集める' },
     ],
     reward: { exp: 1100, money: 2500, items: ['sunglasses_aviator'] },
     // v3 ストーリー分岐（報告時に選ぶ。MissionManager.choose → turnIn で追加報酬・flag・称号）
@@ -135,17 +134,17 @@ const list = [
     id: 'm07_wheels', name: '第7話 ネオンの足', category: 'main', giver: 'officer_kai', turnIn: 'tank', reqLevel: 18, prereq: ['m06_dirty_badge'],
     desc: '港のメカニック、タンクが「足」を用意してくれるらしい。',
     dialog: {
-      offer: ['港のタンクに会え。車がなきゃこの街じゃ半人前だ。'],
-      done: ['こいつは俺のチューンしたスポーツカーさ。いい走りだったろ？', 'ジン、運転はお前担当だな。ルナは…ナビ席で踊るなよ。'],
+      offer: ['港のタンクに会え。あいつの作る「足」がなきゃこの街じゃ半人前だ。', '途中の高架ハイウェイで暴れてるライダーどもも黙らせてこい。タンクの客が轢かれかけたらしい。'],
+      done: ['こいつは俺のチューンした特製ブーツさ。車なんかより小回りが利くぜ。', 'ジン、走るのはお前担当だな。ルナは…走りながら踊るなよ。'],
     },
     dialogByFlag: {
-      sidePolice: { offer: ['お前が渡した証拠のおかげで、署の空気が少し変わった。…礼は言わねえぞ。', '港のタンクに会え。車がなきゃこの街じゃ半人前だ。'] },
-      sideStreet: { offer: ['証拠の売り上げで俺の借金はチャラだ。いい取引だったぜ、相棒。', '港のタンクに会え。裏ルートの車を用意してる。'] },
+      sidePolice: { offer: ['お前が渡した証拠のおかげで、署の空気が少し変わった。…礼は言わねえぞ。', '港のタンクに会え。あいつの作る「足」がなきゃこの街じゃ半人前だ。', '途中の高架ハイウェイのライダーどもも黙らせてこい。'] },
+      sideStreet: { offer: ['証拠の売り上げで俺の借金はチャラだ。いい取引だったぜ、相棒。', '港のタンクに会え。裏ルートの特製ブーツを用意してる。', '途中の高架ハイウェイのライダーどもも黙らせてこい。'] },
     },
     objectives: [
       { type: 'reach', target: 'slums', count: 1, text: '港（スラム）へ行く' },
       { type: 'talk', target: 'tank', count: 1, mapId: 'slums', text: 'タンクと話す' },
-      { type: 'drive', target: 'any', count: 300, text: '車で走る（m）' },
+      { type: 'kill', target: 'thug_biker', count: 12, mapId: 'down_f3', text: '高架ハイウェイでハイウェイ・ライダーを倒す' },
     ],
     reward: { exp: 1500, money: 3000, items: ['boots_black', 'potion_orange', 'potion_orange'] },
   },
@@ -215,19 +214,19 @@ const list = [
   },
   {
     id: 'm13_heat', name: '第13話 ヴァイス・ベイ大炎上', category: 'main', giver: 'officer_kai', reqLevel: 55, prereq: ['m12_mecha'],
-    desc: 'ドンが警察を買収し、二人に全面手配が。カイと共に包囲網を突破しろ。',
+    desc: 'ドンが署長を買収し、私設の警備部隊で街を封鎖した。カイと共に包囲網を突破しろ。',
     dialog: {
-      offer: ['まずいことになった。ドンが署長を買収しやがった。お前らは今や街の最重要指名手配犯だ。', 'どうせなら派手にいけ。★4の包囲網をぶち破れ！'],
-      done: ['ははっ、SWATまで蹴散らすとはな。俺もとうとう腹を括ったぜ。', 'ドンは摩天楼の屋上だ。ノヴァって奴が道を開けてくれる。'],
+      offer: ['まずいことになった。ドンが署長を買収しやがった。署はもう動かねえ。', 'ドンの警備ロボと手下の亡霊どもが夜景ブールバードを封鎖してる。派手にぶち破れ！'],
+      done: ['ははっ、ドンの警備網をまるごと蹴散らすとはな。俺もとうとう腹を括ったぜ。', 'ドンは摩天楼の屋上だ。ノヴァって奴が道を開けてくれる。'],
     },
     objectives: [
-      { type: 'wanted', target: 4, count: 1, text: '手配度★4に到達' },
-      { type: 'kill', target: 'swat_trooper', count: 6, text: '町でSWAT隊員を倒す' },
+      { type: 'kill', target: 'robot_valet', count: 15, mapId: 'casino_f4', text: '夜景ブールバードでバレー・ロボを倒す' },
+      { type: 'kill', target: 'ghost_neon', count: 15, mapId: 'casino_f4', text: '夜景ブールバードでネオンゴーストを倒す' },
     ],
     reward: { exp: 34000, money: 40000, items: ['armor_vest', 'armor_pants'] },
     dialogByFlag: {
-      sidePolice: { offer: ['ドンが署長を買収した。…だが、お前が前に証拠を渡した刑事たちが動いてくれてる。', '★4の包囲網をぶち破れ！ 正義派が裏で道を開ける。'] },
-      sideStreet: { offer: ['ドンが署長を買収しやがった。街のギャングどもも黙っちゃいねえ。', '★4の包囲網をぶち破れ！ ストリートの連中が陽動してくれる。'] },
+      sidePolice: { offer: ['ドンが署長を買収した。…だが、お前が前に証拠を渡した刑事たちが動いてくれてる。', '夜景ブールバードの包囲網をぶち破れ！ 正義派が裏で道を開ける。'] },
+      sideStreet: { offer: ['ドンが署長を買収しやがった。街のギャングどもも黙っちゃいねえ。', '夜景ブールバードの包囲網をぶち破れ！ ストリートの連中が陽動してくれる。'] },
     },
     choicePrompt: '包囲網を抜けた先で、カイが問う。「最後の決戦、誰と組む？」',
     choices: [
@@ -328,10 +327,10 @@ const list = [
     reward: { exp: 18000, money: 30000, items: ['drink_lucky', 'gold_chain_heavy'] },
   },
   {
-    id: 's07_rave_drive', name: 'ミッドナイト・ドライブ', category: 'sub', giver: 'dj_pulse', reqLevel: 22, prereq: ['m08_rave'],
-    desc: 'レイブの宣伝のため、ネオン街を車で流してほしい。',
-    dialog: { offer: ['俺の新曲を爆音で流しながら街を走ってくれ！ 最高の宣伝になる！'], done: ['街中で噂になってるぜ！ サンキュー！'] },
-    objectives: [{ type: 'drive', target: 'any', count: 800, text: '車で走る（m）' }],
+    id: 's07_rave_drive', name: 'ミッドナイト・プロモ', category: 'sub', giver: 'dj_pulse', reqLevel: 22, prereq: ['m08_rave'],
+    desc: '高架ハイウェイに貼ったレイブのポスターを、光るネズミどもがかじって回っている。',
+    dialog: { offer: ['高架ハイウェイに貼った俺のポスター、ネオンラットどもがかじっちまうんだ！', 'ネズミを追っ払ってくれ！ 最高の宣伝になる！'], done: ['街中で噂になってるぜ！ サンキュー！'] },
+    objectives: [{ type: 'kill', target: 'rat_neon', count: 15, mapId: 'down_f3', text: '高架ハイウェイでネオンラットを倒す' }],
     reward: { exp: 2600, money: 5000, items: ['sunglasses_neon'] },
   },
 
@@ -425,15 +424,15 @@ const list = [
     reward: { exp: 1200, money: 2500, items: ['potion_orange', 'potion_orange', 'potion_orange', 'potion_blue', 'potion_blue'] },
   },
   {
-    id: 'd03_heat_check', name: '[デイリー] ヒート・チェック', category: 'daily', daily: true, giver: 'officer_kai', reqLevel: 15, prereq: ['m06_dirty_badge'],
-    desc: '署の目をそらすための陽動。', dialog: { offer: ['今日も騒いでくれ。★3だ。'], done: ['いい仕事だ。いつもの封筒だ。'] },
-    objectives: [{ type: 'wanted', target: 3, count: 1, text: '手配度★3に到達' }],
+    id: 'd03_heat_check', name: '[デイリー] パトロール代行', category: 'daily', daily: true, giver: 'officer_kai', reqLevel: 15, prereq: ['m06_dirty_badge'],
+    desc: '人手不足の署に代わって、公園の見回り。', dialog: { offer: ['署は今日も人手不足でな。公園のスケボー小僧どもを大人しくさせてくれ。'], done: ['いい仕事だ。いつもの封筒だ。'] },
+    objectives: [{ type: 'kill', target: 'thug_skater', count: 20, mapId: 'down_f4', text: 'セントラル公園でスケボー・チンピラを倒す' }],
     reward: { exp: 2000, money: 6000, items: [] },
   },
   {
     id: 'd04_delivery', name: '[デイリー] デリバリー・ラン', category: 'daily', daily: true, giver: 'tank', reqLevel: 18, prereq: ['m07_wheels'],
-    desc: 'パーツの配達。とにかく走れ。', dialog: { offer: ['今日の配達だ。ぶっ飛ばしてこい！'], done: ['タイム更新だな！'] },
-    objectives: [{ type: 'drive', target: 'any', count: 500, text: '車で走る（m）' }],
+    desc: 'パーツの配達。とにかく走れ。', dialog: { offer: ['今日の配達だ。ダウンタウンのママ・ローザの店まで、このパーツを届けて戻ってこい！'], done: ['タイム更新だな！'] },
+    objectives: [{ type: 'talk', target: 'mama_rosa', count: 1, mapId: 'downtown', text: 'ママ・ローザ（ダウンタウン）にパーツを届ける' }],
     reward: { exp: 1800, money: 4000, items: ['drink_energy'] },
   },
   {
@@ -469,11 +468,10 @@ const list = [
 // ======================= v3: 転職ミッション（type:'job'） =======================
 // 受注はプレイヤー頭上の吹き出し → systems/jobs.js acceptJobMission のみ（NPC の available() には出さない）。
 // 報告は教官 NPC（giver = turnIn = 教官）。報告時に MissionManager.turnIn が advanceJob を呼ぶ。
-// 目的: ①教官に会う（talk。報告と同時に満たされる）②試練（その段階の適正Lvフィールドの敵 or ミニボス / ドライブ）
+// 目的: ①教官に会う（talk。報告と同時に満たされる）②試練（その段階の適正Lvフィールドの敵 or ミニボス）
 const T = (target, text, extra = {}) => ({ type: 'talk', target, count: 1, text, ...extra });
 const K = (target, count, mapId, text) => ({ type: 'kill', target, count, mapId, text });
 const B = (target, mapId, text) => ({ type: 'boss', target, count: 1, mapId, text });
-const D = (count, text) => ({ type: 'drive', target: 'any', count, text });
 const JOB_TIER_LEVEL = [0, 10, 30, 60, 100];
 const JOB_TOWN = Object.fromEntries(Object.entries(MISSION_NPCS).filter(([, n]) => n.jobInstructor).map(([id, n]) => [id, n.mapId]));
 function jobMission(jobId, tier, instructor, name, desc, offer, done, trials, reward = {}) {
@@ -505,9 +503,9 @@ const jobMissions = [
     [K('crab_iron', 12, 'beach_f4', 'ハイウェイ入口でアイアンクラブを倒す'), B('boss_king_slime', 'beach_f3', 'ピア桟橋でキングゼリーを倒す')]),
   jobMission('jin_racer', 1, 'job_bull', 'ナイト・レーサーへの道',
     'ブルのガレージで、走り屋の素質を試される。',
-    ['お前、ハンドル握ると目つきが変わるな。', '車で街を走り込んで、裏通りのチンピラどもを蹴散らしてこい。'],
+    ['お前、走り出すと目つきが変わるな。', '裏通りを駆け抜けて、ドローンとチンピラどもを蹴散らしてこい。'],
     ['いい走りだった。今日からお前は「ナイト・レーサー」だ。', '夜の道路は全部お前のサーキットだぜ。'],
-    [D(300, '車で走る（m）'), K('thug_punk', 12, 'down_f1', 'ネオン裏通りでストリートチンピラを倒す')]),
+    [K('drone_peeping', 10, 'down_f1', 'ネオン裏通りでのぞき見ドローンを倒す'), K('thug_punk', 12, 'down_f1', 'ネオン裏通りでストリートチンピラを倒す')]),
   // ---- ルナ 2次（スラム / ゴースト・リリィ） ----
   jobMission('luna_sharpshooter', 2, 'job_lily', 'ピンク・シャープシューターへの道',
     '港の霧の中、伝説の狙撃手リリィが試練を課す。',
@@ -529,7 +527,7 @@ const jobMissions = [
     'エアボートレースの胴元が、泥道でも滑れる走り屋を探している。',
     ['泥の上でドリフトできりゃ、どこでも走れる。', 'たっぷり走り込んで、廃線路のスクラップ屋どもを跳ね飛ばしてこい。'],
     ['見事なドリフトだ！ 今日からお前は「ストリート・ドリフター」。', 'マフラーの炎、俺にも分けてほしいくらいだぜ。'],
-    [D(600, '車で走る（m）'), K('thug_scrapper', 20, 'slums_f4', '廃線路でスクラップ屋を倒す')]),
+    [K('rat_giant', 15, 'slums_f4', '廃線路でジャイアントラットを倒す'), K('thug_scrapper', 20, 'slums_f4', '廃線路でスクラップ屋を倒す')]),
   // ---- ルナ 3次（カジノ / クイーン・ダイヤ） ----
   jobMission('luna_trigger_maestro', 3, 'job_diamond', 'トリガー・マエストロへの道',
     'ネオン・パレスの看板スター、ダイヤが頂点の座を賭けた勝負を挑む。',
@@ -551,7 +549,7 @@ const jobMissions = [
     '元ストリートレース王者タイガーが、カジノ街の夜を支配する走りを求める。',
     ['ストリップの夜は速いやつのものだ。', 'とことん走り込んで、工事現場の建設ロボをなぎ倒してこい。'],
     ['ハッハー！ 今日からお前は「ニトロ・エース」！', 'この街の信号は、もうお前には関係ねえ。'],
-    [D(1000, '車で走る（m）'), K('robot_worker', 25, 'tower_f1', '工事現場の足場で建設ロボを倒す')]),
+    [K('drone_attack', 15, 'tower_f1', '工事現場の足場でアサルトドローンを倒す'), K('robot_worker', 25, 'tower_f1', '工事現場の足場で建設ロボを倒す')]),
   // ---- ルナ 4次（宇宙港 / セレス） ----
   jobMission('luna_galaxy_outlaw', 4, 'job_celes', 'ギャラクシー・アウトローへの道',
     '宇宙港の歌姫セレスの正体は銀河の賞金稼ぎ。最後の賞金首を追う。',
@@ -571,9 +569,9 @@ const jobMissions = [
     [K('alien_warrior', 30, 'space_f4', '謎の宇宙船でエイリアン戦士を倒す'), B('boss_alien', 'space_f4', '謎の宇宙船でオーバーロード・ゾグを倒す')]),
   jobMission('jin_warp_rider', 4, 'job_kaiser', 'ワープ・ライダーへの道',
     '光速を超える走りを求め、宇宙港の滑走路と宇宙船を駆け抜ける。',
-    ['光より速く走れるやつを、俺は一人しか知らん。…昔の俺だ。', '限界まで走り込み、宇宙船のゼノメカを轢き飛ばしてこい。'],
+    ['光より速く走れるやつを、俺は一人しか知らん。…昔の俺だ。', '限界まで走り込み、宇宙船のゼノメカを跳ね飛ばしてこい。'],
     ['光を置き去りにしたな。今日からお前は「ワープ・ライダー」！', '次に走るのは…銀河の高速道路だ。'],
-    [D(1500, '車で走る（m）'), K('robot_xeno', 30, 'space_f4', '謎の宇宙船でゼノメカを倒す')]),
+    [K('alien_warrior', 20, 'space_f4', '謎の宇宙船でエイリアン戦士を倒す'), K('robot_xeno', 30, 'space_f4', '謎の宇宙船でゼノメカを倒す')]),
   // ---- ハッカー 1次（ダウンタウン / ゼロ） ----
   jobMission('hk_netrunner', 1, 'job_zero', 'ネットランナーへの道',
     'ネットカフェ「ゼロ・ポイント」の店長ゼロが、電脳の才能を試す。',

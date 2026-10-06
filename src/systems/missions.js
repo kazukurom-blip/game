@@ -43,7 +43,6 @@ export class MissionManager {
     this.game = game;
     this._unsub = [];
     this._notifiedDone = new Set();
-    this._lastDriveX = null;
     this._ensureState();
     const ev = game.events;
     if (ev) {
@@ -51,7 +50,6 @@ export class MissionManager {
       on('enemyKilled', (d) => this._onKill(d?.enemy));
       on('talkNpc', (d) => this._onTalk(d?.npcId));
       on('mapChanged', (d) => this._onReach(d?.mapId));
-      on('wantedChanged', (d) => this._onWanted(d?.level));
     }
   }
 
@@ -77,7 +75,7 @@ export class MissionManager {
     return ms.objProgress[id];
   }
 
-  // 現在の各目的の進捗値（collect は所持数、drive は m）
+  // 現在の各目的の進捗値（collect は所持数）
   objectiveValues(id) {
     const m = MISSIONS[id];
     if (!m) return [];
@@ -115,7 +113,6 @@ export class MissionManager {
   }
   _onTalk(npcId) { if (npcId) this._bump((o) => o.type === 'talk' && o.target === npcId); }
   _onReach(mapId) { if (mapId) this._bump((o) => o.type === 'reach' && o.target === mapId); }
-  _onWanted(level) { if (level != null) this._bump((o) => o.type === 'wanted' && level >= o.target); }
 
   /** NPC が今オファーできるミッション（転職ミッション type:'job' は吹き出しからのみ受注するので含めない） */
   available(npcId) {
@@ -194,12 +191,11 @@ export class MissionManager {
     const ms = this.ms;
     ms.active.push(id);
     ms.objProgress[id] = m.objectives.map(() => 0);
-    // 受注時点で満たしている reach / wanted
+    // 受注時点で満たしている reach
     const g = this.game;
     const curMap = g.map?.id || g.state.mapId;
     m.objectives.forEach((o, i) => {
       if (o.type === 'reach' && o.target === curMap) ms.objProgress[id][i] = o.count;
-      if (o.type === 'wanted' && (g.wanted || 0) >= o.target) ms.objProgress[id][i] = o.count;
     });
     this._syncProgress(id);
     this._notifiedDone.delete(id);
@@ -287,7 +283,7 @@ export class MissionManager {
         const v = Math.min(vals[i], o.count);
         const ok = v >= o.count;
         let t;
-        if (o.type === 'reach' || o.type === 'talk' || o.type === 'boss' || o.type === 'wanted') t = o.text;
+        if (o.type === 'reach' || o.type === 'talk' || o.type === 'boss') t = o.text;
         else t = `${o.text} ${Math.floor(v)}/${o.count}`;
         if (o.type === 'talk' && o.target === turnInNpc && !ok) return done ? null : `・${t}`;
         return `${ok ? '✔' : '・'}${t}`;
@@ -302,21 +298,10 @@ export class MissionManager {
     const g = this.game;
     if (!g.state) return;
     const active = this.ms.active;
-    if (!active.length) { this._lastDriveX = null; return; }
-    // drive: 乗車中の移動距離（10px = 1m）
-    const p = g.player;
-    const v = p?.inVehicle;
-    if (v) {
-      const x = typeof v === 'object' && typeof v.x === 'number' ? v.x : p.x;
-      if (this._lastDriveX != null) {
-        const dx = Math.abs(x - this._lastDriveX);
-        if (dx > 0 && dx < 400) this._bump((o) => o.type === 'drive', dx / 10);
-      }
-      this._lastDriveX = x;
-    } else this._lastDriveX = null;
-    // reach / wanted のポーリング（イベント取りこぼし対策）
+    if (!active.length) return;
+    // reach のポーリング（イベント取りこぼし対策）。旧 wanted / drive 目的は廃止（警察・乗り物の廃止）
     const curMap = g.map?.id || g.state.mapId;
-    this._bump((o) => (o.type === 'reach' && o.target === curMap) || (o.type === 'wanted' && (g.wanted || 0) >= o.target), 1e9);
+    this._bump((o) => o.type === 'reach' && o.target === curMap, 1e9);
     // 完了通知
     for (const id of active) {
       if (!this._notifiedDone.has(id) && this.isComplete(id)) {

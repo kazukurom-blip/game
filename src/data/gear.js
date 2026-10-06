@@ -27,9 +27,23 @@ export function maxStarFor(item) {
 }
 
 const round10 = (v) => Math.round(v / 10) * 10;
-/** 費用 $ = round10(50 + reqLv^1.8 × (s+1)^1.5 / 20) */
+/** 旧費用（基準額）$ = 50 + reqLv^1.8 × (s+1)^1.5 / 20 */
+export function tuneBaseCost(star, reqLevel) {
+  return 50 + Math.pow(Math.max(0, reqLevel || 0), 1.8) * Math.pow(star + 1, 1.5) / 20;
+}
+/**
+ * 費用倍率（★が高いほど上がる）: 10^(1 + (s/24)^1.5)
+ *  ★0→1 ≈ 10倍 / ★5→6 ≈ 12.5倍 / ★10→11 ≈ 18.6倍 / ★15→16 ≈ 32倍 / ★20→21 ≈ 55倍 / ★24→25 = 100倍
+ *  装備は壊れない・★は下がらない代わりに、強化は「お金の使い道」として高くしてある
+ */
+export function tuneCostMultFor(star) {
+  const s = Math.max(0, Math.min(TUNE_MAX - 1, star || 0));
+  return Math.pow(10, 1 + Math.pow(s / (TUNE_MAX - 1), 1.5));
+}
+/** 費用 $ = 基準額 × 倍率（1万未満は 10 単位、1万以上は 100 単位に丸める） */
 export function tuneCost(star, reqLevel) {
-  return round10(50 + Math.pow(Math.max(0, reqLevel || 0), 1.8) * Math.pow(star + 1, 1.5) / 20);
+  const v = tuneBaseCost(star, reqLevel) * tuneCostMultFor(star);
+  return v < 10000 ? round10(v) : Math.round(v / 100) * 100;
 }
 
 /**

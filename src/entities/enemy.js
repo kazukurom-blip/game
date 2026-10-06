@@ -114,8 +114,7 @@ export class Enemy {
 
     // 被弾検出（combat 側が hurtT を設定しなくても反応する）
     if (this.hp < this.lastHp) {
-      if (this.civilian) this.onCivilianHurt();
-      else this.aggro = true;
+      if (!this.civilian) this.aggro = true; // 住民は攻撃の対象外（ダメージを受けない）
       if (!(this.hurtT > 0)) this.hurtT = 0.3;
     }
     if (this.shoutT > 0) { this.shoutT -= dt; if (this.shoutT <= 0) this.shout = null; }
@@ -147,7 +146,7 @@ export class Enemy {
       case 'flyer': this.aiFlyer(dt, pdx, pdy, pdist); break;
       case 'cop': this.aiCop(dt, pdx, pdy, pdist); break;
       case 'boss': this.aiBoss(dt, pdx, pdy, pdist); break;
-      case 'civilian': this.aiCivilian(dt, pdx); break;
+      case 'civilian': this.aiCivilian(dt); break;
       default: this.aiWalker(dt, pdx); break;
     }
 
@@ -178,13 +177,7 @@ export class Enemy {
     this.y = Math.max(top, Math.min(m.groundY - 10, this.y));
   }
 
-  // ---------------- 市民 ----------------
-  onCivilianHurt() {
-    const p = this.player;
-    this.fleeT = rand(4, 6);
-    this.fleeDir = p ? (this.x >= p.x ? 1 : -1) : -this.facing;
-    this.say(pick(['キャー！', 'ひぃっ！', '助けて！', '警察呼ぶわよ！', 'やめてくれ！', 'イタッ！']), 1.6, true);
-  }
+  // ---------------- 住民（歩いているだけ。攻撃の対象外で、逃げる・通報する流れは廃止） ----------------
 
   say(text, t = 1.6, force = false) {
     // 近く（180px 以内）で別の市民が叫んでいる間は、自発的な叫びは控える（ふきだしの重なり防止）
@@ -196,34 +189,18 @@ export class Enemy {
     return true;
   }
 
-  aiCivilian(dt, pdx) {
-    const p = this.player;
-    if (this.fleeT > 0) {
-      this.fleeT -= dt;
-      // プレイヤーから離れる方向へ全力疾走（端に着いたら反対へ）
-      if (p && Math.abs(pdx) < 160) this.fleeDir = pdx > 0 ? -1 : 1;
-      const m = this.game.map;
-      if (this.x < 60) this.fleeDir = 1;
-      if (this.x > m.width - 60) this.fleeDir = -1;
-      this.vx = this.fleeDir * Math.max(170, this.speed * 2.4);
-      this.state = 'walk';
-      this.facing = this.fleeDir;
-      if (Math.random() < dt * 0.6 && !(this.shoutT > 0)) this.say(pick(['キャー！', '誰かー！', 'ひぇぇ！']), 1.2);
-      return;
-    }
+  aiCivilian(dt) {
     // のんびり歩く・たまに立ち止まる
     this.aiT -= dt;
     if (this.aiT <= 0) {
       this.aiT = rand(1.5, 4.5);
       const r = Math.random();
       this.dir = r < 0.35 ? 0 : (r < 0.68 ? -1 : 1);
-      // 近くで手配中の騒ぎがあると小走り
-      this.hurry = (this.game.wanted || 0) >= 2 ? 1.8 : 1;
     }
     if (this.x < this.homeX1) this.dir = 1;
     if (this.x > this.homeX2) this.dir = -1;
     if (this.dir && this.edgeAhead(this.dir)) this.dir = -this.dir;
-    this.vx = this.dir * Math.min(this.speed, 90) * (this.hurry || 1);
+    this.vx = this.dir * Math.min(this.speed, 90);
     this.state = this.dir ? 'walk' : 'idle';
   }
 

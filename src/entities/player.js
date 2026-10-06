@@ -62,8 +62,6 @@ export class Player {
       for (const n of ['levelUp', 'jobAdvanced', 'bossClear', 'missionComplete', 'towerFloorCleared']) this._unsub.push(ev.on(n, () => { this.joyT = 1.8; }));
       this._unsub.push(ev.on('mapChanged', () => {
         this.move = null; this.gravityScale = 1; this.dashing = false;
-        // changeMap が車を直接外した場合も降車イベントを出す（ラジオ停止など）
-        if (this._lastVehicle && !this.inVehicle) { this._lastVehicle = null; ev.emit('vehicleExit'); }
         syncPet(game, true);
       }));
     }
@@ -124,7 +122,7 @@ export class Player {
 
     // --- 死亡 ---
     if (s.hp <= 0 || this.dead) {
-      if (!this.dead) { this.dead = true; this.deadT = 0; this.move = null; this.gravityScale = 1; if (this.inVehicle) this.inVehicle.exit(this); }
+      if (!this.dead) { this.dead = true; this.deadT = 0; this.move = null; this.gravityScale = 1; }
       this.deadT += dt;
       this.climbing = null;
       this.vx *= 0.9;
@@ -144,20 +142,8 @@ export class Player {
 
     const ctrl = this.canControl();
 
-    // --- 乗車中 ---
+    // 乗り物は廃止（inVehicle は常に null。古いコードが参照しても落ちないよう項目だけ残す）
     this.updatePet(dt);
-    if (this.inVehicle) {
-      const v = this.inVehicle;
-      if (v.remove || !g.vehicles.includes(v)) { this.inVehicle = null; this._lastVehicle = null; g.events?.emit('vehicleExit'); }
-      else {
-        this._lastVehicle = v;
-        if (ctrl && inp.pressed('interact')) { v.exit(this); this._lastVehicle = null; }
-        else if (ctrl && inp.pressed('up')) { if (this.tryPortal()) return; }
-        this.updateAnim(dt);
-        return;
-      }
-    }
-    this._lastVehicle = null;
 
     if (ctrl) this.handleActions(dt, st);
     if (this.move && !this.climbing) this.updateMoveSkill(dt, ctrl, st);
@@ -174,7 +160,7 @@ export class Player {
     const g = this.game, inp = g.input, s = g.state;
     // ポータル（↑）
     if (inp.pressed('up') && this.tryPortal()) return;
-    // 会話（V = 正式な会話キー。E/Enter は会話 → 乗車の順）
+    // 会話（V = 正式な会話キー。E/Enter も会話）
     if (inp.pressed('talk') && this.talk()) return;
     if (inp.pressed('interact')) { this.interact(); return; }
     // スキル（8枠: skill1..8 → skillBar[0..7]）
@@ -199,7 +185,6 @@ export class Player {
     for (const p of g.map.portals || []) {
       if (p.hidden) continue; // タワーの「次の階」ポータルは全滅まで非表示
       if (Math.abs(this.x - p.x) < 44 && Math.abs(this.y - p.y) < 90) {
-        if (this.inVehicle) { this.inVehicle.exit(this); this._lastVehicle = null; }
         spawnEffect(g, 'portal', this.x, this.y - 40);
         if (p.towerNext) {
           const next = (g.towerFloor || 1) + 1;
@@ -251,18 +236,9 @@ export class Player {
     return true;
   }
 
+  /** E / Enter: NPC と話す（乗り物は廃止したので会話だけ） */
   interact() {
-    const g = this.game;
-    // E / Enter: 近くの車に乗る or NPC と話す（両方近いときは近い方。V は常に会話）
-    let car = null, bd = 110;
-    for (const v of g.vehicles) {
-      if (v.driverType) continue;
-      const d = Math.abs(v.x - this.x);
-      if (d < bd && Math.abs(v.y - this.y) < 70) { car = v; bd = d; }
-    }
-    const npc = this.nearestNpc();
-    if (npc && (!car || Math.abs(npc.x - this.x) < bd)) { this.talk(); return; }
-    if (car) { car.enter(this); this.attackLeft = 0; this.attackKind = null; }
+    this.talk();
   }
 
   updateMove(dt, ctrl, st) {
@@ -375,7 +351,7 @@ export class Player {
     if (hdir) this.facing = hdir;
     const dir = this.facing || 1;
     const color = skill?.color || '#7df9ff';
-    const town = !!g.map?.town; // 町では移動のみ（攻撃判定なし）
+    // 町でも攻撃判定は出す（町にいるのは攻撃の対象にならない住民だけなので空振りになる）
     this.attackLeft = 0; this.attackKind = null;
     const power = Math.max(0, mv.power || 0), dist = Math.max(0, mv.distance || 0);
     switch (mv.type) {
@@ -390,7 +366,7 @@ export class Player {
         this.onGround = false;
         // 前方速度 power で目安 distance に届くよう、短時間だけ空気抵抗を止める
         this.move = { type: 'flashJump', t: Math.min(0.5, dist > 0 && power > 0 ? dist / power * 0.55 : 0.3), dir, speed: this.vx, skill, color };
-        if (mv.backShot && !town) {
+        if (mv.backShot) {
           const b = mv.backShot;
           const ox = this.x - dir * 20, oy = this.y - this.h * 0.55;
           // 反動弾は後方へ水平に。小ジャンプ中でも地上の敵に当たるよう足元側へ広げる
@@ -418,7 +394,7 @@ export class Player {
         if (this.climbing) this.climbing = null;
         const time = Math.max(0.08, mv.time || (power > 0 ? dist / power : 0.24));
         const speed = dist > 0 ? dist / time : (power || 1000);
-        this.move = { type: 'rush', t: time, dir, speed, skill, color, push: town ? null : (mv.push || { mult: 1, knock: 360 }), attackId: newAttackId(), faDone: false };
+        this.move = { type: 'rush', t: time, dir, speed, skill, color, push: mv.push || { mult: 1, knock: 360 }, attackId: newAttackId(), faDone: false };
         this.vy = Math.min(this.vy, 0);
         this.vx = dir * speed;
         spawnEffect(g, 'dash', this.x, this.y - this.h / 2, { color, facing: dir });
@@ -440,7 +416,7 @@ export class Player {
         const speed = power || 900;
         // 目安距離 distance（Lv・3次強化で伸びる）を power で走り切る時間。データに time しか無ければそれを使う
         const time = Math.max(0.3, dist > 0 ? dist / speed : (mv.time || 1.6));
-        this.move = { type: 'wheelDash', t: time, total: time, dir, speed, skill, color, contact: town ? null : (mv.contact || { mult: 0.8, knock: 360 }), attackId: newAttackId(), hitT: 0, airT: 0, faDone: false };
+        this.move = { type: 'wheelDash', t: time, total: time, dir, speed, skill, color, contact: mv.contact || { mult: 0.8, knock: 360 }, attackId: newAttackId(), hitT: 0, airT: 0, faDone: false };
         this.vx = dir * speed * 0.6;
         spawnEffect(g, 'dash', this.x, this.y - this.h / 2, { color, facing: dir });
         return true;

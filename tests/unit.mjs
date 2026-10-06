@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 
 import { ITEMS, STARTER_EQUIP, EQUIP_SLOTS, getItem } from '../src/data/items.js';
 import { SKILLS, STARTER_SKILLS, skillsForHero } from '../src/data/skills.js';
-import { ENEMIES, ENEMIES_BY_MAP, COP_UNITS_BY_WANTED } from '../src/data/enemies.js';
+import { ENEMIES, ENEMIES_BY_MAP } from '../src/data/enemies.js';
 import { MISSIONS, MISSION_NPCS, MAP_IDS, turnInNpcOf } from '../src/data/missions.js';
 import { MAPS, MAP_ORDER, CONNECTIONS, TOWN_IDS, FIELD_IDS, reachability } from '../src/world/maps.js';
 import { moveAndCollide, findRope, rectOverlap, entRect } from '../src/world/physics.js';
@@ -19,7 +19,6 @@ import { Player } from '../src/entities/player.js';
 import { Enemy } from '../src/entities/enemy.js';
 import { Spawner, resolveSpawns } from '../src/entities/spawner.js';
 import { NPC } from '../src/entities/npc.js';
-import { Vehicle } from '../src/entities/vehicle.js';
 import { Drop } from '../src/entities/drop.js';
 import { Projectile } from '../src/entities/projectile.js';
 import { DebugPanel } from '../src/debug/debug.js';
@@ -71,7 +70,8 @@ const mapOfEnemy = (id) => {
 };
 const ICONS = ['potionRed', 'potionBlue', 'elixir', 'cash', 'gem', 'chip'];
 const SKILL_KINDS = ['melee', 'projectile', 'aoe', 'buff', 'dash', 'passive', 'move'];
-const OBJ_TYPES = ['kill', 'collect', 'reach', 'wanted', 'drive', 'boss', 'talk'];
+// 旧 wanted（手配度）/ drive（車で走る）は警察・乗り物の廃止で使わない
+const OBJ_TYPES = ['kill', 'collect', 'reach', 'boss', 'talk'];
 const fin = (v) => typeof v === 'number' && Number.isFinite(v);
 
 // ------------------------------------------------------------ スタブ game
@@ -103,7 +103,7 @@ function makeGame(heroId = 'luna', mapId = 'beach') {
       this.map = map; this.state.mapId = id;
       this.enemies.length = 0; this.projectiles.length = 0; this.drops.length = 0; this.effects.length = 0;
       this.npcs = (map.npcs || []).map((n) => new NPC(this, n));
-      this.vehicles = (map.vehicles || []).map((v) => new Vehicle(this, v));
+      this.vehicles = []; // main.js と同じ（乗り物は廃止）
       const p = this.player;
       if (p) { p.inVehicle = null; p.x = x ?? map.spawnX ?? 200; p.y = y ?? map.groundY - 2; p.vx = 0; p.vy = 0; p.climbing = null; }
       this.spawner.reset(map);
@@ -263,7 +263,8 @@ test('enemies: 定義・ドロップ・見た目', () => {
     if (['shooter', 'cop'].includes(e.ai) || e.art === 'drone') assert.ok(e.shoot || e.ai === 'boss' || true);
   }
   for (const [map, ids] of Object.entries(ENEMIES_BY_MAP)) for (const id of ids) assert.ok(ENEMIES[id], `${map}:${id}`);
-  for (const ids of Object.values(COP_UNITS_BY_WANTED)) for (const id of ids) assert.ok(ENEMIES[id]?.isCop, id);
+  // 警察制度は廃止: 警察ユニットはどのマップにも出ない
+  for (const ids of Object.values(ENEMIES_BY_MAP)) for (const id of ids) assert.ok(!ENEMIES[id].isCop, `警官 ${id} がマップに出る`);
 });
 
 test('maps: 構造・ポータル・出現', () => {
@@ -300,7 +301,7 @@ test('maps: 構造・ポータル・出現', () => {
       for (const sid of n.shop || []) assert.ok(ITEMS[sid], `${id} shop ${sid}`);
       for (const pt of m.portals) assert.ok(Math.abs(pt.x - n.x) > 50, `${id} npc ${n.id} がポータルに重なる`);
     }
-    for (const v of m.vehicles) assert.ok(['sports', 'police', 'bike'].includes(v.kind) && v.x > 0 && v.x < m.width, `${id} vehicle`);
+    assert.equal((m.vehicles || []).length, 0, `${id}: 乗り物は廃止（マップに置かない）`);
   }
   // beach から全マップへ到達可能
   const seen = new Set(['beach']); const q = ['beach'];
@@ -324,7 +325,7 @@ test('maps: 構造・ポータル・出現', () => {
 test('world v2: 34マップ・接続表・到達可能性・町/フィールドの出現ルール', () => {
   assert.equal(Object.keys(MAPS).length, 34, 'マップ数');
   assert.equal(TOWN_IDS.length, 7); assert.equal(FIELD_IDS.length, 27);
-  for (const id of TOWN_IDS) assert.ok(MAPS[id]?.town === true && MAPS[id].copSpawns === true, id + ' town');
+  for (const id of TOWN_IDS) assert.ok(MAPS[id]?.town === true && !MAPS[id].copSpawns, id + ' town（警察は廃止）');
   for (const id of FIELD_IDS) {
     const m = MAPS[id];
     assert.ok(m && m.town === false && m.copSpawns === false, id + ' field');
@@ -376,23 +377,26 @@ test('world v2: 34マップ・接続表・到達可能性・町/フィールド�
   }
 });
 
-test('world v2: 町は市民のみ・フィールドに警察なし（シミュレーション）', () => {
+test('world v2: 町は住民のみ・どこにも警察/パトカー/乗り物が出ない（シミュレーション）', () => {
   for (const id of [...TOWN_IDS, ...FIELD_IDS]) {
     const g = makeGame('jin', id);
     g.debug.god = true; g.state.level = 99; g.changeMap(id);
-    setWantedLevel(g, 4);
-    for (let i = 0; i < 30 * 8; i++) { step(g, 1 / 30); if (g.wanted < 4 && g.map.town) setWantedLevel(g, 4); }
+    // 旧デバッグ・旧コードが手配度を上げようとしても 0 のまま
+    setWantedLevel(g, 4); addWanted(g, 30);
+    for (let i = 0; i < 30 * 8; i++) step(g, 1 / 30);
     const m = g.map;
     for (const e of g.enemies) {
-      if (m.town) assert.ok(e.civilian || e.def.isCop, `${id}: 町に ${e.defId}`);
-      else assert.ok(!e.def.isCop && !e.civilian, `${id}: フィールドに ${e.defId}`);
+      assert.ok(!e.def.isCop && !e.fromWanted, `${id}: 警察 ${e.defId} が出た`);
+      if (m.town) assert.ok(e.civilian, `${id}: 町に ${e.defId}`);
+      else assert.ok(!e.civilian, `${id}: フィールドに ${e.defId}`);
     }
-    assert.ok(!g.vehicles.some((v) => v.policeSpawned) || m.town, `${id}: フィールドにパトカー`);
+    assert.equal(g.vehicles.length, 0, `${id}: 乗り物が出た`);
+    assert.equal(g.wanted, 0, `${id}: 手配度が上がった`);
+    assert.equal(g.wantedHeat, 0, `${id}: wantedHeat`);
     if (m.town) {
       const civ = g.enemies.filter((e) => e.civilian && !e.dead).length;
-      assert.ok(civ >= 6 && civ <= 10, `${id}: 市民 ${civ}`);
-      assert.ok(g.enemies.some((e) => e.def.isCop), `${id}: 手配★4で警察が来ない`);
-    } else assert.equal(g.wanted, 0, `${id}: フィールドで手配度が減衰しない`);
+      assert.ok(civ >= 6 && civ <= 10, `${id}: 住民 ${civ}`);
+    }
   }
 }, { random: true });
 
@@ -409,9 +413,6 @@ test('missions: 参照整合性・到達可能性', () => {
   }
   const spawnable = new Set();
   for (const m of Object.values(MAPS)) for (const t of spawnTypesOf(m)) spawnable.add(t);
-  // 手配度で出現する警察ユニット（spawner は art が cop/swat/drone(isCop) の敵を使う）
-  const lawUnits = Object.values(ENEMIES).filter((e) => !e.boss && (e.art === 'cop' || e.art === 'swat' || (e.art === 'drone' && e.isCop))).map((e) => e.id);
-  if (Object.values(MAPS).some((m) => m.copSpawns)) for (const id of lawUnits) spawnable.add(id);
   const droppable = new Set();
   for (const id of spawnable) for (const d of ENEMIES[id].drops) droppable.add(d.id);
   for (const m of all) {
@@ -425,7 +426,7 @@ test('missions: 参照整合性・到達可能性', () => {
       if (o.type === 'kill' || o.type === 'boss') {
         assert.ok(ENEMIES[o.target], `${m.id} target ${o.target}`);
         assert.ok(spawnable.has(o.target), `${m.id}: ${o.target} はどのマップにも出現しない`);
-        if (o.mapId) assert.ok(spawnsAt(o.mapId, o.target) || (ENEMIES[o.target].isCop && MAPS[o.mapId].town), `${m.id}: ${o.target} は ${o.mapId} に出現しない`);
+        if (o.mapId) assert.ok(spawnsAt(o.mapId, o.target), `${m.id}: ${o.target} は ${o.mapId} に出現しない`);
       }
       if (o.type === 'boss') assert.ok(ENEMIES[o.target].boss, `${m.id} boss`);
       if (o.type === 'collect') {
@@ -435,11 +436,7 @@ test('missions: 参照整合性・到達可能性', () => {
       }
       if (o.type === 'reach') assert.ok(MAPS[o.target], `${m.id} reach ${o.target}`);
       if (o.type === 'talk') assert.ok(MISSION_NPCS[o.target], `${m.id} talk ${o.target}`);
-      if (o.type === 'wanted') assert.ok(o.target >= 1 && o.target <= 5, m.id);
-      if (o.type === 'wanted') {
-        // 手配度を上げられるマップ（copSpawns）があること
-        assert.ok(Object.values(MAPS).some((mp) => mp.copSpawns), m.id);
-      }
+      if (o.type === 'talk' && o.mapId) assert.equal(MISSION_NPCS[o.target].mapId, o.mapId, `${m.id} talk ${o.target} の mapId`);
     }
     for (const it of m.reward?.items || []) assert.ok(ITEMS[it], `${m.id} reward ${it}`);
   }
@@ -546,7 +543,7 @@ test('combat: calcDamage 範囲', () => {
   assert.equal(calcDamage(0, 0, 999).dmg, 1, '最低1');
 }, { random: true });
 
-test('combat: 敵撃破 → exp / drop / event / 手配度', () => {
+test('combat: 敵撃破 → exp / drop / event（手配度は上がらない）', () => {
   const g = makeGame('luna');
   const killed = []; g.events.on('enemyKilled', (d) => killed.push(d.enemy.defId));
   const e = new Enemy(g, 'slime_green', g.player.x + 40, g.map.groundY);
@@ -556,10 +553,7 @@ test('combat: 敵撃破 → exp / drop / event / 手配度', () => {
   assert.ok(e.dead); assert.deepEqual(killed, ['slime_green']);
   assert.ok(g.state.exp > exp0 || g.state.level > 1);
   assert.equal(g.state.kills, 1);
-  const cop = new Enemy(g, 'cop_patrol', 500, g.map.groundY);
-  g.enemies.push(cop);
-  damageEnemy(g, cop, 1e9);
-  assert.ok(g.wanted >= 1, '警官撃破で手配度');
+  assert.equal(g.wanted, 0, '撃破しても手配度は 0 のまま');
   // ドロップ（乱数依存なので多数撃破で検証）
   g.drops.length = 0;
   for (let i = 0; i < 30; i++) { const s = new Enemy(g, 'slime_green', 600, g.map.groundY); g.enemies.push(s); damageEnemy(g, s, 1e9); }
@@ -604,23 +598,43 @@ test('combat: damagePlayer / 無敵 / 服破れ', () => {
   assert.equal(st.hp, 0); assert.equal(died, 1); assert.ok(g.player.dead);
 }, { random: true });
 
-test('combat: 手配度', () => {
+test('combat: 手配度は廃止（旧 API を呼んでも 0 のまま・イベントも出ない）', () => {
   const g = makeGame('jin', 'downtown');
   const ch = []; g.events.on('wantedChanged', (d) => ch.push(d.level));
-  addWanted(g, 1); assert.equal(g.wanted, 1);
-  setWantedLevel(g, 4); assert.equal(g.wanted, 4);
-  setWantedLevel(g, 9); assert.equal(g.wanted, 5);
-  setWantedLevel(g, -1); assert.equal(g.wanted, 0);
-  for (let h = 0; h < 50; h++) assert.ok(wantedLevelFor(h) >= 0 && wantedLevelFor(h) <= 5);
-  setWantedLevel(g, 2);
-  for (let i = 0; i < 60 * 40; i++) { g.time += 1 / 60; updateWanted(g, 1 / 60, { seen: false }); }
-  assert.equal(g.wanted, 0, '見られていなければ減衰');
-  assert.ok(ch.length >= 4);
+  addWanted(g, 10); assert.equal(g.wanted, 0);
+  setWantedLevel(g, 4); assert.equal(g.wanted, 0);
+  for (let i = 0; i < 60; i++) { g.time += 1 / 60; updateWanted(g, 1 / 60, { seen: true }); }
+  assert.equal(g.wanted, 0); assert.equal(g.wantedHeat, 0);
+  for (let h = 0; h < 50; h++) assert.equal(wantedLevelFor(h), 0);
+  assert.equal(ch.length, 0, 'wantedChanged は出ない');
 });
+
+test('combat: 住民は攻撃できない（通常攻撃・スキル範囲・弾・直接ダメージ）', () => {
+  const g = makeGame('luna', 'downtown');
+  g.enemies.length = 0;
+  const p = g.player; p.facing = 1;
+  const c = new Enemy(g, 'civilian_tourist', p.x + 40, p.y); c.spawnT = 0; g.enemies.push(c);
+  const hp0 = c.hp;
+  const evs = []; for (const n of ['civilianHit', 'civilianKilled', 'enemyKilled']) g.events.on(n, () => evs.push(n));
+  assert.ok(p.startAttack('basic'));
+  for (let i = 0; i < 30; i++) step(g, 1 / 60);
+  assert.equal(c.hp, hp0, '通常攻撃が住民に当たった');
+  const hit = playerAttackArea(g, { x: p.x - 500, y: p.y - 200, w: 1000, h: 400 }, 5);
+  assert.equal(hit.length, 0, 'スキルの範囲攻撃が住民に当たった');
+  damageEnemy(g, c, 1e9, false, 1);
+  assert.ok(!c.dead && c.hp === hp0, 'damageEnemy で住民にダメージが入った');
+  const pr = new Projectile(g, { owner: 'player', x: c.x - 30, y: c.y - c.h / 2, vx: 900, vy: 0, damage: 999, life: 1 });
+  g.projectiles.push(pr);
+  for (let i = 0; i < 10; i++) step(g, 1 / 60);
+  assert.equal(c.hp, hp0, '弾が住民に当たった');
+  assert.ok(!c.scared && !(c.fleeT > 0), '住民が逃げ出した');
+  assert.deepEqual(evs, [], `住民が攻撃されたイベント: ${evs}`);
+  assert.equal(g.wanted, 0);
+}, { random: true });
 
 test('skills: 初期スキル使用・クールダウン・習得', () => {
   for (const hero of ['luna', 'jin']) {
-    const g = makeGame(hero, 'beach_f1'); // 町ではスキル不可（v2）なのでフィールドで
+    const g = makeGame(hero, 'beach_f1'); // 敵に当てて確かめたいのでフィールドで（町でも使える: 町ルールのテスト参照）
     const sid = STARTER_SKILLS[hero].skillBar[0];
     const mp0 = g.state.mp;
     assert.ok(useSkill(g, sid), hero + ' skill');
@@ -680,18 +694,11 @@ test('missions: 全メインストーリーを順にクリアできる（目的�
       if (o.type === 'collect') addItemToState(st, o.target, o.count);
       if (o.type === 'reach') g.changeMap(o.target);
       if (o.type === 'talk') g.events.emit('talkNpc', { npcId: o.target });
-      if (o.type === 'wanted') setWantedLevel(g, o.target);
-      if (o.type === 'drive') {
-        const v = new Vehicle(g, { kind: 'sports', x: 300 }); g.vehicles.push(v); v.enter(g.player);
-        for (let x = 300; x <= 300 + o.count * 10 + 100; x += 50) { v.x = x; mm.update(1 / 60); }
-        v.exit(g.player);
-      }
     }
     mm.update(1 / 60);
     assert.ok(mm.isComplete(m.id), 'complete ' + m.id + ' ' + JSON.stringify(mm.objectiveValues(m.id)));
     assert.equal(mm.npcMarker(turnInNpcOf(m)), '?', m.id + ' marker');
     assert.ok(mm.turnIn(m.id), 'turnIn ' + m.id);
-    setWantedLevel(g, 0);
   }
   const left = order.filter((m) => !st.missions.completed.includes(m.id)).map((m) => m.id);
   assert.deepEqual(left, [], '未クリア');
@@ -706,7 +713,6 @@ test('missions: デイリーは1日1回', () => {
   for (const o of d.objectives) {
     if (o.type === 'kill') for (let i = 0; i < o.count; i++) g.events.emit('enemyKilled', { enemy: { def: ENEMIES[o.target] } });
     if (o.type === 'collect') addItemToState(g.state, o.target, o.count);
-    if (o.type === 'wanted') setWantedLevel(g, o.target);
   }
   g.missions.update(0.016);
   if (g.missions.isComplete(d.id)) {
@@ -742,7 +748,7 @@ test('physics: 着地・一方通行・下抜け・ロープ', () => {
   assert.equal(f.y, plat.y);
 });
 
-test('player: 移動・ジャンプ・攻撃・ポータル・会話・乗車', () => {
+test('player: 移動・ジャンプ・攻撃・ポータル・会話（乗り物は廃止）', () => {
   const g = makeGame('luna');
   const p = g.player, inp = g.input;
   for (let i = 0; i < 30; i++) step(g);
@@ -763,16 +769,11 @@ test('player: 移動・ジャンプ・攻撃・ポータル・会話・乗車', 
   inp.tap('interact'); step(g);
   assert.ok(g.uiOpened.some((o) => o.name === 'dialog'), 'dialog が開く');
   assert.ok(g.emitted.includes('talkNpc'));
-  // 乗車
-  const v = g.vehicles[0];
-  assert.ok(v, 'beach に乗り物');
-  p.x = v.x; p.y = v.y; for (let i = 0; i < 5; i++) step(g);
-  inp.tap('interact'); step(g);
-  assert.equal(p.inVehicle, v, '乗車');
-  inp.hold('right'); for (let i = 0; i < 60; i++) step(g); inp.release('right');
-  assert.ok(Math.abs(v.vx) > 200, '車が走る');
-  inp.tap('interact'); step(g);
-  assert.equal(p.inVehicle, null, '降車');
+  // 乗り物は廃止: 町に乗り物がなく、E（interact）は会話だけ。NPC がいない所で押しても何も起きない
+  assert.equal(g.vehicles.length, 0, 'beach に乗り物がある');
+  p.x = 1000; p.y = g.map.groundY; for (let i = 0; i < 5; i++) step(g);
+  if (!p.nearestNpc()) { inp.tap('interact'); step(g); }
+  assert.equal(p.inVehicle, null, '乗車できてしまう');
   // ポータル
   const pt = g.map.portals[0];
   p.x = pt.x; p.y = pt.y; for (let i = 0; i < 5; i++) step(g);
@@ -790,7 +791,6 @@ test('enemies: 全種類を数秒シミュレーション（NaN/例外/マップ
     const e = new Enemy(g, id, p.x + 300, g.map.groundY);
     e.aggro = true;
     g.enemies.push(e);
-    if (ENEMIES[id].isCop) setWantedLevel(g, 3);
     for (let i = 0; i < 60 * 8; i++) {
       step(g);
       for (const x of g.enemies) {
@@ -822,34 +822,16 @@ test('spawner: 全マップで敵が自動出現・ボス出現', () => {
   }
 }, { random: true });
 
-test('spawner: 手配度で警察が出現', () => {
-  const g = makeGame('jin', 'downtown');
-  g.debug.god = true;
-  g.state.level = 40;
-  g.enemies.length = 0;
-  g.spawner.areas.forEach((_, i) => { g.spawner.timers[i] = -1e9; });
-  setWantedLevel(g, 5);
-  for (let i = 0; i < 60 * 15; i++) { step(g); if (g.wanted < 5) setWantedLevel(g, 5); }
-  const law = g.enemies.filter((e) => e.fromWanted);
-  assert.ok(law.length >= 3, `警察 ${law.length}`);
-  assert.ok(law.some((e) => e.def.art === 'swat'), 'SWAT');
-}, { random: true });
-
-test('spawner: 手配度★ごとの警察ユニットは COP_UNITS_BY_WANTED に従う（m13 の swat_trooper が出る）', async () => {
-  for (const lv of [1, 2, 3, 4, 5]) {
-    const g = makeGame('jin', 'downtown');
+test('spawner: 警察は出ない（旧 API で手配度★5 にしようとしても警官・SWAT・パトカーが来ない）', () => {
+  for (const mapId of ['downtown', 'casino', 'down_f1']) {
+    const g = makeGame('jin', mapId);
     g.debug.god = true;
     g.state.level = 60;
-    g.enemies.length = 0;
-    g.spawner.areas.forEach((_, i) => { g.spawner.timers[i] = -1e9; });
-    setWantedLevel(g, lv);
-    for (let i = 0; i < 60 * 12; i++) { step(g); if (g.wanted !== lv) setWantedLevel(g, lv); }
-    const law = g.enemies.filter((e) => e.fromWanted && !e.dead);
-    assert.ok(law.length > 0, `★${lv} 警察なし`);
-    // パトカーから降りてくる警官（cop_*）は表の外でも可
-    const bad = law.filter((e) => !COP_UNITS_BY_WANTED[lv].includes(e.defId) && !(e.def.art === 'cop'));
-    assert.deepEqual(bad.map((e) => e.defId), [], `★${lv} 表外のユニット`);
-    if (lv === 4) assert.ok(law.some((e) => e.defId === 'swat_trooper'), '★4 で swat_trooper が出る');
+    for (let i = 0; i < 60 * 15; i++) { setWantedLevel(g, 5); step(g); }
+    const law = g.enemies.filter((e) => e.fromWanted || e.def?.isCop || e.ai === 'cop');
+    assert.deepEqual(law.map((e) => e.defId), [], `${mapId}: 警察`);
+    assert.equal(g.vehicles.length, 0, `${mapId}: パトカー`);
+    assert.equal(g.wanted, 0);
   }
 }, { random: true });
 
@@ -918,8 +900,10 @@ test('debug: DebugPanel アクション', () => {
   assert.ok(g.effects.some((e) => e.type === 'tear'));
   d.run('hpFull'); assert.equal(g.state.hp, max);
   const m0 = g.state.money; d.run('money'); assert.equal(g.state.money, m0 + 10000);
-  d.run('wantedUp'); d.run('wantedUp'); assert.equal(g.wanted, 2);
-  d.run('wantedDown'); assert.equal(g.wanted, 1);
+  // 旧「手配度±1」ボタンは廃止（大金・Lv+10 に置き換え）
+  assert.ok(!d.actions.some((a) => /wanted/.test(a.id) || /手配/.test(a.label())), '手配度ボタンが残っている');
+  const m1 = g.state.money; d.run('moneyBig'); assert.equal(g.state.money, m1 + 10000000);
+  const lv1 = g.state.level; d.run('level10'); assert.equal(g.state.level, lv1 + 10);
   d.run('items');
   assert.ok(g.state.inventory.length <= MAX_SLOTS);
   assert.equal(g.state.inventory.length, MAX_SLOTS);
@@ -963,7 +947,7 @@ test('v2 data: 敵50種以上・habitats/region・ボス・市民/警官・PET',
     if (e.summon) for (const t of e.summon) assert.ok(ENEMIES[t] && !ENEMIES[t].boss, `${id} summon ${t}`);
   }
   for (const id of COP_IDS) assert.ok(ENEMIES[id].isCop);
-  for (const ids of Object.values(COP_UNITS_BY_WANTED)) for (const id of ids) assert.ok(ENEMIES[id].isCop && !ENEMIES[id].habitats.length, id);
+  for (const id of COP_IDS) assert.ok(!ENEMIES[id].habitats.length && !BOOK_IDS.includes(id), `${id}: 廃止した警察ユニットが出現地・図鑑にある`);
   for (const f of SPEC_FIELDS) {
     const n = MONSTER_IDS.filter((id) => !ENEMIES[id].boss && ENEMIES[id].habitats.includes(f)).length;
     assert.ok(n >= 3, `${f}: ${n} 種`);
@@ -1000,9 +984,10 @@ test('v2 data: ショップ・ミッションの参照整合性（SPEC マップ
       if (o.type === 'reach') assert.ok(MAP_INFO[o.target], `${m.id} reach ${o.target}`);
       if ((o.type === 'kill' || o.type === 'boss') && o.mapId) {
         const e = ENEMIES[o.target];
-        assert.ok(e.habitats.includes(o.mapId) || (e.isCop && MAP_INFO[o.mapId].town), `${m.id}: ${o.target} は ${o.mapId} にいない`);
+        assert.ok(e.habitats.includes(o.mapId), `${m.id}: ${o.target} は ${o.mapId} にいない`);
       }
-      if ((o.type === 'kill' || o.type === 'boss') && !o.mapId) assert.ok(ENEMIES[o.target].isCop || ENEMIES[o.target].habitats.length, m.id);
+      if (o.type === 'kill' || o.type === 'boss') assert.ok(!ENEMIES[o.target].isCop && ENEMIES[o.target].habitats.length, `${m.id}: ${o.target} は出現しない`);
+      assert.ok(o.type !== 'wanted' && o.type !== 'drive', `${m.id}: 廃止した目的 ${o.type}`);
     }
   }
 });
@@ -1034,33 +1019,48 @@ test('v2 exp: 序盤少なめ・単調増加・夜ボーナス', () => {
   assert.equal(g.state.exp, Math.round(ENEMIES.crab_iron.exp * 1.1), '夜は +10%');
 });
 
-test('v2 町ルール: スキル不可・市民で手配度・フィールドで素早く減衰', () => {
-  const g = makeGame('jin', 'beach');
-  if (!g.map.town) return; // maps 未移行
-  g.notes.length = 0;
-  const sid = STARTER_SKILLS.jin.skillBar[0];
-  assert.equal(useSkill(g, sid), false, '町ではスキル不可');
-  assert.equal(useSkill(g, sid), false);
-  assert.equal(g.notes.filter((t) => t.includes('町ではスキル')).length, 1, '通知は1.5秒に1回');
-  g.time += 2; useSkill(g, sid);
-  assert.equal(g.notes.filter((t) => t.includes('町ではスキル')).length, 2);
-  // 市民
-  setWantedLevel(g, 0); g.enemies.length = 0;
-  const exp0 = g.state.exp, kills0 = g.state.kills;
-  const c = new Enemy(g, 'civilian_tourist', g.player.x + 40, g.map.groundY); g.enemies.push(c);
-  damageEnemy(g, c, 1, false, 1);
-  const h1 = g.wantedHeat;
-  assert.ok(h1 > 0 && c.scared, '殴ると手配度（小）');
-  damageEnemy(g, c, 1e9, false, 1);
-  assert.ok(g.wantedHeat > h1 + 2, '倒すと手配度（中）');
-  assert.ok(g.wanted >= 1);
-  assert.equal(g.state.exp, exp0, '市民は経験値なし'); assert.equal(g.state.kills, kills0);
-  assert.ok(!g.state.book.civilian_tourist, '市民は図鑑に載らない');
-  // フィールドでは素早く減衰（町なら40秒、フィールドは10秒以内）
-  setWantedLevel(g, 3);
-  g.changeMap('beach_f1');
-  for (let i = 0; i < 60 * 10; i++) { g.time += 1 / 60; updateWanted(g, 1 / 60); }
-  assert.equal(g.wanted, 0, 'フィールドで減衰');
+test('町ルール: 町でもスキル（攻撃・バフ・移動）が使える・住民は攻撃の対象外・手配度は上がらない', () => {
+  for (const town of ['beach', 'downtown']) {
+    const g = makeGame('jin', town);
+    assert.ok(g.map.town);
+    g.debug.god = true;
+    for (let i = 0; i < 20; i++) step(g);
+    const st = g.state;
+    g.notes.length = 0;
+    // ジンの全スキル（ナイトレーサー系を含む。乗り物なしで使えること）＋共通のバフ
+    const ids = Object.values(SKILLS).filter((sk) => (sk.hero === 'jin' || sk.hero === 'both') && sk.kind !== 'passive' && sk.mp).map((sk) => sk.id);
+    const kinds = new Set();
+    for (const id of ids) {
+      const sk = SKILLS[id];
+      st.skills[id] = Math.max(st.skills[id] || 0, 1);
+      st.mp = 1e6;
+      resetCooldowns();
+      g.player.move = null; g.player.vy = 0;
+      // 地上専用の技があるので着地させる
+      for (let i = 0; i < 40 && !g.player.onGround; i++) step(g);
+      let ok = useSkill(g, id);
+      if (!ok && sk.kind === 'move') { g.player.onGround = false; ok = useSkill(g, id); } // 空中専用（フラッシュジャンプ等）
+      assert.ok(ok, `${town}: ${id}（${sk.kind}）が町で使えない`);
+      kinds.add(sk.kind);
+      for (let i = 0; i < 40; i++) step(g);
+      assert.ok(fin(g.player.x) && fin(g.player.y), `${id}: NaN`);
+    }
+    for (const k of ['melee', 'buff', 'move']) assert.ok(kinds.has(k), `${k} スキルを試していない`);
+    for (const id of ['jj_race_burnout', 'jj_race_drift_dash', 'jj_race_wheel_dash', 'jj_race_warp_drive', 'jj_race_meteor_crash']) assert.ok(ids.includes(id), `ナイトレーサー系 ${id}`);
+    assert.equal(g.notes.filter((t) => /町ではスキル|車に乗/.test(t)).length, 0, '町でスキル不可の通知が出た');
+    // 住民は殴っても無傷・手配度 0・経験値/図鑑なし
+    g.enemies.length = 0;
+    const exp0 = st.exp, kills0 = st.kills;
+    const c = new Enemy(g, 'civilian_tourist', g.player.x + 40, g.map.groundY); c.spawnT = 0; g.enemies.push(c);
+    const hp0 = c.hp;
+    damageEnemy(g, c, 1e9, false, 1);
+    resetCooldowns(); st.mp = 1e6; useSkill(g, 'jj_race_burnout');
+    for (let i = 0; i < 60; i++) step(g);
+    assert.ok(!c.dead && c.hp === hp0, '住民にダメージが入った');
+    assert.equal(g.wanted, 0); assert.equal(g.wantedHeat, 0);
+    assert.equal(st.exp, exp0); assert.equal(st.kills, kills0);
+    assert.ok(!st.book.civilian_tourist, '住民は図鑑に載らない');
+  }
 });
 
 test('v2 図鑑: 登録・NEW・ランク・ボーナス', () => {
@@ -1118,7 +1118,9 @@ test('v2 SNS: 自動投稿・フォロワー・節目報酬・称号', () => {
   assert.equal(userPosts(), 1, '雑魚は投稿しない');
   g.events.emit('enemyKilled', { enemy: { def: ENEMIES.boss_king_slime } });
   assert.equal(userPosts(), 2);
-  g.events.emit('wantedChanged', { level: 3 });
+  g.events.emit('wantedChanged', { level: 3 }); // 手配度は廃止: 投稿しない
+  assert.equal(userPosts(), 2);
+  g.events.emit('missionComplete', { id: 'm02_jelly' });
   assert.equal(userPosts(), 3);
   snsPost(g, 'テスト #test', { gain: 200 });
   assert.ok(g.state.sns.milestones.includes(100));
@@ -1316,11 +1318,7 @@ test('v3 jobs: 各ヒーロー×各系統で tier0→4（受注→試練→報�
         for (const o of m.objectives) {
           if (o.type === 'kill' || o.type === 'boss') for (let i = 0; i < o.count; i++) g.events.emit('enemyKilled', { enemy: { def: ENEMIES[o.target] } });
           if (o.type === 'talk') g.events.emit('talkNpc', { npcId: o.target });
-          if (o.type === 'drive') {
-            const v = new Vehicle(g, { kind: 'sports', x: 300 }); g.vehicles.push(v); v.enter(g.player);
-            for (let x = 300; x <= 300 + o.count * 10 + 100; x += 50) { v.x = x; mm.update(1 / 60); }
-            v.exit(g.player);
-          }
+          assert.ok(o.type !== 'drive' && o.type !== 'wanted', `${mid}: 廃止した目的 ${o.type}`);
         }
         mm.update(1 / 60);
         assert.ok(mm.isComplete(mid), 'complete ' + mid + JSON.stringify(mm.objectiveValues(mid)));
@@ -1393,7 +1391,7 @@ test('v3 jobs: 各ヒーロー×各系統で tier0→4（受注→試練→報�
   }
 });
 
-test('v3 jobs: Lv1 移動スキル・町で移動スキル可・旧セーブ補完', () => {
+test('v3 jobs: Lv1 移動スキル・町でスキル可・旧セーブ補完', () => {
   for (const hero of CLASS_IDS) {
     const g = makeGame(hero, 'beach'); // 町
     const st = g.state;
@@ -1402,7 +1400,7 @@ test('v3 jobs: Lv1 移動スキル・町で移動スキル可・旧セーブ補�
     const sp0 = computeStats(st).speed;
     assert.ok(useSkill(g, 'street_dash'), '町でもストリートダッシュ');
     assert.ok(computeStats(st, g.buffs).speed > sp0, '移動速度アップ');
-    assert.equal(useSkill(g, STARTER_SKILLS[hero].skillBar[0]), false, '攻撃スキルは町で不可');
+    assert.ok(useSkill(g, STARTER_SKILLS[hero].skillBar[0]), '攻撃スキルも町で使える（空振り）');
     // 旧セーブ（v2）: job なし・Lv45 → beginner、吹き出し対象
     const old = { heroId: hero, level: 45, exp: 0, mapId: 'downtown', version: 2, skills: { [STARTER_SKILLS[hero].skillBar[0]]: 3 }, skillBar: [STARTER_SKILLS[hero].skillBar[0], null, null, null] };
     const m = migrateState(old);

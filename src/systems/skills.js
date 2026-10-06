@@ -17,8 +17,8 @@ let _lastWarn = 0;
 let _lastTownWarn = -1e9;
 export const TOWN_SKILL_WARN_INTERVAL = 1.5; // 秒
 
-/** 町（map.town === true）ではスキル使用不可 */
-export function skillsBlockedHere(game) { return !!game.map?.town; }
+/** スキルを使えない場所か。町でも使えるようにした（町に敵はいないので攻撃は空振り）ので常に false */
+export function skillsBlockedHere() { return false; }
 
 function warn(game, text) {
   const t = performance.now();

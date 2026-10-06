@@ -1,10 +1,10 @@
 // 敵データ（v2: 7地域・27フィールド・50種以上）
 // aggro: 索敵距離 px（0 = 攻撃されるまで非アクティブ）, speed: px/s, w/h: 当たり判定
 // drops: [{id, chance}] chance は 0〜1（ルークで倍率補正 → systems/loot.js）
-// isCop: 倒すと手配度上昇（heat = 加算量）。spawner が町でのみ出す（habitats は空）
+// isCop: 警察ユニット。警察制度は廃止したのでゲームには出ない（見た目の確認用に定義だけ残す。habitats は空・図鑑にも載らない）
 // boss: ボス（habitats は行き止まりマップ）。summon: ボスが呼ぶ手下
 // habitats: 出現フィールドの mapId 配列（SPEC_V2 のID）。region: 地域ID（図鑑・背景テーマと同じ）
-// civilian: 町の市民（殴ると手配度。経験値/図鑑なし）
+// civilian: 町を歩く住民（攻撃の対象外。経験値/図鑑なし）
 import { ITEMS, looksFromIds } from './items.js';
 import { baseEnemyExp, expToNext, REGION_EXP_MULT } from './balance.js';
 import { ENEMY_LORE } from './lore.js';
@@ -484,7 +484,7 @@ const list = [
   }),
 
   // =====================================================================
-  // 町の市民（町でのみ spawner が出す。殴ると手配度UP・逃げる）
+  // 町の住民（町でのみ spawner が出す。歩いているだけで攻撃の対象外）
   // =====================================================================
   mk('civilian_tourist', '観光客', 1, 'civilian', 'civilian', 'town', [], {
     civilian: true, hp: 40, atk: 0, def: 0, money: [5, 30], speed: 60, w: 30, h: 68, color: '#ff8a00',
@@ -508,7 +508,7 @@ const list = [
   }),
 
   // =====================================================================
-  // 警察エスカレーション（spawner が手配度に応じて町でのみ出す。habitats は空）
+  // 警察ユニット（廃止: 手配度・警察の仕組みはなくなったので spawner は出さない。アートの確認用に定義だけ残す）
   // =====================================================================
   mk('cop_patrol', 'パトロール警官', 14, 'cop', 'cop', 'police', [], {
     speed: 110, w: 32, h: 70, aggro: 500, color: '#3a6bff', isCop: true, heat: 3,
@@ -639,11 +639,3 @@ export function enemiesForMap(mapId, opts = {}) {
 export const ENEMIES_BY_MAP = {};
 for (const e of list) for (const m of e.habitats) (ENEMIES_BY_MAP[m] ||= []).push(e.id);
 
-// 手配度★ごとに出現させる警察ユニット（spawner 用の参考。町でのみ）
-export const COP_UNITS_BY_WANTED = {
-  1: ['cop_patrol'],
-  2: ['cop_patrol', 'drone_scout'],
-  3: ['cop_patrol', 'cop_detective', 'drone_scout'],
-  4: ['cop_detective', 'swat_trooper'],
-  5: ['swat_trooper', 'swat_heavy'],
-};

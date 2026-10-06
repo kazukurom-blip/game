@@ -433,7 +433,7 @@ function nodeTip(g, id, s, cur) {
   if (id === cur) L.push({ t: '★ 現在地', c: COL.gold, size: 13 });
   if (mi.town) {
     L.push({ sep: true });
-    L.push({ t: 'モンスターは出現しない（市民・警察）', c: COL.good, size: 12 });
+    L.push({ t: 'モンスターは出現しない（住民が歩いている）', c: COL.good, size: 12 });
     if (id !== cur) {
       const fare = taxiFareOf(g, id);
       L.push({ t: `TAXI 料金 ${fmtMoney(fare)}`, c: (g.state?.money || 0) >= fare ? COL.money : COL.bad, size: 13.5 });

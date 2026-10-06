@@ -6,7 +6,6 @@ import { hasSave, loadState, saveState, loadSlot, setActiveSlot, firstEmptySlot,
 import { MAPS } from './world/maps.js';
 import { Player } from './entities/player.js';
 import { NPC } from './entities/npc.js';
-import { Vehicle } from './entities/vehicle.js';
 import { Spawner } from './entities/spawner.js';
 
 import { newState, computeStats, expToNext, setActiveBuffs, migrateState } from './systems/progression.js';
@@ -91,7 +90,7 @@ const game = {
     if (map.town && !map.instance) this.state.lastTownId = mapId;
     this.enemies.length = 0; this.projectiles.length = 0; this.drops.length = 0; this.effects.length = 0;
     this.npcs = (map.npcs || []).map((n) => new NPC(this, n));
-    this.vehicles = (map.vehicles || []).map((v) => new Vehicle(this, v));
+    this.vehicles = []; // 乗り物は廃止（map.vehicles は読まない。描画コードは将来用に残してある）
     const p = this.player;
     if (p) {
       if (p.inVehicle) p.inVehicle = null;
@@ -189,7 +188,7 @@ function startGame(choice) {
   let startMap = MAPS[state.mapId] ? state.mapId : Object.keys(MAPS)[0];
   if (MAPS[startMap]?.instance) startMap = (state.lastTownId && MAPS[state.lastTownId] && !MAPS[state.lastTownId].instance) ? state.lastTownId : 'beach';
   game.changeMap(startMap);
-  game.notify('←→移動 / Space ジャンプ / X 攻撃 / A S D F Q W G H スキル / V 会話 / E 乗車 / ↑ ポータル', '#ffd166');
+  game.notify('←→移動 / Space ジャンプ / X 攻撃 / A S D F Q W G H スキル / V・E 会話 / ↑ ポータル', '#ffd166');
 }
 
 /** セーブしてタイトル（キャラ選択）へ戻る */
