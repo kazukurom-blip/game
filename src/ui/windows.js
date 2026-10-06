@@ -9,7 +9,7 @@ import {
   dmgRange, fmtRange, statsWithEquip, statsWithAp, sellPriceEntry, doSell,
 } from './deps.js';
 import {
-  charLook, charName, currentJob, JOBS, skillsForHero, hasJob, jobLineage, jobLockOf, getSp, skillSpTier, moveParams, SKILL_BAR_SIZE, BAR_KEYS,
+  charLook, charName, currentJob, JOBS, JOB_TIERS, skillsForHero, hasJob, jobLineage, jobLockOf, getSp, skillSpTier, moveParams, SKILL_BAR_SIZE, BAR_KEYS,
   missionGuide, trackedMissionId, setTracked, routeTo, MISSION_NPCS, classOf, V3, call,
 } from './v3deps.js';
 import { drawSkillPreview, kindLabel } from './v3windows.js';
@@ -460,7 +460,7 @@ function togglePotion(ui, id) {
 }
 
 // ======================= スキル =======================
-const TIER_TABS = ['基本', '1次', '2次', '3次', '4次'];
+const TIER_TABS = ['基本', '1次', '2次', '3次', '4次', '5次'];
 function skillTierOf(sk) { return sk?.reqJob ? (JOBS[sk.reqJob]?.tier || 1) : 0; }
 function skillListFor(st, tier) {
   const cur = currentJob(st);
@@ -475,14 +475,14 @@ function drawSkills(ui, ctx, win) {
   const { x, y, w, h } = win;
   const t = g.time || 0;
   const job = currentJob(st);
-  if (win.tab == null || win._tabInit !== true) { win.tab = Math.max(0, Math.min(4, job?.tier || 0)); win._tabInit = true; }
+  if (win.tab == null || win._tabInit !== true) { win.tab = Math.max(0, Math.min(TIER_TABS.length - 1, job?.tier || 0)); win._tabInit = true; }
   // ヘッダー
   txt(ctx, `${charName(st)}  ・  ${job?.name || '見習い'}`, x + 20, y + 58, { size: 15, color: COL.sub, maxW: 300 });
   // SP（段階別プール）
-  const pools = [1, 2, 3, 4];
+  const pools = [1, 2, 3, 4, 5];
   pools.forEach((tier, i) => {
     const sp = getSp(st, tier);
-    const r = { x: x + w - 4 * 92 - 14 + i * 92, y: y + 44, w: 86, h: 28 };
+    const r = { x: x + w - pools.length * 92 - 14 + i * 92, y: y + 44, w: 86, h: 28 };
     const on = (win.tab <= 1 ? 1 : win.tab) === tier;
     ctx.save();
     rrPath(ctx, r.x, r.y, r.w, r.h, 14);
@@ -507,10 +507,10 @@ function drawSkills(ui, ctx, win) {
   const list = skillListFor(st, win.tab);
   const lx = x + 16, ly = y + 118, lw = 440, RH = 50, PER = 8;
   const pages = Math.max(1, Math.ceil(list.length / PER));
-  // ページ送りはリストの下（タブ行に置くと 5 個目の「4次」タブに重なっていた）
+  // ページ送りはリストの下（タブ行に置くと「4次」「5次」タブに重なっていた）
   pager(ui, ctx, win, lx + lw / 2 - 56, ly + PER * RH + 1, pages);
   if (!list.length) {
-    txt(ctx, win.tab === 0 ? 'スキルがありません' : `${win.tab}次転職（Lv.${[0, 10, 30, 60, 100][win.tab]}）で解放`, lx + lw / 2, ly + 140, { size: 15, align: 'center', color: COL.dim });
+    txt(ctx, win.tab === 0 ? 'スキルがありません' : `${win.tab}次転職（Lv.${JOB_TIERS[win.tab]}）で解放`, lx + lw / 2, ly + 140, { size: 15, align: 'center', color: COL.dim });
     txt(ctx, '頭上の「⬆ 転職できる！」吹き出しから転職ミッションを受注しよう', lx + lw / 2, ly + 168, { size: 12, align: 'center', color: COL.dim, maxW: lw - 20 });
   }
   if (!win.sel || !list.some((s) => s.id === win.sel)) win.sel = list[0]?.id || null;

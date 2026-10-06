@@ -8,11 +8,12 @@
 //      2次 = 主力攻撃 ＋ 職バフ ＋ ブースター(攻撃速度+25%) ＋ 移動スキル(kind:'move')
 //      3次 = 攻撃 ×2 ＋ 移動スキル強化(enhances) ＋ ファイナルアタック(passive)
 //      4次 = 大技 ＋ 奥義パッシブ(ファイナルアタック強化込み) ＋ ハイパーバフ(長CT)
+//      5次 = 画面全体攻撃（screen:true・長CT・多段）＋ 多段の強攻撃 ＋ 職ごとの専用スキル（通常攻撃強化/移動攻撃/召喚）＋ 覚醒バフ（長CT）＋ マスタリー
 //      追加: ハッカー系は各段階に召喚スキル（kind:'summon'）が1つ、各系統に連撃スキル。1職のスキルは最大5つ
 //  - instructor: 転職教官 NPC ID（data/missions.js MISSION_NPCS）, mission: 転職ミッション ID
 // 純データ＋純関数のみ（systems/progression.js からも import されるため、systems を import しないこと）
 
-export const JOB_TIERS = [0, 10, 30, 60, 100];
+export const JOB_TIERS = [0, 10, 30, 60, 100, 120];
 export const BEGINNER_ID = 'beginner';
 
 /** 系統 */
@@ -141,6 +142,32 @@ const list = [
     desc: '衛星軌道のドローン網を操る天空の支配者。宇宙から光の柱を落とす。',
     statBonus: { int: 30, dex: 10, luk: 14, atk: 40, maxHp: 900, maxMp: 300, def: 20, crit: 0.05, critDmg: 0.25 },
     skills: ['hd_orbital_laser', 'hd_hive_mind', 'hd_full_deploy'], title: '天空のオービタル・マスター', aura: '#ffe14d', sp: 5, instructor: 'job_quasar' }),
+
+  // ===================== 5次転職（Lv120 / 第2ワールド「ネオン・アーク」のアーク・シティで転職） =====================
+  J({ id: 'luna_dimension_desperado', name: 'ディメンション・デスペラード', hero: 'luna', tier: 5, branch: 'gunslinger', from: 'luna_galaxy_outlaw',
+    desc: '次元ゲートの向こうまで賞金首を追う、方舟都市の伝説のならず者。次元の裂け目から無数の銃口を呼び出す。',
+    statBonus: { dex: 45, luk: 25, atk: 60, crit: 0.06, critDmg: 0.45 },
+    skills: ['lj_gun_dimension_barrage', 'lj_gun_quasar_rail', 'lj_gun_desperado_mode', 'lj_gun_bullet_awaken', 'lj_gun_desperado_mastery'], title: '次元のデスペラード', aura: '#ff4fd8', sp: 5, instructor: 'job_nyx' }),
+  J({ id: 'luna_hyper_icon', name: 'ハイパー・アイコン', hero: 'luna', tier: 5, branch: 'neondancer', from: 'luna_cosmo_star',
+    desc: 'ネオン・アークの全次元ネットで同時配信される究極のスター。ひとたび踊れば、画面の向こうまで光の舞台になる。',
+    statBonus: { dex: 42, luk: 20, atk: 54, speed: 30, maxMp: 300, crit: 0.05, dmgReduce: 0.05 },
+    skills: ['lj_dance_hyper_finale', 'lj_dance_prism_cyclone', 'lj_dance_stardust_runway', 'lj_dance_icon_awaken', 'lj_dance_icon_mastery'], title: '全次元のアイコン', aura: '#9ffcff', sp: 5, instructor: 'job_nyx' }),
+  J({ id: 'jin_neon_emperor', name: 'ネオン天帝', hero: 'jin', tier: 5, branch: 'streetfighter', from: 'jin_vice_legend',
+    desc: '覇王の拳で次元の壁すら殴り抜けた者。方舟都市の空を割り、天そのものを落とす。',
+    statBonus: { str: 50, atk: 68, def: 45, maxHp: 2400, crit: 0.04, critDmg: 0.4, dmgReduce: 0.05 },
+    skills: ['jj_fight_heaven_fall', 'jj_fight_thousand_fist', 'jj_fight_emperor_fist', 'jj_fight_emperor_awaken', 'jj_fight_emperor_mastery'], title: '次元を統べる天帝', aura: '#ffb347', sp: 5, instructor: 'job_garo' }),
+  J({ id: 'jin_dimension_racer', name: 'ディメンション・レーサー', hero: 'jin', tier: 5, branch: 'nightracer', from: 'jin_warp_rider',
+    desc: '光速の壁の先、次元のハイウェイを走る唯一のレーサー。走った跡には時空の轍が残る。',
+    statBonus: { str: 36, dex: 24, atk: 62, def: 30, speed: 35, maxHp: 1800, crit: 0.05, critDmg: 0.3, dmgReduce: 0.05 },
+    skills: ['jj_race_dimension_overdrive', 'jj_race_photon_burnout', 'jj_race_lightspeed_run', 'jj_race_limit_break', 'jj_race_dimension_engine'], title: '次元を駆ける者', aura: '#9d7bff', sp: 5, instructor: 'job_garo' }),
+  J({ id: 'hk_demiurge', name: 'デミウルゴス・コード', hero: 'hacker', tier: 5, branch: 'netrunner', from: 'hk_cyber_oracle',
+    desc: '方舟都市の世界そのものを記述する「原初のコード」に触れたハッカー。現実を書き換え、敵の存在を消去する。',
+    statBonus: { int: 48, luk: 20, atk: 60, maxMp: 600, crit: 0.05, critDmg: 0.4, dmgReduce: 0.04 },
+    skills: ['hn_world_rewrite', 'hn_kernel_panic', 'hn_demiurge_avatar', 'hn_root_awaken', 'hn_demiurge_core'], title: '世界を書き換える者', aura: '#3dffc8', sp: 5, instructor: 'job_akasha' }),
+  J({ id: 'hk_star_admiral', name: 'スターフリート・アドミラル', hero: 'hacker', tier: 5, branch: 'dronemaster', from: 'hk_orbital_master',
+    desc: '衛星網の先、方舟都市の星間艦隊を率いる提督。母艦と艦隊の一斉砲撃で空を埋め尽くす。',
+    statBonus: { int: 45, dex: 15, luk: 20, atk: 60, maxHp: 1500, maxMp: 450, def: 30, crit: 0.05, critDmg: 0.35 },
+    skills: ['hd_fleet_barrage', 'hd_carrier_gatling', 'hd_mothership', 'hd_admiral_order', 'hd_fleet_mastery'], title: '星間艦隊の提督', aura: '#ffcf3d', sp: 5, instructor: 'job_akasha' }),
 ];
 
 export const JOBS = Object.fromEntries(list.map((j) => [j.id, j]));
@@ -191,8 +218,8 @@ export function jobBonusOf(state) {
 export function newJobState() { return { id: BEGINNER_ID, tier: 0, history: [] }; }
 
 // ---- SP プール（メイプル式: 転職段階ごとに別プール） ----
-// state.sp = 基本スキル＋1次スキル用（見習い〜1次のレベルアップ分）, state.spByTier = {2, 3, 4}（その段階のレベルアップ分）
-/** スキルが消費する SP プールの段階（1〜4。基本スキル・共通スキルは 1） */
+// state.sp = 基本スキル＋1次スキル用（見習い〜1次のレベルアップ分）, state.spByTier = {2, 3, 4, 5}（その段階のレベルアップ分）
+/** スキルが消費する SP プールの段階（1〜5。基本スキル・共通スキルは 1） */
 export function skillSpTier(skill) {
   const t = skill?.reqJob ? (JOBS[skill.reqJob]?.tier || 1) : 1;
   return Math.max(1, t);
@@ -209,6 +236,8 @@ export function addSp(state, n, tier = currentSpTier(state)) {
   if (!state.spByTier || typeof state.spByTier !== 'object') state.spByTier = newSpByTier();
   state.spByTier[tier] = (state.spByTier[tier] || 0) + n;
 }
-export function newSpByTier() { return { 2: 0, 3: 0, 4: 0 }; }
+export function newSpByTier() { return { 2: 0, 3: 0, 4: 0, 5: 0 }; }
+/** SP プールの段階の一覧（1 = 基本＋1次） */
+export const SP_TIERS = [1, 2, 3, 4, 5];
 /** 全プール合計（UI の簡易表示用） */
-export function totalSp(state) { return getSp(state, 1) + getSp(state, 2) + getSp(state, 3) + getSp(state, 4); }
+export function totalSp(state) { return SP_TIERS.reduce((a, t) => a + getSp(state, t), 0); }

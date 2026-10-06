@@ -37,6 +37,13 @@ export const SKILL_MOTION_TABLE = {
   hd_attack_drone: 'command', hd_sentry_turret: 'hackType', hd_bomber_drone: 'command',
   // 連撃（追加）
   lj_gun_gatling_waltz: 'multiShot', lj_dance_prism_rush: 'flurry', jj_fight_hundred_fist: 'jabRush',
+  // 5次（画面全体攻撃 = finale、覚醒 = awaken）
+  lj_gun_dimension_barrage: 'finale', lj_gun_quasar_rail: 'snipe', lj_gun_desperado_mode: 'reload', lj_gun_bullet_awaken: 'awaken',
+  lj_dance_hyper_finale: 'finale', lj_dance_prism_cyclone: 'spinKick', lj_dance_stardust_runway: 'slideStep', lj_dance_icon_awaken: 'awaken',
+  jj_fight_heaven_fall: 'finale', jj_fight_thousand_fist: 'jabRush', jj_fight_emperor_fist: 'flex', jj_fight_emperor_awaken: 'awaken',
+  jj_race_dimension_overdrive: 'finale', jj_race_photon_burnout: 'revEngine', jj_race_lightspeed_run: 'tackle', jj_race_limit_break: 'awaken',
+  hn_world_rewrite: 'finale', hn_kernel_panic: 'castThrust', hn_demiurge_avatar: 'summonCall', hn_root_awaken: 'awaken',
+  hd_fleet_barrage: 'finale', hd_carrier_gatling: 'command', hd_mothership: 'summonCall', hd_admiral_order: 'awaken',
 };
 
 // モーションの長さ（秒）。連撃系は回数で伸ばす（最大 0.8 秒）
@@ -44,17 +51,17 @@ const DUR = {
   flurry: 0.5, spinKick: 0.6, heavySmash: 0.55, haymaker: 0.55, jabRush: 0.6, uppercut: 0.55, groundPunch: 0.6, tackle: 0.4,
   slideStep: 0.4, palmBlast: 0.5, revEngine: 0.6, meteor: 0.7, multiShot: 0.45, fanSweep: 0.5, snipe: 0.6, skyShot: 0.55,
   throwBomb: 0.5, stagePose: 0.65, castThrust: 0.5, castSweep: 0.5, castRaise: 0.6, command: 0.55, flex: 0.6, idolPose: 0.6,
-  hackType: 0.6, reload: 0.55, laceUp: 0.55, summonCall: 0.6,
+  hackType: 0.6, reload: 0.55, laceUp: 0.55, summonCall: 0.6, finale: 0.9, awaken: 0.7,
 };
 // 当たる瞬間（モーションの進み 0〜1）。ダメージ・弾・爆発はこの瞬間に出す（ボタンを押した瞬間ではなく）
 const IMPACT = {
   flurry: 0.1, spinKick: 0.3, heavySmash: 0.5, haymaker: 0.5, jabRush: 0.14, uppercut: 0.42, groundPunch: 0.5, tackle: 0, slideStep: 0,
   palmBlast: 0.48, revEngine: 0.25, meteor: 0.6, multiShot: 0.18, fanSweep: 0.2, snipe: 0.52, skyShot: 0.25, throwBomb: 0.5,
   stagePose: 0.6, castThrust: 0.45, castSweep: 0.45, castRaise: 0.55, command: 0.5, flex: 0.55, idolPose: 0.5, hackType: 0.8,
-  reload: 0.6, laceUp: 0.65, summonCall: 0.62,
+  reload: 0.6, laceUp: 0.65, summonCall: 0.62, finale: 0.62, awaken: 0.55,
 };
 // 当たった瞬間の手ごたえ（ヒットストップ・揺れの強さ 0〜1）。重い一撃ほど強く
-const WEIGHT = { heavySmash: 0.6, groundPunch: 0.65, meteor: 0.8, uppercut: 0.5, haymaker: 0.55, snipe: 0.5, palmBlast: 0.45, castRaise: 0.45, stagePose: 0.35, throwBomb: 0.35 };
+const WEIGHT = { finale: 0.8, heavySmash: 0.6, groundPunch: 0.65, meteor: 0.8, uppercut: 0.5, haymaker: 0.55, snipe: 0.5, palmBlast: 0.45, castRaise: 0.45, stagePose: 0.35, throwBomb: 0.35 };
 const HITS_SCALED = { flurry: 1, spinKick: 1, jabRush: 1, multiShot: 1 };
 
 const BY_KIND = {

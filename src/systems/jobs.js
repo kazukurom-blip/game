@@ -17,7 +17,7 @@ export { JOBS, JOB_TIERS, jobsFor, jobLineage, hasJob, getSp, totalSp, skillSpTi
 export function currentJob(state) { return currentJobOf(state); }
 export function jobBonus(state) { return jobBonusOf(state); }
 
-/** 次の転職段階（0〜4 の tier。最終段階なら null） */
+/** 次の転職段階（1〜5 の tier。最終段階なら null） */
 export function nextJobTier(state) {
   const t = jobStateOf(state).tier + 1;
   return t < JOB_TIERS.length ? t : null;
@@ -72,6 +72,8 @@ export function acceptJobMission(game, jobId) {
   if (!mm.accept(mid)) return { ok: false, msg: 'ミッションを受注できない' };
   const npc = MISSION_NPCS[j.instructor];
   game.notify?.(`転職ミッション: ${npc?.name || ''} の試練を受けよう`, j.aura || '#ffd23f');
+  // 5次の試練は第2ワールド（アーク・シティ）。次元ゲートがまだ開いていなければ案内する
+  if (j.tier >= 5 && !st.flags?.world2Unlocked) game.notify?.('試練の地はネオン・アーク（第2ワールド）。ルミナ宇宙港の次元ゲートを開こう', '#9ffcff');
   return { ok: true, msg: `「${MISSIONS[mid].name}」を受注した`, missionId: mid };
 }
 
@@ -111,7 +113,7 @@ export function advanceJob(game, jobId) {
   game.shake = Math.max(game.shake || 0, 6);
   game.notify?.(`🎉 転職成功！ ${j.name} になった！（SP+${j.sp}）`, j.aura || '#ffd23f');
   if (learned.length) game.notify?.(`新スキル習得: ${learned.join('・')}`, '#ffd23f');
-  snsPost(game, pickPost(st, j), { gain: [0, 30, 120, 400, 1500][j.tier] || 30, kind: 'job', tags: ['転職', j.name] });
+  snsPost(game, pickPost(st, j), { gain: [0, 30, 120, 400, 1500, 5000][j.tier] || 30, kind: 'job', tags: ['転職', j.name] });
   game.events?.emit('jobAdvanced', { job: j, from: prev, tier: j.tier });
   game.save?.();
   return { ok: true, msg: `${j.name} に転職した`, job: j };

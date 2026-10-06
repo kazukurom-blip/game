@@ -59,7 +59,7 @@ for (const [n, p, title] of [[10, 10], [30, 20], [50, 20], [100, 40, '塔より�
 for (const [n, p, title] of [[10, 5], [30, 10], [50, 10], [70, 20], [100, 20, 'ベテラン'], [150, 40], [200, 40, 'ネオン・レジェンド']]) {
   A('growth', `level_${n}`, `Lv.${n}`, `レベル ${n} に到達`, p, (st) => (st.level || 1) >= n, title ? { title } : {});
 }
-for (const [t, p, title] of [[1, 5], [2, 10], [3, 20], [4, 40, '頂点に立つ者']]) A('growth', `job_${t}`, `${t}次転職`, `${t}次転職を果たす`, p, (st) => (st.job?.tier || 0) >= t, title ? { title } : {});
+for (const [t, p, title] of [[1, 5], [2, 10], [3, 20], [4, 40, '頂点に立つ者'], [5, 60, '次元を超えた者']]) A('growth', `job_${t}`, `${t}次転職`, `${t}次転職を果たす`, p, (st) => (st.job?.tier || 0) >= t, title ? { title } : {});
 A('growth', 'tune_first', 'はじめてのチューン', 'ネオン・チューンに成功する', 5, (st) => (st.tuneStats?.success || 0) >= 1);
 for (const [n, p, title] of [[10, 10], [15, 20, 'チューナー'], [20, 40], [25, 40, '調律の極み']]) A('growth', `star_${n}`, `★${n}`, `装備を ★${n} まで強化する`, p, (st) => maxStar(st) >= n, title ? { title } : {});
 A('growth', 'chip_first', 'はじめてのハック', 'ハックチップを使う', 5, (st) => (st.potStats?.tries || 0) + c(st, 'chipFirst') >= 1);
