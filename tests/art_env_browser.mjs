@@ -51,7 +51,7 @@ function envManifest() {
   return m;
 }
 const MAN = { good: envManifest(), none: REAL, fail: envManifest() };
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.json': 'application/json' };
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.webp': 'image/webp', '.json': 'application/json' };
 function serveSprites(kind, rel, res) {
   if (rel === 'webp.json') { res.writeHead(404); res.end(); return; } // 仮の画像（PNG）で試すので、WebP の対応表は渡さない
   if (rel === 'manifest.json') { res.writeHead(200, { 'Content-Type': MIME['.json'] }); res.end(JSON.stringify(MAN[kind])); return; }

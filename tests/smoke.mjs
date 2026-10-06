@@ -44,7 +44,7 @@ async function startServer() {
     }
     proc.kill();
   }
-  const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.json': 'application/json' };
+  const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.webp': 'image/webp', '.json': 'application/json' };
   const srv = http.createServer((req, res) => {
     const f = path.join(ROOT, decodeURIComponent(req.url.split('?')[0]));
     if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { res.writeHead(404); res.end(); return; }
@@ -95,7 +95,11 @@ async function main() {
     else if (m.type() === 'warning' && /\[ui\].*failed/.test(t)) report('ui.guard', t);
   });
   page.on('pageerror', (e) => report('pageerror', e.stack || e.message));
-  page.on('requestfailed', (r) => report('requestfailed', `${r.url()} ${r.failure()?.errorText}`));
+  page.on('requestfailed', (r) => {
+    // ページの読み直し・移動で読み込み中の画像が打ち切られるのは正常（ERR_ABORTED）。それ以外の失敗は問題として数える
+    if (r.failure()?.errorText === 'net::ERR_ABORTED' && /\.(png|webp)(\?|$)/.test(r.url())) return;
+    report('requestfailed', `${r.url()} ${r.failure()?.errorText}`);
+  });
 
   let shotN = 0;
   const shot = async (name, clip) => {

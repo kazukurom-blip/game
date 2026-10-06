@@ -26,7 +26,7 @@ async function loadPlaywright() {
   for (const r of roots) { try { return createRequire(path.join(r, 'noop.js'))('playwright'); } catch { /* next */ } }
   throw new Error('playwright が見つかりません');
 }
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.json': 'application/json' };
+const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.webp': 'image/webp', '.json': 'application/json' };
 const TOOL_PAGE = '<!doctype html><meta charset="utf-8"><body><script type="module" src="/tools/rig_page.js"></script></body>';
 function startServer() {
   const srv = http.createServer((req, res) => {
