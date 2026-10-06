@@ -50,7 +50,7 @@ for (const f of ls('heads/hair')) add('B', `heads/hair/${f}`, '1024×1024', f.in
 for (const slot of ['top', 'bottom', 'shoes', 'hat', 'accessory', 'weapon']) {
   for (const f of ls('rig/' + slot)) {
     if (f.includes('__')) continue; // 色違いの専用の絵（D 段と同じ扱い）は除く
-    add('B', `rig/${slot}/${f}`, '1024×1024', `服・装備（${slot}）`, 'HERO_PARTS_GUIDE.md（その装備の行の指示文）', slot === 'weapon' ? '武器の型紙 rig/layout_weapon.png' : '素体に重ねてずれないこと');
+    add('B', `rig/${slot}/${f}`, slot === 'weapon' ? '1024×512' : '1024×1024', `服・装備（${slot}）`, 'HERO_PARTS_GUIDE.md（その装備の行の指示文）', slot === 'weapon' ? '武器の型紙 rig/layout_weapon.png' : '素体に重ねてずれないこと');
   }
 }
 // ---- C 装備のアイコン（キャラの絵柄に合わせて描き直す）
@@ -62,7 +62,7 @@ for (const id of COSMETIC_IDS) {
   const it = ITEMS[id];
   const L = it.look;
   const desc = (it.desc || '').replace(/\s+/g, ' ');
-  if (it.slot === 'weapon') add('D', `rig/weapon/${L.style}__${hex(L.color)}.png`, '1024×1024', `${it.name}（武器・手に持った形）: ${desc}`, 'HERO_PARTS_GUIDE.md の weapon/' + L.style + ' の型紙', `形は「${it.name}」そのもの。持つ位置（支点）は ${L.style} と同じ`);
+  if (it.slot === 'weapon') add('D', `rig/weapon/${L.style}__${hex(L.color)}.png`, '1024×512', `${it.name}（武器・手に持った形）: ${desc}`, 'HERO_PARTS_GUIDE.md の weapon/' + L.style + ' の型紙', `形は「${it.name}」そのもの。持つ位置（支点）は ${L.style} と同じ`);
   else for (const g of ['f', 'm']) add('D', `rig/${it.slot}/${L.style}__${hex(L.color)}_${g}.png`, '1024×1024', `${it.name}（${g === 'f' ? '♀' : '♂'}が着た形）: ${desc}`, `HERO_PARTS_GUIDE.md の ${it.slot}/${L.style}_${g} の型紙`, `枠は ${L.style} と同じ。形は「${it.name}」そのもの`);
   add('D', `icons/equip/${id}.png`, '256×256', `${it.name}のアイコン`, 'CODEX_BATCH_03.md「装備のアイコン」', '色替えしないので、そのアイテムの色で描く');
 }
