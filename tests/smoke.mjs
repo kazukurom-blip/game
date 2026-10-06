@@ -96,8 +96,8 @@ async function main() {
   });
   page.on('pageerror', (e) => report('pageerror', e.stack || e.message));
   page.on('requestfailed', (r) => {
-    // ページの読み直し・移動で読み込み中の画像が打ち切られるのは正常（ERR_ABORTED）。それ以外の失敗は問題として数える
-    if (r.failure()?.errorText === 'net::ERR_ABORTED' && /\.(png|webp)(\?|$)/.test(r.url())) return;
+    // ページの読み直し・移動で読み込み中のファイルが打ち切られるのは正常（ERR_ABORTED）。それ以外の失敗（404 など）は問題として数える
+    if (r.failure()?.errorText === 'net::ERR_ABORTED') return;
     report('requestfailed', `${r.url()} ${r.failure()?.errorText}`);
   });
 
