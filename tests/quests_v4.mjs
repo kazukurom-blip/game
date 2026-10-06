@@ -176,6 +176,13 @@ export default function register({ test, makeGame }) {
     for (const r of TOWN_IDS) assert.ok(MISSIONS[`q_memento_${r}`].reward.items.includes(`qset_memento_${r}`), r);
   });
 
+  test('v4 quests: ネタ装備の色は専用の絵のキー（<スタイル>__<色>）として他の装備とかぶらない', () => {
+    const key = (it) => it.slot + '/' + it.look.style + '__' + String(it.look.color).toLowerCase();
+    const owners = {};
+    for (const it of Object.values(ITEMS)) if (it.type === 'equip' && it.look && it.look.style && it.look.color) (owners[key(it)] ||= []).push(it.id);
+    for (const id of COSMETIC_IDS) assert.deepEqual(owners[key(ITEMS[id])], [id], `${id} の専用の絵が他の装備にも出てしまう: ${owners[key(ITEMS[id])]}`);
+  });
+
   test('v4 quests: 派生（A 編・B 編）の分かれ方と、前の結果で変わるセリフ', () => {
     const g = makeGame('luna', 'beach');
     const st = g.state, mm = g.missions;

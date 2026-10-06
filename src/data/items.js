@@ -313,7 +313,7 @@ cosmetic('cos_tourist_aloha', '値札つきアロハ', 'top', ['hawaiian', '#ff7
 cosmetic('cos_toilet_slippers', '公衆トイレのスリッパ', 'shoes', ['sandals', '#4da6ff', '#ffffff'], '「便所」と書いてある。返しに行くタイミングを失った。');
 cosmetic('cos_banana_helmet', 'バナナのヘルメット', 'hat', ['helmet', '#ffe135', '#6a4a2a'], '安全第一。カモメが寄ってくるのが難点。');
 cosmetic('cos_paper_crown', 'カモメ王の紙の王冠', 'hat', ['crown', '#f4f4f4', '#ffd23f'], 'ポップコーンの箱で作った王冠。カモメには大人気。');
-cosmetic('cos_groucho_glasses', '鼻メガネ', 'accessory', ['sunglasses', '#16161e', '#f2c7a5'], '眉毛と鼻とヒゲがついている。誰も正体に気づかない（気づいている）。');
+cosmetic('cos_groucho_glasses', '鼻メガネ', 'accessory', ['sunglasses', '#1a1a24', '#f2c7a5'], '眉毛と鼻とヒゲがついている。誰も正体に気づかない（気づいている）。');
 cosmetic('cos_tuxedo_tshirt', 'タキシード柄Tシャツ', 'top', ['tshirt', '#16161e', '#ffffff'], 'これで正装。ドレスコードを突破できる（できない）。');
 cosmetic('cos_clown_shoes', 'ピエロの靴', 'shoes', ['loafers', '#ff3b3b', '#ffd23f'], '一歩ごとに「ぷぴっ」と鳴る。忍び足は無理。');
 cosmetic('cos_rubber_sword', 'ゴム製の剣', 'weapon', ['katana', '#ff6fb5', '#ffffff'], 'パントマイム用。斬ると「ぼよん」と曲がる。', { wt: 'melee' });

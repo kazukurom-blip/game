@@ -352,6 +352,8 @@ export function itemIconKey(item) {
   const look = item.look;
   if (look && look.style) {
     if (item.slot === 'pet' || /Pet$/.test(look.style)) return null;
+    // そのアイテム専用の絵（equip/<アイテムID>。ネタ装備など）があればそれ（色替えしない）
+    if (item.id && on() && hasArt('icons', `equip/${item.id}`)) return `equip/${item.id}`;
     return `equip/${item.slot}_${look.style}`;
   }
   return item.id ? `item/${item.id}` : null;
@@ -367,7 +369,7 @@ export function itemIconArt(item) {
   const E = entry('icons', k);
   const look = item.look;
   let maps = null;
-  if (look && look.style && E.recolor !== false) {
+  if (look && look.style && E.recolor !== false && k !== `equip/${item.id}`) {
     const b = equipBase(item.slot, look.style) || [];
     const base = E.base || b[0], acc = E.accent || b[1];
     maps = [[base, look.color], [acc, look.accent]];
