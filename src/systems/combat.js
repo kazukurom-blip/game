@@ -11,6 +11,7 @@ import { isNight, NIGHT_EXP_BONUS } from '../data/balance.js';
 import { comboHit } from './combo.js';
 import { weekdayEvent } from './daily.js';
 import { arenaExpMult } from './arena.js';
+import { forceModsFor, neonFragmentDrops, FRAGMENT_ID } from './neonCore.js';
 
 /** 実時刻（ms）。テストは game.nowMs を差し替えて曜日イベントを固定できる */
 export function gameNow(game) { return typeof game?.nowMs === 'function' ? game.nowMs() : Date.now(); }
@@ -47,6 +48,21 @@ export function calcDamage(atk, mult = 1, def = 0, crit = 0, critDmg = 1.5) {
   return { dmg: Math.max(1, Math.round(d)), crit: isCrit };
 }
 
+/**
+ * v5: プレイヤーの攻撃 1 ヒットのダメージ（通常攻撃・スキル・弾・召喚獣・乗り物の共通）
+ *  calcDamage に、ボスダメージ（潜在・ネオン・コア）・防御無視（ネオン・コア）・第2ワールドのネオン適性の倍率（forceMods の dealt）を足したもの
+ *  stats を省くと computeStats(game.state) を使う
+ */
+export function playerHitDamage(game, e, atk, mult = 1, crit = 0, critDmg = 1.5, stats = null) {
+  const s = stats || (game?.state ? computeStats(game.state) : {});
+  const m = e?.def?.boss ? mult * (1 + (s.bossDmg || 0)) : mult;
+  const def = (e?.def?.def || 0) * (1 - Math.min(0.9, s.ignoreDef || 0));
+  const r = calcDamage(atk, m, def, crit, critDmg);
+  const fm = forceModsFor(game);
+  if (fm.dealt !== 1) r.dmg = Math.max(1, Math.round(r.dmg * fm.dealt));
+  return r;
+}
+
 let _attackSeq = 1;
 export function newAttackId() { return _attackSeq++; }
 
@@ -77,9 +93,9 @@ export function playerAttackArea(game, rect, mult = 1, opts = {}) {
   for (const e of hit) {
     if (opts.attackId != null) e._hitBy = opts.attackId;
     const dir = opts.knockDir ?? (e.x >= cx ? 1 : -1);
-    const m = e.def?.boss ? mult * (1 + (stats.bossDmg || 0)) : mult; // 潜在「ボスダメージ」
     for (let i = 0; i < hitsN && !e.dead; i++) {
-      const r = calcDamage(stats.atk, m, e.def?.def || 0, stats.crit, stats.critDmg);
+      // ボスダメージ・防御無視・ネオン適性の倍率は playerHitDamage の中
+      const r = playerHitDamage(game, e, stats.atk, mult, stats.crit, stats.critDmg, stats);
       damageEnemy(game, e, r.dmg, r.crit, i === hitsN - 1 ? dir : 0, {
         stack: i, knock: opts.knock ?? 200, launch: opts.launch || 0,
       });
@@ -140,6 +156,11 @@ function killEnemy(game, enemy) {
     dropMult: (1 + (stats.dropRate || 0)) * (wd.dropMult || 1),
     moneyMult: (1 + (stats.mesoRate || 0)) * (wd.moneyMult || 1),
   });
+  // v5: ネオン・フラグメント（第2ワールドの敵。nc_01_awaken を受けたあとだけ。通常 1%・ボスは確実に数個）
+  if (!practice && !def.civilian) {
+    const nf = neonFragmentDrops(st, def, Math.random);
+    if (nf > 0) drops.push({ id: FRAGMENT_ID, qty: nf }); // ボスの分は 1 つの束で落とす
+  }
   drops.forEach((payload, i) => {
     const off = (i - (drops.length - 1) / 2) * 22;
     const d = new Drop(game, enemy.x + off, enemy.y - Math.min(enemy.h, 60) / 2, payload);
@@ -172,6 +193,7 @@ export function damagePlayer(game, amount, fromX) {
   const s = computeStats(st);
   const before = st.hp / s.maxHp;
   let dmg = amount * (0.9 + Math.random() * 0.2) * (100 / (100 + s.def)) * (1 - s.dmgReduce);
+  dmg *= forceModsFor(game).taken; // v5: 第2ワールドでネオン適性が足りないと多く受ける（足りていると少なく）
   dmg = Math.max(1, Math.round(dmg));
   st.hp = Math.max(0, st.hp - dmg);
   const after = st.hp / s.maxHp;

@@ -13,6 +13,7 @@
 
 import { hasJob } from './jobs.js';
 import { JOB_SKILL_LIST } from './jobSkills.js';
+import { NEON_SKILL_LIST } from './neonCore.js';
 
 const L = (base, per) => (lv) => base + per * Math.max(0, lv - 1);
 const R = (v) => Math.round(v * 100) / 100;
@@ -186,6 +187,8 @@ const list = [
 
 // ===================== 転職スキル（v3, data/jobSkills.js） =====================
 list.push(...JOB_SKILL_LIST);
+// ===================== v5: ネオン・コアの追加スキル（data/neonCore.js。neon: true。SP ではなくフラグメントで覚えて上げる） =====================
+list.push(...NEON_SKILL_LIST);
 
 export const SKILLS = Object.fromEntries(list.map((s) => [s.id, s]));
 
@@ -196,9 +199,11 @@ export function getSkill(id) { return SKILLS[id] || null; }
  *  - state 省略: 転職スキル（reqJob 付き）を含まない基本スキルのみ（従来どおり）
  *  - state あり: 基本スキル ＋ 現職の系譜（下位職を含む）の転職スキル
  *  - opts.allJobs: true なら全系統の転職スキルも含める（ロック表示用。習得可否は jobSkillUnlocked で判定）
+ *  - v5: ネオン・コアの追加スキル（neon: true）は opts.neon が true の時だけ（スキル窓の「ネオン」タブ）。opts.neon === 'only' ならそれだけ
  */
 export function skillsForHero(heroId, state, opts = {}) {
   return list.filter((s) => (s.hero === heroId || s.hero === 'both') &&
+    (s.neon ? !!opts.neon : opts.neon !== 'only') &&
     (!s.reqJob || opts.allJobs || (state && hasJob(state, s.reqJob))));
 }
 

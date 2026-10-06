@@ -1623,6 +1623,8 @@ test('v3 classes: newState(classId, {name, gender, look}) と性別別の初期�
 (await import('./quests_w2.mjs')).default({ test, makeGame, step, fin });
 // v4 第2ワールド「ネオン・アーク」（tests/world2.mjs）
 (await import('./world2.mjs')).default({ test, makeGame, step, fin });
+// v5 ネオン・コア（tests/neon_core.mjs）
+(await import('./neon_core.mjs')).default({ test, makeGame, step, fin });
 // v4 5次転職・Lv100〜200 の強さの釣り合い（tests/balance_v4.mjs・tools/sim_balance.mjs）
 { const bal = await import('./balance_v4.mjs'); bal.default({ test, makeGame, step, fin }); bal.registerEngine({ test, makeGame, step, fin }); }
 

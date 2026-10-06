@@ -11,6 +11,7 @@ import {
 } from './deps.js';
 import { drawJobBubble, drawNavArrow, trackerHit } from './hud3.js';
 import { mapleFrame, maplePartsBack, maplePartsFront, quickSlots, minimapRect, hudLayout, QS } from './hudMaple.js';
+import { neonForceOf, forceModsFor } from '../systems/neonCore.js';
 
 const W = 1280, H = 720;
 const hudState = new WeakMap();
@@ -416,6 +417,29 @@ function drawClockBadge(ctx, game) {
     const lr = map.levelRange;
     if (lr) txt(ctx, `推奨 Lv${lr[0]}-${lr[1]}`, bx + w - 12, by + h / 2 + 1, { size: 11, align: 'right', color: (game.state.level || 1) < lr[0] ? COL.bad : '#fff', sw: 3 });
   }
+  if (map.worldId === 2) guard('hud.neonForce', () => drawNeonForceBadge(ctx, game, bx, by + 24));
+}
+
+// v5: 第2ワールドのマップでは、自分のネオン適性とマップの必要な適性（足りないと赤・点滅）
+function drawNeonForceBadge(ctx, game, bx, by) {
+  const F = neonForceOf(game.state), m = forceModsFor(game);
+  const R = m.R, short = R > 0 && F < R;
+  const w = 150, h = 20;
+  const t = game.time || 0;
+  ctx.save();
+  rrPath(ctx, bx, by, w, h, 5);
+  ctx.fillStyle = short ? `rgba(90,10,30,${0.8 + 0.1 * Math.sin(t * 5)})` : 'rgba(14,9,40,0.82)'; ctx.fill();
+  ctx.lineWidth = 1.5; ctx.strokeStyle = short ? COL.bad : 'rgba(25,240,255,0.85)'; ctx.stroke();
+  ctx.restore();
+  // ネオンの菱形
+  ctx.save();
+  ctx.translate(bx + 11, by + h / 2);
+  ctx.beginPath(); ctx.moveTo(0, -6); ctx.lineTo(5, 0); ctx.lineTo(0, 6); ctx.lineTo(-5, 0); ctx.closePath();
+  ctx.fillStyle = short ? COL.bad : '#9ef7ff'; ctx.fill();
+  ctx.restore();
+  txt(ctx, '適性', bx + 21, by + h / 2 + 1, { size: 10, color: short ? '#ffb3bd' : '#9ef7ff', sw: 3, weight: 900 });
+  txt(ctx, R > 0 ? `${F} / ${R}` : `${F}`, bx + w - 10, by + h / 2 + 1, { size: 11.5, align: 'right', color: short ? COL.bad : '#fff', sw: 3 });
+  if (game.ui?.hudHit) game.ui.hudHit('neonForce', { x: bx, y: by, w, h }, { onClick: () => { if (!game.ui.isModal?.()) game.ui.toggle?.('neoncore'); } });
 }
 
 // ---------- ラジオ局テロップ（上中央） ----------

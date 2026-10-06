@@ -11,9 +11,10 @@ function buildIndex() {
   for (const sk of Object.values(SKILLS)) {
     if (!sk || !sk.color) continue;
     const j = sk.reqJob ? JOBS[sk.reqJob] : null;
+    // v5: ネオン・コアの追加スキルは 1 次職の系譜で覚えるが、演出は fxTier（5 = 5次と同じ派手さ）・branch で決める
     const ent = {
       id: sk.id, sk, kind: sk.kind, hero: sk.hero,
-      branch: j ? j.branch : null, tier: j ? j.tier : 0,
+      branch: sk.branch || (j ? j.branch : null), tier: sk.fxTier ?? (j ? j.tier : 0),
       move: sk.kind === 'move' && sk.move ? sk.move.type : null,
     };
     const key = String(sk.color).toLowerCase();

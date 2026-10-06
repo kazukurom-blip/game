@@ -1,5 +1,6 @@
 // 弾・魔法弾。owner: 'player' | 'enemy'
-import { calcDamage, damageEnemy, damagePlayer, isUntargetable } from '../systems/combat.js';
+import { playerHitDamage, damageEnemy, damagePlayer, isUntargetable } from '../systems/combat.js';
+import { computeStats } from '../systems/progression.js';
 import { sysFn } from '../world/sys.js';
 import { spawnEffect } from '../render/effects.js';
 import { rectOverlap, entRect } from '../world/physics.js';
@@ -77,8 +78,9 @@ export class Projectile {
         if (this.multiHit > 1 && this.dmg == null) {
           // 多段の弾: 1ヒットごとに計算（最後のヒットでノックバック）
           let anyCrit = false;
+          const ps = g.state ? computeStats(g.state) : null; // ボスダメージ・防御無視・ネオン適性（v5）は playerHitDamage の中
           for (let i = 0; i < this.multiHit && !e.dead; i++) {
-            const res = calcDamage(this.atk, this.mult, e.def?.def ?? 0, this.crit, this.critDmg);
+            const res = playerHitDamage(g, e, this.atk, this.mult, this.crit, this.critDmg, ps);
             anyCrit = anyCrit || res.crit;
             damageEnemy(g, e, res.dmg, res.crit, i === this.multiHit - 1 ? Math.sign(this.vx) || 1 : 0, { stack: i, knock: this.knock });
           }
@@ -90,7 +92,7 @@ export class Projectile {
         }
         let dmg = this.dmg, crit = false;
         if (dmg == null) {
-          const res = calcDamage(this.atk, this.mult, e.def?.def ?? 0, this.crit, this.critDmg);
+          const res = playerHitDamage(g, e, this.atk, this.mult, this.crit, this.critDmg);
           dmg = res.dmg; crit = res.crit;
         } else if (typeof dmg === 'object') { crit = !!dmg.crit; dmg = dmg.dmg; }
         else crit = this.crit === true;

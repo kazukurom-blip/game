@@ -15,6 +15,7 @@ import { attachJobs } from './systems/jobs.js';
 import { attachAchievements } from './systems/achievements.js';
 import { attachDaily } from './systems/daily.js';
 import { attachShared, removeSharedChar } from './systems/shared.js';
+import { attachNeonCore } from './systems/neonCore.js';
 import { audio, attachAudio } from './audio/audio.js';
 import { MissionManager } from './systems/missions.js';
 import { updateSkills, resetCooldowns } from './systems/skills.js';
@@ -172,6 +173,7 @@ function startGame(choice) {
     safe('attachAchievements', () => attachAchievements(game));
     safe('attachDaily', () => attachDaily(game));
     safe('attachShared', () => attachShared(game));
+    safe('attachNeonCore', () => attachNeonCore(game)); // v5: 適性が足りないマップに入ったときの注意
   }
   game.wanted = 0; game.wantedHeat = 0;
   // 2回目以降の開始に備えて旧インスタンスのイベント購読・モジュール内状態を破棄

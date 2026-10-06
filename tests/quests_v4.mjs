@@ -49,7 +49,7 @@ export default function register({ test, makeGame }) {
   test('v4 quests: 数（新しく150以上・地域7つすべてに連作・第2部 m2 は5〜8話）', () => {
     const all = Object.values(MISSIONS);
     const news = NEW();
-    assert.equal(all.length - news.length, OLD_IDS_COUNT + (all.filter((m) => m.type === 'job').length - 24), '今のクエストは消えていない');
+    assert.equal(all.length - news.length - all.filter((m) => m.questKind === 'neon').length, OLD_IDS_COUNT + (all.filter((m) => m.type === 'job').length - 24), '今のクエストは消えていない'); // v5: ネオン・コアのクエスト（nc_*）は数えない
     assert.ok(news.length >= 150, `新しいクエスト ${news.length}`);
     for (const r of TOWN_IDS) {
       const ss = Object.values(QUEST_SERIES).filter((s) => s.region === r);

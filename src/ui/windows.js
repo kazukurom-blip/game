@@ -15,6 +15,7 @@ import {
 import { drawSkillPreview, kindLabel } from './v3windows.js';
 import { mapInfo } from './deps.js';
 import { itemGender, canWearGender, GENDER_ONLY_LABEL } from '../data/items.js';
+import { neonSkillsFor, neonSkillInfo, learnNeonSkill, neonUnlocked, neonForceOf, forceModsFor } from '../systems/neonCore.js';
 
 const W = 1280, H = 720;
 const WT = { melee: '近接', gun: '銃', magic: '魔法' };
@@ -460,9 +461,11 @@ function togglePotion(ui, id) {
 }
 
 // ======================= スキル =======================
-const TIER_TABS = ['基本', '1次', '2次', '3次', '4次', '5次'];
+const TIER_TABS = ['基本', '1次', '2次', '3次', '4次', '5次', 'ネオン'];
+const NEON_TAB = 6; // v5: ネオン・コアの追加スキル（フラグメントで上げる）
 function skillTierOf(sk) { return sk?.reqJob ? (JOBS[sk.reqJob]?.tier || 1) : 0; }
 function skillListFor(st, tier) {
+  if (tier === NEON_TAB) return guard('neonSkills', () => neonSkillsFor(st), []) || [];
   const cur = currentJob(st);
   const curId = cur?.id || 'beginner';
   const all = skillsForHero(st.heroId, st, { allJobs: true });
@@ -495,7 +498,7 @@ function drawSkills(ui, ctx, win) {
   TIER_TABS.forEach((lab, i) => {
     const r = { x: x + 16 + i * 84, y: y + 80, w: 78, h: 30 };
     const on = win.tab === i, hov = ui.hover(win, r);
-    const lockedTab = i > 0 && (job?.tier || 0) < i && !skillListFor(st, i).length;
+    const lockedTab = i === NEON_TAB ? !guard('neonUnlocked', () => neonUnlocked(st), false) : i > 0 && (job?.tier || 0) < i && !skillListFor(st, i).length;
     ctx.save();
     rrPath(ctx, r.x, r.y, r.w, r.h, 10);
     if (on) { const gg = ctx.createLinearGradient(0, r.y, 0, r.y + r.h); gg.addColorStop(0, COL.pink); gg.addColorStop(1, COL.purple); ctx.fillStyle = gg; } else ctx.fillStyle = hov ? 'rgba(123,47,247,0.55)' : 'rgba(10,6,30,0.55)';
@@ -510,8 +513,8 @@ function drawSkills(ui, ctx, win) {
   // ページ送りはリストの下（タブ行に置くと「4次」「5次」タブに重なっていた）
   pager(ui, ctx, win, lx + lw / 2 - 56, ly + PER * RH + 1, pages);
   if (!list.length) {
-    txt(ctx, win.tab === 0 ? 'スキルがありません' : `${win.tab}次転職（Lv.${JOB_TIERS[win.tab]}）で解放`, lx + lw / 2, ly + 140, { size: 15, align: 'center', color: COL.dim });
-    txt(ctx, '頭上の「⬆ 転職できる！」吹き出しから転職ミッションを受注しよう', lx + lw / 2, ly + 168, { size: 12, align: 'center', color: COL.dim, maxW: lw - 20 });
+    txt(ctx, win.tab === 0 ? 'スキルがありません' : win.tab === NEON_TAB ? 'ネオン・コアの追加スキル' : `${win.tab}次転職（Lv.${JOB_TIERS[win.tab]}）で解放`, lx + lw / 2, ly + 140, { size: 15, align: 'center', color: COL.dim });
+    txt(ctx, win.tab === NEON_TAB ? '第2ワールドのクエスト「光の壁」の後、ネオン・コアの窓（L）で覚える' : '頭上の「⬆ 転職できる！」吹き出しから転職ミッションを受注しよう', lx + lw / 2, ly + 168, { size: 12, align: 'center', color: COL.dim, maxW: lw - 20 });
   }
   if (!win.sel || !list.some((s) => s.id === win.sel)) win.sel = list[0]?.id || null;
   list.slice((win.page || 0) * PER, (win.page || 0) * PER + PER).forEach((sk, k) => {
@@ -519,7 +522,8 @@ function drawSkills(ui, ctx, win) {
     const lv = st.skills?.[sk.id] || 0, max = sk.maxLevel || 10;
     const lock = jobLockOf(st, sk.id);
     const lvLocked = (st.level || 1) < (sk.reqLevel || 0);
-    const locked = !!lock || lvLocked;
+    const ninfo = sk.neon ? guard('neonInfo', () => neonSkillInfo(st, sk.id), null) : null;
+    const locked = !!lock || lvLocked || (ninfo && !ninfo.open);
     const hov = ui.hover(win, r), on = win.sel === sk.id;
     inset(ctx, r.x, r.y, r.w, r.h, { r: 10, fill: on ? 'rgba(25,211,197,0.25)' : hov ? 'rgba(123,47,247,0.35)' : 'rgba(6,4,24,0.55)', stroke: on ? COL.teal : undefined, lw: on ? 2 : 1.5 });
     ctx.save(); if (locked) ctx.globalAlpha = 0.45;
@@ -531,12 +535,14 @@ function drawSkills(ui, ctx, win) {
     const nameW = Math.min(190, measure(ctx, sk.name, 14.5));
     const kl = kindLabel(sk);
     txt(ctx, kl, r.x + 60 + nameW, r.y + 14, { size: 10.5, color: sk.kind === 'passive' ? COL.gold : sk.kind === 'move' ? '#7fe9ff' : COL.teal, sw: 2.5 });
-    const sub = lock ? `「${lock.jobName}」に転職で習得` : lvLocked ? `Lv.${sk.reqLevel} で習得可能` : (sk.desc || '');
-    txt(ctx, sub, r.x + 52, r.y + 32, { size: 11, color: lock || lvLocked ? COL.bad : COL.sub, maxW: r.w - 52 - 120, sw: 2.5, weight: 700 });
+    const nsub = ninfo && (!ninfo.open ? `コアの合計 Lv${ninfo.need} で解放` : ninfo.lv < ninfo.max ? `フラグメント ${ninfo.cost} 個で${ninfo.lv ? '上げる' : '覚える'}` : null);
+    const sub = lock ? `「${lock.jobName}」に転職で習得` : lvLocked ? `Lv.${sk.reqLevel} で習得可能` : nsub || (sk.desc || '');
+    txt(ctx, sub, r.x + 52, r.y + 32, { size: 11, color: lock || lvLocked || (ninfo && !ninfo.open) ? COL.bad : COL.sub, maxW: r.w - 52 - 120, sw: 2.5, weight: 700 });
     txt(ctx, `Lv ${lv}/${max}`, r.x + r.w - 52, r.y + r.h / 2, { size: 13.5, align: 'right', color: lv >= max ? COL.gold : '#fff' });
     const pool = skillSpTier(sk);
-    const can = !locked && getSp(st, pool) > 0 && lv < max;
+    const can = ninfo ? ninfo.can : !locked && getSp(st, pool) > 0 && lv < max;
     ui.btn(ctx, win, 'learn:' + sk.id, { x: r.x + r.w - 42, y: r.y + 7, w: 34, h: 31 }, '+', () => {
+      if (sk.neon) { const rr = learnNeonSkill(st, sk.id); ui.notify(rr.msg, rr.ok ? COL.gold : COL.bad); return; } // v5: フラグメントで上げる
       const ok = doLearn(g, sk.id);
       if (ok) ui.notify(`${sk.name} が Lv${(st.skills?.[sk.id] || 0)} になった！`, COL.gold);
     }, { disabled: !can, color: COL.orange, size: 20 });
@@ -569,7 +575,7 @@ function drawSkills(ui, ctx, win) {
     txt(ctx, `Lv ${lv}/${max}`, px + pw - 14, yy, { size: 14, align: 'right', color: lv >= max ? COL.gold : '#fff' });
     yy += 22;
     const reqJ = sel.reqJob ? JOBS[sel.reqJob] : null;
-    txt(ctx, `${kindLabel(sel)}  ・  ${reqJ ? reqJ.name : '基本スキル'}  ・  SP: ${skillSpTier(sel) <= 1 ? '基本+1次' : skillSpTier(sel) + '次'}`, px + 14, yy, { size: 11.5, color: COL.sub, sw: 2.5, maxW: pw - 28 });
+    txt(ctx, sel.neon ? `${kindLabel(sel)}  ・  ネオン・コア${reqJ ? '（' + (reqJ.name) + 'の系統）' : '（共通）'}  ・  ネオン・フラグメントで上げる` : `${kindLabel(sel)}  ・  ${reqJ ? reqJ.name : '基本スキル'}  ・  SP: ${skillSpTier(sel) <= 1 ? '基本+1次' : skillSpTier(sel) + '次'}`, px + 14, yy, { size: 11.5, color: COL.sub, sw: 2.5, maxW: pw - 28 });
     yy += 20;
     for (const ln of wrap(ctx, sel.desc || '', pw - 28, 12.5, 700).slice(0, 3)) { txt(ctx, ln, px + 14, yy, { size: 12.5, weight: 700, sw: 2.5 }); yy += 18; }
     yy += 4;
@@ -683,7 +689,14 @@ function drawStats(ui, ctx, win) {
   txt(ctx, `クラス: ${classOf(st.heroId)?.name || ''}`, x + w - 28, jy + 16, { size: 11, align: 'right', color: COL.sub, sw: 2.5 });
   const hist = Array.isArray(st.job?.history) ? st.job.history : [];
   const chain = ['見習い', ...hist.map((e) => `${JOBS[e.id]?.name || e.id}${e.level ? `(Lv${e.level})` : ''}`)].join(' → ');
-  for (const [i, ln] of wrap(ctx, '転職履歴: ' + chain, w - 56, 11.5, 700).slice(0, 3).entries()) txt(ctx, ln, x + 28, jy + 38 + i * 16, { size: 11.5, color: COL.sub, weight: 700, sw: 2.5 });
+  for (const [i, ln] of wrap(ctx, '転職履歴: ' + chain, w - 56, 11.5, 700).slice(0, 2).entries()) txt(ctx, ln, x + 28, jy + 38 + i * 16, { size: 11.5, color: COL.sub, weight: 700, sw: 2.5 });
+  // v5: ネオン適性（第2ワールドのマップでは、そのマップの必要な適性も。足りないと赤）
+  guard('stats.neonForce', () => {
+    const F = neonForceOf(st), fm = forceModsFor(g);
+    const short = fm.R > 0 && F < fm.R;
+    txt(ctx, '◆ ネオン適性', x + 28, jy + 71, { size: 12, color: '#9ef7ff', sw: 2.5 });
+    txt(ctx, fm.R > 0 ? `${F}  /  このマップ ${fm.R}（与ダメ ×${fm.dealt}・被ダメ ×${fm.taken}）` : `${F}`, x + w - 28, jy + 71, { size: 12.5, align: 'right', color: short ? COL.bad : '#fff', sw: 2.5, maxW: w - 150 });
+  });
 }
 // 能力画面: 通常攻撃1発のダメージ幅。値が変わったら差分を少しの間だけ出す。＋ボタンに乗せると振った後の値を予告
 function drawDmgBox(ui, ctx, win, bx, by, bw, bh, cs, apHover) {

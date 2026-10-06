@@ -22,7 +22,7 @@ export const V3_LAYOUT = {
   content: { w: 980, h: 600, title: 'コンテンツ', key: 'U', y: 40 },
   achieve: { w: 920, h: 600, title: '実績・称号', key: 'O', y: 40 },
   settings: { w: 600, h: 520, title: '設定' },
-  menu: { w: 420, h: 520, title: 'メニュー', key: 'Esc' },
+  menu: { w: 420, h: 580, title: 'メニュー', key: 'Esc' }, // v5: ネオン・コアの分だけ高く
   help: { w: 860, h: 560, title: '操作説明' },
 };
 const KIND = { melee: '近接', projectile: '遠距離', aoe: '範囲', buff: 'バフ', dash: 'ダッシュ', passive: 'パッシブ', move: '移動', summon: '召喚' };
@@ -1060,10 +1060,12 @@ function drawMenu(ui, ctx, win) {
     ['📖 操作説明', () => { ui.close('menu'); ui.open('help'); }, COL.purple],
     ['🗼 コンテンツ [U]', () => { ui.close('menu'); ui.open('content'); }, COL.purple],
     ['🏆 実績・称号 [O]', () => { ui.close('menu'); ui.open('achieve'); }, COL.purple],
+    ['💠 ネオン・コア [L]', () => { ui.close('menu'); ui.open('neoncore'); }, COL.purple, 'miNeon'], // v5（id を別にして、ほかの項目の id mi0〜mi5 は変えない）
     ['👥 キャラクター選択へ', () => { win.confirm = true; }, '#c02a52'],
   ];
-  items.forEach(([lab, f, c], i) => {
-    ui.btn(ctx, win, 'mi' + i, { x: x + 30, y: y + 132 + i * 60, w: w - 60, h: 48 }, lab, f, { color: c, size: 17 });
+  let k = 0;
+  items.forEach(([lab, f, c, id], i) => {
+    ui.btn(ctx, win, id || 'mi' + k++, { x: x + 30, y: y + 132 + i * 60, w: w - 60, h: 48 }, lab, f, { color: c, size: 17 });
   });
 }
 
