@@ -16,6 +16,7 @@
 //          画面全体攻撃は CT ごとに 1 回。会心は期待値（1 + 会心率 ×（会心ダメ − 1））。敵の防御は calcDamage と同じ式
 //  - 敵: そのレベルのふつうの敵（第2ワールドは w2Hp / w2Def、第1ワールドは hpAt / defAt）と、強い敵（HP×1.6・防御×1.5）
 //  - ボス: その地域のボスを、ボスの Lv と同じ Lv のキャラで。当てられる時間を 75% とする（移動・ボスの技を避ける時間）
+import * as NC from '../src/data/neonCore.js';
 import { newState, computeStats } from '../src/systems/progression.js';
 import { SKILLS } from '../src/data/skills.js';
 import { JOBS, JOB_TIERS, JOB_BRANCHES, jobLineage } from '../src/data/jobs.js';
@@ -158,15 +159,13 @@ export function forceMods(F, R) {
 }
 /** neonForceOf: コアの Lv の合計 × 10（追加スキルの分は入れない） */
 export const neonForceOfCores = (cores) => 10 * Object.values(cores || {}).reduce((a, v) => a + (v || 0), 0);
-/** % 能力（仮の値。SPEC_V5 の目安「上限まで振ると 攻撃力 +30%・ボスダメージ +40%・防御無視 +20%」）: 1 Lv の上がり幅と上限 Lv */
-export const NEON_STATS = {
-  atkPct: { per: 0.01, max: 30 }, bossDmg: { per: 0.02, max: 20 }, ignoreDef: { per: 0.01, max: 20 }, critDmg: { per: 0.01, max: 20 },
-  maxHpPct: { per: 0.01, max: 30 }, defPct: { per: 0.01, max: 30 }, expPct: { per: 0.01, max: 20 }, dropPct: { per: 0.01, max: 20 },
-};
-/** コア 1 Lv ごとの主ステータス（仮の値。「主のステータスが少し上がる」） */
-export const NEON_MAIN_PER_LV = 3;
-/** コアの Lv n に上げる費用（フラグメント）。SPEC_V5 の目安: 1 Lv 目 10 個くらい、Lv20 まで 1 地域 1,000〜1,500 個 */
-export const neonCoreCost = (n) => Math.round(10 + 1.55 * Math.pow(Math.max(0, n - 1), 1.5));
+/** % 能力・コアの費用・主ステータス: ネオン・コアの実際の値（src/data/neonCore.js）を使う。sim の key は expPct / dropPct */
+const KEYMAP = { expRate: 'expPct', dropRate: 'dropPct' };
+export const NEON_STATS = Object.fromEntries(NC.NEON_STATS.map((x) => [KEYMAP[x.key] || x.key, { per: x.per, max: x.max }]));
+/** コア 1 Lv ごとの主ステータス */
+export const NEON_MAIN_PER_LV = NC.MAIN_STAT_PER_CORE_LV;
+/** コアを Lv n に上げる費用（フラグメント）= CORE_COST[n-1] */
+export const neonCoreCost = (n) => NC.CORE_COST[Math.max(0, Math.min(NC.CORE_COST.length - 1, n - 1))];
 export const NEON_CORE_MAX = 20;
 /** 能力ポイント（= コアの Lv の合計）を、戦いに効く順に 1 つずつ振る（ボスダメ → 攻撃 → 防御無視 → 会心ダメ → 最大HP → 防御） */
 export function allocNeonPoints(points) {

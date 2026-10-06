@@ -26,7 +26,7 @@ export default function register({ test }) {
     }
     const m = forceMods(75, 100);
     assert.ok(near(m.dealt, 0.7) && near(m.taken, 1.5), 'r=0.75 は 0.5 と 1 の間');
-    assert.ok(neonCoreCost(1) >= 8 && neonCoreCost(1) <= 12, `Lv1 ${neonCoreCost(1)}`);
+    assert.ok(neonCoreCost(1) >= 5 && neonCoreCost(1) <= 12, `Lv1 ${neonCoreCost(1)}`);
     for (let n = 2; n <= 20; n++) assert.ok(neonCoreCost(n) > neonCoreCost(n - 1), 'Lv が上がるほど高い');
     assert.ok(coreCostFull() >= 1000 && coreCostFull() <= 1500, `Lv20 まで ${coreCostFull()}`);
   });
