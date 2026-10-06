@@ -2,7 +2,7 @@
 // http-server でプロジェクトをサーブ → chromium headless でロード → 一通り操作 → tests/screenshots/ に保存
 // console error / pageerror / game.lastError / UI ガード警告 を収集し、0 件であることを検証する。
 // 実行: node tests/smoke.mjs   (PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers)
-//   --only=luna,jin,maps,bosses,v1save,story,chars,jobs,v3,world2,oldsaves  で一部だけ実行（既定は全部）
+//   --only=luna,jin,maps,bosses,v1save,story,chars,jobs,v3,world2,neon,oldsaves  で一部だけ実行（既定は全部）
 import { createRequire } from 'node:module';
 import { spawn } from 'node:child_process';
 import http from 'node:http';
@@ -1367,6 +1367,66 @@ async function main() {
     await press('KeyB'); await page.waitForTimeout(400);
     await shot2('book');
     await press('KeyB');
+    await g(() => { window.game.debug.god = false; });
+  }
+
+  // ===================================================== v5 ネオン・コア（窓・HUD の適性・スキル窓のネオンのタブ・ステータス窓）
+  if (want('neon')) {
+    console.log('--- NEON CORE');
+    await startHero('jin');
+    await g(() => { const gm = window.game; gm.debug.god = true; gm.debug.setLevel(150); gm.state.money = 1e8; gm.state.flags.world2Unlocked = true; gm.state.job = { id: 'jin_brawler', tier: 1, history: [] }; });
+    await warp('w2_arkcity', 600);
+    await press('KeyL'); await page.waitForTimeout(300);
+    await shot('neon_locked');
+    await check('ネオン・コアの窓（L）: クエスト前は「まだ目覚めていない」', await g(() => window.game.ui.isOpen('neoncore')));
+    await press('KeyL');
+    // 適性が足りないマップ（FORCE_REQ を仮に 60 にして試す）: 入ったときの注意・HUD の赤
+    await g(() => import('./src/data/forceReq.js').then((m) => { window.__fr = { ...m.FORCE_REQ }; m.FORCE_REQ.w2_arkcity_f3 = 60; }));
+    await g(() => { window.game.ui.toasts.length = 0; });
+    await warp('w2_arkcity_f3', 800);
+    await check('適性が足りないマップに入ると注意の通知', await toastHas(/ネオン適性が足りない/));
+    await shot('neon_hud_short', { x: 0, y: 0, width: 640, height: 260 });
+    // 窓を開けた状態（コア・能力・スキル）
+    await g(() => import('./src/systems/neonCore.js').then((N) => import('./src/systems/inventory.js').then((I) => {
+      const st = window.game.state;
+      st.flags.nc_unlocked = true; st.flags.nc_core_arkcity = true; st.flags.nc_core_cyberwild = true;
+      st.neonCore.cores.arkcity = 6; st.neonCore.cores.cyberwild = 9;
+      I.addItemToState(st, N.FRAGMENT_ID, 900);
+      for (const k of ['atkPct', 'atkPct', 'atkPct', 'bossDmg', 'bossDmg', 'ignoreDef']) N.addNeonStat(st, k);
+      N.learnNeonSkill(st, 'nc_sync'); N.learnNeonSkill(st, 'nc_sync'); N.learnNeonSkill(st, 'nc_fight_neon_quake');
+    })));
+    await press('KeyL'); await page.waitForTimeout(300);
+    const lv0 = await g(() => window.game.state.neonCore.cores.arkcity);
+    await clickHit('neoncore:core:arkcity'); await page.waitForTimeout(200);
+    await clickHit('neoncore:stat:critDmg'); await page.waitForTimeout(200);
+    await clickHit('neoncore:nsk:nc_sync'); await page.waitForTimeout(200);
+    const after = await g(() => ({ lv: window.game.state.neonCore.cores.arkcity, cd: window.game.state.neonCore.stats.critDmg, sync: window.game.state.neonCore.skills.nc_sync }));
+    await shot('neon_window');
+    await check('ネオン・コアの窓: コアを上げる・能力を振る・スキルを上げる（ボタン）', after.lv === lv0 + 1 && after.cd === 1 && after.sync === 3, JSON.stringify(after));
+    await press('KeyL');
+    // メニューのボタン
+    const mb = await g(() => import('./src/ui/hudMaple.js').then((m) => m.menuButtons().find((b) => b.win === 'neoncore')));
+    if (mb) { await clickCanvas(mb.x + mb.w / 2, mb.y + mb.h / 2); await page.waitForTimeout(200); }
+    await check('メニューのボタンからネオン・コアの窓', !!mb && await g(() => window.game.ui.isOpen('neoncore')));
+    if (await g(() => window.game.ui.isOpen('neoncore'))) await press('KeyL');
+    // スキル窓のネオンのタブ
+    await press('KeyK'); await page.waitForTimeout(200);
+    await g(() => { const w = window.game.ui.wins.skills; if (w) { w.tab = 6; w.page = 0; w.sel = 'nc_fight_neon_quake'; } });
+    await page.waitForTimeout(400);
+    await shot('neon_skilltab');
+    await check('スキル窓に「ネオン」のタブ', await g(() => window.game.ui.wins.skills?.tab === 6));
+    await press('KeyK');
+    // ステータス窓の適性
+    await press('KeyT'); await page.waitForTimeout(300);
+    await shot('neon_stats');
+    await press('KeyT');
+    // 追加スキルを使う（演出・モーション）
+    await g(() => import('./src/systems/skills.js').then((S) => { S.resetCooldowns(); window.game.state.mp = 1e6; return S.useSkill(window.game, 'nc_fight_neon_quake'); }));
+    await page.waitForTimeout(250);
+    await shot('neon_skill_use');
+    await page.waitForTimeout(600);
+    await lastError('neon skill');
+    await g(() => import('./src/data/forceReq.js').then((m) => { for (const k of Object.keys(m.FORCE_REQ)) delete m.FORCE_REQ[k]; Object.assign(m.FORCE_REQ, window.__fr || {}); }));
     await g(() => { window.game.debug.god = false; });
   }
 

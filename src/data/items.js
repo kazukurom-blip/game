@@ -721,3 +721,13 @@ for (const it of list.slice(V5_N0)) {
 }
 /** v5 ボス装備の ID の一覧 */
 export const V5_GEAR_IDS = list.slice(V5_N0).map((it) => it.id);
+
+// ============================================================================================
+// v5（システム担当）: ネオン・コアの強化に使う素材（docs/SPEC_V5.md・docs/NEON_CORE.md）
+//  第2ワールドの通常の敵が 1%、ボスが確実に数個落とす（nc_01_awaken を受けたあとだけ）。落とす所は systems/neonCore.js の neonFragmentDrops
+// ============================================================================================
+{
+  const n0 = list.length;
+  etc('neon_fragment', 'ネオン・フラグメント', 'epic', 'gem', 5000, 'ネオン・アークの光が固まったかけら。ネオン・コアに注ぐと、この世界の光になじめる。');
+  for (const it of list.slice(n0)) { it.world = 2; ITEMS[it.id] = it; W2_ITEM_IDS.push(it.id); }
+}

@@ -7,12 +7,13 @@ import { WINDOW_DRAW, drawTooltipBox } from './windows.js';
 import { initDialog, dialogKey, drawDialog, dialogTick, syncDialogTouch } from './dialogMaple.js';
 import { drawWorldMap, drawBook, drawPhone, rideTaxi } from './v2windows.js';
 import { V3_WINDOWS, V3_LAYOUT, drawPopup } from './v3windows.js';
+import { NEON_WINDOWS, NEON_LAYOUT } from './neonCoreWin.js';
 import { drawJobFx } from './hud3.js';
 import { loadSettings, applySettings, SKILL_BAR_SIZE, BAR_KEYS } from './v3deps.js';
 import { enemyDef } from './deps.js';
 import { audio } from '../audio/audio.js';
 
-Object.assign(WINDOW_DRAW, { dialog: drawDialog, worldmap: drawWorldMap, book: drawBook, phone: drawPhone }, V3_WINDOWS);
+Object.assign(WINDOW_DRAW, { dialog: drawDialog, worldmap: drawWorldMap, book: drawBook, phone: drawPhone }, V3_WINDOWS, NEON_WINDOWS);
 
 const W = 1280, H = 720;
 const MODAL = new Set(['dialog', 'shop', 'death', 'worldmap', 'menu', 'jobOffer']);
@@ -28,6 +29,7 @@ const LAYOUT = {
   book: { w: 1000, h: 620, title: 'モンスター図鑑', key: 'B', y: 40 },
   phone: { w: 360, h: 660, title: null, key: 'P', x: W - 360 - 36, y: 30 },
   ...V3_LAYOUT,
+  ...NEON_LAYOUT, // v5: ネオン・コア（L）
 };
 const TOAST_MAX = 3;
 // 重要度: 2 = レベルアップ / PET / レア / ボス / ミッション完了、1 = 進行系、0 = その他
@@ -206,7 +208,7 @@ export class UIManager {
       // トグル
       if (!this.isModal()) {
         const tg = [['inventory', 'inventory'], ['skillWin', 'skills'], ['missionWin', 'missions'], ['statWin', 'stats'],
-          ['mapWin', 'worldmap'], ['bookWin', 'book'], ['phoneWin', 'phone'], ['contentWin', 'content'], ['achieveWin', 'achieve']];
+          ['mapWin', 'worldmap'], ['bookWin', 'book'], ['phoneWin', 'phone'], ['contentWin', 'content'], ['achieveWin', 'achieve'], ['neonWin', 'neoncore']];
         for (const [act, nm] of tg) if (P(act)) { this.toggle(nm); eat(act); consumed = true; }
       } else if (this.wins.worldmap && this.order[this.order.length - 1] === 'worldmap' && P('mapWin')) {
         this.close('worldmap'); eat('mapWin'); consumed = true;

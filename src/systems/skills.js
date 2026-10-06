@@ -390,6 +390,8 @@ export function learnSkill(game, skillId) {
   const sk = SKILLS[skillId];
   const st = game.state;
   if (!sk) return false;
+  // v5: ネオン・コアの追加スキルは SP ではなくネオン・フラグメントで上げる（systems/neonCore.js の learnNeonSkill・ネオン・コアの窓）
+  if (sk.neon) { game.notify?.(`${sk.name} はネオン・コアの窓でネオン・フラグメントを使って上げる`, '#ff8a8a'); return false; }
   if (sk.hero !== 'both' && sk.hero !== st.heroId) { game.notify?.('このキャラは習得できません', '#ff8a8a'); return false; }
   if (!jobSkillUnlocked(st, sk)) { game.notify?.(`「${JOBS[sk.reqJob]?.name || sk.reqJob}」に転職すると習得可能`, '#ff8a8a'); return false; }
   if (st.level < sk.reqLevel) { game.notify?.(`Lv.${sk.reqLevel} で習得可能`, '#ff8a8a'); return false; }
@@ -419,7 +421,7 @@ export function jobLockOf(state, skillId) {
 /** スキル習得可能か（UI用） */
 export function canLearn(state, skillId) {
   const sk = SKILLS[skillId];
-  if (!sk) return false;
+  if (!sk || sk.neon) return false;
   return (sk.hero === 'both' || sk.hero === state.heroId) && state.level >= sk.reqLevel && jobSkillUnlocked(state, sk) &&
     skillLevel(state, skillId) < sk.maxLevel && getSp(state, skillSpTier(sk)) > 0;
 }

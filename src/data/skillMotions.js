@@ -44,6 +44,9 @@ export const SKILL_MOTION_TABLE = {
   jj_race_dimension_overdrive: 'finale', jj_race_photon_burnout: 'revEngine', jj_race_lightspeed_run: 'tackle', jj_race_limit_break: 'awaken',
   hn_world_rewrite: 'finale', hn_kernel_panic: 'castThrust', hn_demiurge_avatar: 'summonCall', hn_root_awaken: 'awaken',
   hd_fleet_barrage: 'finale', hd_carrier_gatling: 'command', hd_mothership: 'summonCall', hd_admiral_order: 'awaken',
+  // v5 ネオン・コアの追加スキル（共通の 3 つは種類とキャラから決める）
+  nc_gun_photon_rain: 'fanSweep', nc_dance_laser_waltz: 'spinKick', nc_dance_afterimage: 'idolPose', nc_fight_neon_quake: 'groundPunch',
+  nc_race_photon_drift: 'tackle', nc_race_overboost: 'revEngine', nc_net_null_pointer: 'castThrust', nc_drone_satellite: 'summonCall', nc_drone_hyper_link: 'command',
 };
 
 // モーションの長さ（秒）。連撃系は回数で伸ばす（最大 0.8 秒）

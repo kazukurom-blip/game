@@ -537,9 +537,10 @@ const MENU = [
   { win: 'worldmap', name: '地図', key: 'M', ico: 'map' },
   { win: 'book', name: '図鑑', key: 'B', ico: 'book' },
   { win: 'phone', name: 'スマホ', key: 'P', ico: 'phone' },
+  { win: 'neoncore', name: 'ネオン・コア', key: 'L', ico: 'core' }, // v5
   { win: 'settings', name: '設定', key: null, ico: 'gear' },
 ];
-const MB_W = 30, MB_H = 24, MB_GAP = 3;
+const MB_W = 29, MB_H = 24, MB_GAP = 3; // 9 個がクイックスロットの幅に収まる
 export function menuButtons() {
   const total = MENU.length * MB_W + (MENU.length - 1) * MB_GAP;
   const x0 = layout.qx + QS_W - total, y = layout.qy - 4 - 6 - MB_H;
@@ -558,6 +559,7 @@ function drawMenuIco(ctx, ico, cx, cy, col) {
     else if (ico === 'map') { ctx.moveTo(-7, -5); ctx.lineTo(-2, -7); ctx.lineTo(2, -5); ctx.lineTo(7, -7); ctx.lineTo(7, 5); ctx.lineTo(2, 7); ctx.lineTo(-2, 5); ctx.lineTo(-7, 7); ctx.closePath(); ctx.moveTo(-2, -7); ctx.lineTo(-2, 5); ctx.moveTo(2, -5); ctx.lineTo(2, 7); }
     else if (ico === 'book') { ctx.moveTo(0, -5); ctx.quadraticCurveTo(-4, -7, -7, -6); ctx.lineTo(-7, 6); ctx.quadraticCurveTo(-4, 5, 0, 7); ctx.quadraticCurveTo(4, 5, 7, 6); ctx.lineTo(7, -6); ctx.quadraticCurveTo(4, -7, 0, -5); ctx.lineTo(0, 7); }
     else if (ico === 'phone') { rrPath(ctx, -4.5, -8, 9, 16, 2); ctx.moveTo(-1.5, 5); ctx.lineTo(1.5, 5); }
+    else if (ico === 'core') { ctx.moveTo(0, -8); ctx.lineTo(7, 0); ctx.lineTo(0, 8); ctx.lineTo(-7, 0); ctx.closePath(); ctx.moveTo(0, -3.5); ctx.lineTo(3.5, 0); ctx.lineTo(0, 3.5); ctx.lineTo(-3.5, 0); ctx.closePath(); }
     else if (ico === 'gear') { for (let i = 0; i < 16; i++) { const a = i * Math.PI / 8, r = i % 2 ? 5.2 : 7.5; i ? ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r) : ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.closePath(); ctx.moveTo(2.2, 0); ctx.arc(0, 0, 2.2, 0, Math.PI * 2); }
   };
   path(); ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,0.65)'; ctx.stroke();

@@ -11,7 +11,7 @@ const KEYMAP = {
   KeyM: 'mapWin', KeyB: 'bookWin', KeyP: 'phoneWin', KeyR: 'radio', KeyN: 'mute',
   KeyV: 'talk',
   KeyQ: 'skill5', KeyW: 'skill6', KeyG: 'skill7', KeyH: 'skill8',
-  KeyU: 'contentWin', KeyO: 'achieveWin',
+  KeyU: 'contentWin', KeyO: 'achieveWin', KeyL: 'neonWin', // v5: ネオン・コア
   F2: 'debug', Backquote: 'debug',
   Escape: 'escape',
 };

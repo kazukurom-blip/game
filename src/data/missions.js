@@ -15,6 +15,7 @@ import { expToNext } from './balance.js';
 import { WORLD_MAP_IDS } from '../systems/travel.js';
 import { QUESTS_W1, QUEST_NPCS } from './questsW1.js';
 import { QUESTS_W2, QUEST_NPCS_W2 } from './questsW2.js';
+import { QUESTS_NEON } from './questsNeon.js';
 export { QUEST_SERIES, QUEST_TITLES, M2_IDS } from './questsW1.js';
 export { QUEST_SERIES_W2, QUEST_TITLES_W2, M2W2_IDS } from './questsW2.js';
 
@@ -673,6 +674,9 @@ list.push(...QUESTS_W1);
 //  exp は questsW2.js 側で expFixed 済み（Lv198 以上でも有限になるよう expToNext(199) で止めてある）。
 Object.assign(MISSION_NPCS, QUEST_NPCS_W2);
 list.push(...QUESTS_W2);
+// v5（システム担当）: ネオン・コアの専用クエスト（nc_01_awaken・nc_cyberwild・nc_abyss・nc_zenith）。データは data/questsNeon.js。
+//  NPC は第2ワールドに今いる NPC（新しい NPC は無い）。exp は questsNeon.js 側で expFixed 済み。
+list.push(...QUESTS_NEON);
 
 const REWARD_EXP_FACTOR = { main: 0.8, sub: 0.5, daily: 0.3, job: 0.5 };
 for (const m of list) {

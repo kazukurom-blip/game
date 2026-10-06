@@ -10,6 +10,7 @@ import { starBonus, mainStatOf, sumPotLines } from '../data/gear.js';
 import { normalizeInventory } from './inventory.js';
 import { achievementBonus } from './achievements.js';
 import { linkBonus } from './shared.js';
+import { newNeonCore, ensureNeonCore, neonBonusOf } from './neonCore.js';
 
 
 // クラス別の基礎値（v3: data/classes.js の CLASSES から生成。heroId = クラスID。name は旧来の既定名）
@@ -72,6 +73,8 @@ export function newState(heroId = 'luna', opts = {}) {
     job: newJobState(),
     // v3 エンドコンテンツ（v4 セーブ）
     ...newV4Fields(),
+    // v5 ネオン・コア（systems/neonCore.js）
+    neonCore: newNeonCore(),
     version: STATE_VERSION,
   };
   normalizeInventory(state);
@@ -220,6 +223,9 @@ export function migrateState(state) {
   if (!Number.isInteger(state.rngSeed)) state.rngSeed = v4.rngSeed;
   for (const k of ['done', 'counters', 'seen']) if (!state.achv[k] || typeof state.achv[k] !== 'object') state.achv[k] = {};
   if (state.potLog.length > 50) state.potLog = state.potLog.slice(-50);
+  // v5: ネオン・コア（古いセーブは空の値で作る。追加スキルの Lv を state.skills に写す）
+  ensureNeonCore(state);
+  state.skillBar = padBar(state.skillBar.map((id) => (id && SKILLS[id] && (!SKILLS[id].neon || state.skills[id] > 0) ? id : null)));
   normalizeInventory(state);
   const s = computeStats(state, []);
   state.hp = Math.max(0, Math.min(num(state.hp, s.maxHp), s.maxHp));
@@ -271,6 +277,8 @@ export function computeStats(state, buffs) {
   // v4: 実績ランク・キャラ間リンク（全ステ・各種％）
   const ab = achievementBonus(state);
   const lb = linkBonus(state);
+  // v5: ネオン・コア（能力アップの %・コアの Lv による主のステータス）
+  const nb = neonBonusOf(state);
 
   // パッシブ
   const pas = { critAdd: 0, critDmgAdd: 0, maxHpPct: 0, defAdd: 0, dmgReduce: 0, speedAdd: 0, atkAdd: 0, attackSpeedPct: 0 };
@@ -293,10 +301,11 @@ export function computeStats(state, buffs) {
   const s = state.stats || {};
   const ms = mainStatOf(state.heroId);
   const msMult = (k) => (k === ms ? 1 + (pot.mainPct || 0) : 1);
-  const str = Math.round(((s.str || 0) + eq.str + jb.str + ab.allStat) * msMult('str'));
-  const dex = Math.round(((s.dex || 0) + eq.dex + jb.dex + ab.allStat) * msMult('dex'));
-  const int = Math.round(((s.int || 0) + eq.int + jb.int + ab.allStat) * msMult('int'));
-  const luk = Math.round(((s.luk || 0) + eq.luk + bk.luk + jb.luk + ab.allStat) * msMult('luk'));
+  const msAdd = (k) => (k === ms ? nb.mainStat : 0);
+  const str = Math.round(((s.str || 0) + eq.str + jb.str + ab.allStat + msAdd('str')) * msMult('str'));
+  const dex = Math.round(((s.dex || 0) + eq.dex + jb.dex + ab.allStat + msAdd('dex')) * msMult('dex'));
+  const int = Math.round(((s.int || 0) + eq.int + jb.int + ab.allStat + msAdd('int')) * msMult('int'));
+  const luk = Math.round(((s.luk || 0) + eq.luk + bk.luk + jb.luk + ab.allStat + msAdd('luk')) * msMult('luk'));
 
   const weaponType = weapon ? weapon.weaponType : 'melee';
   let statAtk;
@@ -304,16 +313,16 @@ export function computeStats(state, buffs) {
   else if (weaponType === 'magic') statAtk = int * 0.6 + luk * 0.15;
   else statAtk = str * 0.5 + dex * 0.2;
 
-  const maxHp = Math.round((base.hp + base.hpPerLv * (L - 1) + str * 2 + eq.maxHp + bk.maxHp + jb.maxHp) * (1 + pas.maxHpPct + (pot.maxHpPct || 0) + lb.maxHpPct));
+  const maxHp = Math.round((base.hp + base.hpPerLv * (L - 1) + str * 2 + eq.maxHp + bk.maxHp + jb.maxHp) * (1 + pas.maxHpPct + (pot.maxHpPct || 0) + lb.maxHpPct + nb.maxHpPct));
   const maxMp = Math.round((base.mp + base.mpPerLv * (L - 1) + int * 3 + eq.maxMp + bk.maxMp + jb.maxMp) * (1 + lb.maxMpPct));
   // v4: Lv100 を超えると、Lv が 1 上がるごとに攻撃力 +0.5%（Lv200 で +50%。第2ワールドで Lv を上げた分だけ強くなる。docs/BALANCE_V4.md）
   const lvAtkPct = L > 100 ? LV_ATK_PCT_W2 * (Math.min(L, 200) - 100) : 0;
-  const atk = Math.max(1, Math.round((5 + 1.5 * L + eq.atk + statAtk + pas.atkAdd + bk.atk + jb.atk) * (1 + bf.atkPct + (pot.atkPct || 0) + lvAtkPct)));
-  const def = Math.round((base.def + eq.def + str * 0.2 + L * 0.5 + pas.defAdd + bk.def + jb.def) * (1 + bf.defPct + (pot.defPct || 0)));
+  const atk = Math.max(1, Math.round((5 + 1.5 * L + eq.atk + statAtk + pas.atkAdd + bk.atk + jb.atk) * (1 + bf.atkPct + (pot.atkPct || 0) + lvAtkPct + nb.atkPct)));
+  const def = Math.round((base.def + eq.def + str * 0.2 + L * 0.5 + pas.defAdd + bk.def + jb.def) * (1 + bf.defPct + (pot.defPct || 0) + nb.defPct));
   const speed = Math.min(450, Math.round((base.speed + eq.speed + (pot.speed || 0) + dex * 0.3 + pas.speedAdd + jb.speed) * (1 + bf.speedPct)));
   const jump = Math.min(1000, base.jump + Math.min(60, eq.speed * 0.5));
   const crit = Math.min(0.8, base.crit + luk * 0.002 + dex * 0.0005 + eq.crit / 100 + pas.critAdd + bf.critAdd + bk.crit + jb.crit + (pot.crit || 0) + lb.crit);
-  const critDmg = base.critDmg + luk * 0.002 + pas.critDmgAdd + jb.critDmg;
+  const critDmg = base.critDmg + luk * 0.002 + pas.critDmgAdd + jb.critDmg + nb.critDmg;
   // ブースター（攻撃速度アップ）: 最大 +60%
   const attackSpeed = (weapon ? weapon.attackSpeed : 2.5) * (1 + Math.min(0.6, pas.attackSpeedPct + bf.attackSpeedPct));
   const range = weapon ? weapon.range : 60;
@@ -329,13 +338,14 @@ export function computeStats(state, buffs) {
     job: jb,
     str, dex, int, luk,
     // v4: 潜在・実績・リンク由来の特殊ステータス
-    bossDmg: pot.bossDmg || 0,          // ボスへの与ダメ +割合
-    dropRate: (pot.dropRate || 0) + lb.dropRate, // ドロップ率 +割合
+    bossDmg: (pot.bossDmg || 0) + nb.bossDmg, // ボスへの与ダメ +割合（潜在・ネオン・コア）
+    ignoreDef: Math.min(0.9, nb.ignoreDef), // v5: 敵の防御を無視する割合（ネオン・コア）
+    dropRate: (pot.dropRate || 0) + lb.dropRate + nb.dropRate, // ドロップ率 +割合
     mesoRate: pot.mesoRate || 0,        // 獲得金 +割合
     cdr: pot.cdr || 0,                  // スキルCT 短縮（秒）
     hpRecover: pot.hpRecover || 0,      // 被弾時 5% で最大HPのこの割合を回復
-    expRate: lb.expRate,                // 経験値 +割合
-    pot, stars, achievement: ab, link: lb,
+    expRate: lb.expRate + nb.expRate,   // 経験値 +割合（リンク・ネオン・コア）
+    pot, stars, achievement: ab, link: lb, neon: nb,
   };
 }
 
