@@ -102,7 +102,7 @@ NEON VICE STORY（ブラウザの横スクロール RPG。MapleStory のよう�
   - §2 の決まり（影 2 段・くっきり・線の太さ・左上の光・質感なし）を守っている
 - こちらでは、届いた ZIP を自動の検査（`tools/check_art.mjs`）にかけ、ゲームの画面で並べたスクショで確かめます。
 
-## 8. 参考の画像（ZIP `DOTS_REQUEST_01.zip` の中）
+## 8. 参考の画像（ZIP `DOTS_REQUEST_01_part1.zip`（文書・一覧・ref の今の絵・顔）と `DOTS_REQUEST_01_part2.zip`（型紙 rig/ と今の体・服の絵 ref/current_rig/）の中。2 つを同じフォルダに展開してください）
 
 ZIP には、この文書・一覧・前の指示書（`HERO_PARTS_GUIDE.md`・`FACE_HAIR_SPEC.md`・`CODEX_BATCH_03.md`）も入っています。
 
