@@ -4,7 +4,7 @@ import {
 } from './theme.js';
 import {
   guard, getItemDef, rarityInfo, stats, computeStatsRaw, drawChar, drawItemIco, drawSkillIco, heroLook, equipLooks,
-  looksFrom, doEquip, doUnequip, doUseItem, doAddItem, doRemoveItem, allSkills, skillDef, skillMp, skillCd, doLearn,
+  doEquip, doUnequip, doUseItem, doAddItem, doRemoveItem, allSkills, skillDef, skillMp, skillCd, doLearn,
   allMissions, missionDef, HERO_NAMES, expNeed, missionNpcName, turnInNpc, sellPriceOf, drawPetArt,
   dmgRange, fmtRange, statsWithEquip, statsWithAp, sellPriceEntry, doSell,
 } from './deps.js';
@@ -14,7 +14,6 @@ import {
 } from './v3deps.js';
 import { drawSkillPreview, kindLabel } from './v3windows.js';
 import { mapInfo } from './deps.js';
-import * as SpriteM from '../render/sprites.js';
 import { itemGender, canWearGender, GENDER_ONLY_LABEL } from '../data/items.js';
 
 const W = 1280, H = 720;
@@ -35,7 +34,6 @@ function fmtVal(k, v) {
   return String(Math.round(v));
 }
 const sellPrice = (it) => sellPriceOf(it);
-const stripMark = (l) => String(l).replace(/^[・✔]\s*/, '');
 
 // ---------- ツールチップ ----------
 export function itemTip(game, it, o = {}) {
@@ -831,12 +829,12 @@ function drawMissions(ui, ctx, win) {
   }
   void t;
 }
-function findNpcName(g, id) {
+export function findNpcName(g, id) {
   if (!id) return '???';
   const n = (g.npcs || []).find((e) => e.id === id || e.data?.id === id) || (g.map?.npcs || []).find((e) => e.id === id);
   return n?.name || n?.data?.name || missionNpcName(id) || id;
 }
-function rewardText(rw) {
+export function rewardText(rw) {
   const parts = [];
   if (rw.exp) parts.push(`EXP +${rw.exp}`);
   if (rw.money) parts.push(fmtMoney(rw.money));
@@ -848,267 +846,8 @@ function rewardText(rw) {
 }
 
 // ======================= 会話 =======================
-function npcOf(win) { return win.data?.npc || win.data || {}; }
-export function initDialog(ui, win) {
-  const npc = npcOf(win);
-  win.brief = null; win.reward = null;
-  say(win, npc.dialog?.length ? npc.dialog : ['…やあ。'], null);
-}
-// 主人公のセリフ: 行の先頭に "@me:" / "@hero:"（全角コロン可）を付けると主人公が話す行（名前プレート・立ち絵が主人公に）
-const HERO_LINE = /^@(?:me|hero)\s*[:：]\s*/;
-function say(win, lines, after) {
-  win.who = [];
-  win.lines = (Array.isArray(lines) ? lines : [String(lines)]).map((l) => {
-    const s = String(l), m = HERO_LINE.exec(s);
-    win.who.push(m ? 'me' : null);
-    return m ? s.slice(m[0].length) : s;
-  });
-  if (!win.lines.length) { win.lines = ['…']; win.who = [null]; }
-  win.li = 0; win.chars = 0; win.opts = null; win.optSel = 0; win.after = after;
-}
-function advance(ui, win) {
-  const line = win.lines?.[win.li] || '';
-  if (win.chars < line.length) { win.chars = line.length; return; }
-  if (win.li < win.lines.length - 1) { win.li++; win.chars = 0; return; }
-  if (win.opts) return;
-  const after = win.after;
-  win.after = null;
-  if (after) after(); else menu(ui, win);
-}
-function npcMissions(ui, npc) {
-  const g = ui.game, st = g.state, mm = g.missions;
-  const act = st.missions?.active || [], done = st.missions?.completed || [];
-  const map = new Map();
-  for (const a of guard('missions.available', () => mm?.available?.(npc.id), []) || []) { const m = missionDef(a); if (m) map.set(m.id, m); }
-  // 報告先は m.turnIn || m.giver（MissionManager.completable / inProgress も併用）
-  for (const a of guard('missions.completable', () => mm?.completable?.(npc.id), []) || []) { const m = missionDef(a); if (m) map.set(m.id, m); }
-  for (const a of guard('missions.inProgress', () => mm?.inProgress?.(npc.id), []) || []) { const m = missionDef(a); if (m) map.set(m.id, m); }
-  for (const id of act) { const m = missionDef(id); if (m && turnInNpc(m) === npc.id) map.set(id, m); }
-  const out = [];
-  for (const m of map.values()) {
-    let status = null;
-    if (act.includes(m.id)) status = guard('isComplete', () => mm?.isComplete?.(m.id), false) ? 'report' : 'active';
-    else if (!done.includes(m.id) || m.daily || m.repeat) status = guard('canAccept', () => mm?.canAccept?.(m.id), true) !== false ? 'offer' : null;
-    if (status) out.push({ m, status });
-  }
-  const order = { report: 0, offer: 1, active: 2 };
-  return out.sort((a, b) => order[a.status] - order[b.status]);
-}
-// ストーリー分岐: m.choices = [{id, text, reward, flag, dialog?}] を会話窓の選択肢に出し MissionManager.choose で確定
-function chosenOf(g, id) {
-  const ms = g.state?.missions;
-  if (typeof g.missions?.needsChoice === 'function') return guard('needsChoice', () => !g.missions.needsChoice(id), true) ? (g.state?.storyChoices?.[id] || true) : null;
-  return g.state?.storyChoices?.[id] ?? ms?.choices?.[id] ?? null;
-}
-function askChoice(ui, win, m) {
-  const g = ui.game;
-  say(win, m.dialog?.choice?.length ? m.dialog.choice : (m.choicePrompt ? [m.choicePrompt] : ['……で、どうする？ ここが分かれ道だぜ。']), () => {
-    win.brief = { ...m, desc: '選んだ道でセリフ・追加報酬・称号が変わる。', objectives: m.choices.map((c) => ({ text: `${c.text}  →  ${rewardText(c.reward || {})}` })) };
-    win.opts = m.choices.map((c) => ({
-      label: c.text, color: COL.gold, fn: () => {
-        win.brief = null;
-        const r = guard('choose', () => g.missions?.choose?.(m.id, c.id), null);
-        if (r === false || r?.ok === false) { ui.notify(r?.msg || '選べませんでした', COL.bad); menu(ui, win); return; }
-        if (r == null && g.state) (g.state.storyChoices ||= {})[m.id] = c.id; // choose 未実装時の保険
-        const stillActive = (g.state?.missions?.active || []).includes(m.id);
-        let rw = r?.reward || null;
-        if (stillActive && guard('isComplete', () => g.missions?.isComplete?.(m.id), false)) rw = guard('turnIn', () => g.missions?.turnIn?.(m.id), null) || rw;
-        say(win, c.dialog?.length ? c.dialog : (m.dialog?.done?.length ? m.dialog.done : ['……そうか。それがお前の答えか。']), () => {
-          const R = m.reward || {}, C = c.reward || {};
-          win.reward = { ...m, reward: { ...R, money: (R.money || 0) + (C.money || 0), items: [...(R.items || []), ...(C.items || [])] } };
-          win.opts = [{ label: 'OK', fn: () => { win.reward = null; say(win, ['また頼むぜ。'], null); } }];
-        });
-        void rw;
-      },
-    }));
-    win.opts.push({ label: 'もう少し考える', color: COL.dim, fn: () => { win.brief = null; menu(ui, win); } });
-  });
-}
-function menu(ui, win) {
-  const g = ui.game, npc = npcOf(win);
-  const opts = [];
-  for (const { m, status } of npcMissions(ui, npc)) {
-    if (status === 'report') {
-      opts.push({ label: '？ 報告: ' + m.name, color: '#c6ff6a', fn: () => {
-        if (m.choices?.length && !chosenOf(g, m.id)) { askChoice(ui, win, m); return; }
-        const res = guard('turnIn', () => g.missions?.turnIn?.(m.id), null);
-        if (res === false) { ui.notify('まだ報告できません', COL.bad); return; } // 成功通知は MissionManager 側
-        const doneLines = guard('mdialog', () => g.missions?.dialog?.(m.id, 'done'), null);
-        say(win, doneLines?.length ? doneLines : m.dialog?.done?.length ? m.dialog.done : ['よくやってくれた！'], () => {
-          win.reward = m;
-          win.opts = [{ label: 'OK', fn: () => { win.reward = null; say(win, ['また頼むぜ。'], null); } }];
-        });
-      } });
-    } else if (status === 'offer') {
-      opts.push({ label: '！ 依頼: ' + m.name, color: COL.gold, fn: () => {
-        say(win, m.dialog?.offer?.length ? m.dialog.offer : [m.desc || '頼みがある。'], () => {
-          win.brief = m;
-          win.opts = [
-            { label: '受注する', color: COL.teal, fn: () => {
-              const r = guard('accept', () => g.missions?.accept?.(m.id), null);
-              win.brief = null;
-              if (r === false) { ui.notify('受注できませんでした', COL.bad); menu(ui, win); return; }
-              say(win, ['頼んだぜ。気をつけてな。'], null);
-            } },
-            { label: '断る', color: COL.dim, fn: () => { win.brief = null; say(win, ['そうか…気が向いたらまた来な。'], null); } },
-          ];
-        });
-      } });
-    } else {
-      opts.push({ label: '… 進行中: ' + m.name, color: COL.sub, fn: () => {
-        const tr = (guard('tracked', () => g.missions?.tracked?.(), []) || []).find((e) => e.name === m.name);
-        say(win, ['まだ終わってないみたいだな。', ...(tr?.lines?.length ? [tr.lines.map(stripMark).join(' / ')] : [])], null);
-      } });
-    }
-  }
-  if (npc.shop?.length) opts.push({ label: '🛒 ショップ', color: COL.teal, fn: () => { ui.close('dialog'); ui.open('shop', { npc }); } });
-  opts.push({ label: 'さようなら', color: COL.dim, fn: () => ui.close('dialog') });
-  win.opts = opts;
-  win.optSel = 0;
-}
-export function dialogKey(ui, win, P, eat) {
-  if (!win || win.t < 0.15) return;
-  const line = win.lines?.[win.li] || '';
-  const lineDone = win.chars >= line.length && win.li >= (win.lines?.length || 1) - 1;
-  if (win.opts && lineDone) {
-    if (P('up')) win.optSel = (win.optSel - 1 + win.opts.length) % win.opts.length;
-    if (P('down')) win.optSel = (win.optSel + 1) % win.opts.length;
-    if (P('confirm') || P('interact')) { eat('confirm'); eat('interact'); win.opts[win.optSel]?.fn(); }
-  } else if (P('confirm') || P('interact') || P('jump') || P('talk')) {
-    eat('confirm'); eat('interact'); eat('talk');
-    advance(ui, win);
-  }
-}
-/** 会話での主人公の表情（立ち絵）: 報酬=smile、「！？」=surprised、「…」で始まる=sad、他は基本 */
-function heroExprOf(win, line) {
-  if (win.reward) return 'smile';
-  if (/[!！][?？]|[?？][!！]/.test(line)) return 'surprised';
-  if (/^[…‥]/.test(line)) return 'sad';
-  if (/♪|ありがと|やった/.test(line)) return 'smile';
-  return null;
-}
-function heroArtKey(g) {
-  const st = g.state;
-  if (!st) return null;
-  const lk = guard('charLook', () => charLook(st), null) || {};
-  const cls = lk.classId || st.heroId, gen = lk.gender || st.gender;
-  return cls && gen ? cls + '_' + gen : null;
-}
-function drawDialog(ui, ctx, win) {
-  const g = ui.game;
-  const npc = npcOf(win);
-  const { x, y, w, h } = win;
-  const t = g.time || ui.frame / 60;
-  const curLine = win.lines?.[win.li] || '';
-  const heroKey = heroArtKey(g);
-  const heroP = heroKey ? guard('portraitFor', () => SpriteM.portraitFor?.(heroKey, undefined, null), null) : null;
-  const meTalks = win.who?.[win.li] === 'me';
-  // 主人公の顔欄（立ち絵があるとき）: 窓の右上に立つ。主人公が話す/選ぶ時は明るく、相手が話す時は少し暗く
-  if (heroP && !meTalks) {
-    const lineDone0 = win.chars >= curLine.length && win.li >= (win.lines?.length || 1) - 1;
-    const active = !!(win.opts && lineDone0);
-    const bob = Math.sin(t * 2) * 1.5;
-    guard('heroPortrait', () => SpriteM.drawPortrait(ctx, heroKey, heroExprOf(win, curLine), x + w - 96, y + 6 + bob, 196, { maxW: 180, flip: true, dim: active ? 0 : 0.35 }));
-  }
-  // 立ち絵
-  const bx = x + 16, by = y + 16, bw = 170, bh = h - 32;
-  ctx.save();
-  rrPath(ctx, bx, by, bw, bh, 12);
-  const bg = ctx.createLinearGradient(0, by, 0, by + bh);
-  bg.addColorStop(0, '#ff9a5c'); bg.addColorStop(0.5, '#c2459c'); bg.addColorStop(1, '#2a1260');
-  ctx.fillStyle = bg; ctx.fill();
-  ctx.clip();
-  ctx.fillStyle = 'rgba(255,230,140,0.5)';
-  ctx.beginPath(); ctx.arc(bx + bw / 2, by + 90, 48, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = 'rgba(20,6,40,0.55)';
-  for (let i = 0; i < 7; i++) { const bw2 = 18 + (i * 37) % 22, bh2 = 40 + (i * 53) % 70; ctx.fillRect(bx + i * 26 - 4, by + bh - 40 - bh2, bw2, bh2 + 40); }
-  // 主人公が話す行（"@me:"）で立ち絵があれば主人公の立ち絵、無ければ相手の姿
-  // 立ち絵の上の方（顔〜腰）を枠の縦横比で切り出す
-  const drewMe = meTalks && heroP && guard('heroPortrait', () => SpriteM.drawPortrait(ctx, heroKey, heroExprOf(win, curLine), bx + bw / 2, by + bh, bh - 6, { maxW: bw + 24, crop: [0, 0, 1, Math.min(1, heroP.w / (bw / bh) / heroP.h)] }), null);
-  if (!drewMe) {
-    if (meTalks) drawChar(ctx, bx + bw / 2, by + bh - 14, charLook(g.state), equipLooks(g.state), { facing: 1, state: 'idle', t, attackT: 0, damage: 0, scale: 1.55 });
-    else drawChar(ctx, bx + bw / 2, by + bh - 14, npc.look, looksFrom(npc.equip), { facing: 1, state: 'idle', t, attackT: 0, damage: 0, scale: 1.55 });
-  }
-  ctx.restore();
-  ctx.save(); rrPath(ctx, bx, by, bw, bh, 12); ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.stroke(); ctx.restore();
-  // 名前プレート
-  const nameStr = meTalks ? (guard('charName', () => charName(g.state), '') || 'あなた') : (npc.name || '???');
-  const nw = Math.max(110, measure(ctx, nameStr, 16) + 30);
-  ctx.save();
-  rrPath(ctx, x + 204, y - 14, nw, 30, 15);
-  const ng = ctx.createLinearGradient(x + 204, 0, x + 204 + nw, 0);
-  ng.addColorStop(0, COL.pink); ng.addColorStop(1, COL.purple);
-  ctx.fillStyle = ng; ctx.shadowColor = COL.pink; ctx.shadowBlur = 12; ctx.fill();
-  ctx.shadowBlur = 0; ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke();
-  ctx.restore();
-  txt(ctx, nameStr, x + 204 + nw / 2, y + 1.5, { size: 16, align: 'center' });
-  if (npc.title && !meTalks) txt(ctx, npc.title, x + 214 + nw, y + 2, { size: 12, color: COL.sub });
-
-  const line = win.lines?.[win.li] || '';
-  const lineDone = win.chars >= line.length && win.li >= (win.lines?.length || 1) - 1;
-  const showOpts = win.opts && lineDone;
-  const tx = x + 206, tw = showOpts ? w - 206 - 300 : w - 206 - 28;
-  const ty = y + 40;
-  if (win.brief && showOpts) {
-    const m = win.brief;
-    let yy = ty;
-    txt(ctx, '！ ' + m.name, tx, yy, { size: 18, color: COL.gold, maxW: tw }); yy += 26;
-    for (const l of wrap(ctx, m.desc || '', tw, 13, 700).slice(0, 2)) { txt(ctx, l, tx, yy, { size: 13, weight: 700, sw: 2.5 }); yy += 19; }
-    for (const o of (m.objectives || []).slice(0, 3)) { txt(ctx, '◆ ' + (o.text || o.type), tx, yy, { size: 13, color: COL.teal, maxW: tw, sw: 2.5 }); yy += 19; }
-    txt(ctx, '報酬: ' + rewardText(m.reward || {}), tx, yy + 4, { size: 13, color: COL.pink, maxW: tw, sw: 2.5 });
-  } else if (win.reward && showOpts) {
-    const m = win.reward;
-    txt(ctx, '★ MISSION COMPLETE ★', tx, ty + 6, { size: 22, color: COL.gold, glow: COL.orange });
-    txt(ctx, m.name, tx, ty + 40, { size: 16, maxW: tw });
-    txt(ctx, '報酬: ' + rewardText(m.reward || {}), tx, ty + 72, { size: 15, color: COL.money, maxW: tw });
-    const items = (m.reward?.items || []).map(getItemDef).filter(Boolean);
-    items.slice(0, 6).forEach((it, i) => {
-      const r = { x: tx + i * 52, y: ty + 94, w: 46, h: 46 };
-      slotBox(ctx, r, it, {});
-      drawItemIco(ctx, it, r.x + 23, r.y + 23, 38);
-      if (ui.hover(win, r)) ui.setTip(itemTip(g, it));
-    });
-  } else {
-    // これまでの行（薄く）＋現在行（タイプライター）
-    let yy = ty;
-    const prev = win.lines.slice(Math.max(0, win.li - 2), win.li);
-    for (const p of prev) {
-      for (const l of wrap(ctx, p, tw, 15, 700).slice(-1)) { txt(ctx, l, tx, yy, { size: 15, color: 'rgba(220,210,255,0.55)', weight: 700, sw: 2.5 }); yy += 24; }
-    }
-    const shown = line.slice(0, Math.floor(win.chars));
-    for (const l of wrap(ctx, shown, tw, 18, 800).slice(0, 5)) { txt(ctx, l, tx, yy + 4, { size: 18 }); yy += 28; }
-    if (!showOpts && win.chars >= line.length) {
-      const a = 0.5 + 0.5 * Math.sin(t * 6);
-      txt(ctx, '▼', x + w - 36, y + h - 28 + Math.sin(t * 6) * 3, { size: 16, align: 'center', color: COL.teal, alpha: a });
-    }
-    txt(ctx, `${win.li + 1}/${win.lines.length}`, tx, y + h - 22, { size: 11, color: COL.dim, sw: 2 });
-  }
-  // テキストエリアのクリックで送る
-  if (!showOpts) ui.hit(win, 'adv', { x: x + 190, y: y, w: w - 190, h }, { onClick: () => advance(ui, win) });
-  // 選択肢
-  if (showOpts) {
-    const ox = x + w - 290, ow = 270;
-    const n = win.opts.length;
-    const oh = Math.min(40, (h - 28) / n);
-    win.opts.forEach((o, i) => {
-      const r = { x: ox, y: y + 16 + i * oh, w: ow, h: oh - 6 };
-      if (ui.hover(win, r)) win.optSel = i;
-      const on = win.optSel === i;
-      ctx.save();
-      rrPath(ctx, r.x, r.y, r.w, r.h, r.h / 2);
-      if (on) {
-        const og = ctx.createLinearGradient(r.x, 0, r.x + r.w, 0);
-        og.addColorStop(0, 'rgba(255,95,162,0.85)'); og.addColorStop(1, 'rgba(123,47,247,0.85)');
-        ctx.fillStyle = og; ctx.shadowColor = COL.pink; ctx.shadowBlur = 12;
-      } else ctx.fillStyle = 'rgba(8,4,30,0.6)';
-      ctx.fill();
-      ctx.shadowBlur = 0; ctx.lineWidth = 1.5; ctx.strokeStyle = on ? '#fff' : 'rgba(200,180,255,0.4)'; ctx.stroke();
-      ctx.restore();
-      txt(ctx, (on ? '▶ ' : '') + o.label, r.x + 16, r.y + r.h / 2 + 1, { size: 14, color: on ? '#fff' : (o.color || '#fff'), maxW: r.w - 28 });
-      ui.hit(win, 'opt' + i, r, { onClick: () => o.fn() });
-    });
-  }
-}
+// 会話の窓（NPC 会話・クエストの受注と報告・選択肢）は dialogMaple.js
+export function npcOf(win) { return win.data?.npc || win.data || {}; }
 
 // ======================= ショップ =======================
 // 購入: 品物のリスト / 売却: 持ち物画面と同じグリッド（タブ・★・潜在・装備中の印）から選ぶ
@@ -1301,6 +1040,6 @@ function drawDeath(ui, ctx, win) {
 
 export const WINDOW_DRAW = {
   inventory: drawInventory, skills: drawSkills, stats: drawStats, missions: drawMissions,
-  dialog: drawDialog, shop: drawShop, death: drawDeath,
+  shop: drawShop, death: drawDeath,
 };
 void expNeed;

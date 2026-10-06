@@ -1603,6 +1603,57 @@ test('v3 classes: newState(classId, {name, gender, look}) と性別別の初期�
 // v4 第2ワールド「ネオン・アーク」（tests/world2.mjs）
 (await import('./world2.mjs')).default({ test, makeGame, step, fin });
 
+// ------------------------------------------------------------ 会話の窓（dialogMaple.js）: 強調の書き方・最初の画面・受注・選択肢
+const DialogM = await import('../src/ui/dialogMaple.js');
+test('会話の窓: 強調の記号・最初の画面（項目の一覧）→ 受注 → ページ分け → 選択肢', () => {
+  const D = DialogM;
+  const g = makeGame('luna');
+  // 強調の書き方: 記号は文字数に数えない・参照は名前に変わる・## は # の文字
+  assert.equal(D.plainRich('#dカイ#k に #r3枚#k ##1', g), 'カイ に 3枚 #1');
+  const gl = D.parseRich('#bA#kB#eC#n#tpotion_red#', g);
+  assert.deepEqual(gl.slice(0, 3).map((x) => [x.ch, x.c, x.b]), [['A', 'b', false], ['B', null, false], ['C', null, true]]);
+  assert.equal(gl.slice(3).map((x) => x.ch).join(''), ITEMS.potion_red.name);
+  assert.equal(gl[3].c, 'b', 'アイテム名は既定で青');
+  // 窓の stub（ui.js の UIManager の代わり）
+  const ui = { game: g, frame: 0, wins: {}, closed: [], opened: [], notify() {}, close(n) { this.closed.push(n); delete this.wins[n]; }, open(n) { this.opened.push(n); } };
+  const rico = g.npcs.find((n) => n.id === 'rico');
+  const win = { name: 'dialog', t: 1, data: { npc: rico } };
+  ui.wins.dialog = win;
+  D.initDialog(ui, win);
+  assert.equal(win.mode, 'list', '最初の画面は項目の一覧');
+  assert.ok(win.opts[0].label.startsWith('！ 依頼'), '受けられるクエストが先頭: ' + win.opts[0].label);
+  assert.ok(win.opts.some((o) => o.kind === 'talk'), '話を聞く');
+  const press = (...on) => { const s = new Set(on); D.dialogKey(ui, win, (a) => s.has(a), (a) => s.delete(a)); };
+  press('confirm'); // 文字を全部出す
+  press('confirm'); // 先頭の項目（依頼）を選ぶ
+  for (let i = 0; i < 20 && win.mode !== 'quest'; i++) press('confirm');
+  assert.equal(win.mode, 'quest', '受注の窓');
+  assert.deepEqual(win.opts.map((o) => o.label), ['受ける', '断る']);
+  const qid = win.card.m.id;
+  press('confirm');
+  assert.ok(g.state.missions.active.includes(qid), '受注できた ' + qid);
+  // ページ分け: 長い文は 4 行ごとのページに分かれる
+  win.data = { npc: { name: 'テスト', dialog: ['あ'.repeat(400)] } };
+  D.initDialog(ui, win);
+  assert.ok(win.lines.length >= 2, 'ページに分かれる');
+  assert.equal(win.lines.join('').length, 400);
+  // 選択肢（データの中の {ask, choices}）: 選ぶと lines を話して続きへ。dialogChoice が出る
+  let ev = null;
+  g.events.on('dialogChoice', (d) => { ev = d; });
+  win.data = { npc: { name: 'テスト', dialog: ['やあ', { id: 'q_test', ask: 'どっち？', choices: [{ id: 'a', text: '#bA#k' }, { id: 'b', text: 'B', lines: ['Bだね'] }] }, 'おわり'] } };
+  D.initDialog(ui, win);
+  press('confirm'); press('confirm'); // 「やあ」
+  assert.equal(win.mode, 'list');
+  assert.equal(win.lines[0], 'どっち？');
+  press('confirm'); press('down'); press('confirm');
+  assert.deepEqual(ev && [ev.key, ev.id], ['q_test', 'b']);
+  assert.equal(win.lines[0], 'Bだね');
+  press('confirm'); press('confirm');
+  assert.equal(win.lines[win.li], 'おわり');
+  press('confirm'); press('confirm');
+  assert.ok(ui.closed.includes('dialog'), '項目の無い NPC は話し終わると閉じる');
+});
+
 // ------------------------------------------------------------ 実行
 const t0 = Date.now();
 for (const t of tests) {

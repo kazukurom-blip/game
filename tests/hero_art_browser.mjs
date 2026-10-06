@@ -359,7 +359,8 @@ async function main() {
     await page.evaluate(() => {
       const g = window.game;
       const npc = (g.npcs || []).find((n) => n.data?.dialog?.length || n.dialog?.length) || g.npcs?.[0];
-      const data = { ...(npc?.data || npc || {}), name: npc?.name || npc?.data?.name || 'テストNPC', look: npc?.look || npc?.data?.look, dialog: ['よう、調子はどうだ？', '@me: ばっちり！ ありがとう♪', '@me：えっ、本当に！？'] };
+      // 会話の窓は、クエスト・ショップのある NPC だと最初に項目の一覧を出すので、セリフだけの NPC にする（id・shop は付けない）
+      const data = { title: npc?.title || npc?.data?.title, equip: npc?.equip || npc?.data?.equip, name: npc?.name || npc?.data?.name || 'テストNPC', look: npc?.look || npc?.data?.look, dialog: ['よう、調子はどうだ？', '@me: ばっちり！ ありがとう♪', '@me：えっ、本当に！？'] };
       g.ui.open('dialog', { npc: data });
     });
     await sleep(500); await frames(page, 20);
