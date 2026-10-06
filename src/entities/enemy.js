@@ -87,6 +87,24 @@ export class Enemy {
     if (this.civilian) { this.ai = 'civilian'; this.aggro = false; }
     this.fleeT = 0;                          // 市民: 逃走残り時間
     this.shout = null; this.shoutT = 0;      // 市民: 叫び吹き出し
+    this.hpBarT = 0;                         // 頭上の HP バーを出す残り秒（当たると 3.5 秒。見た目だけ）
+    this.nameT = 0;                          // 足元の名札（当たる/マウスを乗せる）
+    this.hoverHp = this.hp;
+  }
+
+  /** 頭上の HP バー・足元の名札のタイマー（当たった/マウスを乗せた）。見た目だけ */
+  uiTick(dt) {
+    if (this.hpBarT > 0) this.hpBarT -= dt;
+    if (this.nameT > 0) this.nameT -= dt;
+    if (this.hp < this.hoverHp && !this.civilian) { this.hpBarT = 3.5; this.nameT = Math.max(this.nameT, 3.5); }
+    this.hoverHp = this.hp;
+    const g = this.game, m = g.input && g.input.mouse, cam = g.cam;
+    if (m && cam && !this.civilian && (m.x || m.y)) {
+      const z = g.camZoom || 1;
+      const wx = (z !== 1 ? (m.x - g.W / 2) / z + g.W / 2 : m.x) + cam.x;
+      const wy = (z !== 1 ? (m.y - g.H * 0.6) / z + g.H * 0.6 : m.y) + cam.y;
+      if (Math.abs(wx - this.x) < Math.max(20, this.w / 2 + 6) && wy < this.y + 8 && wy > this.y - this.h - 10) this.nameT = Math.max(this.nameT, 0.25);
+    }
   }
 
   get player() { return this.game.player; }
@@ -94,6 +112,7 @@ export class Enemy {
   update(dt) {
     const g = this.game;
     this.t += dt;
+    this.uiTick(dt);
     if (this.spawnT > 0) this.spawnT -= dt;
     if (this.contactCd > 0) this.contactCd -= dt;
     if (this.ramCd > 0) this.ramCd -= dt;

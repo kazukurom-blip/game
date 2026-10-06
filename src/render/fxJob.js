@@ -4,6 +4,7 @@
 //    色 → 習得スキル → 系統・段階で判定し、系統別の追加エフェクトを重ねる（段階が上がるほど派手）。
 // 重くしない: グラデーションは1エフェクト1つまで、粒は1パスにまとめる、ゴースト（残像）はプール canvas を再利用。
 import { rgba, shade, starPath, makeCanvas, clamp, mix } from './util.js';
+import { mapleWordImage, mapleHasGlyphs } from './mapleFont.js';
 import { drawCharacter, lastDrawnArgs } from './character.js';
 import { resolveSkillStyle, gearTrail, RAINBOW, rainbowAt, BRANCH_STYLE, jobStyleOf, FXA } from './fxStyle.js';
 
@@ -81,10 +82,16 @@ function noteShape(ctx, x, y, r) {
   ctx.moveTo(x + r, y); ctx.arc(x, y, r, 0, TAU);
   ctx.moveTo(x + r * 0.9, y); ctx.lineTo(x + r * 0.9, y - r * 3.2); ctx.lineTo(x + r * 2.2, y - r * 2.6);
 }
+const MAPLE_WORD = /^[A-Za-z0-9 !?+]+$/;
 function bigText(ctx, text, x, y, size, c1, c2, alpha, scale = 1) {
   ctx.save(); ctx.translate(x, y); ctx.scale(scale, scale);
   ctx.globalCompositeOperation = 'source-over';
   ctx.globalAlpha = alpha;
+  // 英字だけの見出し（JOB UP! など）はメイプル風の角ばった金文字（render/mapleFont.js のキャッシュ画像）
+  if (MAPLE_WORD.test(text) && mapleHasGlyphs(text.toUpperCase())) {
+    const img = mapleWordImage(text.toUpperCase(), 'gold', Math.round(size * 1.3), { kern: 0.9 });
+    if (img) { ctx.drawImage(img.img, -img.w / 2, -img.h / 2, img.w, img.h); ctx.restore(); return; }
+  }
   ctx.font = `900 ${size}px "Arial Black", "Arial Rounded MT Bold", sans-serif`;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
   ctx.lineWidth = Math.max(4, size * 0.24); ctx.strokeStyle = '#2a0b3d'; ctx.strokeText(text, 0, 0);
