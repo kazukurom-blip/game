@@ -773,7 +773,7 @@ export default function register({ test, makeGame, step, fin }) {
     const withChoices = Object.values(MISSIONS).filter((m) => m.choices?.length);
     assert.ok(withChoices.length >= 3, '3本以上');
     for (const m of withChoices) {
-      assert.equal(m.category, 'main');
+      assert.equal(m.category, m.series ? 'sub' : 'main'); // v4: 連作クエスト（m.series）の派生は sub
       for (const c of m.choices) { assert.ok(c.id && c.text && c.flag, m.id); for (const it of c.reward?.items || []) assert.ok(ITEMS[it], it); }
     }
     const run = (choiceId) => {

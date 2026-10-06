@@ -9,6 +9,7 @@
 
 import * as SHOP_DATA from '../data/shops.js';
 import { ENEMIES } from '../data/enemies.js';
+import { questNpcsFor } from '../data/questNpcs.js'; // v4（クエスト担当）: 連作クエストの NPC を町の npcs の末尾に足す
 
 const GROUND = 1000;
 export const ROW = 130;          // 段の高さ（ジャンプ最高点 ≈168px）
@@ -604,44 +605,44 @@ const T = {
     desc: '旅の始まりの浜辺の町。モンスターは出ない。', bgColor: '#ff9a6b', world: { x: 0, y: 5 },
     right: 'beach_f1', mids: [{ to: 'beach_f3', x: 1750 }],
     plats: [[420, 870, 300], [900, 870, 320, true], [1300, 740, 300, true], [2150, 870, 300], [2250, 740, 260, true]],
-    npcs: [npc('rico', 380), npc('sunny', 620), npc('night_marin', 1150), concierge('beach', 2400)],
+    npcs: [npc('rico', 380), npc('sunny', 620), npc('night_marin', 1150), concierge('beach', 2400), ...questNpcsFor('beach')],
   }),
   downtown: town({
     id: 'downtown', name: 'ダウンタウン', region: 'downtown', variant: 0, width: 3200, lv: [10, 22], tiers: 3,
     desc: 'ネオン輝く街の中心。4方向へ道が延びる。', bgColor: '#2a1446', world: { x: 4, y: 5 },
     left: 'beach_f4', right: 'down_f3', mids: [{ to: 'down_f1', x: 1150 }, { to: 'down_f4', x: 2250 }],
     npcs: [npc('mama_rosa', 380), npc('night_noodle', 590), npc('officer_kai', 800), npc('night_fortune', 990), npc('shop_downtown', 1350), npc('ammo_shop', 1700),
-      npc('job_velvet', 1900), npc('job_bull', 2050), npc('job_zero', 2450), npc('dash_garage', 2700), concierge('downtown', 2900)],
+      npc('job_velvet', 1900), npc('job_bull', 2050), npc('job_zero', 2450), npc('dash_garage', 2700), concierge('downtown', 2900), ...questNpcsFor('downtown')],
   }),
   slums: town({
     id: 'slums', name: 'ポート・スラム', region: 'slums', variant: 0, width: 3000, lv: [20, 36], tiers: 3,
     desc: 'コンテナが積まれた港町。', bgColor: '#3b2b3a', world: { x: 7, y: 5 },
     left: 'slums_f1', right: 'slums_f4', mids: [{ to: 'slums_f2', x: 1650 }],
-    npcs: [npc('dj_pulse', 380), npc('night_smuggler', 760), npc('sal_pawn', 1100), npc('job_lily', 1380), npc('job_byte', 1950), npc('tank', 2300), concierge('slums', 2620)],
+    npcs: [npc('dj_pulse', 380), npc('night_smuggler', 760), npc('sal_pawn', 1100), npc('job_lily', 1380), npc('job_byte', 1950), npc('tank', 2300), concierge('slums', 2620), ...questNpcsFor('slums')],
   }),
   swamp: town({
     id: 'swamp', name: 'グレイズ村', region: 'swamp', variant: 0, width: 2600, lv: [22, 45],
     desc: '湿地のほとりの小さな村。', bgColor: '#1f3b2c', world: { x: 5, y: 3 },
     left: 'swamp_f1', right: 'swamp_f4', mids: [{ to: 'swamp_f2', x: 1350 }],
-    npcs: [npc('old_boone', 380), npc('night_fisher', 640), npc('voodoo_betty', 900), npc('job_croc', 1650), concierge('swamp', 2100)],
+    npcs: [npc('old_boone', 380), npc('night_fisher', 640), npc('voodoo_betty', 900), npc('job_croc', 1650), concierge('swamp', 2100), ...questNpcsFor('swamp')],
   }),
   casino: town({
     id: 'casino', name: 'ゴールデン・ストリップ', region: 'casino', variant: 0, width: 3200, lv: [42, 60], tiers: 3,
     desc: '黄金のカジノ街。', bgColor: '#3a0a3a', world: { x: 8, y: 3 },
     left: 'casino_f1', right: 'casino_f4', mids: [{ to: 'casino_f2', x: 1650 }],
-    npcs: [npc('vivi', 380), npc('night_bartender', 760), npc('mr_chip', 1100), npc('job_diamond', 1900), npc('job_tiger', 2080), npc('don_caiman', 2400), concierge('casino', 2750)],
+    npcs: [npc('vivi', 380), npc('night_bartender', 760), npc('mr_chip', 1100), npc('job_diamond', 1900), npc('job_tiger', 2080), npc('don_caiman', 2400), concierge('casino', 2750), ...questNpcsFor('casino')],
   }),
   rooftop: town({
     id: 'rooftop', name: 'ヴァイス・タワー', region: 'rooftop', variant: 0, width: 2400, lv: [58, 76], tiers: 3,
     desc: '摩天楼の中層ロビー兼屋上テラス。', bgColor: '#0d0b26', world: { x: 11, y: 3 },
     left: 'tower_f1', right: 'tower_f2',
-    npcs: [npc('nova', 380), npc('job_cipher', 800), concierge('rooftop', 1300), npc('night_stargazer', 1800)],
+    npcs: [npc('nova', 380), npc('job_cipher', 800), concierge('rooftop', 1300), npc('night_stargazer', 1800), ...questNpcsFor('rooftop')],
   }),
   spaceport: town({
     id: 'spaceport', name: 'ルミナ宇宙港', region: 'spaceport', variant: 0, width: 2800, lv: [36, 100], tiers: 3,
     desc: 'ロケットが並ぶ近未来の宇宙港。', bgColor: '#0a1030', world: { x: 11, y: 5 },
     left: 'space_f2', right: 'space_f3',
-    npcs: [npc('dr_stella', 400), npc('night_astro', 850), npc('ace_jet', 1300), npc('job_celes', 1700), npc('job_kaiser', 1880), npc('job_quasar', 2060), concierge('spaceport', 2450)],
+    npcs: [npc('dr_stella', 400), npc('night_astro', 850), npc('ace_jet', 1300), npc('job_celes', 1700), npc('job_kaiser', 1880), npc('job_quasar', 2060), concierge('spaceport', 2450), ...questNpcsFor('spaceport')],
     decor: [{ type: 'rocket', x: 700 }, { type: 'rocket', x: 2300 }, { type: 'satelliteDish', x: 1700 }],
   }),
 };

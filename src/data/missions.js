@@ -13,6 +13,8 @@
 //     reward.exp は expToNext(reqLevel+2) × 係数（main 0.8 / sub 0.5 / daily 0.3）で自動算出（expFixed で固定可）。
 import { expToNext } from './balance.js';
 import { WORLD_MAP_IDS } from '../systems/travel.js';
+import { QUESTS_W1, QUEST_NPCS } from './questsW1.js';
+export { QUEST_SERIES, QUEST_TITLES, M2_IDS } from './questsW1.js';
 
 // npcId → {name, mapId, role}（ワールド担当が maps.js の npcs に配置する）
 export const MISSION_NPCS = {
@@ -659,6 +661,12 @@ const jobMissions = [
     [RE('w2_arkcity_f3', 'アーク・シティの第3フィールドへ行く'), KA(50, 'w2_arkcity', 'w2_arkcity_f3', 'アーク・シティ周辺の敵を倒す'), BA('w2_arkcity', 'アーク・シティ周辺のボスを倒す')]),
 ];
 list.push(...jobMissions);
+
+// ======================= v4（クエスト担当）: 第1ワールドの連作クエスト q_* と、第2ワールドへ行くメインの連作 m2_* =======================
+// データは data/questsW1.js（一覧は docs/QUESTS.md）。新しい NPC は MISSION_NPCS に足す（置き場所は data/questNpcs.js → maps.js）。
+// 連作の exp は questsW1.js 側で expFixed 済み。m2_* は category 'main' なので下の係数（0.8）で自動算出。
+Object.assign(MISSION_NPCS, QUEST_NPCS);
+list.push(...QUESTS_W1);
 
 const REWARD_EXP_FACTOR = { main: 0.8, sub: 0.5, daily: 0.3, job: 0.5 };
 for (const m of list) {

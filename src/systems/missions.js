@@ -26,6 +26,20 @@ export function missionDialog(state, missionId, phase = 'offer') {
   return [...lines];
 }
 
+/**
+ * v4 連作の派生（クエスト担当）: 前提の追加条件
+ *  prereqAny: [[id, id], ...]  … 各グループのどれか 1 つが完了済み（A 編・B 編のどちらかを終えていれば良い、など）
+ *  reqChoice: {mission, choice} … そのミッションの報告時に choice を選んでいた（A 編・B 編の分かれ道）
+ *  reqFlags:  [flag]            … state.flags がすべて立っている
+ */
+export function branchOk(st, ms, m) {
+  for (const g of m.prereqAny || []) if (!(Array.isArray(g) ? g : [g]).some((p) => ms.completed.includes(p))) return false;
+  const rc = m.reqChoice;
+  if (rc && st?.storyChoices?.[rc.mission] !== rc.choice) return false;
+  for (const f of m.reqFlags || []) if (!st?.flags?.[f]) return false;
+  return true;
+}
+
 // デイリーの日付キーはローカル日付（toISOString は UTC なので JST だと朝9時に切り替わっていた）
 const todayKey = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 
@@ -160,7 +174,8 @@ export class MissionManager {
     } else if (ms.completed.includes(id)) return false;
     if (st.level < (m.reqLevel || 1)) return false;
     if (m.type === 'job' && !canTakeJobMission(st, m.jobId)) return false;
-    return (m.prereq || []).every((p) => ms.completed.includes(p));
+    if (!(m.prereq || []).every((p) => ms.completed.includes(p))) return false;
+    return branchOk(st, ms, m);
   }
 
   /** デイリーの残り回数（持ち越し込み） */
@@ -257,7 +272,10 @@ export class MissionManager {
     const r = m.reward || {};
     if (r.money) st.money += r.money;
     if (r.sp) addSp(st, r.sp); // v3: 現職の段階の SP プールへ
+    st.flags ||= {}; // 古いセーブ対策
     if (r.flag) st.flags[r.flag] = true;
+    // v4: 報酬でフラグを立てる（例: m2 連作の最後 reward.flags: ['world2Unlocked']）
+    for (const f of r.flags || []) st.flags[f] = true;
     for (const itemId of r.items || []) {
       if (!addItem(g, itemId, 1)) g.notify?.(`${ITEMS[itemId]?.name} を受け取れなかった（満杯）`, '#ff5555');
     }
@@ -275,6 +293,7 @@ export class MissionManager {
       if (cr.money) st.money += cr.money;
       for (const itemId of cr.items || []) if (!addItem(g, itemId, 1)) g.notify?.(`${ITEMS[itemId]?.name} を受け取れなかった（満杯）`, '#ff5555');
       if (choice.flag) st.flags[choice.flag] = true;
+      for (const f of choice.flags || []) st.flags[f] = true;
       if (choice.title) st.flags[choice.title] = true;
       g.notify?.(`選択: ${choice.text}`, '#c9b6ff');
     }

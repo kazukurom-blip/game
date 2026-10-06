@@ -818,10 +818,11 @@ test('missions: 全メインストーリーを順にクリアできる（目的�
   st.level = 100;
   const order = Object.values(MISSIONS).filter((m) => !m.daily && m.type !== 'job'); // 転職ミッションは 'jobs:' テストで検証
   let guard = 0;
-  while (guard++ < 200) {
+  while (guard++ < 600) {
     const m = order.find((x) => mm.canAccept(x.id));
     if (!m) break;
-    // giver のマップへ行ってから受注
+    // giver のマップへ行ってから受注（v4: 報酬の装備で持ち物があふれないよう毎回空ける）
+    st.inventory = [];
     g.changeMap(MISSION_NPCS[m.giver].mapId);
     assert.ok(mm.accept(m.id), 'accept ' + m.id);
     for (const o of m.objectives) {
@@ -835,7 +836,8 @@ test('missions: 全メインストーリーを順にクリアできる（目的�
     assert.equal(mm.npcMarker(turnInNpcOf(m)), '?', m.id + ' marker');
     assert.ok(mm.turnIn(m.id), 'turnIn ' + m.id);
   }
-  const left = order.filter((m) => !st.missions.completed.includes(m.id)).map((m) => m.id);
+  // v4: 派生（A 編・B 編）で選ばなかった側は受けられないのが正しい
+  const left = order.filter((m) => !st.missions.completed.includes(m.id) && !(m.reqChoice && st.storyChoices?.[m.reqChoice.mission] !== m.reqChoice.choice)).map((m) => m.id);
   assert.deepEqual(left, [], '未クリア');
 });
 
@@ -1605,6 +1607,8 @@ test('v3 classes: newState(classId, {name, gender, look}) と性別別の初期�
 (await import('./world_v3.mjs')).default({ test, makeGame, step, fin });
 // v3 デバッグ担当の回帰テスト（tests/debug_v3.mjs）
 (await import('./debug_v3.mjs')).default({ test, makeGame, step, fin });
+// v4 クエスト担当（tests/quests_v4.mjs）
+(await import('./quests_v4.mjs')).default({ test, makeGame, step, fin });
 
 // ------------------------------------------------------------ 会話の窓（dialogMaple.js）: 強調の書き方・最初の画面・受注・選択肢
 const DialogM = await import('../src/ui/dialogMaple.js');
