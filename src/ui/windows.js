@@ -601,7 +601,7 @@ function drawSkills(ui, ctx, win) {
       const m2 = guard('skill.mult', () => (typeof sel.mult === 'function' ? sel.mult(lv + 1) : sel.mult), null);
       if (m2) txt(ctx, `次Lv: 威力 ${Math.round(m2 * 100)}%  MP ${skillMp(sel, lv + 1)}`, px + 14, yy, { size: 12, color: COL.good, sw: 2.5 });
     }
-    if (sel.townOk) txt(ctx, '町でも使用可', px + pw - 14, dy + dh - 14, { size: 11, align: 'right', color: COL.good, sw: 2.5 });
+    // （旧: 町でも使用可 のラベル。今はすべてのスキルが町でも使えるので出さない）
   } else txt(ctx, 'スキルを選ぶと動きを再生します', px + pw / 2, dy + dh / 2, { size: 13, align: 'center', color: COL.dim });
   // スキルバー登録（8枠）
   const by = y + h - 84;

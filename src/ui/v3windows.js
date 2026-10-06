@@ -197,10 +197,10 @@ function drawJobOffer(ui, ctx, win) {
     // スキル（ボーナスのチップが3行以上になる4次などは、その下から並べる）
     let sy = Math.max(ry + 228, chipEnd + 8);
     txt(ctx, '◆ 獲得スキル', r.x + 16, sy, { size: 13, color: COL.pink }); sy += 14;
-    const nSk = Math.min(4, (J.skills || []).length);
+    const nSk = Math.min(5, (J.skills || []).length);
     const skBottom = r.y + r.h - 64 - 44 - (hov ? 3 : 0); // 教官・試練の行の上まで
     const step = nSk ? Math.max(34, Math.min(43, (skBottom - sy) / nSk)) : 43;
-    (J.skills || []).slice(0, 4).forEach((sid, k) => {
+    (J.skills || []).slice(0, 5).forEach((sid, k) => {
       const sk = skillDef(sid);
       if (!sk) return;
       const rr = { x: r.x + 12, y: sy + k * step, w: r.w - 24, h: step - 4 };

@@ -357,22 +357,7 @@ function drawSkillBar(ctx, game) {
     ctx.restore();
     txt(ctx, sl.key, sl.x + 6, sl.y + 3.5, { size: 11, align: 'center', sw: 2.5 });
   }
-  if (game.map?.town) {
-    const sk = slots.filter((s0) => s0.kind === 'skill');
-    const a0 = sk[0], a1 = sk[sk.length - 1];
-    ctx.save();
-    rrPath(ctx, a0.x - 4, a0.y - 4, a1.x + a1.w - a0.x + 8, a0.h + 8, 12);
-    ctx.fillStyle = 'rgba(8,6,24,0.66)'; ctx.fill();
-    ctx.restore();
-    // 斜線
-    ctx.save();
-    rrPath(ctx, a0.x - 4, a0.y - 4, a1.x + a1.w - a0.x + 8, a0.h + 8, 12); ctx.clip();
-    ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 6;
-    for (let i = -10; i < 30; i++) { ctx.beginPath(); ctx.moveTo(a0.x + i * 16, a0.y + 60); ctx.lineTo(a0.x + i * 16 + 60, a0.y - 10); ctx.stroke(); }
-    ctx.restore();
-    const mx = (a0.x + a1.x + a1.w) / 2;
-    txt(ctx, '町ではスキル不可', mx, a0.y + a0.h / 2, { size: 14, align: 'center', color: '#ffd6e8', sw: 4, stroke: '#2a0b3d' });
-  }
+  // （旧: 町ではスキルの欄を斜線で覆って「町ではスキル不可」と出していた。今は町でもスキルを使える）
   void t;
 }
 
