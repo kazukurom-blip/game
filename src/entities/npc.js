@@ -3,6 +3,10 @@ import { drawCharacter } from '../render/character.js';
 import { tagNpcLook } from '../render/npcFace.js';
 import { MISSIONS } from '../data/missions.js';
 import { inHours, clockOf } from '../world/sys.js';
+import { drawNameTag, questMarkImage } from '../render/nameTag.js';
+
+/** NPC の名前の色（メイプルの NPC の名札の黄色） */
+const NPC_NAME_COLOR = '#ffe21a';
 
 const TALK_RANGE = 90; // player.js の TALK_RANGE と同じ
 /** 頭上マークの色: メイン金・サブ水色・デイリー緑・転職ピンク */
@@ -111,29 +115,18 @@ export class NPC {
     ctx.save();
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    // 名前タグ（メイプル風の黒帯）
-    ctx.font = 'bold 13px sans-serif';
-    const nw = ctx.measureText(this.name).width + 12;
-    ctx.fillStyle = 'rgba(0,0,0,0.65)';
-    roundRect(ctx, this.x - nw / 2, this.y + 4, nw, 18, 4); ctx.fill();
-    ctx.fillStyle = '#ffe066';
-    ctx.fillText(this.name, this.x, this.y + 13);
-    if (this.title) {
-      ctx.font = '11px sans-serif';
-      const tw = ctx.measureText(this.title).width + 10;
-      ctx.fillStyle = 'rgba(20,10,40,0.7)';
-      roundRect(ctx, this.x - tw / 2, top - 8, tw, 16, 4); ctx.fill();
-      ctx.fillStyle = '#9ef0ff';
-      ctx.fillText(this.title, this.x, top);
-    }
+    // 足元の名札（メイプル風）: 肩書き（小さく）→ その下に名前（黄色）
+    let ty = this.y + 3;
+    if (this.title) ty += drawNameTag(ctx, this.x, ty, this.title, { small: true, color: '#fff3b0' }) + 1;
+    ty += drawNameTag(ctx, this.x, ty, this.name, { color: NPC_NAME_COLOR }) + 2;
     const p = this.game.player;
     if (this.hours) {
       // 夜だけの NPC/店の印
       ctx.font = 'bold 10px sans-serif';
       ctx.fillStyle = 'rgba(30,20,70,0.75)';
-      roundRect(ctx, this.x - 30, this.y + 24, 60, 14, 4); ctx.fill();
+      roundRect(ctx, this.x - 30, ty, 60, 14, 4); ctx.fill();
       ctx.fillStyle = '#c9b6ff';
-      ctx.fillText(`🌙 ${this.hours[0]}時〜${this.hours[1]}時`, this.x, this.y + 31);
+      ctx.fillText(`🌙 ${this.hours[0]}時〜${this.hours[1]}時`, this.x, ty + 7);
     }
     // 会話窓・ショップを開いている間は「V で話す」を出さない（窓の上に重なっていた）
     const talking = this.game.ui?.isOpen?.('dialog') || this.game.ui?.isOpen?.('shop');
@@ -155,16 +148,11 @@ export class NPC {
       ctx.fillText('で話す', this.x + 10, by + 1);
     }
     if (this.mark) {
-      const bob = Math.sin(this.t * 4) * 4;
-      const my = top - 30 + bob;
+      // 頭上のクエストの印（メイプル風: 受けられる=色つきの吹き出しに「!」、報告できる=白い丸に「?」）。上下にゆっくり揺れる
+      const bob = Math.sin(this.t * 3.6) * 4;
       const col = MARK_COLORS[this.markKind] || (this.mark === 'complete' ? '#7CFC00' : '#ffd400');
-      ctx.font = 'bold 30px sans-serif';
-      ctx.lineWidth = 5; ctx.strokeStyle = '#3a2400';
-      const ch = this.mark === 'complete' ? '？' : '！';
-      ctx.strokeText(ch, this.x, my);
-      ctx.shadowColor = col; ctx.shadowBlur = 12;
-      ctx.fillStyle = col;
-      ctx.fillText(ch, this.x, my);
+      const img = questMarkImage(this.mark, col);
+      if (img) ctx.drawImage(img.img, Math.round(this.x - img.w / 2), Math.round(top - 30 + bob - img.h / 2), img.w, img.h);
     }
     ctx.restore();
   }

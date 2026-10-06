@@ -6,7 +6,10 @@ import { getEquipLooks, useItem } from '../systems/inventory.js';
 import { useSkill, tryFinalAttack } from '../systems/skills.js';
 import { playerAttackArea, newAttackId } from '../systems/combat.js';
 import { currentJob } from '../systems/jobs.js';
-import { defaultLook } from '../data/classes.js';
+import { defaultLook, defaultName } from '../data/classes.js';
+import { currentTitle } from '../systems/achievements.js';
+import { snsTitle, SNS_TITLES } from '../systems/sns.js';
+import { drawNameTag, drawMedal, drawTombstone } from '../render/nameTag.js';
 import { sysFn } from '../world/sys.js';
 import { getItem } from '../data/items.js';
 import { moveAndCollide, findRope, entRect, rectOverlap } from '../world/physics.js';
@@ -687,7 +690,28 @@ export class Player {
     const look = heroLookOf(s);
     const equip = getEquipLooks(s);
     drawCharacter(ctx, this.x, this.y, look, equip, this.anim);
+    if (this.dead) drawTombstone(ctx, this.x, this.y, this.deadT || 0); // メイプル風: 倒れると墓石が落ちてくる
+    this.drawTag(ctx, s);
     drawSummons(ctx, this.game); // 召喚獣（キャラの手前に浮かぶ）
+  }
+
+  /** 足元の名札（メイプル風: 半透明の黒の角丸に白いキャラ名）＋そのすぐ下にメダル（称号）の細い帯 */
+  drawTag(ctx, s) {
+    const g = this.game;
+    if ((g.time || 0) >= (this._tagT || 0)) {
+      this._tagT = (g.time || 0) + 0.5;
+      let name = s.name;
+      if (!name) { try { name = defaultName(s.heroId, s.gender); } catch (e) { name = ''; } }
+      this._tagName = name || '';
+      // メダル: 選んだ称号（実績）。無ければ SNS の称号（最初の「ただの旅人」は出さない＝メダル無し）
+      let medal = null;
+      try { medal = currentTitle(s)?.name || null; } catch (e) { medal = null; }
+      if (!medal) { try { const t = snsTitle(s); if (t && t !== SNS_TITLES[0][1]) medal = t; } catch (e) { medal = null; } }
+      this._tagMedal = medal;
+    }
+    const y = this.y + 3;
+    const h = drawNameTag(ctx, this.x, y, this._tagName);
+    if (this._tagMedal) drawMedal(ctx, this.x, y + h + 1, this._tagMedal);
   }
 
   rect() { return entRect(this); }

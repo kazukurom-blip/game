@@ -1,12 +1,15 @@
-// ドロップアイテム / お金。ポンと跳ねて着地、レア以上は光の柱。
+// ドロップアイテム / お金。メイプル風: 上へ跳ねて弧を描き、地面で小さく1〜2回跳ねて止まり、ゆっくり上下に浮く。
+// お金は額で見た目が変わる（銅貨・金貨・札束・袋）。レア以上は下から光の輪／光の柱。拾うとプレイヤーへ吸い込まれる。
 import { moveAndCollide } from '../world/physics.js';
 import { getItem } from '../data/items.js';
 import { addItem } from '../systems/inventory.js';
 import { RARITY } from '../systems/loot.js';
 import { drawItemIcon } from '../render/icons.js';
 import { spawnEffect } from '../render/effects.js';
+import { moneySprite, rarityGlowSprite, rarityPillarSprite } from '../render/dropArt.js';
 
 const LIFE = 60;
+const FLY_TIME = 0.22;
 const RARE_SET = new Set(['rare', 'epic', 'legendary', 'mythic']);
 const FALLBACK_COLORS = { common: '#ffffff', rare: '#4da6ff', epic: '#b06bff', legendary: '#ffb020', mythic: '#ff3df2' };
 let lastFullNotify = 0;
@@ -29,6 +32,8 @@ export class Drop {
     this.dead = false;
     this.pickDelay = 0.45;
     this.flyT = -1;           // 拾われて吸い込まれ中
+    this.bounces = 0;         // 着地後の小さな跳ね（見た目だけ。最大2回）
+    this.landT = -1;          // 止まった時刻（浮く動きの位相）
     if (payload.money != null) {
       this.money = Math.max(1, Math.round(payload.money));
       this.item = { id: 'cash', name: `${this.money}$`, icon: 'cash', type: 'etc', rarity: 'common' };
@@ -51,16 +56,27 @@ export class Drop {
       this.flyT += dt;
       const c = this.collector && !this.collector.remove ? this.collector : g.player;
       const tx = c.x, ty = c.y - (c === g.player ? 40 : 14);
-      const k = Math.min(1, dt * 14);
-      this.x += (tx - this.x) * k; this.y += (ty - this.y) * k;
-      if (this.flyT > 0.18) this.remove = true;
+      if (this.sx == null) { this.sx = this.x; this.sy = this.y; }
+      // 少し上へ浮いてから、プレイヤーへ吸い込まれる（0.22秒）
+      const k = Math.min(1, this.flyT / FLY_TIME), ek = k * k * (3 - 2 * k);
+      this.x = this.sx + (tx - this.sx) * ek;
+      this.y = this.sy + (ty - this.sy) * ek - Math.sin(k * Math.PI) * 26;
+      if (this.flyT > FLY_TIME) this.remove = true;
       return;
     }
     if (!this.onGround) {
       this.angle += dt * 14 * Math.sign(this.vx || 1);
+      const vy0 = this.vy;
       moveAndCollide(this, g.map, dt);
-      if (this.onGround) {
-        this.vx = 0; this.angle = 0;
+      if (this.onGround && this.bounces < 2 && vy0 > 160) {
+        // 地面で小さく跳ねる（1回目は落下速度の 3 割、2回目はさらに小さく）。横には動かない
+        this.bounces++;
+        this.vy = -vy0 * (this.bounces === 1 ? 0.3 : 0.18);
+        this.vx = 0;
+        this.onGround = false;
+        this.angle = 0;
+      } else if (this.onGround) {
+        this.vx = 0; this.angle = 0; this.landT = this.t;
         if (this.isRare && !this.announced) {
           this.announced = true;
           spawnEffect(g, 'spark', this.x, this.y - 10, { color: this.color });
@@ -111,32 +127,60 @@ export class Drop {
     const left = LIFE - this.t;
     let alpha = 1;
     if (left < 4) alpha = (Math.floor(this.t * 8) % 2) ? 0.35 : 1;
-    if (this.flyT >= 0) alpha = 1 - this.flyT / 0.18;
+    let sc = 1;
+    if (this.flyT >= 0) { const k = Math.min(1, this.flyT / FLY_TIME); alpha = k < 0.6 ? 1 : 1 - (k - 0.6) / 0.4; sc = 1 - k * 0.45; }
+    if (alpha <= 0) return;
+    const fx = this.game.settings?.fx ?? 1;
+    const landed = this.onGround && this.flyT < 0;
     ctx.save();
-    ctx.globalAlpha = Math.max(0, alpha);
-    // 光の柱
-    if (this.isRare && this.onGround && this.flyT < 0) {
-      const h = this.rarity === 'mythic' ? 260 : this.rarity === 'legendary' ? 220 : this.rarity === 'epic' ? 170 : 120;
-      const pulse = 0.55 + 0.25 * Math.sin(this.t * 4);
-      const gr = ctx.createLinearGradient(0, this.y - h, 0, this.y);
-      gr.addColorStop(0, 'rgba(255,255,255,0)');
-      gr.addColorStop(1, this.color);
-      ctx.globalAlpha = Math.max(0, alpha) * pulse * 0.6;
-      ctx.fillStyle = gr;
-      ctx.fillRect(this.x - 14, this.y - h, 28, h);
-      ctx.globalAlpha = Math.max(0, alpha) * pulse;
-      ctx.fillRect(this.x - 4, this.y - h, 8, h);
-      ctx.globalAlpha = Math.max(0, alpha) * 0.5;
-      ctx.fillStyle = this.color;
-      ctx.beginPath(); ctx.ellipse(this.x, this.y, 26, 6, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.globalAlpha = Math.max(0, alpha);
+    ctx.globalAlpha = alpha;
+    // レア以上: 下から光（レア=光の輪 / エピック=輪＋低い柱 / レジェンダリ以上=高い光の柱）。画像はキャッシュ
+    if (this.isRare && landed) {
+      const pulse = 0.75 + 0.25 * Math.sin(this.t * 4);
+      const tall = this.rarity === 'mythic' ? 230 : this.rarity === 'legendary' ? 190 : this.rarity === 'epic' ? 90 : 0;
+      ctx.globalCompositeOperation = 'lighter';
+      if (tall) {
+        const pl = rarityPillarSprite(this.color);
+        if (pl) {
+          // 明るい背景でも見えるよう、色を薄く重ねてから加算で光らせる
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.globalAlpha = alpha * pulse * 0.45; ctx.drawImage(pl.img, this.x - pl.w / 2, this.y - tall, pl.w, tall);
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.globalAlpha = alpha * pulse * (fx < 0.3 ? 0.5 : 0.9); ctx.drawImage(pl.img, this.x - pl.w / 2, this.y - tall, pl.w, tall);
+        }
+      }
+      ctx.globalCompositeOperation = 'source-over';
+      const rg = rarityGlowSprite(this.color);
+      if (rg) {
+        const rk = (this.t * 0.8) % 1;
+        ctx.globalAlpha = alpha * (0.9 - rk * 0.6);
+        const rw = 34 + rk * 22;
+        ctx.drawImage(rg.ring, this.x - rw, this.y - rw * 0.28, rw * 2, rw * 0.56);
+        ctx.globalAlpha = alpha * pulse;
+        ctx.drawImage(rg.ring, this.x - 30, this.y - 8, 60, 16);
+      }
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = alpha;
     }
-    const bob = this.onGround ? Math.sin(this.t * 3) * 3 : 0;
+    // 地面ではゆっくり上下に浮く（止まった瞬間から）
+    const bob = landed ? (1 - Math.cos((this.t - Math.max(0, this.landT)) * 2.6)) * 2.5 : 0;
     const cy = this.y - 14 - bob;
     ctx.translate(this.x, cy);
+    if (sc !== 1) ctx.scale(sc, sc);
+    if (this.isRare) {
+      const rg = rarityGlowSprite(this.color);
+      if (rg) { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = alpha * 0.8; ctx.drawImage(rg.glow, -26, -26, 52, 52); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = alpha; }
+    }
     if (this.angle) ctx.rotate(this.angle);
-    if (this.isRare) { ctx.shadowColor = this.color; ctx.shadowBlur = 14; }
-    drawItemIcon(ctx, this.item, 0, 0, 28);
+    if (this.money != null) {
+      const m = moneySprite(this.money);
+      if (m) {
+        // 硬貨は地面でくるくる回る（メイプルのメル）。札束・袋は回らない
+        const spin = m.coin ? Math.cos(this.t * 5) : 1;
+        ctx.scale(m.coin ? Math.max(0.12, Math.abs(spin)) : 1, 1);
+        ctx.drawImage(m.img, -m.w / 2, -m.h / 2 + 2, m.w, m.h);
+      } else drawItemIcon(ctx, this.item, 0, 0, 28);
+    } else drawItemIcon(ctx, this.item, 0, 0, 28);
     ctx.restore();
   }
 }

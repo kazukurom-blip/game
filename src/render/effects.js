@@ -3,14 +3,16 @@ import { rgba, shade, rng, starPath } from './util.js';
 import { FX_TYPES, themeSpawn } from './fxJob.js';
 import { drawCutinLayer, pushCutin } from './cutin.js';
 import { RAINBOW as RB, FXA } from './fxStyle.js';
+import { MISSIONS } from '../data/missions.js';
+import { drawMapleText, renderMapleText, mapleWordImage, critStarImage } from './mapleFont.js';
 export { drawCombo } from './cutin.js';
 
 const PI = Math.PI;
 const MAX_EFFECTS = 500;
 
 const LIFE = {
-  slash: 0.28, hit: 0.3, critHit: 0.45, explosion: 0.9, levelUp: 2.2, pickup: 0.5, muzzle: 0.09, dash: 0.4,
-  buff: 1.0, rareDrop: 1.6, heal: 0.9, smoke: 1.0, portal: 0.8, spark: 0.4, tear: 1.1, dmg: 1.0, petPick: 0.8, petDrop: 3.2,
+  slash: 0.28, hit: 0.26, critHit: 0.36, explosion: 0.9, levelUp: 1.6, pickup: 0.5, muzzle: 0.09, dash: 0.4,
+  buff: 1.0, rareDrop: 1.6, questClear: 2.4, heal: 0.9, smoke: 1.0, portal: 0.8, spark: 0.4, tear: 1.1, dmg: 1.0, petPick: 0.8, petDrop: 3.2,
 };
 const DEF_COLOR = {
   slash: '#ffffff', hit: '#ffe066', critHit: '#ff4fd8', explosion: '#ff9a3c', levelUp: '#ffe066', pickup: '#7cfc00', muzzle: '#ffd27a',
@@ -90,7 +92,7 @@ export function impact(game, power = 0.5, color) {
 /** 多段攻撃の数字の時間差（秒）。2ヒット目以降はこの間隔で1つずつ現れて上へ積み重なる */
 export const DMG_SEQ_GAP = 0.08;
 /** 数字1段の高さ（px） */
-const DMG_ROW = 30;
+const DMG_ROW = 28;
 export function spawnDamageNumber(game, x, y, value, opts = {}) {
   if (!game) return null;
   const list = ensure(game);
@@ -260,8 +262,76 @@ export function drawEffects(ctx, game) {
 /** drawCutins(ctx, game) — 画面空間: カットイン＋画面空間エフェクト（opts.screen）。main が HUD の前に呼ぶ */
 export function drawCutins(ctx, game) {
   if (!game) return;
+  drawBossBar(ctx, game);
   if (!game._screenFxSeparate) drawScreenFx(ctx, game, true);
   drawCutinLayer(ctx, game);
+}
+
+// ---------------------------------------------------------------- ボスの HP バー（画面の上・中央）
+// メイプル風: 左にボスの印、横長のバー（段ごとに色が変わる）、右に残りの段数「x5」。見た目だけ（HP は1本のまま）。
+//  占める範囲: y 6〜46, x = 中央 ±310。HUD のマップ名などはこれより下（y ≥ 56）に。
+const BOSS_LAYER_COLS = ['#e8121e', '#ff7a1a', '#f5c400', '#2fbf4a', '#14b8e8', '#3a62ff', '#a040ff', '#ff3dc8'];
+export const BOSS_BAR_RECT = { y: 6, h: 40, w: 620 };
+function bossLayers(def) {
+  if (def.hpBars) return def.hpBars | 0;
+  return Math.max(3, Math.min(10, Math.round((def.level || 10) / 12) + 3));
+}
+export function drawBossBar(ctx, game) {
+  const list = game && game.enemies;
+  if (!list || !list.length || game.scene !== 'play') return;
+  const p = game.player;
+  let b = null;
+  for (const e of list) {
+    if (!e || e.dead || !(e.hp > 0) || !(e.boss || (e.def && e.def.boss))) continue;
+    if (p && Math.abs(e.x - p.x) > 1500 && !e.aggro) continue;
+    b = e; break;
+  }
+  if (!b) return;
+  const def = b.def || {};
+  const W = game.W || 1280;
+  const n = bossLayers(def);
+  const frac = Math.max(0, Math.min(1, b.hp / (b.maxHp || 1)));
+  const total = frac * n;
+  const left = Math.max(1, Math.ceil(total - 1e-6));
+  const inK = Math.max(0, Math.min(1, total - (left - 1)));
+  // 遅れて減る白帯（段が変わったらその段の満タンから）
+  if (b._barLayer !== left) { b._barLayer = left; b._barLag = 1; }
+  b._barLag = b._barLag == null || b._barLag < inK ? inK : b._barLag + (inK - b._barLag) * Math.min(1, (game.dt || 1 / 60) * 3);
+  b._barIn = Math.min(1, (b._barIn || 0) + (game.dt || 1 / 60) * 4);
+  const { y: Y, w: BW } = BOSS_BAR_RECT;
+  const x0 = Math.round(W / 2 - BW / 2);
+  ctx.save();
+  ctx.globalAlpha = b._barIn;
+  // 外枠
+  ctx.fillStyle = 'rgba(8,4,20,0.78)';
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x0, Y, BW, 40, 6) : ctx.rect(x0, Y, BW, 40); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,214,90,0.9)'; ctx.lineWidth = 1.5; ctx.stroke();
+  // 左: ボスの印（ボスの色の円に王冠）
+  const ix = x0 + 4, iy = Y + 4;
+  ctx.fillStyle = '#1a0b30'; ctx.fillRect(ix, iy, 32, 32);
+  ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 1.5; ctx.strokeRect(ix + 0.5, iy + 0.5, 31, 31);
+  ctx.fillStyle = def.color || '#ff3d7f'; ctx.beginPath(); ctx.arc(ix + 16, iy + 19, 10, 0, PI * 2); ctx.fill();
+  ctx.fillStyle = '#ffd23f'; ctx.beginPath();
+  ctx.moveTo(ix + 7, iy + 12); ctx.lineTo(ix + 9, iy + 4); ctx.lineTo(ix + 12.5, iy + 9); ctx.lineTo(ix + 16, iy + 3); ctx.lineTo(ix + 19.5, iy + 9); ctx.lineTo(ix + 23, iy + 4); ctx.lineTo(ix + 25, iy + 12); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#3a1a00'; ctx.lineWidth = 1; ctx.stroke();
+  // 名前（バーの上の行）
+  ctx.font = "bold 12px 'M PLUS Rounded 1c', sans-serif"; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+  ctx.fillStyle = '#ffd84a';
+  ctx.fillText(`Lv.${b.level ?? def.level ?? '?'}  ${def.name || b.name || 'BOSS'}`, x0 + 42, Y + 11);
+  ctx.textAlign = 'right'; ctx.fillStyle = '#ffffff';
+  ctx.fillText(`${Math.round(frac * 1000) / 10}%`, x0 + BW - 54, Y + 11);
+  // バー本体: 下の段の色を地に、今の段の色を上に
+  const bx = x0 + 42, by = Y + 20, bw = BW - 42 - 56, bh = 15;
+  ctx.fillStyle = '#000'; ctx.fillRect(bx - 1, by - 1, bw + 2, bh + 2);
+  ctx.fillStyle = left > 1 ? BOSS_LAYER_COLS[(left - 2) % BOSS_LAYER_COLS.length] : '#2a0a12'; ctx.fillRect(bx, by, bw, bh);
+  if (b._barLag > inK) { ctx.fillStyle = 'rgba(255,245,230,0.9)'; ctx.fillRect(bx, by, bw * b._barLag, bh); }
+  const cc = BOSS_LAYER_COLS[(left - 1) % BOSS_LAYER_COLS.length];
+  ctx.fillStyle = cc; ctx.fillRect(bx, by, bw * inK, bh);
+  ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.fillRect(bx, by, bw * inK, 4);
+  ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.fillRect(bx, by + bh - 3, bw * inK, 3);
+  // 右: 残りの段数
+  drawMapleText(ctx, 'x' + left, x0 + BW - 28, Y + 21, 'white', 24, { kern: 0.88 });
+  ctx.restore();
 }
 
 /**
@@ -317,14 +387,47 @@ function drawFx(ctx, e) {
       break;
     }
     case 'hit': case 'critHit': {
+      // メイプル風の打撃の光: 白い核（すぐ縮む）＋放射状の細い光の線（武器・スキルの色）＋外側の薄い輪
       const crit = e.type === 'critHit';
-      const R = (crit ? 34 : 22) * (0.5 + k);
-      ctx.globalAlpha = FXA.m * (1 - k);
-      ctx.fillStyle = rgba(crit ? '#ff4fd8' : c, 0.6);
-      ctx.beginPath(); starPath(ctx, 0, 0, R, R * 0.35, crit ? 8 : 6, e.seed); ctx.fill();
-      ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.beginPath(); ctx.arc(0, 0, R * 0.35 * (1 - k), 0, PI * 2); ctx.fill();
-      ctx.strokeStyle = rgba(crit ? '#ffe066' : '#ffffff', 0.9); ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(0, 0, R * 1.1, 0, PI * 2); ctx.stroke();
+      const col = crit && !e.opts.color ? '#ff4f8a' : c;
+      const R = (crit ? 46 : 32) * (0.55 + 0.45 * Math.min(1, k * 2.4));
+      const a = Math.max(0, 1 - k * 1.15);
+      // 放射状の線（くさび形）: 種ごとに角度・長さを固定
+      const n = crit ? 12 : 8;
+      ctx.globalAlpha = FXA.m * a;
+      ctx.fillStyle = rgba(col, 0.9);
+      ctx.beginPath();
+      for (let i = 0; i < n; i++) {
+        const an = (i / n) * PI * 2 + ((e.seed * 0.7) % 1) * 0.8 + (i % 2) * 0.12;
+        const len = R * (i % 2 ? 0.72 : 1.08) * (0.85 + ((e.seed * (i + 3) * 0.37) % 1) * 0.3);
+        const wd = (crit ? 3.6 : 2.8) * (1 - k * 0.6);
+        const cs = Math.cos(an), sn = Math.sin(an);
+        const r0 = R * 0.22;
+        ctx.moveTo(cs * r0 - sn * wd, sn * r0 + cs * wd);
+        ctx.lineTo(cs * len, sn * len);
+        ctx.lineTo(cs * r0 + sn * wd, sn * r0 - cs * wd);
+      }
+      ctx.fill();
+      // 線の芯（白）
+      ctx.strokeStyle = 'rgba(255,255,255,0.95)'; ctx.lineWidth = crit ? 1.6 : 1.2;
+      ctx.beginPath();
+      for (let i = 0; i < n; i += 2) {
+        const an = (i / n) * PI * 2 + ((e.seed * 0.7) % 1) * 0.8;
+        ctx.moveTo(Math.cos(an) * R * 0.25, Math.sin(an) * R * 0.25); ctx.lineTo(Math.cos(an) * R * 0.85, Math.sin(an) * R * 0.85);
+      }
+      ctx.stroke();
+      // 白い核（出た瞬間がいちばん大きく、すぐ縮む）
+      const core = (crit ? 17 : 12) * Math.max(0, 1 - k * 1.6);
+      if (core > 0.5) {
+        ctx.globalAlpha = FXA.m * Math.min(1, a * 1.3);
+        ctx.fillStyle = rgba(col, 0.55); ctx.beginPath(); ctx.arc(0, 0, core * 1.7, 0, PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(0, 0, core, 0, PI * 2); ctx.fill();
+      }
+      // 外側の薄い輪
+      ctx.globalAlpha = FXA.m * a * 0.7;
+      ctx.strokeStyle = rgba(crit ? '#ffe066' : col, 0.85); ctx.lineWidth = 2 * (1 - k);
+      ctx.beginPath(); ctx.arc(0, 0, R * 1.05, 0, PI * 2); ctx.stroke();
+      // 飛び散る粒
       ctx.fillStyle = crit ? '#ffe066' : '#ffffff';
       for (const p of e.parts) { ctx.beginPath(); ctx.arc(p.x, p.y, p.r * (1 - k), 0, PI * 2); ctx.fill(); }
       break;
@@ -419,6 +522,10 @@ function drawFx(ctx, e) {
       drawPetDrop(ctx, e, k);
       break;
     }
+    case 'questClear': {
+      drawQuestClear(ctx, e, k);
+      break;
+    }
     case 'portal': {
       ctx.globalAlpha = FXA.m * (1 - k);
       ctx.strokeStyle = rgba(c, 0.9); ctx.lineWidth = 3;
@@ -449,8 +556,8 @@ function drawRising(ctx, e, k, c) {
   const fade = k < 0.8 ? 1 : (1 - k) / 0.2;
   if (type === 'levelUp' || type === 'rareDrop') {
     // 光の柱
-    const h = type === 'levelUp' ? 160 : 130;
-    const w = type === 'levelUp' ? 46 : 26;
+    const h = type === 'levelUp' ? 220 : 130;
+    const w = type === 'levelUp' ? 64 : 26;
     const g = ctx.createLinearGradient(0, -h, 0, 0);
     g.addColorStop(0, rgba(c, 0)); g.addColorStop(0.6, rgba(c, 0.35 * fade)); g.addColorStop(1, rgba('#ffffff', 0.55 * fade));
     ctx.fillStyle = g;
@@ -474,20 +581,70 @@ function drawRising(ctx, e, k, c) {
     else { ctx.beginPath(); starPath(ctx, p.x, p.y, p.r * 1.8, p.r * 0.6, 4, e.t * 2); ctx.fill(); }
   }
   ctx.globalAlpha = FXA.m * (1);
-  if (type === 'levelUp') {
-    // LEVEL UP! テキスト
+  if (type === 'levelUp' && (e.opts.text || !e.opts.color)) {
+    // メイプル風の「LEVEL UP!!」: 金色の角ばった大きな文字（キャッシュ画像）。拡大して出て、少し上がって止まり、消える。
+    //  （転職の光柱として色つきで呼ばれた時＝ jobs.js は文字を出さない）
     ctx.globalCompositeOperation = 'source-over';
-    const ty = -110 - Math.min(1, k * 4) * 20;
-    const pop = k < 0.08 ? 0.6 + (k / 0.08) * 0.6 : k < 0.14 ? 1.2 - ((k - 0.08) / 0.06) * 0.2 : 1;
-    ctx.save(); ctx.translate(0, ty); ctx.scale(pop, pop);
-    ctx.globalAlpha = FXA.m * (fade);
-    ctx.font = '900 30px "Arial Black", "Arial Rounded MT Bold", sans-serif';
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
-    ctx.lineWidth = 7; ctx.strokeStyle = '#2a0b3d'; ctx.strokeText('LEVEL UP!', 0, 0);
-    const g = ctx.createLinearGradient(0, -14, 0, 14);
-    g.addColorStop(0, '#fffbd0'); g.addColorStop(0.5, '#ffd23f'); g.addColorStop(1, '#ff7a3c');
-    ctx.fillStyle = g; ctx.fillText('LEVEL UP!', 0, 0);
-    ctx.restore();
+    const img = mapleWordImage(e.opts.text || 'LEVEL UP!!', 'gold', 44, { kern: 0.9 });
+    if (img) {
+      const t = e.t;
+      const pop = t < 0.09 ? 0.35 + (t / 0.09) * 0.9 : t < 0.18 ? 1.25 - ((t - 0.09) / 0.09) * 0.25 : 1;
+      const ty = -128 - Math.min(1, t / 0.35) * 14;
+      ctx.save(); ctx.translate(0, ty); ctx.scale(pop, pop);
+      ctx.globalAlpha = FXA.m * fade;
+      ctx.drawImage(img.img, -img.w / 2, -img.h / 2, img.w, img.h);
+      // つやの光が左から右へ走る（加算で細い帯）
+      const sk = (t - 0.2) / 0.45;
+      if (sk > 0 && sk < 1) {
+        ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = FXA.m * fade * 0.5 * Math.sin(sk * PI);
+        const sx = -img.w / 2 + sk * img.w;
+        ctx.fillStyle = '#fff6c0';
+        ctx.beginPath(); ctx.moveTo(sx - 6, -img.h * 0.32); ctx.lineTo(sx + 8, -img.h * 0.32); ctx.lineTo(sx - 2, img.h * 0.32); ctx.lineTo(sx - 16, img.h * 0.32); ctx.closePath(); ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+}
+
+// クエスト達成の帯（画面空間・中央）: 横に広がる黒い帯＋金の線、「QUEST CLEAR」の金文字が拡大して出る、下にクエスト名
+function drawQuestClear(ctx, e, k) {
+  ctx.globalCompositeOperation = 'source-over';
+  const t = e.t, W = e.opts.W || 1280;
+  const fade = k < 0.82 ? 1 : (1 - k) / 0.18;
+  const open = Math.min(1, t / 0.2), eo = 1 - (1 - open) * (1 - open);
+  const bw = W * eo, bh = 66;
+  ctx.globalAlpha = fade;
+  const g = ctx.createLinearGradient(-bw / 2, 0, bw / 2, 0);
+  g.addColorStop(0, 'rgba(10,4,24,0)'); g.addColorStop(0.18, 'rgba(10,4,24,0.72)'); g.addColorStop(0.82, 'rgba(10,4,24,0.72)'); g.addColorStop(1, 'rgba(10,4,24,0)');
+  ctx.fillStyle = g; ctx.fillRect(-bw / 2, -bh / 2, bw, bh);
+  const lg = ctx.createLinearGradient(-bw / 2, 0, bw / 2, 0);
+  lg.addColorStop(0, 'rgba(255,210,63,0)'); lg.addColorStop(0.5, 'rgba(255,226,120,1)'); lg.addColorStop(1, 'rgba(255,210,63,0)');
+  ctx.fillStyle = lg; ctx.fillRect(-bw / 2, -bh / 2, bw, 2); ctx.fillRect(-bw / 2, bh / 2 - 2, bw, 2);
+  if (t > 0.08) {
+    const tt = t - 0.08;
+    const pop = tt < 0.1 ? 0.3 + (tt / 0.1) * 0.95 : tt < 0.2 ? 1.25 - ((tt - 0.1) / 0.1) * 0.25 : 1;
+    const img = mapleWordImage(e.opts.text || 'QUEST CLEAR', 'gold', 46, { kern: 0.9 });
+    if (img) {
+      ctx.save(); ctx.translate(0, e.opts.name ? -7 : 0); ctx.scale(pop, pop);
+      ctx.drawImage(img.img, -img.w / 2, -img.h / 2, img.w, img.h);
+      ctx.restore();
+    }
+    // 左右のきらめき
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = '#fff6c0';
+    for (let i = 0; i < 6; i++) {
+      const a = (t * 1.6 + i / 6) % 1;
+      const px = (i % 2 ? 1 : -1) * (150 + i * 28 + a * 40), py = -20 + ((i * 37) % 40) - a * 10;
+      ctx.globalAlpha = fade * Math.sin(a * PI) * 0.9;
+      ctx.beginPath(); starPath(ctx, px, py, 7, 2, 4, 0); ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+    if (e.opts.name && tt > 0.15) {
+      ctx.globalAlpha = fade * Math.min(1, (tt - 0.15) * 5);
+      ctx.font = "bold 15px 'M PLUS Rounded 1c', sans-serif"; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.lineWidth = 3; ctx.strokeStyle = '#1a0b30'; ctx.strokeText(e.opts.name, 0, 22);
+      ctx.fillStyle = '#ffffff'; ctx.fillText(e.opts.name, 0, 22);
+    }
   }
 }
 
@@ -568,67 +725,57 @@ function drawPetDrop(ctx, e, k) {
 }
 
 // ---------------------------------------------------------------- ダメージ数字
+// メイプル風: 1桁ずつキャッシュした角ばった数字（render/mapleFont.js）を、隣と少し重ねて並べる。
+//  1桁目だけ大きく、2桁目以降は少し小さく交互に上下へずらす。出た瞬間にわずかに拡大→上へ少し浮いて止まり→フェード。
 const DMG_STYLE = {
-  normal: { top: '#ffe36e', bot: '#ff8a1f', size: 28 },
-  crit: { top: '#ff7ad9', bot: '#c2187a', size: 34 },
-  toPlayer: { top: '#d9b3ff', bot: '#8a3df0', size: 26 },
-  heal: { top: '#b8ff9e', bot: '#2ecc71', size: 26 },
-  miss: { top: '#eeeeee', bot: '#aaaaaa', size: 22 },
-  mp: { top: '#a8e0ff', bot: '#2e7bff', size: 26 },
-  combo1: { top: '#fff2a0', bot: '#ff5f3c', size: 29 },
-  combo3: { top: '#fffbe0', bot: '#ff2a6d', size: 30 },
-  critHi: { top: '#ffd6ff', bot: '#8a2be2', size: 36 },
+  normal: { key: 'normal', size: 36 },
+  crit: { key: 'crit', size: 40 },
+  toPlayer: { key: 'toPlayer', size: 34 },
+  heal: { key: 'heal', size: 32 },
+  miss: { key: 'miss', size: 30 },
+  mp: { key: 'mp', size: 32 },
+  combo1: { key: 'combo1', size: 37 },
+  combo3: { key: 'combo3', size: 38 },
+  critHi: { key: 'critHi', size: 44 },
 };
-
+const DMG_LAYOUT = { first: 1, rest: 0.84, kern: 0.9, jitter: 1.6 };
 
 function drawDmg(ctx, e) {
   if (e.t < 0) return; // 多段攻撃の順番待ち（まだ出ていない）
   const st = e.miss ? DMG_STYLE.miss : e.heal ? (e.mp ? DMG_STYLE.mp : DMG_STYLE.heal) : e.toPlayer ? DMG_STYLE.toPlayer : e.crit ? (e.clv >= 2 ? DMG_STYLE.critHi : DMG_STYLE.crit) : e.clv >= 3 ? DMG_STYLE.combo3 : e.clv >= 1 ? DMG_STYLE.combo1 : DMG_STYLE.normal;
-  const k = e.t / e.life;
-  const rise = Math.min(1, e.t / 0.8) * 40;
-  const y = e.baseY - DMG_ROW * e.stack - rise - 20;
-  const pop = e.t < 0.1 ? 1.4 - (e.t / 0.1) * 0.4 : 1;
-  const alpha = k < 0.6 ? 1 : Math.max(0, 1 - (k - 0.6) / 0.4);
-  const size = st.size + (e.clv || 0) * 2 + (e.hitsN > 1 ? Math.min(8, e.hitsN) : 0);
+  const t = e.t, k = t / e.life;
+  // 上へ少し浮いて止まる（0.42秒で 22px。消える間だけさらに少し上がる）
+  const ek = Math.min(1, t / 0.42);
+  const fadeK = k < 0.62 ? 0 : (k - 0.62) / 0.38;
+  const rise = (1 - (1 - ek) * (1 - ek)) * 22 + fadeK * 10;
+  const y = e.baseY - DMG_ROW * e.stack - rise - 16;
+  // 出た瞬間の拡大: 通常はわずかに、クリティカルは大きく拡大してから戻る（少し縮んで1.0へ）
+  let pop = 1;
+  if (e.crit && !e.toPlayer && !e.miss) pop = t < 0.06 ? 1.75 - (t / 0.06) * 0.85 : t < 0.13 ? 0.9 + ((t - 0.06) / 0.07) * 0.1 : 1;
+  else pop = t < 0.07 ? 1.22 - (t / 0.07) * 0.22 : 1;
+  const alpha = 1 - fadeK;
+  if (alpha <= 0) return;
+  const size = st.size + (e.clv || 0) * 1.5 + (e.hitsN > 1 ? Math.min(6, e.hitsN * 0.6) : 0);
+  // 数字ごとに1枚の画像へまとめて描き（字はキャッシュ済み）、以後は drawImage 1回だけ。まとめ表示で数字が変わったら作り直す
+  const key = st.key + '|' + size + '|' + e.text;
+  if (e._imgKey !== key) {
+    e._imgKey = key;
+    e._img = renderMapleText(e.text, st.key, size, e.miss ? { kern: 0.9 } : DMG_LAYOUT);
+  }
+  const im = e._img;
+  if (!im) return;
   ctx.save();
   ctx.translate(e.x, y);
-  ctx.scale(pop, pop);
+  if (pop !== 1) ctx.scale(pop, pop);
   ctx.globalAlpha = alpha;
-  ctx.font = `900 ${size}px "Arial Black", "Arial Rounded MT Bold", Impact, sans-serif`;
-  ctx.textBaseline = 'middle';
-  ctx.lineJoin = 'round';
-  // 1文字ずつ少し重ねて描く（メイプル風）
-  const chars = e.text;
-  const ws = [];
-  let total = 0;
-  for (let i = 0; i < chars.length; i++) { const w = ctx.measureText(chars[i]).width * 0.86; ws.push(w); total += w; }
-  let cx = -total / 2;
-  let g = null;
-  if (!e.miss) {
-    g = ctx.createLinearGradient(0, -size * 0.45, 0, size * 0.45);
-    g.addColorStop(0, '#ffffff'); g.addColorStop(0.18, st.top); g.addColorStop(1, st.bot);
+  ctx.drawImage(im.img, -im.w / 2, -im.h / 2, im.w, im.h);
+  const L = { w: im.tw };
+  if (e.crit && !e.toPlayer && !e.miss) {
+    // ★: 1桁目の左上
+    const s = critStarImage();
+    if (s) { const sz = size * 0.72; ctx.drawImage(s.img, -L.w / 2 - sz * 0.62, -size * 0.78, sz, sz); }
   }
-  if (e.crit && !e.toPlayer) {
-    // 星
-    ctx.save(); ctx.translate(cx - 10, -size * 0.45); ctx.rotate(e.t * 3);
-    ctx.beginPath(); starPath(ctx, 0, 0, 13, 5.5, 5);
-    ctx.fillStyle = '#ffe066'; ctx.fill(); ctx.strokeStyle = '#2a0b3d'; ctx.lineWidth = 3; ctx.stroke();
-    ctx.restore();
-  }
-  for (let i = 0; i < chars.length; i++) {
-    const bob = e.t < 0.2 ? Math.sin(Math.min(1, e.t / 0.2) * PI) * -4 * ((i % 2) ? 1 : 0.4) : 0;
-    const tx = cx + ws[i] / 2;
-    ctx.textAlign = 'center';
-    if (e.clv >= 2) { ctx.lineWidth = 10; ctx.strokeStyle = e.clv >= 3 ? 'rgba(255,60,140,0.55)' : 'rgba(255,170,60,0.5)'; ctx.strokeText(chars[i], tx, bob); }
-    ctx.lineWidth = 6; ctx.strokeStyle = '#2a0b3d'; ctx.strokeText(chars[i], tx, bob);
-    ctx.fillStyle = g || st.top; ctx.fillText(chars[i], tx, bob);
-    cx += ws[i];
-  }
-  if (e.hitsN > 1) {
-    ctx.font = '900 15px "Arial Black", sans-serif'; ctx.textAlign = 'left';
-    ctx.lineWidth = 4; ctx.strokeStyle = '#2a0b3d'; ctx.strokeText('×' + e.hitsN, cx + 4, size * 0.2);
-    ctx.fillStyle = '#ffffff'; ctx.fillText('×' + e.hitsN, cx + 4, size * 0.2);
-  }
+  if (e.hitsN > 1) drawMapleText(ctx, 'x' + e.hitsN, L.w / 2 + 4, size * 0.16, 'white', size * 0.5, { align: 'left', kern: 0.86 });
   ctx.restore();
 }
 
@@ -649,12 +796,20 @@ export function attachFx(game, o = {}) {
   const center = () => [(game.W || 1280) / 2, (game.H || 720) * 0.42];
   offs.push(ev.on('jobAdvanced', (d) => {
     const p = game.player, j = d && d.job;
+    // 転職は HUD の「JOB ADVANCE!」の帯が出るので、重なる QUEST CLEAR の帯はすぐ消す
+    for (const e of game.screenFx || []) if (e.type === 'questClear') e.life = Math.min(e.life, e.t + 0.15);
     if (!p || !j) return;
     const col = j.aura || '#ffe066';
     spawnEffect(game, 'jobUp', p.x, p.y, { color: col, name: j.name, title: 'JOB UP!', _child: true });
     // UI 側に転職演出（JOB ADVANCE!）があるため、カットインは o.jobCutin=true のときだけ
     if (o.jobCutin) spawnEffect(game, 'cutin', 0, 0, { name: j.name, color: col, expr: 'smile', line: j.title ? `「${j.title}」の名にかけて！` : undefined });
     impact(game, 0.6, col);
+  }));
+  // クエスト達成: 画面中央に「QUEST CLEAR」の帯（メイプルの完了の帯）
+  offs.push(ev.on('missionComplete', (d) => {
+    const m = d && MISSIONS[d.id];
+    if (m && (m.type === 'job' || m.category === 'job')) return; // 転職のクエストは HUD の転職の帯に任せる
+    spawnEffect(game, 'questClear', (game.W || 1280) / 2, (game.H || 720) * 0.3, { screen: true, W: game.W || 1280, name: m ? m.name : '' });
   }));
   offs.push(ev.on('tuneResult', (d) => {
     const [x, y] = center();

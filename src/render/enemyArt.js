@@ -166,8 +166,16 @@ export function drawEnemy(ctx, e) {
   ctx.restore();
   // HPバー・名前
   if (st !== 'dead' && !EXPORT_MODE) {
-    if (boss) drawBossTag(ctx, e, topY);
-    else if (e.hurtT > 0 || e.showHpT > 0) drawHpBar(ctx, e.x, topY - 10, 40, 5, e.hp / e.maxHp);
+    // メイプル風: 当たった敵だけ頭上に小さな HP バー（数秒で消える）。ボスは画面上のバー（effects.js drawBossBar）
+    if (!boss && (e.hpBarT > 0 || e.showHpT > 0)) {
+      const bw = clamp((e.w || def.w || 40) * 1.05 * (def.scale || 1), 36, 100);
+      const a = e.hpBarT > 0 ? clamp(e.hpBarT / 0.4, 0, 1) : 1;
+      ctx.save(); ctx.globalAlpha *= a;
+      drawHpBar(ctx, e.x, topY - 12, bw, 5, e.hp / e.maxHp);
+      ctx.restore();
+    }
+    // 足元の名札「Lv.3 スライム」（当たった・マウスを乗せた）
+    if (e.nameT > 0 || boss) drawMobTag(ctx, e, boss, boss ? 1 : clamp(e.nameT / 0.25, 0, 1));
   }
 }
 
@@ -276,49 +284,41 @@ function drawAura(ctx, x, y, r, t, c1, c2, wind = 0) {
   ctx.restore();
 }
 
+/** メイプル風の敵の HP バー: 黒い縁・暗い赤の地・赤の中身（上に細いつや）。lag = 遅れて減る白帯 */
 export function drawHpBar(ctx, x, y, w, h, frac, lag) {
   frac = clamp(frac || 0, 0, 1);
+  const x0 = Math.round(x - w / 2), y0 = Math.round(y);
   ctx.save();
-  ctx.fillStyle = 'rgba(42,20,48,0.88)';
-  ctx.beginPath(); rr(ctx, x - w / 2 - 1.5, y - 1.5, w + 3, h + 3, 3); ctx.fill();
-  if (lag != null && lag > frac) { ctx.fillStyle = 'rgba(255,240,200,0.85)'; ctx.beginPath(); rr(ctx, x - w / 2, y, w * clamp(lag, 0, 1), h, 2); ctx.fill(); }
-  const g = ctx.createLinearGradient(0, y, 0, y + h);
-  if (frac < 0.3) { g.addColorStop(0, '#ffb070'); g.addColorStop(1, '#ff3a1f'); }
-  else { g.addColorStop(0, '#ff8fb8'); g.addColorStop(1, '#e8264f'); }
-  ctx.fillStyle = g;
-  if (frac > 0) { ctx.beginPath(); rr(ctx, x - w / 2, y, w * frac, h, 2); ctx.fill(); }
-  ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.fillRect(x - w / 2 + 1, y + 0.5, Math.max(0, w * frac - 2), Math.max(1, h * 0.25));
-  if (w >= 80) { // 目盛り
-    ctx.fillStyle = 'rgba(42,20,48,0.45)';
-    for (let i = 1; i < 10; i++) ctx.fillRect(x - w / 2 + (w * i) / 10 - 0.5, y + h * 0.5, 1, h * 0.5);
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(x0 - 1, y0 - 1, w + 2, h + 2);
+  ctx.fillStyle = '#3a0a0a';
+  ctx.fillRect(x0, y0, w, h);
+  if (lag != null && lag > frac) { ctx.fillStyle = 'rgba(255,240,220,0.85)'; ctx.fillRect(x0, y0, w * clamp(lag, 0, 1), h); }
+  if (frac > 0) {
+    ctx.fillStyle = '#e8121e'; ctx.fillRect(x0, y0, w * frac, h);
+    ctx.fillStyle = '#ff6a5a'; ctx.fillRect(x0, y0, w * frac, Math.max(1, Math.round(h * 0.35)));
   }
   ctx.restore();
 }
 
-function drawBossTag(ctx, e, topY) {
+const TAG_FONT = "bold 12px 'M PLUS Rounded 1c', sans-serif";
+/** 足元の名札（半透明の黒の角丸・白い文字）。ボスは金色の文字 */
+function drawMobTag(ctx, e, boss, a) {
+  if (a <= 0) return;
   const def = e.def || {};
-  const name = def.name || e.name || 'BOSS';
-  const y = topY - 30;
-  const frac = e.maxHp ? e.hp / e.maxHp : 1;
-  // 遅れて減る白いダメージ帯
-  if (e._hpLag == null || e._hpLag < frac) e._hpLag = frac;
-  else e._hpLag += (frac - e._hpLag) * 0.04;
+  const label = e._tagText || (e._tagText = `Lv.${e.level ?? def.level ?? 1} ${def.name || e.name || ''}`);
   ctx.save();
-  ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-  if (def.title) {
-    ctx.font = 'bold 11px sans-serif';
-    ctx.lineWidth = 3; ctx.strokeStyle = '#2a0b3d'; ctx.strokeText(def.title, e.x, y - 18);
-    ctx.fillStyle = '#ffe9a8'; ctx.fillText(def.title, e.x, y - 18);
-  }
-  ctx.font = '900 18px "Arial Black", sans-serif';
-  ctx.lineJoin = 'round';
-  ctx.lineWidth = 5; ctx.strokeStyle = '#2a0b3d'; ctx.strokeText(name, e.x, y);
-  const g = ctx.createLinearGradient(0, y - 16, 0, y);
-  if (frac < 0.5) { g.addColorStop(0, '#ffd0a0'); g.addColorStop(1, '#ff2e4d'); }
-  else { g.addColorStop(0, '#fff3a0'); g.addColorStop(1, '#ff4fa0'); }
-  ctx.fillStyle = g; ctx.fillText(name, e.x, y);
+  ctx.font = TAG_FONT;
+  if (e._tagW == null) e._tagW = ctx.measureText(label).width;
+  const w = e._tagW + 10, h = 16;
+  const x = Math.round(e.x - w / 2), y = Math.round(e.y + 4);
+  ctx.globalAlpha *= a;
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
+  ctx.beginPath(); rr(ctx, x, y, w, h, 3); ctx.fill();
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = boss ? '#ffd84a' : '#ffffff';
+  ctx.fillText(label, e.x, y + h / 2 + 0.5);
   ctx.restore();
-  drawHpBar(ctx, e.x, y + 6, 110, 8, frac, e._hpLag);
 }
 
 // ================================================================ スライム（ソーダゼリー＋サングラス）
