@@ -1,46 +1,31 @@
-// HUD: 左下ステータス / 右上 バフ・召喚獣の残り時間 / 左上ミニマップ / 下中央スキルバー / 右クエストトラッカー
-//      トースト / レアドロップバナー / レベルアップ演出 / 低HPビネット / 警官接近フラッシュ
+// HUD: メイプル風の常駐 UI（hudMaple.js: EXP バー / 下中央ステータス / 右下クイックスロット・メニュー / 左下の取得ログ /
+//      左上ミニマップ / 地名 / コンボ）＋ 右上 バフ・召喚獣の残り時間 / 右クエストトラッカー
+//      レアドロップバナー / レベルアップ演出 / 低HPビネット / 警官接近フラッシュ
 import {
-  COL, FONT, font, panel, inset, txt, bar, rrPath, starPath, fmtMoney, rgba, clamp, ease, rarityFill, measure,
+  COL, FONT, font, panel, txt, rrPath, starPath, rgba, clamp, ease, rarityFill, measure,
   getClock, clockStr, clockPhase, drawPhaseIcon, PHASE_INFO, rainbowGrad, RAINBOW,
 } from './theme.js';
 import {
-  guard, stats, expNeed, HERO_NAMES, skillDef, getItemDef, cooldown, skillMp, countItem,
-  drawSkillIco, drawItemIco, rarityInfo, snsTitleOf, drawPetArt, drawEnemyArt, mapInfo, regionColor,
+  guard, stats, skillDef, getItemDef,
+  drawSkillIco, drawItemIco, rarityInfo, drawPetArt, drawEnemyArt, mapInfo, regionColor,
 } from './deps.js';
-import { charName, currentJob, classOf, BAR_KEYS, SKILL_BAR_SIZE, call } from './v3deps.js';
 import { drawJobBubble, drawNavArrow, trackerHit } from './hud3.js';
+import { mapleFrame, maplePartsBack, maplePartsFront, quickSlots, minimapRect, hudLayout, QS } from './hudMaple.js';
 
 const W = 1280, H = 720;
 const hudState = new WeakMap();
 function hs(game) {
   let s = hudState.get(game);
   if (!s) {
-    s = { money: game.state?.money ?? 0, moneyShown: game.state?.money ?? 0, deltas: [], lastT: game.time || 0,
-      hpGhost: 1, wanted: 0, wantedT: 0 };
+    s = { lastT: game.time || 0 };
     hudState.set(game, s);
   }
   return s;
 }
 
-// スキルバー/ポーションスロットの画面矩形（UI のドラッグ&ドロップでも使う）
-export const SLOT = 46;
-let _slots = null;
-export function hudSlots() {
-  if (_slots) return _slots;
-  const gap = 6, sep = 20, n = SKILL_BAR_SIZE || 8;
-  const total = SLOT * (n + 2) + gap * n + sep;
-  // 左下ステータス（右端 x=384）に重ならないよう中央より少し右へ
-  const x0 = Math.max(400, Math.round(W / 2 - total / 2));
-  const y = H - SLOT - 22;
-  const out = [];
-  let x = x0;
-  for (let i = 0; i < n; i++) { out.push({ kind: 'skill', i, x, y, w: SLOT, h: SLOT, key: BAR_KEYS[i] || String(i + 1) }); x += SLOT + gap; }
-  x += sep - gap;
-  for (let i = 0; i < 2; i++) { out.push({ kind: 'potion', i, x, y, w: SLOT, h: SLOT, key: String(i + 1) }); x += SLOT + gap; }
-  _slots = out;
-  return out;
-}
+// スキルバー/ポーションスロットの画面矩形（UI のドラッグ&ドロップでも使う）= 右下のクイックスロット
+export const SLOT = QS;
+export function hudSlots() { return quickSlots(); }
 
 // main から直接呼んでも ui.draw() 経由でも良い（同一フレームで二重描画しないガード付き）
 export function drawHUD(ctx, game, _internal = false) {
@@ -55,14 +40,17 @@ export function drawHUD(ctx, game, _internal = false) {
     ui._hudHits = []; ui._hudFrameHits = fr;
     if (_internal) ui._hudByUi = true; else ui._hudByUi = false;
   }
-  const s = hs(game);
-  const dt = clamp((game.time || 0) - s.lastT, 0, 0.1);
-  s.lastT = game.time || 0;
+  const s0 = hs(game);
+  const dt = clamp((game.time || 0) - s0.lastT, 0, 0.1);
+  s0.lastT = game.time || 0;
+  let s = s0;
+  try { s = mapleFrame(game); } catch (e) { guard('hud.mapleFrame', () => { throw e; }); }
   const parts = [
-    ['vignette', drawVignette], ['copFlash', drawCopFlash], ['jobBubble', drawJobBubble], ['navArrow', drawNavArrow], ['minimap', drawMinimap], ['status', drawStatus],
-    ['skillbar', drawSkillBar], ['money', drawMoney], ['tracker', drawTracker], ['clock', drawClockBadge],
+    ['vignette', drawVignette], ['copFlash', drawCopFlash], ...maplePartsBack(), ['jobBubble', drawJobBubble], ['navArrow', drawNavArrow],
+    ['buffs', drawBuffBar], ['tracker', drawTracker], ['clock', drawClockBadge],
     ['radio', drawRadio], ['bookNew', drawBookToasts],
-    ['levelUp', drawLevelUp], ['banner', drawBanner], ['toasts', drawToasts], ['petFx', drawPetFx],
+    ...maplePartsFront(),
+    ['levelUp', drawLevelUp], ['banner', drawBanner], ['petFx', drawPetFx],
   ];
   const prof = game.debug?.profile ? (game.debug.hudProf ||= {}) : null; // デバッグ: 部位ごとの描画時間(ms, EMA)
   for (const [tag, fn] of parts) {
@@ -122,249 +110,10 @@ function drawCopFlash(ctx, game) {
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, 60);
 }
 
-// ---------- ミニマップ（左上） ----------
-function drawMinimap(ctx, game) {
-  const map = game.map;
-  const x = 12, y = 12, w = 260, h = 150;
-  panel(ctx, x, y, w, h, { r: 12, top: 'rgba(30,20,76,0.86)', bottom: 'rgba(14,9,40,0.86)', inner: 'rgba(25,211,197,0.45)' });
-  // ヘッダー（マップ名）
-  ctx.save();
-  rrPath(ctx, x + 6, y + 6, w - 12, 22, 8);
-  const hg = ctx.createLinearGradient(x, 0, x + w, 0);
-  hg.addColorStop(0, 'rgba(255,95,162,0.85)'); hg.addColorStop(1, 'rgba(123,47,247,0.85)');
-  ctx.fillStyle = hg; ctx.fill();
-  ctx.restore();
-  txt(ctx, '◆ ' + (map?.name || '???'), x + 14, y + 17.5, { size: 13, maxW: w - 30 });
-  if (!map) return;
-  const ix = x + 10, iy = y + 34, iw = w - 20, ih = h - 44;
-  inset(ctx, ix, iy, iw, ih, { r: 6, fill: 'rgba(0,0,0,0.35)' });
-  const mw = map.width || 2000, mh = map.height || 1200;
-  const sc = Math.min(iw / mw, ih / mh);
-  const ox = ix + (iw - mw * sc) / 2, oy = iy + (ih - mh * sc) / 2;
-  const P = (wx, wy) => [ox + wx * sc, oy + wy * sc];
-  ctx.save();
-  ctx.beginPath(); ctx.rect(ix, iy, iw, ih); ctx.clip();
-  // カメラ視野
-  if (game.cam) {
-    const [cx, cy] = P(game.cam.x, game.cam.y);
-    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(cx, cy, (game.W || W) * sc, (game.H || H) * sc);
-  }
-  // 地面
-  ctx.lineCap = 'round';
-  if (map.groundY != null) {
-    const [gx, gy] = P(0, map.groundY);
-    ctx.fillStyle = 'rgba(25,211,197,0.18)';
-    ctx.fillRect(gx, gy, mw * sc, (mh - map.groundY) * sc);
-    ctx.strokeStyle = COL.teal; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(gx, gy); ctx.lineTo(gx + mw * sc, gy); ctx.stroke();
-  }
-  // 足場
-  ctx.strokeStyle = 'rgba(200,240,255,0.85)'; ctx.lineWidth = 2;
-  for (const pf of map.platforms || []) {
-    const [a, b] = P(pf.x, pf.y);
-    ctx.beginPath(); ctx.moveTo(a, b); ctx.lineTo(a + pf.w * sc, b); ctx.stroke();
-  }
-  for (const wl of map.walls || []) {
-    const [a, b] = P(wl.x, wl.y);
-    ctx.fillStyle = 'rgba(200,240,255,0.35)';
-    ctx.fillRect(a, b, wl.w * sc, wl.h * sc);
-  }
-  // ロープ
-  ctx.strokeStyle = 'rgba(255,210,120,0.7)'; ctx.lineWidth = 1;
-  for (const r of map.ropes || []) {
-    const [a, b] = P(r.x, r.top); const [, c] = P(r.x, r.bottom);
-    ctx.beginPath(); ctx.moveTo(a, b); ctx.lineTo(a, c); ctx.stroke();
-  }
-  const t = game.time || 0;
-  // ポータル
-  for (const po of map.portals || []) {
-    const [a, b] = P(po.x, po.y - 30);
-    ctx.fillStyle = 'rgba(127,233,255,0.35)';
-    ctx.beginPath(); ctx.arc(a, b, 5 + Math.sin(t * 4) * 1, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#7FE9FF'; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(a, b, 3.5, 0, Math.PI * 2); ctx.stroke();
-  }
-  const dot = (wx, wy, col, r = 2.6) => {
-    const [a, b] = P(wx, wy - 20);
-    ctx.fillStyle = col;
-    ctx.beginPath(); ctx.arc(a, b, r, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.lineWidth = 1; ctx.stroke();
-  };
-  const npcs = (game.npcs && game.npcs.length ? game.npcs : map.npcs) || [];
-  for (const n of npcs) if (!n.hidden) dot(n.x, n.y ?? map.groundY ?? 0, '#5dff7a', 2.8);
-  // 敵（警官はミニマップに出さない：画面端フラッシュで表現）
-  for (const e of game.enemies || []) {
-    if (!e || e.dead) continue;
-    const d = e.def || {};
-    if (d.isCop || d.ai === 'cop') continue;
-    dot(e.x, e.y, d.boss ? '#ff2ea6' : '#ff4d4d', d.boss ? 4 : 2.3);
-  }
-  const pet = game.pet;
-  if (pet && Number.isFinite(pet.x) && Number.isFinite(pet.y)) {
-    const [a, b] = P(pet.x, pet.y - 20);
-    ctx.fillStyle = '#ff6ad5';
-    ctx.beginPath(); ctx.arc(a, b, 2.8, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.stroke();
-  }
-  const p = game.player;
-  if (p) {
-    const [a, b] = P(p.x, p.y - 20);
-    const pr = 3.6 + Math.sin(t * 6) * 0.8;
-    ctx.fillStyle = 'rgba(255,230,80,0.35)';
-    ctx.beginPath(); ctx.arc(a, b, pr + 3, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#ffe14d';
-    ctx.beginPath(); ctx.arc(a, b, pr, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#3a2a00'; ctx.lineWidth = 1; ctx.stroke();
-  }
-  ctx.restore();
-}
-
-// ---------- 左下ステータス ----------
-function drawStatus(ctx, game, s, dt) {
-  const st = game.state, cs = stats(game);
-  const x = 12, y = H - 120, w = 372, h = 100;
-  panel(ctx, x, y, w, h, { r: 16 });
-  // Lv バッジ
-  const bx = x + 46, by = y + 50;
-  ctx.save();
-  const g = ctx.createRadialGradient(bx - 8, by - 10, 4, bx, by, 36);
-  g.addColorStop(0, '#ffe78a'); g.addColorStop(0.55, COL.orange); g.addColorStop(1, '#b8325e');
-  ctx.beginPath(); ctx.arc(bx, by, 34, 0, Math.PI * 2);
-  ctx.fillStyle = g; ctx.shadowColor = COL.pink; ctx.shadowBlur = 14; ctx.fill();
-  ctx.shadowBlur = 0; ctx.lineWidth = 3; ctx.strokeStyle = '#fff'; ctx.stroke();
-  ctx.restore();
-  txt(ctx, 'Lv.', bx, by - 15, { size: 13, align: 'center', color: '#fff7d0' });
-  txt(ctx, st.level ?? 1, bx, by + 8, { size: 28, align: 'center', sw: 5, stroke: '#5a1030' });
-  // 名前
-  const name = charName(st) || HERO_NAMES[st.heroId] || 'HERO';
-  const nmW = Math.min(150, measure(ctx, name, 17));
-  txt(ctx, name, x + 92, y + 20, { size: 17, color: '#fff', maxW: 150 });
-  // 職名（currentJob(state).title）
-  const job = currentJob(st);
-  const jt = job?.title || job?.name || '';
-  const nx = x + 92 + nmW + 8;
-  if (jt) {
-    const tw = Math.min(w - (nx - x) - 12, measure(ctx, jt, 11) + 18);
-    const jc = job.aura || COL.teal;
-    ctx.save();
-    rrPath(ctx, nx, y + 11, tw, 19, 9.5);
-    const jg = ctx.createLinearGradient(nx, 0, nx + tw, 0);
-    jg.addColorStop(0, rgba(jc, 0.85)); jg.addColorStop(1, 'rgba(60,20,110,0.85)');
-    ctx.fillStyle = jg; ctx.fill();
-    ctx.lineWidth = 1.2; ctx.strokeStyle = '#fff'; ctx.stroke();
-    ctx.restore();
-    txt(ctx, jt, nx + tw / 2, y + 21, { size: 11, align: 'center', color: '#fff', sw: 2.5, maxW: tw - 10 });
-  }
-  // パネル上: クラス名 ＋ SNS 称号
-  const cls = classOf(st.heroId)?.name || '';
-  const title = snsTitleOf(st);
-  const ttl = call('achievements', 'currentTitle', [st], null)?.name || null;
-  const tagParts = [cls, ttl || title.name].filter(Boolean);
-  if (tagParts.length) {
-    const label = tagParts.join('  ・  ');
-    const tw = Math.min(w, measure(ctx, label, 11) + 26);
-    ctx.save();
-    rrPath(ctx, x + 8, y - 22, tw, 20, 10);
-    ctx.fillStyle = 'rgba(10,4,30,0.72)'; ctx.fill();
-    ctx.lineWidth = 1.3; ctx.strokeStyle = rainbowGrad(ctx, x, 0, x + tw, 0, (game.time || 0) * 0.15); ctx.stroke();
-    ctx.restore();
-    txt(ctx, label, x + 21, y - 11.5, { size: 11, color: title.color || '#ffe3f7', sw: 2.5, maxW: tw - 24 });
-  }
-  // バー
-  const maxHp = Math.max(1, cs.maxHp || 1), maxMp = Math.max(1, cs.maxMp || 1);
-  const hp = clamp(st.hp ?? maxHp, 0, maxHp), mp = clamp(st.mp ?? maxMp, 0, maxMp);
-  const need = Math.max(1, expNeed(st.level || 1));
-  const hr = hp / maxHp;
-  s.hpGhost = s.hpGhost > hr ? Math.max(hr, s.hpGhost - dt * 0.5) : hr;
-  const bx0 = x + 118, bw = w - 118 - 14;
-  const rows = [
-    ['HP', hr, COL.hp, COL.hp2, `${Math.ceil(hp)} / ${maxHp}`, s.hpGhost],
-    ['MP', mp / maxMp, COL.mp, COL.mp2, `${Math.floor(mp)} / ${maxMp}`, null],
-    ['EXP', (st.exp || 0) / need, COL.exp, COL.exp2, `${Math.floor(st.exp || 0)} / ${need}  (${((st.exp || 0) / need * 100).toFixed(1)}%)`, null],
-  ];
-  rows.forEach(([lab, r, c1, c2, val, ghost], i) => {
-    const yy = y + 34 + i * 21;
-    txt(ctx, lab, x + 92, yy + 8, { size: 12, color: c2, sw: 3 });
-    bar(ctx, bx0, yy, bw, 16, r, c1, c2, { ghost });
-    txt(ctx, val, bx0 + bw / 2, yy + 8.5, { size: 11.5, align: 'center', sw: 3 });
-  });
-  // 画面最下部の EXP ストリップ（メイプル風）
-  const er = clamp((st.exp || 0) / need, 0, 1);
-  ctx.fillStyle = 'rgba(0,0,0,0.55)';
-  ctx.fillRect(0, H - 6, W, 6);
-  const eg = ctx.createLinearGradient(0, 0, W, 0);
-  eg.addColorStop(0, COL.exp); eg.addColorStop(1, COL.orange);
-  ctx.fillStyle = eg;
-  ctx.fillRect(0, H - 6, W * er, 6);
-  ctx.fillStyle = 'rgba(255,255,255,0.4)';
-  ctx.fillRect(0, H - 6, W * er, 2);
-}
-
-// ---------- 下中央スキルバー ----------
-function drawSkillBar(ctx, game) {
-  const st = game.state;
-  const slots = hudSlots();
-  const first = slots[0], last = slots[slots.length - 1];
-  panel(ctx, first.x - 12, first.y - 12, last.x + last.w - first.x + 24, SLOT + 26, {
-    r: 14, top: 'rgba(40,28,96,0.78)', bottom: 'rgba(16,10,44,0.82)', inner: 'rgba(255,95,162,0.4)',
-  });
-  const t = game.time || 0;
-  for (const sl of slots) {
-    inset(ctx, sl.x, sl.y, sl.w, sl.h, { r: 10, fill: 'rgba(5,3,22,0.7)', stroke: sl.kind === 'skill' ? 'rgba(25,211,197,0.6)' : 'rgba(255,95,162,0.6)' });
-    const cx = sl.x + sl.w / 2, cy = sl.y + sl.h / 2;
-    if (sl.kind === 'skill') {
-      const id = st.skillBar?.[sl.i];
-      const sk = skillDef(id);
-      if (sk) {
-        const lv = st.skills?.[id] || 0;
-        drawSkillIco(ctx, sk, cx, cy, 39);
-        const needMp = skillMp(sk, lv);
-        const dark = lv <= 0 || (st.mp ?? 0) < needMp;
-        if (dark) {
-          rrPath(ctx, sl.x, sl.y, sl.w, sl.h, 10);
-          ctx.fillStyle = 'rgba(10,10,40,0.62)'; ctx.fill();
-          if (lv > 0) txt(ctx, 'MP', cx, cy + 12, { size: 10, align: 'center', color: COL.mp2, sw: 3 });
-        }
-        const cd = cooldown(id);
-        if (cd && cd.left > 0 && cd.total > 0) {
-          const r = clamp(cd.left / cd.total, 0, 1);
-          ctx.save();
-          rrPath(ctx, sl.x, sl.y, sl.w, sl.h, 10); ctx.clip();
-          ctx.beginPath(); ctx.moveTo(cx, cy);
-          ctx.arc(cx, cy, sl.w, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * r, false);
-          ctx.closePath();
-          ctx.fillStyle = 'rgba(0,0,0,0.62)'; ctx.fill();
-          ctx.restore();
-          txt(ctx, cd.left >= 10 ? Math.ceil(cd.left) : cd.left.toFixed(1), cx, cy, { size: 16, align: 'center', color: '#fff' });
-        }
-      }
-    } else {
-      const id = st.potionBar?.[sl.i];
-      const it = getItemDef(id);
-      if (it) {
-        const n = countItem(st, id);
-        drawItemIco(ctx, it, cx, cy, 37);
-        if (n <= 0) { rrPath(ctx, sl.x, sl.y, sl.w, sl.h, 10); ctx.fillStyle = 'rgba(10,10,40,0.6)'; ctx.fill(); }
-        txt(ctx, n, sl.x + sl.w - 5, sl.y + sl.h - 9, { size: 13, align: 'right', color: n > 0 ? '#fff' : COL.bad });
-      }
-    }
-    // キーラベル
-    ctx.save();
-    rrPath(ctx, sl.x - 3, sl.y - 5, 18, 16, 5);
-    ctx.fillStyle = sl.kind === 'skill' ? COL.teal : COL.pink; ctx.fill();
-    ctx.restore();
-    txt(ctx, sl.key, sl.x + 6, sl.y + 3.5, { size: 11, align: 'center', sw: 2.5 });
-  }
-  // （旧: 町ではスキルの欄を斜線で覆って「町ではスキル不可」と出していた。今は町でもスキルを使える）
-  void t;
-}
-
-// ---------- 右上 バフ・召喚獣の残り時間（メイプル風）＋所持金の増減トースト ----------
-// 所持金そのものは持ち物画面に出すので HUD には出さない。手配度★も出さない（警察の仕組みは廃止予定）
+// ---------- 右上 バフ・召喚獣の残り時間（メイプル風） ----------
+// 所持金は持ち物画面に、増えた分は左下の取得ログに出す。手配度★は出さない（警察の仕組みは廃止）
 export const BUFF_ICON = 34;
-const BUFF_GAP = 5, BUFF_PER_ROW = 12, BUFF_TOP = 12;
+const BUFF_GAP = 5, BUFF_PER_ROW = 12;
 const BUFF_FX = [
   ['atkPct', '攻撃力', true], ['defPct', '防御力', true], ['speedPct', '移動速度', true], ['attackSpeedPct', '攻撃速度', true],
   ['critAdd', 'クリティカル率', true], ['luckAdd', '幸運', false],
@@ -454,6 +203,7 @@ function drawBuffBar(ctx, game) {
   if (ui) ui._buffBarBottom = 0;
   if (!items.length) return 0;
   const t = game.time || 0, sz = BUFF_ICON;
+  const BUFF_TOP = hudLayout().buffTop || 12; // タッチ端末では #touch のメニューの下
   const m = game.input?.mouse;
   let hov = null;
   items.forEach((e, i) => {
@@ -475,28 +225,6 @@ function drawBuffBar(ctx, game) {
   }
   return bottom;
 }
-function drawMoney(ctx, game, s, dt) {
-  const bottom = drawBuffBar(ctx, game) || 0;
-  const money = game.state.money ?? 0;
-  if (money !== s.money) {
-    s.deltas.push({ v: money - s.money, t: 0 });
-    if (s.deltas.length > 4) s.deltas.shift();
-    s.money = money;
-  }
-  // 増減アニメ（+$100 など）。バフの列の下に出す
-  const rx = W - 16, y0 = Math.max(26, bottom + 12);
-  s.deltas.forEach((d, i) => {
-    d.t += dt;
-    const a = 1 - clamp((d.t - 1.0) / 0.6, 0, 1);
-    if (a <= 0) return;
-    const yy = y0 + i * 20 - Math.min(d.t, 1) * 4;
-    txt(ctx, (d.v > 0 ? '+' : '-') + fmtMoney(Math.abs(d.v)), rx, yy, {
-      size: 17, align: 'right', color: d.v > 0 ? COL.money : COL.bad, alpha: a, sw: 4, stroke: d.v > 0 ? COL.moneyShadow : '#3d0b14',
-    });
-  });
-  s.deltas = s.deltas.filter((d) => d.t < 1.6);
-}
-
 // ---------- 右側 クエストトラッカー ----------
 function drawTracker(ctx, game) {
   const list = guard('missions.tracked', () => game.missions?.tracked?.(), []) || [];
@@ -507,22 +235,24 @@ function drawTracker(ctx, game) {
   // 高さを計算
   const trackedId = game.state?.trackedMission;
   const items = list.slice(0, 4).map((m, i) => ({ id: m.id, name: m.name || '', lines: (m.lines || []).slice(0, 4), done: !!(m.done || m.complete), tracked: trackedId ? m.id === trackedId : i === 0 }));
-  const hgt = 34 + items.reduce((a, m) => a + 22 + m.lines.length * 19 + 6, 0);
+  const hgt = 32 + items.reduce((a, m) => a + 22 + m.lines.length * 19 + 6, 0);
   if (game.ui) game.ui._trackerBottom = y + hgt; // コンボ表示（render/cutin.js）はこの下に出す
+  // メイプルのクエストヘルパー風: 半透明の黒・角の丸みは小さく・上に細い見出しの帯
   ctx.save();
-  rrPath(ctx, x, y, w, hgt, 12);
+  rrPath(ctx, x, y, w, hgt, 5);
   const g = ctx.createLinearGradient(x, 0, x + w, 0);
-  g.addColorStop(0, 'rgba(0,0,0,0.25)'); g.addColorStop(1, 'rgba(10,4,30,0.62)');
+  g.addColorStop(0, 'rgba(0,0,0,0.3)'); g.addColorStop(1, 'rgba(0,0,0,0.55)');
   ctx.fillStyle = g; ctx.fill();
-  ctx.lineWidth = 1.5; ctx.strokeStyle = 'rgba(255,95,162,0.55)'; ctx.stroke();
+  ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.stroke();
+  ctx.beginPath(); ctx.rect(x, y, w, 26); ctx.clip();
+  rrPath(ctx, x, y, w, 26, 5);
+  const hg = ctx.createLinearGradient(x, 0, x + w, 0);
+  hg.addColorStop(0, 'rgba(255,95,162,0.85)'); hg.addColorStop(1, 'rgba(123,47,247,0.5)');
+  ctx.fillStyle = hg; ctx.fill();
   ctx.restore();
-  ctx.save();
-  rrPath(ctx, x + 8, y + 7, 92, 20, 10);
-  ctx.fillStyle = COL.pink; ctx.fill();
-  ctx.restore();
-  txt(ctx, 'MISSION', x + 54, y + 17.5, { size: 12, align: 'center', sw: 3 });
-  txt(ctx, 'クリックで詳細 [J]', x + w - 12, y + 17.5, { size: 10.5, align: 'right', color: COL.dim, sw: 2.5 });
-  y += 36;
+  txt(ctx, 'MISSION', x + 12, y + 13.5, { size: 12, sw: 3 });
+  txt(ctx, 'クリックで詳細 [J]', x + w - 12, y + 13.5, { size: 10.5, align: 'right', color: COL.dim, sw: 2.5 });
+  y += 34;
   for (const m of items) {
     const top = y;
     txt(ctx, (m.tracked ? '⌖ ' : m.done ? '★ ' : '◆ ') + m.name, x + 12, y + 8, { size: 14, color: m.done ? '#c6ff6a' : m.tracked ? '#7fe9ff' : COL.gold, maxW: w - 24 });
@@ -537,35 +267,6 @@ function drawTracker(ctx, game) {
     }
     trackerHit(ctx, game, m, { x: x + 4, y: top - 2, w: w - 8, h: y - top + 4 });
     y += 6;
-  }
-}
-
-// ---------- トースト（上中央） ----------
-function drawToasts(ctx, game, s, dt) {
-  const ui = game.ui;
-  const list = ui?.toasts;
-  if (!list || !list.length) return;
-  if (ui.jobFx && ui.jobFx.t < (ui.jobFx.life || 5) - 0.7) return; // 転職演出中は隠す（ui.update で時間も止めている）
-  let y = 96;
-  for (const tt of list) {
-    const a = clamp(tt.t / 0.2, 0, 1) * (1 - clamp((tt.t - tt.life + 0.5) / 0.5, 0, 1));
-    if (a <= 0) continue;
-    const label = tt.count > 1 ? `${tt.text}  ×${tt.count}` : tt.text;
-    const tw = Math.min(W - 40, measure(ctx, label, 16) + 44);
-    const x = W / 2 - tw / 2;
-    const yy = y - (1 - ease(tt.t / 0.25)) * 14;
-    ctx.save();
-    ctx.globalAlpha = a;
-    rrPath(ctx, x, yy, tw, 32, 16);
-    ctx.fillStyle = 'rgba(14,8,40,0.82)'; ctx.fill();
-    ctx.lineWidth = 2; ctx.strokeStyle = tt.color || COL.teal;
-    ctx.shadowColor = tt.color || COL.teal; ctx.shadowBlur = 10; ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = tt.color || COL.teal;
-    ctx.beginPath(); ctx.arc(x + 17, yy + 16, 4.5, 0, Math.PI * 2); ctx.fill();
-    ctx.restore();
-    txt(ctx, label, x + 30, yy + 16.5, { size: 16, color: '#fff', alpha: a, maxW: tw - 44 });
-    y += 38;
   }
 }
 
@@ -702,63 +403,65 @@ function drawLevelUp(ctx, game) {
 
 // ---------- 時計＋エリアバッジ（ミニマップ右） ----------
 function drawClockBadge(ctx, game) {
-  const x = 284, y = 12;
+  // ミニマップ（大きさを切り替えられる）の右に並べる
+  const mm = minimapRect(game);
+  const x = mm.x + mm.w + 8, y = 8;
   const c = getClock(game);
   const t = game.time || 0;
   let bx = x, by = y;
   if (c != null) {
     const ph = clockPhase(c), info = PHASE_INFO[ph];
-    const w = 168, h = 36;
+    const w = 150, h = 26;
     ctx.save();
-    rrPath(ctx, bx, by, w, h, 18);
+    rrPath(ctx, bx, by, w, h, 5);
     const g = ctx.createLinearGradient(bx, 0, bx + w, 0);
     g.addColorStop(0, ph === 'night' ? 'rgba(20,24,80,0.88)' : ph === 'dusk' ? 'rgba(110,40,80,0.85)' : ph === 'dawn' ? 'rgba(110,60,110,0.85)' : 'rgba(40,70,140,0.82)');
     g.addColorStop(1, 'rgba(14,9,40,0.85)');
     ctx.fillStyle = g; ctx.fill();
     ctx.lineWidth = 1.5; ctx.strokeStyle = rgba(info.color, 0.8); ctx.stroke();
     ctx.restore();
-    drawPhaseIcon(ctx, ph, bx + 20, by + h / 2, 8, t);
+    drawPhaseIcon(ctx, ph, bx + 14, by + h / 2, 6.5, t);
     ctx.save();
-    ctx.font = `italic 900 18px ${FONT}`;
+    ctx.font = `italic 900 14px ${FONT}`;
     ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
     ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(5,3,20,0.9)';
     const s0 = clockStr(c);
-    ctx.strokeText(s0, bx + 38, by + h / 2 + 1);
-    ctx.fillStyle = '#fff'; ctx.fillText(s0, bx + 38, by + h / 2 + 1);
+    ctx.strokeText(s0, bx + 28, by + h / 2 + 1);
+    ctx.fillStyle = '#fff'; ctx.fillText(s0, bx + 28, by + h / 2 + 1);
     ctx.restore();
     txt(ctx, info.name, bx + w - 12, by + h / 2 + 1, { size: 10, align: 'right', color: info.color, sw: 2.5 });
-    by += h + 6;
+    by += h + 4;
   }
   const map = game.map;
   if (!map) return;
   if (map.town) {
-    const w = 168, h = 26;
+    const w = 150, h = 20;
     const pulse = 0.5 + 0.5 * Math.sin(t * 2.5);
     ctx.save();
-    rrPath(ctx, bx, by, w, h, 13);
+    rrPath(ctx, bx, by, w, h, 5);
     const g = ctx.createLinearGradient(bx, 0, bx + w, 0);
     g.addColorStop(0, 'rgba(25,211,197,0.9)'); g.addColorStop(1, 'rgba(60,140,255,0.85)');
-    ctx.fillStyle = g; ctx.shadowColor = COL.teal; ctx.shadowBlur = 6 + pulse * 8; ctx.fill();
+    ctx.fillStyle = g; ctx.shadowColor = COL.teal; ctx.shadowBlur = 3 + pulse * 5; ctx.fill();
     ctx.shadowBlur = 0; ctx.lineWidth = 1.5; ctx.strokeStyle = '#fff'; ctx.stroke();
     ctx.restore();
     // 盾
     ctx.save();
-    ctx.translate(bx + 16, by + h / 2);
+    ctx.translate(bx + 13, by + h / 2); ctx.scale(0.75, 0.75);
     ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(7, -5); ctx.lineTo(6, 3); ctx.lineTo(0, 8); ctx.lineTo(-6, 3); ctx.lineTo(-7, -5); ctx.closePath();
     ctx.fillStyle = '#fff'; ctx.fill();
     ctx.restore();
-    txt(ctx, 'SAFE ZONE / TOWN', bx + 30, by + h / 2 + 1, { size: 12, color: '#fff', sw: 3, stroke: '#063a4a', weight: 900 });
+    txt(ctx, 'SAFE ZONE / TOWN', bx + 25, by + h / 2 + 1, { size: 10.5, color: '#fff', sw: 3, stroke: '#063a4a', weight: 900 });
   } else if (map.levelRange || map.region) {
-    const w = 168, h = 26;
+    const w = 150, h = 20;
     const col = regionColor(mapInfo(map.id).region);
     ctx.save();
-    rrPath(ctx, bx, by, w, h, 13);
+    rrPath(ctx, bx, by, w, h, 5);
     ctx.fillStyle = 'rgba(14,9,40,0.82)'; ctx.fill();
     ctx.lineWidth = 1.5; ctx.strokeStyle = rgba(col, 0.9); ctx.stroke();
     ctx.restore();
-    txt(ctx, 'FIELD', bx + 12, by + h / 2 + 1, { size: 11, color: col, sw: 3, weight: 900 });
+    txt(ctx, 'FIELD', bx + 12, by + h / 2 + 1, { size: 10, color: col, sw: 3, weight: 900 });
     const lr = map.levelRange;
-    if (lr) txt(ctx, `推奨 Lv${lr[0]}-${lr[1]}`, bx + w - 12, by + h / 2 + 1, { size: 12, align: 'right', color: (game.state.level || 1) < lr[0] ? COL.bad : '#fff', sw: 3 });
+    if (lr) txt(ctx, `推奨 Lv${lr[0]}-${lr[1]}`, bx + w - 12, by + h / 2 + 1, { size: 11, align: 'right', color: (game.state.level || 1) < lr[0] ? COL.bad : '#fff', sw: 3 });
   }
 }
 
@@ -799,7 +502,7 @@ function drawBookToasts(ctx, game) {
   const list = game.ui?.bookToasts;
   if (!list?.length) return;
   const t0 = game.time || 0;
-  let y = H - 150;
+  let y = hudLayout().qy - 4 - 6 - 24 - 10 - 58; // 右下のメニューボタン列の上
   for (let i = list.length - 1; i >= 0; i--) {
     const b = list[i];
     const a = clamp(b.t / 0.2, 0, 1) * (1 - clamp((b.t - b.life + 0.5) / 0.5, 0, 1));

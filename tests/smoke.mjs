@@ -540,6 +540,18 @@ async function main() {
 
     // HUD は1フレームに1回だけ描く（main の drawHUD と ui.draw の二重描画防止）
     await check('HUD は main から1フレーム1回描画（二重描画なし）', await g(() => { const u = window.game.ui; return u._hudFrame === window.game.frameNo && u._hudByUi === false; }));
+    // メイプル風 HUD: 右下のクイックスロット・取得ログ・メニューボタン
+    const qs = await g(async () => (await import('./src/ui/hud.js')).hudSlots().map((s) => ({ kind: s.kind, x: s.x, y: s.y })));
+    await check('クイックスロット: スキル8＋消耗品2 が右下に', qs.filter((s) => s.kind === 'skill').length === 8 && qs.filter((s) => s.kind === 'potion').length === 2 && qs.every((s) => s.x > 900 && s.y > 600), JSON.stringify(qs.slice(0, 2)));
+    await g(() => { const G = window.game; G.state.money += 25; G.events.emit('moneyPicked', { amount: 25 }); G.events.emit('itemPicked', { id: 'potion_red', qty: 1 }); });
+    await frames(3);
+    const logs = await g(async () => (await import('./src/ui/hudMaple.js')).hudLogLines(window.game));
+    await check('取得ログ: お金・アイテムをメイプルの文の形で出す', logs.includes('ドルを 25 獲得しました。') && logs.some((l) => /^アイテムを獲得しました（.+）$/.test(l)), JSON.stringify(logs.slice(-3)));
+    await g(() => window.game.ui.closeAll());
+    await frames(3);
+    await clickHit('hud:menu:inventory');
+    await check('右下のメニューボタンで持ち物が開く', await g(() => window.game.ui.isOpen('inventory')));
+    await g(() => window.game.ui.closeAll());
     // 昼夜
     const ck0 = await g(() => window.game.clock);
     await page.waitForTimeout(1000);
@@ -994,6 +1006,8 @@ async function main() {
     await g(() => window.game.missions.accept('m01_welcome'));
     await g(() => window.game.ui.closeAll());
     await page.waitForTimeout(400);
+    // 重い通し実行ではフレームが遅れることがあるので、少し待って確かめる
+    await waitFor(() => (window.game.ui.hits || []).some((h) => h.id === 'hud:nav'), 3000);
     await check('ナビ矢印（画面端）が出る（別マップの目的地 → ポータル方向）', await hasHit('hud:nav'));
     await shot('v3_nav_arrow');
     await clickHit('hud:track:m01_welcome');
