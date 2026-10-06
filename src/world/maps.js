@@ -532,6 +532,19 @@ const NPC = {
     look: { body: 'f', skin: '#bff6ff', hair: 'long', hairColor: '#b6ff3d', eyeColor: '#ffffff' },
     equip: { top: L('suit', '#e8ffff', '#b6ff3d'), bottom: L('suitPants', '#e8ffff'), shoes: L('loafers', '#e8ffff'), accessory: L('halo', '#b6ff3d') },
     dialog: ['……接続者を確認。演算を開始する。'] },
+  // ---------------- v4: 5次転職教官（第2ワールドのアーク・シティ w2_arkcity に置く。配置はワールド担当） ----------------
+  job_nyx: { id: 'job_nyx', name: 'ニクス', title: '5次転職教官 / ストリートスター', jobInstructor: true,
+    look: { body: 'f', skin: '#f2cfb4', hair: 'long', hairColor: '#ff4fd8', eyeColor: '#9ffcff' },
+    equip: { hat: L('headphones', '#1d1030', '#9ffcff'), top: L('leatherJacket', '#1d1030', '#ff4fd8'), bottom: L('skirt', '#1d1030'), shoes: L('boots', '#ff4fd8'), accessory: L('sunglasses', '#9ffcff'), weapon: L('pistol', '#ff4fd8', '#9ffcff') },
+    dialog: ['こちら NYX FM。次元の向こうからでも、いい音は届くのよ。', 'Lv120 になったら頭の上の吹き出しを押して。次元の試練を流してあげる。'] },
+  job_garo: { id: 'job_garo', name: 'ガロウ', title: '5次転職教官 / ストリートブロウラー', jobInstructor: true,
+    look: { body: 'm', skin: '#9a6440', hair: 'wolf', hairColor: '#ffb347', eyeColor: '#9d7bff' },
+    equip: { hat: L('bandana', '#9d7bff', '#ffb347'), top: L('armorVest', '#2a2238', '#ffb347'), bottom: L('trackPants', '#2a2238', '#9d7bff'), shoes: L('boots', '#1d1d24'), accessory: L('goldChain', '#ffd166') },
+    dialog: ['ゼロ・グラビティ・リングへようこそ。ここじゃ重力も遠慮する。', '拳で天を割るか、次元を走り抜けるか。どっちも見せてもらおう。'] },
+  job_akasha: { id: 'job_akasha', name: 'アカシャ', title: '5次転職教官 / ストリートハッカー', jobInstructor: true, alpha: 0.8,
+    look: { body: 'f', skin: '#d8fff4', hair: 'long', hairColor: '#3dffc8', eyeColor: '#ffcf3d' },
+    equip: { top: L('suit', '#eafff8', '#3dffc8'), bottom: L('suitPants', '#eafff8'), shoes: L('loafers', '#eafff8'), accessory: L('halo', '#ffcf3d'), weapon: L('staff', '#3dffc8', '#ffcf3d') },
+    dialog: ['……方舟都市の記録へようこそ。あなたの行は、まだ白紙。'] },
 
   // ---------------- v3: 夜だけ現れる NPC / 店（hours:[from, to]、20時〜翌5時 = 夜） ----------------
   night_marin: { id: 'night_marin', name: 'DJマリン', title: '🌙 焚き火ビーチバー', hours: [20, 5],

@@ -7,6 +7,7 @@ import { rgba, shade, starPath, makeCanvas, clamp, mix } from './util.js';
 import { mapleWordImage, mapleHasGlyphs } from './mapleFont.js';
 import { drawCharacter, lastDrawnArgs } from './character.js';
 import { resolveSkillStyle, gearTrail, RAINBOW, rainbowAt, BRANCH_STYLE, jobStyleOf, FXA } from './fxStyle.js';
+import { ULT_FX_TYPES } from './fxUlt.js';
 
 const PI = Math.PI, TAU = PI * 2;
 const ease = (k) => 1 - (1 - k) * (1 - k);
@@ -973,6 +974,8 @@ export const FX_TYPES = {
     },
   },
 };
+// 5次転職（画面全体攻撃・通常攻撃強化）の演出は render/fxUlt.js
+Object.assign(FX_TYPES, ULT_FX_TYPES);
 
 // ================================================================ 系統別の重ね掛け（themeSpawn）
 const CAST_TYPES = { slash: 1, muzzle: 1, dash: 1, buff: 1 };
@@ -1042,11 +1045,12 @@ export function themeSpawn(game, e, spawn, impactFn) {
     return;
   }
 
-  // ---- カットイン（4次の攻撃スキル）・インパクト
+  // ---- カットイン（4次・5次の攻撃スキル）・インパクト
   const attackKind = sk.kind === 'melee' || sk.kind === 'aoe' || sk.kind === 'projectile' || sk.kind === 'dash';
   if (cast && attackKind && e.type !== 'dash') {
     const tnow = now();
-    if (tier >= 4 && tnow - lastCutin > 5 && game.settings?.cutin !== false && (e.type !== 'muzzle' || sk.kind === 'projectile')) {
+    // 画面全体攻撃（5次）は skills.js が専用のカットインを出すので、ここでは出さない
+    if (tier >= 4 && !sk.screen && tnow - lastCutin > 5 && game.settings?.cutin !== false && (e.type !== 'muzzle' || sk.kind === 'projectile')) {
       lastCutin = tnow;
       spawn(game, 'cutin', 0, 0, { name: sk.name, color: BRANCH_STYLE[style.branch]?.col || e.color, sub: BRANCH_STYLE[style.branch]?.sub, branch: style.branch, _child: true });
     }

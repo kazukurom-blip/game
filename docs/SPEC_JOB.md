@@ -132,3 +132,45 @@ skill.move = {
   `{type, power, distance, cooldown, invuln, afterBuff|null, arrivalBlast|null, enhancedBy:[skillId], backShot?, push?, contact?, lift?, time?, gravityScale?, airOnly?, groundOnly?, vertical?}`
 - useSkill が自動で行うこと: `invuln > 0` なら無敵付与、エフェクト `dash`、`afterBuff` のバフ付与、`arrivalBlast` の範囲攻撃（**doMoveSkill が同期的に位置を移動させた後の位置**で判定。テレポートは doMoveSkill 内で即座に x/y を書き換えること）。
 - player.js 側で実装すること: 実際の移動（teleport は壁・マップ端を考慮して即時移動、flashJump は vx/vy 設定、rush/glide/wheelDash は time 秒間の速度制御）、backShot/push/contact の攻撃判定（`playerAttackArea` を使用）、着地/空中判定（`onGround`）。
+
+---
+
+## 5次転職（v4 / Lv120。docs/SPEC_V4.md）
+
+- `JOB_TIERS = [0, 10, 30, 60, 100, 120]`。各系統に 5 次の職が 1 つ（合計 30 職）。4 次の職の `from` から続く。
+- 5 次の職は、4 次と同じく系統の攻撃モーション（`JOB_MOTIONS[branch]`）を使い、オーラは段階 5（描画は最大の段階 4 で頭打ち）。
+- SP: `state.spByTier = {2, 3, 4, 5}`。5 次スキルは 5 次プールの SP を使う。旧セーブ（5 の枠が無い）は `migrateState` で `5: 0` を補う。
+- スキルの窓は「基本・1次〜5次」のタブと、5 つの SP 表示（基本+1次・2次〜5次）。
+
+### 5次の職
+
+| jobId | 名前 | 系統 | from | 称号 | オーラ | 教官（町） | 試練 |
+|---|---|---|---|---|---|---|---|
+| `luna_dimension_desperado` | ディメンション・デスペラード | ガンスリンガー | luna_galaxy_outlaw | 次元のデスペラード | #ff4fd8 | ニクス `job_nyx`（w2_arkcity） | reach w2_arkcity_f2 / killAny×40@w2_arkcity / 地域のボス |
+| `luna_hyper_icon` | ハイパー・アイコン | ネオンダンサー | luna_cosmo_star | 全次元のアイコン | #9ffcff | ニクス | reach w2_arkcity_f3 / killAny×50 / 地域のボス |
+| `jin_neon_emperor` | ネオン天帝 | ストリートファイター | jin_vice_legend | 次元を統べる天帝 | #ffb347 | ガロウ `job_garo`（w2_arkcity） | reach w2_arkcity_f1 / killAny×45 / 地域のボス |
+| `jin_dimension_racer` | ディメンション・レーサー | ナイトレーサー | jin_warp_rider | 次元を駆ける者 | #9d7bff | ガロウ | reach w2_arkcity_f4 / killAny×45 / 地域のボス |
+| `hk_demiurge` | デミウルゴス・コード | ネットランナー | hk_cyber_oracle | 世界を書き換える者 | #3dffc8 | アカシャ `job_akasha`（w2_arkcity） | reach w2_arkcity_f2 / killAny×40 / 地域のボス |
+| `hk_star_admiral` | スターフリート・アドミラル | ドローンマスター | hk_orbital_master | 星間艦隊の提督 | #ffcf3d | アカシャ | reach w2_arkcity_f3 / killAny×50 / 地域のボス |
+
+### 試練の目的 `killAny`（敵の ID に依らない書き方。systems/missions.js）
+
+```js
+{ type: 'killAny', count, area: 'w2_arkcity', mapId?: 'w2_arkcity_f2', boss?: true, text }
+```
+- `area` はマップ ID の頭。倒した場所が `area` か `area + '_…'`（w2_arkcity_f1〜f4・ボス部屋など）なら数える。市民は数えない。
+- `boss: true` ならボス（`def.boss`）だけを数える。`mapId` はナビの行き先（任意）。
+- 倒した場所は `enemy.mapId`、無ければ今のマップ（`game.map.id`）。
+
+### 5次スキルの種類
+
+| 種類 | データ | 動き |
+|---|---|---|
+| 画面全体攻撃 | `kind:'aoe', screen:true, hits 12〜15, maxTargets 999, ult:{delay:1.0}`、CT 90〜100（最大Lvで −10%） | 押すと暗転（`ult5Dark`）＋カットイン＋画面内の敵に狙いの印（`ult5Mark`）。溜めの間は無敵。1.0 秒後に**その時の画面の矩形**（`screenRect(game)` = cam.x, cam.y, 1280×720）にいる敵すべてへ hits 回。系統の大演出（`ultChildren` → `ult5Burst` ほか）・ヒットストップ・揺れ |
+| 多段の強攻撃 | melee / aoe / projectile（`hits` 4〜14）/ dash | 今までと同じ（多段の数字は積み重なる） |
+| 通常攻撃強化 | `kind:'buff'`, `buff(lv).empower = {mult, hits, w, h, kind:'beam'|'wave', color}` | 持続中、通常攻撃のたびに前方へ追撃（`onBasicAttack`。player.startAttack を skills.js が包む） |
+| 覚醒 | `kind:'buff'`、CT 180 秒・持続 47〜60 秒 | 攻撃力 +37〜53% ほか |
+| 召喚（ハッカー） | `kind:'summon'`（systems/summons.js）CT 60 秒・持続 60〜78 秒 | daemon（光線）/ bomber（爆撃） |
+| マスタリー | `kind:'passive'` | 攻撃力 +70〜80 ほか（最大Lv10） |
+
+モーション（data/skillMotions.js）: 画面全体攻撃 = `finale`、覚醒 = `awaken`（render/character.js の SKILL_MOTIONS に追加）。ほかは既存のモーション。

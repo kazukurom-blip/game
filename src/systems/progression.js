@@ -48,7 +48,7 @@ export function newState(heroId = 'luna', opts = {}) {
     level: 1, exp: 0, money: 500,
     hp: 0, mp: 0,
     sp: 0, ap: 0,
-    spByTier: newSpByTier(), // v3: 2次/3次/4次スキル用の SP プール（state.sp は基本＋1次用）
+    spByTier: newSpByTier(), // v3: 2次〜5次スキル用の SP プール（state.sp は基本＋1次用）
     stats: { ...base.stats },
     inventory: [
       { id: 'potion_red', qty: 15 },
@@ -194,7 +194,7 @@ export function migrateState(state) {
   // v3 SP プール
   const sbt = state.spByTier && typeof state.spByTier === 'object' ? state.spByTier : {};
   state.spByTier = { ...newSpByTier() };
-  for (const t of [2, 3, 4]) state.spByTier[t] = Math.max(0, num(sbt[t], 0));
+  for (const t of Object.keys(state.spByTier)) state.spByTier[t] = Math.max(0, num(sbt[t], 0)); // 5次の枠が無い旧セーブは 0 で補う
   // v3 転職: 旧セーブは見習い（Lv10以上でも自動転職しない。吹き出しから転職する）
   const js = jobStateOf(state);
   state.job = { id: js.id, tier: js.tier, history: js.history.filter((h) => h && typeof h === 'object') };

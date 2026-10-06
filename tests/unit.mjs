@@ -34,7 +34,9 @@ import { JOBS, JOB_TIERS, JOB_BRANCHES, jobsFor, jobBonusOf, BEGINNER_ID } from 
 import { JOB_MISSIONS } from '../src/data/missions.js';
 import { attachJobs, jobOffer, acceptJobMission, advanceJob, currentJob, jobBonus, canTakeJobMission } from '../src/systems/jobs.js';
 import { moveParams, jobLockOf, finalAttackOf, tryFinalAttack } from '../src/systems/skills.js';
-import { flushSkillHits } from '../src/systems/skills.js';
+import { flushSkillHits, onBasicAttack } from '../src/systems/skills.js';
+import { SKILL_MOTION_TABLE } from '../src/data/skillMotions.js';
+import { SKILL_MOTION_IDS } from '../src/render/character.js';
 import { spawnSummon, clearSummons, summonUnits, MAX_SUMMONS } from '../src/systems/summons.js';
 import { SUMMON_TYPES } from '../src/render/summons.js';
 import { addSp, getSp } from '../src/data/jobs.js';
@@ -74,7 +76,9 @@ const mapOfEnemy = (id) => {
 const ICONS = ['potionRed', 'potionBlue', 'elixir', 'cash', 'gem', 'chip'];
 const SKILL_KINDS = ['melee', 'projectile', 'aoe', 'buff', 'dash', 'passive', 'move', 'summon'];
 // 旧 wanted（手配度）/ drive（車で走る）は警察・乗り物の廃止で使わない
-const OBJ_TYPES = ['kill', 'collect', 'reach', 'boss', 'talk'];
+const OBJ_TYPES = ['kill', 'collect', 'reach', 'boss', 'talk', 'killAny'];
+/** 第2ワールド（w2_*。ワールド担当が作成中）のマップで、この作業コピーにまだ無いもの */
+const pendingW2 = (id) => typeof id === 'string' && id.startsWith('w2_') && !MAPS[id];
 const fin = (v) => typeof v === 'number' && Number.isFinite(v);
 
 // ------------------------------------------------------------ スタブ game
@@ -437,7 +441,8 @@ test('missions: 参照整合性・到達可能性', () => {
         const shop = Object.values(MAPS).some((mp) => mp.npcs.some((n) => (n.shop || []).includes(o.target)));
         assert.ok(droppable.has(o.target) || shop, `${m.id}: ${o.target} は入手不能`);
       }
-      if (o.type === 'reach') assert.ok(MAPS[o.target], `${m.id} reach ${o.target}`);
+      if (o.type === 'reach') assert.ok(MAPS[o.target] || pendingW2(o.target), `${m.id} reach ${o.target}`);
+      if (o.type === 'killAny') assert.ok(typeof (o.area || o.mapId) === 'string' && (!o.mapId || MAPS[o.mapId] || pendingW2(o.mapId)), `${m.id} killAny ${o.area}`);
       if (o.type === 'talk') assert.ok(MISSION_NPCS[o.target], `${m.id} talk ${o.target}`);
       if (o.type === 'talk' && o.mapId) assert.equal(MISSION_NPCS[o.target].mapId, o.mapId, `${m.id} talk ${o.target} の mapId`);
     }
@@ -1110,8 +1115,8 @@ test('v2 data: ショップ・ミッションの参照整合性（SPEC マップ
   for (const m of Object.values(MISSIONS)) {
     assert.ok(fin(m.reward.exp) && m.reward.exp > 0, m.id + ' exp');
     for (const o of m.objectives) {
-      if (o.mapId) assert.ok(MAP_INFO[o.mapId], `${m.id} mapId ${o.mapId}`);
-      if (o.type === 'reach') assert.ok(MAP_INFO[o.target], `${m.id} reach ${o.target}`);
+      if (o.mapId) assert.ok(MAP_INFO[o.mapId] || pendingW2(o.mapId), `${m.id} mapId ${o.mapId}`);
+      if (o.type === 'reach') assert.ok(MAP_INFO[o.target] || pendingW2(o.target), `${m.id} reach ${o.target}`);
       if ((o.type === 'kill' || o.type === 'boss') && o.mapId) {
         const e = ENEMIES[o.target];
         assert.ok(e.habitats.includes(o.mapId), `${m.id}: ${o.target} は ${o.mapId} にいない`);
@@ -1334,10 +1339,10 @@ test('v2 migrateState: 旧セーブを補完', () => {
 
 
 // ============================================================ v3 転職
-test('v3 jobs: データ整合性（24職・系統・スキル・ミッション・教官）', () => {
+test('v3 jobs: データ整合性（30職・系統・スキル・ミッション・教官）', () => {
   const jobs = Object.values(JOBS).filter((j) => j.tier > 0);
-  assert.equal(jobs.length, 24);
-  assert.deepEqual(JOB_TIERS, [0, 10, 30, 60, 100]);
+  assert.equal(jobs.length, 30); // 3クラス×2系統×5段階
+  assert.deepEqual(JOB_TIERS, [0, 10, 30, 60, 100, 120]);
   for (const j of jobs) {
     assert.ok(CLASS_IDS.includes(j.hero) && JOB_BRANCHES[j.branch]?.hero === j.hero, j.id);
     assert.equal(j.reqLevel, JOB_TIERS[j.tier], j.id + ' reqLevel');
@@ -1357,7 +1362,7 @@ test('v3 jobs: データ整合性（24職・系統・スキル・ミッション
       assert.ok(Math.abs(e.level - j.reqLevel) <= 12, `${m.id} ${o.target} Lv${e.level} vs ${j.reqLevel}`);
     }
   }
-  for (const h of CLASS_IDS) for (let t = 1; t <= 4; t++) assert.equal(jobsFor(h, t).length, 2, `${h} tier${t}`);
+  for (const h of CLASS_IDS) for (let t = 1; t <= 5; t++) assert.equal(jobsFor(h, t).length, 2, `${h} tier${t}`);
   assert.equal(jobsFor('luna', 1, BEGINNER_ID).length, 2);
   // 段階が上がるほど強い（同系統のスキル威力・ボーナス）
   for (const b of Object.keys(JOB_BRANCHES)) {
@@ -1402,7 +1407,7 @@ test('v3 jobs: データ整合性（24職・系統・スキル・ミッション
   assert.equal(ITEMS[STARTER_EQUIP.hacker.weapon].weaponType, 'magic');
 });
 
-test('v3 jobs: 各ヒーロー×各系統で tier0→4（受注→試練→報告→転職）', () => {
+test('v3 jobs: 各ヒーロー×各系統で tier0→5（受注→試練→報告→転職）', () => {
   for (const hero of CLASS_IDS) {
     for (const branch of Object.keys(JOB_BRANCHES).filter((b) => JOB_BRANCHES[b].hero === hero)) {
       const g = makeGame(hero, 'beach_f1');
@@ -1416,7 +1421,7 @@ test('v3 jobs: 各ヒーロー×各系統で tier0→4（受注→試練→報�
       assert.equal(jobOffer(st), null, 'Lv9 では転職不可');
       const base = computeStats(st);
       let prevSp = st.sp;
-      for (let tier = 1; tier <= 4; tier++) {
+      for (let tier = 1; tier < JOB_TIERS.length; tier++) {
         st.level = JOB_TIERS[tier] - 1; st.exp = 0;
         assert.equal(jobOffer(st), null, `Lv${st.level} tier${tier} 前は null`);
         gainExp(g, expToNext(st.level)); // レベルアップ → jobAvailable
@@ -1448,6 +1453,9 @@ test('v3 jobs: 各ヒーロー×各系統で tier0→4（受注→試練→報�
         for (const o of m.objectives) {
           if (o.type === 'kill' || o.type === 'boss') for (let i = 0; i < o.count; i++) g.events.emit('enemyKilled', { enemy: { def: ENEMIES[o.target] } });
           if (o.type === 'talk') g.events.emit('talkNpc', { npcId: o.target });
+          // v4（5次）: 敵の ID に依らない討伐（地域で倒した数）・マップに着く
+          if (o.type === 'killAny') for (let i = 0; i < o.count; i++) g.events.emit('enemyKilled', { enemy: { def: o.boss ? ENEMIES.boss_alien : ENEMIES.robot_xeno, mapId: o.mapId || o.area } });
+          if (o.type === 'reach') g.events.emit('mapChanged', { mapId: o.target });
           assert.ok(o.type !== 'drive' && o.type !== 'wanted', `${mid}: 廃止した目的 ${o.type}`);
         }
         mm.update(1 / 60);
@@ -1462,7 +1470,7 @@ test('v3 jobs: 各ヒーロー×各系統で tier0→4（受注→試練→報�
         assert.ok(getSp(st, pool) >= spBefore + job.sp, 'SP ボーナス（段階別プール）');
         for (const sid of job.skills) assert.ok(st.skills[sid] >= 1, '自動習得 ' + sid);
         // SP は段階別プール: 別段階のプールでは上げられない
-        const s0 = st.sp, keep = { ...st.spByTier }; st.sp = 0; for (const t of [2, 3, 4]) st.spByTier[t] = 0;
+        const s0 = st.sp, keep = { ...st.spByTier }; st.sp = 0; for (const t of Object.keys(st.spByTier)) st.spByTier[t] = 0;
         if (pool > 1) { st.sp = 5; assert.equal(learnSkill(g, job.skills[0]), false, '1次プールでは上位スキル不可'); st.sp = 0; }
         addSp(st, 1, pool);
         assert.ok(learnSkill(g, job.skills[0]), '転職後は習得可（レベルアップ）');
@@ -1535,7 +1543,7 @@ test('v3 jobs: Lv1 移動スキル・町でスキル可・旧セーブ補完', (
     const old = { heroId: hero, level: 45, exp: 0, mapId: 'downtown', version: 2, skills: { [STARTER_SKILLS[hero].skillBar[0]]: 3 }, skillBar: [STARTER_SKILLS[hero].skillBar[0], null, null, null] };
     const m = migrateState(old);
     assert.equal(m.skillBar.length, 8, 'スキルバー8枠');
-    assert.deepEqual(m.spByTier, { 2: 0, 3: 0, 4: 0 });
+    assert.deepEqual(m.spByTier, { 2: 0, 3: 0, 4: 0, 5: 0 });
     if (hero !== 'hacker') {
       assert.equal(m.gender, hero === 'luna' ? 'f' : 'm', '旧セーブの性別');
       assert.equal(m.name, hero === 'luna' ? 'ルナ' : 'ジン');
@@ -1597,6 +1605,185 @@ test('v3 classes: newState(classId, {name, gender, look}) と性別別の初期�
 (await import('./world_v3.mjs')).default({ test, makeGame, step, fin });
 // v3 デバッグ担当の回帰テスト（tests/debug_v3.mjs）
 (await import('./debug_v3.mjs')).default({ test, makeGame, step, fin });
+
+// ------------------------------------------------------------ v4: 5次転職（Lv120）
+/** その系統の4次まで転職済み（Lv120）の state を作る */
+function toTier(g, branch, tier) {
+  const st = g.state;
+  const chain = Object.values(JOBS).filter((j) => j.branch === branch && j.tier >= 1 && j.tier <= tier).sort((a, b) => a.tier - b.tier);
+  st.level = JOB_TIERS[tier];
+  st.job = { id: chain[chain.length - 1].id, tier, history: chain.map((j) => ({ id: j.id, tier: j.tier, from: j.from, level: j.reqLevel, t: 0 })) };
+  return chain[chain.length - 1];
+}
+const ULT_IDS = () => Object.values(JOBS).filter((j) => j.tier === 5).map((j) => j.skills.find((id) => SKILLS[id].screen));
+
+test('v4 5次: 6系統に5次の職がそろう（Lv120・4次から続く・専用スキル4〜5個・画面全体攻撃）', () => {
+  const t5 = Object.values(JOBS).filter((j) => j.tier === 5);
+  assert.equal(t5.length, 6);
+  assert.deepEqual(t5.map((j) => j.branch).sort(), Object.keys(JOB_BRANCHES).sort());
+  for (const j of t5) {
+    assert.equal(j.reqLevel, 120, j.id);
+    assert.equal(JOBS[j.from].tier, 4); assert.equal(JOBS[j.from].branch, j.branch);
+    assert.ok(j.skills.length >= 4 && j.skills.length <= 5, j.id);
+    assert.ok(/^#[0-9a-f]{6}$/i.test(j.aura) && j.title && j.desc, j.id);
+    for (const k of ['atk']) assert.ok(j.statBonus[k] > JOBS[j.from].statBonus[k], j.id + ' ' + k);
+    const sks = j.skills.map((id) => SKILLS[id]);
+    const ult = sks.filter((s) => s.screen);
+    assert.equal(ult.length, 1, j.id + ' 画面全体攻撃は1つ');
+    const u = ult[0];
+    assert.ok(u.hits >= 10 && u.hits <= 15, u.id + ' hits ' + u.hits);
+    assert.ok(u.cooldown(1) >= 60 && u.cooldown(1) <= 120 && u.cooldown(u.maxLevel) >= 60, u.id + ' CT ' + u.cooldown(1));
+    assert.ok(u.kind === 'aoe' && u.maxTargets >= 99, u.id);
+    // 4次の奥義（最大Lv）より1回の総威力が大きい
+    const t4best = Math.max(...JOBS[j.from].skills.map((id) => SKILLS[id]).filter((s) => s.kind === 'aoe' || s.kind === 'projectile' || s.kind === 'melee' || s.kind === 'dash').map((s) => s.mult(s.maxLevel) * Math.max(1, s.hits)));
+    assert.ok(u.mult(1) * u.hits > t4best, `${u.id} ${u.mult(1) * u.hits} > 4次 ${t4best}`);
+    // 多段の強攻撃・覚醒（長CTバフ）がある
+    assert.ok(sks.some((s) => !s.screen && ['melee', 'aoe', 'projectile', 'dash'].includes(s.kind) && s.hits >= 4), j.id + ' 多段');
+    assert.ok(sks.some((s) => s.kind === 'buff' && s.cooldown(1) >= 120), j.id + ' 覚醒');
+    if (j.hero === 'hacker') assert.ok(sks.some((s) => s.kind === 'summon' && s.summon?.type), j.id + ' 召喚');
+    for (const s of sks) {
+      assert.equal(s.reqJob, j.id); assert.equal(s.reqLevel, 120);
+      if (s.kind !== 'passive') assert.ok(SKILL_MOTION_TABLE[s.id], s.id + ' モーション');
+    }
+    // 転職ミッション: 教官は第2ワールドの町、試練は敵の ID に依らない書き方
+    const m = MISSIONS[JOB_MISSIONS[j.id]];
+    assert.equal(MISSION_NPCS[j.instructor].mapId, 'w2_arkcity');
+    assert.ok(m.objectives.some((o) => o.type === 'killAny' && !o.boss && o.area === 'w2_arkcity' && o.count >= 30), m.id);
+    assert.ok(m.objectives.some((o) => o.type === 'killAny' && o.boss), m.id + ' boss');
+  }
+  for (const id of new Set(Object.values(SKILL_MOTION_TABLE))) assert.ok(SKILL_MOTION_IDS.includes(id), 'motion ' + id);
+});
+
+test('v4 5次: 画面全体攻撃は画面に映る敵すべてに hits 回当たり、画面外には当たらない', () => {
+  for (const uid of ULT_IDS()) {
+    const sk = SKILLS[uid];
+    const hero = sk.hero;
+    const g = makeGame(hero, 'space_f4');
+    g.enemies.length = 0;
+    toTier(g, JOBS[sk.reqJob].branch, 5);
+    g.state.skills[uid] = 1; g.state.mp = 1e6;
+    const p = g.player;
+    g.cam = { x: p.x - 640, y: p.y - 500 };
+    const mk = (dx) => { const e = new Enemy(g, 'robot_xeno', p.x + dx, p.y); e.spawnT = 0; e.hp = e.maxHp = 1e9; g.enemies.push(e); return e; };
+    const inside = [-600, -320, 0, 250, 600].map(mk);
+    const outside = [-800, 760, 1500].map(mk);
+    g.effects.length = 0; g.cutins = [];
+    assert.ok(useSkill(g, uid), 'use ' + uid);
+    assert.ok(g.effects.some((e) => e.type === 'ult5Dark'), '暗転');
+    assert.ok((g.cutins || []).length > 0, 'カットイン');
+    assert.ok(inside.every((e) => e.hp === 1e9), '当たるのは溜めの後');
+    flushSkillHits();
+    for (const e of inside) {
+      assert.ok(e.hp < 1e9, `${uid}: 画面内の敵 ${e.x - p.x}`);
+      const n = g.effects.filter((f) => f.kind === 'dmg' && Math.abs(f.x - e.x) < 1).length;
+      assert.equal(n, sk.hits, `${uid}: ${sk.hits} ヒット（数字の積み重ね）`);
+    }
+    for (const e of outside) assert.equal(e.hp, 1e9, `${uid}: 画面外の敵 ${e.x - p.x} には当たらない`);
+    assert.ok(g.effects.some((e) => e.type === 'ult5Burst'), '系統の大きな演出');
+    assert.ok(g.hitstop > 0 && g.shake > 0, 'ヒットストップ・揺れ');
+  }
+});
+
+test('v4 5次: 画面全体攻撃のクールタイム（60〜120秒）・覚醒/通常攻撃強化', () => {
+  const g = makeGame('luna', 'space_f4');
+  toTier(g, 'gunslinger', 5);
+  const st = g.state; st.mp = 1e6;
+  const uid = 'lj_gun_dimension_barrage';
+  st.skills[uid] = 1;
+  assert.ok(useSkill(g, uid));
+  const cd = getCooldown(uid);
+  assert.equal(cd.total, SKILLS[uid].cooldown(1)); assert.ok(cd.total >= 60 && cd.total <= 120);
+  assert.equal(useSkill(g, uid), false, 'クールタイム中は使えない');
+  for (let i = 0; i < Math.ceil((cd.total - 1) * 10); i++) updateSkills(g, 0.1);
+  assert.ok(getCooldown(uid).left > 0 && useSkill(g, uid) === false, '残り1秒前はまだ');
+  for (let i = 0; i < 20; i++) updateSkills(g, 0.1);
+  assert.equal(getCooldown(uid).left, 0);
+  assert.ok(useSkill(g, uid), 'クールタイム明けに再使用');
+  flushSkillHits();
+  // 通常攻撃強化: バフ中は通常攻撃のたびに追撃（前方の敵に hits 回）
+  resetCooldowns(); g.enemies.length = 0;
+  st.skills.lj_gun_desperado_mode = 1;
+  const p = g.player; p.facing = 1;
+  const e = new Enemy(g, 'robot_xeno', p.x + 200, p.y); e.spawnT = 0; e.hp = e.maxHp = 1e9; g.enemies.push(e);
+  assert.equal(onBasicAttack(g), false, 'バフ無しでは追撃しない');
+  assert.ok(useSkill(g, 'lj_gun_desperado_mode'));
+  assert.ok(g.buffs.some((b) => b.empower), 'empower バフ');
+  g.effects.length = 0;
+  p.attackCd = 0; p.startAttack('basic');
+  flushSkillHits();
+  const em = SKILLS.lj_gun_desperado_mode.buff(1).empower;
+  assert.ok(e.hp < 1e9, '追撃が当たる');
+  assert.ok(g.effects.filter((f) => f.kind === 'dmg' && Math.abs(f.x - e.x) < 1).length >= em.hits, '追撃は多段');
+  assert.ok(g.effects.some((f) => f.type === 'empBeam'), '追撃の演出');
+  // 覚醒（長CT）
+  st.skills.lj_gun_bullet_awaken = 1;
+  const atk0 = computeStats(st, g.buffs).atk;
+  assert.ok(useSkill(g, 'lj_gun_bullet_awaken'));
+  assert.ok(computeStats(st, g.buffs).atk > atk0, '覚醒で攻撃力アップ');
+  assert.ok(getCooldown('lj_gun_bullet_awaken').total >= 120);
+});
+
+test('v4 5次: SP の5次プール（転職ボーナス・レベルアップ・習得）と killAny の数え方', () => {
+  const g = makeGame('hacker', 'beach_f1');
+  const st = g.state;
+  toTier(g, 'netrunner', 4); st.level = 120;
+  st.spByTier = { 2: 0, 3: 0, 4: 0, 5: 0 };
+  const offer = jobOffer(st);
+  assert.ok(offer && offer.tier === 5 && offer.reqLevel === 120 && offer.options.length === 1 && offer.options[0] === 'hk_demiurge');
+  st.level = 119; assert.equal(jobOffer(st), null, 'Lv119 では出ない'); st.level = 120;
+  const r = acceptJobMission(g, 'hk_demiurge'); assert.ok(r.ok, r.msg);
+  const mm = g.missions, mid = r.missionId, m = MISSIONS[mid];
+  // killAny: 地域の外の撃破・ボス以外は数えない
+  const ka = m.objectives.findIndex((o) => o.type === 'killAny' && !o.boss);
+  const kb = m.objectives.findIndex((o) => o.type === 'killAny' && o.boss);
+  g.events.emit('enemyKilled', { enemy: { def: ENEMIES.robot_xeno, mapId: 'space_f4' } });
+  g.events.emit('enemyKilled', { enemy: { def: ENEMIES.robot_xeno, mapId: 'w2_arkcity_f2' } });
+  g.events.emit('enemyKilled', { enemy: { def: { id: 'w2_dummy', civilian: true }, mapId: 'w2_arkcity_f2' } });
+  assert.equal(mm.objectiveValues(mid)[ka], 1, '地域の敵だけ数える');
+  assert.equal(mm.objectiveValues(mid)[kb], 0, 'ボス以外はボスの目的に数えない');
+  g.events.emit('enemyKilled', { enemy: { def: ENEMIES.boss_alien, mapId: 'w2_arkcity_boss' } });
+  assert.equal(mm.objectiveValues(mid)[kb], 1, '地域のボス（w2_arkcity_*）');
+  for (const o of m.objectives) {
+    if (o.type === 'killAny' && !o.boss) for (let i = 0; i < o.count; i++) g.events.emit('enemyKilled', { enemy: { def: { id: 'w2_any_' + i }, mapId: o.mapId } });
+    if (o.type === 'reach') g.events.emit('mapChanged', { mapId: o.target });
+  }
+  assert.ok(mm.isComplete(mid), JSON.stringify(mm.objectiveValues(mid)));
+  assert.ok(mm.tracked().find((t) => t.id === mid).lines.length >= 2);
+  assert.ok(mm.turnIn(mid));
+  assert.equal(st.job.id, 'hk_demiurge'); assert.equal(st.job.tier, 5);
+  assert.equal(getSp(st, 5), JOBS.hk_demiurge.sp, '転職ボーナス SP は5次プールへ');
+  assert.equal(getSp(st, 4), 0);
+  for (const sid of JOBS.hk_demiurge.skills) assert.equal(st.skills[sid], 1, '自動習得 ' + sid);
+  const lv0 = st.level; gainExp(g, expToNext(st.level));
+  assert.equal(st.level, lv0 + 1); assert.equal(getSp(st, 5), JOBS.hk_demiurge.sp + 3, 'レベルアップ SP は5次プールへ');
+  assert.ok(learnSkill(g, 'hn_world_rewrite')); assert.equal(st.skills.hn_world_rewrite, 2);
+  assert.equal(getSp(st, 5), JOBS.hk_demiurge.sp + 2);
+  st.spByTier[5] = 0; st.spByTier[4] = 9;
+  assert.equal(learnSkill(g, 'hn_kernel_panic'), false, '4次プールでは5次スキルを上げられない');
+  assert.equal(jobOffer(st), null, '5次の後は転職なし'); st.level = 200; assert.equal(jobOffer(st), null);
+  // 5次スキルを全部使ってみる（例外なし。召喚も）
+  st.mp = 1e6;
+  for (const sid of JOBS.hk_demiurge.skills) { if (SKILLS[sid].kind === 'passive') continue; resetCooldowns(); assert.ok(useSkill(g, sid), sid); for (let i = 0; i < 30; i++) step(g); }
+  assert.ok((g.summons || []).some((s) => s.skillId === 'hn_demiurge_avatar'), '5次の召喚');
+});
+
+test('v4 5次: 古いセーブ（5次の SP の枠が無い）を migrateState で補う', () => {
+  const old = { heroId: 'jin', level: 125, exp: 0, mapId: 'spaceport', version: 3, spByTier: { 2: 4, 3: 5, 4: 6 },
+    job: { id: 'jin_warp_rider', tier: 4, history: [] }, skills: { jj_race_warp_drive: 3 }, skillBar: ['jj_race_warp_drive', null, null, null] };
+  const m = migrateState(JSON.parse(JSON.stringify(old)));
+  assert.deepEqual({ ...m.spByTier }, { 2: 4, 3: 5, 4: 6, 5: 0 }, '5次の枠を 0 で補い、他は保つ');
+  assert.equal(getSp(m, 5), 0);
+  addSp(m, 2, 5); assert.equal(getSp(m, 5), 2);
+  const off = jobOffer(m);
+  assert.ok(off && off.tier === 5 && off.options[0] === 'jin_dimension_racer', '旧セーブ（4次・Lv125）で5次転職の吹き出し');
+  // 壊れた spByTier・無いもの
+  assert.deepEqual({ ...migrateState({ heroId: 'luna', level: 5, spByTier: 'x' }).spByTier }, { 2: 0, 3: 0, 4: 0, 5: 0 });
+  assert.deepEqual({ ...migrateState({ heroId: 'luna', level: 5, spByTier: { 2: -3, 5: 'a' } }).spByTier }, { 2: 0, 3: 0, 4: 0, 5: 0 });
+  // 5次職のセーブもそのまま読める
+  const t5 = migrateState({ heroId: 'luna', level: 130, job: { id: 'luna_hyper_icon', tier: 5, history: [] }, spByTier: { 2: 0, 3: 0, 4: 0, 5: 7 } });
+  assert.equal(t5.job.id, 'luna_hyper_icon'); assert.equal(getSp(t5, 5), 7);
+  assert.ok(computeStats(t5, []).atk > computeStats(migrateState({ heroId: 'luna', level: 130 }), []).atk);
+});
 
 // ------------------------------------------------------------ 実行
 const t0 = Date.now();
