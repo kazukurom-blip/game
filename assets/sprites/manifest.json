@@ -159,6 +159,7 @@
       "bottom/shorts_f": "rig/bottom/shorts_f.png",
       "bottom/shorts_m": "rig/bottom/shorts_m.png",
       "bottom/skirt_f": "rig/bottom/skirt_f.png",
+      "bottom/skirt_m": "rig/bottom/skirt_m.png",
       "bottom/suitPants_f": "rig/bottom/suitPants_f.png",
       "bottom/suitPants_m": "rig/bottom/suitPants_m.png",
       "bottom/trackPants_f": "rig/bottom/trackPants_f.png",
@@ -219,6 +220,7 @@
       "weapon/guitar": "rig/weapon/guitar.png",
       "weapon/katana": "rig/weapon/katana.png",
       "weapon/knife": "rig/weapon/knife.png",
+      "weapon/neonSword": "rig/weapon/neonSword.png",
       "weapon/pistol": "rig/weapon/pistol.png",
       "weapon/smg": "rig/weapon/smg.png",
       "weapon/staff": "rig/weapon/staff.png",
@@ -875,6 +877,8 @@
     "sports": "vehicles/sports.png"
   },
   "ui": {
-    "logo": "ui/logo.png"
+    "logo": "ui/logo.png",
+    "title_art": "ui/title_art.png",
+    "world_map": "ui/world_map.png"
   }
 }

@@ -161,7 +161,9 @@ export function checkEnv(r, im, info, cat, H) {
   r.metrics.opaqueRatio = +(opaqueRatio(im) * 100).toFixed(2);
   if (info.bad) { r.add('NG', 'ファイルの場所・名前の形がゲームの決まりに合わない（bg/<地域>_<town|field>_<far|mid|lights>.png・tiles/<地域>_<ground|platform>.png・icons/<equip|item|skill>/…・vehicles/<種類>[_wheel].png・ui/<title_art|logo|world_map>.png）', '依頼書（CODEX_BATCH_03.md）の保存先のとおりにしてください'); return false; }
   const want = sizeOf(info);
-  if (want && (im.w !== want[0] || im.h !== want[1])) { r.add('NG', `大きさが ${im.w}×${im.h}（${want[0]}×${want[1]} が正しい）`, `${want[0]}×${want[1]} で描き直してください（縮小・切り抜き・余白の追加はしない）`); return false; }
+  // ワールドマップは地図の枠いっぱいに伸ばして描くので、16:9 で横 1600px 以上なら大きさは問わない（依頼書は 1600×900 と書いた）
+  const flexOk = info.kind === 'ui' && info.id === 'world_map' && im.w >= 1600 && Math.abs(im.w / im.h - 16 / 9) < 0.01;
+  if (want && !flexOk && (im.w !== want[0] || im.h !== want[1])) { r.add('NG', `大きさが ${im.w}×${im.h}（${want[0]}×${want[1]} が正しい）`, `${want[0]}×${want[1]} で描き直してください（縮小・切り抜き・余白の追加はしない）`); return false; }
   if (info.kind === 'bg') {
     if (!im.hasAlpha) { r.add('NG', '透明の情報（アルファ）が無い RGB の画像（空が塗られている）', '空を透明にした RGBA の PNG で保存してください'); return false; }
     const sky = rowsCov(im, 0, T.skyRows, 32);

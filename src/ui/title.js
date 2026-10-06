@@ -333,7 +333,8 @@ function drawTitleScreen(ctx, game, t) {
   ctx.save(); ctx.fillStyle = 'rgba(10,4,30,0.18)'; ctx.fillRect(0, 0, W, H); ctx.restore();
   drawLogo(ctx, t, 170, 1.15);
   // 3クラスのシルエット行進（タイトルの絵に主人公が描かれている時は省く）
-  const ids = guard('titleArt', () => uiArt('title_art'), null) ? [] : CLASS_IDS.slice(0, 3);
+  const hasArt = !!guard('titleArt', () => uiArt('title_art'), null);
+  const ids = hasArt ? [] : CLASS_IDS.slice(0, 3);
   ids.forEach((id, i) => {
     const x = W / 2 + (i - 1) * 230, y = 618;
     const g = i % 2 ? 'm' : 'f';
@@ -346,14 +347,20 @@ function drawTitleScreen(ctx, game, t) {
     drawChar(ctx, x, y, defaultLook(id, g), starterEquipLooks(id, g), { facing: i === 0 ? 1 : i === 2 ? -1 : 1, state: 'idle', t: t + i, attackT: 0, damage: 0, scale: 1.85 });
   });
   const pulse = 0.5 + 0.5 * Math.sin(t * 3.4);
-  const r = { x: W / 2 - 170, y: 300, w: 340, h: 58 };
+  // タイトルの絵があるときは、絵の主人公（頭の上端が y≈350）に重ならないよう、ボタンを少し上・小さめにし、案内は1行にまとめる
+  const r = hasArt ? { x: W / 2 - 160, y: 278, w: 320, h: 50 } : { x: W / 2 - 170, y: 300, w: 340, h: 58 };
   btn(ctx, 'start', r, '▶  PRESS START', () => {
     const any = refreshSlots(true).some(Boolean);
     if (any) go('select'); else startCreate(Math.max(0, guard('firstEmpty', () => SaveM.firstEmptySlot(), 0)));
   }, { color: '#d93f86', size: 22, glow: COL.pink, r: 29 });
-  txt(ctx, 'Enter ・ Space ・ クリック でスタート', W / 2, r.y + r.h + 18, { size: 13, align: 'center', color: '#ffe3f0', alpha: 0.55 + pulse * 0.45, sw: 3 });
   const n = refreshSlots().filter(Boolean).length;
-  txt(ctx, n ? `セーブデータ ${n} / ${maxSlots()} キャラ` : 'はじめてのプレイ：キャラクターを作ろう！', W / 2, r.y + r.h + 42, { size: 12, align: 'center', color: COL.sub, sw: 3 });
+  const sub = n ? `セーブデータ ${n} / ${maxSlots()} キャラ` : 'はじめてのプレイ：キャラクターを作ろう！';
+  if (hasArt) {
+    txt(ctx, 'Enter ・ Space ・ クリック でスタート　／　' + sub, W / 2, r.y + r.h + 15, { size: 12, align: 'center', color: '#ffe3f0', alpha: 0.6 + pulse * 0.4, sw: 4 });
+  } else {
+    txt(ctx, 'Enter ・ Space ・ クリック でスタート', W / 2, r.y + r.h + 18, { size: 13, align: 'center', color: '#ffe3f0', alpha: 0.55 + pulse * 0.45, sw: 3 });
+    txt(ctx, sub, W / 2, r.y + r.h + 42, { size: 12, align: 'center', color: COL.sub, sw: 3 });
+  }
   helpBar(ctx, '←→ 移動  Space ジャンプ  X 攻撃  A S D F Q W G H スキル  V 会話  E 乗車  ↑ ポータル  I/K/J/T 窓  M 地図  U コンテンツ  O 実績  Esc メニュー');
   txt(ctx, '© NEON VICE STORY  —  ネオリダ州ヴァイス・ベイ市（架空）', W - 16, 16, { size: 10, align: 'right', color: 'rgba(255,255,255,0.45)', stroke: false });
 }
