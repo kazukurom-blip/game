@@ -197,6 +197,21 @@ export default function register({ test, makeGame, step }) {
     assert.equal(expToNext(200), Infinity);
   });
 
+  test('w2 5次転職の前提: 教官はアーク・シティ・敵の mapId（ボス部屋はボスのフィールド）・HP の目安', () => {
+    for (const id of ['job_nyx', 'job_garo', 'job_akasha']) assert.ok(MAPS.w2_arkcity.npcs.some((n) => n.id === id), id);
+    const g = makeGame('luna', 'w2_arkcity_f1');
+    const e = new Enemy(g, 'ark_slime_neon', 600, g.map.groundY);
+    assert.equal(e.mapId, 'w2_arkcity_f1');
+    g.changeMap('boss_ark_titan');
+    const b = new Enemy(g, 'boss_ark_titan', 900, g.map.groundY);
+    assert.equal(b.mapId, 'w2_arkcity_f3', 'ボス部屋のボスは w2_arkcity_f3 で倒した扱い');
+    assert.ok(ENEMIES.boss_ark_titan.boss && ENEMIES.boss_ark_titan.habitats[0].startsWith('w2_arkcity'));
+    // HP・防御の目安（Lv120 ≒ 8,000/120, 150 ≒ 14,000/150, 180 ≒ 20,000/180, 200 ≒ 26,000/200、ボス Lv200 ≒ 100 万）
+    const rough = (v, t) => v > t * 0.7 && v < t * 1.4;
+    assert.ok(rough(ENEMIES.wild_seagull_neon.hp, 14000) && ENEMIES.wild_seagull_neon.def === 150, 'Lv150');
+    assert.ok(rough(ENEMIES.boss_zenith.hp + ENEMIES.boss_zenith_true.hp, 2.1e6) && rough(ENEMIES.boss_zenith.hp, 1e6), 'ラスボス');
+  });
+
   test('w2 debug: ワープの一覧と第2ワールドのワープ', () => {
     const g = makeGame('luna', 'beach');
     const dbg = new DebugPanel(g);

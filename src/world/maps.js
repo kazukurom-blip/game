@@ -746,6 +746,8 @@ const T2 = {
       w2Npc('w2_ark_shop', 'メイ', 'アーク・マート', 1650, 'shopF',
         { hat: L('catEars', '#ff3dd2', '#19f0ff'), top: L('hoodie', '#1a1a2e', '#ff3dd2'), bottom: L('shorts', '#1a1a2e'), shoes: L('sneakers', '#19f0ff') },
         ['いらっしゃい！ アーク製の装備とポーション、そろってるよ。'], { shop: [...W2_SHOP_POTS, ...W2_GEAR_SHOP('ark')], shopName: 'アーク・マート' }),
+      // v4: 5次転職の教官（見た目・セリフは NPC 表。5次転職担当）
+      npc('job_nyx', 950), npc('job_garo', 1900), npc('job_akasha', 2500),
       concierge('w2_arkcity', 2200),
     ],
   }),

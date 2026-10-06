@@ -127,7 +127,7 @@ const W2_MAT = {
   arkcity: ['ark_chip', 'holo_shard'], cyberwild: ['wild_seed', 'vine_cable'],
   abyss: ['abyss_pearl', 'pressure_scale'], zenith: ['cloud_essence', 'star_fragment'],
 };
-/** 第2ワールドの伸びの補正: Lv100 で 1、Lv200 で 1 - a（HP 0.75・防御 0.7・攻撃 0.85 にする） */
+/** 第2ワールドの伸びの補正: Lv100 で 1、Lv200 で 1 - a（攻撃に使う。Lv200 で 0.85） */
 export const w2k = (lv, a) => 1 - a * Math.max(0, Math.min(100, lv - 100)) / 100;
 // 第2ワールドの装備から Lv に合う物（必要Lv が 敵Lv-30〜敵Lv+2。その地域の物を優先）を 3 つ（id ハッシュで決定的）
 const W2_GEAR_ALL = Object.values(W2_GEAR).flat();
@@ -144,15 +144,31 @@ function w2GearDrops(id, region, lv, n = 3) {
   }
   return out;
 }
+// 第2ワールドの HP・防御の目安（5次転職のスキルの威力に合わせた値。間は直線でつなぐ）
+//  Lv100: 第1ワールドの式の値（連続） / Lv120: 8,000・防御120 / Lv150: 14,000・150 / Lv180: 20,000・180 / Lv200: 26,000・200
+const W2_HP_KNOTS = [[100, hpAt(100)], [120, 8000], [150, 14000], [180, 20000], [200, 26000]];
+const W2_DEF_KNOTS = [[100, defAt(100)], [120, 120], [150, 150], [180, 180], [200, 200]];
+function knots(K, lv) {
+  if (lv <= K[0][0]) return K[0][1];
+  for (let i = 1; i < K.length; i++) if (lv <= K[i][0]) { const [a, va] = K[i - 1], [b, vb] = K[i]; return va + (vb - va) * (lv - a) / (b - a); }
+  return K[K.length - 1][1];
+}
+/** 第2ワールドの通常の敵の HP / 防御（倍率 1 の時） */
+export const w2Hp = (lv) => Math.round(knots(W2_HP_KNOTS, lv));
+export const w2Def = (lv) => Math.round(knots(W2_DEF_KNOTS, lv));
+/** 第2ワールドのボスの HP（通常の敵 × 倍率。ラスボス第1形態 ≒ 91 万・第2形態 ≒ 120 万） */
+export const w2BossHp = (lv, x = 35) => Math.round(w2Hp(lv) * x / 1000) * 1000;
+
 /** w2(...) — mk と同じ引数。world:2 を付け、強さに w2 補正、ドロップに地域の素材・装備を入れる */
 function w2(id, name, level, art, ai, region, habitats, o = {}) {
   const q = { ...o, world: 2 };
   if (o.boss) {
     q.atk = Math.round(o.atk * w2k(level, 0.15));
-    q.def = Math.round(o.def * w2k(level, 0.3));
+    q.hp = w2BossHp(level, o.w2BossX ?? 35);
+    q.def = Math.round(w2Def(level) * 1.5);
   } else {
-    q.hp = o.hp ?? Math.round(hpAt(level, o.hpM ?? o.m ?? 1) * w2k(level, 0.25));
-    q.def = o.def ?? Math.round(defAt(level, o.defM ?? 1) * w2k(level, 0.3));
+    q.hp = o.hp ?? Math.round(w2Hp(level) * (o.hpM ?? o.m ?? 1));
+    q.def = o.def ?? Math.round(w2Def(level) * (o.defM ?? 1));
     q.atk = o.atk ?? Math.round(atkAt(level, o.atkM ?? 1) * w2k(level, 0.15));
     if (!o.drops) {
       const [m1, m2] = W2_MAT[region];
@@ -722,7 +738,7 @@ const list = [
   }),
   // =====================================================================
   // v4: 第2ワールド「ネオン・アーク」（Lv100〜200）。見た目は今ある型の色違い・大きさ違い
-  //  強さ: Lv100 の敵と同じ式（hpAt/atkAt/defAt）から始め、Lv が上がるほど HP・防御・攻撃の伸びを少し抑える（w2 補正）
+  //  強さ: HP・防御は 5 次転職の目安の表（w2Hp / w2Def）、攻撃は第1ワールドの式（atkAt）の伸びを少し抑えた値（w2k）
   // =====================================================================
   // ---------------- arkcity（アーク・シティ / Lv100〜130）夜の未来都市: ドローン・ロボ・ホロ
   w2('ark_drone_patrol', 'ホロ巡回ドローン', 101, 'drone', 'flyer', 'arkcity', ['w2_arkcity_f1'], {
@@ -894,7 +910,7 @@ const list = [
     drops: [{ id: 'zenith_core', chance: 1 }, { id: 'star_fragment', chance: 1 }, { id: 'elixir', chance: 1 }, { id: 'w2_zen2_top', chance: 0.05 }, { id: 'w2_zen2_hat', chance: 0.05 }],
   }),
   w2('boss_zenith_true', '真ゼニス・ソブリン', 200, 'bossAlien', 'boss', 'zenith', ['w2_zenith_f4'], {
-    ...bossStats(200, 40, { expBase: 199, expX: 0.45, atkX: 1.9 }), speed: 160, w: 200, h: 176, scale: 1.95, color: '#2a1a5c', accent: '#ff3dd2',
+    ...bossStats(200, 40, { expBase: 199, expX: 0.45, atkX: 1.9 }), w2BossX: 46, speed: 160, w: 200, h: 176, scale: 1.95, color: '#2a1a5c', accent: '#ff3dd2',
     title: '第2形態・ネオン・アークの起源', summon: ['zen_golem_titan', 'zen_jelly_aurora'], shoot: GUN_SHOT(820, 0.55, 900, 0.5),
     phaseOf: 'boss_zenith',
     drops: [{ id: 'origin_core', chance: 1 }, { id: 'star_fragment', chance: 1 }, { id: 'elixir', chance: 1 }, { id: 'w2_sovereign_blade', chance: 0.02 }, { id: 'w2_sovereign_gun', chance: 0.02 }, { id: 'w2_sovereign_staff', chance: 0.02 }, { id: 'w2_sovereign_wings', chance: 0.01 }, { id: 'w2_zen2_melee', chance: 0.06 }, { id: 'w2_zen2_accessory', chance: 0.06 }],
