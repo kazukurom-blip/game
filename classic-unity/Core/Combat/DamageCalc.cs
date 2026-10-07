@@ -30,7 +30,7 @@ namespace Lumina.Core.Combat
         /// weaponMul = 武器係数の上書き（二つ星投げ 5.0）。
         /// </summary>
         public static HitResult Physical(FinalStats st, int playerLv, DefenderInfo mob, double skillPct, IRandom rng,
-            double? weaponMul = null, string element = null, bool stab = false, bool alwaysCrit = false)
+            double? weaponMul = null, string element = null, bool stab = false, bool alwaysCrit = false, bool ignoreDef = false)
         {
             // 命中の判定
             double hit = Formulas.HitChance(st.Acc, mob.Avoid, playerLv, mob.Level);
@@ -44,7 +44,7 @@ namespace Lumina.Core.Combat
             dmg *= Formulas.LevelPenalty(playerLv, mob.Level);
             bool crit = alwaysCrit || (st.CritRate > 0 && rng.Chance(st.CritRate));
             if (crit) dmg *= Math.Max(1, st.CritDamage);
-            int final = Formulas.AfterDef(dmg, mob.Def, rng.Range(0.5, 0.6));
+            int final = Formulas.AfterDef(dmg, ignoreDef ? 0 : mob.Def, rng.Range(0.5, 0.6)); // 捨て身は防御を無視
             if (dmg <= 0) final = 0; // 属性で無効
             return new HitResult { Damage = Math.Min(Formulas.DamageCap, final), Critical = crit };
         }

@@ -51,6 +51,8 @@ namespace Lumina.View
             // クイックスロット: 置いてある物がスキルなら SkillPressed、アイテムなら ItemPressed
             for (int i = 0; i < quickSlotKeys.Length && i < GameSession.QuickSlotCount; i++)
             {
+                // 押しっぱなしのスキル（攻撃スキルはくり返す。嵐の連射・弾幕も）
+                if (Input.GetKey(quickSlotKeys[i]) && session.QuickSlots[i]?.Kind == "skill") p.SkillHeld = session.QuickSlots[i].Id;
                 if (!Input.GetKeyDown(quickSlotKeys[i])) continue;
                 var q = session.QuickSlots[i];
                 if (q == null) continue;

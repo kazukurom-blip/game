@@ -15,7 +15,8 @@ classic-unity/
     Combat/    Formulas（STATS.md の式）・DamageCalc（乱数入りの 1 回のダメージ）・Attack（振りの時間・当たる瞬間・範囲・数字）
     Character/ Curves（経験値の表・敵の基礎値）・Jobs・CharacterState（Lv/AP/SP/HP/MP/転職/死）・StatCalc（最終の能力）
     Skills/    SkillDef（データの形）・SkillBook（SP・前提・待ち時間）・Buffs（強化・召喚）
-    Mobs/      MobDef・Mob/MobAI（動き）・DropRoller（ドロップ）
+    Mobs/      MobDef・Mob/MobAI（動き）・MobSkill（技・ボスの段階の形）・MobCombat（技を選ぶ・予兆・段階・呼び出し）・DropRoller（ドロップ）
+    Status/    StatusSet（かかっている状態異常）・StatusSystem（かける・治す・時間を進める公開の入口）
     Items/     ItemDef・StatBlock・Inventory（5 タブ）・Equipment・ScrollSystem
     Quests/    QuestDef・QuestLog
     World/     MapData（マップの JSON の形）・MapInstance（敵・落ちている物・湧き直し）
@@ -25,7 +26,8 @@ classic-unity/
     Util/      Json（小さな読み書き）・Rng（決まった乱数）・Expr（スキルの式）
   Data/                     ← ゲームのデータ（JSON）。Unity では Assets/Resources/Lumina/ へコピー
     items.json monsters.json quests.json shops.json npcs.json skills.json maps/*.json
-    tools/export_data.mjs   ← classic/tools/data/*.mjs → JSON（skills.json だけは手で書く。元は JOBS.md）。--check で「書き出し直しが要らないか」と検査だけ
+    tools/export_data.mjs   ← classic/tools/data/*.mjs → JSON（--check で書き出さずに検査）
+    tools/skills_export.mjs ← skills.json = JOBS.md 4 章の表（名前・最大Lv・効果・MP・前提）＋ classic/tools/data/skills.mjs（範囲・式・動き・状態異常）
     tools/world/            ← マップの生成器と検査（generate.mjs・check.mjs・specs.mjs（マップごとの違い）・npcs.mjs・island.mjs（島は手で置いた））
     tools/quest_goals.mjs   ← 文章だけだったクエストの目的を、判定できる形（talk/visit/interact/collect/event）に直した表
     tools/export_golden.mjs ← テストの期待値（ブラウザ版の物理・設計書の式）→ Tests/Golden/
@@ -38,8 +40,8 @@ classic-unity/
 ```
 cd classic-unity
 dotnet test Tests/Lumina.Core.Tests.csproj          # 全部のテスト
-node Data/tools/export_data.mjs                    # データを書き出し直す（classic/tools/data・tools/world を直したら）
-node Data/tools/export_data.mjs --check            # 書き出さずに: 生成し直した結果がファイルと同じか（種が決まっているので同じになる）＋マップの検査
+node Data/tools/export_data.mjs                    # データを書き出し直す（classic/tools/data・JOBS.md・tools/world を直したら）
+node Data/tools/export_data.mjs --check            # 書き出さずに: 今の JSON が元のデータと同じか（マップは種が決まっているので同じになる）・スキルの表とのつじつま・マップの検査
 node Data/tools/world/check.mjs                    # Data/maps/*.json の検査だけ（下の 4-8）
 node Data/tools/export_golden.mjs                  # 期待値を書き出し直す（ブラウザ版の物理・式を直したら）
 node ../classic/tools/gen_docs.mjs --check         # 設計書の表とのつじつま
@@ -65,10 +67,12 @@ session.Update(Time.deltaTime, input);     // 中で 1/60 秒の固定の更新�
 session.Body          // 足元の位置 X, Y（px・y は下が正）、State、Facing、InvT（無敵）
 session.PrevX/PrevY + session.Stepper.Alpha   // 描く時の補間
 session.Pose          // Motion（stand1/walk1/jump/ladder/rope/alert/swingO1/prone/dead）・Frame・FacingRight・Visible（点滅）
-session.Map           // Data（マップの JSON）・Mobs（敵: X, Y, HopY, Facing, Motion, Hp, FadeOut, Uid）・Drops（落ちている物）
+session.Map           // Data（マップの JSON）・Mobs（敵: X, Y, HopY, Facing, Motion, Hp, FadeOut, Uid, Hidden, StatusIcons）・Drops（落ちている物）
+                      // Projectiles（敵の飛び道具）・Hazards（敵の技の予兆と当たる所）・BossBar（ボスの HP バーの値。いなければ null）
+session.Status        // 主人公の状態異常（Active で一覧、Pose.StatusIcons にビット）
 session.Out.Events    // 起きたこと（音・エフェクト・メッセージ）。次の Update の始めに空になる
 session.Out.Damage    // ダメージの数字（Kind・Value・X/Y・Stack・Delay）
-session.Character / Stats / Inventory / Equipment / Skills / Buffs / Quests / QuickSlots
+session.Character / Stats / Inventory / Equipment / Skills / Buffs / Status / Quests / QuickSlots
 ```
 
 - **入力**（`PlayerInput`）: 押している間の物（Left/Right/Up/Down/Jump/Attack/Pickup）と、押した瞬間の物（JumpPressed/UpPressed/InteractPressed/SkillPressed/ItemPressed）。押した瞬間の物は Core が次の固定の更新で読むまで覚えている。キー配置は `Unity/InputBridge.cs`。
@@ -104,36 +108,69 @@ session.Character / Stats / Inventory / Equipment / Skills / Buffs / Quests / Qu
 
 ### 4-4. スキル（JOBS.md 4 章）— データ駆動
 
-`Data/skills.json`。式の `x` はスキルの Lv、`lv` はキャラの Lv（`floor`・`ceil`・`min`・`max` が使える）。
+`Data/skills.json`（**JOBS.md の全 306 スキル**: 初心者 3・1 次 30・2 次 82・3 次 87・4 次 104）。式の `x` はスキルの Lv、`lv` はキャラの Lv（`floor`・`ceil`・`min`・`max` が使える）。
+名前・最大 Lv（★は `masterLevel`）・効果の文・MP・前提は JOBS.md の表から、動きは `classic/tools/data/skills.mjs` から書き出す（手で直さない）。2 次以降は `branch`（2 次で選んだ枝）が合う時だけ覚えられる。
 
 | 種類 | kind | 例 |
 |---|---|---|
-| 攻撃 | attack | 強打・二段突き・拳の連打・かく乱（弱体だけ） |
-| 範囲 | area | なぎ払い（6 体・HP 5）・宙返り蹴り（まわり） |
-| 遠距離 | ranged | 魔力の矢・魔力の爪（2 回）・強弓・ダブルショット（2 本）・二つ星投げ（LUK×5.0・2 つ）・石つぶて（固定） |
-| 移動 | movement | 早足（前へ押し出す＋速さ・ジャンプ） |
-| 強化 | buff | 鉄の体・魔力の盾・魔力の鎧・集中・闇隠れ・身軽な足 |
-| 回復 | heal | ひと休み（10 秒ごと）・ヒール（見本） |
-| パッシブ | passive | HP/MP回復力・最大HP/MP・我慢・弓の心得・遠目・必中の矢・身のこなし・鋭い目・身軽な構え・銃の心得 |
-| 召喚 | summon | 闇の獣（見本） |
+| 攻撃 | attack | 強打・二段突き・闘気爆発・天の一撃（4 回）・捨て身（防御無視）・暗殺（闇隠れ中 2 倍）・百裂拳（6 回） |
+| 範囲 | area | なぎ払い・乱れ斬り（3 体 × 2）・連突き（3 体 × 3）・竜の咆哮（画面・HP 20%）・爆裂矢（最初の 1 体のまわりに爆発）・鉄の矢（貫く -10%/体）・貫く矢（+30%/体）・連鎖の雷・忍び寄る影（1 秒ごと 5 回） |
+| 遠距離 | ranged | 魔力の矢・火の矢・二つ星投げ（LUK×5.0）・嵐の連射／弾幕（押しっぱなしで 1 秒 8 本）・狙撃（待ち時間 5 秒） |
+| 移動 | movement | 早足・テレポート（向き／↑↓で上下の足場、壁は越えない）・空中ジャンプ |
+| 強化 | buff | 加速（+2 段階）・神速（重なる）・闘気・付与（属性・同時に 1 つ）・全能力の加護・体力強化・魂の矢・影分身・お金の盾・煙玉・復活・変身・乗船 |
+| 回復 | heal | ひと休み・ヒール（不死の敵に聖）・気の回復（LUK・DEX）・気合いの回復（MP） |
+| パッシブ | passive | 熟練（最小ダメージ・命中）・追撃・闘気の極み・不屈・属性の増幅（MP も増える）・急所狙い・必殺の一撃・気合い・影の衣・暗黒の力 |
+| 召喚 | summon | 闇の獣（回復）・火の精／銀の鷹など（interval 秒ごとに近くの敵へ）・タコの砲台（その場に置く）・身代わり人形（形だけ） |
 
-- 初心者 3 と 1 次職 5 系統 × 6 = **33 スキル**（JOBS.md のとおり）。`sample: true` は仕組みを試すための見本（ヒール・ヘイスト・剣の加速・闇の獣・意志の力の待ち時間）。
-- 決まり: SP はそのスキルの段階の財布から・前提（`prereqs`、「または」は `prereqAny`）・MP/HP・待ち時間（`cooldown`）・効果の時間（`buff.sec`）・使える武器（`weapons`）・弾を使う（`ammo`）・射程のパッシブがのる（`rangeBonus`）。縄・はしごの上では使えない。
+- 決まり: SP はそのスキルの段階の財布から・前提（`prereqs`、「または」は `prereqAny`）・MP/HP（`hpPct` は最大 HP の %）・お金（`meso`）・待ち時間（`cooldown`。4 次の一部と気合いの回復だけ）・効果の時間（`buff.sec`）・使える武器（`weapons`。2 次以降の攻撃は職の武器だけ）・弾を使う（`ammo`、1 回ごとに 1 つ）・射程のパッシブがのる（`rangeBonus`）。縄・はしごの上では使えない。
+- 動きの種類（`motion`: swing/stab/shoot/throw/cast/punch）→ `Pose.AttackKind`。無ければ武器（剣=振り・槍と短剣=突き・弓と銃=撃ち・クロー=投げ・ナックル=殴り）、魔法は詠唱。
+- 1 回の時間 = 攻撃速度の時間 × `delay` ＋ 詠唱 `cast`（流星群・吹雪・天の裁き 1.5 秒）・溜め `charge`（溜めの大魔法 2 秒、溜めきった扱いで ×2）。当たる瞬間は詠唱の後の振りの 300/800。突進（`dash`・`dashTime`）は攻撃中も前へ進む。
+- 攻撃スキルのキーを押しっぱなし（`PlayerInput.SkillHeld`）で、終わるたびにくり返す。
+- 弓・クロスボウで矢が無い時のふつうの攻撃は**弱い殴り**（振り・武器係数 1.4・矢は減らない）。クロー・銃はお知らせだけ。
+- 状態異常: スキルのデータの `status`（種類・確率・秒・強さ）を `StatusSystem` へ渡す（poison/burn → 毒、stun/bind → 気絶、darkness・seal・freeze）。slow・polymorph・charm は `StatusKind` に無いので `MobStatusHook` とお知らせだけ。意志の力・解除は `CureStatus`、聖なる盾の間は受けない。
+- 効き目の合計は `Stats.Mods`（`SkillMods`）。闘気の玉は `session.ComboOrbs`、気合いは `session.Energy`（100 で満タン → 60 秒の強化）。
 
 ### 4-5. 敵（MONSTERS.md・FEEL.md 9 章）
 
 - 数値は `export_data.mjs` が `monsters.mjs` と `curves.mjs` の式で作る（MONSTERS.md の表と同じ。テストで島の 7 体を確かめる）。
-- 動き: 這（40 px/秒）・歩（75）・跳（70、時々約 36 px 跳ねる）・飛（60、足場に関係なく漂う、家から ±150）・止・瞬（4 秒ごと）。1〜3 秒歩く ↔ 1〜3 秒止まる。足場の端・壁・45° より急な坂で向きを変える（落ちない）。
-- 攻撃されたら 5 秒追う。Lv20 以上の歩く敵は同じ足場にいると近づく。遠・魔の敵は 3 秒ごとに飛び道具。触れるとダメージ（闇隠れ中は当たらない）。
+- 動き: 這・歩・跳（時々約 36 px 跳ねる）・飛（足場に関係なく漂う）・止・瞬（4 秒ごと）。速さは敵ごと（下の「速さ」）。1〜3 秒歩く ↔ 1〜3 秒止まる。足場の端・壁・45° より急な坂で向きを変える（落ちない）。
+- 攻撃されたら 5 秒追う。Lv20 以上の歩く敵は同じ足場にいると近づく。触れるとダメージ（闇隠れ中は当たらない）。技は下の「敵の技」。気絶・凍結・眠り・技の構えの間は動かない。
 - 被弾で 0.3 秒ひるむ。「押される量」（HP の 10%、ボスは押されない）以上で約 15 px 押される。倒れると 0.6 秒で消える。
 - 湧き直し: 湧く所ごとに 1 体・最大数まで・7 秒ごとに補充。強敵（`timedSpawns`）は倒されてから決まった時間（大コロ貝 600 秒）。**最近いた 6 マップはそのまま残す**（離れて戻っても削った HP・落ちている物はそのまま）。
 - ドロップ: お金 60%（0.7〜1.3 倍）・素材 55%・薬 各 4%・原石 2%・宝石 1%・装備（Lv 帯）0.8%（強敵 30%・ボス確定 3）・書 0.3%/0.1%・呪いの書・固有品。倒れた所から約 40 px 跳ねて落ち、中央 → 右 → 左 …（25 px おき・0.05 秒ずつ）。2 分で消える。拾うキーで 0.1 秒に 1 つ。
+
+- **速さ**（敵ごと）: `monsters.mjs` の最後の列にクラシック流の速さ（-50〜+50）。動く速さ = 100 + 速さ px/秒（FEEL.md 9 章。止は 0）。MONSTERS.md の表の「速さ」の列（`gen_docs.mjs` が作る）。這は -50〜-38（50〜62 px/秒）、歩は -25 前後、素早い獣は +、重い物は −。ボスの段階で `speedMul`。
+- **跳ねる敵**: 歩いている間 0.4〜1.4 秒おきに約 36 px 跳ね、跳ねている間も前へ進む。追う時は着地してすぐ跳ねる。弱りの間は跳ねない。
+- **飛ぶ敵**: 家から左右 ±150・上下 ±60 の中を漂う（歩き出すたびに次の高さを選ぶ）。追う時は主人公の高さ（縄の上も）へ。
+
+#### 敵の技（`Mobs/MobCombat.cs`・データは `classic/tools/data/mob_skills.mjs` → monsters.json の `attacks`）
+
+| type | 動き | 当たる所 |
+|---|---|---|
+| melee | 構え（windup）→ 前（`back` なら後ろ）の四角 | `Hazards`（ShowWarning = false。構えの絵 `attack1`） |
+| shot | 構え → 真っすぐ飛ぶ（count 本を上下に広げる） | `Projectiles`（SkillId・Status つき） |
+| magic | **主人公の足元に予兆 → windup 秒後に当たる**（count 個を spread px おき、`linger` 秒残って状態異常をかけ続ける＝毒の沼） | `Hazards`（Progress 0→1） |
+| area | 敵のまわり（w）か画面全体（global）。`groundOnly`（跳べばよけられる）・`safeHeight`（高い足場は安全） | `Hazards` |
+| summon | 手下を呼ぶ（mobs を順に count 体、生きている手下は max まで。呼んだ手下は湧き直しの数に入らない・すぐ向かってくる） | — |
+| heal | 自分の HP を pct% 治す | — |
+| dive | 消えて（`Hidden`・当たらない）、主人公の所に予兆 → 出てきて当たる | `Hazards` |
+
+- 技の無い敵は「攻撃」の列から自動（遠 = 3 秒ごとの飛び道具、魔 = 足元に予兆の魔法）。体当たりは今までどおり。`touchStatus` で触れた時の状態異常（フグトゲの毒・クラゲンの気絶など）。
+- 技を使うのは: ボス、攻撃されて追っている間、Lv20 以上の歩く敵、動かない敵。待ち時間は技ごと（ボスは入った直後 30%）、技と技の間 1 秒。気絶・凍結・眠りで構えは消える（予兆も消える）。封印の間は技を使わない。闇隠れ中は狙わない・当たらない。
+- 当たると `HitPlayer`（ダメージは攻撃力 × pct%。魔法は避けられない。pct 0 は状態異常だけで、無敵の間もかかる）。お知らせ: `MobCast`（構え・予兆の始まり）・`MobSkillHit`・`MobSummoned`。
+
+#### ボス（`MobDef.Boss`）
+
+- `boss.phases`: HP がその割合以下で次の段階（戻らない）。段階ごとに `atkMul`・`defMul`・`speedMul`・`rate`（技の速さ）・`elements`（弱点の上書き）・`healPct`（始まった時に治す）・`summon`（始まった時に呼ぶ）。技は `phases` で使う段階を決める。お知らせ `BossPhase`（Value = 段階、Text = 名前）。
+- 地域のボス 12 体・大ボス 3 体・ダンジョンの主 7 体にデータあり（MONSTERS.md 5 章をもとに。大ボスの部位は段階にまとめた簡略版）。データの無いボスも 1 段階で HP バーは出る。
+- **ボスの HP バー**: `session.Map.BossBar`（`BossBarInfo`: Name・Lv・Hp/MaxHp・Ratio・Phase/PhaseCount/PhaseName・段階の中の残り PhaseRatio・状態異常・大技の詠唱 Casting/CastName/CastProgress）。色は Phase で変える。
 
 ### 4-6. アイテム（ITEMS.md）
 
 - 持ち物 5 タブ（装備・消費・設置・その他・特別）、各 24 枠、転職で +4。薬 100・素材 200・矢 1000・投げ星 500 などで重なる。お金の上限 21 億。
 - 装備: 部位（全身は上下を外す・両手武器は盾を外す・盾は両手武器を外す）、職の制限（初心者は共通だけ）、必要 Lv・能力（AP ＋ ほかの装備）。落とした装備は ±5% ぶれ、1% で上質（+10%）。
 - 強化の書: 10/60/100%、呪いの 30/70%（失敗の半分で壊れる）。成功しても失敗しても回数 −1。
+- 解毒薬（毒）・目薬（暗闇）・聖水（呪い）・万能薬（毒・気絶・暗闇・封印・呪い）。弱り・凍結・眠りは時間だけ（STATS.md 4-3）。治す物が無くても使える。
 - 薬・強化の薬（時間）・帰還の書（地域の中だけ。「一番近い町」もある）・店（買う・売る。装備は 1/5）・宿屋。
 
 ### 4-7. クエスト（QUESTS.md）
@@ -153,6 +190,7 @@ session.Character / Stats / Inventory / Equipment / Skills / Buffs / Quests / Qu
 - 手触りの決まり（FEEL.md）: 跳んで上がる段差は 40〜60 px（設計の上限 64）、64〜80 px の「跳べそうで跳べない」段差は作らない、80 px 以上は縄・はしご（上端は足場の高さちょうど、下端は下の足場の 20 px 上）、坂は 45 度まで。狩り場は横長で 3 層以上・湧く所 8 以上。
 - **検査**（`tools/world/check.mjs`。生成器は通るまで種を変えて作り直す）: どのポータル（出現の位置も）からも全部の足場に行ける・ポータルの行き先が両方向で合っている・maps.mjs のつながりと同じ・湧く所/強敵/NPC/調べる物が足場の上・maps.mjs の敵が全部湧く・縄の両端・跳べない段差なし。動きのモデルは物理と同じ数値（その場ジャンプ・↓ジャンプ・端から落ちる・縄・同じマップの中のポータル）。
 - **テストは本物の物理でも確かめる**（`Tests/MapReach.cs`・`WorldMapTests.cs`）: 全マップで、足場の上の 16 px おきの位置から PlayerPhysics で動いて行ける所を調べ、どのポータルからも全部の足場に行けること。代表の 17 枚は 1 つの体で全部の足場を順に回り、全部のポータルの前に立つ（歩いて止まる → 動く、を続けて）。
+- ボス（monsters.json の `boss` を持つ 22 体: 地域ボス 12・大ボス 3・ダンジョンの主など 7）は、ボスの間（1 人用ダンジョンは最後の部屋・試験の部屋）の `timedSpawns` に置いてある。間隔は WORLD.md の特徴の欄（「1 時間ごと」「1 日 2 回」「週 1 回」）から。
 - 戻る町（`returnMap`）: ポータルでたどって一番近い町。島は芽吹き村。
 - NPC は `tools/world/npcs.mjs`（167 人）。位置は生成の時に決まる（高い町では `tier` の段に）。同じ人が別のマップにもいる時（転職官が修練場にいる）は `dorga_V413` のような別の ID。乗り物の NPC（雲の船・潜水船・大きな鳥・そり）は `travel`。町の薬屋には店（`shop.<町>.potion`）がある。
 - 隠し部屋（WORLD.md 6 章）: S007・V102（灯台のてっぺん）・V105・V409・V506・V601・M107。隠しポータル（`hidden`）で入り、部屋のポータルで戻る。
@@ -166,16 +204,47 @@ session.Character / Stats / Inventory / Equipment / Skills / Buffs / Quests / Qu
 - 版: `version`（今は 2）。古い版は `SaveMigrations` で 1 つずつ直してから読む。新しすぎる版は断る（バックアップへ）。データに無いアイテムは外してお知らせ。
 - 保存する物: キャラ・持ち物・装備（ぶれ・書の結果込み）・スキル・待ち時間・クイックスロット・クエスト（数も）・場所・フラグ・乱数の状態。バフはクラシックどおり保存しない。死んでいる時は町に置いて保存。
 
+### 4-10. 状態異常（STATS.md 4-3）— `Core/Status/`
+
+| 種類 | StatusKind / データの名前 | 効き目 | 治し方 |
+|---|---|---|---|
+| 毒 | Poison / poison | 1 秒ごとに最大 HP の power%（既定 2%）。**HP 1 で止まる**（敵も） | 解毒薬・万能薬・時間 |
+| 気絶 | Stun / stun | 動けない・攻撃もスキルもできない（薬は使える） | 万能薬・時間 |
+| 暗闇 | Darkness / darkness | 命中 −power%（既定 50%） | 目薬・万能薬・時間 |
+| 封印 | Seal / seal | スキルが使えない（治すスキルは使える）。敵は技を使わない | 万能薬・時間 |
+| 呪い | Curse / curse | 攻撃力・魔力・防御 −power%（既定 20%）、主人公が得る経験値 −50% | 聖水・万能薬・時間 |
+| 弱り | Weak / weak | ジャンプできない（跳ねる敵は跳ねない） | 時間 |
+| 凍結 | Freeze / freeze | 動けない・攻撃できない。**攻撃を受けると解ける** | 時間 |
+| 眠り | Sleep / sleep | 同上 | 時間 |
+
+- **重ねがけ**: 同じ種類は重ならない（かけ直すと残り時間は長い方・強さは強い方）。違う種類は同時にかかる。死ぬと全部消える。セーブしない（バフと同じ）。
+- **効きにくさ**: ボス（kind = boss）は気絶・凍結・眠りが 1/3 の時間、毒は 1/10 の強さ。大ボス（raid）は何も効かない（`StatusResisted`）。
+- **公開の入口**（スキル担当が「スキルが状態異常を付ける」時に使う）:
+
+```csharp
+StatusSystem.Apply(target, StatusKind.Poison, seconds, power, session.Out);   // target = Mob か GameSession（IStatusTarget）
+StatusSystem.Apply(target, "stun", seconds);                                  // データの名前でも
+StatusSystem.TryApply(target, kind, seconds, power, chance, session.Rng, session.Out); // 確率つき
+StatusSystem.Cure(target, kind, session.Out);  StatusSystem.Cure(target, kinds, session.Out);
+session.ApplyStatus(mob, kind, seconds, power);   // お知らせ付き（敵）
+session.ApplyStatus(kind, seconds, power);        // お知らせ付き（主人公）
+session.CureStatus(GameSession.CurableAll);       // 治すスキル（意志の力の見本は今これを呼ぶ）
+// 戻り値 StatusApplyResult: Applied / Refreshed / Resisted（確率で外れ）/ Immune / Invalid
+```
+
+- **お知らせ**（GameEvents）: `StatusApplied`・`StatusEnded`・`StatusCured`・`StatusResisted`（Id = poison など、Value = 敵の Uid・主人公は 0、Text = 名前、X/Y = 頭の上）。毒の数字は `DamageKind.Poison`。
+- **頭の上のアイコン**: 主人公は `session.Pose.StatusIcons`（ビット `1 << (int)StatusKind`、`HasStatus(kind)`）。残り時間は `session.Status.Active` の `Ratio`。敵は `mob.StatusIcons`、ボスは `BossBar.StatusIcons`。
+
 ## 5. クラシックに比べてまだ違う所・次にやること
 
-- **敵の速さ**: MONSTERS.md の「速さ（-50〜+50）」の列がまだ無いので、動きの種類ごとの決まった値（這 40・歩 75 …）。敵ごとの速さを `monsters.mjs` に足すとよい。
-- **敵の攻撃**: 遠・魔は 3 秒ごとの真っすぐな飛び道具だけ。魔法の「足元に予兆を出してから当たる」・ボスの技・段階は未実装。
-- **状態異常**（毒・気絶・暗闇・封印・呪い・弱り・凍結・眠り）は未実装（意志の力・万能薬は「治った」のお知らせだけ）。
-- **2〜4 次のスキル**は見本の 5 つだけ。熟練（最小ダメージ）・追撃・闘気などは形（`passive.mastery` など）だけ用意。
+- **敵の速さ**: 這う敵は前の 40 px/秒から 50〜62 px/秒（FEEL.md の「-50〜+50 で 50〜150」に合わせた。MONSTERS.md の「30〜50」の書き方も直した）。
+- **ボス**: 簡略にした所がある — 大ボスの部位（焔の巨像の腕 8 本・黒竜の 6 部位・星を呑む者の背中の核）は段階にまとめた。雲の魔女の分身・時計塔の「時の裂け目」・深淵の大魚の「光る岩」・巨像の「盾の陰」・大樹の怪の「ツタで引き寄せる」・渦潮の吸い込みは無い（技の数値だけ）。ボスの間の回数制限・制限時間も未実装。
+- **状態異常**: ボスの毒を 1/10 にしたのは独自（クラシックは技ごとの上限）。石化（雲の魔女）は気絶で代わりにした。誘惑・混乱などクラシックの他の異常は無い。
+- **敵の技の絵**: Core は `Motion`（attack1 / skill1）・`Hazards`（予兆）・`Projectiles`（SkillId）を出すだけ。絵・音は Unity 側。
+- **2〜4 次のスキル**: 全部入れたが「形と最低限の動き」の物がある — 敵の強化を消す（鎧崩し・魔法崩し・力崩し・解除）はお知らせだけ（敵のバフが無い）。遅延・変化の呪い・錯乱弾は状態異常の種類が無いのでお知らせだけ。秘術の扉は町へ行くだけ（戻る扉なし）。身代わり人形・乗船の HP・隠れ足（ゆっくり落ちる）・毒の霧の「置いておく」・クローの熟練の「1 束 +」・調合上手は数値だけで効いていない。MP 吸収は敵の MP を減らさない。溜めの大魔法は溜める長さを選べない（いつも 2 秒で ×2）。盗賊団・爆弾カモメは即時の攻撃。当たる範囲・ディレイ・状態異常の秒（JOBS.md に無い物）は「似」で決めた値。
 - **攻撃の絵**: Core は攻撃の種類（振り・突き・撃ち・投げ・詠唱・殴り）を `Pose.AttackKind` で出しているが、絵の名前は ART_SPEC の `swingO1` だけ。
-- **弓が矢なしの時**: クラシックは弱い殴りになるが、今は撃てない（お知らせだけ）。
 - **闇隠れの「速さ −20+x」**: ブラウザ版の速さの計算（100 より下にしない）に合わせているので、遅くはならない。
-- **ペット・倉庫・椅子・製作・2 次以降の転職の試験・1 人用ダンジョン・ボス**は未実装（データの形は広げられる）。
+- **ペット・倉庫・椅子・製作・2 次以降の転職の試験・1 人用ダンジョン・ボスの間（入る回数・制限時間）**は未実装（ボスそのものの技・段階は 4-5）。
 - **マップの見た目**: 足場の配置は生成なので、絵（タイル・背景の層・飾り）を置く時に「ここに家」「ここに風車」などの手直しが要るかもしれない。直す時は `specs.mjs`（型・層の数・横幅）か、その 1 枚だけ島のように手で置く。
 - **まだ呼ぶ所が無い event**: 倉庫・ペット・1 人用ダンジョンのクリア・2〜4 次転職・クイズ・ボスを倒した時（`boss_kill`）。クエストのデータは用意済み。
 - **店**: 町の薬屋だけ。武器屋・防具屋・倉庫番・タクシーは NPC（`role`）だけで品ぞろえ・仕組みはまだ。乗り物の NPC は 1 人 1 行き先（雲の船の駅は行き先ごとに係がいる）。

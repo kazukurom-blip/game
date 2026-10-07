@@ -7,6 +7,8 @@ namespace Lumina.Core.Game
     {
         // 押している間
         public bool Left, Right, Up, Down, Jump, Attack, Pickup;
+        /// <summary>押している間のスキル（攻撃スキルはクラシックどおり押しっぱなしでくり返す。嵐の連射・弾幕もこれ）。null なら無し。</summary>
+        public string SkillHeld;
         // 押した瞬間（Core が 1 回読んだら消える）
         public bool JumpPressed, UpPressed, InteractPressed;
         /// <summary>このフレームで使うスキル（クイックスロットのキー）。null なら無し。</summary>

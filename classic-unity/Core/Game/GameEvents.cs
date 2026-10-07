@@ -20,6 +20,13 @@ namespace Lumina.Core.Game
         Died, Revived,
         Saved, SaveFailed,
         Message,                                          // システムメッセージ（Text）
+        // 状態異常（Id = poison/stun/darkness/seal/curse/weak/freeze/sleep、Value = 敵の Uid（主人公は 0）、Text = 名前）
+        StatusApplied, StatusEnded, StatusCured, StatusResisted,
+        // 敵の技（Id = 技の ID、Value = 敵の Uid、Text = 技の名前、X/Y = 予兆の位置）
+        MobCast,        // 構え・予兆が始まった（音・予兆のエフェクト）
+        MobSkillHit,    // 技が主人公に当たった
+        MobSummoned,    // 手下を呼んだ（Id = 呼ばれた敵の ID）
+        BossPhase,      // ボスの段階が変わった（Value = 段階（0〜）、Text = 段階の名前、Id = ボスの ID）
     }
 
     public struct GameEvent

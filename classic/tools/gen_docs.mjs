@@ -26,12 +26,12 @@ const ORE = (lv) => (lv < 20 ? '青銅の原石' : lv < 35 ? '鉄の原石' : lv
 const GEM = (lv) => ['ガーネット', 'アメジスト', 'アクアマリン', 'エメラルド', 'オパール', 'サファイア', 'トパーズ', 'ダイヤモンド', '黒水晶'][Math.min(8, Math.floor(lv / 15))] + 'の原石';
 const BAND = (lv) => [10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150].reduce((a, b) => (b <= lv ? b : a), 0);
 
-export const MONSTERS = MONSTERS_RAW.map(([id, name, lv, kind, move, atkType, el, etc, special, note]) => {
+export const MONSTERS = MONSTERS_RAW.map(([id, name, lv, kind, move, atkType, el, etc, special, note, speed = 0]) => {
   const b = mobBase(lv);
   const k = KIND_MUL[kind];
   const magic = atkType.includes('魔');
   return {
-    id, name, lv, kind, move, atkType, el, etc, special, note,
+    id, name, lv, kind, move, atkType, el, etc, special, note, speed,
     hp: nice(b.hp * k.hp), mp: magic ? nice(lv * 6 + 10) : nice(lv * 2), exp: nice(b.exp * k.exp),
     atk: nice(b.atk * k.atk), matk: magic ? nice(b.atk * k.atk * 1.1) : 0, def: nice(b.def * k.def), mdef: nice(b.def * k.def * (magic ? 1.3 : 0.8)),
     avoid: Math.round(b.avoid * (kind === 'frail' ? 1.5 : 1)), acc: Math.round(lv * 1.4 + 5), meso: nice(b.meso * (kind === 'boss' ? 30 : kind === 'raid' ? 100 : kind === 'elite' ? 6 : 1)),
@@ -58,6 +58,7 @@ for (const m of MAPS) {
   }
 }
 for (const mob of MONSTERS) if (!mob.maps.length) problems.push(`敵 ${mob.id} ${mob.name} がどのマップにも出ない`);
+for (const mob of MONSTERS) if (!Number.isInteger(mob.speed) || mob.speed < -50 || mob.speed > 50) problems.push(`敵 ${mob.id} ${mob.name} の速さ ${mob.speed} が -50〜+50 の整数でない`);
 // どのマップからも町へ歩いて戻れるか（乗り物を含めず、ポータルだけで町に着くか）
 for (const m of MAPS) {
   if (m.type === '町' || m.type === '移' && !m.links.length) continue;
@@ -86,11 +87,11 @@ function genMonsters() {
     const list = MONSTERS.filter((m) => m.maps.some((id) => id[0] === code) && (m.maps[0][0] === code));
     if (!list.length) continue;
     out.push(`\n### ${rname}\n`);
-    out.push('| ID | 名前 | Lv | 種類 | HP | MP | 経験値 | 攻撃(物/魔) | 防御(物/魔) | 回避/命中 | お金 | 動き・攻撃 | 属性 | 出るマップ |');
-    out.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
+    out.push('| ID | 名前 | Lv | 種類 | HP | MP | 経験値 | 攻撃(物/魔) | 防御(物/魔) | 回避/命中 | お金 | 動き・攻撃 | 速さ | 属性 | 出るマップ |');
+    out.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
     for (const m of list) {
       const kindJ = { normal: '通常', tough: '硬い', frail: '柔い', elite: '強敵', boss: 'ボス', raid: '大ボス' }[m.kind];
-      out.push(`| ${m.id} | ${m.name} | ${m.lv} | ${kindJ} | ${fmt(m.hp)} | ${fmt(m.mp)} | ${fmt(m.exp)} | ${fmt(m.atk)}/${m.matk ? fmt(m.matk) : '-'} | ${fmt(m.def)}/${fmt(m.mdef)} | ${m.avoid}/${m.acc} | ${fmt(m.meso)} | ${m.move}・${m.atkType} | ${m.el} | ${m.maps.join(' ')} |`);
+      out.push(`| ${m.id} | ${m.name} | ${m.lv} | ${kindJ} | ${fmt(m.hp)} | ${fmt(m.mp)} | ${fmt(m.exp)} | ${fmt(m.atk)}/${m.matk ? fmt(m.matk) : '-'} | ${fmt(m.def)}/${fmt(m.mdef)} | ${m.avoid}/${m.acc} | ${fmt(m.meso)} | ${m.move}・${m.atkType} | ${m.move === '止' ? '-' : (m.speed > 0 ? '+' : '') + m.speed} | ${m.el} | ${m.maps.join(' ')} |`);
     }
     out.push('');
     out.push('<details><summary>ドロップと説明</summary>\n');

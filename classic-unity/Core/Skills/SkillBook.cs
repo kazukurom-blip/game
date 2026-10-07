@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Lumina.Core.Character;
 using Lumina.Core.Data;
+using Lumina.Core.Util;
 
 namespace Lumina.Core.Skills
 {
@@ -13,6 +14,8 @@ namespace Lumina.Core.Skills
         private readonly GameData data;
         public readonly Dictionary<string, int> Levels = new Dictionary<string, int>();
         public readonly Dictionary<string, double> Cooldowns = new Dictionary<string, double>();
+        /// <summary>極意の書で上がった最大 Lv（★のスキルだけ。JOBS.md 2-3）。</summary>
+        public readonly Dictionary<string, int> Masters = new Dictionary<string, int>();
 
         public SkillBook(GameData data) { this.data = data; }
 
@@ -27,11 +30,25 @@ namespace Lumina.Core.Skills
             }
         }
 
-        /// <summary>その職がこのスキルの系統か（初心者のスキルは全員が持てる）。</summary>
+        /// <summary>その職がこのスキルの系統か（初心者のスキルは全員が持てる）。2 次以降は 2 次で選んだ枝も同じ時だけ。</summary>
         public static bool JobMatches(SkillDef s, CharacterState c)
         {
             if (s.Job == JobLine.Beginner) return true;
-            return s.Job == c.Line;
+            if (s.Job != c.Line) return false;
+            return s.Branch < 0 || s.Branch == c.Branch;
+        }
+
+        /// <summary>今の最大 Lv（★は極意の書を使うと上がる）。</summary>
+        public int MaxLevel(SkillDef s) => s.CapFor(Masters.TryGetValue(s.Id, out var m) ? m : 0);
+
+        /// <summary>極意の書（20 / 30）。成功すると最大 Lv が cap に上がる（今の上限より上の書だけ。失敗しても書は無くなる）。</summary>
+        public bool UseMasteryBook(string id, int cap, double successRate, IRandom rng)
+        {
+            var s = data.Skill(id);
+            if (s == null || s.MasterLevel <= 0 || cap <= MaxLevel(s) || cap > s.MasterLevel) return false;
+            if (!rng.Chance(successRate)) return false;
+            Masters[id] = cap;
+            return true;
         }
 
         public LearnResult CanLearn(string id, CharacterState c)
@@ -40,7 +57,7 @@ namespace Lumina.Core.Skills
             if (s == null) return LearnResult.UnknownSkill;
             if (!JobMatches(s, c)) return LearnResult.WrongJob;
             if (c.Tier < s.Tier) return LearnResult.TierTooLow;
-            if (Level(id) >= s.MaxLevel) return LearnResult.MaxLevel;
+            if (Level(id) >= MaxLevel(s)) return LearnResult.MaxLevel;
             if (c.Sp[s.Tier] <= 0) return LearnResult.NoSp;
             if (s.Prereqs.Count > 0)
             {

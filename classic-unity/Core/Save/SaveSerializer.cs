@@ -44,6 +44,7 @@ namespace Lumina.Core.Save
 
             w.Key("skills").BeginObject(); foreach (var kv in s.Skills) w.Prop(kv.Key, kv.Value); w.EndObject();
             w.Key("cooldowns").BeginObject(); foreach (var kv in s.Cooldowns) w.Prop(kv.Key, kv.Value); w.EndObject();
+            w.Key("skillMasters").BeginObject(); foreach (var kv in s.SkillMasters) w.Prop(kv.Key, kv.Value); w.EndObject();
             w.Key("quickslots").BeginArray();
             foreach (var q in s.QuickSlots) w.BeginObject().Prop("key", q.Key).Prop("kind", q.Kind).Prop("id", q.Id).EndObject();
             w.EndArray();
@@ -123,6 +124,8 @@ namespace Lumina.Core.Save
             if (sk != null) foreach (var kv in sk) s.Skills[kv.Key] = (int)J.ToDouble(kv.Value);
             var cd = J.Obj(d, "cooldowns");
             if (cd != null) foreach (var kv in cd) s.Cooldowns[kv.Key] = J.ToDouble(kv.Value);
+            var sm = J.Obj(d, "skillMasters");
+            if (sm != null) foreach (var kv in sm) s.SkillMasters[kv.Key] = (int)J.ToDouble(kv.Value);
             foreach (var o in J.Arr(d, "quickslots"))
             {
                 var q = (Dictionary<string, object>)o;

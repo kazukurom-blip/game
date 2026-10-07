@@ -20,6 +20,7 @@ using Lumina.Core.Physics;
 using Lumina.Core.Quests;
 using Lumina.Core.Save;
 using Lumina.Core.Skills;
+using Lumina.Core.Status;
 using Lumina.Core.Util;
 using Lumina.Core.World;
 
@@ -119,6 +120,7 @@ namespace Lumina.Core.Game
             // 押している物は今の値、押した瞬間の物は Core が読むまで覚えておく
             input.Left = frameInput.Left; input.Right = frameInput.Right; input.Up = frameInput.Up; input.Down = frameInput.Down;
             input.Jump = frameInput.Jump; input.Attack = frameInput.Attack; input.Pickup = frameInput.Pickup;
+            input.SkillHeld = frameInput.SkillHeld;
             input.JumpPressed |= frameInput.JumpPressed;
             input.UpPressed |= frameInput.UpPressed;
             input.InteractPressed |= frameInput.InteractPressed;
@@ -150,32 +152,38 @@ namespace Lumina.Core.Game
             {
                 Map.StepWorld(dt, Rng);
                 StepMobs(dt);
-                Pose = poseTracker.Update(Body, null, true, dt);
+                Pose = poseTracker.Update(Body, null, true, dt, 0);
                 TickAutoSave(dt);
                 return;
             }
 
             if (inp.ItemPressed != null) UseItem(inp.ItemPressed);
+            skillInput = inp;
             if (inp.SkillPressed != null) UseSkill(inp.SkillPressed);
+            // 攻撃スキルのキーを押しっぱなし: 終わるたびにくり返す（嵐の連射・弾幕も）
+            else if (inp.SkillHeld != null && Attack == null && Data.Skill(inp.SkillHeld)?.IsAttack == true) UseSkill(inp.SkillHeld, true);
             if (inp.InteractPressed) InteractNearby();
 
             // ポータル: ↑を押した瞬間、足元にポータルがあれば入る（縄より先）
             if (inp.UpPressed && !Body.OnRope)
             {
                 var p = Map.Data.FindPortalAt(Body.X, Body.Y);
-                if (p != null && UsePortal(p)) { Pose = poseTracker.Update(Body, Attack, Dead, dt); return; }
+                if (p != null && Status.CanMove && UsePortal(p)) { Pose = poseTracker.Update(Body, Attack, Dead, dt, Status.Mask); return; }
             }
 
             // ふつうの攻撃（押している間くり返す）
             if (inp.Attack && Attack == null) StartBasicAttack();
 
-            // 物理
+            // 物理（気絶・凍結・眠りの間は入力が効かない。弱りはジャンプだけできない）
             Body.AttackLock = Attack != null && Attack.OnGround && !Attack.Finished;
+            if (Attack != null && Attack.Dashing) { Body.AttackLock = false; if (Body.OnGround) Body.Vx = Attack.Facing * Attack.DashSpeed; } // 突進
+            Body.NoJump = !Status.CanJump;
             var pin = new PhysicsInput
             {
                 Left = inp.Left, Right = inp.Right, Up = inp.Up, Down = inp.Down, Jump = inp.Jump,
                 JumpPressed = inp.JumpPressed || (inp.Jump && !prevJump),
             };
+            if (!Status.CanMove) pin = PhysicsInput.None;
             prevJump = inp.Jump;
             PlayerPhysics.Step(Body, pin, Map.Physics, dt);
             foreach (var e in Body.Events) Out.Add(ToEventType(e), x: Body.X, y: Body.Y);
@@ -189,8 +197,9 @@ namespace Lumina.Core.Game
             if (Attack != null)
             {
                 if (Attack.Advance(dt)) ResolveAttackHit();
-                if (Attack.Finished) Attack = null;
+                if (Attack != null && Attack.Finished) Attack = null;
             }
+            TickPendingHits(dt);
 
             StepMobs(dt);
             Map.StepWorld(dt, Rng);
@@ -199,10 +208,11 @@ namespace Lumina.Core.Game
             if (inp.Pickup && pickupT <= 0) { if (TryPickup()) pickupT = 0.1; }
 
             TickBuffs(dt);
+            TickPlayerStatus(dt);
             Skills.Tick(dt);
             Regen(dt);
 
-            Pose = poseTracker.Update(Body, Attack, Dead, dt);
+            Pose = poseTracker.Update(Body, Attack, Dead, dt, Status.Mask);
             TickAutoSave(dt);
         }
 
@@ -223,6 +233,19 @@ namespace Lumina.Core.Game
         public void RefreshStats()
         {
             Stats = StatCalc.Compute(Character, Equipment, Skills, Buffs, Inventory, Data);
+            if (Status.Any)
+            {
+                // 暗闇: 命中 −50%。呪い: 攻撃力・魔力・防御 −20%（STATS.md 4-3）
+                Stats.Acc *= Status.AccMul;
+                double cm = Status.AtkMul;
+                if (cm < 1)
+                {
+                    Stats.Watk = (int)Math.Floor(Stats.Watk * cm);
+                    Stats.MagicPower = (int)Math.Floor(Stats.MagicPower * cm);
+                    Stats.Wdef = (int)Math.Floor(Stats.Wdef * cm);
+                    Stats.Mdef = (int)Math.Floor(Stats.Mdef * cm);
+                }
+            }
             if (Body != null) Body.SetMoveStats(Stats.Speed, Stats.Jump);
             if (Character.Hp > Stats.MaxHp) Character.Hp = Stats.MaxHp;
             if (Character.Mp > Stats.MaxMp) Character.Mp = Stats.MaxMp;
@@ -341,11 +364,17 @@ namespace Lumina.Core.Game
 
         private void TickBuffs(double dt)
         {
+            TickSummons(dt);
             var r = Buffs.Tick(dt);
             if (r.HealHp > 0) HealHp(r.HealHp);
+            if (r.LoseHp > 0) LoseHpFromBuff(r.LoseHp);
             if (r.Expired != null)
             {
-                foreach (var id in r.Expired) Out.Add(GameEventType.BuffEnded, id);
+                foreach (var id in r.Expired)
+                {
+                    Out.Add(GameEventType.BuffEnded, id);
+                    if (id == StatCalc.EnergyBuffId) Energy = 0; // 気合いの満タンが切れた
+                }
                 RefreshStats();
             }
         }
@@ -371,11 +400,21 @@ namespace Lumina.Core.Game
 
         private void Die()
         {
+            // 復活（ビショップ）: かけておくと一度だけその場で HP 50% で起き上がる
+            var rv = Buffs.ReviveBuff;
+            if (rv != null)
+            {
+                Buffs.Remove(rv.Id);
+                Character.Hp = Math.Max(1, Stats.MaxHp / 2);
+                Out.Add(GameEventType.Revived, rv.Id, x: Body.X, y: Body.Y, text: "復活した");
+                return;
+            }
             Dead = true;
             Character.Hp = 0;
             Attack = null;
             Body.Vx = 0;
             Buffs.Clear();
+            Status.Clear();
             Out.Add(GameEventType.Died, Map.Data.Id, x: Body.X, y: Body.Y);
         }
 
@@ -440,6 +479,7 @@ namespace Lumina.Core.Game
             foreach (var kv in Equipment.All) s.Equipment[ItemEnums.SlotKey(kv.Key)] = ToSaved(kv.Value, 0, 0);
             foreach (var kv in Skills.Levels) s.Skills[kv.Key] = kv.Value;
             foreach (var kv in Skills.Cooldowns) s.Cooldowns[kv.Key] = kv.Value;
+            foreach (var kv in Skills.Masters) s.SkillMasters[kv.Key] = kv.Value;
             for (int i = 0; i < QuickSlots.Length; i++) if (QuickSlots[i] != null) s.QuickSlots.Add(new SavedQuickSlot { Key = i, Kind = QuickSlots[i].Kind, Id = QuickSlots[i].Id });
             foreach (var kv in Quests.Entries)
             {
@@ -499,6 +539,7 @@ namespace Lumina.Core.Game
             }
             foreach (var kv in s.Skills) if (data.Skill(kv.Key) != null) g.Skills.Levels[kv.Key] = kv.Value;
             foreach (var kv in s.Cooldowns) g.Skills.Cooldowns[kv.Key] = kv.Value;
+            foreach (var kv in s.SkillMasters) if (data.Skill(kv.Key) != null) g.Skills.Masters[kv.Key] = kv.Value;
             foreach (var q in s.QuickSlots) if (q.Key >= 0 && q.Key < QuickSlotCount) g.QuickSlots[q.Key] = new QuickSlot { Kind = q.Kind, Id = q.Id };
             foreach (var q in s.Quests)
             {

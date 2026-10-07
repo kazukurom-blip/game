@@ -28,7 +28,7 @@ namespace Lumina.Core.Combat
         }
     }
 
-    public enum DamageKind { Dealt, Critical, Taken, Heal, MpHeal, Miss }
+    public enum DamageKind { Dealt, Critical, Taken, Heal, MpHeal, Miss, Poison } // Poison = 毒で減った分（紫の数字）
 
     /// <summary>画面に出すダメージの数字（FEEL.md 6 章・UI.md 1-3）。Unity 側の DamageNumberView が描く。</summary>
     public struct DamageNumber
@@ -61,26 +61,35 @@ namespace Lumina.Core.Combat
         public int Facing;
         public bool OnGround;           // 地上で始めたか（地上なら止まる）
         public bool Stab;
+        public double Pre;              // 詠唱・溜め（秒）。この間は 1 コマ目のまま、その後に振る
+        public double DashSpeed, DashTime; // 突進（攻撃の始めから DashTime 秒、前へ DashSpeed px/秒）
+        public bool FromStealth;        // 闇隠れから出した攻撃（暗殺・影の衣）
+        public bool Whack;              // 弓・クロスボウで矢が無い時の弱い殴り
+        public double ComboPct;         // 始めた時の闘気のダメージ +%
 
         public bool Finished => Elapsed >= Duration;
-        /// <summary>振りの何コマ目か（0〜2）。swingO1 の 300/150/350ms の割合。</summary>
+        public bool Dashing => DashTime > 0 && Elapsed < DashTime;
+        /// <summary>振りの何コマ目か（0〜2）。swingO1 の 300/150/350ms の割合（詠唱の間は 0）。</summary>
         public int Frame
         {
             get
             {
-                double t = Duration <= 0 ? 1 : Elapsed / Duration;
+                double swing = Duration - Pre;
+                double t = swing <= 0 ? 1 : (Elapsed - Pre) / swing;
+                if (t < 0) return 0;
                 if (t < 300.0 / 800) return 0;
                 if (t < 450.0 / 800) return 1;
                 return 2;
             }
         }
 
-        public static AttackAction Start(double duration, int facing, bool onGround, string skillId = null, int skillLevel = 0, AttackMotion motion = AttackMotion.Swing)
+        /// <summary>攻撃を始める。duration = 振りの時間、pre = その前の詠唱・溜め（当たる瞬間は pre + 振りの 300/800）。</summary>
+        public static AttackAction Start(double duration, int facing, bool onGround, string skillId = null, int skillLevel = 0, AttackMotion motion = AttackMotion.Swing, double pre = 0)
         {
             return new AttackAction
             {
-                SkillId = skillId, SkillLevel = skillLevel, Motion = motion, Duration = duration,
-                HitTime = duration * Physics.Feel.SwingHitFraction, Facing = facing, OnGround = onGround,
+                SkillId = skillId, SkillLevel = skillLevel, Motion = motion, Duration = pre + duration, Pre = pre,
+                HitTime = pre + duration * Physics.Feel.SwingHitFraction, Facing = facing, OnGround = onGround,
             };
         }
 

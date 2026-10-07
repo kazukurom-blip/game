@@ -3,8 +3,8 @@
 //
 // 実行: node classic-unity/Data/tools/export_data.mjs            … 書き出す（マップは生成して検査してから）
 //       node classic-unity/Data/tools/export_data.mjs --check    … 書き出さずに、生成し直した結果がファイルと同じか・マップの検査を通るかだけ確かめる
-// 出力: classic-unity/Data/items.json, monsters.json, quests.json, shops.json, npcs.json, maps/<ID>.json, maps/index.json
-// 手で書くデータ: classic-unity/Data/skills.json（JOBS.md から）
+// 出力: classic-unity/Data/items.json, monsters.json, quests.json, shops.json, npcs.json, skills.json, maps/<ID>.json, maps/index.json
+// スキル: 名前・MP・前提などは classic/docs/JOBS.md の表、動き（範囲・式・状態異常）は classic/tools/data/skills.mjs（skills_export.mjs）
 // マップ: 芽吹きの島は world/island.mjs（手で置いた）、ほかの 222 枚は world/generate.mjs（地形の型から生成。種はマップの ID）。
 //         つながり（ポータル）と出る敵は maps.mjs のとおり。NPC は world/npcs.mjs。検査は world/check.mjs。
 // クエスト: 文章だけの目的は quest_goals.mjs で判定できる形に直す。
@@ -13,6 +13,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mobBase, KIND_MUL, nice, expToNext } from '../../../classic/tools/lib/curves.mjs';
 import { MONSTERS_RAW } from '../../../classic/tools/data/monsters.mjs';
+import { MOB_SKILLS } from '../../../classic/tools/data/mob_skills.mjs';
 import { MAPS_RAW } from '../../../classic/tools/data/maps.mjs';
 import { armorList, extraList, weaponList, STARTER, WEAPON_TYPES } from '../../../classic/tools/data/equips.mjs';
 import { SCROLLS, scrollsFor } from '../../../classic/tools/data/scrolls.mjs';
@@ -20,6 +21,7 @@ import { QUESTS_RAW } from '../../../classic/tools/data/quests.mjs';
 import { NPCS, npcIdOf, POTION_SHOPS } from './world/npcs.mjs';
 import { buildWorld } from './world/world.mjs';
 import { QUEST_GOALS } from './quest_goals.mjs';
+import { buildSkills } from './skills_export.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.resolve(HERE, '..');
@@ -91,7 +93,7 @@ const USE = [
   ['antidote', '解毒薬', { cure: ['poison'] }, 300],
   ['eye_drop', '目薬', { cure: ['darkness'] }, 300],
   ['holy_water', '聖水', { cure: ['curse'] }, 500],
-  ['all_cure', '万能薬', { cure: ['poison', 'darkness', 'curse', 'stun', 'seal', 'weak'] }, 600],
+  ['all_cure', '万能薬', { cure: ['poison', 'darkness', 'curse', 'stun', 'seal'] }, 600], // STATS.md 4-3（弱り・凍結・眠りは時間だけ）
   ['power_tonic', '力の薬', { buff: { watk: 5 }, buffSec: 180 }, 2000],
   ['magic_tonic', '魔力の薬', { buff: { matk: 5 }, buffSec: 180 }, 2000],
   ['aim_tonic', '狙いの薬', { buff: { acc: 10 }, buffSec: 180 }, 1500],
@@ -218,13 +220,22 @@ const ORE = (lv) => (lv < 20 ? 'bronze' : lv < 35 ? 'iron' : lv < 50 ? 'silver' 
 const GEM = (lv) => Math.min(8, Math.floor(lv / 15));
 const BAND = (lv) => [10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150].reduce((a, b) => (b <= lv ? b : a), 0);
 const MOVE = { 這: 'crawl', 歩: 'walk', 跳: 'jump', 飛: 'fly', 止: 'stand', 瞬: 'teleport' };
-const MOVE_SPEED = { crawl: 40, walk: 75, jump: 70, fly: 60, stand: 0, teleport: 50 };
+// 速さ（-50〜+50、monsters.mjs の最後の列）→ px/秒 = 100 + 速さ（FEEL.md 9 章）。止は 0。
+const moveSpeed = (mv, sp) => (mv === 'stand' ? 0 : 100 + Math.max(-50, Math.min(50, sp ?? 0)));
+const STATUS_KINDS = ['poison', 'stun', 'darkness', 'seal', 'curse', 'weak', 'freeze', 'sleep'];
+const ATTACK_TYPES = ['melee', 'shot', 'magic', 'area', 'summon', 'heal', 'dive'];
+// mob_skills.mjs に無い敵の技: 遠 = 真っすぐの飛び道具（3 秒ごと）、魔 = 足元に予兆 → 当たる魔法
+const defaultAttacks = (atkType) => {
+  if (atkType.includes('遠')) return [{ id: 'shot', name: '飛び道具', type: 'shot', range: 300, cd: 3, windup: 0.3, pct: 100, speed: 300, life: 1.2 }];
+  if (atkType.includes('魔')) return [{ id: 'magic', name: '魔法', type: 'magic', range: 300, cd: 3.5, windup: 0.8, pct: 100, w: 70, h: 90 }];
+  return [];
+};
 const ELEM = { 火: 'fire', 氷: 'ice', 雷: 'lightning', 毒: 'poison', 聖: 'holy', 闇: 'dark' };
 const SIZE = { crawl: [30, 24], walk: [44, 44], jump: [36, 36], fly: [34, 30], stand: [40, 56], teleport: [40, 50] };
 const SIZE_MUL = { normal: 1, tough: 1.3, frail: 0.9, elite: 2, boss: 4, raid: 6 };
 const idOf = (name) => { const id = byName.get(name); if (!id) problems.push(`アイテムの名前が見つからない: ${name}`); return id; };
 
-const monsters = MONSTERS_RAW.map(([id, name, lv, kind, move, atkType, el, etc, special, note]) => {
+const monsters = MONSTERS_RAW.map(([id, name, lv, kind, move, atkType, el, etc, special, note, speedStat]) => {
   const b = mobBase(lv);
   const k = KIND_MUL[kind];
   const magic = atkType.includes('魔');
@@ -251,18 +262,34 @@ const monsters = MONSTERS_RAW.map(([id, name, lv, kind, move, atkType, el, etc, 
   if (lv >= 40) drops.push({ item: lv >= 80 ? 'use.power_elixir' : 'use.elixir', chance: big ? 1 : 0.005, count: big ? 5 : 1 });
   if (special) drops.push({ item: byName.get(special) || byName.get(special.replace(/（.+）$/, '')), chance: big ? 0.15 : kind === 'elite' ? 0.1 : 0.0005 });
   const sz = SIZE[mv].map((v) => Math.round(v * SIZE_MUL[kind]));
+  const sk = MOB_SKILLS[id] || {};
+  const attacks = sk.attacks || defaultAttacks(atkType);
+  const checkStatus = (st, where) => { if (st && !STATUS_KINDS.includes(st.kind)) problems.push(`${id} ${where} の状態異常 ${st.kind} が無い`); };
+  const ids = new Set();
+  for (const a of attacks) {
+    if (!ATTACK_TYPES.includes(a.type)) problems.push(`${id} の技 ${a.id} の種類 ${a.type} が無い`);
+    if (ids.has(a.id)) problems.push(`${id} の技の ID ${a.id} が重なっている`);
+    ids.add(a.id);
+    checkStatus(a.status, a.id);
+    for (const m of a.mobs || []) if (!MONSTERS_RAW.some((r) => r[0] === m)) problems.push(`${id} の技 ${a.id} が呼ぶ ${m} が無い`);
+  }
+  checkStatus(sk.touchStatus, '触れた時');
+  const boss = sk.boss || (big ? { phases: [{ hp: 1, name: name }] } : null);
+  if (boss) for (const ph of boss.phases) for (const m of ph.summon?.mobs || []) if (!MONSTERS_RAW.some((r) => r[0] === m)) problems.push(`${id} の段階 ${ph.name} が呼ぶ ${m} が無い`);
+  if (!Number.isInteger(speedStat) || speedStat < -50 || speedStat > 50) problems.push(`${id} の速さ ${speedStat} が -50〜+50 でない`);
   return {
     id, name, lv, kind, move: mv, attack: atkType, touch: atkType.includes('体'), ranged: atkType.includes('遠'), magic,
     elements, hp, mp: magic ? nice(lv * 6 + 10) : nice(lv * 2), exp: nice(b.exp * k.exp),
     atk: nice(b.atk * k.atk), matk: magic ? nice(b.atk * k.atk * 1.1) : 0, def: nice(b.def * k.def), mdef: nice(b.def * k.def * (magic ? 1.3 : 0.8)),
     avoid: Math.round(b.avoid * (kind === 'frail' ? 1.5 : 1)), acc: Math.round(lv * 1.4 + 5),
     meso: nice(b.meso * (kind === 'boss' ? 30 : kind === 'raid' ? 100 : kind === 'elite' ? 6 : 1)), mesoChance: 0.6,
-    speed: MOVE_SPEED[mv], chaseOnSight: mv === 'walk' && lv >= 20, width: sz[0], height: sz[1],
+    speedStat, speed: moveSpeed(mv, speedStat), chaseOnSight: mv === 'walk' && lv >= 20, width: sz[0], height: sz[1],
     pushed: big ? 0 : Math.max(1, Math.round(hp * 0.1)), noKnockback: big,
     drops: drops.filter((d) => d.item),
     equipDrop: lv >= 10 ? { band: BAND(lv) || 10, chance: big ? 1 : kind === 'elite' ? 0.3 : 0.008, count: big ? 3 : 1 } : null,
     cursedScrollChance: big ? 0.2 : kind === 'elite' ? 0.02 : 0,
     etc: `etc.${id}`, special: special || null, note,
+    attacks, touchStatus: sk.touchStatus || null, boss,
   };
 });
 write('monsters.json', { note: 'export_data.mjs が monsters.mjs と curves.mjs から書き出した（MONSTERS.md の表と同じ値）。手で直さない。', monsters });
@@ -386,6 +413,14 @@ for (const [id, name, map, extra = {}] of NPCS) {
 }
 write('npcs.json', { note: 'world/npcs.mjs（位置はマップを作った時に決まる）', npcs: npcOut });
 
+// ---------------- スキル（JOBS.md の表 ＋ skills.mjs の動き）
+const skills = buildSkills(problems);
+write('skills.json', {
+  note: 'export_data.mjs が JOBS.md 4 章の表（名前・最大Lv・効果・MP・前提）と classic/tools/data/skills.mjs（範囲・式・動き・状態異常）から書き出した。手で直さない。式の x はスキルの Lv、lv はキャラの Lv。range は当たる範囲（px、主人公の足元から。front = 向いている方）。',
+  skills,
+});
+
+
 // クエストの目的が指す物があるか
 {
   const objIds = new Set(Object.values(world.maps).flatMap((m) => (m.objects || []).map((o) => o.id)));
@@ -409,4 +444,4 @@ if (CHECK) {
   process.exit(0);
 }
 if (problems.length) { console.error('問題:\n  ' + problems.join('\n  ')); process.exit(1); }
-console.log(`書き出した: アイテム ${items.length}、敵 ${monsters.length}、クエスト ${quests.length}、マップ ${mapIndex.length}（検査 OK）、NPC ${NPCS.length}、店 ${shops.length}`);
+console.log(`書き出した: アイテム ${items.length}、敵 ${monsters.length}、クエスト ${quests.length}、マップ ${mapIndex.length}（検査 OK）、NPC ${NPCS.length}、店 ${shops.length}、スキル ${skills.length}`);
