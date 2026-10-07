@@ -21,11 +21,13 @@ classic-unity/
     Quests/    QuestDef・QuestLog
     World/     MapData（マップの JSON の形）・MapInstance（敵・落ちている物・湧き直し）
     Save/      SaveData・SaveSerializer・SaveMigrations・SaveStore（壊れない書き方）・FileSystem
-    Game/      GameSession（全部をまとめる。Unity が持つのはこれ 1 つ。.Combat/.Skills/.Status/.Items/.Quests/.Mechanics に分けてある）・PlayerInput・GameEvents・AvatarPose
+    Town/      SystemsData（systems.json の形）・Storage（倉庫・共有の AccountData）・PetState・DailyLog（実時間の 1 日 N 回）・QuizSession
+    Game/      GameSession（全部をまとめる。Unity が持つのはこれ 1 つ。.Combat/.Skills/.Status/.Items/.Quests/.Mechanics/.Town/.Jobs/.Rooms/.Pets に分けてある）・PlayerInput・GameEvents・AvatarPose
     Data/      GameData（JSON を読む）・IDataSource
     Util/      Json（小さな読み書き）・Rng（決まった乱数）・Expr（スキルの式）
   Data/                     ← ゲームのデータ（JSON）。Unity では Assets/Resources/Lumina/ へコピー
-    items.json monsters.json quests.json shops.json npcs.json skills.json maps/*.json
+    items.json monsters.json quests.json shops.json npcs.json skills.json systems.json maps/*.json
+    tools/systems.mjs       ← 町と成長の仕組み（店の品ぞろえ・倉庫・タクシー・部屋の決まり・ペット・製作・クイズ・転職の試験）→ shops.json・systems.json・items.json の品
     tools/export_data.mjs   ← classic/tools/data/*.mjs → JSON（--check で書き出さずに検査）
     tools/skills_export.mjs ← skills.json = JOBS.md 4 章の表（名前・最大Lv・効果・MP・前提）＋ classic/tools/data/skills.mjs（範囲・式・動き・状態異常）
     tools/world/            ← マップの生成器と検査（generate.mjs・check.mjs・specs.mjs（マップごとの違い）・npcs.mjs・island.mjs（島は手で置いた））
@@ -78,7 +80,9 @@ session.Character / Stats / Inventory / Equipment / Skills / Buffs / Status / Qu
 
 - **入力**（`PlayerInput`）: 押している間の物（Left/Right/Up/Down/Jump/Attack/Pickup）と、押した瞬間の物（JumpPressed/UpPressed/InteractPressed/SkillPressed/ItemPressed）。押した瞬間の物は Core が次の固定の更新で読むまで覚えている。キー配置は `Unity/InputBridge.cs`。
 - **座標**: Core は 1 px = 1・y は下が正。Unity（PPU = 1）では `(x, -y)`。Pixel Perfect Camera は 800×600。
-- **UI から呼ぶ操作**: `Talk(npcId)` → `NpcDialog`（受けられる・報告できるクエスト、店、宿屋、乗り物）／`AcceptQuest`／`CompleteQuest`／`Buy`／`Sell`／`RestAtInn`／`Travel`／`UseItem`／`UseSkill`／`SetQuickSlot`／`EquipFromInventory`／`Unequip`／`ApplyScrollToEquipped`／`ApplyScrollToInventory`／`SpendAp`／`SpendApHp`／`SpendApMp`／`LearnSkill`／`AdvanceJob`／`Revive`／`SaveNow`／`NpcBulb`（電球）。
+- **UI から呼ぶ操作**: `Talk(npcId)` → `NpcDialog`（受けられる・報告できるクエスト、店、宿屋、乗り物）／`AcceptQuest`／`CompleteQuest`／`Buy`／`Sell`／`RestAtInn`／`Travel`／`UseItem`／`UseSkill`／`SetQuickSlot`／`EquipFromInventory`／`Unequip`／`ApplyScrollToEquipped`／`ApplyScrollToInventory`／`SpendAp`／`SpendApHp`／`SpendApMp`／`LearnSkill`／`AdvanceJob`／`AdvanceJob2`（2 次: 試験の証と枝）／`Revive`／`SaveNow`／`NpcBulb`（電球）。
+  町の仕組み（4-11）: `StorageDeposit`／`StorageWithdraw`／`StorageDepositMeso`／`StorageWithdrawMeso`／`StorageExpand`／`ShopItems`（今日の品）／`Recharge`（詰め直し）／`TaxiTo`・`TaxiFee`／`Craft`・`CraftsAt`／`SitOnChair`・`StandUp`（または椅子を `UseItem`）／`FeedPet`・`TalkToPet`・`SetPetOut`・`RenamePet`（ペットの品・餌・技の本は `UseItem`）／`StartQuiz`・`AnswerQuiz`（賢者の石を `Interact` すると始まる）／`UseMasterBook`／`CanEnterRoom`・`RoomEntriesLeft`。
+  読む物: `session.Storage`・`Pets`（X/Y/Motion）・`Quiz`（Current: 問題と混ぜた選択肢）・`CurrentRoom`・`RoomTimeLeft`/`RoomTimerRunning`/`RoomCleared`・`Sitting`（Pose.Motion = "sit"）・`Daily`。
 - **セーブ**: 自動（マップ移動・Lv アップ・クエスト完了・転職・起き上がり・3 分ごと）。アプリを閉じる時・裏に回った時は Unity 側で `SaveNow`。
 
 ## 4. 仕組みの説明
@@ -202,7 +206,8 @@ session.Character / Stats / Inventory / Equipment / Skills / Buffs / Status / Qu
 
 - `Data/quests.json`（286 本）。目的: `kill`（倒す）・`collect`（持ち物の数。完了で渡す）・`talk`（話す）・`visit`（行く）・`interact`（調べる）・`event`（操作の名前。`GameSession.QuestEvent` で知らせる）。報告先 `end`（`auto` は着いたら完了）。受ける条件の能力値 `minStats`（転職の「STR35 以上」。足りなければ `StartResult.StatTooLow`）。
 - **全部のクエストに判定できる目的がある**。文章だけだった物（手紙を届ける・灯台のランプ・化石を調べる・ダンジョンをクリア・転職 など 91 本）は `Data/tools/quest_goals.mjs` で直した。依頼者・報告先は「名前＠マップ」から NPC の ID に直してある（そのマップにいない依頼者は書き出しの時に問題として止まる）。
-- event の名前: quickslot_set / use_potion / ap_spent / sp_spent / skill_used（チュートリアル）・`job_advance.1`（`AdvanceJob` が知らせる）・`job_advance.2〜4`・`storage_deposit` / `storage_withdraw`・`pet_adopted` / `pet_fed` / `pet_closeness`・`dungeon_clear` と `dungeon_clear.<マップID>`・`boss_kill`・`quiz_cleared`。`job_advance.1` 以外は、その仕組み（倉庫・ペット・1 人用ダンジョン・2 次以降の転職・クイズ）ができた時に呼ぶ（今は呼ぶ所が無い）。
+- event の名前: quickslot_set / use_potion / ap_spent / sp_spent / skill_used（チュートリアル）・`job_advance.1`（`AdvanceJob` が知らせる）・`job_advance.2〜4`・`storage_deposit` / `storage_withdraw`・`pet_adopted` / `pet_fed` / `pet_closeness`・`dungeon_clear` と `dungeon_clear.<マップID>`・`boss_kill`・`quiz_cleared`。全部 Core が知らせる（4-11）。
+- 転職のクエスト（J 系）は `line`（自分の系統だけ受けられる。違えば `StartResult.WrongJob`）。`advance`（J?-7 = 3 次・J?-9 = 4 次: 完了すると転職）・`unlock`（V-13 = 倉庫の枠 +4、PET-07 = ペット 2 匹）は quest_goals.mjs。
 - 報酬の経験値・お金は QUESTS.md 1-3 の式。品は名前から ID に直してある（直せない物は `rewardUnparsed` に残る。大陸のクエストの「自分の職の◯◯」など）。
 - 頭の上の電球: `NpcBulb`（2 = 緑、1 = 黄）。
 - **チュートリアル 20 本（S-01〜S-20）は、目的を機械で判定できる形に書き直し、テストで最初から最後まで遊んで通す**（歩いて岩を越える・縄を登って木箱・ポータル・狩り・拾う・隠し部屋・船で大陸へ）。
@@ -218,7 +223,9 @@ session.Character / Stats / Inventory / Equipment / Skills / Buffs / Status / Qu
 - ボス（monsters.json の `boss` を持つ 22 体: 地域ボス 12・大ボス 3・ダンジョンの主など 7）は、ボスの間（1 人用ダンジョンは最後の部屋・試験の部屋）の `timedSpawns` に置いてある。間隔は WORLD.md の特徴の欄（「1 時間ごと」「1 日 2 回」「週 1 回」）から。
 - 戻る町（`returnMap`）: ポータルでたどって一番近い町。島は芽吹き村。
 - NPC は `tools/world/npcs.mjs`（167 人）。位置は生成の時に決まる（高い町では `tier` の段に）。同じ人が別のマップにもいる時（転職官が修練場にいる）は `dorga_V413` のような別の ID。乗り物の NPC（雲の船・潜水船・大きな鳥・そり）は `travel`。町の薬屋には店（`shop.<町>.potion`）がある。
-- 隠し部屋（WORLD.md 6 章）: S007・V102（灯台のてっぺん）・V105・V409・V506・V601・M107。隠しポータル（`hidden`）で入り、部屋のポータルで戻る。
+- 隠し部屋（WORLD.md 6 章）: S007・V102（灯台のてっぺん）・V105・V409・V506・V601・M107・T104（おもちゃ箱の底）。隠しポータル（`hidden`）で入り、部屋のポータルで戻る。
+- **一方通行のポータル**（`oneWay: true`）: 雲の塔 C107〜C110 の窓（`window`）→ C111 の `slide_in`（type `landing` = 着くだけの位置。入れない）。T104 の落とし穴（`secret`、同じマップの中）→ おもちゃ箱の底 → 部屋の出口は出現の位置（`sp`）へ。specs.mjs の `slide` / `landing` / `secret.oneWay`。検査（check.mjs・WorldMapTests）: 一方通行は戻りが要らない（着く先から戻れたら間違い）・ふつうのポータルの着く先は landing でない・landing はどこかの一方通行の着く先・maps.mjs のつながりの比べには入れない。
+- 町の店の人（武器屋・防具屋・薬屋/雑貨・ペット屋・市場）には export_data.mjs が `shop` を付ける（品ぞろえは systems.mjs）。タクシーの運転手（大陸の 6 町）は `taxi`（行き先 5 つと料金）。
 
 ### 4-9. セーブ（いちばん大事）
 
@@ -227,6 +234,9 @@ session.Character / Stats / Inventory / Equipment / Skills / Buffs / Status / Qu
 - 書く順番: `.tmp` に書いて fsync → 読み直して確かめる → bak を 1 つずつ後ろへ → 今のセーブを bak1 へ → `.tmp` で一度に置き換え。**どこで落ちても、前の版か新しい版のどちらかが必ず読める**（テストで全部の手順で「落ちた」を再現。ちぎれた書き込みも）。
 - 読む順番: 今のセーブと `.tmp` のうち壊れていなくて `seq` の大きい方 → bak1 → bak2 → bak3。壊れていたら `LoadResult.Recovered` と理由（`Problems`）。全部壊れていても落ちずに「読めない」を返す。
 - 版: `version`（今は 2）。古い版は `SaveMigrations` で 1 つずつ直してから読む。新しすぎる版は断る（バックアップへ）。データに無いアイテムは外してお知らせ。
+- 版 3: ペット（`pets`）と実時間の回数（`daily`: ボスの間・ダンジョン・毎日の宝箱）を足した。版 2 は空で足して読む。
+- **倉庫はキャラ全員で共有**: キャラのセーブとは別の枠 `account`（同じ壊れない書き方。`SaveStore.SaveText/LoadText`、中身は `AccountData`）。`AttachSave` で読み、`SaveNow` でキャラより先に書く（間で落ちると品が両方に残る向き。消えはしない）。
+- 制限時間のある部屋（ボスの間・ダンジョン・試験）の中では、場所を戻り先にして保存する。
 - 保存する物: キャラ・持ち物・装備（ぶれ・書の結果込み）・スキル・待ち時間・クイックスロット・クエスト（数も）・場所・フラグ・乱数の状態。バフはクラシックどおり保存しない。死んでいる時は町に置いて保存。
 
 ### 4-10. 状態異常（STATS.md 4-3）— `Core/Status/`
@@ -264,19 +274,47 @@ session.CureStatus(GameSession.CurableAll);       // 治すスキル（意志の
 - **お知らせ**（GameEvents）: `StatusApplied`・`StatusEnded`・`StatusCured`・`StatusResisted`（Id = poison など、Value = 敵の Uid・主人公は 0、Text = 名前、X/Y = 頭の上）。毒の数字は `DamageKind.Poison`。
 - **頭の上のアイコン**: 主人公は `session.Pose.StatusIcons`（ビット `1 << (int)StatusKind`、`HasStatus(kind)`）。残り時間は `session.Status.Active` の `Ratio`。敵は `mob.StatusIcons`、ボスは `BossBar.StatusIcons`。
 
+### 4-11. 町と成長の仕組み — `Core/Town/`・`GameSession.Town/Jobs/Rooms/Pets.cs`（データは `Data/systems.json` ← `Data/tools/systems.mjs`）
+
+- **店**（ITEMS.md 6 章）: 町ごとに武器屋・防具屋（職と Lv の範囲で装備を選ぶ。Lv100 以上は売らない）・薬屋/雑貨（薬・強化の薬・状態異常の薬・帰還の書・お守り）。ペット屋（V200）・ねむり谷の雑貨屋・市場の家具。買値 = 装備の値段、売値 = 装備 1/5・ほか 1/2（今までどおり）。**市場の日替わり**（`daily`: 古道具屋 8 品（中古は 0.7 倍）・書の行商人 5 品（60% 3 万・100% 2 万））は日付と店の ID の種で選ぶ（`ShopItems`）。**詰め直し**（クロウ街・潮風号の武器屋）: 減った分を新品の 1/2。
+- **倉庫**（ITEMS.md 1 章）: 倉庫番（role `storage`）で出し入れ 1 回 100 ルド（お金の出し入れは無料）。16 枠 → 4 枠ずつ 48 まで（10,000 → 20,000 → …）。クエストの品は預けられない。重なる物は重ねる。`storage_deposit` / `storage_withdraw`。共有の保存は 4-9。
+- **タクシー**（WORLD.md 4 章）: 大陸の 6 町（V100・V200・V300・V400・V500・V600）の運転手から残り 5 町へ。料金 800 ＋ 140 ×（町の並びの離れ − 1）= 800〜1,500、初心者（0 次）は 1/10。回数券で無料。雲の船は `Travel(npc, useTicket)` で切符が使える。
+- **製作**（ITEMS.md 4 章）: 精錬（原石 10 → 板。カジ・ツララ・ドラン）・宝石（原石 10 → 宝石。ネズ）・ミスリルの小手（攻撃力 +2）・闇の水晶（ジュエ）。`CraftsAt(npc)` が `NpcDialog.Crafts` にも入る。
+- **毎日の宝箱**: T104 おもちゃ箱の宝箱・M107 沈んだ宝箱。`Interact` で 1 日 1 回（その Lv の敵のお金 × 20 と薬 5 つずつ）。
+- **椅子**（設置）: `UseItem`（または `SitOnChair`）で座る。地上で止まっている時だけ。自然回復 1 回の量が 1.5 倍。左右・上下・ジャンプ・攻撃・スキルで立つ。`Pose.Motion = "sit"`。
+- **2〜4 次の転職**（JOBS.md 3 章）: 2 次 = J?-2 推薦状 → J?-3 修練場で試しの珠 30（20 分。外に出る・時間切れ・中で倒れるとやり直しで珠が消える）→ 試験の証 → `AdvanceJob2(枝)`（J?-4 の `job_advance.2`）。3 次 = J?-5 手紙 → J?-6 **次元の扉**（修験の雪洞 F118 は J?-6 を進めている間だけ入れる。入るとすぐもう一人の自分。20 分）→ J?-7 賢者の石（`Interact` でクイズ。黒いお守りと闇の水晶が要る）→ 完了で 3 次（`job_advance.3`、AP +5・SP +1）。4 次 = J?-8 → J?-9 紅翼の主・蒼翼の主（試験中は印を必ず落とす）→ 完了で 4 次（`job_advance.4`・極意の書 20）。転職のたびに持ち物の枠 +4（装備・消費・その他）。
+- **クイズ**: 30 問（このゲームの町・人・決まりのオリジナルの問題）から 5 問。選択肢の順番は毎回混ぜる。全問正解で `quiz_cleared`、間違えると闇の水晶を 1 つ失って終わり。
+- **極意の書**: `UseMasterBook(書, ★スキル)`。20 は 70%、30 は 50%（決めた値）。上限が上がらない組み合わせは `Invalid`（書は残る）。
+- **ボスの間・1 人用ダンジョン・試験の部屋**（`RoomRule`。MONSTERS.md 5 章・QUESTS.md 6 章）: 入る条件（鍵の品・前提クエスト・Lv の範囲・実時間の 1 日 N 回/週 1 回）はポータルで入る時に確かめ（`CanEnterRoom`）、入ったら 1 回使う。`fresh` の部屋は入るたびに作り直し（ボス・主がすぐ出る）。制限時間が切れると戻り先へ（`RoomTimeUp`）。中で倒れると戻り先で起き上がる（1 人用ダンジョンは経験値 1%）。
+
+| 部屋 | 回数 | 時間 | 条件 |
+|---|---|---|---|
+| V309 大樹の根元 / V412 / V512 | 1 日 3 回 | 30 分（決めた） | V309 は W-15 の後 |
+| V618 封印の間 / C116 / F110 | 1 日 2 回 | 30 分（決めた） | V618 は封印の鍵 |
+| T117 時の門 / M112 / P109 | 1 日 2 回 | 20 / 20 / 25 分 | T117 は時の鍵 |
+| H107 焔の祭壇 | 1 日 1 回 | 45 分 | 焔の目 |
+| D114 黒竜の洞くつ 最奥 / E108 星の玉座 | 週 1 回 | 60 分 | 通行証 / 星の玉座の鍵 |
+| 1 人用ダンジョン V516・T121・T122・C119・M115・D117 | 1 日 5 回 | 20・30・15・45・30・30 分 | Lv の範囲。主を倒すと `dungeon_clear` と `dungeon_clear.<マップ>`・試練のメダル（ダンジョンごと） |
+| 修練場 V413・V311・V211・V513・V108 | — | 20 分（J?-3 の間だけ） | 外に出る・時間切れで試しの珠が消える |
+| F118 修験の雪洞（次元の扉） | — | 20 分 | J?-6 を進めている間だけ |
+
+- **boss_kill**: ボス・大ボス（kind boss/raid）を倒すと（R-21）。お知らせ `BossKilled`。
+- **ペット**（QUESTS.md 4 章）: ペット屋で買った「子犬」などを `UseItem` で迎える（`pet_adopted`）。連れて歩けるのは 1 匹（PET-07 の後 2 匹）。満腹度 0〜100（36 秒で 1 減る・餌 +30・0 で動かない）。親密度 Lv1〜30（Lv n → n+1 に 3n 点。餌 +3（お腹が空いている時）・芸の成功 +1（60%・10 秒に 1 回）・満腹度 50 以上で 5 分連れて歩くと +1・満腹度 0 のまま 10 分で −1）。親密度の目的（PET-04〜07）は「今の Lv」まで進む。技の本: 自動で拾う（80 px、範囲を広げると 200 px）・自動で薬（HP 50%・MP 30% を下回ると一番効く薬）。子竜は親密度 30 で「竜」。名札で名前を変える。数は全部「決めた値」（systems.mjs）。
+- お知らせ（GameEvents）: `StorageChanged`・`Crafted`・`ChestOpened`・`SatDown`/`StoodUp`・`PetAdopted`/`PetFed`/`PetCloseness`/`PetTrick`/`PetHungry`/`PetUsedPotion`・`RoomEntered`（Value = 制限時間、Text = あと何回）/`RoomTimeUp`/`RoomFailed`/`DungeonCleared`・`BossKilled`・`QuizQuestion`/`QuizAnswered`/`QuizCleared`。
+
 ## 5. クラシックに比べてまだ違う所・次にやること
 
 - **敵の速さ**: 這う敵は前の 40 px/秒から 50〜62 px/秒（FEEL.md の「-50〜+50 で 50〜150」に合わせた。MONSTERS.md の「30〜50」の書き方も直した）。
-- **ボス**: 簡略にした所がある — 大ボスの部位（焔の巨像の腕 8 本・黒竜の 6 部位・星を呑む者の背中の核）は段階にまとめた。ボスの間の回数制限・制限時間も未実装。仕掛け（分身・時の裂け目・光る岩・盾の陰・ツタ・渦潮）は 4-5 のとおり入れたが、盾の陰は全滅の炎の予兆の間だけ（いつも置いてある盾の絵はマップの方で）。時のかけらは持ち物ではなく、そのボスの間の中だけの数（`Rifts.Shards`）。
+- **ボス**: 簡略にした所がある — 大ボスの部位（焔の巨像の腕 8 本・黒竜の 6 部位・星を呑む者の背中の核）は段階にまとめた。ボスの間の回数制限・制限時間は 4-11。仕掛け（分身・時の裂け目・光る岩・盾の陰・ツタ・渦潮）は 4-5 のとおり入れたが、盾の陰は全滅の炎の予兆の間だけ（いつも置いてある盾の絵はマップの方で）。時のかけらは持ち物ではなく、そのボスの間の中だけの数（`Rifts.Shards`）。
 - **状態異常**: ボスの毒を 1/10 にしたのは独自（クラシックは技ごとの上限）。石化（雲の魔女）は気絶で代わりにした。誘惑などクラシックの他の異常は無い。錯乱は「主人公 = 左右逆」「敵 = 味方になる（錯乱弾）」の 2 つの意味で 1 つの種類にした。
 - **敵の技の絵**: Core は `Motion`（attack1 / skill1）・`Hazards`（予兆）・`Projectiles`（SkillId）を出すだけ。絵・音は Unity 側。
 - **2〜4 次のスキル**: 全部入れて効かせた（敵の強化を消す・遅延・変化の呪い・錯乱弾・秘術の扉の戻りの扉・身代わり人形・乗船の HP・隠れ足・毒の霧の設置・クローの熟練の 1 束・調合上手・MP 吸収で敵の MP を減らす）。残り: 溜めの大魔法は溜める長さを選べない（いつも 2 秒で ×2）。盗賊団・爆弾カモメは即時の攻撃。当たる範囲・ディレイ・状態異常の秒（JOBS.md に無い物）・身代わり人形の引きつける距離（450 px）・船の HP（2000+200x）・隠れ足の落ちる速さ（120 px/秒）・敵の反射の上限（最大 HP の 20%）は「似」で決めた値。
 - **攻撃の絵**: Core は攻撃の種類（振り・突き・撃ち・投げ・詠唱・殴り）を `Pose.AttackKind` で出しているが、絵の名前は ART_SPEC の `swingO1` だけ。
 - **闇隠れの「速さ −20+x」**: ブラウザ版の速さの計算（100 より下にしない）に合わせているので、遅くはならない。
-- **ペット・倉庫・椅子・製作・2 次以降の転職の試験・1 人用ダンジョン・ボスの間（入る回数・制限時間）**は未実装（ボスそのものの技・段階は 4-5）。
+- **町と成長の仕組み（4-11）の簡略**: 1 人用ダンジョンの部屋ごとの課題（合い札・縄の組み合わせ・鍵集め・迷路のつながりが変わる 等）は無く、最後の主を倒すとクリア。ごほうびの部屋・ランダムの報酬・メダルの交換（6-7）・R-22 のメダル 2 枚は無い。修練場の職ごとの仕掛け（テレポート台・動く的・暗い倉庫 等）は無い。もう一人の自分は自分のスキルを使わない（ふつうの強敵）。市場の素材屋の 1 割高の買い取り・露店の冒険者は無い。製作は例の分だけ（手袋 6・靴 4 などの一覧はまだ）。ペットの装備・芸の絵は Unity 側。1 次転職でもらう武器（JOBS.md 3-1）はまだ渡していない。
+- **極意の書 20**: このデータの★スキルは最初から上限 20 なので、J?-9・T-14 の「極意の書 20」は使えない（30 の書だけ効く）。設計書の★の最初の上限（10?）とデータを合わせるか、報酬を 30 にするか決めてほしい。
 - **マップの見た目**: 足場の配置は生成なので、絵（タイル・背景の層・飾り）を置く時に「ここに家」「ここに風車」などの手直しが要るかもしれない。直す時は `specs.mjs`（型・層の数・横幅）か、その 1 枚だけ島のように手で置く。
-- **まだ呼ぶ所が無い event**: 倉庫・ペット・1 人用ダンジョンのクリア・2〜4 次転職・クイズ・ボスを倒した時（`boss_kill`）。クエストのデータは用意済み。
-- **店**: 町の薬屋だけ。武器屋・防具屋・倉庫番・タクシーは NPC（`role`）だけで品ぞろえ・仕組みはまだ。乗り物の NPC は 1 人 1 行き先（雲の船の駅は行き先ごとに係がいる）。
-- **一方通行のポータル**（雲の塔の窓の滑り台・崩れる足場の下の「おもちゃ箱の底」）は作っていない（検査は「両方向」が決まり）。
+- **乗り物**: 雲の船・潜水船などは 1 人 1 行き先のまま（雲の船の駅は行き先ごとに係がいる）。複数の行き先はタクシーだけ。船の「10 分ごとに出る・乗っている 2 分」は無い（すぐ着く）。
+- **崩れる足場**（T104）は物理に無いので、おもちゃ箱の底へは地面の右端の隠しの落とし穴から入る。
 - **命中**: 初心者が当たらなすぎたので、レベルで上がる基礎の命中（5 + Lv × 0.5）を足した（`StatCalc.BaseAcc`）。Lv8・DEX 4 で Lv8 のダイダイダケに約 94%。
 - 敵の HP バー・ボスの HP バー・NPC の会話の窓・UI の窓は Unity 側の仕事（Core は値を出している）。
