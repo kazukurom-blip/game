@@ -1,8 +1,8 @@
 // セーブの中身（JSON にする前の形）。版番号（Version）を付け、古い版は SaveMigrations で今の版へ直してから読む。
 //
-// 今の版（2）の JSON:
+// 今の版（3）の JSON:
 // {
-//   "version": 2, "seq": 12, "savedAt": "2026-10-07T12:00:00Z", "playSec": 3600.5, "reason": "map",
+//   "version": 3, "seq": 12, "savedAt": "2026-10-07T12:00:00Z", "playSec": 3600.5, "reason": "map",
 //   "character": { "name": "...", "line": "warrior", "tier": 1, "branch": 0, "level": 12, "exp": 345,
 //                  "str": 40, "dex": 12, "int": 4, "luk": 4, "ap": 0, "sp": [0, 3, 0, 0, 0],
 //                  "baseMaxHp": 400, "baseMaxMp": 60, "hp": 300, "mp": 60, "apHp": 0, "apMp": 0 },
@@ -16,6 +16,9 @@
 //   "quests": [ { "id": "S-01", "status": "done", "counts": {}, "at": 120 } ],
 //   "location": { "map": "S001", "x": 300, "y": 640 },
 //   "flags": { "leftIsland": false },
+//   "pets": [ { "kind": "puppy", "name": "子犬", "fullness": 80, "points": 40, "out": true, "skills": ["pickup"] } ],  … 版 3 から
+//   "daily": { "room.V516": [9410, 2], "chest.T104.toybox": [9410, 1] },   … 版 3 から（[日の番号, 回数]）
+//   （倉庫はキャラ全員で共有するので、ここではなく "account" の枠: Town/Storage.cs の AccountData）
 //   "rng": ["0123456789abcdef", "fedcba9876543210"]
 // }
 using System.Collections.Generic;
@@ -41,6 +44,13 @@ namespace Lumina.Core.Save
     }
 
     public sealed class SavedQuickSlot { public int Key; public string Kind, Id; }
+
+    public sealed class SavedPet
+    {
+        public string Kind, Name;
+        public int Fullness = 100, Points;
+        public bool Out, Pickup, Range, Potion;
+    }
 
     public sealed class SaveData
     {
@@ -74,5 +84,9 @@ namespace Lumina.Core.Save
         public double X, Y;
         public Dictionary<string, bool> Flags = new Dictionary<string, bool>();
         public string Rng0, Rng1;
+
+        // 版 3: ペット・実時間の回数（ボスの間・ダンジョン・毎日の宝箱）
+        public List<SavedPet> Pets = new List<SavedPet>();
+        public Dictionary<string, int[]> Daily = new Dictionary<string, int[]>();
     }
 }

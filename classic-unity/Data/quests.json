@@ -845,11 +845,14 @@
    "end": "olga",
    "exp": 133,
    "meso": 510,
-   "rewards": [],
-   "rewardText": "タクシーの回数券 ×5",
-   "rewardUnparsed": [
-    "タクシーの回数券 ×5"
+   "rewards": [
+    {
+     "item": "use.taxi_ticket",
+     "count": 5
+    }
    ],
+   "rewardText": "タクシーの回数券 ×5",
+   "rewardUnparsed": [],
    "story": "大陸めぐり 5。5 人の転職官に会い、どの職になるか決める材料がそろう。",
    "tutorial": false
   },
@@ -1078,6 +1081,7 @@
     }
    ],
    "end": "dan",
+   "unlock": "storage+4",
    "exp": 96,
    "meso": 250,
    "rewards": [],
@@ -1485,11 +1489,14 @@
    "end": "bob",
    "exp": 332,
    "meso": 745,
-   "rewards": [],
-   "rewardText": "風車の椅子",
-   "rewardUnparsed": [
-    "風車の椅子"
+   "rewards": [
+    {
+     "item": "setup.chair.windmill",
+     "count": 1
+    }
    ],
+   "rewardText": "風車の椅子",
+   "rewardUnparsed": [],
    "story": "動く羽の上を跳ぶ、最初のジャンプの道。",
    "tutorial": false
   },
@@ -1847,11 +1854,14 @@
    "end": "noa",
    "exp": 4080,
    "meso": 2030,
-   "rewards": [],
-   "rewardText": "雲の船の切符 ×3",
-   "rewardUnparsed": [
-    "雲の船の切符 ×3"
+   "rewards": [
+    {
+     "item": "use.ship_ticket",
+     "count": 3
+    }
    ],
+   "rewardText": "雲の船の切符 ×3",
+   "rewardUnparsed": [],
    "story": "夜の便の上をフクロウが飛び回る。",
    "tutorial": false
   },
@@ -2492,10 +2502,14 @@
    "end": "kaji",
    "exp": 1980,
    "meso": 1500,
-   "rewards": [],
+   "rewards": [
+    {
+     "item": "etc.plate.bronze",
+     "count": 1
+    }
+   ],
    "rewardText": "青銅の板 ×1、製作の手引き",
    "rewardUnparsed": [
-    "青銅の板 ×1",
     "製作の手引き"
    ],
    "story": "精錬と製作を覚える。",
@@ -2929,11 +2943,14 @@
    "end": "nez",
    "exp": 2290,
    "meso": 1590,
-   "rewards": [],
-   "rewardText": "試練のメダル（裏路地）×3",
-   "rewardUnparsed": [
-    "試練のメダル（裏路地）×3"
+   "rewards": [
+    {
+     "item": "etc.medal.V516",
+     "count": 3
+    }
    ],
+   "rewardText": "試練のメダル（裏路地）×3",
+   "rewardUnparsed": [],
    "story": "ネズは腕の立つ人にしか情報を売らない。",
    "tutorial": false
   },
@@ -3299,11 +3316,14 @@
    "end": "sig",
    "exp": 428000,
    "meso": 22500,
-   "rewards": [],
-   "rewardText": "封印の鍵",
-   "rewardUnparsed": [
-    "封印の鍵"
+   "rewards": [
+    {
+     "item": "special.key.seal",
+     "count": 1
+    }
    ],
+   "rewardText": "封印の鍵",
+   "rewardUnparsed": [],
    "story": "封印の間へ入る鍵を作る。",
    "tutorial": false
   },
@@ -3363,11 +3383,14 @@
    "end": "sig",
    "exp": 305000,
    "meso": 11300,
-   "rewards": [],
-   "rewardText": "闇の水晶（3 次転職に使う）",
-   "rewardUnparsed": [
-    "闇の水晶（3 次転職に使う）"
+   "rewards": [
+    {
+     "item": "special.dark_crystal",
+     "count": 1
+    }
    ],
+   "rewardText": "闇の水晶（3 次転職に使う）",
+   "rewardUnparsed": [],
    "story": "シグが石から闇の水晶を作ってくれる。",
    "tutorial": false
   },
@@ -3691,11 +3714,14 @@
    "end": "stella",
    "exp": 233000,
    "meso": 17600,
-   "rewards": [],
-   "rewardText": "天馬の羽の椅子",
-   "rewardUnparsed": [
-    "天馬の羽の椅子"
+   "rewards": [
+    {
+     "item": "setup.chair.pegasus",
+     "count": 1
+    }
    ],
+   "rewardText": "天馬の羽の椅子",
+   "rewardUnparsed": [],
    "story": "巫女の儀式の羽。",
    "tutorial": false
   },
@@ -3721,11 +3747,14 @@
    "end": "hana",
    "exp": 273000,
    "meso": 18800,
-   "rewards": [],
-   "rewardText": "雲のクッション（椅子）",
-   "rewardUnparsed": [
-    "雲のクッション（椅子）"
+   "rewards": [
+    {
+     "item": "setup.chair.cloud",
+     "count": 1
+    }
    ],
+   "rewardText": "雲のクッション（椅子）",
+   "rewardUnparsed": [],
    "story": "雲の綿でクッションを作る。",
    "tutorial": false
   },
@@ -4624,11 +4653,14 @@
    "end": "clock",
    "exp": 3250000,
    "meso": 54000,
-   "rewards": [],
-   "rewardText": "時の鍵",
-   "rewardUnparsed": [
-    "時の鍵"
+   "rewards": [
+    {
+     "item": "special.key.time",
+     "count": 1
+    }
    ],
+   "rewardText": "時の鍵",
+   "rewardUnparsed": [],
    "story": "時の門を開ける鍵を作る。",
    "tutorial": false
   },
@@ -4654,11 +4686,14 @@
    "end": "toy",
    "exp": 10500000,
    "meso": 155000,
-   "rewards": [],
-   "rewardText": "極意の書 20（自分の職の★スキル 1 つ）",
-   "rewardUnparsed": [
-    "極意の書 20（自分の職の★スキル 1 つ）"
+   "rewards": [
+    {
+     "item": "use.master_book.20",
+     "count": 1
+    }
    ],
+   "rewardText": "極意の書 20（自分の職の★スキル 1 つ）",
+   "rewardUnparsed": [],
    "story": "塔の時を狂わせていた魔物。",
    "tutorial": false
   },
@@ -5067,11 +5102,14 @@
    "end": "ruri",
    "exp": 10500000,
    "meso": 155000,
-   "rewards": [],
-   "rewardText": "極意の書 20（自分の職の★スキル 1 つ）",
-   "rewardUnparsed": [
-    "極意の書 20（自分の職の★スキル 1 つ）"
+   "rewards": [
+    {
+     "item": "use.master_book.20",
+     "count": 1
+    }
    ],
+   "rewardText": "極意の書 20（自分の職の★スキル 1 つ）",
+   "rewardUnparsed": [],
    "story": "深い海の主。",
    "tutorial": false
   },
@@ -5310,11 +5348,14 @@
    "end": "alma",
    "exp": 17000000,
    "meso": 178000,
-   "rewards": [],
-   "rewardText": "極意の書 30（自分の職の★スキル 1 つ）",
-   "rewardUnparsed": [
-    "極意の書 30（自分の職の★スキル 1 つ）"
+   "rewards": [
+    {
+     "item": "use.master_book.30",
+     "count": 1
+    }
    ],
+   "rewardText": "極意の書 30（自分の職の★スキル 1 つ）",
+   "rewardUnparsed": [],
    "story": "黒いかけらに縛られた守護神を解き放つ。",
    "tutorial": false
   },
@@ -5582,11 +5623,14 @@
    "end": "vald",
    "exp": 35000000,
    "meso": 108000,
-   "rewards": [],
-   "rewardText": "黒竜の洞くつの通行証",
-   "rewardUnparsed": [
-    "黒竜の洞くつの通行証"
+   "rewards": [
+    {
+     "item": "special.key.black_dragon",
+     "count": 1
+    }
    ],
+   "rewardText": "黒竜の洞くつの通行証",
+   "rewardUnparsed": [],
    "story": "黒竜の洞くつへの封印を解く。",
    "tutorial": false
   },
@@ -5772,11 +5816,14 @@
    "end": "igni",
    "exp": 13800000,
    "meso": 81800,
-   "rewards": [],
-   "rewardText": "焔の目（祭壇へ入る品）",
-   "rewardUnparsed": [
-    "焔の目（祭壇へ入る品）"
+   "rewards": [
+    {
+     "item": "special.key.flame_eye",
+     "count": 1
+    }
    ],
+   "rewardText": "焔の目（祭壇へ入る品）",
+   "rewardUnparsed": [],
    "story": "祭壇の扉を開く品を作る。",
    "tutorial": false
   },
@@ -5990,11 +6037,14 @@
    "end": "astra",
    "exp": 68300000,
    "meso": 126000,
-   "rewards": [],
-   "rewardText": "極意の書 30（自分の職の★スキル 1 つ）",
-   "rewardUnparsed": [
-    "極意の書 30（自分の職の★スキル 1 つ）"
+   "rewards": [
+    {
+     "item": "use.master_book.30",
+     "count": 1
+    }
    ],
+   "rewardText": "極意の書 30（自分の職の★スキル 1 つ）",
+   "rewardUnparsed": [],
    "story": "廃都の歴史を読む。",
    "tutorial": false
   },
@@ -6169,11 +6219,14 @@
    "end": "astra",
    "exp": 575000000,
    "meso": 441000,
-   "rewards": [],
-   "rewardText": "星の玉座の鍵",
-   "rewardUnparsed": [
-    "星の玉座の鍵"
+   "rewards": [
+    {
+     "item": "special.key.star_throne",
+     "count": 1
+    }
    ],
+   "rewardText": "星の玉座の鍵",
+   "rewardUnparsed": [],
    "story": "各地のボスが持っていた「黒いかけら」は、星を呑む者の封印のかけらだった。",
    "tutorial": false
   },
@@ -6673,11 +6726,14 @@
    "end": "chiko",
    "exp": 166,
    "meso": 298,
-   "rewards": [],
-   "rewardText": "ペットの名札",
-   "rewardUnparsed": [
-    "ペットの名札"
+   "rewards": [
+    {
+     "item": "use.pet_name_tag",
+     "count": 1
+    }
    ],
+   "rewardText": "ペットの名札",
+   "rewardUnparsed": [],
    "story": "ペットは話しかけると芸をする（「お座り」「お手」など。親密度で増える）。",
    "tutorial": false
   },
@@ -6704,11 +6760,14 @@
    "end": "chiko",
    "exp": 756,
    "meso": 968,
-   "rewards": [],
-   "rewardText": "ペットの技の本「自動で拾う」",
-   "rewardUnparsed": [
-    "ペットの技の本「自動で拾う」"
+   "rewards": [
+    {
+     "item": "use.petskill.pickup",
+     "count": 1
+    }
    ],
+   "rewardText": "ペットの技の本「自動で拾う」",
+   "rewardUnparsed": [],
    "story": "ペットが落ちた物を拾うようになる。",
    "tutorial": false
   },
@@ -6735,11 +6794,14 @@
    "end": "chiko",
    "exp": 4080,
    "meso": 2030,
-   "rewards": [],
-   "rewardText": "ペットの技の本「拾う範囲を広げる」",
-   "rewardUnparsed": [
-    "ペットの技の本「拾う範囲を広げる」"
+   "rewards": [
+    {
+     "item": "use.petskill.range",
+     "count": 1
+    }
    ],
+   "rewardText": "ペットの技の本「拾う範囲を広げる」",
+   "rewardUnparsed": [],
    "story": "",
    "tutorial": false
   },
@@ -6766,11 +6828,14 @@
    "end": "chiko",
    "exp": 33000,
    "meso": 8180,
-   "rewards": [],
-   "rewardText": "ペットの技の本「自動で HP/MP 薬」",
-   "rewardUnparsed": [
-    "ペットの技の本「自動で HP/MP 薬」"
+   "rewards": [
+    {
+     "item": "use.petskill.potion",
+     "count": 1
+    }
    ],
+   "rewardText": "ペットの技の本「自動で HP/MP 薬」",
+   "rewardUnparsed": [],
    "story": "HP・MP が決めた割合を下回ると、ペットが薬を飲ませてくれる。",
    "tutorial": false
   },
@@ -6795,6 +6860,7 @@
     }
    ],
    "end": "chiko",
+   "unlock": "pet.second",
    "exp": 170000,
    "meso": 15600,
    "rewards": [],
@@ -6827,11 +6893,14 @@
    "end": "doran",
    "exp": 3250000,
    "meso": 54000,
-   "rewards": [],
-   "rewardText": "ペット「子竜」（親密度 30 で「竜」に育つ）",
-   "rewardUnparsed": [
-    "ペット「子竜」（親密度 30 で「竜」に育つ）"
+   "rewards": [
+    {
+     "item": "use.pet.dragon",
+     "count": 1
+    }
    ],
+   "rewardText": "ペット「子竜」（親密度 30 で「竜」に育つ）",
+   "rewardUnparsed": [],
    "story": "竜の背の村のめずらしいペット。",
    "tutorial": false
   },
@@ -7473,7 +7542,7 @@
    "meso": 1590,
    "rewards": [
     {
-     "item": "etc.unique.M068",
+     "item": "etc.medal.V516",
      "count": 1
     }
    ],
@@ -7506,7 +7575,7 @@
    "meso": 3410,
    "rewards": [
     {
-     "item": "etc.unique.M068",
+     "item": "etc.medal.T121",
      "count": 1
     }
    ],
@@ -7539,7 +7608,7 @@
    "meso": 6700,
    "rewards": [
     {
-     "item": "etc.unique.M068",
+     "item": "etc.medal.T122",
      "count": 1
     }
    ],
@@ -7572,7 +7641,7 @@
    "meso": 16100,
    "rewards": [
     {
-     "item": "etc.unique.M068",
+     "item": "etc.medal.C119",
      "count": 1
     }
    ],
@@ -7605,7 +7674,7 @@
    "meso": 28800,
    "rewards": [
     {
-     "item": "etc.unique.M068",
+     "item": "etc.medal.M115",
      "count": 1
     }
    ],
@@ -7638,7 +7707,7 @@
    "meso": 54000,
    "rewards": [
     {
-     "item": "etc.unique.M068",
+     "item": "etc.medal.D117",
      "count": 1
     }
    ],
@@ -7701,13 +7770,17 @@
     }
    ],
    "end": "dorga",
+   "line": "warrior",
    "exp": 4200,
    "meso": 1100,
-   "rewards": [],
-   "rewardText": "推薦状",
-   "rewardUnparsed": [
-    "推薦状"
+   "rewards": [
+    {
+     "item": "special.job.recommend",
+     "count": 1
+    }
    ],
+   "rewardText": "推薦状",
+   "rewardUnparsed": [],
    "story": "2 次転職の始まり。",
    "tutorial": false
   },
@@ -7731,13 +7804,17 @@
     }
    ],
    "end": "dorga_V413",
+   "line": "warrior",
    "exp": 8400,
    "meso": 2750,
-   "rewards": [],
-   "rewardText": "試験の証",
-   "rewardUnparsed": [
-    "試験の証"
+   "rewards": [
+    {
+     "item": "special.job.proof",
+     "count": 1
+    }
    ],
+   "rewardText": "試験の証",
+   "rewardUnparsed": [],
    "story": "修練場での試験（JOBS.md 3-2）。",
    "tutorial": false
   },
@@ -7761,6 +7838,7 @@
     }
    ],
    "end": "dorga",
+   "line": "warrior",
    "exp": 8400,
    "meso": 2750,
    "rewards": [
@@ -7794,6 +7872,7 @@
     }
    ],
    "end": "dorga",
+   "line": "warrior",
    "exp": 174000,
    "meso": 4800,
    "rewards": [],
@@ -7822,6 +7901,7 @@
     }
    ],
    "end": "dorga_F118",
+   "line": "warrior",
    "exp": 725000,
    "meso": 28800,
    "rewards": [
@@ -7866,6 +7946,8 @@
     }
    ],
    "end": "glen_F107",
+   "line": "warrior",
+   "advance": 3,
    "exp": 725000,
    "meso": 28800,
    "rewards": [
@@ -7901,6 +7983,7 @@
     }
    ],
    "end": "vald",
+   "line": "warrior",
    "exp": 2040000,
    "meso": 11900,
    "rewards": [],
@@ -7946,13 +8029,19 @@
     }
    ],
    "end": "vald",
+   "line": "warrior",
+   "advance": 4,
    "exp": 17000000,
    "meso": 178000,
-   "rewards": [],
+   "rewards": [
+    {
+     "item": "use.master_book.20",
+     "count": 1
+    }
+   ],
    "rewardText": "AP +5、極意の書 20 ×1",
    "rewardUnparsed": [
-    "AP +5",
-    "極意の書 20 ×1"
+    "AP +5"
    ],
    "story": "4 次の職になる。",
    "tutorial": false
@@ -8009,13 +8098,17 @@
     }
    ],
    "end": "orfe",
+   "line": "magician",
    "exp": 4200,
    "meso": 1100,
-   "rewards": [],
-   "rewardText": "推薦状",
-   "rewardUnparsed": [
-    "推薦状"
+   "rewards": [
+    {
+     "item": "special.job.recommend",
+     "count": 1
+    }
    ],
+   "rewardText": "推薦状",
+   "rewardUnparsed": [],
    "story": "2 次転職の始まり。",
    "tutorial": false
   },
@@ -8039,13 +8132,17 @@
     }
    ],
    "end": "orfe_V311",
+   "line": "magician",
    "exp": 8400,
    "meso": 2750,
-   "rewards": [],
-   "rewardText": "試験の証",
-   "rewardUnparsed": [
-    "試験の証"
+   "rewards": [
+    {
+     "item": "special.job.proof",
+     "count": 1
+    }
    ],
+   "rewardText": "試験の証",
+   "rewardUnparsed": [],
    "story": "修練場での試験（JOBS.md 3-2）。",
    "tutorial": false
   },
@@ -8069,6 +8166,7 @@
     }
    ],
    "end": "orfe",
+   "line": "magician",
    "exp": 8400,
    "meso": 2750,
    "rewards": [
@@ -8102,6 +8200,7 @@
     }
    ],
    "end": "orfe",
+   "line": "magician",
    "exp": 174000,
    "meso": 4800,
    "rewards": [],
@@ -8130,6 +8229,7 @@
     }
    ],
    "end": "orfe_F118",
+   "line": "magician",
    "exp": 725000,
    "meso": 28800,
    "rewards": [
@@ -8174,6 +8274,8 @@
     }
    ],
    "end": "frost_F107",
+   "line": "magician",
+   "advance": 3,
    "exp": 725000,
    "meso": 28800,
    "rewards": [
@@ -8209,6 +8311,7 @@
     }
    ],
    "end": "vald",
+   "line": "magician",
    "exp": 2040000,
    "meso": 11900,
    "rewards": [],
@@ -8254,13 +8357,19 @@
     }
    ],
    "end": "vald",
+   "line": "magician",
+   "advance": 4,
    "exp": 17000000,
    "meso": 178000,
-   "rewards": [],
+   "rewards": [
+    {
+     "item": "use.master_book.20",
+     "count": 1
+    }
+   ],
    "rewardText": "AP +5、極意の書 20 ×1",
    "rewardUnparsed": [
-    "AP +5",
-    "極意の書 20 ×1"
+    "AP +5"
    ],
    "story": "4 次の職になる。",
    "tutorial": false
@@ -8317,13 +8426,17 @@
     }
    ],
    "end": "erna",
+   "line": "bowman",
    "exp": 4200,
    "meso": 1100,
-   "rewards": [],
-   "rewardText": "推薦状",
-   "rewardUnparsed": [
-    "推薦状"
+   "rewards": [
+    {
+     "item": "special.job.recommend",
+     "count": 1
+    }
    ],
+   "rewardText": "推薦状",
+   "rewardUnparsed": [],
    "story": "2 次転職の始まり。",
    "tutorial": false
   },
@@ -8347,13 +8460,17 @@
     }
    ],
    "end": "erna_V211",
+   "line": "bowman",
    "exp": 8400,
    "meso": 2750,
-   "rewards": [],
-   "rewardText": "試験の証",
-   "rewardUnparsed": [
-    "試験の証"
+   "rewards": [
+    {
+     "item": "special.job.proof",
+     "count": 1
+    }
    ],
+   "rewardText": "試験の証",
+   "rewardUnparsed": [],
    "story": "修練場での試験（JOBS.md 3-2）。",
    "tutorial": false
   },
@@ -8377,6 +8494,7 @@
     }
    ],
    "end": "erna",
+   "line": "bowman",
    "exp": 8400,
    "meso": 2750,
    "rewards": [
@@ -8410,6 +8528,7 @@
     }
    ],
    "end": "erna",
+   "line": "bowman",
    "exp": 174000,
    "meso": 4800,
    "rewards": [],
@@ -8438,6 +8557,7 @@
     }
    ],
    "end": "erna_F118",
+   "line": "bowman",
    "exp": 725000,
    "meso": 28800,
    "rewards": [
@@ -8482,6 +8602,8 @@
     }
    ],
    "end": "heine_F107",
+   "line": "bowman",
+   "advance": 3,
    "exp": 725000,
    "meso": 28800,
    "rewards": [
@@ -8517,6 +8639,7 @@
     }
    ],
    "end": "vald",
+   "line": "bowman",
    "exp": 2040000,
    "meso": 11900,
    "rewards": [],
@@ -8562,13 +8685,19 @@
     }
    ],
    "end": "vald",
+   "line": "bowman",
+   "advance": 4,
    "exp": 17000000,
    "meso": 178000,
-   "rewards": [],
+   "rewards": [
+    {
+     "item": "use.master_book.20",
+     "count": 1
+    }
+   ],
    "rewardText": "AP +5、極意の書 20 ×1",
    "rewardUnparsed": [
-    "AP +5",
-    "極意の書 20 ×1"
+    "AP +5"
    ],
    "story": "4 次の職になる。",
    "tutorial": false
@@ -8625,13 +8754,17 @@
     }
    ],
    "end": "yami",
+   "line": "thief",
    "exp": 4200,
    "meso": 1100,
-   "rewards": [],
-   "rewardText": "推薦状",
-   "rewardUnparsed": [
-    "推薦状"
+   "rewards": [
+    {
+     "item": "special.job.recommend",
+     "count": 1
+    }
    ],
+   "rewardText": "推薦状",
+   "rewardUnparsed": [],
    "story": "2 次転職の始まり。",
    "tutorial": false
   },
@@ -8655,13 +8788,17 @@
     }
    ],
    "end": "yami_V513",
+   "line": "thief",
    "exp": 8400,
    "meso": 2750,
-   "rewards": [],
-   "rewardText": "試験の証",
-   "rewardUnparsed": [
-    "試験の証"
+   "rewards": [
+    {
+     "item": "special.job.proof",
+     "count": 1
+    }
    ],
+   "rewardText": "試験の証",
+   "rewardUnparsed": [],
    "story": "修練場での試験（JOBS.md 3-2）。",
    "tutorial": false
   },
@@ -8685,6 +8822,7 @@
     }
    ],
    "end": "yami",
+   "line": "thief",
    "exp": 8400,
    "meso": 2750,
    "rewards": [
@@ -8718,6 +8856,7 @@
     }
    ],
    "end": "yami",
+   "line": "thief",
    "exp": 174000,
    "meso": 4800,
    "rewards": [],
@@ -8746,6 +8885,7 @@
     }
    ],
    "end": "yami_F118",
+   "line": "thief",
    "exp": 725000,
    "meso": 28800,
    "rewards": [
@@ -8790,6 +8930,8 @@
     }
    ],
    "end": "mist_F107",
+   "line": "thief",
+   "advance": 3,
    "exp": 725000,
    "meso": 28800,
    "rewards": [
@@ -8825,6 +8967,7 @@
     }
    ],
    "end": "vald",
+   "line": "thief",
    "exp": 2040000,
    "meso": 11900,
    "rewards": [],
@@ -8870,13 +9013,19 @@
     }
    ],
    "end": "vald",
+   "line": "thief",
+   "advance": 4,
    "exp": 17000000,
    "meso": 178000,
-   "rewards": [],
+   "rewards": [
+    {
+     "item": "use.master_book.20",
+     "count": 1
+    }
+   ],
    "rewardText": "AP +5、極意の書 20 ×1",
    "rewardUnparsed": [
-    "AP +5",
-    "極意の書 20 ×1"
+    "AP +5"
    ],
    "story": "4 次の職になる。",
    "tutorial": false
@@ -8933,13 +9082,17 @@
     }
    ],
    "end": "rio",
+   "line": "pirate",
    "exp": 4200,
    "meso": 1100,
-   "rewards": [],
-   "rewardText": "推薦状",
-   "rewardUnparsed": [
-    "推薦状"
+   "rewards": [
+    {
+     "item": "special.job.recommend",
+     "count": 1
+    }
    ],
+   "rewardText": "推薦状",
+   "rewardUnparsed": [],
    "story": "2 次転職の始まり。",
    "tutorial": false
   },
@@ -8963,13 +9116,17 @@
     }
    ],
    "end": "rio_V108",
+   "line": "pirate",
    "exp": 8400,
    "meso": 2750,
-   "rewards": [],
-   "rewardText": "試験の証",
-   "rewardUnparsed": [
-    "試験の証"
+   "rewards": [
+    {
+     "item": "special.job.proof",
+     "count": 1
+    }
    ],
+   "rewardText": "試験の証",
+   "rewardUnparsed": [],
    "story": "修練場での試験（JOBS.md 3-2）。",
    "tutorial": false
   },
@@ -8993,6 +9150,7 @@
     }
    ],
    "end": "rio",
+   "line": "pirate",
    "exp": 8400,
    "meso": 2750,
    "rewards": [
@@ -9026,6 +9184,7 @@
     }
    ],
    "end": "rio",
+   "line": "pirate",
    "exp": 174000,
    "meso": 4800,
    "rewards": [],
@@ -9054,6 +9213,7 @@
     }
    ],
    "end": "rio_F118",
+   "line": "pirate",
    "exp": 725000,
    "meso": 28800,
    "rewards": [
@@ -9098,6 +9258,8 @@
     }
    ],
    "end": "keel_F107",
+   "line": "pirate",
+   "advance": 3,
    "exp": 725000,
    "meso": 28800,
    "rewards": [
@@ -9133,6 +9295,7 @@
     }
    ],
    "end": "vald",
+   "line": "pirate",
    "exp": 2040000,
    "meso": 11900,
    "rewards": [],
@@ -9178,13 +9341,19 @@
     }
    ],
    "end": "vald",
+   "line": "pirate",
+   "advance": 4,
    "exp": 17000000,
    "meso": 178000,
-   "rewards": [],
+   "rewards": [
+    {
+     "item": "use.master_book.20",
+     "count": 1
+    }
+   ],
    "rewardText": "AP +5、極意の書 20 ×1",
    "rewardUnparsed": [
-    "AP +5",
-    "極意の書 20 ×1"
+    "AP +5"
    ],
    "story": "4 次の職になる。",
    "tutorial": false

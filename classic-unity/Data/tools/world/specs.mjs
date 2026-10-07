@@ -17,7 +17,8 @@
 //
 // 値: bg（背景の種類）/ bgm（SOUND.md の曲の ID）/ w（横幅の範囲）/ layers（層の数）/ rope（'rope' | 'ladder'）
 //     objects（調べる物 { id, name, at: 'top' | 'mid' | 'ground-left' | 'ground-right' | 'secret' }）
-//     secret（隠し部屋 { from: 'ground-left' | 'ground-right' | 'top', name }。隠しポータルで入る）
+//     secret（隠し部屋 { from: 'ground-left' | 'ground-right' | 'top', name, oneWay }。隠しポータルで入る。oneWay なら入口は一方通行で、部屋の出口は出現の位置へ）
+//     slide（一方通行のポータル { name, to, toPortal }。一番上の足場に置く）/ landing（一方通行で着くだけの位置の名前。type 'landing'）
 //     rooms（部屋の数）/ mobMax（敵の最大数）
 export const TYPE_TPL = { 町: 'town', 狩: 'field', 洞: 'cave', ボ: 'arena', 特: 'room', 移: 'room' };
 
@@ -51,6 +52,7 @@ export function regionDefaults(id) {
 }
 
 const ob = (id, name, at) => ({ id, name, at });
+const SLIDE = { name: 'window', to: 'C111', toPortal: 'slide_in' };
 
 export const SPECS = {
   // ===== ブリーズ港まわり =====
@@ -157,8 +159,9 @@ export const SPECS = {
   C101: { tpl: 'room', bg: 'cloud_station', bgm: 'town_ceres', w: [1600, 1800] },
   C102: { tpl: 'field', bg: 'cloud_park' }, C103: { tpl: 'forest', bg: 'star_garden' }, C104: { tpl: 'forest', bg: 'moon_garden' },
   C105: { tpl: 'forest', bg: 'sun_garden' }, C106: { tpl: 'field', bg: 'greenhouse' },
-  C107: { tpl: 'tower', bg: 'cloud_tower' }, C108: { tpl: 'tower', bg: 'cloud_tower' }, C109: { tpl: 'tower', bg: 'cloud_tower' },
-  C110: { tpl: 'tower', bg: 'cloud_tower' }, C111: { tpl: 'tower', bg: 'cloud_tower' },
+  // 雲の塔: 各階の窓から 1 階へ一気に降りる滑り台（一方通行。WORLD.md 6 章）
+  C107: { tpl: 'tower', bg: 'cloud_tower', slide: SLIDE }, C108: { tpl: 'tower', bg: 'cloud_tower', slide: SLIDE }, C109: { tpl: 'tower', bg: 'cloud_tower', slide: SLIDE },
+  C110: { tpl: 'tower', bg: 'cloud_tower', slide: SLIDE }, C111: { tpl: 'tower', bg: 'cloud_tower', landing: ['slide_in'] },
   C112: { tpl: 'field', bg: 'cloud_road' }, C113: { tpl: 'cliff', bg: 'pegasus_hill' }, C114: { tpl: 'forest', bg: 'cloud_garden' },
   C115: { tpl: 'field', bg: 'altar_road', layers: 3 },
   C116: { tpl: 'arena', bg: 'cloud_altar', bgm: 'boss_mid' },
@@ -180,7 +183,8 @@ export const SPECS = {
   // ===== ティンクル =====
   T100: { tpl: 'townTall', bg: 'toy_town', bgm: 'town_tinkle', layers: 2, rope: 'ladder' },
   T101: { tpl: 'room', bg: 'toy_station', bgm: 'town_tinkle' },
-  T102: { tpl: 'field', bg: 'blocks' }, T103: { tpl: 'field', bg: 'plush_plaza' }, T104: { tpl: 'forest', bg: 'block_garden' },
+  T102: { tpl: 'field', bg: 'blocks' }, T103: { tpl: 'field', bg: 'plush_plaza' }, T104: { tpl: 'forest', bg: 'block_garden',
+    secret: { from: 'ground-right', name: 'おもちゃ箱の底', oneWay: true }, objects: [ob('T104.toybox', 'おもちゃ箱の宝箱', 'secret')] },
   T105: { tpl: 'field', bg: 'clock_path' }, T106: { tpl: 'cave', bg: 'screw_storage', rope: 'ladder' }, T107: { tpl: 'cave', bg: 'rocking_horse' },
   T108: { tpl: 'arena', bg: 'block_plaza', bgm: 'boss_mid' },
   T109: { tpl: 'cave', bg: 'toy_factory', rope: 'ladder' }, T110: { tpl: 'cave', bg: 'clock_room' }, T111: { tpl: 'cave', bg: 'toy_factory', rope: 'ladder', layers: 4 },

@@ -8,6 +8,7 @@ using Lumina.Core.Items;
 using Lumina.Core.Mobs;
 using Lumina.Core.Quests;
 using Lumina.Core.Skills;
+using Lumina.Core.Town;
 using Lumina.Core.Util;
 using Lumina.Core.World;
 
@@ -39,7 +40,15 @@ namespace Lumina.Core.Data
     }
 
     public sealed class ShopEntry { public string Item; public long Price; public int Bundle = 1; }
-    public sealed class ShopDef { public string Id, Name; public readonly List<ShopEntry> Items = new List<ShopEntry>(); }
+    public sealed class ShopDef
+    {
+        public string Id, Name;
+        public readonly List<ShopEntry> Items = new List<ShopEntry>();
+        /// <summary>日替わり（にぎわい市場）: Items の中からこの数を日付で選んで並べる。0 = いつも全部</summary>
+        public int Daily;
+        /// <summary>投げ星・弾の詰め直しができる（新品の値段の 1/2）</summary>
+        public bool Recharge;
+    }
 
     public sealed class NpcDef
     {
@@ -58,6 +67,8 @@ namespace Lumina.Core.Data
         public readonly Dictionary<string, ShopDef> Shops = new Dictionary<string, ShopDef>();
         public readonly Dictionary<string, NpcDef> Npcs = new Dictionary<string, NpcDef>();
         public readonly List<string> MapIds = new List<string>();
+        /// <summary>町と成長の仕組み（systems.json: 倉庫・部屋の決まり・ペット・製作・クイズ・転職の試験）。無ければ空</summary>
+        public SystemsData Systems = new SystemsData();
         private readonly Dictionary<string, MapData> maps = new Dictionary<string, MapData>();
         private IDataSource source;
 
@@ -89,7 +100,7 @@ namespace Lumina.Core.Data
             foreach (var o in J.Arr(Read(src, "shops.json"), "shops"))
             {
                 var d = (Dictionary<string, object>)o;
-                var shop = new ShopDef { Id = J.Str(d, "id"), Name = J.Str(d, "name", "") };
+                var shop = new ShopDef { Id = J.Str(d, "id"), Name = J.Str(d, "name", ""), Daily = J.Int(d, "daily"), Recharge = J.Bool(d, "recharge") };
                 foreach (var e in J.Arr(d, "items"))
                 {
                     var ed = (Dictionary<string, object>)e;
@@ -114,6 +125,8 @@ namespace Lumina.Core.Data
                     g.Npcs[n.Id] = n;
                 }
             }
+            var sys = src.ReadText("systems.json");
+            if (sys != null) g.Systems = SystemsData.FromDict(Json.ParseObject(sys));
             var idx = src.ReadText("maps/index.json");
             if (idx != null) foreach (var o in J.Arr(Json.ParseObject(idx), "maps")) g.MapIds.Add(J.Str((Dictionary<string, object>)o, "id"));
             return g;

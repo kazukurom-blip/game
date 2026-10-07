@@ -23,7 +23,7 @@ namespace Lumina.Core.Quests
         public string QuestId; public int ObjectiveIndex; public int Count, Need;
     }
 
-    public enum StartResult { Ok, Unknown, AlreadyStarted, AlreadyCompleted, LevelTooLow, PrereqMissing, GiverNotHere, StatTooLow }
+    public enum StartResult { Ok, Unknown, AlreadyStarted, AlreadyCompleted, LevelTooLow, PrereqMissing, GiverNotHere, StatTooLow, WrongJob }
 
     public sealed class QuestLog
     {
@@ -46,6 +46,7 @@ namespace Lumina.Core.Quests
             if (c.Level < q.MinLevel) return StartResult.LevelTooLow;
             foreach (var pre in q.Prereqs) if (!IsCompleted(pre)) return StartResult.PrereqMissing;
             foreach (var kv in q.MinStats) if (c.GetStat(ParseStat(kv.Key)) < kv.Value) return StartResult.StatTooLow;
+            if (q.Line != null && q.Line != c.Line) return StartResult.WrongJob; // 転職のクエストは自分の系統だけ
             return StartResult.Ok;
         }
 

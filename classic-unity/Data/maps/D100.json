@@ -201,21 +201,24 @@
    "id": "doran",
    "name": "鍛冶屋ドラン",
    "x": 800,
-   "y": 516
+   "y": 516,
+   "role": "craft"
   },
   {
    "id": "uroko",
    "name": "武器屋ウロコ",
    "x": 1280,
    "y": 516,
-   "role": "weapon"
+   "role": "weapon",
+   "shop": "shop.D100.weapon"
   },
   {
    "id": "hone",
    "name": "防具屋ホネ",
    "x": 1720,
    "y": 516,
-   "role": "armor"
+   "role": "armor",
+   "shop": "shop.D100.armor"
   },
   {
    "id": "tsume",

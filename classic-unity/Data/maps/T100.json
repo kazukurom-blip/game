@@ -232,14 +232,16 @@
    "name": "武器屋ゼンマイ",
    "x": 1440,
    "y": 520,
-   "role": "weapon"
+   "role": "weapon",
+   "shop": "shop.T100.weapon"
   },
   {
    "id": "wata",
    "name": "防具屋ワタ",
    "x": 1848,
    "y": 520,
-   "role": "armor"
+   "role": "armor",
+   "shop": "shop.T100.armor"
   },
   {
    "id": "ame",

@@ -124,7 +124,8 @@
    "map": "V100",
    "x": 592,
    "y": 368,
-   "role": "weapon"
+   "role": "weapon",
+   "shop": "shop.V100.weapon"
   },
   {
    "id": "mire",
@@ -132,7 +133,8 @@
    "map": "V100",
    "x": 824,
    "y": 368,
-   "role": "armor"
+   "role": "armor",
+   "shop": "shop.V100.armor"
   },
   {
    "id": "pola",
@@ -157,7 +159,37 @@
    "map": "V100",
    "x": 1648,
    "y": 368,
-   "role": "taxi"
+   "role": "taxi",
+   "taxi": {
+    "dests": [
+     {
+      "to": "V200",
+      "toPortal": "town",
+      "fee": 800
+     },
+     {
+      "to": "V300",
+      "toPortal": "town",
+      "fee": 940
+     },
+     {
+      "to": "V400",
+      "toPortal": "town",
+      "fee": 1080
+     },
+     {
+      "to": "V500",
+      "toPortal": "town",
+      "fee": 1220
+     },
+     {
+      "to": "V600",
+      "toPortal": "town",
+      "fee": 1360
+     }
+    ],
+    "beginnerDiv": 10
+   }
   },
   {
    "id": "rokko",
@@ -206,7 +238,7 @@
    "id": "rio",
    "name": "キャプテン・リオ",
    "map": "V107",
-   "x": 440,
+   "x": 376,
    "y": 520,
    "role": "job"
   },
@@ -214,17 +246,28 @@
    "id": "battsu",
    "name": "砲手バッツ",
    "map": "V107",
-   "x": 920,
-   "y": 520
+   "x": 736,
+   "y": 520,
+   "role": "weapon",
+   "shop": "shop.V107.weapon"
   },
   {
    "id": "guri",
    "name": "料理人グリ",
    "map": "V107",
-   "x": 1400,
+   "x": 1096,
    "y": 520,
    "role": "potion",
    "shop": "shop.V107.potion"
+  },
+  {
+   "id": "hose",
+   "name": "帆縫いのホセ",
+   "map": "V107",
+   "x": 1456,
+   "y": 520,
+   "role": "armor",
+   "shop": "shop.V107.armor"
   },
   {
    "id": "rio_V108",
@@ -240,28 +283,32 @@
    "map": "V090",
    "x": 400,
    "y": 360,
-   "role": "weapon"
+   "role": "weapon",
+   "shop": "shop.V090.used"
   },
   {
    "id": "scri",
    "name": "書の行商人スクリ",
    "map": "V090",
    "x": 904,
-   "y": 360
+   "y": 360,
+   "shop": "shop.V090.scroll"
   },
   {
    "id": "jue",
    "name": "宝石商ジュエ",
    "map": "V090",
    "x": 1184,
-   "y": 360
+   "y": 360,
+   "role": "craft"
   },
   {
    "id": "mate",
    "name": "素材屋マテ",
    "map": "V090",
    "x": 1528,
-   "y": 360
+   "y": 360,
+   "shop": "shop.V090.furniture"
   },
   {
    "id": "board",
@@ -281,7 +328,7 @@
    "id": "erna",
    "name": "弓の師範エルナ",
    "map": "V200",
-   "x": 352,
+   "x": 336,
    "y": 336,
    "role": "job"
   },
@@ -291,21 +338,23 @@
    "map": "V200",
    "x": 592,
    "y": 336,
-   "role": "weapon"
+   "role": "weapon",
+   "shop": "shop.V200.weapon"
   },
   {
    "id": "lana",
    "name": "防具屋ラナ",
    "map": "V200",
-   "x": 944,
+   "x": 872,
    "y": 336,
-   "role": "armor"
+   "role": "armor",
+   "shop": "shop.V200.armor"
   },
   {
    "id": "popo",
    "name": "薬屋ポポ",
    "map": "V200",
-   "x": 1224,
+   "x": 1136,
    "y": 384,
    "role": "potion",
    "shop": "shop.V200.potion"
@@ -314,44 +363,84 @@
    "id": "chiko",
    "name": "ペット屋チコ",
    "map": "V200",
-   "x": 1536,
-   "y": 384
+   "x": 1408,
+   "y": 384,
+   "role": "pet",
+   "shop": "shop.V200.pet"
   },
   {
    "id": "hako",
    "name": "倉庫番ハコ",
    "map": "V200",
-   "x": 1856,
-   "y": 432,
+   "x": 1648,
+   "y": 414,
    "role": "storage"
   },
   {
    "id": "bob",
    "name": "風車守ボブ",
    "map": "V200",
-   "x": 1936,
+   "x": 1872,
    "y": 200
   },
   {
    "id": "marsa",
    "name": "農家のマーサ",
    "map": "V200",
-   "x": 2136,
+   "x": 1944,
    "y": 432
   },
   {
    "id": "sui",
    "name": "花売りのスイ",
    "map": "V200",
-   "x": 2432,
-   "y": 480
+   "x": 2208,
+   "y": 432
   },
   {
    "id": "taro",
    "name": "牧場の少年タロ",
    "map": "V200",
-   "x": 2728,
+   "x": 2480,
    "y": 480
+  },
+  {
+   "id": "taxi_pom",
+   "name": "タクシーの運転手ピピ",
+   "map": "V200",
+   "x": 2744,
+   "y": 480,
+   "role": "taxi",
+   "taxi": {
+    "dests": [
+     {
+      "to": "V100",
+      "toPortal": "town",
+      "fee": 800
+     },
+     {
+      "to": "V300",
+      "toPortal": "town",
+      "fee": 800
+     },
+     {
+      "to": "V400",
+      "toPortal": "town",
+      "fee": 940
+     },
+     {
+      "to": "V500",
+      "toPortal": "town",
+      "fee": 1080
+     },
+     {
+      "to": "V600",
+      "toPortal": "town",
+      "fee": 1220
+     }
+    ],
+    "beginnerDiv": 10
+   }
   },
   {
    "id": "erna_V211",
@@ -372,7 +461,7 @@
    "id": "orfe",
    "name": "大魔導師オルフェ",
    "map": "V300",
-   "x": 688,
+   "x": 528,
    "y": 376,
    "role": "job"
   },
@@ -380,23 +469,25 @@
    "id": "mint",
    "name": "魔法の武器屋ミント",
    "map": "V300",
-   "x": 376,
+   "x": 432,
    "y": 496,
-   "role": "weapon"
+   "role": "weapon",
+   "shop": "shop.V300.weapon"
   },
   {
    "id": "fio",
    "name": "ローブ屋フィオ",
    "map": "V300",
-   "x": 800,
+   "x": 872,
    "y": 496,
-   "role": "armor"
+   "role": "armor",
+   "shop": "shop.V300.armor"
   },
   {
    "id": "herb",
    "name": "薬草屋ハーブ",
    "map": "V300",
-   "x": 1736,
+   "x": 1840,
    "y": 496,
    "role": "potion",
    "shop": "shop.V300.potion"
@@ -405,7 +496,7 @@
    "id": "kura",
    "name": "倉庫番クラ",
    "map": "V300",
-   "x": 2160,
+   "x": 2192,
    "y": 496,
    "role": "storage"
   },
@@ -413,22 +504,60 @@
    "id": "libra",
    "name": "司書リブラ",
    "map": "V300",
-   "x": 1016,
+   "x": 1040,
    "y": 376
   },
   {
    "id": "tia",
    "name": "妖精の使いティア",
    "map": "V300",
-   "x": 2040,
+   "x": 2064,
    "y": 376
   },
   {
    "id": "wood",
    "name": "木こりの青年ウッド",
    "map": "V300",
-   "x": 1320,
+   "x": 800,
    "y": 632
+  },
+  {
+   "id": "taxi_silva",
+   "name": "タクシーの運転手リーフ",
+   "map": "V300",
+   "x": 1928,
+   "y": 632,
+   "role": "taxi",
+   "taxi": {
+    "dests": [
+     {
+      "to": "V100",
+      "toPortal": "town",
+      "fee": 940
+     },
+     {
+      "to": "V200",
+      "toPortal": "town",
+      "fee": 800
+     },
+     {
+      "to": "V400",
+      "toPortal": "town",
+      "fee": 800
+     },
+     {
+      "to": "V500",
+      "toPortal": "town",
+      "fee": 940
+     },
+     {
+      "to": "V600",
+      "toPortal": "town",
+      "fee": 1080
+     }
+    ],
+    "beginnerDiv": 10
+   }
   },
   {
    "id": "noa",
@@ -463,7 +592,7 @@
    "id": "dorga",
    "name": "戦士長ドルガ",
    "map": "V400",
-   "x": 560,
+   "x": 592,
    "y": 388,
    "role": "job"
   },
@@ -471,23 +600,25 @@
    "id": "gantetsu",
    "name": "武器屋ガンテツ",
    "map": "V400",
-   "x": 392,
+   "x": 376,
    "y": 532,
-   "role": "weapon"
+   "role": "weapon",
+   "shop": "shop.V400.weapon"
   },
   {
    "id": "hagane",
    "name": "防具屋ハガネ",
    "map": "V400",
-   "x": 808,
+   "x": 840,
    "y": 532,
-   "role": "armor"
+   "role": "armor",
+   "shop": "shop.V400.armor"
   },
   {
    "id": "ginger",
    "name": "薬屋ジンジャー",
    "map": "V400",
-   "x": 1160,
+   "x": 1072,
    "y": 532,
    "role": "potion",
    "shop": "shop.V400.potion"
@@ -496,7 +627,7 @@
    "id": "iwa",
    "name": "倉庫番イワ",
    "map": "V400",
-   "x": 1544,
+   "x": 1488,
    "y": 532,
    "role": "storage"
   },
@@ -504,22 +635,61 @@
    "id": "rossi",
    "name": "発掘隊長ロッシ",
    "map": "V400",
-   "x": 1896,
+   "x": 1800,
    "y": 532
   },
   {
    "id": "toto",
    "name": "祈祷師トト",
    "map": "V400",
-   "x": 2040,
+   "x": 2232,
    "y": 388
   },
   {
    "id": "kaji",
    "name": "鍛冶屋カジ",
    "map": "V400",
-   "x": 2312,
-   "y": 532
+   "x": 2160,
+   "y": 532,
+   "role": "craft"
+  },
+  {
+   "id": "taxi_gard",
+   "name": "タクシーの運転手ガタ",
+   "map": "V400",
+   "x": 2472,
+   "y": 532,
+   "role": "taxi",
+   "taxi": {
+    "dests": [
+     {
+      "to": "V100",
+      "toPortal": "town",
+      "fee": 1080
+     },
+     {
+      "to": "V200",
+      "toPortal": "town",
+      "fee": 940
+     },
+     {
+      "to": "V300",
+      "toPortal": "town",
+      "fee": 800
+     },
+     {
+      "to": "V500",
+      "toPortal": "town",
+      "fee": 800
+     },
+     {
+      "to": "V600",
+      "toPortal": "town",
+      "fee": 940
+     }
+    ],
+    "beginnerDiv": 10
+   }
   },
   {
    "id": "dorga_V413",
@@ -548,23 +718,25 @@
    "id": "sue",
    "name": "ナイフ屋スー",
    "map": "V500",
-   "x": 432,
+   "x": 408,
    "y": 504,
-   "role": "weapon"
+   "role": "weapon",
+   "shop": "shop.V500.weapon"
   },
   {
    "id": "kuroe",
    "name": "防具屋クロエ",
    "map": "V500",
-   "x": 928,
+   "x": 896,
    "y": 504,
-   "role": "armor"
+   "role": "armor",
+   "shop": "shop.V500.armor"
   },
   {
    "id": "kusuri",
    "name": "薬屋クスリ",
    "map": "V500",
-   "x": 1408,
+   "x": 1240,
    "y": 504,
    "role": "potion",
    "shop": "shop.V500.potion"
@@ -573,7 +745,7 @@
    "id": "kinko",
    "name": "倉庫番キンコ",
    "map": "V500",
-   "x": 1904,
+   "x": 1656,
    "y": 504,
    "role": "storage"
   },
@@ -581,14 +753,14 @@
    "id": "tetsu",
    "name": "駅員テツ",
    "map": "V500",
-   "x": 2392,
+   "x": 2064,
    "y": 504
   },
   {
    "id": "bolt",
    "name": "工事の親方ボルト",
    "map": "V500",
-   "x": 2880,
+   "x": 2408,
    "y": 504
   },
   {
@@ -596,7 +768,46 @@
    "name": "情報屋ネズ",
    "map": "V500",
    "x": 2288,
-   "y": 376
+   "y": 376,
+   "role": "craft"
+  },
+  {
+   "id": "taxi_crow",
+   "name": "タクシーの運転手ネオ",
+   "map": "V500",
+   "x": 2912,
+   "y": 504,
+   "role": "taxi",
+   "taxi": {
+    "dests": [
+     {
+      "to": "V100",
+      "toPortal": "town",
+      "fee": 1220
+     },
+     {
+      "to": "V200",
+      "toPortal": "town",
+      "fee": 1080
+     },
+     {
+      "to": "V300",
+      "toPortal": "town",
+      "fee": 940
+     },
+     {
+      "to": "V400",
+      "toPortal": "town",
+      "fee": 800
+     },
+     {
+      "to": "V600",
+      "toPortal": "town",
+      "fee": 800
+     }
+    ],
+    "beginnerDiv": 10
+   }
   },
   {
    "id": "yami_V513",
@@ -631,7 +842,7 @@
    "id": "nemu",
    "name": "宿屋のネム",
    "map": "V600",
-   "x": 368,
+   "x": 352,
    "y": 368,
    "inn": 100
   },
@@ -639,7 +850,7 @@
    "id": "mayu",
    "name": "薬屋のマユ",
    "map": "V600",
-   "x": 712,
+   "x": 648,
    "y": 368,
    "role": "potion",
    "shop": "shop.V600.potion"
@@ -648,37 +859,77 @@
    "id": "koro",
    "name": "雑貨屋のコロ",
    "map": "V600",
-   "x": 1056,
-   "y": 368
+   "x": 952,
+   "y": 368,
+   "role": "general",
+   "shop": "shop.V600.general"
   },
   {
    "id": "yuu",
    "name": "温泉番ユウ",
    "map": "V600",
-   "x": 1336,
+   "x": 1248,
    "y": 368
   },
   {
    "id": "sig",
    "name": "封印の番人シグ",
    "map": "V600",
-   "x": 1744,
-   "y": 353
+   "x": 1552,
+   "y": 344
   },
   {
    "id": "doc",
    "name": "学者ドク",
    "map": "V600",
-   "x": 2088,
+   "x": 1912,
    "y": 368
   },
   {
    "id": "nagi",
    "name": "倉庫番ナギ",
    "map": "V600",
-   "x": 2432,
+   "x": 2152,
    "y": 368,
    "role": "storage"
+  },
+  {
+   "id": "taxi_nemu",
+   "name": "タクシーの運転手ウトウ",
+   "map": "V600",
+   "x": 2448,
+   "y": 368,
+   "role": "taxi",
+   "taxi": {
+    "dests": [
+     {
+      "to": "V100",
+      "toPortal": "town",
+      "fee": 1360
+     },
+     {
+      "to": "V200",
+      "toPortal": "town",
+      "fee": 1220
+     },
+     {
+      "to": "V300",
+      "toPortal": "town",
+      "fee": 1080
+     },
+     {
+      "to": "V400",
+      "toPortal": "town",
+      "fee": 940
+     },
+     {
+      "to": "V500",
+      "toPortal": "town",
+      "fee": 800
+     }
+    ],
+    "beginnerDiv": 10
+   }
   },
   {
    "id": "stella",
@@ -707,7 +958,8 @@
    "map": "C100",
    "x": 840,
    "y": 644,
-   "role": "weapon"
+   "role": "weapon",
+   "shop": "shop.C100.weapon"
   },
   {
    "id": "shiro",
@@ -715,7 +967,8 @@
    "map": "C100",
    "x": 1200,
    "y": 644,
-   "role": "armor"
+   "role": "armor",
+   "shop": "shop.C100.armor"
   },
   {
    "id": "hikari",
@@ -859,7 +1112,8 @@
    "map": "F100",
    "x": 1328,
    "y": 352,
-   "role": "weapon"
+   "role": "weapon",
+   "shop": "shop.F100.weapon"
   },
   {
    "id": "mofu",
@@ -867,7 +1121,8 @@
    "map": "F100",
    "x": 1664,
    "y": 328,
-   "role": "armor"
+   "role": "armor",
+   "shop": "shop.F100.armor"
   },
   {
    "id": "danro",
@@ -1054,7 +1309,8 @@
    "map": "T100",
    "x": 1440,
    "y": 520,
-   "role": "weapon"
+   "role": "weapon",
+   "shop": "shop.T100.weapon"
   },
   {
    "id": "wata",
@@ -1062,7 +1318,8 @@
    "map": "T100",
    "x": 1848,
    "y": 520,
-   "role": "armor"
+   "role": "armor",
+   "shop": "shop.T100.armor"
   },
   {
    "id": "ame",
@@ -1143,7 +1400,8 @@
    "map": "M100",
    "x": 1248,
    "y": 532,
-   "role": "weapon"
+   "role": "weapon",
+   "shop": "shop.M100.weapon"
   },
   {
    "id": "kai_m",
@@ -1151,7 +1409,8 @@
    "map": "M100",
    "x": 1632,
    "y": 532,
-   "role": "armor"
+   "role": "armor",
+   "shop": "shop.M100.armor"
   },
   {
    "id": "shizuku",
@@ -1241,7 +1500,8 @@
    "name": "鍛冶屋ドラン",
    "map": "D100",
    "x": 800,
-   "y": 516
+   "y": 516,
+   "role": "craft"
   },
   {
    "id": "uroko",
@@ -1249,7 +1509,8 @@
    "map": "D100",
    "x": 1280,
    "y": 516,
-   "role": "weapon"
+   "role": "weapon",
+   "shop": "shop.D100.weapon"
   },
   {
    "id": "hone",
@@ -1257,7 +1518,8 @@
    "map": "D100",
    "x": 1720,
    "y": 516,
-   "role": "armor"
+   "role": "armor",
+   "shop": "shop.D100.armor"
   },
   {
    "id": "tsume",

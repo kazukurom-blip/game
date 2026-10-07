@@ -27,6 +27,12 @@ namespace Lumina.Core.Quests
         public int MinLevel;
         public long Exp, Meso;
         public bool Tutorial;
+        /// <summary>受けられる系統（転職の 2 段目から。warrior など）。null ならだれでも</summary>
+        public string Line;
+        /// <summary>完了すると転職する段階（3 / 4。JOBS.md 3-3・3-4）。0 = しない</summary>
+        public int Advance;
+        /// <summary>完了すると開く物（storage+4 = 倉庫の枠 +4、pet.second = ペットを 2 匹）</summary>
+        public string Unlock;
         public readonly List<string> Prereqs = new List<string>();
         public readonly List<QuestObjective> Objectives = new List<QuestObjective>();
         public readonly List<QuestReward> Rewards = new List<QuestReward>();
@@ -57,6 +63,7 @@ namespace Lumina.Core.Quests
                 Map = J.Str(d, "map"), Size = J.Str(d, "size"), GoalText = J.Str(d, "goalText", ""), End = J.Str(d, "end"),
                 RewardText = J.Str(d, "rewardText", ""), Story = J.Str(d, "story", ""), MinLevel = J.Int(d, "minLevel", 1),
                 Exp = J.Long(d, "exp"), Meso = J.Long(d, "meso"), Tutorial = J.Bool(d, "tutorial"),
+                Line = J.Str(d, "line"), Advance = J.Int(d, "advance"), Unlock = J.Str(d, "unlock"),
             };
             if (q.End == null) q.End = q.Giver;
             q.Prereqs.AddRange(J.StrList(d, "prereqs"));

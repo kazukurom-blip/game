@@ -1,8 +1,11 @@
 // NPC の一覧（WORLD.md 3 章の町の顔ぶれ＋クエストの依頼者・相手）。名前はすべてオリジナル。
 // 列: [ID, 名前, マップ, 追加]
 //   追加: x（島だけ手で置く。ほかは生成器が足場の上に並べる）/ tier（0 = 地面、1〜 = 上の段。高い町で上の段に置く）
-//         shop（店の ID）/ inn（宿屋の料金）/ travel（乗り物）/ role（weapon・armor・potion・storage・taxi・guide など。絵や会話の手がかり）
+//         shop（店の ID。武器屋・防具屋などは systems.mjs の品ぞろえから export_data.mjs が付ける）/ inn（宿屋の料金）/ travel（乗り物）
+//         taxi（タクシー: 行き先の一覧と料金。systems.mjs）/ role（weapon・armor・potion・storage・taxi・guide など。絵や会話の手がかり）
 // 同じ人が別のマップにもいる時（転職官が修練場にいる など）は ID に _<マップ> を付けた別の NPC にする（名前は同じ）。
+import { taxiOf } from '../systems.mjs';
+
 const TRV = (to, o = {}) => ({ travel: { to, toPortal: 'sp', minLevel: 0, oneWay: false, fee: 0, ...o } });
 
 export const NPCS = [
@@ -28,21 +31,22 @@ export const NPCS = [
   ['mire', '防具屋ミレ', 'V100', { role: 'armor' }],
   ['pola', '薬屋ポーラ', 'V100', { role: 'potion', shop: 'shop.V100.potion' }],
   ['dan', '倉庫番ダン', 'V100', { role: 'storage' }],
-  ['marco', 'タクシーの運転手マルコ', 'V100', { role: 'taxi' }],
+  ['marco', 'タクシーの運転手マルコ', 'V100', { role: 'taxi', taxi: taxiOf('V100') }],
   ['rokko', '船乗りロッコ', 'V100'],
   ['uo', '釣り好きのウオ爺', 'V100'],
   ['ichiba', '市場の案内人', 'V100', { role: 'guide' }],
   ['minato', '潜水船の係ミナト', 'V100', TRV('M113', { fee: 1500, minLevel: 40 })],
   ['sol', '灯台守ソル', 'V102'],
   ['rio', 'キャプテン・リオ', 'V107', { role: 'job' }],
-  ['battsu', '砲手バッツ', 'V107'],
+  ['battsu', '砲手バッツ', 'V107', { role: 'weapon' }],
   ['guri', '料理人グリ', 'V107', { role: 'potion', shop: 'shop.V107.potion' }],
+  ['hose', '帆縫いのホセ', 'V107', { role: 'armor' }],
   ['rio_V108', 'キャプテン・リオ', 'V108', { role: 'job' }],
 
   // ===== にぎわい市場 =====
   ['horn', '古道具屋ホルン', 'V090', { role: 'weapon' }],
   ['scri', '書の行商人スクリ', 'V090'],
-  ['jue', '宝石商ジュエ', 'V090'],
+  ['jue', '宝石商ジュエ', 'V090', { role: 'craft' }],
   ['mate', '素材屋マテ', 'V090'],
   ['board', '掲示板係ボード', 'V090'],
   ['yomi', '占い師ヨミ', 'V090'],
@@ -52,12 +56,13 @@ export const NPCS = [
   ['toma', '弓の武器屋トマ', 'V200', { role: 'weapon' }],
   ['lana', '防具屋ラナ', 'V200', { role: 'armor' }],
   ['popo', '薬屋ポポ', 'V200', { role: 'potion', shop: 'shop.V200.potion' }],
-  ['chiko', 'ペット屋チコ', 'V200'],
+  ['chiko', 'ペット屋チコ', 'V200', { role: 'pet' }],
   ['hako', '倉庫番ハコ', 'V200', { role: 'storage' }],
   ['bob', '風車守ボブ', 'V200', { tier: 1 }],
   ['marsa', '農家のマーサ', 'V200'],
   ['sui', '花売りのスイ', 'V200'],
   ['taro', '牧場の少年タロ', 'V200'],
+  ['taxi_pom', 'タクシーの運転手ピピ', 'V200', { role: 'taxi', taxi: taxiOf('V200') }],
   ['erna_V211', '弓の師範エルナ', 'V211', { role: 'job' }],
   ['fin', '試験官フィン', 'V211'],
 
@@ -70,6 +75,7 @@ export const NPCS = [
   ['libra', '司書リブラ', 'V300', { tier: 2 }],
   ['tia', '妖精の使いティア', 'V300', { tier: 2 }],
   ['wood', '木こりの青年ウッド', 'V300'],
+  ['taxi_silva', 'タクシーの運転手リーフ', 'V300', { role: 'taxi', taxi: taxiOf('V300') }],
   ['noa', '駅員ノア', 'V310', TRV('C101', { fee: 1000, minLevel: 20 })],
   ['orfe_V311', '大魔導師オルフェ', 'V311', { role: 'job' }],
   ['sera', '試験官セラ', 'V311'],
@@ -82,7 +88,8 @@ export const NPCS = [
   ['iwa', '倉庫番イワ', 'V400', { role: 'storage' }],
   ['rossi', '発掘隊長ロッシ', 'V400'],
   ['toto', '祈祷師トト', 'V400', { tier: 1 }],
-  ['kaji', '鍛冶屋カジ', 'V400'],
+  ['kaji', '鍛冶屋カジ', 'V400', { role: 'craft' }],
+  ['taxi_gard', 'タクシーの運転手ガタ', 'V400', { role: 'taxi', taxi: taxiOf('V400') }],
   ['dorga_V413', '戦士長ドルガ', 'V413', { role: 'job' }],
   ['block', '試験官ブロック', 'V413'],
 
@@ -94,7 +101,8 @@ export const NPCS = [
   ['kinko', '倉庫番キンコ', 'V500', { role: 'storage' }],
   ['tetsu', '駅員テツ', 'V500'],
   ['bolt', '工事の親方ボルト', 'V500'],
-  ['nez', '情報屋ネズ', 'V500', { tier: 1 }],
+  ['nez', '情報屋ネズ', 'V500', { tier: 1, role: 'craft' }],
+  ['taxi_crow', 'タクシーの運転手ネオ', 'V500', { role: 'taxi', taxi: taxiOf('V500') }],
   ['yami_V513', '影の頭領ヤミ', 'V513', { role: 'job' }],
   ['jill', '試験官ジル', 'V513'],
   ['rat', '受付ラット', 'V515'],
@@ -103,11 +111,12 @@ export const NPCS = [
   // ===== ねむり谷 =====
   ['nemu', '宿屋のネム', 'V600', { inn: 100 }],
   ['mayu', '薬屋のマユ', 'V600', { role: 'potion', shop: 'shop.V600.potion' }],
-  ['koro', '雑貨屋のコロ', 'V600'],
+  ['koro', '雑貨屋のコロ', 'V600', { role: 'general' }],
   ['yuu', '温泉番ユウ', 'V600'],
   ['sig', '封印の番人シグ', 'V600'],
   ['doc', '学者ドク', 'V600'],
   ['nagi', '倉庫番ナギ', 'V600', { role: 'storage' }],
+  ['taxi_nemu', 'タクシーの運転手ウトウ', 'V600', { role: 'taxi', taxi: taxiOf('V600') }],
 
   // ===== セレス =====
   ['stella', '都の巫女ステラ', 'C100', { tier: 1 }],
@@ -184,7 +193,7 @@ export const NPCS = [
 
   // ===== 竜の谷 =====
   ['haruka', '村長ハルカ', 'D100'],
-  ['doran', '鍛冶屋ドラン', 'D100'],
+  ['doran', '鍛冶屋ドラン', 'D100', { role: 'craft' }],
   ['uroko', '武器屋ウロコ', 'D100', { role: 'weapon' }],
   ['hone', '防具屋ホネ', 'D100', { role: 'armor' }],
   ['tsume', '薬屋ツメ', 'D100', { role: 'potion', shop: 'shop.D100.potion' }],
@@ -213,22 +222,3 @@ export function npcIdOf(name, map) {
   const any = NPCS.find((n) => n[1] === name);
   return any ? any[0] : null;
 }
-
-// 薬屋の品（地域の Lv に合わせる）。ITEMS.md 6 章の島の薬屋を広げた物
-export const POTION_SHOPS = {
-  V100: ['use.red_potion', 'use.orange_potion', 'use.blue_potion'],
-  V107: ['use.red_potion', 'use.orange_potion', 'use.blue_potion'],
-  V200: ['use.red_potion', 'use.orange_potion', 'use.blue_potion'],
-  V300: ['use.red_potion', 'use.orange_potion', 'use.blue_potion'],
-  V400: ['use.red_potion', 'use.orange_potion', 'use.blue_potion'],
-  V500: ['use.red_potion', 'use.orange_potion', 'use.blue_potion'],
-  V600: ['use.orange_potion', 'use.white_potion', 'use.blue_potion'],
-  C100: ['use.orange_potion', 'use.white_potion', 'use.blue_potion', 'use.mana_elixir'],
-  F100: ['use.white_potion', 'use.big_white_potion', 'use.mana_elixir'],
-  T100: ['use.orange_potion', 'use.white_potion', 'use.blue_potion', 'use.mana_elixir'],
-  M100: ['use.white_potion', 'use.big_white_potion', 'use.mana_elixir'],
-  P100: ['use.big_white_potion', 'use.xl_potion', 'use.mana_elixir', 'use.blue_secret'],
-  D100: ['use.big_white_potion', 'use.xl_potion', 'use.mana_elixir', 'use.blue_secret'],
-  H100: ['use.xl_potion', 'use.blue_secret'],
-  E100: ['use.xl_potion', 'use.blue_secret'],
-};

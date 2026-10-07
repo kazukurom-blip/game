@@ -322,8 +322,9 @@ function addSecret(B, rng, sec) {
   }
   const room = B.addPlat(x1, x1 + RW, y, { id: 'secret', kind: 'secret' });
   B.walls.push({ x: room.x1, top: y - 120, bottom: y }, { x: room.x2, top: y - 120, bottom: y });
-  B.portals.push({ name: 'secret', type: 'hidden', x: from.x, y: from.y, toPortal: 'room' });
-  B.portals.push({ name: 'room', type: 'visible', x: room.x1 + 40, y, toPortal: 'secret' });
+  // oneWay: 落とし穴（入口は一方通行）。部屋の出口は出現の位置へ戻す
+  B.portals.push({ name: 'secret', type: 'hidden', x: from.x, y: from.y, toPortal: 'room', ...(sec.oneWay ? { oneWay: true } : {}) });
+  B.portals.push({ name: 'room', type: 'visible', x: room.x1 + 40, y, toPortal: sec.oneWay ? 'sp' : 'secret' });
   B.reserved.push(from.x);
   return room;
 }
@@ -656,6 +657,20 @@ export function generateMap(raw, ctx) {
       const spx = tpl === 'rooms' ? 140 : freeX(B, 100, B.W - 100, tpl.startsWith('town') ? B.W / 2 : 140, 40, 24);
       B.portals.unshift({ name: 'sp', type: 'spawn', x: spx, y: B.groundY(spx) });
       if (type === '町') { const tx = freeX(B, 100, B.W - 100, B.W / 2 + 40, 24, 24); B.portals.splice(1, 0, { name: 'town', type: 'town', x: tx, y: B.groundY(tx) }); }
+      // 一方通行のポータル（滑り台）と、一方通行で着く位置
+      if (spec.slide) {
+        const tp = topPlat(B);
+        const x = tp && freeX(B, tp.x1 + 40, tp.x2 - 40, (tp.x1 + tp.x2) / 2, 80, 32);
+        if (x == null) throw new Error(`${id}: 滑り台の置き場が無い`);
+        B.portals.push({ name: spec.slide.name, type: 'visible', x, y: tp.y, to: spec.slide.to, toPortal: spec.slide.toPortal, oneWay: true });
+        B.reserved.push(x);
+      }
+      for (const nm of spec.landing || []) {
+        const x = freeX(B, 200, B.W - 200, B.W / 2, 64, 32);
+        if (x == null) throw new Error(`${id}: 着く位置 ${nm} の置き場が無い`);
+        B.portals.push({ name: nm, type: 'landing', x, y: B.groundY(x) });
+        B.reserved.push(x);
+      }
       placeNpcs(B, rng, npcs, type === '町');
       placeObjects(B, rng, spec.objects, secretRoom);
       const sp = placeSpawns(B, rng, mobs, ctx.monsters, note, tpl, lctx, spec);

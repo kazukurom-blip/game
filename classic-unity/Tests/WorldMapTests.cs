@@ -71,6 +71,8 @@ namespace Lumina.Core.Tests
                         Assert.True(dst != null, m.Id + " → " + p.To + " のマップが無い");
                         var back = dst.FindPortalByName(p.ToPortal);
                         Assert.True(back != null, m.Id + " → " + p.To + "." + p.ToPortal + " が無い");
+                        if (p.OneWay) { Assert.False(back.To == m.Id && back.ToPortal == p.Name, m.Id + "." + p.Name + " は一方通行なのに戻れる"); continue; }
+                        Assert.NotEqual(PortalType.Landing, back.Type);
                         Assert.Equal(m.Id, back.To);
                         Assert.Equal(p.Name, back.ToPortal);
                     }

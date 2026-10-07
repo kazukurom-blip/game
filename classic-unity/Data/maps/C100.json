@@ -250,14 +250,16 @@
    "name": "武器屋クモ",
    "x": 840,
    "y": 644,
-   "role": "weapon"
+   "role": "weapon",
+   "shop": "shop.C100.weapon"
   },
   {
    "id": "shiro",
    "name": "防具屋シロ",
    "x": 1200,
    "y": 644,
-   "role": "armor"
+   "role": "armor",
+   "shop": "shop.C100.armor"
   },
   {
    "id": "hikari",

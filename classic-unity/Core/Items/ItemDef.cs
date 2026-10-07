@@ -141,6 +141,15 @@ namespace Lumina.Core.Items
         public string AmmoKind;         // 弾・矢・投げ星の種類（arrow_bow / arrow_xbow / star / bullet）
         public int AmmoWatk;
 
+        // 町と成長の仕組み（Data/tools/systems.mjs）
+        public string Pet;              // 使うとこの種類のペットを迎える（puppy など）
+        public string PetSkill;         // ペットの技の本（pickup / range / potion）
+        public double ChairRegenMul;    // 椅子（設置）: 座ると自然回復がこの倍。0 = 椅子でない
+        public int MasterBookCap;       // 極意の書: 上がる最大 Lv（20 / 30）
+        public double MasterBookRate;   // 極意の書の成功率
+        public string Ticket;           // 乗り物の券（taxi / ship）: 料金の代わりに 1 枚使う
+        public bool IsChair => ChairRegenMul > 0;
+
         public bool IsEquip => Tab == InvTab.Equip;
         public bool Stackable => MaxStack > 1;
 
@@ -167,6 +176,11 @@ namespace Lumina.Core.Items
                 case "LUK": it.ReqStat = Stat.LUK; break;
                 default: it.ReqStat = Stat.None; break;
             }
+            it.Pet = J.Str(d, "pet"); it.PetSkill = J.Str(d, "petSkill"); it.Ticket = J.Str(d, "ticket");
+            var ch = J.Obj(d, "chair");
+            if (ch != null) it.ChairRegenMul = J.Num(ch, "regenMul", 1.5);
+            var mb = J.Obj(d, "masterBook");
+            if (mb != null) { it.MasterBookCap = J.Int(mb, "cap"); it.MasterBookRate = J.Num(mb, "rate", 1); }
             if (it.WeaponType != null && it.AttackSpeed == 0) it.AttackSpeed = WeaponClass.Get(it.WeaponType).Speed;
             var u = J.Obj(d, "use");
             if (u != null)

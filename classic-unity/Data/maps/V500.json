@@ -232,21 +232,23 @@
   {
    "id": "sue",
    "name": "ナイフ屋スー",
-   "x": 432,
+   "x": 408,
    "y": 504,
-   "role": "weapon"
+   "role": "weapon",
+   "shop": "shop.V500.weapon"
   },
   {
    "id": "kuroe",
    "name": "防具屋クロエ",
-   "x": 928,
+   "x": 896,
    "y": 504,
-   "role": "armor"
+   "role": "armor",
+   "shop": "shop.V500.armor"
   },
   {
    "id": "kusuri",
    "name": "薬屋クスリ",
-   "x": 1408,
+   "x": 1240,
    "y": 504,
    "role": "potion",
    "shop": "shop.V500.potion"
@@ -254,21 +256,58 @@
   {
    "id": "kinko",
    "name": "倉庫番キンコ",
-   "x": 1904,
+   "x": 1656,
    "y": 504,
    "role": "storage"
   },
   {
    "id": "tetsu",
    "name": "駅員テツ",
-   "x": 2392,
+   "x": 2064,
    "y": 504
   },
   {
    "id": "bolt",
    "name": "工事の親方ボルト",
-   "x": 2880,
+   "x": 2408,
    "y": 504
+  },
+  {
+   "id": "taxi_crow",
+   "name": "タクシーの運転手ネオ",
+   "x": 2912,
+   "y": 504,
+   "role": "taxi",
+   "taxi": {
+    "dests": [
+     {
+      "to": "V100",
+      "toPortal": "town",
+      "fee": 1220
+     },
+     {
+      "to": "V200",
+      "toPortal": "town",
+      "fee": 1080
+     },
+     {
+      "to": "V300",
+      "toPortal": "town",
+      "fee": 940
+     },
+     {
+      "to": "V400",
+      "toPortal": "town",
+      "fee": 800
+     },
+     {
+      "to": "V600",
+      "toPortal": "town",
+      "fee": 800
+     }
+    ],
+    "beginnerDiv": 10
+   }
   },
   {
    "id": "yami",
@@ -281,7 +320,8 @@
    "id": "nez",
    "name": "情報屋ネズ",
    "x": 2288,
-   "y": 376
+   "y": 376,
+   "role": "craft"
   }
  ],
  "objects": [],

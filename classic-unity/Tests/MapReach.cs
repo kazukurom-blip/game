@@ -272,7 +272,9 @@ namespace Lumina.Core.Tests
                 else press = true;                                                   // 行きすぎ: 逆へ
                 PlayerPhysics.Step(p, new PhysicsInput { Left = press && dir < 0, Right = press && dir > 0 }, Map, Feel.Dt);
             }
-            return false;
+            // 少しの押し引きで行ったり来たりして止まりきれない時（すべりの小さな周期）: 手を離して止まり、3 px 以内なら着いたことにする
+            for (int f = 0; f < 120 && p.OnGround && Math.Abs(p.Vx) >= 1; f++) PlayerPhysics.Step(p, default, Map, Feel.Dt);
+            return p.OnGround && Math.Abs(tx - p.X) <= 3;
         }
 
         /// <summary>動きを 1 つ実際に行う。着いたかたまりを返す（失敗は null）。</summary>
@@ -280,6 +282,8 @@ namespace Lumina.Core.Tests
         {
             if (!WalkTo(p, e.X)) return null;
             for (int i = 0; i < 6; i++) PlayerPhysics.Step(p, default, Map, Feel.Dt);
+            // 縄から跳び降りた直後は少しの間つかまれない（RegrabT）。人と同じく、つかまれるまで待ってから動く
+            for (int i = 0; i < 120 && p.RegrabT > 0; i++) PlayerPhysics.Step(p, default, Map, Feel.Dt);
             switch (e.Kind)
             {
                 case MoveKind.Jump: return Simulate(p, JumpInput, 240);

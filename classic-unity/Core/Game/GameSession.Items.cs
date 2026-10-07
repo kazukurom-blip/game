@@ -23,6 +23,13 @@ namespace Lumina.Core.Game
         {
             var d = Map.DropAt(Body.X, Body.Y);
             if (d == null) return false;
+            return PickupDrop(d);
+        }
+
+        /// <summary>落ちている物を 1 つ拾う（足元の物・ペットの「自動で拾う」）。</summary>
+        public bool PickupDrop(DropItem d)
+        {
+            if (d == null || d.PickedUp || !d.Landed) return false;
             if (d.IsMeso)
             {
                 Inventory.AddMeso(d.Meso);
@@ -64,7 +71,11 @@ namespace Lumina.Core.Game
         public bool UseItem(string itemId)
         {
             var def = Data.Item(itemId);
-            if (def == null || def.Use == null || !Inventory.Has(itemId) || Dead) return false;
+            if (def == null || !Inventory.Has(itemId) || Dead) return false;
+            var pet = TryUsePetItem(def); // ペット・餌・技の本（GameSession.Pets.cs）
+            if (pet.HasValue) return pet.Value;
+            if (def.IsChair) { if (Sitting == itemId) { StandUp(); return true; } return SitOnChair(itemId); } // 椅子（GameSession.Town.cs）
+            if (def.Use == null) return false;
             var u = def.Use;
             if (u.ReturnTo != null)
             {
@@ -203,7 +214,7 @@ namespace Lumina.Core.Game
         public ShopResult Buy(string shopId, string itemId, int count = 1)
         {
             if (!Data.Shops.TryGetValue(shopId, out var shop) || !ShopHere(shopId)) return ShopResult.NoShopHere;
-            var e = shop.Items.Find(x => x.Item == itemId);
+            var e = ShopItems(shopId).Find(x => x.Item == itemId); // 日替わりの店は今日の品だけ
             if (e == null) return ShopResult.NotSold;
             if (count <= 0) return ShopResult.NotEnough;
             long cost = e.Price * count;
@@ -292,11 +303,7 @@ namespace Lumina.Core.Game
         {
             var r = Character.AdvanceFirst(line, Rng);
             if (r != AdvanceResult.Ok) return r;
-            Inventory.Expand(InvTab.Equip, 4); Inventory.Expand(InvTab.Use, 4); Inventory.Expand(InvTab.Etc, 4);
-            RefreshStats();
-            Out.Add(GameEventType.JobAdvanced, line, 1, text: Character.JobName);
-            QuestEvent("job_advance.1"); // 転職のクエスト（J1-1 など）
-            AutoSave.Request("job");
+            AfterAdvance(1); // 持ち物の枠 +4・お知らせ・job_advance.1（GameSession.Jobs.cs。2〜4 次も同じ）
             return r;
         }
     }

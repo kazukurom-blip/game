@@ -152,7 +152,7 @@
   {
    "id": "erna",
    "name": "弓の師範エルナ",
-   "x": 352,
+   "x": 336,
    "y": 336,
    "role": "job"
   },
@@ -161,19 +161,21 @@
    "name": "弓の武器屋トマ",
    "x": 592,
    "y": 336,
-   "role": "weapon"
+   "role": "weapon",
+   "shop": "shop.V200.weapon"
   },
   {
    "id": "lana",
    "name": "防具屋ラナ",
-   "x": 944,
+   "x": 872,
    "y": 336,
-   "role": "armor"
+   "role": "armor",
+   "shop": "shop.V200.armor"
   },
   {
    "id": "popo",
    "name": "薬屋ポポ",
-   "x": 1224,
+   "x": 1136,
    "y": 384,
    "role": "potion",
    "shop": "shop.V200.potion"
@@ -181,38 +183,77 @@
   {
    "id": "chiko",
    "name": "ペット屋チコ",
-   "x": 1536,
-   "y": 384
+   "x": 1408,
+   "y": 384,
+   "role": "pet",
+   "shop": "shop.V200.pet"
   },
   {
    "id": "hako",
    "name": "倉庫番ハコ",
-   "x": 1856,
-   "y": 432,
+   "x": 1648,
+   "y": 414,
    "role": "storage"
   },
   {
    "id": "marsa",
    "name": "農家のマーサ",
-   "x": 2136,
+   "x": 1944,
    "y": 432
   },
   {
    "id": "sui",
    "name": "花売りのスイ",
-   "x": 2432,
-   "y": 480
+   "x": 2208,
+   "y": 432
   },
   {
    "id": "taro",
    "name": "牧場の少年タロ",
-   "x": 2728,
+   "x": 2480,
    "y": 480
+  },
+  {
+   "id": "taxi_pom",
+   "name": "タクシーの運転手ピピ",
+   "x": 2744,
+   "y": 480,
+   "role": "taxi",
+   "taxi": {
+    "dests": [
+     {
+      "to": "V100",
+      "toPortal": "town",
+      "fee": 800
+     },
+     {
+      "to": "V300",
+      "toPortal": "town",
+      "fee": 800
+     },
+     {
+      "to": "V400",
+      "toPortal": "town",
+      "fee": 940
+     },
+     {
+      "to": "V500",
+      "toPortal": "town",
+      "fee": 1080
+     },
+     {
+      "to": "V600",
+      "toPortal": "town",
+      "fee": 1220
+     }
+    ],
+    "beginnerDiv": 10
+   }
   },
   {
    "id": "bob",
    "name": "風車守ボブ",
-   "x": 1936,
+   "x": 1872,
    "y": 200
   }
  ],

@@ -18,10 +18,11 @@ import { MAPS_RAW } from '../../../classic/tools/data/maps.mjs';
 import { armorList, extraList, weaponList, STARTER, WEAPON_TYPES } from '../../../classic/tools/data/equips.mjs';
 import { SCROLLS, scrollsFor } from '../../../classic/tools/data/scrolls.mjs';
 import { QUESTS_RAW } from '../../../classic/tools/data/quests.mjs';
-import { NPCS, npcIdOf, POTION_SHOPS } from './world/npcs.mjs';
+import { NPCS, npcIdOf } from './world/npcs.mjs';
 import { buildWorld } from './world/world.mjs';
 import { QUEST_GOALS } from './quest_goals.mjs';
 import { buildSkills } from './skills_export.mjs';
+import * as SYS from './systems.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.resolve(HERE, '..');
@@ -197,9 +198,16 @@ for (const w of weaponList()) {
 // クエストの見た目だけの品・特別な品
 equipItem({ id: 'eq.cosmetic.shell_necklace', name: '貝の首飾り', slot: 'face', job: 'common', reqLevel: 0, stats: {}, upgrades: 0, price: 0, cosmetic: true, desc: '見た目だけ' });
 addItem({ id: 'special.letter_breeze', name: 'ブリーズ港への推薦状', tab: 'special', maxStack: 1, price: 0, quest: true });
+// 町と成長の仕組みの品（systems.mjs: 転職の試験・鍵・極意の書・乗り物の券・ペット・椅子・板・宝石・メダル）
+for (const [id, name, tab, extra = {}] of SYS.SYSTEM_ITEMS) {
+  const { alias, ...rest } = extra;
+  addItem({ id, name, tab, maxStack: tab === 'special' ? 1 : 100, price: 0, ...rest });
+  for (const a of alias || []) byName.set(a, id);
+}
+for (const e of SYS.craftedEquips(items)) equipItem(e);
 // 敵の固有品（2-5。島では「旅立ちの髪飾り」）
 for (const [id, , lv, kind, , , , , special] of MONSTERS_RAW) {
-  if (!special || byName.has(special)) continue;
+  if (!special || byName.has(special) || SYS.MEDAL_OF_MOB[id]) continue; // 1 人用ダンジョンの主のメダルはダンジョンごと（systems.mjs）
   const m = /^(.+?)（(.+)）$/.exec(special);
   const name = m ? m[1] : special;
   const kindWord = m ? m[2] : '';
@@ -260,7 +268,8 @@ const monsters = MONSTERS_RAW.map(([id, name, lv, kind, move, atkType, el, etc, 
     drops.push({ item: `scroll.${sid}.10`, chance: big ? 0.1 : 0.001 });
   }
   if (lv >= 40) drops.push({ item: lv >= 80 ? 'use.power_elixir' : 'use.elixir', chance: big ? 1 : 0.005, count: big ? 5 : 1 });
-  if (special) drops.push({ item: byName.get(special) || byName.get(special.replace(/（.+）$/, '')), chance: big ? 0.15 : kind === 'elite' ? 0.1 : 0.0005 });
+  const specialId = SYS.MEDAL_OF_MOB[id] ? `etc.medal.${SYS.MEDAL_OF_MOB[id]}` : byName.get(special) || byName.get(special?.replace(/（.+）$/, ''));
+  if (special) drops.push({ item: specialId, chance: big ? 0.15 : kind === 'elite' ? 0.1 : 0.0005 });
   const sz = SIZE[mv].map((v) => Math.round(v * SIZE_MUL[kind]));
   const sk = MOB_SKILLS[id] || {};
   const attacks = sk.attacks || defaultAttacks(atkType);
@@ -297,19 +306,59 @@ write('monsters.json', { note: 'export_data.mjs が monsters.mjs と curves.mjs 
 // ---------------- NPC（world/npcs.mjs。位置はマップを作った時に決まる → 下のマップの所で書き出す）
 const NPC_BY_NAME = new Map(NPCS.map(([id, name]) => [name, id]));
 
-// ---------------- 店
+// ---------------- 店（ITEMS.md 6 章。品ぞろえは systems.mjs）
 const shops = [
   { id: 'shop.S003.general', name: '芽吹き村の雑貨屋', items: items.filter((i) => i.id.startsWith('eq.starter.') && i.price > 0).map((i) => ({ item: i.id })) },
   { id: 'shop.S003.potion', name: '芽吹き村の薬屋', items: [{ item: 'use.red_potion' }, { item: 'use.blue_potion' }] },
 ];
-// 町の薬屋（地域の Lv に合わせた薬）。武器屋・防具屋の品ぞろえはまだ（NPC の role だけ）
-for (const [mid, list] of Object.entries(POTION_SHOPS)) {
-  const town = MAPS_RAW.find((m) => m[0] === mid);
-  for (const it of list) if (!items.some((x) => x.id === it)) problems.push(`店の品 ${it} が無い`);
-  shops.push({ id: `shop.${mid}.potion`, name: `${town ? town[1] : mid}の薬屋`, items: list.map((item) => ({ item })) });
+const townName = (mid) => MAPS_RAW.find((m) => m[0] === mid)?.[1] || mid;
+const SHOP_OF_NPC = {}; // NPC の ID → 店の ID（npcs.mjs に shop が無い店の人）
+// 町の薬屋・雑貨（地域の Lv に合わせた薬・強化の薬・帰還の書・状態異常の薬）
+for (const [mid, list] of Object.entries(SYS.GENERAL_SHOPS)) {
+  shops.push({ id: `shop.${mid}.potion`, name: `${townName(mid)}の薬屋`, items: list.map((item) => ({ item })) });
+}
+// 武器屋・防具屋（職と Lv の範囲で装備を選ぶ。Lv100・110 は売らない）
+const shopEquips = (o, kind) => {
+  const out = items.filter((i) => i.tab === 'equip' && i.price > 0 && !i.id.startsWith('eq.starter.') && o.jobs.includes(i.job) && i.reqLevel >= o.lv[0] && i.reqLevel <= o.lv[1] && i.reqLevel < 100
+    && (kind === 'weapon' ? i.slot === 'weapon' : !['weapon', 'shield', 'cape', 'earring'].includes(i.slot)));
+  if (kind === 'armor') {
+    for (const lv of o.shields || []) out.push(...items.filter((i) => i.slot === 'shield' && i.reqLevel === lv && i.price > 0 && o.jobs.includes(i.job)));
+    for (const lv of o.capes || []) out.push(...items.filter((i) => i.slot === 'cape' && i.reqLevel === lv && i.price > 0));
+    for (const lv of o.earrings || []) out.push(...items.filter((i) => i.slot === 'earring' && i.reqLevel === lv && i.price > 0));
+  }
+  out.sort((a, b) => a.reqLevel - b.reqLevel || a.id.localeCompare(b.id));
+  return [...out.map((i) => ({ item: i.id })), ...(o.extra || []).map((item) => ({ item }))];
+};
+for (const [mid, t] of Object.entries(SYS.TOWN_SHOPS)) {
+  for (const kind of ['weapon', 'armor']) {
+    const o = t[kind];
+    if (!o) continue;
+    const id = `shop.${mid}.${kind}`;
+    const list = shopEquips(o, kind);
+    if (!list.length) problems.push(`店 ${id} の品が無い`);
+    shops.push({ id, name: `${townName(mid)}の${kind === 'weapon' ? '武器屋' : '防具屋'}`, items: list, ...(o.recharge ? { recharge: true } : {}) });
+    SHOP_OF_NPC[o.npc] = id;
+  }
+}
+for (const o of SYS.OTHER_SHOPS) { shops.push({ id: o.id, name: o.name, items: o.items.map((item) => ({ item })) }); SHOP_OF_NPC[o.npc] = o.id; }
+// にぎわい市場の日替わり（候補の中から Core が日付で選ぶ）
+for (const o of SYS.DAILY_SHOPS) {
+  let pool;
+  if (o.pool.equip) pool = items.filter((i) => i.tab === 'equip' && i.price > 0 && !i.id.startsWith('eq.starter.') && i.reqLevel >= o.pool.lv[0] && i.reqLevel <= o.pool.lv[1])
+    .map((i) => ({ item: i.id, price: Math.round(i.price * o.priceMul) }));
+  else pool = items.filter((i) => i.scroll && !i.scroll.cursed && o.pool.scroll.includes(i.scroll.rate)).map((i) => ({ item: i.id, price: o.price[i.scroll.rate] }));
+  shops.push({ id: o.id, name: o.name, daily: o.pick, items: pool });
+  SHOP_OF_NPC[o.npc] = o.id;
+}
+for (const sh of shops) for (const e of sh.items) if (!items.some((x) => x.id === e.item)) problems.push(`店 ${sh.id} の品 ${e.item} が無い`);
+for (const [npc, shop] of Object.entries(SHOP_OF_NPC)) {
+  const n = NPCS.find((x) => x[0] === npc);
+  if (!n) problems.push(`店 ${shop} の NPC ${npc} がいない`);
+  else if (n[3]?.shop && n[3].shop !== shop) problems.push(`NPC ${npc} の店が 2 つ（${n[3].shop} と ${shop}）`);
+  else { n[3] = n[3] || {}; n[3].shop = shop; }
 }
 for (const n of NPCS) if (n[3]?.shop && !shops.some((sh) => sh.id === n[3].shop)) problems.push(`NPC ${n[0]} の店 ${n[3].shop} が無い`);
-write('shops.json', { note: 'ITEMS.md 6 章（島の店と、町の薬屋。武器屋・防具屋の品ぞろえは後で足す）', shops });
+write('shops.json', { note: 'ITEMS.md 6 章（町ごとの武器屋・防具屋・薬屋/雑貨・ペット屋・市場の日替わり）。品ぞろえは Data/tools/systems.mjs。daily: その数を日付で選ぶ。recharge: 詰め直しができる', shops });
 
 // ---------------- クエスト
 const QSIZE = { 小: [0.06, 10], 中: [0.12, 25], 大: [0.25, 60], 特: [0.5, 150] };
@@ -362,9 +411,11 @@ function parseRewards(text) {
     let m = /^([\d.]+)\s*万ルド$/.exec(part);
     if (m) { meso += Math.round(parseFloat(m[1]) * 10000); continue; }
     m = /^(.+?)\s*×\s*(\d+)/.exec(part);
+    const full = m ? m[1].trim() : part.trim();
     let name = m ? m[1].trim() : part.replace(/（.*）$/, '').trim();
     const count = m ? parseInt(m[2], 10) : 1;
-    let id = byName.get(name) || byName.get(name.replace(/\s/g, ''));
+    // 名前に（）が付く品（試練のメダル（裏路地）など）は、まず（）込みの名前で探す
+    let id = byName.get(full) || byName.get(name) || byName.get(name.replace(/\s/g, ''));
     if (!id) {
       const sm = /^(.+?)の書\s*(\d+)%$/.exec(name.replace(/\s/g, ''));
       if (sm) { const it = items.find((x) => x.scroll && x.name.replace(/\s/g, '') === `${sm[1]}の書${sm[2]}%`); if (it) id = it.id; }
@@ -388,7 +439,8 @@ const quests = QUESTS_RAW.map(([id, name, giver, map, lv, pre, goal, size, items
   return {
     id, name, giver: giverId, giverName: giver, map, minLevel: lv, prereqs: pre === '-' ? [] : pre.split(/[・,]/).map((s) => s.trim()),
     size, goalText: goal.replace(/\[\[(k|i|m):([A-Z0-9]+)(?::(\d+))?\]\]/g, (_, t, a, n) => `${a}${n ? '×' + n : ''}`), objectives,
-    end: tut.end || giverId, ...(tut.minStats ? { minStats: tut.minStats } : {}), exp, meso: meso + r.meso, rewards: r.rewards, rewardText: itemsText, rewardUnparsed: r.rest, story,
+    end: tut.end || giverId, ...(tut.minStats ? { minStats: tut.minStats } : {}),
+    ...(tut.line ? { line: tut.line } : {}), ...(tut.advance ? { advance: tut.advance } : {}), ...(tut.unlock ? { unlock: tut.unlock } : {}), exp, meso: meso + r.meso, rewards: r.rewards, rewardText: itemsText, rewardUnparsed: r.rest, story,
     tutorial: id.startsWith('S-'),
   };
 });
@@ -412,6 +464,44 @@ for (const [id, name, map, extra = {}] of NPCS) {
   npcOut.push({ id, name, map, x: placed?.x ?? extra.x, y: placed?.y, ...rest });
 }
 write('npcs.json', { note: 'world/npcs.mjs（位置はマップを作った時に決まる）', npcs: npcOut });
+
+// ---------------- 町と成長の仕組み（systems.mjs → systems.json）
+{
+  const has = (id) => items.some((i) => i.id === id);
+  const need = (id, where) => { if (id && !has(id)) problems.push(`${where}: アイテム ${id} が無い`); };
+  for (const r of SYS.ROOMS) {
+    if (!world.maps[r.map]) problems.push(`部屋の決まり: マップ ${r.map} が無い`);
+    if (!world.maps[r.exit]) problems.push(`部屋の決まり ${r.map}: 戻り先 ${r.exit} が無い`);
+    need(r.requiresItem, `部屋の決まり ${r.map}`); need(r.medal, `部屋の決まり ${r.map}`);
+    for (const it of r.resetItems || []) need(it, `部屋の決まり ${r.map}`);
+    if (r.clearMob && !(world.maps[r.map]?.timedSpawns || []).some((t) => t.mob === r.clearMob)) problems.push(`部屋の決まり ${r.map}: 主 ${r.clearMob} がいない`);
+    for (const q of [r.requiresQuest, ...(r.requiresAnyQuest || []), r.timerQuest !== 'any' ? r.timerQuest : null]) if (q && !quests.some((x) => x.id === q)) problems.push(`部屋の決まり ${r.map}: クエスト ${q} が無い`);
+  }
+  for (const c of SYS.CRAFTS) {
+    for (const x of c.in) need(x.item, `製作 ${c.id}`);
+    need(c.out.item, `製作 ${c.id}`);
+    if (!NPCS.some((n) => n[0] === c.npc)) problems.push(`製作 ${c.id}: NPC ${c.npc} がいない`);
+  }
+  for (const d of SYS.JOB_TESTS.questDrops) need(d.item, '転職の試験');
+  for (const it of SYS.JOB_TESTS.quiz.needItems) need(it, 'クイズ');
+  if (SYS.QUIZ.length !== 30) problems.push(`クイズの問題が ${SYS.QUIZ.length}（30 問）`);
+  for (const q of SYS.QUIZ) if (q.choices.length !== 4 || q.answer < 0 || q.answer > 3) problems.push(`クイズ ${q.id} の形が変`);
+  for (const k of SYS.PETS.kinds) need(`use.pet.${k.id}`, 'ペット');
+  // 毎日の宝箱: その場所の Lv の敵のお金 × mesoMul ＋ その Lv 帯の薬
+  const chests = {};
+  for (const [oid, c] of Object.entries(SYS.DAILY_CHESTS)) {
+    const m = Object.values(world.maps).find((mm) => (mm.objects || []).some((o) => o.id === oid));
+    if (!m) { problems.push(`毎日の宝箱 ${oid} がマップに無い`); continue; }
+    const lv = m.lv ? m.lv[0] : 10;
+    const [hpPot, mpPot] = POT(lv);
+    chests[oid] = { meso: nice(mobBase(lv).meso * c.mesoMul), items: [{ item: idOf(hpPot), count: 5 }, { item: idOf(mpPot), count: 5 }] };
+  }
+  for (const n of NPCS) for (const d of n[3]?.taxi?.dests || []) if (!world.maps[d.to]) problems.push(`タクシー ${n[0]} の行き先 ${d.to} が無い`);
+  write('systems.json', {
+    note: 'Data/tools/systems.mjs から書き出した（倉庫・部屋の決まり・ペット・製作・クイズ・転職の試験・毎日の宝箱）。手で直さない。',
+    storage: SYS.STORAGE, rooms: SYS.ROOMS, pets: SYS.PETS, crafts: SYS.CRAFTS, quiz: SYS.QUIZ, jobs: SYS.JOB_TESTS, chests,
+  });
+}
 
 // ---------------- スキル（JOBS.md の表 ＋ skills.mjs の動き）
 const skills = buildSkills(problems);

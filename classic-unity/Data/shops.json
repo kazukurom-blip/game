@@ -1,5 +1,5 @@
 {
- "note": "ITEMS.md 6 章（島の店と、町の薬屋。武器屋・防具屋の品ぞろえは後で足す）",
+ "note": "ITEMS.md 6 章（町ごとの武器屋・防具屋・薬屋/雑貨・ペット屋・市場の日替わり）。品ぞろえは Data/tools/systems.mjs。daily: その数を日付で選ぶ。recharge: 詰め直しができる",
  "shops": [
   {
    "id": "shop.S003.general",
@@ -60,7 +60,52 @@
      "item": "use.orange_potion"
     },
     {
+     "item": "use.white_potion"
+    },
+    {
      "item": "use.blue_potion"
+    },
+    {
+     "item": "use.mana_elixir"
+    },
+    {
+     "item": "use.speed_tonic"
+    },
+    {
+     "item": "use.antidote"
+    },
+    {
+     "item": "use.eye_drop"
+    },
+    {
+     "item": "use.holy_water"
+    },
+    {
+     "item": "use.all_cure"
+    },
+    {
+     "item": "use.return.V100"
+    },
+    {
+     "item": "use.return.V200"
+    },
+    {
+     "item": "use.return.V300"
+    },
+    {
+     "item": "use.return.V400"
+    },
+    {
+     "item": "use.return.V500"
+    },
+    {
+     "item": "use.return.V600"
+    },
+    {
+     "item": "use.return.nearest"
+    },
+    {
+     "item": "use.safety_charm"
     }
    ]
   },
@@ -75,7 +120,25 @@
      "item": "use.orange_potion"
     },
     {
+     "item": "use.white_potion"
+    },
+    {
      "item": "use.blue_potion"
+    },
+    {
+     "item": "use.mana_elixir"
+    },
+    {
+     "item": "use.antidote"
+    },
+    {
+     "item": "use.eye_drop"
+    },
+    {
+     "item": "use.holy_water"
+    },
+    {
+     "item": "use.all_cure"
     }
    ]
   },
@@ -90,7 +153,31 @@
      "item": "use.orange_potion"
     },
     {
+     "item": "use.white_potion"
+    },
+    {
      "item": "use.blue_potion"
+    },
+    {
+     "item": "use.mana_elixir"
+    },
+    {
+     "item": "use.aim_tonic"
+    },
+    {
+     "item": "use.baked_apple"
+    },
+    {
+     "item": "use.antidote"
+    },
+    {
+     "item": "use.eye_drop"
+    },
+    {
+     "item": "use.holy_water"
+    },
+    {
+     "item": "use.all_cure"
     }
    ]
   },
@@ -105,7 +192,31 @@
      "item": "use.orange_potion"
     },
     {
+     "item": "use.white_potion"
+    },
+    {
      "item": "use.blue_potion"
+    },
+    {
+     "item": "use.mana_elixir"
+    },
+    {
+     "item": "use.magic_tonic"
+    },
+    {
+     "item": "use.nut_soup"
+    },
+    {
+     "item": "use.antidote"
+    },
+    {
+     "item": "use.eye_drop"
+    },
+    {
+     "item": "use.holy_water"
+    },
+    {
+     "item": "use.all_cure"
     }
    ]
   },
@@ -120,7 +231,28 @@
      "item": "use.orange_potion"
     },
     {
+     "item": "use.white_potion"
+    },
+    {
      "item": "use.blue_potion"
+    },
+    {
+     "item": "use.mana_elixir"
+    },
+    {
+     "item": "use.power_tonic"
+    },
+    {
+     "item": "use.antidote"
+    },
+    {
+     "item": "use.eye_drop"
+    },
+    {
+     "item": "use.holy_water"
+    },
+    {
+     "item": "use.all_cure"
     }
    ]
   },
@@ -135,7 +267,28 @@
      "item": "use.orange_potion"
     },
     {
+     "item": "use.white_potion"
+    },
+    {
      "item": "use.blue_potion"
+    },
+    {
+     "item": "use.mana_elixir"
+    },
+    {
+     "item": "use.dodge_tonic"
+    },
+    {
+     "item": "use.antidote"
+    },
+    {
+     "item": "use.eye_drop"
+    },
+    {
+     "item": "use.holy_water"
+    },
+    {
+     "item": "use.all_cure"
     }
    ]
   },
@@ -151,6 +304,21 @@
     },
     {
      "item": "use.blue_potion"
+    },
+    {
+     "item": "use.mana_elixir"
+    },
+    {
+     "item": "use.antidote"
+    },
+    {
+     "item": "use.eye_drop"
+    },
+    {
+     "item": "use.holy_water"
+    },
+    {
+     "item": "use.all_cure"
     }
    ]
   },
@@ -165,10 +333,31 @@
      "item": "use.white_potion"
     },
     {
+     "item": "use.big_white_potion"
+    },
+    {
      "item": "use.blue_potion"
     },
     {
      "item": "use.mana_elixir"
+    },
+    {
+     "item": "use.antidote"
+    },
+    {
+     "item": "use.eye_drop"
+    },
+    {
+     "item": "use.holy_water"
+    },
+    {
+     "item": "use.all_cure"
+    },
+    {
+     "item": "use.return.C100"
+    },
+    {
+     "item": "use.return.nearest"
     }
    ]
   },
@@ -183,7 +372,34 @@
      "item": "use.big_white_potion"
     },
     {
+     "item": "use.blue_potion"
+    },
+    {
      "item": "use.mana_elixir"
+    },
+    {
+     "item": "use.warm_milk"
+    },
+    {
+     "item": "use.star_snow"
+    },
+    {
+     "item": "use.antidote"
+    },
+    {
+     "item": "use.eye_drop"
+    },
+    {
+     "item": "use.holy_water"
+    },
+    {
+     "item": "use.all_cure"
+    },
+    {
+     "item": "use.return.F100"
+    },
+    {
+     "item": "use.return.nearest"
     }
    ]
   },
@@ -198,10 +414,31 @@
      "item": "use.white_potion"
     },
     {
+     "item": "use.big_white_potion"
+    },
+    {
      "item": "use.blue_potion"
     },
     {
      "item": "use.mana_elixir"
+    },
+    {
+     "item": "use.antidote"
+    },
+    {
+     "item": "use.eye_drop"
+    },
+    {
+     "item": "use.holy_water"
+    },
+    {
+     "item": "use.all_cure"
+    },
+    {
+     "item": "use.return.T100"
+    },
+    {
+     "item": "use.return.nearest"
     }
    ]
   },
@@ -217,6 +454,27 @@
     },
     {
      "item": "use.mana_elixir"
+    },
+    {
+     "item": "use.seaweed_dango"
+    },
+    {
+     "item": "use.antidote"
+    },
+    {
+     "item": "use.eye_drop"
+    },
+    {
+     "item": "use.holy_water"
+    },
+    {
+     "item": "use.all_cure"
+    },
+    {
+     "item": "use.return.M100"
+    },
+    {
+     "item": "use.return.nearest"
     }
    ]
   },
@@ -235,6 +493,21 @@
     },
     {
      "item": "use.blue_secret"
+    },
+    {
+     "item": "use.antidote"
+    },
+    {
+     "item": "use.eye_drop"
+    },
+    {
+     "item": "use.holy_water"
+    },
+    {
+     "item": "use.all_cure"
+    },
+    {
+     "item": "use.return.P100"
     }
    ]
   },
@@ -253,6 +526,24 @@
     },
     {
      "item": "use.blue_secret"
+    },
+    {
+     "item": "use.antidote"
+    },
+    {
+     "item": "use.eye_drop"
+    },
+    {
+     "item": "use.holy_water"
+    },
+    {
+     "item": "use.all_cure"
+    },
+    {
+     "item": "use.return.D100"
+    },
+    {
+     "item": "use.return.nearest"
     }
    ]
   },
@@ -265,6 +556,21 @@
     },
     {
      "item": "use.blue_secret"
+    },
+    {
+     "item": "use.antidote"
+    },
+    {
+     "item": "use.eye_drop"
+    },
+    {
+     "item": "use.holy_water"
+    },
+    {
+     "item": "use.all_cure"
+    },
+    {
+     "item": "use.return.H100"
     }
    ]
   },
@@ -277,6 +583,4727 @@
     },
     {
      "item": "use.blue_secret"
+    },
+    {
+     "item": "use.antidote"
+    },
+    {
+     "item": "use.eye_drop"
+    },
+    {
+     "item": "use.holy_water"
+    },
+    {
+     "item": "use.all_cure"
+    },
+    {
+     "item": "use.return.E100"
+    }
+   ]
+  },
+  {
+   "id": "shop.V100.weapon",
+   "name": "ブリーズ港の武器屋",
+   "items": [
+    {
+     "item": "eq.bowman.bow.10"
+    },
+    {
+     "item": "eq.bowman.xbow.10"
+    },
+    {
+     "item": "eq.pirate.gun.10"
+    },
+    {
+     "item": "eq.pirate.knuckle.10"
+    },
+    {
+     "item": "eq.thief.claw.10"
+    },
+    {
+     "item": "eq.thief.dagger.10"
+    },
+    {
+     "item": "eq.warrior.axe1.10"
+    },
+    {
+     "item": "eq.warrior.axe2.10"
+    },
+    {
+     "item": "eq.warrior.mace1.10"
+    },
+    {
+     "item": "eq.warrior.mace2.10"
+    },
+    {
+     "item": "eq.warrior.polearm.10"
+    },
+    {
+     "item": "eq.warrior.spear.10"
+    },
+    {
+     "item": "eq.warrior.sword1.10"
+    },
+    {
+     "item": "eq.warrior.sword2.10"
+    },
+    {
+     "item": "eq.bowman.bow.15"
+    },
+    {
+     "item": "eq.bowman.xbow.15"
+    },
+    {
+     "item": "eq.magician.staff.15"
+    },
+    {
+     "item": "eq.magician.wand.15"
+    },
+    {
+     "item": "eq.pirate.gun.15"
+    },
+    {
+     "item": "eq.pirate.knuckle.15"
+    },
+    {
+     "item": "eq.thief.claw.15"
+    },
+    {
+     "item": "eq.thief.dagger.15"
+    },
+    {
+     "item": "eq.warrior.axe1.15"
+    },
+    {
+     "item": "eq.warrior.axe2.15"
+    },
+    {
+     "item": "eq.warrior.mace1.15"
+    },
+    {
+     "item": "eq.warrior.mace2.15"
+    },
+    {
+     "item": "eq.warrior.polearm.15"
+    },
+    {
+     "item": "eq.warrior.spear.15"
+    },
+    {
+     "item": "eq.warrior.sword1.15"
+    },
+    {
+     "item": "eq.warrior.sword2.15"
+    }
+   ]
+  },
+  {
+   "id": "shop.V100.armor",
+   "name": "ブリーズ港の防具屋",
+   "items": [
+    {
+     "item": "eq.bowman.bottom.10"
+    },
+    {
+     "item": "eq.bowman.cap.10"
+    },
+    {
+     "item": "eq.bowman.gloves.10"
+    },
+    {
+     "item": "eq.bowman.shoes.10"
+    },
+    {
+     "item": "eq.bowman.top.10"
+    },
+    {
+     "item": "eq.magician.cap.10"
+    },
+    {
+     "item": "eq.magician.gloves.10"
+    },
+    {
+     "item": "eq.magician.overall.10"
+    },
+    {
+     "item": "eq.magician.shoes.10"
+    },
+    {
+     "item": "eq.pirate.bottom.10"
+    },
+    {
+     "item": "eq.pirate.cap.10"
+    },
+    {
+     "item": "eq.pirate.gloves.10"
+    },
+    {
+     "item": "eq.pirate.shoes.10"
+    },
+    {
+     "item": "eq.pirate.top.10"
+    },
+    {
+     "item": "eq.thief.bottom.10"
+    },
+    {
+     "item": "eq.thief.cap.10"
+    },
+    {
+     "item": "eq.thief.gloves.10"
+    },
+    {
+     "item": "eq.thief.shoes.10"
+    },
+    {
+     "item": "eq.thief.top.10"
+    },
+    {
+     "item": "eq.warrior.bottom.10"
+    },
+    {
+     "item": "eq.warrior.cap.10"
+    },
+    {
+     "item": "eq.warrior.gloves.10"
+    },
+    {
+     "item": "eq.warrior.shoes.10"
+    },
+    {
+     "item": "eq.warrior.top.10"
+    },
+    {
+     "item": "eq.bowman.bottom.15"
+    },
+    {
+     "item": "eq.bowman.cap.15"
+    },
+    {
+     "item": "eq.bowman.gloves.15"
+    },
+    {
+     "item": "eq.bowman.shoes.15"
+    },
+    {
+     "item": "eq.bowman.top.15"
+    },
+    {
+     "item": "eq.magician.cap.15"
+    },
+    {
+     "item": "eq.magician.gloves.15"
+    },
+    {
+     "item": "eq.magician.overall.15"
+    },
+    {
+     "item": "eq.magician.shoes.15"
+    },
+    {
+     "item": "eq.pirate.bottom.15"
+    },
+    {
+     "item": "eq.pirate.cap.15"
+    },
+    {
+     "item": "eq.pirate.gloves.15"
+    },
+    {
+     "item": "eq.pirate.shoes.15"
+    },
+    {
+     "item": "eq.pirate.top.15"
+    },
+    {
+     "item": "eq.thief.bottom.15"
+    },
+    {
+     "item": "eq.thief.cap.15"
+    },
+    {
+     "item": "eq.thief.gloves.15"
+    },
+    {
+     "item": "eq.thief.shoes.15"
+    },
+    {
+     "item": "eq.thief.top.15"
+    },
+    {
+     "item": "eq.warrior.bottom.15"
+    },
+    {
+     "item": "eq.warrior.cap.15"
+    },
+    {
+     "item": "eq.warrior.gloves.15"
+    },
+    {
+     "item": "eq.warrior.shoes.15"
+    },
+    {
+     "item": "eq.warrior.top.15"
+    }
+   ]
+  },
+  {
+   "id": "shop.V200.weapon",
+   "name": "ポム丘の武器屋",
+   "items": [
+    {
+     "item": "eq.bowman.bow.10"
+    },
+    {
+     "item": "eq.bowman.xbow.10"
+    },
+    {
+     "item": "eq.bowman.bow.15"
+    },
+    {
+     "item": "eq.bowman.xbow.15"
+    },
+    {
+     "item": "eq.bowman.bow.20"
+    },
+    {
+     "item": "eq.bowman.xbow.20"
+    },
+    {
+     "item": "eq.bowman.bow.25"
+    },
+    {
+     "item": "eq.bowman.xbow.25"
+    },
+    {
+     "item": "eq.bowman.bow.30"
+    },
+    {
+     "item": "eq.bowman.xbow.30"
+    },
+    {
+     "item": "eq.bowman.bow.35"
+    },
+    {
+     "item": "eq.bowman.xbow.35"
+    },
+    {
+     "item": "use.arrow_bow"
+    },
+    {
+     "item": "use.arrow_xbow"
+    },
+    {
+     "item": "use.bronze_arrow_bow"
+    },
+    {
+     "item": "use.bronze_arrow_xbow"
+    }
+   ]
+  },
+  {
+   "id": "shop.V200.armor",
+   "name": "ポム丘の防具屋",
+   "items": [
+    {
+     "item": "eq.bowman.bottom.10"
+    },
+    {
+     "item": "eq.bowman.cap.10"
+    },
+    {
+     "item": "eq.bowman.gloves.10"
+    },
+    {
+     "item": "eq.bowman.shoes.10"
+    },
+    {
+     "item": "eq.bowman.top.10"
+    },
+    {
+     "item": "eq.bowman.bottom.15"
+    },
+    {
+     "item": "eq.bowman.cap.15"
+    },
+    {
+     "item": "eq.bowman.gloves.15"
+    },
+    {
+     "item": "eq.bowman.shoes.15"
+    },
+    {
+     "item": "eq.bowman.top.15"
+    },
+    {
+     "item": "eq.bowman.bottom.20"
+    },
+    {
+     "item": "eq.bowman.cap.20"
+    },
+    {
+     "item": "eq.bowman.gloves.20"
+    },
+    {
+     "item": "eq.bowman.shoes.20"
+    },
+    {
+     "item": "eq.bowman.top.20"
+    },
+    {
+     "item": "eq.bowman.bottom.25"
+    },
+    {
+     "item": "eq.bowman.cap.25"
+    },
+    {
+     "item": "eq.bowman.gloves.25"
+    },
+    {
+     "item": "eq.bowman.shoes.25"
+    },
+    {
+     "item": "eq.bowman.top.25"
+    },
+    {
+     "item": "eq.bowman.bottom.30"
+    },
+    {
+     "item": "eq.bowman.cap.30"
+    },
+    {
+     "item": "eq.bowman.gloves.30"
+    },
+    {
+     "item": "eq.bowman.shoes.30"
+    },
+    {
+     "item": "eq.bowman.top.30"
+    },
+    {
+     "item": "eq.bowman.bottom.35"
+    },
+    {
+     "item": "eq.bowman.cap.35"
+    },
+    {
+     "item": "eq.bowman.gloves.35"
+    },
+    {
+     "item": "eq.bowman.shoes.35"
+    },
+    {
+     "item": "eq.bowman.top.35"
+    }
+   ]
+  },
+  {
+   "id": "shop.V300.weapon",
+   "name": "シルワ森都の武器屋",
+   "items": [
+    {
+     "item": "eq.magician.staff.8"
+    },
+    {
+     "item": "eq.magician.wand.8"
+    },
+    {
+     "item": "eq.magician.staff.15"
+    },
+    {
+     "item": "eq.magician.wand.15"
+    },
+    {
+     "item": "eq.magician.staff.20"
+    },
+    {
+     "item": "eq.magician.wand.20"
+    },
+    {
+     "item": "eq.magician.staff.25"
+    },
+    {
+     "item": "eq.magician.wand.25"
+    },
+    {
+     "item": "eq.magician.staff.30"
+    },
+    {
+     "item": "eq.magician.wand.30"
+    },
+    {
+     "item": "eq.magician.staff.35"
+    },
+    {
+     "item": "eq.magician.wand.35"
+    }
+   ]
+  },
+  {
+   "id": "shop.V300.armor",
+   "name": "シルワ森都の防具屋",
+   "items": [
+    {
+     "item": "eq.magician.cap.10"
+    },
+    {
+     "item": "eq.magician.gloves.10"
+    },
+    {
+     "item": "eq.magician.overall.10"
+    },
+    {
+     "item": "eq.magician.shoes.10"
+    },
+    {
+     "item": "eq.magician.cap.15"
+    },
+    {
+     "item": "eq.magician.gloves.15"
+    },
+    {
+     "item": "eq.magician.overall.15"
+    },
+    {
+     "item": "eq.magician.shoes.15"
+    },
+    {
+     "item": "eq.magician.cap.20"
+    },
+    {
+     "item": "eq.magician.gloves.20"
+    },
+    {
+     "item": "eq.magician.overall.20"
+    },
+    {
+     "item": "eq.magician.shoes.20"
+    },
+    {
+     "item": "eq.magician.cap.25"
+    },
+    {
+     "item": "eq.magician.gloves.25"
+    },
+    {
+     "item": "eq.magician.overall.25"
+    },
+    {
+     "item": "eq.magician.shoes.25"
+    },
+    {
+     "item": "eq.magician.cap.30"
+    },
+    {
+     "item": "eq.magician.gloves.30"
+    },
+    {
+     "item": "eq.magician.overall.30"
+    },
+    {
+     "item": "eq.magician.shield.30"
+    },
+    {
+     "item": "eq.magician.shoes.30"
+    },
+    {
+     "item": "eq.magician.cap.35"
+    },
+    {
+     "item": "eq.magician.gloves.35"
+    },
+    {
+     "item": "eq.magician.overall.35"
+    },
+    {
+     "item": "eq.magician.shoes.35"
+    }
+   ]
+  },
+  {
+   "id": "shop.V400.weapon",
+   "name": "ガルド岩台の武器屋",
+   "items": [
+    {
+     "item": "eq.warrior.axe1.10"
+    },
+    {
+     "item": "eq.warrior.axe2.10"
+    },
+    {
+     "item": "eq.warrior.mace1.10"
+    },
+    {
+     "item": "eq.warrior.mace2.10"
+    },
+    {
+     "item": "eq.warrior.polearm.10"
+    },
+    {
+     "item": "eq.warrior.spear.10"
+    },
+    {
+     "item": "eq.warrior.sword1.10"
+    },
+    {
+     "item": "eq.warrior.sword2.10"
+    },
+    {
+     "item": "eq.warrior.axe1.15"
+    },
+    {
+     "item": "eq.warrior.axe2.15"
+    },
+    {
+     "item": "eq.warrior.mace1.15"
+    },
+    {
+     "item": "eq.warrior.mace2.15"
+    },
+    {
+     "item": "eq.warrior.polearm.15"
+    },
+    {
+     "item": "eq.warrior.spear.15"
+    },
+    {
+     "item": "eq.warrior.sword1.15"
+    },
+    {
+     "item": "eq.warrior.sword2.15"
+    },
+    {
+     "item": "eq.warrior.axe1.20"
+    },
+    {
+     "item": "eq.warrior.axe2.20"
+    },
+    {
+     "item": "eq.warrior.mace1.20"
+    },
+    {
+     "item": "eq.warrior.mace2.20"
+    },
+    {
+     "item": "eq.warrior.polearm.20"
+    },
+    {
+     "item": "eq.warrior.spear.20"
+    },
+    {
+     "item": "eq.warrior.sword1.20"
+    },
+    {
+     "item": "eq.warrior.sword2.20"
+    },
+    {
+     "item": "eq.warrior.axe1.25"
+    },
+    {
+     "item": "eq.warrior.axe2.25"
+    },
+    {
+     "item": "eq.warrior.mace1.25"
+    },
+    {
+     "item": "eq.warrior.mace2.25"
+    },
+    {
+     "item": "eq.warrior.polearm.25"
+    },
+    {
+     "item": "eq.warrior.spear.25"
+    },
+    {
+     "item": "eq.warrior.sword1.25"
+    },
+    {
+     "item": "eq.warrior.sword2.25"
+    },
+    {
+     "item": "eq.warrior.axe1.30"
+    },
+    {
+     "item": "eq.warrior.axe2.30"
+    },
+    {
+     "item": "eq.warrior.mace1.30"
+    },
+    {
+     "item": "eq.warrior.mace2.30"
+    },
+    {
+     "item": "eq.warrior.polearm.30"
+    },
+    {
+     "item": "eq.warrior.spear.30"
+    },
+    {
+     "item": "eq.warrior.sword1.30"
+    },
+    {
+     "item": "eq.warrior.sword2.30"
+    },
+    {
+     "item": "eq.warrior.axe1.35"
+    },
+    {
+     "item": "eq.warrior.axe2.35"
+    },
+    {
+     "item": "eq.warrior.mace1.35"
+    },
+    {
+     "item": "eq.warrior.mace2.35"
+    },
+    {
+     "item": "eq.warrior.polearm.35"
+    },
+    {
+     "item": "eq.warrior.spear.35"
+    },
+    {
+     "item": "eq.warrior.sword1.35"
+    },
+    {
+     "item": "eq.warrior.sword2.35"
+    }
+   ]
+  },
+  {
+   "id": "shop.V400.armor",
+   "name": "ガルド岩台の防具屋",
+   "items": [
+    {
+     "item": "eq.warrior.bottom.10"
+    },
+    {
+     "item": "eq.warrior.cap.10"
+    },
+    {
+     "item": "eq.warrior.gloves.10"
+    },
+    {
+     "item": "eq.warrior.shield.10"
+    },
+    {
+     "item": "eq.warrior.shoes.10"
+    },
+    {
+     "item": "eq.warrior.top.10"
+    },
+    {
+     "item": "eq.warrior.bottom.15"
+    },
+    {
+     "item": "eq.warrior.cap.15"
+    },
+    {
+     "item": "eq.warrior.gloves.15"
+    },
+    {
+     "item": "eq.warrior.shoes.15"
+    },
+    {
+     "item": "eq.warrior.top.15"
+    },
+    {
+     "item": "eq.warrior.bottom.20"
+    },
+    {
+     "item": "eq.warrior.cap.20"
+    },
+    {
+     "item": "eq.warrior.gloves.20"
+    },
+    {
+     "item": "eq.warrior.shield.20"
+    },
+    {
+     "item": "eq.warrior.shoes.20"
+    },
+    {
+     "item": "eq.warrior.top.20"
+    },
+    {
+     "item": "eq.warrior.bottom.25"
+    },
+    {
+     "item": "eq.warrior.cap.25"
+    },
+    {
+     "item": "eq.warrior.gloves.25"
+    },
+    {
+     "item": "eq.warrior.shoes.25"
+    },
+    {
+     "item": "eq.warrior.top.25"
+    },
+    {
+     "item": "eq.warrior.bottom.30"
+    },
+    {
+     "item": "eq.warrior.cap.30"
+    },
+    {
+     "item": "eq.warrior.gloves.30"
+    },
+    {
+     "item": "eq.warrior.shield.30"
+    },
+    {
+     "item": "eq.warrior.shoes.30"
+    },
+    {
+     "item": "eq.warrior.top.30"
+    },
+    {
+     "item": "eq.warrior.bottom.35"
+    },
+    {
+     "item": "eq.warrior.cap.35"
+    },
+    {
+     "item": "eq.warrior.gloves.35"
+    },
+    {
+     "item": "eq.warrior.shoes.35"
+    },
+    {
+     "item": "eq.warrior.top.35"
+    }
+   ]
+  },
+  {
+   "id": "shop.V500.weapon",
+   "name": "クロウ街の武器屋",
+   "items": [
+    {
+     "item": "eq.thief.claw.10"
+    },
+    {
+     "item": "eq.thief.dagger.10"
+    },
+    {
+     "item": "eq.thief.claw.15"
+    },
+    {
+     "item": "eq.thief.dagger.15"
+    },
+    {
+     "item": "eq.thief.claw.20"
+    },
+    {
+     "item": "eq.thief.dagger.20"
+    },
+    {
+     "item": "eq.thief.claw.25"
+    },
+    {
+     "item": "eq.thief.dagger.25"
+    },
+    {
+     "item": "eq.thief.claw.30"
+    },
+    {
+     "item": "eq.thief.dagger.30"
+    },
+    {
+     "item": "eq.thief.claw.35"
+    },
+    {
+     "item": "eq.thief.dagger.35"
+    },
+    {
+     "item": "use.star_iron"
+    },
+    {
+     "item": "use.star_steel"
+    },
+    {
+     "item": "use.star_silver_moon"
+    }
+   ],
+   "recharge": true
+  },
+  {
+   "id": "shop.V500.armor",
+   "name": "クロウ街の防具屋",
+   "items": [
+    {
+     "item": "eq.thief.bottom.10"
+    },
+    {
+     "item": "eq.thief.cap.10"
+    },
+    {
+     "item": "eq.thief.gloves.10"
+    },
+    {
+     "item": "eq.thief.shoes.10"
+    },
+    {
+     "item": "eq.thief.top.10"
+    },
+    {
+     "item": "eq.thief.bottom.15"
+    },
+    {
+     "item": "eq.thief.cap.15"
+    },
+    {
+     "item": "eq.thief.gloves.15"
+    },
+    {
+     "item": "eq.thief.shoes.15"
+    },
+    {
+     "item": "eq.thief.top.15"
+    },
+    {
+     "item": "eq.thief.bottom.20"
+    },
+    {
+     "item": "eq.thief.cap.20"
+    },
+    {
+     "item": "eq.thief.gloves.20"
+    },
+    {
+     "item": "eq.thief.shield.20"
+    },
+    {
+     "item": "eq.thief.shoes.20"
+    },
+    {
+     "item": "eq.thief.top.20"
+    },
+    {
+     "item": "eq.thief.bottom.25"
+    },
+    {
+     "item": "eq.thief.cap.25"
+    },
+    {
+     "item": "eq.thief.gloves.25"
+    },
+    {
+     "item": "eq.thief.shoes.25"
+    },
+    {
+     "item": "eq.thief.top.25"
+    },
+    {
+     "item": "eq.thief.bottom.30"
+    },
+    {
+     "item": "eq.thief.cap.30"
+    },
+    {
+     "item": "eq.thief.gloves.30"
+    },
+    {
+     "item": "eq.thief.shoes.30"
+    },
+    {
+     "item": "eq.thief.top.30"
+    },
+    {
+     "item": "eq.thief.bottom.35"
+    },
+    {
+     "item": "eq.thief.cap.35"
+    },
+    {
+     "item": "eq.thief.gloves.35"
+    },
+    {
+     "item": "eq.thief.shoes.35"
+    },
+    {
+     "item": "eq.thief.top.35"
+    }
+   ]
+  },
+  {
+   "id": "shop.V107.weapon",
+   "name": "潮風号の武器屋",
+   "items": [
+    {
+     "item": "eq.pirate.gun.10"
+    },
+    {
+     "item": "eq.pirate.knuckle.10"
+    },
+    {
+     "item": "eq.pirate.gun.15"
+    },
+    {
+     "item": "eq.pirate.knuckle.15"
+    },
+    {
+     "item": "eq.pirate.gun.20"
+    },
+    {
+     "item": "eq.pirate.knuckle.20"
+    },
+    {
+     "item": "eq.pirate.gun.25"
+    },
+    {
+     "item": "eq.pirate.knuckle.25"
+    },
+    {
+     "item": "eq.pirate.gun.30"
+    },
+    {
+     "item": "eq.pirate.knuckle.30"
+    },
+    {
+     "item": "eq.pirate.gun.35"
+    },
+    {
+     "item": "eq.pirate.knuckle.35"
+    },
+    {
+     "item": "use.bullet_lead"
+    },
+    {
+     "item": "use.bullet_steel"
+    }
+   ],
+   "recharge": true
+  },
+  {
+   "id": "shop.V107.armor",
+   "name": "潮風号の防具屋",
+   "items": [
+    {
+     "item": "eq.pirate.bottom.10"
+    },
+    {
+     "item": "eq.pirate.cap.10"
+    },
+    {
+     "item": "eq.pirate.gloves.10"
+    },
+    {
+     "item": "eq.pirate.shoes.10"
+    },
+    {
+     "item": "eq.pirate.top.10"
+    },
+    {
+     "item": "eq.pirate.bottom.15"
+    },
+    {
+     "item": "eq.pirate.cap.15"
+    },
+    {
+     "item": "eq.pirate.gloves.15"
+    },
+    {
+     "item": "eq.pirate.shoes.15"
+    },
+    {
+     "item": "eq.pirate.top.15"
+    },
+    {
+     "item": "eq.pirate.bottom.20"
+    },
+    {
+     "item": "eq.pirate.cap.20"
+    },
+    {
+     "item": "eq.pirate.gloves.20"
+    },
+    {
+     "item": "eq.pirate.shoes.20"
+    },
+    {
+     "item": "eq.pirate.top.20"
+    },
+    {
+     "item": "eq.pirate.bottom.25"
+    },
+    {
+     "item": "eq.pirate.cap.25"
+    },
+    {
+     "item": "eq.pirate.gloves.25"
+    },
+    {
+     "item": "eq.pirate.shoes.25"
+    },
+    {
+     "item": "eq.pirate.top.25"
+    },
+    {
+     "item": "eq.pirate.bottom.30"
+    },
+    {
+     "item": "eq.pirate.cap.30"
+    },
+    {
+     "item": "eq.pirate.gloves.30"
+    },
+    {
+     "item": "eq.pirate.shoes.30"
+    },
+    {
+     "item": "eq.pirate.top.30"
+    },
+    {
+     "item": "eq.pirate.bottom.35"
+    },
+    {
+     "item": "eq.pirate.cap.35"
+    },
+    {
+     "item": "eq.pirate.gloves.35"
+    },
+    {
+     "item": "eq.pirate.shoes.35"
+    },
+    {
+     "item": "eq.pirate.top.35"
+    }
+   ]
+  },
+  {
+   "id": "shop.C100.weapon",
+   "name": "セレスの武器屋",
+   "items": [
+    {
+     "item": "eq.bowman.bow.40"
+    },
+    {
+     "item": "eq.bowman.xbow.40"
+    },
+    {
+     "item": "eq.magician.staff.40"
+    },
+    {
+     "item": "eq.magician.wand.40"
+    },
+    {
+     "item": "eq.pirate.gun.40"
+    },
+    {
+     "item": "eq.pirate.knuckle.40"
+    },
+    {
+     "item": "eq.thief.claw.40"
+    },
+    {
+     "item": "eq.thief.dagger.40"
+    },
+    {
+     "item": "eq.warrior.axe1.40"
+    },
+    {
+     "item": "eq.warrior.axe2.40"
+    },
+    {
+     "item": "eq.warrior.mace1.40"
+    },
+    {
+     "item": "eq.warrior.mace2.40"
+    },
+    {
+     "item": "eq.warrior.polearm.40"
+    },
+    {
+     "item": "eq.warrior.spear.40"
+    },
+    {
+     "item": "eq.warrior.sword1.40"
+    },
+    {
+     "item": "eq.warrior.sword2.40"
+    },
+    {
+     "item": "eq.bowman.bow.50"
+    },
+    {
+     "item": "eq.bowman.xbow.50"
+    },
+    {
+     "item": "eq.magician.staff.50"
+    },
+    {
+     "item": "eq.magician.wand.50"
+    },
+    {
+     "item": "eq.pirate.gun.50"
+    },
+    {
+     "item": "eq.pirate.knuckle.50"
+    },
+    {
+     "item": "eq.thief.claw.50"
+    },
+    {
+     "item": "eq.thief.dagger.50"
+    },
+    {
+     "item": "eq.warrior.axe1.50"
+    },
+    {
+     "item": "eq.warrior.axe2.50"
+    },
+    {
+     "item": "eq.warrior.mace1.50"
+    },
+    {
+     "item": "eq.warrior.mace2.50"
+    },
+    {
+     "item": "eq.warrior.polearm.50"
+    },
+    {
+     "item": "eq.warrior.spear.50"
+    },
+    {
+     "item": "eq.warrior.sword1.50"
+    },
+    {
+     "item": "eq.warrior.sword2.50"
+    },
+    {
+     "item": "use.arrow_bow"
+    },
+    {
+     "item": "use.arrow_xbow"
+    },
+    {
+     "item": "use.steel_arrow_bow"
+    },
+    {
+     "item": "use.steel_arrow_xbow"
+    },
+    {
+     "item": "use.star_iron"
+    },
+    {
+     "item": "use.bullet_lead"
+    }
+   ]
+  },
+  {
+   "id": "shop.C100.armor",
+   "name": "セレスの防具屋",
+   "items": [
+    {
+     "item": "eq.common.cape.30"
+    },
+    {
+     "item": "eq.bowman.bottom.40"
+    },
+    {
+     "item": "eq.bowman.cap.40"
+    },
+    {
+     "item": "eq.bowman.gloves.40"
+    },
+    {
+     "item": "eq.bowman.shoes.40"
+    },
+    {
+     "item": "eq.bowman.top.40"
+    },
+    {
+     "item": "eq.magician.cap.40"
+    },
+    {
+     "item": "eq.magician.gloves.40"
+    },
+    {
+     "item": "eq.magician.overall.40"
+    },
+    {
+     "item": "eq.magician.shoes.40"
+    },
+    {
+     "item": "eq.pirate.bottom.40"
+    },
+    {
+     "item": "eq.pirate.cap.40"
+    },
+    {
+     "item": "eq.pirate.gloves.40"
+    },
+    {
+     "item": "eq.pirate.shoes.40"
+    },
+    {
+     "item": "eq.pirate.top.40"
+    },
+    {
+     "item": "eq.thief.bottom.40"
+    },
+    {
+     "item": "eq.thief.cap.40"
+    },
+    {
+     "item": "eq.thief.gloves.40"
+    },
+    {
+     "item": "eq.thief.shoes.40"
+    },
+    {
+     "item": "eq.thief.top.40"
+    },
+    {
+     "item": "eq.warrior.bottom.40"
+    },
+    {
+     "item": "eq.warrior.cap.40"
+    },
+    {
+     "item": "eq.warrior.gloves.40"
+    },
+    {
+     "item": "eq.warrior.shoes.40"
+    },
+    {
+     "item": "eq.warrior.top.40"
+    },
+    {
+     "item": "eq.bowman.bottom.50"
+    },
+    {
+     "item": "eq.bowman.cap.50"
+    },
+    {
+     "item": "eq.bowman.gloves.50"
+    },
+    {
+     "item": "eq.bowman.shoes.50"
+    },
+    {
+     "item": "eq.bowman.top.50"
+    },
+    {
+     "item": "eq.common.cape.50"
+    },
+    {
+     "item": "eq.magician.cap.50"
+    },
+    {
+     "item": "eq.magician.gloves.50"
+    },
+    {
+     "item": "eq.magician.overall.50"
+    },
+    {
+     "item": "eq.magician.shoes.50"
+    },
+    {
+     "item": "eq.pirate.bottom.50"
+    },
+    {
+     "item": "eq.pirate.cap.50"
+    },
+    {
+     "item": "eq.pirate.gloves.50"
+    },
+    {
+     "item": "eq.pirate.shoes.50"
+    },
+    {
+     "item": "eq.pirate.top.50"
+    },
+    {
+     "item": "eq.thief.bottom.50"
+    },
+    {
+     "item": "eq.thief.cap.50"
+    },
+    {
+     "item": "eq.thief.gloves.50"
+    },
+    {
+     "item": "eq.thief.shoes.50"
+    },
+    {
+     "item": "eq.thief.top.50"
+    },
+    {
+     "item": "eq.warrior.bottom.50"
+    },
+    {
+     "item": "eq.warrior.cap.50"
+    },
+    {
+     "item": "eq.warrior.gloves.50"
+    },
+    {
+     "item": "eq.warrior.shoes.50"
+    },
+    {
+     "item": "eq.warrior.top.50"
+    }
+   ]
+  },
+  {
+   "id": "shop.F100.weapon",
+   "name": "ヒョウガ村の武器屋",
+   "items": [
+    {
+     "item": "eq.bowman.bow.50"
+    },
+    {
+     "item": "eq.bowman.xbow.50"
+    },
+    {
+     "item": "eq.magician.staff.50"
+    },
+    {
+     "item": "eq.magician.wand.50"
+    },
+    {
+     "item": "eq.pirate.gun.50"
+    },
+    {
+     "item": "eq.pirate.knuckle.50"
+    },
+    {
+     "item": "eq.thief.claw.50"
+    },
+    {
+     "item": "eq.thief.dagger.50"
+    },
+    {
+     "item": "eq.warrior.axe1.50"
+    },
+    {
+     "item": "eq.warrior.axe2.50"
+    },
+    {
+     "item": "eq.warrior.mace1.50"
+    },
+    {
+     "item": "eq.warrior.mace2.50"
+    },
+    {
+     "item": "eq.warrior.polearm.50"
+    },
+    {
+     "item": "eq.warrior.spear.50"
+    },
+    {
+     "item": "eq.warrior.sword1.50"
+    },
+    {
+     "item": "eq.warrior.sword2.50"
+    },
+    {
+     "item": "eq.bowman.bow.60"
+    },
+    {
+     "item": "eq.bowman.xbow.60"
+    },
+    {
+     "item": "eq.magician.staff.60"
+    },
+    {
+     "item": "eq.magician.wand.60"
+    },
+    {
+     "item": "eq.pirate.gun.60"
+    },
+    {
+     "item": "eq.pirate.knuckle.60"
+    },
+    {
+     "item": "eq.thief.claw.60"
+    },
+    {
+     "item": "eq.thief.dagger.60"
+    },
+    {
+     "item": "eq.warrior.axe1.60"
+    },
+    {
+     "item": "eq.warrior.axe2.60"
+    },
+    {
+     "item": "eq.warrior.mace1.60"
+    },
+    {
+     "item": "eq.warrior.mace2.60"
+    },
+    {
+     "item": "eq.warrior.polearm.60"
+    },
+    {
+     "item": "eq.warrior.spear.60"
+    },
+    {
+     "item": "eq.warrior.sword1.60"
+    },
+    {
+     "item": "eq.warrior.sword2.60"
+    },
+    {
+     "item": "use.arrow_bow"
+    },
+    {
+     "item": "use.arrow_xbow"
+    },
+    {
+     "item": "use.star_iron"
+    },
+    {
+     "item": "use.bullet_lead"
+    }
+   ]
+  },
+  {
+   "id": "shop.F100.armor",
+   "name": "ヒョウガ村の防具屋",
+   "items": [
+    {
+     "item": "eq.bowman.bottom.50"
+    },
+    {
+     "item": "eq.bowman.cap.50"
+    },
+    {
+     "item": "eq.bowman.gloves.50"
+    },
+    {
+     "item": "eq.bowman.shoes.50"
+    },
+    {
+     "item": "eq.bowman.top.50"
+    },
+    {
+     "item": "eq.magician.cap.50"
+    },
+    {
+     "item": "eq.magician.gloves.50"
+    },
+    {
+     "item": "eq.magician.overall.50"
+    },
+    {
+     "item": "eq.magician.shoes.50"
+    },
+    {
+     "item": "eq.pirate.bottom.50"
+    },
+    {
+     "item": "eq.pirate.cap.50"
+    },
+    {
+     "item": "eq.pirate.gloves.50"
+    },
+    {
+     "item": "eq.pirate.shoes.50"
+    },
+    {
+     "item": "eq.pirate.top.50"
+    },
+    {
+     "item": "eq.thief.bottom.50"
+    },
+    {
+     "item": "eq.thief.cap.50"
+    },
+    {
+     "item": "eq.thief.gloves.50"
+    },
+    {
+     "item": "eq.thief.shoes.50"
+    },
+    {
+     "item": "eq.thief.top.50"
+    },
+    {
+     "item": "eq.warrior.bottom.50"
+    },
+    {
+     "item": "eq.warrior.cap.50"
+    },
+    {
+     "item": "eq.warrior.gloves.50"
+    },
+    {
+     "item": "eq.warrior.shoes.50"
+    },
+    {
+     "item": "eq.warrior.top.50"
+    },
+    {
+     "item": "eq.bowman.bottom.60"
+    },
+    {
+     "item": "eq.bowman.cap.60"
+    },
+    {
+     "item": "eq.bowman.gloves.60"
+    },
+    {
+     "item": "eq.bowman.shoes.60"
+    },
+    {
+     "item": "eq.bowman.top.60"
+    },
+    {
+     "item": "eq.magician.cap.60"
+    },
+    {
+     "item": "eq.magician.gloves.60"
+    },
+    {
+     "item": "eq.magician.overall.60"
+    },
+    {
+     "item": "eq.magician.shoes.60"
+    },
+    {
+     "item": "eq.pirate.bottom.60"
+    },
+    {
+     "item": "eq.pirate.cap.60"
+    },
+    {
+     "item": "eq.pirate.gloves.60"
+    },
+    {
+     "item": "eq.pirate.shoes.60"
+    },
+    {
+     "item": "eq.pirate.top.60"
+    },
+    {
+     "item": "eq.thief.bottom.60"
+    },
+    {
+     "item": "eq.thief.cap.60"
+    },
+    {
+     "item": "eq.thief.gloves.60"
+    },
+    {
+     "item": "eq.thief.shoes.60"
+    },
+    {
+     "item": "eq.thief.top.60"
+    },
+    {
+     "item": "eq.warrior.bottom.60"
+    },
+    {
+     "item": "eq.warrior.cap.60"
+    },
+    {
+     "item": "eq.warrior.gloves.60"
+    },
+    {
+     "item": "eq.warrior.shoes.60"
+    },
+    {
+     "item": "eq.warrior.top.60"
+    }
+   ]
+  },
+  {
+   "id": "shop.T100.weapon",
+   "name": "ティンクルの武器屋",
+   "items": [
+    {
+     "item": "eq.bowman.bow.40"
+    },
+    {
+     "item": "eq.bowman.xbow.40"
+    },
+    {
+     "item": "eq.magician.staff.40"
+    },
+    {
+     "item": "eq.magician.wand.40"
+    },
+    {
+     "item": "eq.pirate.gun.40"
+    },
+    {
+     "item": "eq.pirate.knuckle.40"
+    },
+    {
+     "item": "eq.thief.claw.40"
+    },
+    {
+     "item": "eq.thief.dagger.40"
+    },
+    {
+     "item": "eq.warrior.axe1.40"
+    },
+    {
+     "item": "eq.warrior.axe2.40"
+    },
+    {
+     "item": "eq.warrior.mace1.40"
+    },
+    {
+     "item": "eq.warrior.mace2.40"
+    },
+    {
+     "item": "eq.warrior.polearm.40"
+    },
+    {
+     "item": "eq.warrior.spear.40"
+    },
+    {
+     "item": "eq.warrior.sword1.40"
+    },
+    {
+     "item": "eq.warrior.sword2.40"
+    },
+    {
+     "item": "eq.bowman.bow.50"
+    },
+    {
+     "item": "eq.bowman.xbow.50"
+    },
+    {
+     "item": "eq.magician.staff.50"
+    },
+    {
+     "item": "eq.magician.wand.50"
+    },
+    {
+     "item": "eq.pirate.gun.50"
+    },
+    {
+     "item": "eq.pirate.knuckle.50"
+    },
+    {
+     "item": "eq.thief.claw.50"
+    },
+    {
+     "item": "eq.thief.dagger.50"
+    },
+    {
+     "item": "eq.warrior.axe1.50"
+    },
+    {
+     "item": "eq.warrior.axe2.50"
+    },
+    {
+     "item": "eq.warrior.mace1.50"
+    },
+    {
+     "item": "eq.warrior.mace2.50"
+    },
+    {
+     "item": "eq.warrior.polearm.50"
+    },
+    {
+     "item": "eq.warrior.spear.50"
+    },
+    {
+     "item": "eq.warrior.sword1.50"
+    },
+    {
+     "item": "eq.warrior.sword2.50"
+    },
+    {
+     "item": "eq.bowman.bow.60"
+    },
+    {
+     "item": "eq.bowman.xbow.60"
+    },
+    {
+     "item": "eq.magician.staff.60"
+    },
+    {
+     "item": "eq.magician.wand.60"
+    },
+    {
+     "item": "eq.pirate.gun.60"
+    },
+    {
+     "item": "eq.pirate.knuckle.60"
+    },
+    {
+     "item": "eq.thief.claw.60"
+    },
+    {
+     "item": "eq.thief.dagger.60"
+    },
+    {
+     "item": "eq.warrior.axe1.60"
+    },
+    {
+     "item": "eq.warrior.axe2.60"
+    },
+    {
+     "item": "eq.warrior.mace1.60"
+    },
+    {
+     "item": "eq.warrior.mace2.60"
+    },
+    {
+     "item": "eq.warrior.polearm.60"
+    },
+    {
+     "item": "eq.warrior.spear.60"
+    },
+    {
+     "item": "eq.warrior.sword1.60"
+    },
+    {
+     "item": "eq.warrior.sword2.60"
+    },
+    {
+     "item": "use.arrow_bow"
+    },
+    {
+     "item": "use.arrow_xbow"
+    },
+    {
+     "item": "use.steel_arrow_bow"
+    },
+    {
+     "item": "use.steel_arrow_xbow"
+    },
+    {
+     "item": "use.star_iron"
+    },
+    {
+     "item": "use.bullet_lead"
+    }
+   ]
+  },
+  {
+   "id": "shop.T100.armor",
+   "name": "ティンクルの防具屋",
+   "items": [
+    {
+     "item": "eq.common.earring.35"
+    },
+    {
+     "item": "eq.bowman.bottom.40"
+    },
+    {
+     "item": "eq.bowman.cap.40"
+    },
+    {
+     "item": "eq.bowman.gloves.40"
+    },
+    {
+     "item": "eq.bowman.shoes.40"
+    },
+    {
+     "item": "eq.bowman.top.40"
+    },
+    {
+     "item": "eq.magician.cap.40"
+    },
+    {
+     "item": "eq.magician.gloves.40"
+    },
+    {
+     "item": "eq.magician.overall.40"
+    },
+    {
+     "item": "eq.magician.shoes.40"
+    },
+    {
+     "item": "eq.pirate.bottom.40"
+    },
+    {
+     "item": "eq.pirate.cap.40"
+    },
+    {
+     "item": "eq.pirate.gloves.40"
+    },
+    {
+     "item": "eq.pirate.shoes.40"
+    },
+    {
+     "item": "eq.pirate.top.40"
+    },
+    {
+     "item": "eq.thief.bottom.40"
+    },
+    {
+     "item": "eq.thief.cap.40"
+    },
+    {
+     "item": "eq.thief.gloves.40"
+    },
+    {
+     "item": "eq.thief.shoes.40"
+    },
+    {
+     "item": "eq.thief.top.40"
+    },
+    {
+     "item": "eq.warrior.bottom.40"
+    },
+    {
+     "item": "eq.warrior.cap.40"
+    },
+    {
+     "item": "eq.warrior.gloves.40"
+    },
+    {
+     "item": "eq.warrior.shoes.40"
+    },
+    {
+     "item": "eq.warrior.top.40"
+    },
+    {
+     "item": "eq.bowman.bottom.50"
+    },
+    {
+     "item": "eq.bowman.cap.50"
+    },
+    {
+     "item": "eq.bowman.gloves.50"
+    },
+    {
+     "item": "eq.bowman.shoes.50"
+    },
+    {
+     "item": "eq.bowman.top.50"
+    },
+    {
+     "item": "eq.magician.cap.50"
+    },
+    {
+     "item": "eq.magician.gloves.50"
+    },
+    {
+     "item": "eq.magician.overall.50"
+    },
+    {
+     "item": "eq.magician.shoes.50"
+    },
+    {
+     "item": "eq.pirate.bottom.50"
+    },
+    {
+     "item": "eq.pirate.cap.50"
+    },
+    {
+     "item": "eq.pirate.gloves.50"
+    },
+    {
+     "item": "eq.pirate.shoes.50"
+    },
+    {
+     "item": "eq.pirate.top.50"
+    },
+    {
+     "item": "eq.thief.bottom.50"
+    },
+    {
+     "item": "eq.thief.cap.50"
+    },
+    {
+     "item": "eq.thief.gloves.50"
+    },
+    {
+     "item": "eq.thief.shoes.50"
+    },
+    {
+     "item": "eq.thief.top.50"
+    },
+    {
+     "item": "eq.warrior.bottom.50"
+    },
+    {
+     "item": "eq.warrior.cap.50"
+    },
+    {
+     "item": "eq.warrior.gloves.50"
+    },
+    {
+     "item": "eq.warrior.shoes.50"
+    },
+    {
+     "item": "eq.warrior.top.50"
+    },
+    {
+     "item": "eq.common.earring.55"
+    },
+    {
+     "item": "eq.bowman.bottom.60"
+    },
+    {
+     "item": "eq.bowman.cap.60"
+    },
+    {
+     "item": "eq.bowman.gloves.60"
+    },
+    {
+     "item": "eq.bowman.shoes.60"
+    },
+    {
+     "item": "eq.bowman.top.60"
+    },
+    {
+     "item": "eq.magician.cap.60"
+    },
+    {
+     "item": "eq.magician.gloves.60"
+    },
+    {
+     "item": "eq.magician.overall.60"
+    },
+    {
+     "item": "eq.magician.shoes.60"
+    },
+    {
+     "item": "eq.pirate.bottom.60"
+    },
+    {
+     "item": "eq.pirate.cap.60"
+    },
+    {
+     "item": "eq.pirate.gloves.60"
+    },
+    {
+     "item": "eq.pirate.shoes.60"
+    },
+    {
+     "item": "eq.pirate.top.60"
+    },
+    {
+     "item": "eq.thief.bottom.60"
+    },
+    {
+     "item": "eq.thief.cap.60"
+    },
+    {
+     "item": "eq.thief.gloves.60"
+    },
+    {
+     "item": "eq.thief.shoes.60"
+    },
+    {
+     "item": "eq.thief.top.60"
+    },
+    {
+     "item": "eq.warrior.bottom.60"
+    },
+    {
+     "item": "eq.warrior.cap.60"
+    },
+    {
+     "item": "eq.warrior.gloves.60"
+    },
+    {
+     "item": "eq.warrior.shoes.60"
+    },
+    {
+     "item": "eq.warrior.top.60"
+    }
+   ]
+  },
+  {
+   "id": "shop.M100.weapon",
+   "name": "マリナの武器屋",
+   "items": [
+    {
+     "item": "eq.bowman.bow.60"
+    },
+    {
+     "item": "eq.bowman.xbow.60"
+    },
+    {
+     "item": "eq.magician.staff.60"
+    },
+    {
+     "item": "eq.magician.wand.60"
+    },
+    {
+     "item": "eq.pirate.gun.60"
+    },
+    {
+     "item": "eq.pirate.knuckle.60"
+    },
+    {
+     "item": "eq.thief.claw.60"
+    },
+    {
+     "item": "eq.thief.dagger.60"
+    },
+    {
+     "item": "eq.warrior.axe1.60"
+    },
+    {
+     "item": "eq.warrior.axe2.60"
+    },
+    {
+     "item": "eq.warrior.mace1.60"
+    },
+    {
+     "item": "eq.warrior.mace2.60"
+    },
+    {
+     "item": "eq.warrior.polearm.60"
+    },
+    {
+     "item": "eq.warrior.spear.60"
+    },
+    {
+     "item": "eq.warrior.sword1.60"
+    },
+    {
+     "item": "eq.warrior.sword2.60"
+    },
+    {
+     "item": "eq.bowman.bow.70"
+    },
+    {
+     "item": "eq.bowman.xbow.70"
+    },
+    {
+     "item": "eq.magician.staff.70"
+    },
+    {
+     "item": "eq.magician.wand.70"
+    },
+    {
+     "item": "eq.pirate.gun.70"
+    },
+    {
+     "item": "eq.pirate.knuckle.70"
+    },
+    {
+     "item": "eq.thief.claw.70"
+    },
+    {
+     "item": "eq.thief.dagger.70"
+    },
+    {
+     "item": "eq.warrior.axe1.70"
+    },
+    {
+     "item": "eq.warrior.axe2.70"
+    },
+    {
+     "item": "eq.warrior.mace1.70"
+    },
+    {
+     "item": "eq.warrior.mace2.70"
+    },
+    {
+     "item": "eq.warrior.polearm.70"
+    },
+    {
+     "item": "eq.warrior.spear.70"
+    },
+    {
+     "item": "eq.warrior.sword1.70"
+    },
+    {
+     "item": "eq.warrior.sword2.70"
+    },
+    {
+     "item": "use.arrow_bow"
+    },
+    {
+     "item": "use.arrow_xbow"
+    },
+    {
+     "item": "use.star_iron"
+    },
+    {
+     "item": "use.bullet_lead"
+    }
+   ]
+  },
+  {
+   "id": "shop.M100.armor",
+   "name": "マリナの防具屋",
+   "items": [
+    {
+     "item": "eq.bowman.bottom.60"
+    },
+    {
+     "item": "eq.bowman.cap.60"
+    },
+    {
+     "item": "eq.bowman.gloves.60"
+    },
+    {
+     "item": "eq.bowman.shoes.60"
+    },
+    {
+     "item": "eq.bowman.top.60"
+    },
+    {
+     "item": "eq.magician.cap.60"
+    },
+    {
+     "item": "eq.magician.gloves.60"
+    },
+    {
+     "item": "eq.magician.overall.60"
+    },
+    {
+     "item": "eq.magician.shoes.60"
+    },
+    {
+     "item": "eq.pirate.bottom.60"
+    },
+    {
+     "item": "eq.pirate.cap.60"
+    },
+    {
+     "item": "eq.pirate.gloves.60"
+    },
+    {
+     "item": "eq.pirate.shoes.60"
+    },
+    {
+     "item": "eq.pirate.top.60"
+    },
+    {
+     "item": "eq.thief.bottom.60"
+    },
+    {
+     "item": "eq.thief.cap.60"
+    },
+    {
+     "item": "eq.thief.gloves.60"
+    },
+    {
+     "item": "eq.thief.shoes.60"
+    },
+    {
+     "item": "eq.thief.top.60"
+    },
+    {
+     "item": "eq.warrior.bottom.60"
+    },
+    {
+     "item": "eq.warrior.cap.60"
+    },
+    {
+     "item": "eq.warrior.gloves.60"
+    },
+    {
+     "item": "eq.warrior.shoes.60"
+    },
+    {
+     "item": "eq.warrior.top.60"
+    },
+    {
+     "item": "eq.bowman.bottom.70"
+    },
+    {
+     "item": "eq.bowman.cap.70"
+    },
+    {
+     "item": "eq.bowman.gloves.70"
+    },
+    {
+     "item": "eq.bowman.shoes.70"
+    },
+    {
+     "item": "eq.bowman.top.70"
+    },
+    {
+     "item": "eq.magician.cap.70"
+    },
+    {
+     "item": "eq.magician.gloves.70"
+    },
+    {
+     "item": "eq.magician.overall.70"
+    },
+    {
+     "item": "eq.magician.shoes.70"
+    },
+    {
+     "item": "eq.pirate.bottom.70"
+    },
+    {
+     "item": "eq.pirate.cap.70"
+    },
+    {
+     "item": "eq.pirate.gloves.70"
+    },
+    {
+     "item": "eq.pirate.shoes.70"
+    },
+    {
+     "item": "eq.pirate.top.70"
+    },
+    {
+     "item": "eq.thief.bottom.70"
+    },
+    {
+     "item": "eq.thief.cap.70"
+    },
+    {
+     "item": "eq.thief.gloves.70"
+    },
+    {
+     "item": "eq.thief.shoes.70"
+    },
+    {
+     "item": "eq.thief.top.70"
+    },
+    {
+     "item": "eq.warrior.bottom.70"
+    },
+    {
+     "item": "eq.warrior.cap.70"
+    },
+    {
+     "item": "eq.warrior.gloves.70"
+    },
+    {
+     "item": "eq.warrior.shoes.70"
+    },
+    {
+     "item": "eq.warrior.top.70"
+    }
+   ]
+  },
+  {
+   "id": "shop.D100.weapon",
+   "name": "竜の背の村の武器屋",
+   "items": [
+    {
+     "item": "eq.bowman.bow.70"
+    },
+    {
+     "item": "eq.bowman.xbow.70"
+    },
+    {
+     "item": "eq.magician.staff.70"
+    },
+    {
+     "item": "eq.magician.wand.70"
+    },
+    {
+     "item": "eq.pirate.gun.70"
+    },
+    {
+     "item": "eq.pirate.knuckle.70"
+    },
+    {
+     "item": "eq.thief.claw.70"
+    },
+    {
+     "item": "eq.thief.dagger.70"
+    },
+    {
+     "item": "eq.warrior.axe1.70"
+    },
+    {
+     "item": "eq.warrior.axe2.70"
+    },
+    {
+     "item": "eq.warrior.mace1.70"
+    },
+    {
+     "item": "eq.warrior.mace2.70"
+    },
+    {
+     "item": "eq.warrior.polearm.70"
+    },
+    {
+     "item": "eq.warrior.spear.70"
+    },
+    {
+     "item": "eq.warrior.sword1.70"
+    },
+    {
+     "item": "eq.warrior.sword2.70"
+    },
+    {
+     "item": "eq.bowman.bow.80"
+    },
+    {
+     "item": "eq.bowman.xbow.80"
+    },
+    {
+     "item": "eq.magician.staff.80"
+    },
+    {
+     "item": "eq.magician.wand.80"
+    },
+    {
+     "item": "eq.pirate.gun.80"
+    },
+    {
+     "item": "eq.pirate.knuckle.80"
+    },
+    {
+     "item": "eq.thief.claw.80"
+    },
+    {
+     "item": "eq.thief.dagger.80"
+    },
+    {
+     "item": "eq.warrior.axe1.80"
+    },
+    {
+     "item": "eq.warrior.axe2.80"
+    },
+    {
+     "item": "eq.warrior.mace1.80"
+    },
+    {
+     "item": "eq.warrior.mace2.80"
+    },
+    {
+     "item": "eq.warrior.polearm.80"
+    },
+    {
+     "item": "eq.warrior.spear.80"
+    },
+    {
+     "item": "eq.warrior.sword1.80"
+    },
+    {
+     "item": "eq.warrior.sword2.80"
+    },
+    {
+     "item": "eq.bowman.bow.90"
+    },
+    {
+     "item": "eq.bowman.xbow.90"
+    },
+    {
+     "item": "eq.magician.staff.90"
+    },
+    {
+     "item": "eq.magician.wand.90"
+    },
+    {
+     "item": "eq.pirate.gun.90"
+    },
+    {
+     "item": "eq.pirate.knuckle.90"
+    },
+    {
+     "item": "eq.thief.claw.90"
+    },
+    {
+     "item": "eq.thief.dagger.90"
+    },
+    {
+     "item": "eq.warrior.axe1.90"
+    },
+    {
+     "item": "eq.warrior.axe2.90"
+    },
+    {
+     "item": "eq.warrior.mace1.90"
+    },
+    {
+     "item": "eq.warrior.mace2.90"
+    },
+    {
+     "item": "eq.warrior.polearm.90"
+    },
+    {
+     "item": "eq.warrior.spear.90"
+    },
+    {
+     "item": "eq.warrior.sword1.90"
+    },
+    {
+     "item": "eq.warrior.sword2.90"
+    },
+    {
+     "item": "use.arrow_bow"
+    },
+    {
+     "item": "use.arrow_xbow"
+    },
+    {
+     "item": "use.star_iron"
+    },
+    {
+     "item": "use.bullet_lead"
+    }
+   ]
+  },
+  {
+   "id": "shop.D100.armor",
+   "name": "竜の背の村の防具屋",
+   "items": [
+    {
+     "item": "eq.bowman.bottom.70"
+    },
+    {
+     "item": "eq.bowman.cap.70"
+    },
+    {
+     "item": "eq.bowman.gloves.70"
+    },
+    {
+     "item": "eq.bowman.shoes.70"
+    },
+    {
+     "item": "eq.bowman.top.70"
+    },
+    {
+     "item": "eq.common.cape.70"
+    },
+    {
+     "item": "eq.magician.cap.70"
+    },
+    {
+     "item": "eq.magician.gloves.70"
+    },
+    {
+     "item": "eq.magician.overall.70"
+    },
+    {
+     "item": "eq.magician.shoes.70"
+    },
+    {
+     "item": "eq.pirate.bottom.70"
+    },
+    {
+     "item": "eq.pirate.cap.70"
+    },
+    {
+     "item": "eq.pirate.gloves.70"
+    },
+    {
+     "item": "eq.pirate.shoes.70"
+    },
+    {
+     "item": "eq.pirate.top.70"
+    },
+    {
+     "item": "eq.thief.bottom.70"
+    },
+    {
+     "item": "eq.thief.cap.70"
+    },
+    {
+     "item": "eq.thief.gloves.70"
+    },
+    {
+     "item": "eq.thief.shoes.70"
+    },
+    {
+     "item": "eq.thief.top.70"
+    },
+    {
+     "item": "eq.warrior.bottom.70"
+    },
+    {
+     "item": "eq.warrior.cap.70"
+    },
+    {
+     "item": "eq.warrior.gloves.70"
+    },
+    {
+     "item": "eq.warrior.shoes.70"
+    },
+    {
+     "item": "eq.warrior.top.70"
+    },
+    {
+     "item": "eq.bowman.bottom.80"
+    },
+    {
+     "item": "eq.bowman.cap.80"
+    },
+    {
+     "item": "eq.bowman.gloves.80"
+    },
+    {
+     "item": "eq.bowman.shoes.80"
+    },
+    {
+     "item": "eq.bowman.top.80"
+    },
+    {
+     "item": "eq.magician.cap.80"
+    },
+    {
+     "item": "eq.magician.gloves.80"
+    },
+    {
+     "item": "eq.magician.overall.80"
+    },
+    {
+     "item": "eq.magician.shoes.80"
+    },
+    {
+     "item": "eq.pirate.bottom.80"
+    },
+    {
+     "item": "eq.pirate.cap.80"
+    },
+    {
+     "item": "eq.pirate.gloves.80"
+    },
+    {
+     "item": "eq.pirate.shoes.80"
+    },
+    {
+     "item": "eq.pirate.top.80"
+    },
+    {
+     "item": "eq.thief.bottom.80"
+    },
+    {
+     "item": "eq.thief.cap.80"
+    },
+    {
+     "item": "eq.thief.gloves.80"
+    },
+    {
+     "item": "eq.thief.shoes.80"
+    },
+    {
+     "item": "eq.thief.top.80"
+    },
+    {
+     "item": "eq.warrior.bottom.80"
+    },
+    {
+     "item": "eq.warrior.cap.80"
+    },
+    {
+     "item": "eq.warrior.gloves.80"
+    },
+    {
+     "item": "eq.warrior.shoes.80"
+    },
+    {
+     "item": "eq.warrior.top.80"
+    },
+    {
+     "item": "eq.bowman.bottom.90"
+    },
+    {
+     "item": "eq.bowman.cap.90"
+    },
+    {
+     "item": "eq.bowman.gloves.90"
+    },
+    {
+     "item": "eq.bowman.shoes.90"
+    },
+    {
+     "item": "eq.bowman.top.90"
+    },
+    {
+     "item": "eq.common.cape.90"
+    },
+    {
+     "item": "eq.magician.cap.90"
+    },
+    {
+     "item": "eq.magician.gloves.90"
+    },
+    {
+     "item": "eq.magician.overall.90"
+    },
+    {
+     "item": "eq.magician.shoes.90"
+    },
+    {
+     "item": "eq.pirate.bottom.90"
+    },
+    {
+     "item": "eq.pirate.cap.90"
+    },
+    {
+     "item": "eq.pirate.gloves.90"
+    },
+    {
+     "item": "eq.pirate.shoes.90"
+    },
+    {
+     "item": "eq.pirate.top.90"
+    },
+    {
+     "item": "eq.thief.bottom.90"
+    },
+    {
+     "item": "eq.thief.cap.90"
+    },
+    {
+     "item": "eq.thief.gloves.90"
+    },
+    {
+     "item": "eq.thief.shoes.90"
+    },
+    {
+     "item": "eq.thief.top.90"
+    },
+    {
+     "item": "eq.warrior.bottom.90"
+    },
+    {
+     "item": "eq.warrior.cap.90"
+    },
+    {
+     "item": "eq.warrior.gloves.90"
+    },
+    {
+     "item": "eq.warrior.shoes.90"
+    },
+    {
+     "item": "eq.warrior.top.90"
+    }
+   ]
+  },
+  {
+   "id": "shop.V600.general",
+   "name": "ねむり谷の雑貨屋",
+   "items": [
+    {
+     "item": "use.return.V100"
+    },
+    {
+     "item": "use.return.V200"
+    },
+    {
+     "item": "use.return.V300"
+    },
+    {
+     "item": "use.return.V400"
+    },
+    {
+     "item": "use.return.V500"
+    },
+    {
+     "item": "use.return.V600"
+    },
+    {
+     "item": "use.return.nearest"
+    },
+    {
+     "item": "use.safety_charm"
+    },
+    {
+     "item": "use.red_potion"
+    },
+    {
+     "item": "use.blue_potion"
+    }
+   ]
+  },
+  {
+   "id": "shop.V200.pet",
+   "name": "ペット屋",
+   "items": [
+    {
+     "item": "use.pet.puppy"
+    },
+    {
+     "item": "use.pet.kitten"
+    },
+    {
+     "item": "use.pet.bunny"
+    },
+    {
+     "item": "use.pet.panda"
+    },
+    {
+     "item": "use.pet.penguin"
+    },
+    {
+     "item": "use.pet_food"
+    },
+    {
+     "item": "use.pet_name_tag"
+    }
+   ]
+  },
+  {
+   "id": "shop.V090.furniture",
+   "name": "素材屋の家具の棚",
+   "items": [
+    {
+     "item": "setup.chair.wood"
+    }
+   ]
+  },
+  {
+   "id": "shop.V090.used",
+   "name": "古道具屋（日替わりの中古の装備）",
+   "daily": 8,
+   "items": [
+    {
+     "item": "eq.warrior.cap.10",
+     "price": 889
+    },
+    {
+     "item": "eq.warrior.top.10",
+     "price": 1337
+    },
+    {
+     "item": "eq.warrior.bottom.10",
+     "price": 889
+    },
+    {
+     "item": "eq.warrior.shoes.10",
+     "price": 889
+    },
+    {
+     "item": "eq.warrior.gloves.10",
+     "price": 889
+    },
+    {
+     "item": "eq.warrior.cap.15",
+     "price": 1890
+    },
+    {
+     "item": "eq.warrior.top.15",
+     "price": 2835
+    },
+    {
+     "item": "eq.warrior.bottom.15",
+     "price": 1890
+    },
+    {
+     "item": "eq.warrior.shoes.15",
+     "price": 1890
+    },
+    {
+     "item": "eq.warrior.gloves.15",
+     "price": 1890
+    },
+    {
+     "item": "eq.warrior.cap.20",
+     "price": 3213
+    },
+    {
+     "item": "eq.warrior.top.20",
+     "price": 4823
+    },
+    {
+     "item": "eq.warrior.bottom.20",
+     "price": 3213
+    },
+    {
+     "item": "eq.warrior.shoes.20",
+     "price": 3213
+    },
+    {
+     "item": "eq.warrior.gloves.20",
+     "price": 3213
+    },
+    {
+     "item": "eq.warrior.cap.25",
+     "price": 4858
+    },
+    {
+     "item": "eq.warrior.top.25",
+     "price": 7280
+    },
+    {
+     "item": "eq.warrior.bottom.25",
+     "price": 4858
+    },
+    {
+     "item": "eq.warrior.shoes.25",
+     "price": 4858
+    },
+    {
+     "item": "eq.warrior.gloves.25",
+     "price": 4858
+    },
+    {
+     "item": "eq.warrior.cap.30",
+     "price": 6811
+    },
+    {
+     "item": "eq.warrior.top.30",
+     "price": 10220
+    },
+    {
+     "item": "eq.warrior.bottom.30",
+     "price": 6811
+    },
+    {
+     "item": "eq.warrior.shoes.30",
+     "price": 6811
+    },
+    {
+     "item": "eq.warrior.gloves.30",
+     "price": 6811
+    },
+    {
+     "item": "eq.warrior.cap.35",
+     "price": 9030
+    },
+    {
+     "item": "eq.warrior.top.35",
+     "price": 13580
+    },
+    {
+     "item": "eq.warrior.bottom.35",
+     "price": 9030
+    },
+    {
+     "item": "eq.warrior.shoes.35",
+     "price": 9030
+    },
+    {
+     "item": "eq.warrior.gloves.35",
+     "price": 9030
+    },
+    {
+     "item": "eq.warrior.cap.40",
+     "price": 11620
+    },
+    {
+     "item": "eq.warrior.top.40",
+     "price": 17360
+    },
+    {
+     "item": "eq.warrior.bottom.40",
+     "price": 11620
+    },
+    {
+     "item": "eq.warrior.shoes.40",
+     "price": 11620
+    },
+    {
+     "item": "eq.warrior.gloves.40",
+     "price": 11620
+    },
+    {
+     "item": "eq.warrior.cap.50",
+     "price": 17500
+    },
+    {
+     "item": "eq.warrior.top.50",
+     "price": 26250
+    },
+    {
+     "item": "eq.warrior.bottom.50",
+     "price": 17500
+    },
+    {
+     "item": "eq.warrior.shoes.50",
+     "price": 17500
+    },
+    {
+     "item": "eq.warrior.gloves.50",
+     "price": 17500
+    },
+    {
+     "item": "eq.warrior.cap.60",
+     "price": 24570
+    },
+    {
+     "item": "eq.warrior.top.60",
+     "price": 36820
+    },
+    {
+     "item": "eq.warrior.bottom.60",
+     "price": 24570
+    },
+    {
+     "item": "eq.warrior.shoes.60",
+     "price": 24570
+    },
+    {
+     "item": "eq.warrior.gloves.60",
+     "price": 24570
+    },
+    {
+     "item": "eq.warrior.cap.70",
+     "price": 32620
+    },
+    {
+     "item": "eq.warrior.top.70",
+     "price": 49000
+    },
+    {
+     "item": "eq.warrior.bottom.70",
+     "price": 32620
+    },
+    {
+     "item": "eq.warrior.shoes.70",
+     "price": 32620
+    },
+    {
+     "item": "eq.warrior.gloves.70",
+     "price": 32620
+    },
+    {
+     "item": "eq.magician.cap.10",
+     "price": 889
+    },
+    {
+     "item": "eq.magician.overall.10",
+     "price": 2380
+    },
+    {
+     "item": "eq.magician.shoes.10",
+     "price": 889
+    },
+    {
+     "item": "eq.magician.gloves.10",
+     "price": 889
+    },
+    {
+     "item": "eq.magician.cap.15",
+     "price": 1890
+    },
+    {
+     "item": "eq.magician.overall.15",
+     "price": 5033
+    },
+    {
+     "item": "eq.magician.shoes.15",
+     "price": 1890
+    },
+    {
+     "item": "eq.magician.gloves.15",
+     "price": 1890
+    },
+    {
+     "item": "eq.magician.cap.20",
+     "price": 3213
+    },
+    {
+     "item": "eq.magician.overall.20",
+     "price": 8610
+    },
+    {
+     "item": "eq.magician.shoes.20",
+     "price": 3213
+    },
+    {
+     "item": "eq.magician.gloves.20",
+     "price": 3213
+    },
+    {
+     "item": "eq.magician.cap.25",
+     "price": 4858
+    },
+    {
+     "item": "eq.magician.overall.25",
+     "price": 12950
+    },
+    {
+     "item": "eq.magician.shoes.25",
+     "price": 4858
+    },
+    {
+     "item": "eq.magician.gloves.25",
+     "price": 4858
+    },
+    {
+     "item": "eq.magician.cap.30",
+     "price": 6811
+    },
+    {
+     "item": "eq.magician.overall.30",
+     "price": 18130
+    },
+    {
+     "item": "eq.magician.shoes.30",
+     "price": 6811
+    },
+    {
+     "item": "eq.magician.gloves.30",
+     "price": 6811
+    },
+    {
+     "item": "eq.magician.cap.35",
+     "price": 9030
+    },
+    {
+     "item": "eq.magician.overall.35",
+     "price": 24150
+    },
+    {
+     "item": "eq.magician.shoes.35",
+     "price": 9030
+    },
+    {
+     "item": "eq.magician.gloves.35",
+     "price": 9030
+    },
+    {
+     "item": "eq.magician.cap.40",
+     "price": 11620
+    },
+    {
+     "item": "eq.magician.overall.40",
+     "price": 30940
+    },
+    {
+     "item": "eq.magician.shoes.40",
+     "price": 11620
+    },
+    {
+     "item": "eq.magician.gloves.40",
+     "price": 11620
+    },
+    {
+     "item": "eq.magician.cap.50",
+     "price": 17500
+    },
+    {
+     "item": "eq.magician.overall.50",
+     "price": 46690
+    },
+    {
+     "item": "eq.magician.shoes.50",
+     "price": 17500
+    },
+    {
+     "item": "eq.magician.gloves.50",
+     "price": 17500
+    },
+    {
+     "item": "eq.magician.cap.60",
+     "price": 24570
+    },
+    {
+     "item": "eq.magician.overall.60",
+     "price": 65450
+    },
+    {
+     "item": "eq.magician.shoes.60",
+     "price": 24570
+    },
+    {
+     "item": "eq.magician.gloves.60",
+     "price": 24570
+    },
+    {
+     "item": "eq.magician.cap.70",
+     "price": 32620
+    },
+    {
+     "item": "eq.magician.overall.70",
+     "price": 86800
+    },
+    {
+     "item": "eq.magician.shoes.70",
+     "price": 32620
+    },
+    {
+     "item": "eq.magician.gloves.70",
+     "price": 32620
+    },
+    {
+     "item": "eq.bowman.cap.10",
+     "price": 889
+    },
+    {
+     "item": "eq.bowman.top.10",
+     "price": 1337
+    },
+    {
+     "item": "eq.bowman.bottom.10",
+     "price": 889
+    },
+    {
+     "item": "eq.bowman.shoes.10",
+     "price": 889
+    },
+    {
+     "item": "eq.bowman.gloves.10",
+     "price": 889
+    },
+    {
+     "item": "eq.bowman.cap.15",
+     "price": 1890
+    },
+    {
+     "item": "eq.bowman.top.15",
+     "price": 2835
+    },
+    {
+     "item": "eq.bowman.bottom.15",
+     "price": 1890
+    },
+    {
+     "item": "eq.bowman.shoes.15",
+     "price": 1890
+    },
+    {
+     "item": "eq.bowman.gloves.15",
+     "price": 1890
+    },
+    {
+     "item": "eq.bowman.cap.20",
+     "price": 3213
+    },
+    {
+     "item": "eq.bowman.top.20",
+     "price": 4823
+    },
+    {
+     "item": "eq.bowman.bottom.20",
+     "price": 3213
+    },
+    {
+     "item": "eq.bowman.shoes.20",
+     "price": 3213
+    },
+    {
+     "item": "eq.bowman.gloves.20",
+     "price": 3213
+    },
+    {
+     "item": "eq.bowman.cap.25",
+     "price": 4858
+    },
+    {
+     "item": "eq.bowman.top.25",
+     "price": 7280
+    },
+    {
+     "item": "eq.bowman.bottom.25",
+     "price": 4858
+    },
+    {
+     "item": "eq.bowman.shoes.25",
+     "price": 4858
+    },
+    {
+     "item": "eq.bowman.gloves.25",
+     "price": 4858
+    },
+    {
+     "item": "eq.bowman.cap.30",
+     "price": 6811
+    },
+    {
+     "item": "eq.bowman.top.30",
+     "price": 10220
+    },
+    {
+     "item": "eq.bowman.bottom.30",
+     "price": 6811
+    },
+    {
+     "item": "eq.bowman.shoes.30",
+     "price": 6811
+    },
+    {
+     "item": "eq.bowman.gloves.30",
+     "price": 6811
+    },
+    {
+     "item": "eq.bowman.cap.35",
+     "price": 9030
+    },
+    {
+     "item": "eq.bowman.top.35",
+     "price": 13580
+    },
+    {
+     "item": "eq.bowman.bottom.35",
+     "price": 9030
+    },
+    {
+     "item": "eq.bowman.shoes.35",
+     "price": 9030
+    },
+    {
+     "item": "eq.bowman.gloves.35",
+     "price": 9030
+    },
+    {
+     "item": "eq.bowman.cap.40",
+     "price": 11620
+    },
+    {
+     "item": "eq.bowman.top.40",
+     "price": 17360
+    },
+    {
+     "item": "eq.bowman.bottom.40",
+     "price": 11620
+    },
+    {
+     "item": "eq.bowman.shoes.40",
+     "price": 11620
+    },
+    {
+     "item": "eq.bowman.gloves.40",
+     "price": 11620
+    },
+    {
+     "item": "eq.bowman.cap.50",
+     "price": 17500
+    },
+    {
+     "item": "eq.bowman.top.50",
+     "price": 26250
+    },
+    {
+     "item": "eq.bowman.bottom.50",
+     "price": 17500
+    },
+    {
+     "item": "eq.bowman.shoes.50",
+     "price": 17500
+    },
+    {
+     "item": "eq.bowman.gloves.50",
+     "price": 17500
+    },
+    {
+     "item": "eq.bowman.cap.60",
+     "price": 24570
+    },
+    {
+     "item": "eq.bowman.top.60",
+     "price": 36820
+    },
+    {
+     "item": "eq.bowman.bottom.60",
+     "price": 24570
+    },
+    {
+     "item": "eq.bowman.shoes.60",
+     "price": 24570
+    },
+    {
+     "item": "eq.bowman.gloves.60",
+     "price": 24570
+    },
+    {
+     "item": "eq.bowman.cap.70",
+     "price": 32620
+    },
+    {
+     "item": "eq.bowman.top.70",
+     "price": 49000
+    },
+    {
+     "item": "eq.bowman.bottom.70",
+     "price": 32620
+    },
+    {
+     "item": "eq.bowman.shoes.70",
+     "price": 32620
+    },
+    {
+     "item": "eq.bowman.gloves.70",
+     "price": 32620
+    },
+    {
+     "item": "eq.thief.cap.10",
+     "price": 889
+    },
+    {
+     "item": "eq.thief.top.10",
+     "price": 1337
+    },
+    {
+     "item": "eq.thief.bottom.10",
+     "price": 889
+    },
+    {
+     "item": "eq.thief.shoes.10",
+     "price": 889
+    },
+    {
+     "item": "eq.thief.gloves.10",
+     "price": 889
+    },
+    {
+     "item": "eq.thief.cap.15",
+     "price": 1890
+    },
+    {
+     "item": "eq.thief.top.15",
+     "price": 2835
+    },
+    {
+     "item": "eq.thief.bottom.15",
+     "price": 1890
+    },
+    {
+     "item": "eq.thief.shoes.15",
+     "price": 1890
+    },
+    {
+     "item": "eq.thief.gloves.15",
+     "price": 1890
+    },
+    {
+     "item": "eq.thief.cap.20",
+     "price": 3213
+    },
+    {
+     "item": "eq.thief.top.20",
+     "price": 4823
+    },
+    {
+     "item": "eq.thief.bottom.20",
+     "price": 3213
+    },
+    {
+     "item": "eq.thief.shoes.20",
+     "price": 3213
+    },
+    {
+     "item": "eq.thief.gloves.20",
+     "price": 3213
+    },
+    {
+     "item": "eq.thief.cap.25",
+     "price": 4858
+    },
+    {
+     "item": "eq.thief.top.25",
+     "price": 7280
+    },
+    {
+     "item": "eq.thief.bottom.25",
+     "price": 4858
+    },
+    {
+     "item": "eq.thief.shoes.25",
+     "price": 4858
+    },
+    {
+     "item": "eq.thief.gloves.25",
+     "price": 4858
+    },
+    {
+     "item": "eq.thief.cap.30",
+     "price": 6811
+    },
+    {
+     "item": "eq.thief.top.30",
+     "price": 10220
+    },
+    {
+     "item": "eq.thief.bottom.30",
+     "price": 6811
+    },
+    {
+     "item": "eq.thief.shoes.30",
+     "price": 6811
+    },
+    {
+     "item": "eq.thief.gloves.30",
+     "price": 6811
+    },
+    {
+     "item": "eq.thief.cap.35",
+     "price": 9030
+    },
+    {
+     "item": "eq.thief.top.35",
+     "price": 13580
+    },
+    {
+     "item": "eq.thief.bottom.35",
+     "price": 9030
+    },
+    {
+     "item": "eq.thief.shoes.35",
+     "price": 9030
+    },
+    {
+     "item": "eq.thief.gloves.35",
+     "price": 9030
+    },
+    {
+     "item": "eq.thief.cap.40",
+     "price": 11620
+    },
+    {
+     "item": "eq.thief.top.40",
+     "price": 17360
+    },
+    {
+     "item": "eq.thief.bottom.40",
+     "price": 11620
+    },
+    {
+     "item": "eq.thief.shoes.40",
+     "price": 11620
+    },
+    {
+     "item": "eq.thief.gloves.40",
+     "price": 11620
+    },
+    {
+     "item": "eq.thief.cap.50",
+     "price": 17500
+    },
+    {
+     "item": "eq.thief.top.50",
+     "price": 26250
+    },
+    {
+     "item": "eq.thief.bottom.50",
+     "price": 17500
+    },
+    {
+     "item": "eq.thief.shoes.50",
+     "price": 17500
+    },
+    {
+     "item": "eq.thief.gloves.50",
+     "price": 17500
+    },
+    {
+     "item": "eq.thief.cap.60",
+     "price": 24570
+    },
+    {
+     "item": "eq.thief.top.60",
+     "price": 36820
+    },
+    {
+     "item": "eq.thief.bottom.60",
+     "price": 24570
+    },
+    {
+     "item": "eq.thief.shoes.60",
+     "price": 24570
+    },
+    {
+     "item": "eq.thief.gloves.60",
+     "price": 24570
+    },
+    {
+     "item": "eq.thief.cap.70",
+     "price": 32620
+    },
+    {
+     "item": "eq.thief.top.70",
+     "price": 49000
+    },
+    {
+     "item": "eq.thief.bottom.70",
+     "price": 32620
+    },
+    {
+     "item": "eq.thief.shoes.70",
+     "price": 32620
+    },
+    {
+     "item": "eq.thief.gloves.70",
+     "price": 32620
+    },
+    {
+     "item": "eq.pirate.cap.10",
+     "price": 889
+    },
+    {
+     "item": "eq.pirate.top.10",
+     "price": 1337
+    },
+    {
+     "item": "eq.pirate.bottom.10",
+     "price": 889
+    },
+    {
+     "item": "eq.pirate.shoes.10",
+     "price": 889
+    },
+    {
+     "item": "eq.pirate.gloves.10",
+     "price": 889
+    },
+    {
+     "item": "eq.pirate.cap.15",
+     "price": 1890
+    },
+    {
+     "item": "eq.pirate.top.15",
+     "price": 2835
+    },
+    {
+     "item": "eq.pirate.bottom.15",
+     "price": 1890
+    },
+    {
+     "item": "eq.pirate.shoes.15",
+     "price": 1890
+    },
+    {
+     "item": "eq.pirate.gloves.15",
+     "price": 1890
+    },
+    {
+     "item": "eq.pirate.cap.20",
+     "price": 3213
+    },
+    {
+     "item": "eq.pirate.top.20",
+     "price": 4823
+    },
+    {
+     "item": "eq.pirate.bottom.20",
+     "price": 3213
+    },
+    {
+     "item": "eq.pirate.shoes.20",
+     "price": 3213
+    },
+    {
+     "item": "eq.pirate.gloves.20",
+     "price": 3213
+    },
+    {
+     "item": "eq.pirate.cap.25",
+     "price": 4858
+    },
+    {
+     "item": "eq.pirate.top.25",
+     "price": 7280
+    },
+    {
+     "item": "eq.pirate.bottom.25",
+     "price": 4858
+    },
+    {
+     "item": "eq.pirate.shoes.25",
+     "price": 4858
+    },
+    {
+     "item": "eq.pirate.gloves.25",
+     "price": 4858
+    },
+    {
+     "item": "eq.pirate.cap.30",
+     "price": 6811
+    },
+    {
+     "item": "eq.pirate.top.30",
+     "price": 10220
+    },
+    {
+     "item": "eq.pirate.bottom.30",
+     "price": 6811
+    },
+    {
+     "item": "eq.pirate.shoes.30",
+     "price": 6811
+    },
+    {
+     "item": "eq.pirate.gloves.30",
+     "price": 6811
+    },
+    {
+     "item": "eq.pirate.cap.35",
+     "price": 9030
+    },
+    {
+     "item": "eq.pirate.top.35",
+     "price": 13580
+    },
+    {
+     "item": "eq.pirate.bottom.35",
+     "price": 9030
+    },
+    {
+     "item": "eq.pirate.shoes.35",
+     "price": 9030
+    },
+    {
+     "item": "eq.pirate.gloves.35",
+     "price": 9030
+    },
+    {
+     "item": "eq.pirate.cap.40",
+     "price": 11620
+    },
+    {
+     "item": "eq.pirate.top.40",
+     "price": 17360
+    },
+    {
+     "item": "eq.pirate.bottom.40",
+     "price": 11620
+    },
+    {
+     "item": "eq.pirate.shoes.40",
+     "price": 11620
+    },
+    {
+     "item": "eq.pirate.gloves.40",
+     "price": 11620
+    },
+    {
+     "item": "eq.pirate.cap.50",
+     "price": 17500
+    },
+    {
+     "item": "eq.pirate.top.50",
+     "price": 26250
+    },
+    {
+     "item": "eq.pirate.bottom.50",
+     "price": 17500
+    },
+    {
+     "item": "eq.pirate.shoes.50",
+     "price": 17500
+    },
+    {
+     "item": "eq.pirate.gloves.50",
+     "price": 17500
+    },
+    {
+     "item": "eq.pirate.cap.60",
+     "price": 24570
+    },
+    {
+     "item": "eq.pirate.top.60",
+     "price": 36820
+    },
+    {
+     "item": "eq.pirate.bottom.60",
+     "price": 24570
+    },
+    {
+     "item": "eq.pirate.shoes.60",
+     "price": 24570
+    },
+    {
+     "item": "eq.pirate.gloves.60",
+     "price": 24570
+    },
+    {
+     "item": "eq.pirate.cap.70",
+     "price": 32620
+    },
+    {
+     "item": "eq.pirate.top.70",
+     "price": 49000
+    },
+    {
+     "item": "eq.pirate.bottom.70",
+     "price": 32620
+    },
+    {
+     "item": "eq.pirate.shoes.70",
+     "price": 32620
+    },
+    {
+     "item": "eq.pirate.gloves.70",
+     "price": 32620
+    },
+    {
+     "item": "eq.warrior.shield.10",
+     "price": 1190
+    },
+    {
+     "item": "eq.warrior.shield.20",
+     "price": 4291
+    },
+    {
+     "item": "eq.warrior.shield.30",
+     "price": 9100
+    },
+    {
+     "item": "eq.warrior.shield.40",
+     "price": 15470
+    },
+    {
+     "item": "eq.warrior.shield.50",
+     "price": 23380
+    },
+    {
+     "item": "eq.warrior.shield.60",
+     "price": 32760
+    },
+    {
+     "item": "eq.warrior.shield.70",
+     "price": 43540
+    },
+    {
+     "item": "eq.thief.shield.20",
+     "price": 4291
+    },
+    {
+     "item": "eq.thief.shield.40",
+     "price": 15470
+    },
+    {
+     "item": "eq.thief.shield.60",
+     "price": 32760
+    },
+    {
+     "item": "eq.magician.shield.30",
+     "price": 9100
+    },
+    {
+     "item": "eq.magician.shield.50",
+     "price": 23380
+    },
+    {
+     "item": "eq.magician.shield.70",
+     "price": 43540
+    },
+    {
+     "item": "eq.common.cape.30",
+     "price": 7910
+    },
+    {
+     "item": "eq.common.cape.50",
+     "price": 20440
+    },
+    {
+     "item": "eq.common.cape.70",
+     "price": 38080
+    },
+    {
+     "item": "eq.common.earring.15",
+     "price": 2520
+    },
+    {
+     "item": "eq.common.earring.35",
+     "price": 12040
+    },
+    {
+     "item": "eq.common.earring.55",
+     "price": 27860
+    },
+    {
+     "item": "eq.warrior.sword1.10",
+     "price": 2233
+    },
+    {
+     "item": "eq.warrior.sword1.15",
+     "price": 4718
+    },
+    {
+     "item": "eq.warrior.sword1.20",
+     "price": 8050
+    },
+    {
+     "item": "eq.warrior.sword1.25",
+     "price": 12180
+    },
+    {
+     "item": "eq.warrior.sword1.30",
+     "price": 17010
+    },
+    {
+     "item": "eq.warrior.sword1.35",
+     "price": 22610
+    },
+    {
+     "item": "eq.warrior.sword1.40",
+     "price": 28980
+    },
+    {
+     "item": "eq.warrior.sword1.50",
+     "price": 43820
+    },
+    {
+     "item": "eq.warrior.sword1.60",
+     "price": 61390
+    },
+    {
+     "item": "eq.warrior.sword1.70",
+     "price": 81900
+    },
+    {
+     "item": "eq.warrior.sword2.10",
+     "price": 2233
+    },
+    {
+     "item": "eq.warrior.sword2.15",
+     "price": 4718
+    },
+    {
+     "item": "eq.warrior.sword2.20",
+     "price": 8050
+    },
+    {
+     "item": "eq.warrior.sword2.25",
+     "price": 12180
+    },
+    {
+     "item": "eq.warrior.sword2.30",
+     "price": 17010
+    },
+    {
+     "item": "eq.warrior.sword2.35",
+     "price": 22610
+    },
+    {
+     "item": "eq.warrior.sword2.40",
+     "price": 28980
+    },
+    {
+     "item": "eq.warrior.sword2.50",
+     "price": 43820
+    },
+    {
+     "item": "eq.warrior.sword2.60",
+     "price": 61390
+    },
+    {
+     "item": "eq.warrior.sword2.70",
+     "price": 81900
+    },
+    {
+     "item": "eq.warrior.axe1.10",
+     "price": 2233
+    },
+    {
+     "item": "eq.warrior.axe1.15",
+     "price": 4718
+    },
+    {
+     "item": "eq.warrior.axe1.20",
+     "price": 8050
+    },
+    {
+     "item": "eq.warrior.axe1.25",
+     "price": 12180
+    },
+    {
+     "item": "eq.warrior.axe1.30",
+     "price": 17010
+    },
+    {
+     "item": "eq.warrior.axe1.35",
+     "price": 22610
+    },
+    {
+     "item": "eq.warrior.axe1.40",
+     "price": 28980
+    },
+    {
+     "item": "eq.warrior.axe1.50",
+     "price": 43820
+    },
+    {
+     "item": "eq.warrior.axe1.60",
+     "price": 61390
+    },
+    {
+     "item": "eq.warrior.axe1.70",
+     "price": 81900
+    },
+    {
+     "item": "eq.warrior.axe2.10",
+     "price": 2233
+    },
+    {
+     "item": "eq.warrior.axe2.15",
+     "price": 4718
+    },
+    {
+     "item": "eq.warrior.axe2.20",
+     "price": 8050
+    },
+    {
+     "item": "eq.warrior.axe2.25",
+     "price": 12180
+    },
+    {
+     "item": "eq.warrior.axe2.30",
+     "price": 17010
+    },
+    {
+     "item": "eq.warrior.axe2.35",
+     "price": 22610
+    },
+    {
+     "item": "eq.warrior.axe2.40",
+     "price": 28980
+    },
+    {
+     "item": "eq.warrior.axe2.50",
+     "price": 43820
+    },
+    {
+     "item": "eq.warrior.axe2.60",
+     "price": 61390
+    },
+    {
+     "item": "eq.warrior.axe2.70",
+     "price": 81900
+    },
+    {
+     "item": "eq.warrior.mace1.10",
+     "price": 2233
+    },
+    {
+     "item": "eq.warrior.mace1.15",
+     "price": 4718
+    },
+    {
+     "item": "eq.warrior.mace1.20",
+     "price": 8050
+    },
+    {
+     "item": "eq.warrior.mace1.25",
+     "price": 12180
+    },
+    {
+     "item": "eq.warrior.mace1.30",
+     "price": 17010
+    },
+    {
+     "item": "eq.warrior.mace1.35",
+     "price": 22610
+    },
+    {
+     "item": "eq.warrior.mace1.40",
+     "price": 28980
+    },
+    {
+     "item": "eq.warrior.mace1.50",
+     "price": 43820
+    },
+    {
+     "item": "eq.warrior.mace1.60",
+     "price": 61390
+    },
+    {
+     "item": "eq.warrior.mace1.70",
+     "price": 81900
+    },
+    {
+     "item": "eq.warrior.mace2.10",
+     "price": 2233
+    },
+    {
+     "item": "eq.warrior.mace2.15",
+     "price": 4718
+    },
+    {
+     "item": "eq.warrior.mace2.20",
+     "price": 8050
+    },
+    {
+     "item": "eq.warrior.mace2.25",
+     "price": 12180
+    },
+    {
+     "item": "eq.warrior.mace2.30",
+     "price": 17010
+    },
+    {
+     "item": "eq.warrior.mace2.35",
+     "price": 22610
+    },
+    {
+     "item": "eq.warrior.mace2.40",
+     "price": 28980
+    },
+    {
+     "item": "eq.warrior.mace2.50",
+     "price": 43820
+    },
+    {
+     "item": "eq.warrior.mace2.60",
+     "price": 61390
+    },
+    {
+     "item": "eq.warrior.mace2.70",
+     "price": 81900
+    },
+    {
+     "item": "eq.warrior.spear.10",
+     "price": 2233
+    },
+    {
+     "item": "eq.warrior.spear.15",
+     "price": 4718
+    },
+    {
+     "item": "eq.warrior.spear.20",
+     "price": 8050
+    },
+    {
+     "item": "eq.warrior.spear.25",
+     "price": 12180
+    },
+    {
+     "item": "eq.warrior.spear.30",
+     "price": 17010
+    },
+    {
+     "item": "eq.warrior.spear.35",
+     "price": 22610
+    },
+    {
+     "item": "eq.warrior.spear.40",
+     "price": 28980
+    },
+    {
+     "item": "eq.warrior.spear.50",
+     "price": 43820
+    },
+    {
+     "item": "eq.warrior.spear.60",
+     "price": 61390
+    },
+    {
+     "item": "eq.warrior.spear.70",
+     "price": 81900
+    },
+    {
+     "item": "eq.warrior.polearm.10",
+     "price": 2233
+    },
+    {
+     "item": "eq.warrior.polearm.15",
+     "price": 4718
+    },
+    {
+     "item": "eq.warrior.polearm.20",
+     "price": 8050
+    },
+    {
+     "item": "eq.warrior.polearm.25",
+     "price": 12180
+    },
+    {
+     "item": "eq.warrior.polearm.30",
+     "price": 17010
+    },
+    {
+     "item": "eq.warrior.polearm.35",
+     "price": 22610
+    },
+    {
+     "item": "eq.warrior.polearm.40",
+     "price": 28980
+    },
+    {
+     "item": "eq.warrior.polearm.50",
+     "price": 43820
+    },
+    {
+     "item": "eq.warrior.polearm.60",
+     "price": 61390
+    },
+    {
+     "item": "eq.warrior.polearm.70",
+     "price": 81900
+    },
+    {
+     "item": "eq.magician.wand.15",
+     "price": 4718
+    },
+    {
+     "item": "eq.magician.wand.20",
+     "price": 8050
+    },
+    {
+     "item": "eq.magician.wand.25",
+     "price": 12180
+    },
+    {
+     "item": "eq.magician.wand.30",
+     "price": 17010
+    },
+    {
+     "item": "eq.magician.wand.35",
+     "price": 22610
+    },
+    {
+     "item": "eq.magician.wand.40",
+     "price": 28980
+    },
+    {
+     "item": "eq.magician.wand.50",
+     "price": 43820
+    },
+    {
+     "item": "eq.magician.wand.60",
+     "price": 61390
+    },
+    {
+     "item": "eq.magician.wand.70",
+     "price": 81900
+    },
+    {
+     "item": "eq.magician.staff.15",
+     "price": 4718
+    },
+    {
+     "item": "eq.magician.staff.20",
+     "price": 8050
+    },
+    {
+     "item": "eq.magician.staff.25",
+     "price": 12180
+    },
+    {
+     "item": "eq.magician.staff.30",
+     "price": 17010
+    },
+    {
+     "item": "eq.magician.staff.35",
+     "price": 22610
+    },
+    {
+     "item": "eq.magician.staff.40",
+     "price": 28980
+    },
+    {
+     "item": "eq.magician.staff.50",
+     "price": 43820
+    },
+    {
+     "item": "eq.magician.staff.60",
+     "price": 61390
+    },
+    {
+     "item": "eq.magician.staff.70",
+     "price": 81900
+    },
+    {
+     "item": "eq.bowman.bow.10",
+     "price": 2233
+    },
+    {
+     "item": "eq.bowman.bow.15",
+     "price": 4718
+    },
+    {
+     "item": "eq.bowman.bow.20",
+     "price": 8050
+    },
+    {
+     "item": "eq.bowman.bow.25",
+     "price": 12180
+    },
+    {
+     "item": "eq.bowman.bow.30",
+     "price": 17010
+    },
+    {
+     "item": "eq.bowman.bow.35",
+     "price": 22610
+    },
+    {
+     "item": "eq.bowman.bow.40",
+     "price": 28980
+    },
+    {
+     "item": "eq.bowman.bow.50",
+     "price": 43820
+    },
+    {
+     "item": "eq.bowman.bow.60",
+     "price": 61390
+    },
+    {
+     "item": "eq.bowman.bow.70",
+     "price": 81900
+    },
+    {
+     "item": "eq.bowman.xbow.10",
+     "price": 2233
+    },
+    {
+     "item": "eq.bowman.xbow.15",
+     "price": 4718
+    },
+    {
+     "item": "eq.bowman.xbow.20",
+     "price": 8050
+    },
+    {
+     "item": "eq.bowman.xbow.25",
+     "price": 12180
+    },
+    {
+     "item": "eq.bowman.xbow.30",
+     "price": 17010
+    },
+    {
+     "item": "eq.bowman.xbow.35",
+     "price": 22610
+    },
+    {
+     "item": "eq.bowman.xbow.40",
+     "price": 28980
+    },
+    {
+     "item": "eq.bowman.xbow.50",
+     "price": 43820
+    },
+    {
+     "item": "eq.bowman.xbow.60",
+     "price": 61390
+    },
+    {
+     "item": "eq.bowman.xbow.70",
+     "price": 81900
+    },
+    {
+     "item": "eq.thief.claw.10",
+     "price": 2233
+    },
+    {
+     "item": "eq.thief.claw.15",
+     "price": 4718
+    },
+    {
+     "item": "eq.thief.claw.20",
+     "price": 8050
+    },
+    {
+     "item": "eq.thief.claw.25",
+     "price": 12180
+    },
+    {
+     "item": "eq.thief.claw.30",
+     "price": 17010
+    },
+    {
+     "item": "eq.thief.claw.35",
+     "price": 22610
+    },
+    {
+     "item": "eq.thief.claw.40",
+     "price": 28980
+    },
+    {
+     "item": "eq.thief.claw.50",
+     "price": 43820
+    },
+    {
+     "item": "eq.thief.claw.60",
+     "price": 61390
+    },
+    {
+     "item": "eq.thief.claw.70",
+     "price": 81900
+    },
+    {
+     "item": "eq.thief.dagger.10",
+     "price": 2233
+    },
+    {
+     "item": "eq.thief.dagger.15",
+     "price": 4718
+    },
+    {
+     "item": "eq.thief.dagger.20",
+     "price": 8050
+    },
+    {
+     "item": "eq.thief.dagger.25",
+     "price": 12180
+    },
+    {
+     "item": "eq.thief.dagger.30",
+     "price": 17010
+    },
+    {
+     "item": "eq.thief.dagger.35",
+     "price": 22610
+    },
+    {
+     "item": "eq.thief.dagger.40",
+     "price": 28980
+    },
+    {
+     "item": "eq.thief.dagger.50",
+     "price": 43820
+    },
+    {
+     "item": "eq.thief.dagger.60",
+     "price": 61390
+    },
+    {
+     "item": "eq.thief.dagger.70",
+     "price": 81900
+    },
+    {
+     "item": "eq.pirate.knuckle.10",
+     "price": 2233
+    },
+    {
+     "item": "eq.pirate.knuckle.15",
+     "price": 4718
+    },
+    {
+     "item": "eq.pirate.knuckle.20",
+     "price": 8050
+    },
+    {
+     "item": "eq.pirate.knuckle.25",
+     "price": 12180
+    },
+    {
+     "item": "eq.pirate.knuckle.30",
+     "price": 17010
+    },
+    {
+     "item": "eq.pirate.knuckle.35",
+     "price": 22610
+    },
+    {
+     "item": "eq.pirate.knuckle.40",
+     "price": 28980
+    },
+    {
+     "item": "eq.pirate.knuckle.50",
+     "price": 43820
+    },
+    {
+     "item": "eq.pirate.knuckle.60",
+     "price": 61390
+    },
+    {
+     "item": "eq.pirate.knuckle.70",
+     "price": 81900
+    },
+    {
+     "item": "eq.pirate.gun.10",
+     "price": 2233
+    },
+    {
+     "item": "eq.pirate.gun.15",
+     "price": 4718
+    },
+    {
+     "item": "eq.pirate.gun.20",
+     "price": 8050
+    },
+    {
+     "item": "eq.pirate.gun.25",
+     "price": 12180
+    },
+    {
+     "item": "eq.pirate.gun.30",
+     "price": 17010
+    },
+    {
+     "item": "eq.pirate.gun.35",
+     "price": 22610
+    },
+    {
+     "item": "eq.pirate.gun.40",
+     "price": 28980
+    },
+    {
+     "item": "eq.pirate.gun.50",
+     "price": 43820
+    },
+    {
+     "item": "eq.pirate.gun.60",
+     "price": 61390
+    },
+    {
+     "item": "eq.pirate.gun.70",
+     "price": 81900
+    }
+   ]
+  },
+  {
+   "id": "shop.V090.scroll",
+   "name": "書の行商人（日替わりの書）",
+   "daily": 5,
+   "items": [
+    {
+     "item": "scroll.W01.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.W01.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.W02.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.W02.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.W03.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.W03.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.W04.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.W04.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.W05.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.W05.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.W06.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.W06.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.W07.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.W07.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.W08.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.W08.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.W09.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.W09.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.W10.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.W10.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.W11.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.W11.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.W12.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.W12.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.W13.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.W13.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.W14.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.W14.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.W15.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.W15.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.W16.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.W16.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.A01.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A01.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.A02.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A02.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.A03.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A04.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A05.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A05.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.A06.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A07.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A08.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A08.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.A09.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A10.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A11.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A12.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A13.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A14.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A14.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.A15.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A16.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A17.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A17.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.A18.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A18.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.A19.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A20.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A21.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A21.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.A22.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A23.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A24.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A25.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A26.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A27.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A28.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A28.100",
+     "price": 20000
+    },
+    {
+     "item": "scroll.A29.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A30.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A31.60",
+     "price": 30000
+    },
+    {
+     "item": "scroll.A32.60",
+     "price": 30000
     }
    ]
   }

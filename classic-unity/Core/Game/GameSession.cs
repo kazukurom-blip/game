@@ -10,6 +10,8 @@
 //
 // このファイル: 作る・読む・1 フレームの流れ・マップ移動・自然回復・死んだ時・セーブ。
 // 攻撃とスキルは GameSession.Combat.cs、アイテムと店は GameSession.Items.cs、NPC とクエストは GameSession.Quests.cs。
+// 町の仕組み（倉庫・タクシー・製作・椅子）は GameSession.Town.cs、転職の試験は GameSession.Jobs.cs、
+// ボスの間・ダンジョン・試験の部屋は GameSession.Rooms.cs、ペットは GameSession.Pets.cs。
 using System;
 using System.Collections.Generic;
 using Lumina.Core.Character;
@@ -21,6 +23,7 @@ using Lumina.Core.Quests;
 using Lumina.Core.Save;
 using Lumina.Core.Skills;
 using Lumina.Core.Status;
+using Lumina.Core.Town;
 using Lumina.Core.Util;
 using Lumina.Core.World;
 
@@ -109,7 +112,8 @@ namespace Lumina.Core.Game
             return s;
         }
 
-        public void AttachSave(SaveStore store, string slot) { Store = store; Slot = slot; }
+        /// <summary>セーブの場所を決める。キャラ全員で共有する倉庫（"account" の枠）もここで読む。</summary>
+        public void AttachSave(SaveStore store, string slot) { Store = store; Slot = slot; LoadAccount(); }
 
         // ---------------- 1 フレーム
 
@@ -157,6 +161,7 @@ namespace Lumina.Core.Game
                 return;
             }
 
+            PreStepTown(ref inp);
             if (inp.ItemPressed != null) UseItem(inp.ItemPressed);
             skillInput = inp;
             if (inp.SkillPressed != null) UseSkill(inp.SkillPressed);
@@ -211,8 +216,10 @@ namespace Lumina.Core.Game
             TickPlayerStatus(dt);
             Skills.Tick(dt);
             Regen(dt);
+            TickTown(dt); // ペット・部屋の制限時間（GameSession.Town.cs）
 
             Pose = poseTracker.Update(Body, Attack, Dead, dt, Status.Mask);
+            if (Sitting != null) Pose.Motion = "sit";
             TickAutoSave(dt);
         }
 
@@ -264,6 +271,9 @@ namespace Lumina.Core.Game
                 if (Map != null) return;
                 md = Data.GetMap(StartMap);
             }
+            bool sameMap = Map != null && Map.Data.Id == md.Id;
+            if (Map != null) BeforeEnterMap(md);
+            Sitting = null;
             Map = GetOrCreateMap(md);
             var (x, y) = portalName != null && md.FindPortalByName(portalName) != null ? PortalPos(md, portalName) : md.SpawnPoint();
             if (Body == null) Body = new PlayerBody(x, y);
@@ -277,6 +287,8 @@ namespace Lumina.Core.Game
                 Out.Add(GameEventType.MapChanged, md.Id, text: md.Name);
                 AutoSave.Request("map");
             }
+            AfterEnterMap(md, sameMap && !first);
+            foreach (var pet in Pets) { pet.X = Body.X; pet.Y = Body.Y; }
             OnVisitMap(md.Id);
         }
 
@@ -319,6 +331,7 @@ namespace Lumina.Core.Game
                 Out.Add(GameEventType.Message, text: "今は入れない");
                 return false;
             }
+            if (p.To != null && !CheckRoomEntry(p.To)) return false; // ボスの間・ダンジョン・試験の部屋（GameSession.Rooms.cs）
             Out.Add(GameEventType.PortalUsed, p.Name, x: p.X, y: p.Y);
             if (p.To == null)
             {
@@ -345,8 +358,9 @@ namespace Lumina.Core.Game
                 if (regenT >= interval)
                 {
                     regenT = 0;
-                    Character.Hp = Math.Min(Stats.MaxHp, Character.Hp + Stats.HpRegen);
-                    Character.Mp = Math.Min(Stats.MaxMp, Character.Mp + Stats.MpRegen);
+                    double mul = RegenMul; // 椅子に座っていると 1.5 倍
+                    Character.Hp = Math.Min(Stats.MaxHp, Character.Hp + (int)Math.Round(Stats.HpRegen * mul));
+                    Character.Mp = Math.Min(Stats.MaxMp, Character.Mp + (int)Math.Round(Stats.MpRegen * mul));
                 }
             }
             else regenT = 0;
@@ -410,6 +424,8 @@ namespace Lumina.Core.Game
                 return;
             }
             Dead = true;
+            StandUp();
+            Quiz = null;
             Character.Hp = 0;
             Attack = null;
             Body.Vx = 0;
@@ -425,12 +441,12 @@ namespace Lumina.Core.Game
         public long Revive()
         {
             if (!Dead) return 0;
-            bool safe = Map.Data.IsTown;
+            bool safe = Map.Data.IsTown || InDungeon; // 町・1 人用ダンジョンの中は 1%
             bool charm = Character.Tier > 0 && Inventory.Has("use.safety_charm");
             if (charm) Inventory.Remove("use.safety_charm");
             long lost = Character.ApplyDeath(safe, charm);
             Dead = false;
-            string town = Map.Data.ReturnMap ?? StartMap;
+            string town = RoomReviveMap() ?? Map.Data.ReturnMap ?? StartMap; // ボスの間などの中なら戻り先（GameSession.Rooms.cs）
             Character.Hp = Math.Max(1, Stats.MaxHp / 2);
             ChangeMap(town, Data.GetMap(town)?.FindPortalByName("town") != null ? "town" : null);
             Out.Add(GameEventType.Revived, value: lost, text: charm ? "守りのお守りが代わりに砕けた" : (lost > 0 ? "経験値を " + lost + " 失った" : null));
@@ -451,6 +467,9 @@ namespace Lumina.Core.Game
         public SaveResult SaveNow(string reason = "manual")
         {
             if (Store == null) return new SaveResult { Ok = false, Error = "セーブの場所が決まっていない" };
+            // 倉庫（キャラ全員で共有）を先に保存する（途中で落ちても品が消えない向き: 両方にある方へ倒れる）
+            var acc = SaveAccount();
+            if (acc != null && !acc.Ok) Out.Add(GameEventType.SaveFailed, AccountData.Slot, text: acc.Error);
             var r = Store.Save(Slot, ToSaveData(reason));
             AutoSave.MarkSaved();
             Out.Add(r.Ok ? GameEventType.Saved : GameEventType.SaveFailed, reason, r.Seq, text: r.Ok ? null : r.Error);
@@ -489,7 +508,8 @@ namespace Lumina.Core.Game
             }
             foreach (var kv in Flags) s.Flags[kv.Key] = kv.Value;
             // 死んでいる時は、起き上がる町に置いておく（読み込んだら町から）
-            if (Dead) { s.Map = Map.Data.ReturnMap ?? StartMap; var md = Data.GetMap(s.Map); var p = md?.FindPortalByName("town"); s.X = p?.X ?? 0; s.Y = p?.Y ?? 0; }
+            if (Dead) { s.Map = CurrentRoom?.Exit ?? Map.Data.ReturnMap ?? StartMap; var md = Data.GetMap(s.Map); var p = md?.FindPortalByName("town"); s.X = p?.X ?? 0; s.Y = p?.Y ?? 0; }
+            WriteTownSave(s); // 倉庫以外の町の仕組み（毎日の回数・ペット）
             return s;
         }
 
@@ -562,6 +582,7 @@ namespace Lumina.Core.Game
                 var sp = md.SpawnPoint();
                 if (g.Map.Physics.SegBelow(pos.Item1, pos.Item2) == null) PlayerPhysics.PlaceOnGround(g.Body, g.Map.Physics, sp.x, sp.y);
             }
+            g.ReadTownSave(s);
             g.RefreshStats();
             if (c.Hp <= 0) c.Hp = Math.Max(1, g.Stats.MaxHp / 2);
             g.Out.Clear();

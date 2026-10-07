@@ -200,14 +200,16 @@
    "name": "武器屋ジャン",
    "x": 592,
    "y": 368,
-   "role": "weapon"
+   "role": "weapon",
+   "shop": "shop.V100.weapon"
   },
   {
    "id": "mire",
    "name": "防具屋ミレ",
    "x": 824,
    "y": 368,
-   "role": "armor"
+   "role": "armor",
+   "shop": "shop.V100.armor"
   },
   {
    "id": "pola",
@@ -229,7 +231,37 @@
    "name": "タクシーの運転手マルコ",
    "x": 1648,
    "y": 368,
-   "role": "taxi"
+   "role": "taxi",
+   "taxi": {
+    "dests": [
+     {
+      "to": "V200",
+      "toPortal": "town",
+      "fee": 800
+     },
+     {
+      "to": "V300",
+      "toPortal": "town",
+      "fee": 940
+     },
+     {
+      "to": "V400",
+      "toPortal": "town",
+      "fee": 1080
+     },
+     {
+      "to": "V500",
+      "toPortal": "town",
+      "fee": 1220
+     },
+     {
+      "to": "V600",
+      "toPortal": "town",
+      "fee": 1360
+     }
+    ],
+    "beginnerDiv": 10
+   }
   },
   {
    "id": "rokko",

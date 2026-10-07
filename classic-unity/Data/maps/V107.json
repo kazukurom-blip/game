@@ -152,23 +152,33 @@
   {
    "id": "rio",
    "name": "キャプテン・リオ",
-   "x": 440,
+   "x": 376,
    "y": 520,
    "role": "job"
   },
   {
    "id": "battsu",
    "name": "砲手バッツ",
-   "x": 920,
-   "y": 520
+   "x": 736,
+   "y": 520,
+   "role": "weapon",
+   "shop": "shop.V107.weapon"
   },
   {
    "id": "guri",
    "name": "料理人グリ",
-   "x": 1400,
+   "x": 1096,
    "y": 520,
    "role": "potion",
    "shop": "shop.V107.potion"
+  },
+  {
+   "id": "hose",
+   "name": "帆縫いのホセ",
+   "x": 1456,
+   "y": 520,
+   "role": "armor",
+   "shop": "shop.V107.armor"
   }
  ],
  "objects": [],

@@ -4,7 +4,8 @@
 // 版 1（最初の形。平らな形）:
 //   { "version": 1, "name", "job", "level", "exp", "str", "dex", "int", "luk", "ap", "hp", "mp", "maxHp", "maxMp",
 //     "meso", "map", "x", "y", "items": [ { "id", "count" } ], "skills": { id: lv }, "quests": { id: "active"|"done" } }
-// 版 2（今）: SaveData.cs の説明のとおり（キャラ・持ち物・装備・場所を分けた形）。
+// 版 2: キャラ・持ち物・装備・場所を分けた形。
+// 版 3（今）: 版 2 ＋ ペット（pets）と実時間の回数（daily）。版 2 には無いので空で足す。
 using System;
 using System.Collections.Generic;
 using Lumina.Core.Util;
@@ -13,12 +14,13 @@ namespace Lumina.Core.Save
 {
     public static class SaveMigrations
     {
-        public const int CurrentVersion = 2;
+        public const int CurrentVersion = 3;
 
         private static readonly Dictionary<int, Func<Dictionary<string, object>, Dictionary<string, object>>> Steps =
             new Dictionary<int, Func<Dictionary<string, object>, Dictionary<string, object>>>
             {
                 { 1, V1ToV2 },
+                { 2, V2ToV3 },
             };
 
         public static Dictionary<string, object> Migrate(Dictionary<string, object> d, int fromVersion)
@@ -32,6 +34,13 @@ namespace Lumina.Core.Save
                 d["version"] = (long)v;
             }
             return d;
+        }
+
+        private static Dictionary<string, object> V2ToV3(Dictionary<string, object> o)
+        {
+            if (!o.ContainsKey("pets")) o["pets"] = new List<object>();
+            if (!o.ContainsKey("daily")) o["daily"] = new Dictionary<string, object>();
+            return o;
         }
 
         private static Dictionary<string, object> V1ToV2(Dictionary<string, object> o)

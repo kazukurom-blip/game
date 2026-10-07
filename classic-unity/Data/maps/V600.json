@@ -175,14 +175,14 @@
   {
    "id": "nemu",
    "name": "宿屋のネム",
-   "x": 368,
+   "x": 352,
    "y": 368,
    "inn": 100
   },
   {
    "id": "mayu",
    "name": "薬屋のマユ",
-   "x": 712,
+   "x": 648,
    "y": 368,
    "role": "potion",
    "shop": "shop.V600.potion"
@@ -190,33 +190,72 @@
   {
    "id": "koro",
    "name": "雑貨屋のコロ",
-   "x": 1056,
-   "y": 368
+   "x": 952,
+   "y": 368,
+   "role": "general",
+   "shop": "shop.V600.general"
   },
   {
    "id": "yuu",
    "name": "温泉番ユウ",
-   "x": 1336,
+   "x": 1248,
    "y": 368
   },
   {
    "id": "sig",
    "name": "封印の番人シグ",
-   "x": 1744,
-   "y": 353
+   "x": 1552,
+   "y": 344
   },
   {
    "id": "doc",
    "name": "学者ドク",
-   "x": 2088,
+   "x": 1912,
    "y": 368
   },
   {
    "id": "nagi",
    "name": "倉庫番ナギ",
-   "x": 2432,
+   "x": 2152,
    "y": 368,
    "role": "storage"
+  },
+  {
+   "id": "taxi_nemu",
+   "name": "タクシーの運転手ウトウ",
+   "x": 2448,
+   "y": 368,
+   "role": "taxi",
+   "taxi": {
+    "dests": [
+     {
+      "to": "V100",
+      "toPortal": "town",
+      "fee": 1360
+     },
+     {
+      "to": "V200",
+      "toPortal": "town",
+      "fee": 1220
+     },
+     {
+      "to": "V300",
+      "toPortal": "town",
+      "fee": 1080
+     },
+     {
+      "to": "V400",
+      "toPortal": "town",
+      "fee": 940
+     },
+     {
+      "to": "V500",
+      "toPortal": "town",
+      "fee": 800
+     }
+    ],
+    "beginnerDiv": 10
+   }
   }
  ],
  "objects": [],

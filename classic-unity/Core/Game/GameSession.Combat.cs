@@ -558,6 +558,8 @@ namespace Lumina.Core.Game
             GainExp((long)Math.Max(1, Math.Round(def.Exp * mul)));
             foreach (var note in Quests.Progress(ObjectiveType.Kill, def.Id)) OnQuestNote(note);
             var drops = DropRoller.Roll(def, Data, Rng, 1, 1 + Stats.Mods.MesoPct / 100);
+            AddQuestDrops(def, drops);   // 転職の試験の印（GameSession.Rooms.cs）
+            OnMobKilledTown(mob);        // boss_kill・ダンジョンのクリア
             if (drops.Count > 0)
             {
                 Map.SpawnDrops(mob.X, mob.Y, drops);

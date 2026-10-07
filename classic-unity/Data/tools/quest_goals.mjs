@@ -3,15 +3,17 @@
 // 目的の種類: talk（NPC と話す）/ visit（マップに着く）/ interact（調べる物。マップの objects）/ collect（持ち物の数。完了で渡す）
 //             kill（倒す）/ event（Core が知らせる操作の名前。下の EVENTS）
 // end: 報告先（無ければ依頼者）。minStats: 受ける条件の能力値（転職: STR35 など）。parsed: true なら [[..]] から読んだ目的を前に付ける。
+// line: 受けられる系統（転職の 2 段目から。warrior など）。advance: 完了すると転職する段階（3 / 4）。
+// unlock: 完了すると開く物（'storage+4' = 倉庫の枠 +4、'pet.second' = ペットを 2 匹連れて歩ける）。
 //
 // Core が知らせる event の名前（GameSession.QuestEvent）:
 //   quickslot_set / use_potion / ap_spent / sp_spent / skill_used（チュートリアル）
-//   job_advance.1（1 次転職した時）/ job_advance.2 / job_advance.3 / job_advance.4（2〜4 次。転職の試験の仕組みができたら呼ぶ）
-//   storage_deposit / storage_withdraw（倉庫。仕組みはまだ）
-//   pet_adopted / pet_fed / pet_closeness（ペット。仕組みはまだ）
-//   dungeon_clear（どれかの 1 人用ダンジョン）と dungeon_clear.<マップID>（そのダンジョン）（仕組みはまだ）
+//   job_advance.1〜4（1 次: AdvanceJob、2 次: AdvanceJob2（試験の証を渡して職を選ぶ）、3・4 次: J-7・J-9 の完了で転職した時）
+//   storage_deposit / storage_withdraw（倉庫に預けた・取り出した）
+//   pet_adopted / pet_fed / pet_closeness（ペットを迎えた・餌をあげた・親密度。親密度は「今の Lv まで」進む）
+//   dungeon_clear（どれかの 1 人用ダンジョン）と dungeon_clear.<マップID>（そのダンジョンの主を倒した）
 //   boss_kill（ボス・大ボスを倒した時）
-//   quiz_cleared（賢者の石のクイズ。仕組みはまだ）
+//   quiz_cleared（賢者の石のクイズに 5 問続けて正解）
 const talk = (npc, label) => ({ type: 'talk', npc, ...(label ? { label } : {}) });
 const visit = (map, label) => ({ type: 'visit', map, ...(label ? { label } : {}) });
 const look = (target, label, count) => ({ type: 'interact', target, label, ...(count ? { count } : {}) });
@@ -30,7 +32,7 @@ export const QUEST_GOALS = {
   'V-06': { objectives: [talk('rio', 'キャプテン・リオに手紙を届ける')], end: 'olga' },
   'V-07': { parsed: true, objectives: [look('V102.lamp', '灯台のてっぺんのランプを掃除する')], end: 'sol' },
   'V-10': { objectives: [look('V105.pool', '行き止まりの水たまりを調べる')] },
-  'V-13': { objectives: [ev('storage_deposit', '倉庫に 1 つ預ける'), ev('storage_withdraw', '倉庫から取り出す')] },
+  'V-13': { objectives: [ev('storage_deposit', '倉庫に 1 つ預ける'), ev('storage_withdraw', '倉庫から取り出す')], unlock: 'storage+4' },
   // ===== ポム丘 =====
   'B-10': { objectives: [look('V202.bellpig', '鈴の音のするブタっぺを連れ戻す', 3)] },
   'B-12': { objectives: [look('V202.flag', '風車のてっぺんの旗に触る')] },
@@ -41,7 +43,7 @@ export const QUEST_GOALS = {
   'PET-04': { objectives: [ev('pet_closeness', 'ペットの親密度を 10 にする', 10)] },
   'PET-05': { objectives: [ev('pet_closeness', 'ペットの親密度を 15 にする', 15)] },
   'PET-06': { objectives: [ev('pet_closeness', 'ペットの親密度を 20 にする', 20)] },
-  'PET-07': { objectives: [ev('pet_closeness', 'ペットの親密度を 25 にする', 25)] },
+  'PET-07': { objectives: [ev('pet_closeness', 'ペットの親密度を 25 にする', 25)], unlock: 'pet.second' },
   // ===== シルワ森都 =====
   'W-01': { objectives: [look('V301.book', '森の入口の光る本'), look('V302.book', 'スライムの池の光る本'), look('V303.book', 'ヒトツメの森の光る本')] },
   'W-05': { parsed: true, objectives: [talk('herb', '薬草屋ハーブに薬を作ってもらう')] },
@@ -90,20 +92,22 @@ export const QUEST_GOALS = {
 
 // ===== 転職（5 系統 × 9 段。QUESTS.md 6 章） =====
 const LINES = [
-  // [系統, 転職官, 長老, 能力値の条件]
-  ['J1', 'dorga', 'glen', { STR: 35 }],
-  ['J2', 'orfe', 'frost', { INT: 20 }],
-  ['J3', 'erna', 'heine', { DEX: 25 }],
-  ['J4', 'yami', 'mist', { DEX: 25 }],
-  ['J5', 'rio', 'keel', { DEX: 20 }],
+  // [系統, 転職官, 長老, 能力値の条件, 系統の名前]
+  ['J1', 'dorga', 'glen', { STR: 35 }, 'warrior'],
+  ['J2', 'orfe', 'frost', { INT: 20 }, 'magician'],
+  ['J3', 'erna', 'heine', { DEX: 25 }, 'bowman'],
+  ['J4', 'yami', 'mist', { DEX: 25 }, 'thief'],
+  ['J5', 'rio', 'keel', { DEX: 20 }, 'pirate'],
 ];
-for (const [j, master, elder, stat] of LINES) {
+for (const [j, master, elder, stat, line] of LINES) {
   QUEST_GOALS[`${j}-1`] = { minStats: stat, objectives: [ev('job_advance.1', '1 次の職になる')] };
-  QUEST_GOALS[`${j}-2`] = { objectives: [talk(master, '推薦状を受け取る')] };
-  QUEST_GOALS[`${j}-4`] = { objectives: [ev('job_advance.2', '試験の証を渡し、2 次の職を選ぶ')], end: master };
-  QUEST_GOALS[`${j}-5`] = { objectives: [talk(master, '長老の手紙を届ける')], end: master };
-  QUEST_GOALS[`${j}-7`] = { objectives: [give('etc.M300', 1, '黒いお守りを捧げる'), look('F107.sage_stone', '賢者の石に捧げる'), ev('quiz_cleared', '5 問のクイズに答える')] };
-  QUEST_GOALS[`${j}-8`] = { objectives: [talk('vald', '竜の大老ヴァルドに推薦状を届ける')], end: 'vald' };
-  QUEST_GOALS[`${j}-9`] = { parsed: true, objectives: [give('etc.M211', 1, '紅の印を渡す'), give('etc.M212', 1, '蒼の印を渡す')] };
+  QUEST_GOALS[`${j}-2`] = { line, objectives: [talk(master, '推薦状を受け取る')] };
+  QUEST_GOALS[`${j}-3`] = { line, parsed: true, objectives: [] };
+  QUEST_GOALS[`${j}-4`] = { line, objectives: [ev('job_advance.2', '試験の証を渡し、2 次の職を選ぶ')], end: master };
+  QUEST_GOALS[`${j}-5`] = { line, objectives: [talk(master, '長老の手紙を届ける')], end: master };
+  QUEST_GOALS[`${j}-6`] = { line, parsed: true, objectives: [] };
+  QUEST_GOALS[`${j}-7`] = { line, advance: 3, objectives: [give('etc.M300', 1, '黒いお守りを捧げる'), look('F107.sage_stone', '賢者の石に捧げる'), ev('quiz_cleared', '5 問のクイズに答える')] };
+  QUEST_GOALS[`${j}-8`] = { line, objectives: [talk('vald', '竜の大老ヴァルドに推薦状を届ける')], end: 'vald' };
+  QUEST_GOALS[`${j}-9`] = { line, advance: 4, parsed: true, objectives: [give('etc.M211', 1, '紅の印を渡す'), give('etc.M212', 1, '蒼の印を渡す')] };
   void elder;
 }

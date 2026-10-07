@@ -16,6 +16,12 @@ namespace Lumina.Core.Game
         public string Shop;
         public int InnFee = -1;
         public TravelData Travel;
+        // 町の仕組み（GameSession.Town.cs が埋める）
+        public string Role;
+        public TaxiData Taxi;                                         // タクシー（行き先と料金。TaxiFee で初心者割引込み）
+        public bool Storage;                                          // 倉庫番
+        public bool ShopRecharge;                                     // 店で詰め直しができる
+        public List<Town.CraftRecipe> Crafts = new List<Town.CraftRecipe>(); // 作れる物
     }
 
     public enum CompleteResult { Ok, NotInProgress, NotDone, WrongNpc, InventoryFull }
@@ -32,6 +38,7 @@ namespace Lumina.Core.Game
             d.Completable = Quests.CompletableAt(npcId, Inventory);
             d.Available = Quests.AvailableFrom(npcId, Character);
             foreach (var q in Quests.InProgress()) if (q.End == npcId && !d.Completable.Contains(q)) d.InProgress.Add(q);
+            FillTownDialog(d);
             return d;
         }
 
@@ -52,6 +59,7 @@ namespace Lumina.Core.Game
             var r = Quests.Start(questId, Character);
             if (r != StartResult.Ok) return r;
             Out.Add(GameEventType.QuestStarted, questId, text: q.Name);
+            OnQuestAcceptedTown(q); // 試験の部屋の時間・ペットの親密度（GameSession.Rooms.cs）
             // 今いるマップが「行く」目的なら、もう着いている
             foreach (var note in Quests.Progress(ObjectiveType.Visit, Map.Data.Id)) OnQuestNote(note);
             CheckAutoComplete();
@@ -92,6 +100,7 @@ namespace Lumina.Core.Game
                 Out.Add(GameEventType.ItemPicked, rw.Item, rw.Count, text: Data.Item(rw.Item).Name);
             }
             GainExp(q.Exp);
+            OnQuestFinishedTown(q); // 3・4 次の転職・開く物（GameSession.Jobs.cs）
             RefreshStats();
             AutoSave.Request("quest");
             return CompleteResult.Ok;
@@ -156,19 +165,22 @@ namespace Lumina.Core.Game
             Out.Add(GameEventType.Message, objectId, text: found.Name + "を調べた");
             foreach (var note in Quests.Progress(ObjectiveType.Interact, objectId)) OnQuestNote(note);
             CheckAutoComplete();
+            OnInteractTown(found); // 毎日の宝箱・賢者の石（GameSession.Town.cs）
             return true;
         }
 
-        /// <summary>乗り物（船など）に乗る。島の船は Lv7 以上・片道。</summary>
-        public bool Travel(string npcId)
+        /// <summary>乗り物（船など）に乗る。島の船は Lv7 以上・片道。useTicket = true なら雲の船の切符を 1 枚使う（料金なし）。</summary>
+        public bool Travel(string npcId, bool useTicket = false)
         {
             var n = Map.Npc(npcId);
             var t = n?.Travel;
             if (t == null) return false;
             if (Character.Level < t.MinLevel) { Out.Add(GameEventType.Message, npcId, text: "Lv" + t.MinLevel + " から乗れる"); return false; }
             if (t.RequiresQuest != null && Quests.Status(t.RequiresQuest) == QuestStatus.None) { Out.Add(GameEventType.Message, npcId, text: "まだ乗れない"); return false; }
-            if (Inventory.Meso < t.Fee) { Out.Add(GameEventType.Message, npcId, text: "お金が足りない"); return false; }
-            Inventory.AddMeso(-t.Fee);
+            long fee = t.Fee;
+            if (useTicket && fee > 0 && Inventory.Has("use.ship_ticket")) { Inventory.Remove("use.ship_ticket"); fee = 0; }
+            if (Inventory.Meso < fee) { Out.Add(GameEventType.Message, npcId, text: "お金が足りない"); return false; }
+            Inventory.AddMeso(-fee);
             string from = Map.Data.Region;
             Out.Add(GameEventType.Travel, t.To);
             ChangeMap(t.To, t.ToPortal);

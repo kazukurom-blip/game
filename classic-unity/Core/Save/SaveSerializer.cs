@@ -59,6 +59,20 @@ namespace Lumina.Core.Save
             w.Key("location").BeginObject().Prop("map", s.Map).Prop("x", s.X).Prop("y", s.Y).EndObject();
             w.Key("flags").BeginObject(); foreach (var kv in s.Flags) w.Prop(kv.Key, kv.Value); w.EndObject();
             w.Key("rng").BeginArray().String(s.Rng0).String(s.Rng1).EndArray();
+            w.Key("pets").BeginArray();
+            foreach (var p in s.Pets)
+            {
+                w.BeginObject().Prop("kind", p.Kind).Prop("name", p.Name).Prop("fullness", p.Fullness).Prop("points", p.Points).Prop("out", p.Out);
+                w.Key("skills").BeginArray();
+                if (p.Pickup) w.String("pickup");
+                if (p.Range) w.String("range");
+                if (p.Potion) w.String("potion");
+                w.EndArray().EndObject();
+            }
+            w.EndArray();
+            w.Key("daily").BeginObject();
+            foreach (var kv in s.Daily) { w.Key(kv.Key).BeginArray(); foreach (var v in kv.Value) w.Number((long)v); w.EndArray(); }
+            w.EndObject();
             w.EndObject();
             return w.ToString();
         }
@@ -145,6 +159,23 @@ namespace Lumina.Core.Save
             if (fl != null) foreach (var kv in fl) s.Flags[kv.Key] = kv.Value is bool b && b;
             var rng = J.Arr(d, "rng");
             if (rng.Count == 2) { s.Rng0 = rng[0] as string; s.Rng1 = rng[1] as string; }
+            foreach (var o in J.Arr(d, "pets"))
+            {
+                var p = (Dictionary<string, object>)o;
+                var skills = J.StrList(p, "skills");
+                s.Pets.Add(new SavedPet
+                {
+                    Kind = J.Str(p, "kind"), Name = J.Str(p, "name", ""), Fullness = Math.Max(0, Math.Min(100, J.Int(p, "fullness", 100))), Points = Math.Max(0, J.Int(p, "points")),
+                    Out = J.Bool(p, "out"), Pickup = skills.Contains("pickup"), Range = skills.Contains("range"), Potion = skills.Contains("potion"),
+                });
+            }
+            var daily = J.Obj(d, "daily");
+            if (daily != null)
+                foreach (var kv in daily)
+                {
+                    var a = kv.Value as List<object>;
+                    if (a != null && a.Count == 2) s.Daily[kv.Key] = new[] { (int)J.ToDouble(a[0]), (int)J.ToDouble(a[1]) };
+                }
             return s;
         }
 

@@ -185,25 +185,29 @@
    "name": "古道具屋ホルン",
    "x": 400,
    "y": 360,
-   "role": "weapon"
+   "role": "weapon",
+   "shop": "shop.V090.used"
   },
   {
    "id": "scri",
    "name": "書の行商人スクリ",
    "x": 904,
-   "y": 360
+   "y": 360,
+   "shop": "shop.V090.scroll"
   },
   {
    "id": "jue",
    "name": "宝石商ジュエ",
    "x": 1184,
-   "y": 360
+   "y": 360,
+   "role": "craft"
   },
   {
    "id": "mate",
    "name": "素材屋マテ",
    "x": 1528,
-   "y": 360
+   "y": 360,
+   "shop": "shop.V090.furniture"
   },
   {
    "id": "board",

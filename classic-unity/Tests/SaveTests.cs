@@ -37,7 +37,7 @@ namespace Lumina.Core.Tests
             var mine = Json.ParseObject(text);
             Assert.Equal("lumina-save", J.Str(mine, "format"));
             using var doc = System.Text.Json.JsonDocument.Parse(text);
-            Assert.Equal(2, doc.RootElement.GetProperty("data").GetProperty("version").GetInt32());
+            Assert.Equal(SaveMigrations.CurrentVersion, doc.RootElement.GetProperty("data").GetProperty("version").GetInt32());
             Assert.Equal(123, doc.RootElement.GetProperty("data").GetProperty("inventory").GetProperty("meso").GetInt64());
         }
 
@@ -260,7 +260,7 @@ namespace Lumina.Core.Tests
             var mem = new MemoryFileSystem();
             g.AttachSave(new SaveStore(mem, ""), "c");
             g.SaveNow();
-            Assert.Contains("\"version\":2", mem.Text("c.json"));
+            Assert.Contains("\"version\":" + SaveMigrations.CurrentVersion, mem.Text("c.json"));
         }
 
         [Fact]
@@ -271,7 +271,7 @@ namespace Lumina.Core.Tests
             store.Save("c", Sample(7));
             store.Save("c", Sample(8));
             // 今のセーブを「未来の版」に書き換える（CRC は合わせる）
-            var body = SaveSerializer.ToJson(Sample(9)).Replace("\"version\":2", "\"version\":99");
+            var body = SaveSerializer.ToJson(Sample(9)).Replace("\"version\":" + SaveMigrations.CurrentVersion, "\"version\":99");
             mem.WriteAllDurable("c.json", Encoding.UTF8.GetBytes(SaveStore.Wrap(body, 50)));
             var lr = store.Load("c");
             Assert.Equal(7, lr.Data.Meso);

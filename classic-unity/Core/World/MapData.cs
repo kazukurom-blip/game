@@ -10,11 +10,12 @@
 //   "walls":     [ { "x": 0, "top": 0, "bottom": 640 } ],                              // 縦の壁（任意）
 //   "portals":   [ { "name": "sp", "type": "spawn", "x": 90, "y": 640 },
 //                  { "name": "east", "type": "visible", "x": 1550, "y": 640, "to": "S002", "toPortal": "west" } ],
-//                 // type: spawn（出現の位置）/ visible（光の渦）/ hidden（見えない）/ town（帰還の書の位置）
-//                 // to が無く toPortal だけ → 同じマップの中の別の位置へ（隠し部屋など）
+//                 // type: spawn（出現の位置）/ visible（光の渦）/ hidden（見えない）/ town（帰還の書の位置）/ landing（一方通行で着くだけの位置）
+//                 // to が無く toPortal だけ → 同じマップの中の別の位置へ（隠し部屋など）。"oneWay": true → 一方通行（滑り台・落とし穴。戻りが無い）
 //   "spawns":    [ { "mob": "M001", "x": 300, "y": 640 } ], "mobMax": 8, "respawnSec": 7,
 //   "timedSpawns": [ { "mob": "M007", "x": 800, "y": 640, "intervalSec": 600 } ],     // 強敵・ボス
 //   "npcs":      [ { "id": "luka", "name": "案内人ルカ", "x": 200, "y": 640, "shop": null, "role": "guide" } ],
+//                 // travel（乗り物 1 つ）/ taxi（{ "dests": [ { "to", "toPortal", "fee" } ], "beginnerDiv": 10 }）/ inn（宿屋の料金）
 //   "objects":   [ { "id": "S001.crate", "name": "木箱", "x": 500, "y": 512 } ]       // 調べられる物
 // }
 using System;
@@ -41,6 +42,7 @@ namespace Lumina.Core.World
         public const string Visible = "visible";
         public const string Hidden = "hidden";
         public const string Town = "town";
+        public const string Landing = "landing";
     }
 
     public sealed class PortalData
@@ -49,7 +51,9 @@ namespace Lumina.Core.World
         public double X, Y;
         /// <summary>入るのに必要なクエスト（進行中か完了）。無ければ null。</summary>
         public string RequiresQuest;
-        public bool IsEnterable => Type != PortalType.Spawn && Type != PortalType.Town && (To != null || ToPortal != null);
+        /// <summary>一方通行（雲の塔の窓の滑り台・おもちゃ箱の底へ落ちる穴）。着く先から戻るポータルは無い。</summary>
+        public bool OneWay;
+        public bool IsEnterable => Type != PortalType.Spawn && Type != PortalType.Town && Type != PortalType.Landing && (To != null || ToPortal != null);
     }
 
     public sealed class SpawnData { public string Mob; public double X, Y; public double IntervalSec; }
@@ -60,14 +64,23 @@ namespace Lumina.Core.World
         public int MinLevel; public long Fee; public bool OneWay;
     }
 
+    /// <summary>タクシー（行き先がいくつもある乗り物）。初心者（0 次）は料金 ÷ BeginnerDiv。</summary>
+    public sealed class TaxiData
+    {
+        public sealed class Dest { public string To, ToPortal; public long Fee; }
+        public readonly List<Dest> Dests = new List<Dest>();
+        public int BeginnerDiv = 10;
+    }
+
     public sealed class NpcData
     {
         public string Id, Name, Shop;
-        /// <summary>見た目・会話の手がかり（weapon / armor / potion / storage / taxi / guide / job）。無ければ null</summary>
+        /// <summary>見た目・会話の手がかり（weapon / armor / potion / general / storage / taxi / pet / craft / guide / job）。無ければ null</summary>
         public string Role;
         public double X, Y;
         public int InnFee = -1;          // 宿屋（休むと HP/MP 全回復）の料金。-1 = 宿屋でない
         public TravelData Travel;
+        public TaxiData Taxi;
     }
     public sealed class MapObjectData { public string Id, Name; public double X, Y; }
 
@@ -132,7 +145,7 @@ namespace Lumina.Core.World
                 m.Portals.Add(new PortalData
                 {
                     Name = J.Str(r, "name"), Type = J.Str(r, "type", PortalType.Visible), To = J.Str(r, "to"), ToPortal = J.Str(r, "toPortal"),
-                    X = J.Num(r, "x"), Y = J.Num(r, "y"), RequiresQuest = J.Str(r, "requiresQuest"),
+                    X = J.Num(r, "x"), Y = J.Num(r, "y"), RequiresQuest = J.Str(r, "requiresQuest"), OneWay = J.Bool(r, "oneWay"),
                 });
             }
             foreach (var o in J.Arr(d, "spawns"))
@@ -157,6 +170,16 @@ namespace Lumina.Core.World
                         To = J.Str(tr, "to"), ToPortal = J.Str(tr, "toPortal"), RequiresQuest = J.Str(tr, "requiresQuest"),
                         MinLevel = J.Int(tr, "minLevel"), Fee = J.Long(tr, "fee"), OneWay = J.Bool(tr, "oneWay"),
                     };
+                }
+                var tx = J.Obj(r, "taxi");
+                if (tx != null)
+                {
+                    npc.Taxi = new TaxiData { BeginnerDiv = Math.Max(1, J.Int(tx, "beginnerDiv", 10)) };
+                    foreach (var o2 in J.Arr(tx, "dests"))
+                    {
+                        var dd = (Dictionary<string, object>)o2;
+                        npc.Taxi.Dests.Add(new TaxiData.Dest { To = J.Str(dd, "to"), ToPortal = J.Str(dd, "toPortal"), Fee = J.Long(dd, "fee") });
+                    }
                 }
                 m.Npcs.Add(npc);
             }

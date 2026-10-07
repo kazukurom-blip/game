@@ -27,6 +27,20 @@ namespace Lumina.Core.Game
         MobSkillHit,    // 技が主人公に当たった
         MobSummoned,    // 手下を呼んだ（Id = 呼ばれた敵の ID）
         BossPhase,      // ボスの段階が変わった（Value = 段階（0〜）、Text = 段階の名前、Id = ボスの ID）
+        // 町と成長の仕組み（GameSession.Town / Jobs / Rooms / Pets）
+        StorageChanged, // 倉庫に預けた・取り出した・枠を増やした（Id = アイテム、Value = 数 / お金）
+        Crafted,        // 製作・精錬した（Id = できた物）
+        ChestOpened,    // 毎日の宝箱を開けた（Id = 調べる物の ID）
+        SatDown, StoodUp, // 椅子に座った（Id = 椅子）・立った
+        PetAdopted, PetFed, PetCloseness, PetTrick, PetHungry, PetUsedPotion, // ペット（Id = 種類、Value = 親密度 Lv など）
+        RoomEntered,    // ボスの間・ダンジョン・試験の部屋に入った（Id = マップ、Value = 制限時間（秒）、Text = 今日あと何回）
+        RoomTimeUp,     // 制限時間が切れて外へ出された
+        RoomFailed,     // 試験の部屋を出た・時間切れでやり直し（試しの珠が消えた）
+        DungeonCleared, // 1 人用ダンジョンの主を倒した（Id = マップ）
+        BossKilled,     // ボス・大ボスを倒した（Id = 敵）
+        QuizQuestion,   // クイズの問題（Id = 問題の ID、Value = 何問目（1〜）、Text = 問題）
+        QuizAnswered,   // 答えた（Value = 1 正解 / 0 不正解）
+        QuizCleared,    // 全問正解
     }
 
     public struct GameEvent

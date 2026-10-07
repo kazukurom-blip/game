@@ -109,24 +109,55 @@ namespace Lumina.Core.Save
             catch (Exception e) { problem = "読めない: " + e.Message; return null; }
         }
 
+        /// <summary>中身の確かめ方（読めれば null、読めなければ理由）。</summary>
+        private static string CheckSave(string body)
+        {
+            try { SaveSerializer.FromJson(body); return null; }
+            catch (SaveFormatException e) { return e.Message; }
+            catch (Exception e) { return "読めない: " + e.Message; }
+        }
+
+        private string TryReadText(string path, Func<string, string> check, out long seq, out string problem)
+        {
+            var body = Unwrap(fs.ReadAll(path), out seq, out problem);
+            if (body == null) return null;
+            problem = check?.Invoke(body);
+            return problem == null ? body : null;
+        }
+
         // ---------------- 保存
 
         public SaveResult Save(string slot, SaveData data)
+        {
+            return SaveCore(slot, seq =>
+            {
+                data.Seq = seq;
+                data.Version = SaveMigrations.CurrentVersion;
+                return SaveSerializer.ToJson(data);
+            }, CheckSave);
+        }
+
+        /// <summary>
+        /// セーブと同じ書き方（.tmp → 確かめる → bak1〜3 → 置き換え）で、ほかの中身（倉庫を入れた「アカウント」など）を保存する。
+        /// check は読み直した中身の確かめ方（読めれば null）。
+        /// </summary>
+        public SaveResult SaveText(string slot, string body, Func<string, string> check = null) => SaveCore(slot, _ => body, check);
+
+        private SaveResult SaveCore(string slot, Func<long, string> makeBody, Func<string, string> check)
         {
             string main = MainPath(slot), tmp = TmpPath(slot);
             try
             {
                 fs.EnsureDirectory(dir);
                 long seq = Math.Max(SeqOf(main), SeqOf(tmp)) + 1;
-                data.Seq = seq;
-                data.Version = SaveMigrations.CurrentVersion;
-                string text = Wrap(SaveSerializer.ToJson(data), seq);
+                string text = Wrap(makeBody(seq), seq);
                 var bytes = Encoding.UTF8.GetBytes(text);
 
                 // 1. 一時ファイルに書く（fsync まで）
                 fs.WriteAllDurable(tmp, bytes);
                 // 2. 読み直して確かめる
-                if (TryRead(tmp, out long check, out string problem) == null || check != seq)
+                long check2;
+                if (TryReadText(tmp, check, out check2, out string problem) == null || check2 != seq)
                     return new SaveResult { Ok = false, Error = "書いたファイルを確かめられない: " + problem };
                 // 3〜5. バックアップを 1 つずつ後ろへ
                 string bLast = BakPath(slot, Backups);
@@ -137,7 +168,7 @@ namespace Lumina.Core.Save
                     if (fs.Exists(b)) fs.MoveReplace(b, BakPath(slot, i + 1));
                 }
                 // 6. 今のセーブ（壊れていなければ）を bak1 へ
-                if (fs.Exists(main) && TryRead(main, out _, out _) != null) fs.Copy(main, BakPath(slot, 1));
+                if (fs.Exists(main) && TryReadText(main, check, out _, out _) != null) fs.Copy(main, BakPath(slot, 1));
                 // 7. 一度に置き換え
                 fs.MoveReplace(tmp, main);
                 return new SaveResult { Ok = true, Seq = seq };
@@ -183,6 +214,24 @@ namespace Lumina.Core.Save
             r.Source = bestSrc;
             r.Recovered = best != null && bestSrc != "main";
             return r;
+        }
+
+        /// <summary>SaveText で保存した中身を読む（Load と同じ順番: 今と .tmp の新しい方 → bak1〜3）。無ければ null。</summary>
+        public string LoadText(string slot, Func<string, string> check = null)
+        {
+            string best = null; long bestSeq = -1;
+            foreach (var path in new[] { MainPath(slot), TmpPath(slot) })
+            {
+                if (!fs.Exists(path)) continue;
+                var body = TryReadText(path, check, out long seq, out _);
+                if (body != null && seq > bestSeq) { best = body; bestSeq = seq; }
+            }
+            for (int i = 1; i <= Backups && best == null; i++)
+            {
+                string path = BakPath(slot, i);
+                if (fs.Exists(path)) best = TryReadText(path, check, out _, out _);
+            }
+            return best;
         }
 
         public void Delete(string slot)

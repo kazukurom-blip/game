@@ -18617,6 +18617,450 @@
    "quest": true
   },
   {
+   "id": "special.job.recommend",
+   "name": "推薦状",
+   "tab": "special",
+   "maxStack": 1,
+   "price": 0,
+   "quest": true,
+   "desc": "2 次の試験官への推薦状"
+  },
+  {
+   "id": "special.job.proof",
+   "name": "試験の証",
+   "tab": "special",
+   "maxStack": 1,
+   "price": 0,
+   "quest": true,
+   "desc": "2 次の試験に受かった証。転職官に渡して 2 次の職を選ぶ"
+  },
+  {
+   "id": "special.dark_crystal",
+   "name": "闇の水晶",
+   "tab": "special",
+   "maxStack": 1,
+   "price": 0,
+   "quest": true,
+   "desc": "賢者の石に捧げる。クイズを間違えると失う"
+  },
+  {
+   "id": "special.key.seal",
+   "name": "封印の鍵",
+   "tab": "special",
+   "maxStack": 1,
+   "price": 0,
+   "quest": true,
+   "desc": "封印の間（V618）に入れる"
+  },
+  {
+   "id": "special.key.time",
+   "name": "時の鍵",
+   "tab": "special",
+   "maxStack": 1,
+   "price": 0,
+   "quest": true,
+   "desc": "時の門（T117）に入れる"
+  },
+  {
+   "id": "special.key.flame_eye",
+   "name": "焔の目",
+   "tab": "special",
+   "maxStack": 1,
+   "price": 0,
+   "quest": true,
+   "desc": "焔の祭壇（H107）に入れる"
+  },
+  {
+   "id": "special.key.black_dragon",
+   "name": "黒竜の洞くつの通行証",
+   "tab": "special",
+   "maxStack": 1,
+   "price": 0,
+   "quest": true,
+   "desc": "黒竜の洞くつ 最奥（D114）に入れる"
+  },
+  {
+   "id": "special.key.star_throne",
+   "name": "星の玉座の鍵",
+   "tab": "special",
+   "maxStack": 1,
+   "price": 0,
+   "quest": true,
+   "desc": "星の玉座（E108）に入れる"
+  },
+  {
+   "id": "use.master_book.20",
+   "name": "極意の書 20",
+   "tab": "use",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 5000,
+   "masterBook": {
+    "cap": 20,
+    "rate": 0.7
+   }
+  },
+  {
+   "id": "use.master_book.30",
+   "name": "極意の書 30",
+   "tab": "use",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 10000,
+   "masterBook": {
+    "cap": 30,
+    "rate": 0.5
+   }
+  },
+  {
+   "id": "use.taxi_ticket",
+   "name": "タクシーの回数券",
+   "tab": "use",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 100,
+   "ticket": "taxi"
+  },
+  {
+   "id": "use.ship_ticket",
+   "name": "雲の船の切符",
+   "tab": "use",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 250,
+   "ticket": "ship"
+  },
+  {
+   "id": "use.pet.puppy",
+   "name": "子犬",
+   "tab": "use",
+   "maxStack": 1,
+   "price": 10000,
+   "sellPrice": 0,
+   "pet": "puppy"
+  },
+  {
+   "id": "use.pet.kitten",
+   "name": "子猫",
+   "tab": "use",
+   "maxStack": 1,
+   "price": 10000,
+   "sellPrice": 0,
+   "pet": "kitten"
+  },
+  {
+   "id": "use.pet.bunny",
+   "name": "子うさぎ",
+   "tab": "use",
+   "maxStack": 1,
+   "price": 10000,
+   "sellPrice": 0,
+   "pet": "bunny"
+  },
+  {
+   "id": "use.pet.panda",
+   "name": "子パンダ",
+   "tab": "use",
+   "maxStack": 1,
+   "price": 10000,
+   "sellPrice": 0,
+   "pet": "panda"
+  },
+  {
+   "id": "use.pet.penguin",
+   "name": "子ペンギン",
+   "tab": "use",
+   "maxStack": 1,
+   "price": 10000,
+   "sellPrice": 0,
+   "pet": "penguin"
+  },
+  {
+   "id": "use.pet.dragon",
+   "name": "子竜",
+   "tab": "use",
+   "maxStack": 1,
+   "price": 0,
+   "sellPrice": 0,
+   "pet": "dragon"
+  },
+  {
+   "id": "use.pet_name_tag",
+   "name": "ペットの名札",
+   "tab": "use",
+   "maxStack": 100,
+   "price": 1000,
+   "sellPrice": 0,
+   "desc": "ペットの名前を変える"
+  },
+  {
+   "id": "use.petskill.pickup",
+   "name": "ペットの技の本「自動で拾う」",
+   "tab": "use",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 0,
+   "petSkill": "pickup"
+  },
+  {
+   "id": "use.petskill.range",
+   "name": "ペットの技の本「拾う範囲を広げる」",
+   "tab": "use",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 0,
+   "petSkill": "range"
+  },
+  {
+   "id": "use.petskill.potion",
+   "name": "ペットの技の本「自動で HP/MP 薬」",
+   "tab": "use",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 0,
+   "petSkill": "potion"
+  },
+  {
+   "id": "setup.chair.windmill",
+   "name": "風車の椅子",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "sellPrice": 1,
+   "chair": {
+    "regenMul": 1.5
+   }
+  },
+  {
+   "id": "setup.chair.pegasus",
+   "name": "天馬の羽の椅子",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "sellPrice": 1,
+   "chair": {
+    "regenMul": 1.5
+   }
+  },
+  {
+   "id": "setup.chair.cloud",
+   "name": "雲のクッション",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "sellPrice": 1,
+   "chair": {
+    "regenMul": 1.5
+   }
+  },
+  {
+   "id": "setup.chair.wood",
+   "name": "木の長椅子",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 50000,
+   "sellPrice": 1,
+   "chair": {
+    "regenMul": 1.5
+   }
+  },
+  {
+   "id": "etc.plate.bronze",
+   "name": "青銅の板",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 150
+  },
+  {
+   "id": "etc.plate.iron",
+   "name": "鉄の板",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 250
+  },
+  {
+   "id": "etc.plate.silver",
+   "name": "銀の板",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 400
+  },
+  {
+   "id": "etc.plate.mithril",
+   "name": "ミスリルの板",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 1000
+  },
+  {
+   "id": "etc.plate.gold",
+   "name": "金の板",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 2500
+  },
+  {
+   "id": "etc.plate.adaman",
+   "name": "アダマンの板",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 5000
+  },
+  {
+   "id": "etc.plate.starsteel",
+   "name": "星鉄の板",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 25000
+  },
+  {
+   "id": "etc.jewel.0",
+   "name": "ガーネット",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 2500
+  },
+  {
+   "id": "etc.jewel.1",
+   "name": "アメジスト",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 3000
+  },
+  {
+   "id": "etc.jewel.2",
+   "name": "アクアマリン",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 3500
+  },
+  {
+   "id": "etc.jewel.3",
+   "name": "エメラルド",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 4000
+  },
+  {
+   "id": "etc.jewel.4",
+   "name": "オパール",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 4500
+  },
+  {
+   "id": "etc.jewel.5",
+   "name": "サファイア",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 5000
+  },
+  {
+   "id": "etc.jewel.6",
+   "name": "トパーズ",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 5500
+  },
+  {
+   "id": "etc.jewel.7",
+   "name": "ダイヤモンド",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 6000
+  },
+  {
+   "id": "etc.jewel.8",
+   "name": "黒水晶",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 6500
+  },
+  {
+   "id": "etc.medal.V516",
+   "name": "試練のメダル（裏路地）",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 1
+  },
+  {
+   "id": "etc.medal.T121",
+   "name": "試練のメダル（からくり）",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 1
+  },
+  {
+   "id": "etc.medal.T122",
+   "name": "試練のメダル（迷路）",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 1
+  },
+  {
+   "id": "etc.medal.C119",
+   "name": "試練のメダル（雲）",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 1
+  },
+  {
+   "id": "etc.medal.M115",
+   "name": "試練のメダル（沈没船）",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 1
+  },
+  {
+   "id": "etc.medal.D117",
+   "name": "試練のメダル（竜の巣）",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 1
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.craft.mithril_gauntlet",
+   "name": "ミスリルの小手",
+   "slot": "gloves",
+   "job": "warrior",
+   "reqLevel": 50,
+   "reqStat": "STR",
+   "reqValue": 135,
+   "stats": {
+    "wdef": 15,
+    "mdef": 3,
+    "watk": 2
+   },
+   "upgrades": 5,
+   "price": 0,
+   "sellPrice": 6000,
+   "desc": "製作（鍛冶屋カジ）"
+  },
+  {
    "tab": "equip",
    "maxStack": 1,
    "id": "eq.unique.M007",
@@ -18835,60 +19279,6 @@
    },
    "upgrades": 5,
    "price": 0,
-   "desc": "固有品"
-  },
-  {
-   "id": "etc.unique.M068",
-   "name": "試練のメダル",
-   "tab": "etc",
-   "maxStack": 100,
-   "price": 0,
-   "sellPrice": 1500,
-   "desc": "固有品"
-  },
-  {
-   "id": "etc.unique.M161",
-   "name": "試練のメダル",
-   "tab": "etc",
-   "maxStack": 100,
-   "price": 0,
-   "sellPrice": 2500,
-   "desc": "固有品"
-  },
-  {
-   "id": "etc.unique.M162",
-   "name": "試練のメダル",
-   "tab": "etc",
-   "maxStack": 100,
-   "price": 0,
-   "sellPrice": 3000,
-   "desc": "固有品"
-  },
-  {
-   "id": "etc.unique.M118",
-   "name": "試練のメダル",
-   "tab": "etc",
-   "maxStack": 100,
-   "price": 0,
-   "sellPrice": 3500,
-   "desc": "固有品"
-  },
-  {
-   "id": "etc.unique.M188",
-   "name": "試練のメダル",
-   "tab": "etc",
-   "maxStack": 100,
-   "price": 0,
-   "sellPrice": 4500,
-   "desc": "固有品"
-  },
-  {
-   "id": "etc.unique.M213",
-   "name": "試練のメダル",
-   "tab": "etc",
-   "maxStack": 100,
-   "price": 0,
-   "sellPrice": 6000,
    "desc": "固有品"
   }
  ]

@@ -4,6 +4,8 @@
 //   - 足場: 点は左から右へ・坂は 45 度まで・マップの中
 //   - ポータル: 足場の上・名前が重ならない・行き先のマップと着く先がある・戻りのポータルが「こちらへ」向いている（両方向）
 //               maps.mjs のつながりと同じ（歩いて行けるポータルの行き先の組が一致）
+//               一方通行（oneWay: 滑り台・落とし穴）は戻りが要らない。着く先は landing（着くだけの位置）か、ふつうのポータル。
+//               landing はどこかの一方通行のポータルの着く先になっている（使われない landing は間違い）
 //   - 湧く所・強敵・NPC・調べる物: 足場の上。maps.mjs の「出る敵」と湧く所が一致
 //   - 縄・はしご: 上端に足場がある（上りきると立てる）・下端に下の足場から ↑ で届く
 //   - 段差: 上の足場と真下の足場の差が 64〜80 px の「跳べそうで跳べない」所が無い（縄・はしごで結ばれていれば可）
@@ -346,7 +348,7 @@ export function checkWorld(maps, raw) {
     if (!r) { out.push(`${id}: maps.mjs に無いマップ`); continue; }
     out.push(...checkMap(m, { mobs: r[5] }));
     // つながり（maps.mjs のとおり）
-    const have = [...new Set((m.portals || []).filter((p) => p.to).map((p) => p.to))].sort().join(',');
+    const have = [...new Set((m.portals || []).filter((p) => p.to && !p.oneWay).map((p) => p.to))].sort().join(',');
     const want = [...r[4]].sort().join(',');
     if (have !== want) out.push(`${id}: ポータルの行き先 [${have}] が maps.mjs のつながり [${want}] と違う`);
     // 両方向
@@ -356,10 +358,26 @@ export function checkWorld(maps, raw) {
       if (!dst) { out.push(`${id}: ポータル ${p.name} の行き先 ${p.to} が無い`); continue; }
       const back = (dst.portals || []).find((q) => q.name === p.toPortal);
       if (!back) { out.push(`${id}: ポータル ${p.name} の着く先 ${p.to}.${p.toPortal} が無い`); continue; }
+      if (p.oneWay) {
+        // 一方通行: 戻りは要らない。ただし着く先が「こちらへ戻るポータル」なら一方通行ではない
+        if (back.to === id && back.toPortal === p.name) out.push(`${id}: ${p.name} は一方通行なのに ${p.to}.${p.toPortal} から戻れる`);
+        continue;
+      }
+      if (back.type === 'landing') { out.push(`${id}: ${p.name} は一方通行でないのに着く先 ${p.to}.${p.toPortal} が landing`); continue; }
       if (back.to !== id || back.toPortal !== p.name) out.push(`${id}: ${p.name} → ${p.to}.${p.toPortal} の戻りが ${back.to}.${back.toPortal}（${id}.${p.name} であるべき）`);
     }
     if (m.returnMap && (!maps[m.returnMap] || maps[m.returnMap].type !== '町')) out.push(`${id}: 戻る町 ${m.returnMap} が町でない`);
+    for (const p of m.portals || []) {
+      if (p.type !== 'landing') continue;
+      const used = Object.values(maps).some((mm) => (mm.portals || []).some((q) => q.oneWay && (q.to || mm.id) === id && q.toPortal === p.name));
+      if (!used) out.push(`${id}: 着く位置 ${p.name} へ来る一方通行のポータルが無い`);
+    }
     for (const n of m.npcs || []) {
+      for (const d of n.taxi?.dests || []) {
+        const t = maps[d.to];
+        if (!t) out.push(`${id}: タクシー ${n.id} の行き先 ${d.to} が無い`);
+        else if (d.toPortal && !(t.portals || []).some((q) => q.name === d.toPortal)) out.push(`${id}: タクシー ${n.id} の着く先 ${d.to}.${d.toPortal} が無い`);
+      }
       if (n.travel) {
         const t = maps[n.travel.to];
         if (!t) out.push(`${id}: NPC ${n.id} の乗り物の行き先 ${n.travel.to} が無い`);
@@ -386,11 +404,11 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const { MAPS_RAW } = await import('../../../../classic/tools/data/maps.mjs');
   const maps = readMapsDir(path.resolve(HERE, '../../maps'));
   const problems = checkWorld(maps, MAPS_RAW);
-  let segs = 0, ropes = 0, spawns = 0;
-  for (const m of Object.values(maps)) { segs += m.footholds.length; ropes += (m.ropes || []).length; spawns += (m.spawns || []).length; }
+  let segs = 0, ropes = 0, spawns = 0, oneWay = 0;
+  for (const m of Object.values(maps)) { segs += m.footholds.length; ropes += (m.ropes || []).length; spawns += (m.spawns || []).length; oneWay += (m.portals || []).filter((p) => p.oneWay).length; }
   if (problems.length) {
     console.error(`問題 ${problems.length} 件:\n  ` + problems.slice(0, 200).join('\n  '));
     process.exit(1);
   }
-  console.log(`検査 OK: マップ ${Object.keys(maps).length}（足場 ${segs}・縄/はしご ${ropes}・湧く所 ${spawns}）。どのポータルからも全部の足場に行ける・ポータルは両方向・湧く所は足場の上・跳べない段差なし`);
+  console.log(`検査 OK: マップ ${Object.keys(maps).length}（足場 ${segs}・縄/はしご ${ropes}・湧く所 ${spawns}・一方通行 ${oneWay}）。どのポータルからも全部の足場に行ける・ポータルは両方向（一方通行を除く）・湧く所は足場の上・跳べない段差なし`);
 }

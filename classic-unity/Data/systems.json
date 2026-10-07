@@ -1,0 +1,1037 @@
+{
+ "note": "Data/tools/systems.mjs から書き出した（倉庫・部屋の決まり・ペット・製作・クイズ・転職の試験・毎日の宝箱）。手で直さない。",
+ "storage": {
+  "startSlots": 16,
+  "maxSlots": 48,
+  "step": 4,
+  "expandBase": 10000,
+  "fee": 100,
+  "shared": true
+ },
+ "rooms": [
+  {
+   "map": "V309",
+   "kind": "boss",
+   "perDay": 3,
+   "timeSec": 1800,
+   "exit": "V307",
+   "requiresQuest": "W-15",
+   "fresh": true
+  },
+  {
+   "map": "V412",
+   "kind": "boss",
+   "perDay": 3,
+   "timeSec": 1800,
+   "exit": "V411",
+   "fresh": true
+  },
+  {
+   "map": "V512",
+   "kind": "boss",
+   "perDay": 3,
+   "timeSec": 1800,
+   "exit": "V511",
+   "fresh": true
+  },
+  {
+   "map": "V618",
+   "kind": "boss",
+   "perDay": 2,
+   "timeSec": 1800,
+   "exit": "V617",
+   "requiresItem": "special.key.seal",
+   "fresh": true
+  },
+  {
+   "map": "C116",
+   "kind": "boss",
+   "perDay": 2,
+   "timeSec": 1800,
+   "exit": "C115",
+   "fresh": true
+  },
+  {
+   "map": "F110",
+   "kind": "boss",
+   "perDay": 2,
+   "timeSec": 1800,
+   "exit": "F109",
+   "fresh": true
+  },
+  {
+   "map": "T117",
+   "kind": "boss",
+   "perDay": 2,
+   "timeSec": 1200,
+   "exit": "T116",
+   "requiresItem": "special.key.time",
+   "fresh": true
+  },
+  {
+   "map": "M112",
+   "kind": "boss",
+   "perDay": 2,
+   "timeSec": 1200,
+   "exit": "M111",
+   "fresh": true
+  },
+  {
+   "map": "P109",
+   "kind": "boss",
+   "perDay": 2,
+   "timeSec": 1500,
+   "exit": "P108",
+   "fresh": true
+  },
+  {
+   "map": "H107",
+   "kind": "boss",
+   "perDay": 1,
+   "timeSec": 2700,
+   "exit": "H106",
+   "requiresItem": "special.key.flame_eye",
+   "fresh": true
+  },
+  {
+   "map": "D114",
+   "kind": "boss",
+   "perDay": 1,
+   "period": "week",
+   "timeSec": 3600,
+   "exit": "D113",
+   "requiresItem": "special.key.black_dragon",
+   "fresh": true
+  },
+  {
+   "map": "E108",
+   "kind": "boss",
+   "perDay": 1,
+   "period": "week",
+   "timeSec": 3600,
+   "exit": "E107",
+   "requiresItem": "special.key.star_throne",
+   "fresh": true
+  },
+  {
+   "map": "V516",
+   "kind": "dungeon",
+   "perDay": 5,
+   "timeSec": 1200,
+   "exit": "V515",
+   "lv": [
+    21,
+    30
+   ],
+   "clearMob": "M068",
+   "medal": "etc.medal.V516",
+   "fresh": true
+  },
+  {
+   "map": "T121",
+   "kind": "dungeon",
+   "perDay": 5,
+   "timeSec": 1800,
+   "exit": "T118",
+   "lv": [
+    35,
+    50
+   ],
+   "clearMob": "M161",
+   "medal": "etc.medal.T121",
+   "fresh": true
+  },
+  {
+   "map": "T122",
+   "kind": "dungeon",
+   "perDay": 5,
+   "timeSec": 900,
+   "exit": "T119",
+   "lv": [
+    51,
+    70
+   ],
+   "clearMob": "M162",
+   "medal": "etc.medal.T122",
+   "fresh": true
+  },
+  {
+   "map": "C119",
+   "kind": "dungeon",
+   "perDay": 5,
+   "timeSec": 2700,
+   "exit": "C117",
+   "lv": [
+    51,
+    70
+   ],
+   "clearMob": "M118",
+   "medal": "etc.medal.C119",
+   "fresh": true
+  },
+  {
+   "map": "M115",
+   "kind": "dungeon",
+   "perDay": 5,
+   "timeSec": 1800,
+   "exit": "M114",
+   "lv": [
+    70,
+    90
+   ],
+   "clearMob": "M188",
+   "medal": "etc.medal.M115",
+   "fresh": true
+  },
+  {
+   "map": "D117",
+   "kind": "dungeon",
+   "perDay": 5,
+   "timeSec": 1800,
+   "exit": "D116",
+   "lv": [
+    100,
+    120
+   ],
+   "clearMob": "M213",
+   "medal": "etc.medal.D117",
+   "fresh": true
+  },
+  {
+   "map": "V413",
+   "kind": "test",
+   "timeSec": 1200,
+   "exit": "V400",
+   "timerQuest": "J1-3",
+   "resetItems": [
+    "etc.M301"
+   ]
+  },
+  {
+   "map": "V311",
+   "kind": "test",
+   "timeSec": 1200,
+   "exit": "V300",
+   "timerQuest": "J2-3",
+   "resetItems": [
+    "etc.M301"
+   ]
+  },
+  {
+   "map": "V211",
+   "kind": "test",
+   "timeSec": 1200,
+   "exit": "V200",
+   "timerQuest": "J3-3",
+   "resetItems": [
+    "etc.M301"
+   ]
+  },
+  {
+   "map": "V513",
+   "kind": "test",
+   "timeSec": 1200,
+   "exit": "V500",
+   "timerQuest": "J4-3",
+   "resetItems": [
+    "etc.M301"
+   ]
+  },
+  {
+   "map": "V108",
+   "kind": "test",
+   "timeSec": 1200,
+   "exit": "V107",
+   "timerQuest": "J5-3",
+   "resetItems": [
+    "etc.M301"
+   ]
+  },
+  {
+   "map": "F118",
+   "kind": "test",
+   "timeSec": 1200,
+   "exit": "F117",
+   "requiresAnyQuest": [
+    "J1-6",
+    "J2-6",
+    "J3-6",
+    "J4-6",
+    "J5-6"
+   ],
+   "timerQuest": "any",
+   "fresh": true
+  }
+ ],
+ "pets": {
+  "kinds": [
+   {
+    "id": "puppy",
+    "name": "子犬"
+   },
+   {
+    "id": "kitten",
+    "name": "子猫"
+   },
+   {
+    "id": "bunny",
+    "name": "子うさぎ"
+   },
+   {
+    "id": "panda",
+    "name": "子パンダ"
+   },
+   {
+    "id": "penguin",
+    "name": "子ペンギン"
+   },
+   {
+    "id": "dragon",
+    "name": "子竜",
+    "grownName": "竜",
+    "growAt": 30
+   }
+  ],
+  "fullnessMax": 100,
+  "hungerSec": 36,
+  "foodItem": "use.pet_food",
+  "foodFullness": 30,
+  "closenessMax": 30,
+  "pointsPerLevel": 3,
+  "feedPoints": 3,
+  "trickPoints": 1,
+  "trickChance": 0.6,
+  "trickCooldown": 10,
+  "walkPointSec": 300,
+  "starvePenaltySec": 600,
+  "pickupRange": 80,
+  "pickupRangeWide": 200,
+  "pickupInterval": 0.2,
+  "potionHpPct": 0.5,
+  "potionMpPct": 0.3,
+  "followGap": 36,
+  "tricks": [
+   "お座り",
+   "お手",
+   "ふせ",
+   "くるりと回る",
+   "ジャンプ",
+   "寝たふり"
+  ]
+ },
+ "crafts": [
+  {
+   "id": "refine.bronze",
+   "npc": "kaji",
+   "in": [
+    {
+     "item": "etc.ore.bronze",
+     "count": 10
+    }
+   ],
+   "fee": 300,
+   "out": {
+    "item": "etc.plate.bronze",
+    "count": 1
+   }
+  },
+  {
+   "id": "refine.iron",
+   "npc": "kaji",
+   "in": [
+    {
+     "item": "etc.ore.iron",
+     "count": 10
+    }
+   ],
+   "fee": 500,
+   "out": {
+    "item": "etc.plate.iron",
+    "count": 1
+   }
+  },
+  {
+   "id": "refine.silver",
+   "npc": "kaji",
+   "in": [
+    {
+     "item": "etc.ore.silver",
+     "count": 10
+    }
+   ],
+   "fee": 800,
+   "out": {
+    "item": "etc.plate.silver",
+    "count": 1
+   }
+  },
+  {
+   "id": "refine.mithril",
+   "npc": "kaji",
+   "in": [
+    {
+     "item": "etc.ore.mithril",
+     "count": 10
+    }
+   ],
+   "fee": 2000,
+   "out": {
+    "item": "etc.plate.mithril",
+    "count": 1
+   }
+  },
+  {
+   "id": "craft.mithril_gauntlet",
+   "npc": "kaji",
+   "in": [
+    {
+     "item": "etc.plate.mithril",
+     "count": 5
+    },
+    {
+     "item": "etc.M079",
+     "count": 30
+    }
+   ],
+   "fee": 30000,
+   "out": {
+    "item": "eq.craft.mithril_gauntlet",
+    "count": 1
+   }
+  },
+  {
+   "id": "gem.0",
+   "npc": "nez",
+   "in": [
+    {
+     "item": "etc.gem.0",
+     "count": 10
+    }
+   ],
+   "fee": 500,
+   "out": {
+    "item": "etc.jewel.0",
+    "count": 1
+   }
+  },
+  {
+   "id": "gem.1",
+   "npc": "nez",
+   "in": [
+    {
+     "item": "etc.gem.1",
+     "count": 10
+    }
+   ],
+   "fee": 1000,
+   "out": {
+    "item": "etc.jewel.1",
+    "count": 1
+   }
+  },
+  {
+   "id": "gem.2",
+   "npc": "nez",
+   "in": [
+    {
+     "item": "etc.gem.2",
+     "count": 10
+    }
+   ],
+   "fee": 1500,
+   "out": {
+    "item": "etc.jewel.2",
+    "count": 1
+   }
+  },
+  {
+   "id": "gem.3",
+   "npc": "nez",
+   "in": [
+    {
+     "item": "etc.gem.3",
+     "count": 10
+    }
+   ],
+   "fee": 2000,
+   "out": {
+    "item": "etc.jewel.3",
+    "count": 1
+   }
+  },
+  {
+   "id": "gem.4",
+   "npc": "nez",
+   "in": [
+    {
+     "item": "etc.gem.4",
+     "count": 10
+    }
+   ],
+   "fee": 2500,
+   "out": {
+    "item": "etc.jewel.4",
+    "count": 1
+   }
+  },
+  {
+   "id": "gem.5",
+   "npc": "nez",
+   "in": [
+    {
+     "item": "etc.gem.5",
+     "count": 10
+    }
+   ],
+   "fee": 3000,
+   "out": {
+    "item": "etc.jewel.5",
+    "count": 1
+   }
+  },
+  {
+   "id": "gem.6",
+   "npc": "nez",
+   "in": [
+    {
+     "item": "etc.gem.6",
+     "count": 10
+    }
+   ],
+   "fee": 3500,
+   "out": {
+    "item": "etc.jewel.6",
+    "count": 1
+   }
+  },
+  {
+   "id": "gem.7",
+   "npc": "nez",
+   "in": [
+    {
+     "item": "etc.gem.7",
+     "count": 10
+    }
+   ],
+   "fee": 4000,
+   "out": {
+    "item": "etc.jewel.7",
+    "count": 1
+   }
+  },
+  {
+   "id": "gem.8",
+   "npc": "nez",
+   "in": [
+    {
+     "item": "etc.gem.8",
+     "count": 10
+    }
+   ],
+   "fee": 5000,
+   "out": {
+    "item": "etc.jewel.8",
+    "count": 1
+   }
+  },
+  {
+   "id": "refine.gold",
+   "npc": "tsurara",
+   "in": [
+    {
+     "item": "etc.ore.gold",
+     "count": 10
+    }
+   ],
+   "fee": 5000,
+   "out": {
+    "item": "etc.plate.gold",
+    "count": 1
+   }
+  },
+  {
+   "id": "refine.adaman",
+   "npc": "tsurara",
+   "in": [
+    {
+     "item": "etc.ore.adaman",
+     "count": 10
+    }
+   ],
+   "fee": 8000,
+   "out": {
+    "item": "etc.plate.adaman",
+    "count": 1
+   }
+  },
+  {
+   "id": "refine.starsteel",
+   "npc": "doran",
+   "in": [
+    {
+     "item": "etc.ore.starsteel",
+     "count": 10
+    }
+   ],
+   "fee": 50000,
+   "out": {
+    "item": "etc.plate.starsteel",
+    "count": 1
+   }
+  },
+  {
+   "id": "craft.dark_crystal",
+   "npc": "jue",
+   "in": [
+    {
+     "item": "etc.jewel.8",
+     "count": 1
+    },
+    {
+     "item": "etc.M079",
+     "count": 10
+    }
+   ],
+   "fee": 10000,
+   "out": {
+    "item": "special.dark_crystal",
+    "count": 1
+   }
+  }
+ ],
+ "quiz": [
+  {
+   "id": "q1",
+   "q": "浜で目を覚ました主人公を村へ案内してくれた少年は？",
+   "choices": [
+    "案内人ルカ",
+    "漁師トビオ",
+    "教官バルド",
+    "船長カイ"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q2",
+   "q": "芽吹きの島から大陸へ渡る船が出る所は？",
+   "choices": [
+    "旅立ちの桟橋",
+    "しずくの洞窟",
+    "スライムの泉",
+    "村の訓練所"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q3",
+   "q": "大陸に着いた旅人が最初に降りる港町は？",
+   "choices": [
+    "ブリーズ港",
+    "マリナ",
+    "クロウ街",
+    "セレス"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q4",
+   "q": "弓使いの転職官がいる、風車の町は？",
+   "choices": [
+    "ポム丘",
+    "ガルド岩台",
+    "シルワ森都",
+    "ねむり谷"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q5",
+   "q": "大木の上にある魔法使いの町は？",
+   "choices": [
+    "シルワ森都",
+    "ティンクル",
+    "ポム丘",
+    "セレス"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q6",
+   "q": "戦士の転職官の名前は？",
+   "choices": [
+    "戦士長ドルガ",
+    "大魔導師オルフェ",
+    "影の頭領ヤミ",
+    "弓の師範エルナ"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q7",
+   "q": "盗賊の町クロウ街の地下を走っている物は？",
+   "choices": [
+    "地下鉄",
+    "雲の船",
+    "潜水船",
+    "そり"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q8",
+   "q": "海賊の転職官キャプテン・リオがいる船の名前は？",
+   "choices": [
+    "潮風号",
+    "雲の船",
+    "沈没船",
+    "竜の背"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q9",
+   "q": "2 次の転職の試験で 30 個集める物は？",
+   "choices": [
+    "試しの珠",
+    "黒いお守り",
+    "紅の印",
+    "闇の水晶"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q10",
+   "q": "1 次の転職ができる Lv（魔法使いを除く）は？",
+   "choices": [
+    "10",
+    "8",
+    "15",
+    "30"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q11",
+   "q": "魔法使いは Lv いくつから転職できる？",
+   "choices": [
+    "8",
+    "10",
+    "12",
+    "5"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q12",
+   "q": "3 次の転職ができる Lv は？",
+   "choices": [
+    "70",
+    "50",
+    "60",
+    "100"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q13",
+   "q": "ペットの満腹度を増やす物は？",
+   "choices": [
+    "ペットの餌",
+    "赤ポーション",
+    "帰還の書",
+    "強化の書"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q14",
+   "q": "倉庫に出し入れするといくらかかる？",
+   "choices": [
+    "100 ルド",
+    "無料",
+    "1,000 ルド",
+    "10 ルド"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q15",
+   "q": "死んだ時に経験値を失わずにすむ品は？",
+   "choices": [
+    "守りのお守り",
+    "万能薬",
+    "聖水",
+    "持ち物の袋"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q16",
+   "q": "毒を治す薬は？",
+   "choices": [
+    "解毒薬",
+    "目薬",
+    "聖水",
+    "温かい乳"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q17",
+   "q": "雲の上の白い町の名前は？",
+   "choices": [
+    "セレス",
+    "ヒョウガ村",
+    "ティンクル",
+    "マリナ"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q18",
+   "q": "3 次の転職の長老たちが住む、雪山の村は？",
+   "choices": [
+    "ヒョウガ村",
+    "ねむり谷",
+    "竜の背の村",
+    "ポム丘"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q19",
+   "q": "おもちゃ箱の中のような町は？",
+   "choices": [
+    "ティンクル",
+    "マリナ",
+    "クロウ街",
+    "セレス"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q20",
+   "q": "海の底の泡のドームの町は？",
+   "choices": [
+    "マリナ",
+    "ティンクル",
+    "ブリーズ港",
+    "ガルド岩台"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q21",
+   "q": "4 次の転職を授ける竜の大老の名前は？",
+   "choices": [
+    "ヴァルド",
+    "グレン",
+    "アストラ",
+    "ガロン"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q22",
+   "q": "「もう一人の自分」と戦う部屋がある所は？",
+   "choices": [
+    "修験の雪洞",
+    "雲の祭壇",
+    "時の門",
+    "封印の間"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q23",
+   "q": "キノコの女王が出る広場は？",
+   "choices": [
+    "キノコの広場",
+    "積み木の広場",
+    "地下の広間",
+    "溝の底"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q24",
+   "q": "書の成功率で、失敗すると装備が壊れることがあるのは？",
+   "choices": [
+    "呪いの書",
+    "100% の書",
+    "60% の書",
+    "10% の書"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q25",
+   "q": "盗賊の回避の上限は？",
+   "choices": [
+    "80%",
+    "30%",
+    "50%",
+    "100%"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q26",
+   "q": "町の中で立ち止まると、HP が回復する間隔は？",
+   "choices": [
+    "5 秒ごと",
+    "10 秒ごと",
+    "1 秒ごと",
+    "60 秒ごと"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q27",
+   "q": "椅子に座ると自然回復はどうなる？",
+   "choices": [
+    "1.5 倍になる",
+    "止まる",
+    "半分になる",
+    "変わらない"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q28",
+   "q": "にぎわい市場で、日替わりの依頼を出しているのは？",
+   "choices": [
+    "掲示板係ボード",
+    "古道具屋ホルン",
+    "宝石商ジュエ",
+    "占い師ヨミ"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q29",
+   "q": "セレスとヒョウガ村の間を結ぶ乗り物は？",
+   "choices": [
+    "タクシー（そり）",
+    "潜水船",
+    "大きな鳥",
+    "昇降機"
+   ],
+   "answer": 0
+  },
+  {
+   "id": "q30",
+   "q": "最後の地域「星の果て」の玉座にいるのは？",
+   "choices": [
+    "星を呑む者",
+    "三つ首の黒竜",
+    "焔の巨像",
+    "時計塔の魔物"
+   ],
+   "answer": 0
+  }
+ ],
+ "jobs": {
+  "lines": {
+   "warrior": "J1",
+   "magician": "J2",
+   "bowman": "J3",
+   "thief": "J4",
+   "pirate": "J5"
+  },
+  "tier2": {
+   "level": 30,
+   "proof": "special.job.proof"
+  },
+  "quiz": {
+   "count": 5,
+   "needItems": [
+    "etc.M300",
+    "special.dark_crystal"
+   ],
+   "loseOnWrong": "special.dark_crystal",
+   "stone": "F107.sage_stone"
+  },
+  "questDrops": [
+   {
+    "quest": "J1-9",
+    "mob": "M211",
+    "item": "etc.M211"
+   },
+   {
+    "quest": "J1-9",
+    "mob": "M212",
+    "item": "etc.M212"
+   },
+   {
+    "quest": "J2-9",
+    "mob": "M211",
+    "item": "etc.M211"
+   },
+   {
+    "quest": "J2-9",
+    "mob": "M212",
+    "item": "etc.M212"
+   },
+   {
+    "quest": "J3-9",
+    "mob": "M211",
+    "item": "etc.M211"
+   },
+   {
+    "quest": "J3-9",
+    "mob": "M212",
+    "item": "etc.M212"
+   },
+   {
+    "quest": "J4-9",
+    "mob": "M211",
+    "item": "etc.M211"
+   },
+   {
+    "quest": "J4-9",
+    "mob": "M212",
+    "item": "etc.M212"
+   },
+   {
+    "quest": "J5-9",
+    "mob": "M211",
+    "item": "etc.M211"
+   },
+   {
+    "quest": "J5-9",
+    "mob": "M212",
+    "item": "etc.M212"
+   }
+  ],
+  "inventoryPlus": 4
+ },
+ "chests": {
+  "T104.toybox": {
+   "meso": 2200,
+   "items": [
+    {
+     "item": "use.orange_potion",
+     "count": 5
+    },
+    {
+     "item": "use.blue_potion",
+     "count": 5
+    }
+   ]
+  },
+  "M107.chest": {
+   "meso": 9030,
+   "items": [
+    {
+     "item": "use.big_white_potion",
+     "count": 5
+    },
+    {
+     "item": "use.mana_elixir",
+     "count": 5
+    }
+   ]
+  }
+ }
+}

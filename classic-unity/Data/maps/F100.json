@@ -182,14 +182,16 @@
    "name": "武器屋ツララ",
    "x": 1328,
    "y": 352,
-   "role": "weapon"
+   "role": "weapon",
+   "shop": "shop.F100.weapon"
   },
   {
    "id": "mofu",
    "name": "防具屋モフ",
    "x": 1664,
    "y": 328,
-   "role": "armor"
+   "role": "armor",
+   "shop": "shop.F100.armor"
   },
   {
    "id": "danro",

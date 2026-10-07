@@ -224,14 +224,16 @@
    "name": "武器屋サンゴ",
    "x": 1248,
    "y": 532,
-   "role": "weapon"
+   "role": "weapon",
+   "shop": "shop.M100.weapon"
   },
   {
    "id": "kai_m",
    "name": "防具屋カイガラ",
    "x": 1632,
    "y": 532,
-   "role": "armor"
+   "role": "armor",
+   "shop": "shop.M100.armor"
   },
   {
    "id": "shizuku",
