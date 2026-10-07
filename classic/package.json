@@ -1,0 +1,12 @@
+{
+  "name": "luminaria-classic",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "ルミナリア・クラシック（classic/ 以下の新作。ビルド無し・ES Modules）",
+  "scripts": {
+    "serve": "http-server . -p 8701 -c-1",
+    "test:unit": "node tests/physics_unit.mjs && node tests/avatar_unit.mjs",
+    "shots": "node tests/shots.mjs"
+  }
+}
