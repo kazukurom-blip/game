@@ -323,7 +323,8 @@ const NPC_BY_NAME = new Map(NPCS.map(([id, name]) => [name, id]));
 
 // ---------------- 店（ITEMS.md 6 章。品ぞろえは systems.mjs）
 const shops = [
-  { id: 'shop.S003.general', name: '芽吹き村の雑貨屋', items: items.filter((i) => i.id.startsWith('eq.starter.') && i.price > 0).map((i) => ({ item: i.id })) },
+  // 練習用の弓を売るので矢も売る（島ではお金が少ないので小さな束）
+  { id: 'shop.S003.general', name: '芽吹き村の雑貨屋', items: [...items.filter((i) => i.id.startsWith('eq.starter.') && i.price > 0).map((i) => ({ item: i.id })), { item: 'use.arrow_bow', bundle: 200, price: 200 }] },
   { id: 'shop.S003.potion', name: '芽吹き村の薬屋', items: [{ item: 'use.red_potion' }, { item: 'use.blue_potion' }] },
 ];
 const townName = (mid) => MAPS_RAW.find((m) => m[0] === mid)?.[1] || mid;

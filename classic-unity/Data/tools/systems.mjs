@@ -68,7 +68,7 @@ const RETURN_V = ['V100', 'V200', 'V300', 'V400', 'V500', 'V600'].map((m) => `us
 const CURE = ['use.antidote', 'use.eye_drop', 'use.holy_water', 'use.all_cure'];
 // 町ごとの武器屋・防具屋。jobs と Lv の範囲で items.json の装備から選ぶ（Lv100・110 は売らない）
 export const TOWN_SHOPS = {
-  V100: { weapon: { npc: 'jan', jobs: ALL, lv: [10, 15] }, armor: { npc: 'mire', jobs: ALL, lv: [10, 15] } },
+  V100: { weapon: { npc: 'jan', jobs: ALL, lv: [10, 15], extra: ['use.arrow_bow', 'use.arrow_xbow', 'use.star_iron', 'use.bullet_lead'] }, armor: { npc: 'mire', jobs: ALL, lv: [10, 15] } },
   V200: { weapon: { npc: 'toma', jobs: ['bowman'], lv: [10, 35], extra: ['use.arrow_bow', 'use.arrow_xbow', 'use.bronze_arrow_bow', 'use.bronze_arrow_xbow'] },
     armor: { npc: 'lana', jobs: ['bowman'], lv: [10, 35] } },
   V300: { weapon: { npc: 'mint', jobs: ['magician'], lv: [8, 35] }, armor: { npc: 'fio', jobs: ['magician'], lv: [10, 35], shields: [30] } },

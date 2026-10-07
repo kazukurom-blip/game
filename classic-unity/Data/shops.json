@@ -34,6 +34,11 @@
     },
     {
      "item": "eq.starter.13"
+    },
+    {
+     "item": "use.arrow_bow",
+     "bundle": 200,
+     "price": 200
     }
    ]
   },
@@ -694,6 +699,18 @@
     },
     {
      "item": "eq.warrior.sword2.15"
+    },
+    {
+     "item": "use.arrow_bow"
+    },
+    {
+     "item": "use.arrow_xbow"
+    },
+    {
+     "item": "use.star_iron"
+    },
+    {
+     "item": "use.bullet_lead"
     }
    ]
   },
