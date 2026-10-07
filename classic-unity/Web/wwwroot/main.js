@@ -239,6 +239,7 @@ class Game {
         case 'ExpGained': if (value > 0) U.msg(`経験値 +${value}`, 'exp'); break;
         case 'LevelUp': U.msg(`Lv ${value} になった！ AP +5`, 'big'); this.renderer.addFx('level', x, y, 'LEVEL UP'); dirty = true; break;
         case 'JobAdvanced': U.msg(`${text} に転職した！`, 'big'); this.renderer.addFx('job', f.p[0], f.p[1], text); dirty = true; break;
+        case 'QuestAvailable': U.msg(text || `新しいクエストが ${value} 件受けられるようになった`, 'quest'); break;
         case 'QuestStarted': U.msg(`クエスト「${text}」を受けた`, 'quest'); dirty = true; break;
         case 'QuestCompleted': U.msg(`クエスト「${text}」完了！ 経験値 +${value}`, 'quest'); dirty = true; break;
         case 'QuestProgress': { const q = this.db.quests?.[id]; U.msg(`クエストの進み ${text}`, 'quest'); dirty = true; break; }

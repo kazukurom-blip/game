@@ -239,7 +239,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "C111.q_mark",
+   "name": "古い刻印",
+   "x": 180,
+   "y": 852,
+   "quest": "C-38"
+  }
+ ],
  "note": "塔の下はヒョウガ村の雪原へ出る。",
  "seed": "C111#0"
 }

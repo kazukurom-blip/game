@@ -52,6 +52,16 @@ namespace Lumina.Core.Game
             return d;
         }
 
+        /// <summary>Lv が from から to に上がって、新しく受けられるようになったクエストの数
+        /// （受けられる Lv がその間で、今 CanStart が Ok の物。掲示板・隠しの条件に合わない物は数えない。QUESTS.md 8-4）。</summary>
+        public int NewQuestsAt(int from, int to)
+        {
+            int n = 0;
+            foreach (var q in Data.QuestList)
+                if (q.MinLevel > from && q.MinLevel <= to && Quests.CanStart(q.Id, Character) == StartResult.Ok) n++;
+            return n;
+        }
+
         /// <summary>頭の上の電球: 2 = 報告できる（緑）、1 = 受けられる（黄）、0 = 無し。</summary>
         public int NpcBulb(string npcId)
         {

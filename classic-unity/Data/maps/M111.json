@@ -326,7 +326,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "M111.q_buoy",
+   "name": "古い浮き標",
+   "x": 456,
+   "y": 532,
+   "quest": "M-44"
+  }
+ ],
  "note": "",
  "seed": "M111#0"
 }

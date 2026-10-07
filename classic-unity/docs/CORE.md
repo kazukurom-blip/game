@@ -212,7 +212,7 @@ session.Character / Stats / Inventory / Equipment / Skills / Buffs / Status / Qu
 
 ### 4-7. クエスト（QUESTS.md）
 
-- `Data/quests.json`（624 本。うち 338 本は寄り道の追加 = `classic/tools/data/quests_more.mjs`、QUESTS.md 8 章）。目的: `kill`（倒す）・`collect`（持ち物の数。完了で渡す）・`talk`（話す）・`visit`（行く）・`interact`（調べる）・`event`（操作の名前。`GameSession.QuestEvent` で知らせる）。報告先 `end`（`auto` は着いたら完了）。受ける条件の能力値 `minStats`（転職の「STR35 以上」。足りなければ `StartResult.StatTooLow`）。
+- `Data/quests.json`（811 本。うち 525 本は寄り道の追加 = `classic/tools/data/quests_more.mjs`、QUESTS.md 8 章）。目的: `kill`（倒す）・`collect`（持ち物の数。完了で渡す）・`talk`（話す）・`visit`（行く）・`interact`（調べる）・`event`（操作の名前。`GameSession.QuestEvent` で知らせる）。報告先 `end`（`auto` は着いたら完了）。受ける条件の能力値 `minStats`（転職の「STR35 以上」。足りなければ `StartResult.StatTooLow`）。
 - **全部のクエストに判定できる目的がある**。文章だけだった物（手紙を届ける・灯台のランプ・化石を調べる・ダンジョンをクリア・転職 など 91 本）は `Data/tools/quest_goals.mjs` で直した。依頼者・報告先は「名前＠マップ」から NPC の ID に直してある（そのマップにいない依頼者は書き出しの時に問題として止まる）。
 - event の名前: quickslot_set / use_potion / ap_spent / sp_spent / skill_used（チュートリアル）・`job_advance.1`（`AdvanceJob` が知らせる）・`job_advance.2〜4`・`storage_deposit` / `storage_withdraw`・`pet_adopted` / `pet_fed` / `pet_closeness`・`dungeon_clear` と `dungeon_clear.<マップID>`・`boss_kill`・`quiz_cleared`。全部 Core が知らせる（4-11）。
 - 転職のクエスト（J 系）は `line`（自分の系統だけ受けられる。違えば `StartResult.WrongJob`）。1 次転職のクエスト（目的が `job_advance.1` の J?-1）は初心者だけ（転職した後は `WrongJob`。受けると終わらないクエストが残るため。PLAYTEST.md）。`advance`（J?-7 = 3 次・J?-9 = 4 次: 完了すると転職）・`unlock`（V-13 = 倉庫の枠 +4、PET-07 = ペット 2 匹）は quest_goals.mjs。
@@ -223,6 +223,7 @@ session.Character / Stats / Inventory / Equipment / Skills / Buffs / Status / Qu
 - **装備のメダルの欄**（`EquipSlot.Medal`・`"medal"`）: 称号の代わり。限定の品（`questOnly`）は店に並ばず敵も落とさない（`QuestCoverageTests`）。
 - **確かめ**（`Tests/QuestCoverageTests.cs`）: 全クエストで依頼者・報告先がそのマップにいる・倒す敵がどこかに湧く（専用の敵はそのクエストの間）・集める品を落とす敵が湧く（か店・報酬・製作）・行く所・調べる物がある・知っている操作だけ・前提の Lv・前提が輪にならない・NPC 全員に依頼（雲の船の上のカゼだけ除く）・限定の品・隠しの順番・専用ボス・隠しの条件・長い目標・毎日。
 - 頭の上の電球: `NpcBulb`（2 = 緑、1 = 黄）。
+- **Lv だけで受けられる頼みごと**（QUESTS.md 8-4。`quests_more/anytime.mjs`）: 各町の Lv 帯のどの Lv でも、10 Lv 下までに始まる前提無しの物が 3 本以上（`QuestCoverageTests.EveryTownHasQuestsWithoutPrereqs`。数えた物がその Lv の新しいキャラで本当に `Ok` かも見る）。Lv が上がって新しく受けられる物が出たら `GainExp` が `LevelUp` の後に `GameEventType.QuestAvailable`（Value = 件数、Text = 「新しい頼みごとが N 件受けられるようになった」）を出す（`GameSession.NewQuestsAt(前の Lv, 今の Lv)`。掲示板・隠しの条件に合わない物は数えない）。
 - **チュートリアル 20 本（S-01〜S-20）は、目的を機械で判定できる形に書き直し、テストで最初から最後まで遊んで通す**（歩いて岩を越える・縄を登って木箱・ポータル・狩り・拾う・隠し部屋・船で大陸へ）。
 
 ### 4-8. ワールド（WORLD.md）

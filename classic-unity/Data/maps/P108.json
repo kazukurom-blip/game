@@ -268,7 +268,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "P108.q_mirror",
+   "name": "曇った鏡",
+   "x": 1220,
+   "y": 640,
+   "quest": "A-33"
+  }
+ ],
  "note": "",
  "seed": "P108#0"
 }

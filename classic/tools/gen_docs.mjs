@@ -14,6 +14,7 @@ import { huntTable, killsPerMin } from './hunt_speed.mjs';
 import { QUESTS_RAW } from './data/quests.mjs';
 import { QUEST_SPAWNS, SIDE_EXP, SIDE_MESO } from './data/quests_more.mjs';
 import { QUEST_ITEMS } from './data/quest_items.mjs';
+import { Q as ANYTIME } from './data/quests_more/anytime.mjs';
 import { FIELD_BOSSES, SEASON_MOBS } from './data/fun_mobs.mjs';
 import { expToNext } from './lib/curves.mjs';
 import { check } from './balance_check.mjs';
@@ -226,6 +227,39 @@ function genQTowns() {
   out.push(`| その Lv の 10 下までに始まる本数 | ${near.join(' | ')} |`);
   return out.join('\n');
 }
+// 前提無しで Lv だけで受けられる頼みごと（QUESTS.md 8-4）。町ごとの Lv 帯（TOWN_BANDS）の中のどの Lv でも、
+// 「その Lv から 10 下までに始まる前提無しの物」が 3 本以上あること。QuestCoverageTests.EveryTownHasQuestsWithoutPrereqs と同じ数え方・同じ帯。
+export const TOWN_BANDS = [
+  ['芽吹きの島', 3, 10], ['ブリーズ港（潮風号を含む）', 8, 22], ['ポム丘', 9, 30], ['シルワ森都', 10, 35], ['ガルド岩台', 10, 55], ['クロウ街', 14, 40],
+  ['ねむり谷', 20, 70], ['にぎわい市場', 10, 40], ['セレス', 28, 65], ['ヒョウガ村', 40, 85], ['ティンクル', 25, 95], ['マリナ', 40, 100],
+  ['古の神殿', 85, 120], ['竜の谷', 98, 155], ['焔の坑道', 110, 140], ['星の果て', 150, 200],
+];
+const FREE_MIN = 3;
+// 前提無し・隠しでない・毎日でない・転職/掲示板/ダンジョンの受付/長い目標/本筋でない
+const isFree = (q) => q.pre === '-' && !q.ext.hours && !q.ext.needItem && !q.ext.repeat && !/^(J\d|R|PQ|X|L)-/.test(q.id);
+const freeAt = (qs, L) => qs.filter((q) => q.lv <= L && q.lv >= L - 10).length;
+function genQFree() {
+  const added = new Set(ANYTIME.map((r) => r[0]));
+  const out = ['| 町 | Lv 帯 | 前提無しの本数（足す前 → 今） | 足した本数 | 帯の中で一番少ない Lv の本数（足す前 → 今） |', '|---|---|---|---|---|'];
+  const LVS = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200];
+  const grid = ['| 町 | ' + LVS.join(' | ') + ' |', '|---|' + LVS.map(() => '---|').join('')];
+  let tb = 0, ta = 0;
+  for (const [t, lo, hi] of TOWN_BANDS) {
+    const all = QUESTS.filter((q) => TOWN_OF(q.map) === t && isFree(q));
+    const before = all.filter((q) => !added.has(q.id));
+    let minB = Infinity, minA = Infinity;
+    for (let L = lo; L <= hi; L++) {
+      minB = Math.min(minB, freeAt(before, L)); minA = Math.min(minA, freeAt(all, L));
+      if (freeAt(all, L) < FREE_MIN) problems.push(`${t} の Lv${L} で前提無しで受けられる頼みごとが ${freeAt(all, L)} 本（${FREE_MIN} 本以上）`);
+    }
+    tb += before.length; ta += all.length;
+    out.push(`| ${t} | ${lo}〜${hi} | ${before.length} → ${all.length} | +${all.length - before.length} | ${minB} → ${minA} |`);
+    grid.push(`| ${t} | ` + LVS.map((L) => (L < lo || L > hi ? '-' : freeAt(all, L))).join(' | ') + ' |');
+  }
+  out.push(`| **合計** | | ${tb} → ${ta} | +${ta - tb} | |`);
+  return [...out, '', '「その Lv から 10 下までに始まる、前提無しの頼みごと」の本数（町の Lv 帯の中だけ）:', '', ...grid].join('\n');
+}
+
 // クエストでしか手に入らない品（ITEMS.md 8 章）
 function genQuestItems() {
   const out = ['| 名前 | 種類 | 必要Lv | 能力 | 入手 | 説明 |', '|---|---|---|---|---|---|'];
@@ -344,7 +378,7 @@ const BLOCKS = {
   'STATS.md': { exp: genExp, hit: genHit, hunt: genHunt, balance: genBalance },
   'ITEMS.md': { equips: genEquips, scrolls: genScrolls, questitems: genQuestItems },
   'DESIGN.md': { counts: genCounts },
-  'QUESTS.md': { quests: genQuests, qstats: genQStats, qtowns: genQTowns },
+  'QUESTS.md': { quests: genQuests, qstats: genQStats, qtowns: genQTowns, qfree: genQFree },
 };
 
 let drift = 0;

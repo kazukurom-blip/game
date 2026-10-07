@@ -447,7 +447,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V312.q_key",
+   "name": "車の鍵",
+   "x": 2876,
+   "y": 200,
+   "quest": "W-38"
+  }
+ ],
  "note": "町の上の枝。縄が多い。",
  "seed": "V312#0"
 }

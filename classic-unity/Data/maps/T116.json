@@ -261,7 +261,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "T116.q_pendulum",
+   "name": "止まった振り子",
+   "x": 1620,
+   "y": 496,
+   "quest": "T-51"
+  }
+ ],
  "note": "",
  "seed": "T116#0"
 }

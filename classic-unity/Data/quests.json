@@ -21257,6 +21257,5923 @@
    "rewardUnparsed": [],
    "story": "【毎日】鳥の通り道を空けておく。",
    "tutorial": false
+  },
+  {
+   "id": "IS-27",
+   "name": "棚の陰のキノコ",
+   "giver": "tata",
+   "giverName": "雑貨屋タタ",
+   "map": "S003",
+   "minLevel": 3,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M003×8",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M003",
+     "count": 8
+    }
+   ],
+   "end": "tata",
+   "exp": 4,
+   "meso": 36,
+   "rewards": [
+    {
+     "item": "use.red_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "赤ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "タタの店の棚の陰に、いつの間にかホコリダケが生えた。畑の方から胞子が飛んでくるらしい。元を減らしてほしい。",
+   "tutorial": false
+  },
+  {
+   "id": "IS-28",
+   "name": "縄の干し場",
+   "giver": "ganzo",
+   "giverName": "縄職人ガンゾ",
+   "map": "S001",
+   "minLevel": 3,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M001×10",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M001",
+     "count": 10
+    }
+   ],
+   "end": "ganzo",
+   "exp": 4,
+   "meso": 36,
+   "rewards": [
+    {
+     "item": "use.red_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "赤ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "干した縄の上に、コロ貝がずらりと並んで日なたぼっこをしている。ガンゾ「縄がぬるぬるになる。どいてもらえ」。",
+   "tutorial": false
+  },
+  {
+   "id": "IS-29",
+   "name": "小びんのふた",
+   "giver": "nina",
+   "giverName": "薬屋ニナ",
+   "map": "S003",
+   "minLevel": 4,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M001×6",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M001",
+     "count": 6
+    }
+   ],
+   "end": "nina",
+   "exp": 4,
+   "meso": 44,
+   "rewards": [
+    {
+     "item": "use.red_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "赤ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "コロ貝のからを薄く削ると、薬の小びんにぴったりのふたになる。ニナ「コルクより湿気に強いの」。",
+   "tutorial": false
+  },
+  {
+   "id": "IS-30",
+   "name": "直した段",
+   "giver": "poppo",
+   "giverName": "はしご番のポッポ",
+   "map": "S002",
+   "minLevel": 5,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "浜の案内人ルカに「はしごの段を 1 段直した」と伝える",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "luka",
+     "label": "案内人ルカ"
+    }
+   ],
+   "end": "poppo",
+   "exp": 4,
+   "meso": 54,
+   "rewards": [
+    {
+     "item": "use.red_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "赤ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "ポッポはゆうべ、ぐらつく段を直した。毎朝はしごで遊ぶルカに知らせたいが、自分は持ち場を離れられない。",
+   "tutorial": false
+  },
+  {
+   "id": "IS-31",
+   "name": "崖の物干し",
+   "giver": "momo",
+   "giverName": "宿屋のモモ",
+   "map": "S003",
+   "minLevel": 6,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M005×12",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M005",
+     "count": 12
+    }
+   ],
+   "end": "momo",
+   "exp": 4,
+   "meso": 66,
+   "rewards": [
+    {
+     "item": "use.red_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "赤ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "モモは風のよく通る東の崖の上にシーツを干す。ポヨスライムが跳ねてきて、真っ白なシーツにしずくの跡を付けていく。",
+   "tutorial": false
+  },
+  {
+   "id": "IS-32",
+   "name": "花冠のしずく",
+   "giver": "riri",
+   "giverName": "少女リリ",
+   "map": "S003",
+   "minLevel": 6,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M005×8",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M005",
+     "count": 8
+    }
+   ],
+   "end": "riri",
+   "exp": 4,
+   "meso": 66,
+   "rewards": [
+    {
+     "item": "use.red_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "赤ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "ポヨのしずくに花を浸けておくと、花冠が 3 日しおれない。リリは村のみんなの分を作るつもり。",
+   "tutorial": false
+  },
+  {
+   "id": "IS-33",
+   "name": "網の浮き",
+   "giver": "tobio",
+   "giverName": "漁師トビオ",
+   "map": "S003",
+   "minLevel": 8,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M006×8",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M006",
+     "count": 8
+    }
+   ],
+   "end": "tobio",
+   "exp": 7,
+   "meso": 100,
+   "rewards": [
+    {
+     "item": "use.blue_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "青ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "ダイダイダケのかさは水に浮いて、遠くからでもよく見える。トビオは網の浮きを全部これに替えたい。",
+   "tutorial": false
+  },
+  {
+   "id": "IS-34",
+   "name": "浜の境の杭",
+   "giver": "yomogi",
+   "giverName": "村長ヨモギ",
+   "map": "S003",
+   "minLevel": 9,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "大コロ貝の浜の古い境の杭を調べる",
+   "objectives": [
+    {
+     "type": "interact",
+     "target": "S009.q_post",
+     "label": "大コロ貝の浜の古い境の杭"
+    }
+   ],
+   "end": "yomogi",
+   "exp": 9,
+   "meso": 122,
+   "rewards": [
+    {
+     "item": "use.blue_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "青ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "島の地図を書き直すヨモギ。浜の端に、村ができた頃に打った杭が残っているはず。刻まれた印を見てきてほしい。",
+   "tutorial": false
+  },
+  {
+   "id": "IS-35",
+   "name": "朝の散歩道",
+   "giver": "luka_S003",
+   "giverName": "案内人ルカ",
+   "map": "S003",
+   "minLevel": 9,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M004×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M004",
+     "count": 20
+    }
+   ],
+   "end": "luka_S003",
+   "exp": 9,
+   "meso": 122,
+   "rewards": [
+    {
+     "item": "use.red_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "赤ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "ルカの毎朝の散歩道に、アカコロ貝が増えて通れない。「村に来た日の浜、きみも覚えてるでしょ。あの道を守りたいんだ」。",
+   "tutorial": false
+  },
+  {
+   "id": "V-52",
+   "name": "干した帆のカニ",
+   "giver": "hose",
+   "giverName": "帆縫いのホセ",
+   "map": "V107",
+   "minLevel": 8,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M010×12",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M010",
+     "count": 12
+    }
+   ],
+   "end": "hose",
+   "exp": 7,
+   "meso": 100,
+   "rewards": [
+    {
+     "item": "use.red_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "赤ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "ホセは浜に帆を広げて繕う。ハマガニが横歩きでやってきて、はさみで縫い目を 1 本ずつ切っていく。",
+   "tutorial": false
+  },
+  {
+   "id": "V-44",
+   "name": "刃の研ぎ代わり",
+   "giver": "jan",
+   "giverName": "武器屋ジャン",
+   "map": "V100",
+   "minLevel": 8,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M010×8",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M010",
+     "count": 8
+    }
+   ],
+   "end": "jan",
+   "exp": 7,
+   "meso": 100,
+   "rewards": [
+    {
+     "item": "use.red_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "赤ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "ハマガニのはさみの内側はざらざらで、刃の仕上げ研ぎにちょうどいい。ジャン「砥石より安くつく。言いふらすなよ」。",
+   "tutorial": false
+  },
+  {
+   "id": "V-45",
+   "name": "街道のブタっぺ",
+   "giver": "marco",
+   "giverName": "タクシーの運転手マルコ",
+   "map": "V100",
+   "minLevel": 8,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M020×15",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M020",
+     "count": 15
+    }
+   ],
+   "end": "marco",
+   "exp": 7,
+   "meso": 100,
+   "rewards": [
+    {
+     "item": "use.red_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "赤ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "北の小道と街道で、ブタっぺが車の前に飛び出してくる。マルコ「ひいたら大変だ。少し山へ帰ってもらおう」。",
+   "tutorial": false
+  },
+  {
+   "id": "V-46",
+   "name": "市場への木箱",
+   "giver": "ichiba",
+   "giverName": "市場の案内人",
+   "map": "V100",
+   "minLevel": 9,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "にぎわい市場の素材屋マテに、港で揚がった木箱を届ける",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "mate",
+     "label": "素材屋マテ"
+    }
+   ],
+   "end": "ichiba",
+   "exp": 9,
+   "meso": 122,
+   "rewards": [
+    {
+     "item": "use.red_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "赤ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "港に着いた船の荷の 1 つは市場あて。案内人は道案内で忙しく、荷を運ぶ手が足りない。",
+   "tutorial": false
+  },
+  {
+   "id": "V-47",
+   "name": "倉庫の屋根の巣",
+   "giver": "dan",
+   "giverName": "倉庫番ダン",
+   "map": "V100",
+   "minLevel": 10,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M011×15",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M011",
+     "count": 15
+    }
+   ],
+   "end": "dan",
+   "exp": 23,
+   "meso": 150,
+   "rewards": [
+    {
+     "item": "use.blue_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "青ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "倉庫の屋根にウミネコが巣をかけ、朝から晩まで鳴いている。ダン「預かり物の帳面が、鳴き声で数え間違える」。",
+   "tutorial": false
+  },
+  {
+   "id": "V-48",
+   "name": "灯台守の胃薬",
+   "giver": "pola",
+   "giverName": "薬屋ポーラ",
+   "map": "V100",
+   "minLevel": 12,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "灯台守ソルに胃薬を届ける",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "sol",
+     "label": "灯台守ソル"
+    }
+   ],
+   "end": "sol",
+   "exp": 46,
+   "meso": 179,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "橙ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "ソルは夜通しランプの番をして、朝にまとめて食べるから胃を悪くする。ポーラ「ついでに、ちゃんと寝ろって言っといて」。",
+   "tutorial": false
+  },
+  {
+   "id": "V-49",
+   "name": "かぶとの型紙",
+   "giver": "mire",
+   "giverName": "防具屋ミレ",
+   "map": "V100",
+   "minLevel": 17,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M014×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M014",
+     "count": 10
+    }
+   ],
+   "end": "mire",
+   "exp": 389,
+   "meso": 692,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "橙ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "ヤドカリ兵がかぶっている貝は、頭の形にぴったり合っている。ミレはそれを型紙にして、新しいかぶとを考える。",
+   "tutorial": false
+  },
+  {
+   "id": "V-50",
+   "name": "裏山の物置",
+   "giver": "minato",
+   "giverName": "潜水船の係ミナト",
+   "map": "V100",
+   "minLevel": 20,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M014×25",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M014",
+     "count": 25
+    }
+   ],
+   "end": "minato",
+   "exp": 693,
+   "meso": 900,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "橙ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "潜水船の予備の部品は、港の裏山の洞に置いてある。ヤドカリ兵が住みついて、ミナトは部品を取りに行けない。",
+   "tutorial": false
+  },
+  {
+   "id": "V-51",
+   "name": "昆布の林",
+   "giver": "guri",
+   "giverName": "料理人グリ",
+   "map": "V107",
+   "minLevel": 21,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M012×25",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M012",
+     "count": 25
+    }
+   ],
+   "end": "guri",
+   "exp": 802,
+   "meso": 956,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "橙ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "入江の昆布の林で、タコぴょんが昆布を巻いて遊ぶ。グリ「船のだしは昆布が命だ。あいつら、ぜんぶ結び目にしやがる」。",
+   "tutorial": false
+  },
+  {
+   "id": "B-37",
+   "name": "矢じりの見本",
+   "giver": "toma",
+   "giverName": "弓の武器屋トマ",
+   "map": "V200",
+   "minLevel": 19,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M025×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M025",
+     "count": 12
+    }
+   ],
+   "end": "toma",
+   "exp": 571,
+   "meso": 825,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "橙ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "クマバチの針は細くて硬い。トマはそれを見本に、刺さりのいい矢じりの形を試している。",
+   "tutorial": false
+  },
+  {
+   "id": "B-38",
+   "name": "東の丘のネズミ",
+   "giver": "sui",
+   "giverName": "花売りのスイ",
+   "map": "V200",
+   "minLevel": 21,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M026×25",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M026",
+     "count": 25
+    }
+   ],
+   "end": "sui",
+   "exp": 802,
+   "meso": 956,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "橙ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "東の丘でスイが育てる花の球根を、ノネズミが掘り返して食べてしまう。春に咲く分が半分になった。",
+   "tutorial": false
+  },
+  {
+   "id": "B-39",
+   "name": "籠手の詰め物",
+   "giver": "lana",
+   "giverName": "防具屋ラナ",
+   "map": "V200",
+   "minLevel": 23,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M027×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M027",
+     "count": 12
+    }
+   ],
+   "end": "lana",
+   "exp": 1070,
+   "meso": 1080,
+   "rewards": [
+    {
+     "item": "use.baked_apple",
+     "count": 10
+    }
+   ],
+   "rewardText": "焼きりんご ×10",
+   "rewardUnparsed": [],
+   "story": "カカシ兵のわらはよく乾いていて、籠手の内側に詰めると手の汗を吸う。ラナ「動くわらから取るのが一番新しいの」。",
+   "tutorial": false
+  },
+  {
+   "id": "B-40",
+   "name": "薬草畑の行進",
+   "giver": "popo",
+   "giverName": "薬屋ポポ",
+   "map": "V200",
+   "minLevel": 25,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M027×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M027",
+     "count": 20
+    }
+   ],
+   "end": "popo",
+   "exp": 1430,
+   "meso": 1220,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "橙ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "夜になると、カカシ兵が列を作ってポポの薬草畑の中を歩いていく。踏まれた薬草は使い物にならない。",
+   "tutorial": false
+  },
+  {
+   "id": "B-41",
+   "name": "東の丘への近道",
+   "giver": "taxi_pom",
+   "giverName": "タクシーの運転手ピピ",
+   "map": "V200",
+   "minLevel": 27,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M026×25 と M025×15",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M026",
+     "count": 25
+    },
+    {
+     "type": "kill",
+     "mob": "M025",
+     "count": 15
+    }
+   ],
+   "end": "taxi_pom",
+   "exp": 1910,
+   "meso": 1380,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "橙ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "ピピは東の丘まで車を出す近道を作りたい。道の上をノネズミが走り、空からはクマバチが車をつつく。",
+   "tutorial": false
+  },
+  {
+   "id": "B-42",
+   "name": "カカシの帽子",
+   "giver": "hako",
+   "giverName": "倉庫番ハコ",
+   "map": "V200",
+   "minLevel": 28,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "カカシの畑の古い麦わら帽子を調べる",
+   "objectives": [
+    {
+     "type": "interact",
+     "target": "V207.q_hat",
+     "label": "カカシの畑の古い麦わら帽子"
+    }
+   ],
+   "end": "hako",
+   "exp": 1100,
+   "meso": 585,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "橙ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "ハコの倉庫に「カカシの帽子を取りに来る」という預かり札が 10 年残っている。持ち主のカカシは、まだ畑にいるのだろうか。",
+   "tutorial": false
+  },
+  {
+   "id": "B-43",
+   "name": "秋の取り入れ",
+   "giver": "marsa",
+   "giverName": "農家のマーサ",
+   "map": "V200",
+   "minLevel": 30,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M027×30 と M026×15",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M027",
+     "count": 30
+    },
+    {
+     "type": "collect",
+     "item": "etc.M026",
+     "count": 15
+    }
+   ],
+   "end": "marsa",
+   "exp": 2940,
+   "meso": 1650,
+   "rewards": [
+    {
+     "item": "use.baked_apple",
+     "count": 20
+    }
+   ],
+   "rewardText": "焼きりんご ×20",
+   "rewardUnparsed": [],
+   "story": "取り入れの日なのに、カカシ兵とノネズミが畑を取り合っている。マーサ「誰の畑か、はっきりさせとくれ」。",
+   "tutorial": false
+  },
+  {
+   "id": "W-36",
+   "name": "湿った木箱",
+   "giver": "kura",
+   "giverName": "倉庫番クラ",
+   "map": "V300",
+   "minLevel": 10,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M033×12",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M033",
+     "count": 12
+    }
+   ],
+   "end": "kura",
+   "exp": 23,
+   "meso": 150,
+   "rewards": [
+    {
+     "item": "use.blue_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "青ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "森の入口から、モリスライムが倉庫の床下まで入り込む。クラ「預かった本が、みんな緑色に湿る」。",
+   "tutorial": false
+  },
+  {
+   "id": "W-37",
+   "name": "淡い黄色の染め",
+   "giver": "fio",
+   "giverName": "ローブ屋フィオ",
+   "map": "V300",
+   "minLevel": 10,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M005×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M005",
+     "count": 10
+    }
+   ],
+   "end": "fio",
+   "exp": 23,
+   "meso": 150,
+   "rewards": [
+    {
+     "item": "use.red_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "赤ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "ポヨのしずくで布を染めると、朝の光のような淡い黄色になる。フィオは見習いのローブをこの色にしたい。",
+   "tutorial": false
+  },
+  {
+   "id": "W-38",
+   "name": "枝の上の鍵",
+   "giver": "taxi_silva",
+   "giverName": "タクシーの運転手リーフ",
+   "map": "V300",
+   "minLevel": 17,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "木の上の小道の枝に引っかかった車の鍵を取ってくる",
+   "objectives": [
+    {
+     "type": "interact",
+     "target": "V312.q_key",
+     "label": "木の上の小道の枝に引っかかった車の鍵"
+    }
+   ],
+   "end": "taxi_silva",
+   "exp": 194,
+   "meso": 277,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "橙ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "ヒトツメが光る物を拾って、木の上の小道まで運んでいった。その中にリーフの車の鍵があった。リーフは高い所が苦手。",
+   "tutorial": false
+  },
+  {
+   "id": "W-39",
+   "name": "フクロウの羽ペン",
+   "giver": "mint",
+   "giverName": "魔法の武器屋ミント",
+   "map": "V300",
+   "minLevel": 29,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M036×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M036",
+     "count": 15
+    }
+   ],
+   "end": "mint",
+   "exp": 2550,
+   "meso": 1550,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "橙ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "ヨルフクロウの羽で作ったペンは、夜に書いても字がにじまない。ミントは杖の注文を受ける帳面用に欲しい。",
+   "tutorial": false
+  },
+  {
+   "id": "W-40",
+   "name": "深い森の道しるべ",
+   "giver": "wood",
+   "giverName": "木こりの青年ウッド",
+   "map": "V300",
+   "minLevel": 31,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M035×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M035",
+     "count": 20
+    }
+   ],
+   "end": "wood",
+   "exp": 3340,
+   "meso": 1720,
+   "rewards": [
+    {
+     "item": "use.nut_soup",
+     "count": 10
+    }
+   ],
+   "rewardText": "木の実のスープ ×10",
+   "rewardUnparsed": [],
+   "story": "ウッドが深い森に立てた道しるべを、森のクマが背中かきに使って倒してしまう。立て直す間、クマを遠ざけたい。",
+   "tutorial": false
+  },
+  {
+   "id": "W-41",
+   "name": "夜森の見回り",
+   "giver": "tia",
+   "giverName": "妖精の使いティア",
+   "map": "V300",
+   "minLevel": 33,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M036×25 と M034×15",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M036",
+     "count": 25
+    },
+    {
+     "type": "kill",
+     "mob": "M034",
+     "count": 15
+    }
+   ],
+   "end": "tia",
+   "exp": 4330,
+   "meso": 1880,
+   "rewards": [
+    {
+     "item": "use.mana_elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "魔力のエリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "夜の森で、ヨルフクロウとキノボリザルが妖精の灯りを取り合っている。ティア「灯りは妖精の道しるべなの」。",
+   "tutorial": false
+  },
+  {
+   "id": "W-42",
+   "name": "杖の握り",
+   "giver": "orfe",
+   "giverName": "大魔導師オルフェ",
+   "map": "V300",
+   "minLevel": 35,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M035×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M035",
+     "count": 15
+    }
+   ],
+   "end": "orfe",
+   "exp": 5540,
+   "meso": 2050,
+   "rewards": [
+    {
+     "item": "use.mana_elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "魔力のエリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "オルフェの古い杖は、握りが手の汗ですべる。クマの毛皮を巻くと、冬でも手が温かい。弟子たちの杖にも巻いてやりたい。",
+   "tutorial": false
+  },
+  {
+   "id": "G-35",
+   "name": "倉庫の薪",
+   "giver": "iwa",
+   "giverName": "倉庫番イワ",
+   "map": "V400",
+   "minLevel": 10,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M041×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M041",
+     "count": 10
+    }
+   ],
+   "end": "iwa",
+   "exp": 23,
+   "meso": 150,
+   "rewards": [
+    {
+     "item": "use.red_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "赤ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "ヤミキリカブの固い枝は、ゆっくり長く燃える。岩台の夜は冷えるので、イワは倉庫のだるまストーブ用に貯めておきたい。",
+   "tutorial": false
+  },
+  {
+   "id": "G-36",
+   "name": "西の道の切り株",
+   "giver": "taxi_gard",
+   "giverName": "タクシーの運転手ガタ",
+   "map": "V400",
+   "minLevel": 12,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M041×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M041",
+     "count": 20
+    }
+   ],
+   "end": "taxi_gard",
+   "exp": 46,
+   "meso": 179,
+   "rewards": [
+    {
+     "item": "use.blue_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "青ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "岩台の西の道で、ヤミキリカブが車輪の前に根を張って動かない。ガタ「客を待たせるのが一番嫌いなんだ」。",
+   "tutorial": false
+  },
+  {
+   "id": "G-37",
+   "name": "焦げた牙の粉",
+   "giver": "ginger",
+   "giverName": "薬屋ジンジャー",
+   "map": "V400",
+   "minLevel": 36,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M045×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M045",
+     "count": 15
+    }
+   ],
+   "end": "ginger",
+   "exp": 6300,
+   "meso": 2140,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "白ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "ヒイノシシの焦げた牙を粉にすると、体の芯から温まる薬になる。発掘場で冷えた隊員たちに配りたい。",
+   "tutorial": false
+  },
+  {
+   "id": "G-38",
+   "name": "鉄のたてがみ",
+   "giver": "hagane",
+   "giverName": "防具屋ハガネ",
+   "map": "V400",
+   "minLevel": 39,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M050×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M050",
+     "count": 10
+    }
+   ],
+   "end": "hagane",
+   "exp": 9240,
+   "meso": 2430,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "白ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "テツイノシシのたてがみは、鎖かたびらに編み込むと刃を通さない。ハガネ「針金より軽い。いい物は自然にあるもんだ」。",
+   "tutorial": false
+  },
+  {
+   "id": "G-39",
+   "name": "包帯の犬",
+   "giver": "toto",
+   "giverName": "祈祷師トト",
+   "map": "V400",
+   "minLevel": 42,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M047×30",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M047",
+     "count": 30
+    }
+   ],
+   "end": "toto",
+   "exp": 12800,
+   "meso": 2760,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "白ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "発掘場の奥で、古い包帯を巻いたままの犬たちが歩き回る。トト「昔の人が埋めた犬だ。もう一度眠らせてやろう」。",
+   "tutorial": false
+  },
+  {
+   "id": "G-40",
+   "name": "古い戦場の見回り",
+   "giver": "gantetsu",
+   "giverName": "武器屋ガンテツ",
+   "map": "V400",
+   "minLevel": 45,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M048×35",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M048",
+     "count": 35
+    }
+   ],
+   "end": "gantetsu",
+   "exp": 17300,
+   "meso": 3150,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "白ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "古い戦場の骨の兵が、ガンテツの店の前まで剣の音を響かせる。「俺の剣の方がいい音がする。だが客が怖がる」。",
+   "tutorial": false
+  },
+  {
+   "id": "G-41",
+   "name": "隊長の勲章",
+   "giver": "block",
+   "giverName": "試験官ブロック",
+   "map": "V413",
+   "minLevel": 48,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M049×8",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M049",
+     "count": 8
+    }
+   ],
+   "end": "block",
+   "exp": 23400,
+   "meso": 3580,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 20
+    }
+   ],
+   "rewardText": "白ポーション ×20",
+   "rewardUnparsed": [],
+   "story": "修練場の壁に、昔の隊長たちの勲章を飾りたい。ブロック「戦った相手に敬意を払うのも、戦士の修行だ」。",
+   "tutorial": false
+  },
+  {
+   "id": "G-42",
+   "name": "戦場の隊長",
+   "giver": "dorga",
+   "giverName": "戦士長ドルガ",
+   "map": "V400",
+   "minLevel": 51,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M049×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M049",
+     "count": 20
+    }
+   ],
+   "end": "dorga",
+   "exp": 30900,
+   "meso": 4020,
+   "rewards": [
+    {
+     "item": "use.mana_elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "魔力のエリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "古い戦場でガイコツ隊長が兵を集め直している。ドルガ「隊列を組まれる前に崩せ。戦いは始まる前に決まる」。",
+   "tutorial": false
+  },
+  {
+   "id": "G-43",
+   "name": "墓所の香炉",
+   "giver": "toto",
+   "giverName": "祈祷師トト",
+   "map": "V400",
+   "minLevel": 54,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "古い戦場の割れた香炉を調べ、M049×15",
+   "objectives": [
+    {
+     "type": "interact",
+     "target": "V411.q_censer",
+     "label": "古い戦場の割れた香炉"
+    },
+    {
+     "type": "kill",
+     "mob": "M049",
+     "count": 15
+    }
+   ],
+   "end": "toto",
+   "exp": 39200,
+   "meso": 4410,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 20
+    }
+   ],
+   "rewardText": "白ポーション ×20",
+   "rewardUnparsed": [],
+   "story": "古い戦場の奥に、大将を弔う香炉が割れて転がっているという。トト「香が絶えたから、隊長たちが起き出すのかもしれん」。",
+   "tutorial": false
+  },
+  {
+   "id": "K-35",
+   "name": "路地裏の羽音",
+   "giver": "kusuri",
+   "giverName": "薬屋クスリ",
+   "map": "V500",
+   "minLevel": 14,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M060×15",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M060",
+     "count": 15
+    }
+   ],
+   "end": "kusuri",
+   "exp": 93,
+   "meso": 213,
+   "rewards": [
+    {
+     "item": "use.blue_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "青ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "路地裏のコウモリンガが、夜中にクスリの店の窓をたたく。クスリ「薬を作るのは夜なのよ。集中できない」。",
+   "tutorial": false
+  },
+  {
+   "id": "K-36",
+   "name": "夜のマントの裏地",
+   "giver": "kuroe",
+   "giverName": "防具屋クロエ",
+   "map": "V500",
+   "minLevel": 14,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M060×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M060",
+     "count": 10
+    }
+   ],
+   "end": "kuroe",
+   "exp": 93,
+   "meso": 213,
+   "rewards": [
+    {
+     "item": "use.blue_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "青ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "コウモリの翼は薄くて丈夫で、夜の風を通さない。クロエはクロウ街らしい黒いマントを仕立てたい。",
+   "tutorial": false
+  },
+  {
+   "id": "K-37",
+   "name": "開かない金庫",
+   "giver": "kinko",
+   "giverName": "倉庫番キンコ",
+   "map": "V500",
+   "minLevel": 30,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M065×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M065",
+     "count": 10
+    }
+   ],
+   "end": "kinko",
+   "exp": 2940,
+   "meso": 1650,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "橙ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "古い金庫の歯車が欠けて、扉が開かない。キンコ「工事現場のガラクタロボの歯車なら、大きさが合うはず」。",
+   "tutorial": false
+  },
+  {
+   "id": "K-38",
+   "name": "沼の荷車",
+   "giver": "kago",
+   "giverName": "荷物番のカゴ",
+   "map": "V707",
+   "minLevel": 33,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M064×30",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M064",
+     "count": 30
+    }
+   ],
+   "end": "kago",
+   "exp": 4330,
+   "meso": 1880,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "白ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "沼を通る荷車が、ヌマワニにかじられて車輪を 2 つなくした。カゴは分かれ道で、荷の積み替えに追われている。",
+   "tutorial": false
+  },
+  {
+   "id": "K-39",
+   "name": "下水のドロ",
+   "giver": "bolt",
+   "giverName": "工事の親方ボルト",
+   "map": "V500",
+   "minLevel": 36,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M067×25",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M067",
+     "count": 25
+    }
+   ],
+   "end": "bolt",
+   "exp": 6300,
+   "meso": 2140,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "白ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "下水道を直したいのに、ドロ人形が掘った所を全部埋め戻してしまう。ボルト「仕事が早いのは認めるがな」。",
+   "tutorial": false
+  },
+  {
+   "id": "K-40",
+   "name": "試練の幕",
+   "giver": "rat",
+   "giverName": "受付ラット",
+   "map": "V515",
+   "minLevel": 38,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M066×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M066",
+     "count": 15
+    }
+   ],
+   "end": "rat",
+   "exp": 8150,
+   "meso": 2330,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "白ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "裏路地の試練の入口にかけた幕が破れた。ラット「亡霊の布は向こうが透けない。挑戦者に中を見せるわけにはいかない」。",
+   "tutorial": false
+  },
+  {
+   "id": "K-41",
+   "name": "ワニ皮の鞘",
+   "giver": "sue",
+   "giverName": "ナイフ屋スー",
+   "map": "V500",
+   "minLevel": 40,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M064×15 と M067×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M064",
+     "count": 15
+    },
+    {
+     "type": "kill",
+     "mob": "M067",
+     "count": 20
+    }
+   ],
+   "end": "sue",
+   "exp": 10500,
+   "meso": 2540,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 20
+    }
+   ],
+   "rewardText": "白ポーション ×20",
+   "rewardUnparsed": [],
+   "story": "ワニの皮で作った鞘は、沼に落としても中が濡れない。皮を取りに行く深い沼では、ドロ人形が邪魔をする。",
+   "tutorial": false
+  },
+  {
+   "id": "N-34",
+   "name": "倉庫の前のキノコ",
+   "giver": "nagi",
+   "giverName": "倉庫番ナギ",
+   "map": "V600",
+   "minLevel": 20,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M070×15",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M070",
+     "count": 15
+    }
+   ],
+   "end": "nagi",
+   "exp": 693,
+   "meso": 900,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "橙ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "谷の森のツノダケが、倉庫の前まで群れて歩いてくる。ナギ「ツノが戸に刺さって、朝、開かなかった」。",
+   "tutorial": false
+  },
+  {
+   "id": "N-48",
+   "name": "アオダケの寝相",
+   "giver": "doc",
+   "giverName": "学者ドク",
+   "map": "V600",
+   "minLevel": 20,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M024×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M024",
+     "count": 10
+    }
+   ],
+   "end": "doc",
+   "exp": 693,
+   "meso": 900,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "橙ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "ドクの説: 谷のアオダケは、夜になるとかさを傾けて眠る。かさの傾きの跡を比べて、谷がなぜ眠くなるのか調べたい。",
+   "tutorial": false
+  },
+  {
+   "id": "N-35",
+   "name": "沼の道",
+   "giver": "taxi_nemu",
+   "giverName": "タクシーの運転手ウトウ",
+   "map": "V600",
+   "minLevel": 21,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M062×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M062",
+     "count": 20
+    }
+   ],
+   "end": "taxi_nemu",
+   "exp": 802,
+   "meso": 956,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "橙ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "谷の沼を回る道で、ドブヘビが車の下に潜り込む。ウトウ「眠そうな顔の客を、もっと眠らせちまう」。",
+   "tutorial": false
+  },
+  {
+   "id": "N-36",
+   "name": "熱さましのうろこ",
+   "giver": "mayu",
+   "giverName": "薬屋のマユ",
+   "map": "V600",
+   "minLevel": 38,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M074×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M074",
+     "count": 12
+    }
+   ],
+   "end": "mayu",
+   "exp": 8150,
+   "meso": 2330,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "白ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "ミニドレイクのうろこは、熱いうちに煎じると逆に熱を下げる薬になる。谷の子どもたちが熱を出している。",
+   "tutorial": false
+  },
+  {
+   "id": "N-37",
+   "name": "冷たいしっぽの氷室",
+   "giver": "koro",
+   "giverName": "雑貨屋のコロ",
+   "map": "V600",
+   "minLevel": 40,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M073×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M073",
+     "count": 15
+    }
+   ],
+   "end": "koro",
+   "exp": 10500,
+   "meso": 2540,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "白ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "ヒエヒエ目玉のしっぽは、いつまでも冷たい。コロは店の裏に氷室を作り、夏も冷たい飲み物を売りたい。",
+   "tutorial": false
+  },
+  {
+   "id": "N-38",
+   "name": "湯船の縁石",
+   "giver": "yuu",
+   "giverName": "温泉番ユウ",
+   "map": "V600",
+   "minLevel": 44,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M078×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M078",
+     "count": 10
+    }
+   ],
+   "end": "yuu",
+   "exp": 15700,
+   "meso": 3010,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "白ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "温泉の縁石が割れた。石の寺跡のゴーレムのかけらは、湯に浸けても割れない。ユウ「湯は谷の宝だから」。",
+   "tutorial": false
+  },
+  {
+   "id": "N-39",
+   "name": "ドレイクの角の年輪",
+   "giver": "doc",
+   "giverName": "学者ドク",
+   "map": "V600",
+   "minLevel": 47,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M075×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M075",
+     "count": 15
+    }
+   ],
+   "end": "doc",
+   "exp": 21200,
+   "meso": 3430,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 20
+    }
+   ],
+   "rewardText": "白ポーション ×20",
+   "rewardUnparsed": [],
+   "story": "ドレイクの角には木のような年輪がある。ドクは数を比べて、洞窟のドレイクがいつから住んでいるか調べたい。",
+   "tutorial": false
+  },
+  {
+   "id": "N-40",
+   "name": "参道の黒い石",
+   "giver": "nemu",
+   "giverName": "宿屋のネム",
+   "map": "V600",
+   "minLevel": 50,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M079×25",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M079",
+     "count": 25
+    }
+   ],
+   "end": "nemu",
+   "exp": 28600,
+   "meso": 3900,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 20
+    }
+   ],
+   "rewardText": "白ポーション ×20",
+   "rewardUnparsed": [],
+   "story": "黒い寺跡の参道をクロゴーレムがふさぎ、お参りの客が宿に来なくなった。ネム「客がいないと、私まで眠くなる」。",
+   "tutorial": false
+  },
+  {
+   "id": "N-41",
+   "name": "赤いうろこの暖炉",
+   "giver": "nagi",
+   "giverName": "倉庫番ナギ",
+   "map": "V600",
+   "minLevel": 53,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M076×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M076",
+     "count": 15
+    }
+   ],
+   "end": "nagi",
+   "exp": 36200,
+   "meso": 4280,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 20
+    }
+   ],
+   "rewardText": "白ポーション ×20",
+   "rewardUnparsed": [],
+   "story": "アカドレイクの赤いうろこは、暖炉の内側に貼ると火が長持ちする。冬の谷は、倉庫の中まで冷える。",
+   "tutorial": false
+  },
+  {
+   "id": "N-42",
+   "name": "氷の洞窟の道",
+   "giver": "taxi_nemu",
+   "giverName": "タクシーの運転手ウトウ",
+   "map": "V600",
+   "minLevel": 56,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M077×30",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M077",
+     "count": 30
+    }
+   ],
+   "end": "taxi_nemu",
+   "exp": 45800,
+   "meso": 4690,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "大白ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "ウトウは赤い洞窟から氷の洞窟へ抜ける道を、そりで走れるようにしたい。アイスドレイクが道を凍らせて回る。",
+   "tutorial": false
+  },
+  {
+   "id": "N-43",
+   "name": "苔の売り物",
+   "giver": "koro",
+   "giverName": "雑貨屋のコロ",
+   "map": "V600",
+   "minLevel": 59,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M080×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M080",
+     "count": 12
+    }
+   ],
+   "end": "koro",
+   "exp": 58400,
+   "meso": 5140,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "大白ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "コケゴーレムの苔は、鉢に植えると何年も青いまま。コロは谷のおみやげにして売り出したい。",
+   "tutorial": false
+  },
+  {
+   "id": "N-44",
+   "name": "湯の時間の角笛",
+   "giver": "yuu",
+   "giverName": "温泉番ユウ",
+   "map": "V600",
+   "minLevel": 62,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M081×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M081",
+     "count": 10
+    }
+   ],
+   "end": "yuu",
+   "exp": 71800,
+   "meso": 5630,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "大白ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "牛の角で角笛を作り、温泉の男湯と女湯の入れ替えを谷じゅうに知らせたい。今は大声で叫んでいて、喉がもたない。",
+   "tutorial": false
+  },
+  {
+   "id": "N-45",
+   "name": "崖の薬草",
+   "giver": "mayu",
+   "giverName": "薬屋のマユ",
+   "map": "V600",
+   "minLevel": 65,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M082×30",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M082",
+     "count": 30
+    }
+   ],
+   "end": "mayu",
+   "exp": 87800,
+   "meso": 6180,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "大白ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "牛の砦の崖にしか生えない薬草がある。ウシ槍兵が見張っていて、マユは近づけない。",
+   "tutorial": false
+  },
+  {
+   "id": "N-46",
+   "name": "門の彫り物",
+   "giver": "doc",
+   "giverName": "学者ドク",
+   "map": "V600",
+   "minLevel": 68,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "封印の門の古い彫り物を調べ、M082×20",
+   "objectives": [
+    {
+     "type": "interact",
+     "target": "V617.q_relief",
+     "label": "封印の門の古い彫り物"
+    },
+    {
+     "type": "kill",
+     "mob": "M082",
+     "count": 20
+    }
+   ],
+   "end": "doc",
+   "exp": 107000,
+   "meso": 6770,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 2
+    }
+   ],
+   "rewardText": "エリクサー ×2",
+   "rewardUnparsed": [],
+   "story": "ドクは封印の門の彫り物を写し取りたい。門の前にはウシ槍兵が立ち、写している間も槍を向けてくる。",
+   "tutorial": false
+  },
+  {
+   "id": "N-47",
+   "name": "門の見回り",
+   "giver": "nemu",
+   "giverName": "宿屋のネム",
+   "map": "V600",
+   "minLevel": 70,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M077×25 と M082×25",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M077",
+     "count": 25
+    },
+    {
+     "type": "kill",
+     "mob": "M082",
+     "count": 25
+    }
+   ],
+   "end": "nemu",
+   "exp": 122000,
+   "meso": 7200,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "封印の門のあたりが騒がしい夜は、谷の誰も眠れない。ネム「静かな夜が、この宿の売り物なの」。",
+   "tutorial": false
+  },
+  {
+   "id": "MK-13",
+   "name": "倉庫あての預かり物",
+   "giver": "horn",
+   "giverName": "古道具屋ホルン",
+   "map": "V090",
+   "minLevel": 10,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "ブリーズ港の倉庫番ダンに、預かりの古時計を届ける",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "dan",
+     "label": "倉庫番ダン"
+    }
+   ],
+   "end": "horn",
+   "exp": 23,
+   "meso": 150,
+   "rewards": [
+    {
+     "item": "use.red_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "赤ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "客が「港の倉庫に預けて」と置いていった古時計。ホルンは店番を離れられない。",
+   "tutorial": false
+  },
+  {
+   "id": "MK-14",
+   "name": "表紙の羽",
+   "giver": "scri",
+   "giverName": "書の行商人スクリ",
+   "map": "V090",
+   "minLevel": 10,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M011×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M011",
+     "count": 10
+    }
+   ],
+   "end": "scri",
+   "exp": 23,
+   "meso": 150,
+   "rewards": [
+    {
+     "item": "use.red_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "赤ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "書の表紙にウミネコの羽を 1 本さすと、潮風の町で売れ行きがいい。スクリ「中身より表紙で選ぶ客もいるのさ」。",
+   "tutorial": false
+  },
+  {
+   "id": "MK-15",
+   "name": "水晶玉の磨き水",
+   "giver": "yomi",
+   "giverName": "占い師ヨミ",
+   "map": "V090",
+   "minLevel": 10,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M005×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M005",
+     "count": 10
+    }
+   ],
+   "end": "yomi",
+   "exp": 23,
+   "meso": 150,
+   "rewards": [
+    {
+     "item": "use.blue_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "青ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "ヨミはポヨのしずくで水晶玉を磨く。「曇った玉には、曇った明日しか映らないのよ」。",
+   "tutorial": false
+  },
+  {
+   "id": "MK-16",
+   "name": "宝石箱の裏打ち",
+   "giver": "jue",
+   "giverName": "宝石商ジュエ",
+   "map": "V090",
+   "minLevel": 24,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M063×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M063",
+     "count": 12
+    }
+   ],
+   "end": "jue",
+   "exp": 1230,
+   "meso": 1150,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "橙ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "亡霊のかけらは暗い所でほんのり光る。宝石箱の内側に貼ると、ふたを開けた時に石がきらめいて見える。",
+   "tutorial": false
+  },
+  {
+   "id": "MK-17",
+   "name": "ワニ皮の仕入れ",
+   "giver": "mate",
+   "giverName": "素材屋マテ",
+   "map": "V090",
+   "minLevel": 27,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M064×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M064",
+     "count": 15
+    }
+   ],
+   "end": "mate",
+   "exp": 1910,
+   "meso": 1380,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "橙ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "クロウ街の職人からワニ皮の注文が続いている。マテ「仕入れ先の猟師が腰を痛めてね。代わりに頼めるかい」。",
+   "tutorial": false
+  },
+  {
+   "id": "MK-18",
+   "name": "記録の写し",
+   "giver": "memori",
+   "giverName": "冒険の記録係メモリ",
+   "map": "V090",
+   "minLevel": 31,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "司書リブラと学者ドクに、冒険の記録の写しを届ける",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "libra",
+     "label": "司書リブラ"
+    },
+    {
+     "type": "talk",
+     "npc": "doc",
+     "label": "学者ドク"
+    }
+   ],
+   "end": "memori",
+   "exp": 1670,
+   "meso": 689,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "橙ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "メモリの集めた記録は、森の図書館と谷の学者にも写しを置くことになっている。数字は分け合うほど役に立つ。",
+   "tutorial": false
+  },
+  {
+   "id": "MK-19",
+   "name": "からくりの部品",
+   "giver": "horn",
+   "giverName": "古道具屋ホルン",
+   "map": "V090",
+   "minLevel": 34,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M065×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M065",
+     "count": 15
+    }
+   ],
+   "end": "horn",
+   "exp": 4870,
+   "meso": 1960,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "白ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "ホルンが仕入れた古いからくり時計は、歯車が足りなくて動かない。ガラクタロボの歯車なら、ちょうど合う。",
+   "tutorial": false
+  },
+  {
+   "id": "MK-20",
+   "name": "しおりの粉",
+   "giver": "scri",
+   "giverName": "書の行商人スクリ",
+   "map": "V090",
+   "minLevel": 37,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M083×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M083",
+     "count": 15
+    }
+   ],
+   "end": "scri",
+   "exp": 7180,
+   "meso": 2230,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "白ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "眠りの鱗粉をしおりにまぶすと、読んでいる途中で眠っても、しおりの所から夢の続きが読める……とスクリは言う。",
+   "tutorial": false
+  },
+  {
+   "id": "MK-21",
+   "name": "うろこの光",
+   "giver": "jue",
+   "giverName": "宝石商ジュエ",
+   "map": "V090",
+   "minLevel": 40,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M074×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M074",
+     "count": 15
+    }
+   ],
+   "end": "jue",
+   "exp": 10500,
+   "meso": 2540,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "白ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "ミニドレイクのうろこは、磨くと宝石のように光る。ジュエ「本物の宝石の隣に置くと、どっちが本物か聞かれるのよ」。",
+   "tutorial": false
+  },
+  {
+   "id": "C-31",
+   "name": "星のかけらの研ぎ",
+   "giver": "kumo",
+   "giverName": "武器屋クモ",
+   "map": "C100",
+   "minLevel": 28,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M100×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M100",
+     "count": 10
+    }
+   ],
+   "end": "kumo",
+   "exp": 2200,
+   "meso": 1460,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "橙ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "星のかけらで刃を研ぐと、暗い所で刃先が光る。クモ「雲の上の武器屋らしい売り物を作りたいんだ」。",
+   "tutorial": false
+  },
+  {
+   "id": "C-39",
+   "name": "森都の駅の忘れ物",
+   "giver": "luna",
+   "giverName": "駅員ルナ",
+   "map": "C101",
+   "minLevel": 28,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "シルワ森都の駅の駅員ノアに、雲の船の忘れ物の傘を届ける",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "noa",
+     "label": "駅員ノア"
+    }
+   ],
+   "end": "luna",
+   "exp": 1100,
+   "meso": 585,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "橙ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "雲の船に忘れられた緑の傘。持ち主は森都から乗った客らしい。ルナ「雲の上で傘を忘れる人、多いんです。雨は下に降るので」。",
+   "tutorial": false
+  },
+  {
+   "id": "C-32",
+   "name": "公園の小道",
+   "giver": "ceres_taxi",
+   "giverName": "タクシーの運転手フワ",
+   "map": "C100",
+   "minLevel": 29,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M100×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M100",
+     "count": 20
+    }
+   ],
+   "end": "ceres_taxi",
+   "exp": 2550,
+   "meso": 1550,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "橙ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "雲の公園の小道で、ホシの子が車の前を転がっていく。フワ「雲の上は止まると沈むんだ。急に止まれない」。",
+   "tutorial": false
+  },
+  {
+   "id": "C-33",
+   "name": "日のかけらの灯り",
+   "giver": "hikari",
+   "giverName": "薬屋ヒカリ",
+   "map": "C100",
+   "minLevel": 46,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M102×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M102",
+     "count": 12
+    }
+   ],
+   "end": "hikari",
+   "exp": 19200,
+   "meso": 3280,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "白ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "日のかけらは夜もぬくもりが残る。ヒカリは薬棚の灯りにして、夜中に来る客のために店を開けておきたい。",
+   "tutorial": false
+  },
+  {
+   "id": "C-34",
+   "name": "天馬の羽の布団",
+   "giver": "tsumu",
+   "giverName": "倉庫番ツム",
+   "map": "C100",
+   "minLevel": 53,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M108×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M108",
+     "count": 15
+    }
+   ],
+   "end": "tsumu",
+   "exp": 36200,
+   "meso": 4280,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 20
+    }
+   ],
+   "rewardText": "白ポーション ×20",
+   "rewardUnparsed": [],
+   "story": "倉庫番のツムは、預かり物の陰で昼寝をするのが好き。コテンバの羽で布団を作れば、雲より柔らかい。",
+   "tutorial": false
+  },
+  {
+   "id": "C-35",
+   "name": "雲の綿の裏地",
+   "giver": "shiro",
+   "giverName": "防具屋シロ",
+   "map": "C100",
+   "minLevel": 56,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M109×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M109",
+     "count": 15
+    }
+   ],
+   "end": "shiro",
+   "exp": 45800,
+   "meso": 4690,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "大白ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "雲の精の綿を鎧の裏に入れると、重い鎧でも体が浮くように軽く感じる。シロ「白い鎧は白い綿で、が決まりよ」。",
+   "tutorial": false
+  },
+  {
+   "id": "C-36",
+   "name": "祭壇への道",
+   "giver": "sora",
+   "giverName": "ティンクル行きの係ソラ",
+   "map": "C101",
+   "minLevel": 59,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M109×30",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M109",
+     "count": 30
+    }
+   ],
+   "end": "sora",
+   "exp": 58400,
+   "meso": 5140,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "大白ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "祭壇への道で雲の精が増えすぎて、雲の船の航路まで霧がかかる。ソラ「このままだと便が遅れる」。",
+   "tutorial": false
+  },
+  {
+   "id": "C-37",
+   "name": "守り人の兜",
+   "giver": "hashi",
+   "giverName": "天の階段の船頭",
+   "map": "C101",
+   "minLevel": 62,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M110×25",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M110",
+     "count": 25
+    }
+   ],
+   "end": "hashi",
+   "exp": 71800,
+   "meso": 5630,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "大白ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "塔の守り人が、天の階段の乗り場をのぞきに来る。船頭「客がおびえて乗ってくれん。少し塔へ帰ってもらおう」。",
+   "tutorial": false
+  },
+  {
+   "id": "C-38",
+   "name": "塔の 1 階の刻印",
+   "giver": "xeno",
+   "giverName": "塔の魔導師ゼノ",
+   "map": "C100",
+   "minLevel": 65,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "雲の塔 1 階の古い刻印を調べ、M110×10",
+   "objectives": [
+    {
+     "type": "interact",
+     "target": "C111.q_mark",
+     "label": "雲の塔 1 階の古い刻印"
+    },
+    {
+     "type": "collect",
+     "item": "etc.M110",
+     "count": 10
+    }
+   ],
+   "end": "xeno",
+   "exp": 87800,
+   "meso": 6180,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "ゼノは塔の建てられた年を知りたい。1 階の柱の刻印と、守り人の兜の古い模様を比べれば分かるはず。",
+   "tutorial": false
+  },
+  {
+   "id": "F-37",
+   "name": "村の外れの雪だるま",
+   "giver": "danro",
+   "giverName": "薬屋ダンロ",
+   "map": "F100",
+   "minLevel": 40,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M125×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M125",
+     "count": 20
+    }
+   ],
+   "end": "danro",
+   "exp": 10500,
+   "meso": 2540,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "白ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "村の外れで雪だるま兵が増え、薬草を掘りに行けない。ダンロ「雪の下の草ほど、よく効くんだがね」。",
+   "tutorial": false
+  },
+  {
+   "id": "F-38",
+   "name": "氷の毛皮の敷物",
+   "giver": "yukimi",
+   "giverName": "倉庫番ユキミ",
+   "map": "F100",
+   "minLevel": 40,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M120×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M120",
+     "count": 12
+    }
+   ],
+   "end": "yukimi",
+   "exp": 10500,
+   "meso": 2540,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "白ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "倉庫の床が冷たくて、ユキミは足の指の感覚がない。コオリオオカミの毛皮は、冷たいのに不思議と足が温まる。",
+   "tutorial": false
+  },
+  {
+   "id": "F-48",
+   "name": "村の外れの見張り",
+   "giver": "zack",
+   "giverName": "坑道の番人ザック",
+   "map": "F100",
+   "minLevel": 40,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M120×15",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M120",
+     "count": 15
+    }
+   ],
+   "end": "zack",
+   "exp": 10500,
+   "meso": 2540,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "白ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "ザックは坑道の番のついでに村の外れも見ている。コオリオオカミが坑道の入口の方まで下りてきて、番が 2 倍になった。",
+   "tutorial": false
+  },
+  {
+   "id": "F-39",
+   "name": "坑夫のランプ",
+   "giver": "tsurara",
+   "giverName": "武器屋ツララ",
+   "map": "F100",
+   "minLevel": 58,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M128×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M128",
+     "count": 12
+    }
+   ],
+   "end": "tsurara",
+   "exp": 53800,
+   "meso": 4980,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "大白ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "坑夫ゾンビの帽子のランプは、今も消えずに灯っている。ツララは鍛冶場の手元を照らすのに使いたい。",
+   "tutorial": false
+  },
+  {
+   "id": "F-40",
+   "name": "黒い角の兜",
+   "giver": "mofu",
+   "giverName": "防具屋モフ",
+   "map": "F100",
+   "minLevel": 61,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M124×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M124",
+     "count": 12
+    }
+   ],
+   "end": "mofu",
+   "exp": 67200,
+   "meso": 5460,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "大白ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "ダークイエティの黒い角を兜の飾りにすると、吹雪の中でも仲間から見つけてもらえる。モフの冬の新作。",
+   "tutorial": false
+  },
+  {
+   "id": "F-41",
+   "name": "つるはしの音",
+   "giver": "yuki",
+   "giverName": "雪ん子ユキ",
+   "map": "F100",
+   "minLevel": 64,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "坑道の番人ザックに音の話を聞き、M129×25",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "zack",
+     "label": "坑道の番人ザック"
+    },
+    {
+     "type": "kill",
+     "mob": "M129",
+     "count": 25
+    }
+   ],
+   "end": "yuki",
+   "exp": 81900,
+   "meso": 5990,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "大白ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "夜になると、坑道からカン、カンとつるはしの音が聞こえる。ユキ「まだ誰か掘ってるの？ 怖いから見てきて」。",
+   "tutorial": false
+  },
+  {
+   "id": "F-42",
+   "name": "名も無い兵",
+   "giver": "van",
+   "giverName": "村長ヴァン",
+   "map": "F100",
+   "minLevel": 67,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M130×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M130",
+     "count": 15
+    }
+   ],
+   "end": "van",
+   "exp": 100000,
+   "meso": 6570,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "大白ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "坑道の骨の兵士たちは、誰だったのかもう分からない。ヴァン「名前が無くても、村の墓には入れてやれる」。",
+   "tutorial": false
+  },
+  {
+   "id": "F-43",
+   "name": "つめの湿布",
+   "giver": "danro",
+   "giverName": "薬屋ダンロ",
+   "map": "F100",
+   "minLevel": 74,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M126×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M126",
+     "count": 12
+    }
+   ],
+   "end": "danro",
+   "exp": 152000,
+   "meso": 7830,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "獣のつめを煎じて湿布にすると、凍えた手足の痛みが引く。ダンロ「猟師たちは、痛いと言わんからな」。",
+   "tutorial": false
+  },
+  {
+   "id": "F-44",
+   "name": "将校の印",
+   "giver": "tsurara",
+   "giverName": "武器屋ツララ",
+   "map": "F100",
+   "minLevel": 77,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M131×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M131",
+     "count": 12
+    }
+   ],
+   "end": "tsurara",
+   "exp": 179000,
+   "meso": 8340,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "骨の将校の印は、古い鋼でできている。今は作れない硬さで、ツララはこれを溶かして刃に混ぜてみたい。",
+   "tutorial": false
+  },
+  {
+   "id": "F-45",
+   "name": "獣の住処",
+   "giver": "mofu",
+   "giverName": "防具屋モフ",
+   "map": "F100",
+   "minLevel": 80,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M127×25",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M127",
+     "count": 25
+    }
+   ],
+   "end": "mofu",
+   "exp": 210000,
+   "meso": 8880,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "エリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "獣の住処のライカンが、モフの毛皮干し場から毛皮を持っていく。モフ「仲間の毛皮だと思ってるのかもね」。",
+   "tutorial": false
+  },
+  {
+   "id": "F-46",
+   "name": "焔の門の見張り",
+   "giver": "hyoga_taxi",
+   "giverName": "そりの御者トナ",
+   "map": "F100",
+   "minLevel": 83,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M132×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M132",
+     "count": 20
+    }
+   ],
+   "end": "hyoga_taxi",
+   "exp": 244000,
+   "meso": 9450,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "エリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "焔の門のあたりで骨の将軍が動き、トナのそり道まで地鳴りが響く。犬たちがおびえて走らない。",
+   "tutorial": false
+  },
+  {
+   "id": "F-47",
+   "name": "古いそりの残骸",
+   "giver": "yuki",
+   "giverName": "雪ん子ユキ",
+   "map": "F100",
+   "minLevel": 85,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "獣の住処の古いそりを調べ、M127×15",
+   "objectives": [
+    {
+     "type": "interact",
+     "target": "F109.q_sled",
+     "label": "獣の住処の古いそり"
+    },
+    {
+     "type": "kill",
+     "mob": "M127",
+     "count": 15
+    }
+   ],
+   "end": "yuki",
+   "exp": 269000,
+   "meso": 9860,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "エリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "ユキのおじいさんは昔、そりごと獣の住処で消えた。ユキ「おじいちゃんのそりの印、星の形なの」。",
+   "tutorial": false
+  },
+  {
+   "id": "T-34",
+   "name": "積み木の道のクマ",
+   "giver": "kippu",
+   "giverName": "ティンクルの駅員キップ",
+   "map": "T101",
+   "minLevel": 25,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M140×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M140",
+     "count": 20
+    }
+   ],
+   "end": "kippu",
+   "exp": 1430,
+   "meso": 1220,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "橙ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "積み木の道でチャイロクマ人形が線路の上に寝転がる。キップ「おもちゃの汽車が、ぬいぐるみに負けて止まるんです」。",
+   "tutorial": false
+  },
+  {
+   "id": "T-54",
+   "name": "ボタンの目",
+   "giver": "ruru",
+   "giverName": "人形師ルル",
+   "map": "T100",
+   "minLevel": 25,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M140×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M140",
+     "count": 10
+    }
+   ],
+   "end": "ruru",
+   "exp": 1430,
+   "meso": 1220,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "橙ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "チャイロクマ人形のボタンの目は、昔ルルが縫いつけた物かもしれない。ルル「目が取れた子たちに、返してあげたいの」。",
+   "tutorial": false
+  },
+  {
+   "id": "T-35",
+   "name": "ピンクの綿",
+   "giver": "wata",
+   "giverName": "防具屋ワタ",
+   "map": "T100",
+   "minLevel": 26,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M141×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M141",
+     "count": 12
+    }
+   ],
+   "end": "wata",
+   "exp": 1650,
+   "meso": 1290,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "橙ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "モモクマ人形の綿はふわふわで、鎧の肩当ての内側に入れるとぶつけても痛くない。ワタ「名前のとおり、綿が専門です」。",
+   "tutorial": false
+  },
+  {
+   "id": "T-36",
+   "name": "飴の刷毛",
+   "giver": "ame",
+   "giverName": "薬屋アメ",
+   "map": "T100",
+   "minLevel": 45,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M146×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M146",
+     "count": 12
+    }
+   ],
+   "end": "ame",
+   "exp": 17300,
+   "meso": 3150,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "白ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "飴の薬は、表に薄く飴を塗ると飲みやすい。木馬のたてがみは、刷毛にするとむらなく塗れる。",
+   "tutorial": false
+  },
+  {
+   "id": "T-37",
+   "name": "ブリキの板",
+   "giver": "zenmai",
+   "giverName": "武器屋ゼンマイ",
+   "map": "T100",
+   "minLevel": 47,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M148×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M148",
+     "count": 15
+    }
+   ],
+   "end": "zenmai",
+   "exp": 21200,
+   "meso": 3430,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "白ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "ブリキロボの板は薄いのにへこまない。ゼンマイは、おもちゃの町の子どもが振っても危なくない練習用の剣を作りたい。",
+   "tutorial": false
+  },
+  {
+   "id": "T-38",
+   "name": "時計虫の部屋",
+   "giver": "hakobe",
+   "giverName": "倉庫番ハコベ",
+   "map": "T100",
+   "minLevel": 50,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M149×30",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M149",
+     "count": 30
+    }
+   ],
+   "end": "hakobe",
+   "exp": 28600,
+   "meso": 3900,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 20
+    }
+   ],
+   "rewardText": "白ポーション ×20",
+   "rewardUnparsed": [],
+   "story": "倉庫の預かり物の時計が、いつの間にか全部ずれている。時計虫が工場から倉庫まで、針を食べに来ているらしい。",
+   "tutorial": false
+  },
+  {
+   "id": "T-39",
+   "name": "隊長のバネ",
+   "giver": "gear",
+   "giverName": "受付ギア",
+   "map": "T118",
+   "minLevel": 53,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M150×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M150",
+     "count": 10
+    }
+   ],
+   "end": "gear",
+   "exp": 36200,
+   "meso": 4280,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 20
+    }
+   ],
+   "rewardText": "白ポーション ×20",
+   "rewardUnparsed": [],
+   "story": "からくり迷宮の扉のバネがのびてしまった。ギア「隊長ブリキロボのバネは、100 年たってものびないんです」。",
+   "tutorial": false
+  },
+  {
+   "id": "T-40",
+   "name": "金の縫い針",
+   "giver": "ruru",
+   "giverName": "人形師ルル",
+   "map": "T100",
+   "minLevel": 56,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M151×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M151",
+     "count": 10
+    }
+   ],
+   "end": "ruru",
+   "exp": 45800,
+   "meso": 4690,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "大白ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "時計虫の群れ長の金の針は、人形の目を縫うのにちょうどいい細さ。ルル「目が決まると、人形は急に話しそうになるの」。",
+   "tutorial": false
+  },
+  {
+   "id": "T-41",
+   "name": "工場の奥の見回り",
+   "giver": "buro",
+   "giverName": "積み木職人ブロ",
+   "map": "T100",
+   "minLevel": 59,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M151×30",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M151",
+     "count": 30
+    }
+   ],
+   "end": "buro",
+   "exp": 58400,
+   "meso": 5140,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "大白ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "ブロの積み木を工場に納めに行くと、時計虫の群れが積み木をかじって穴だらけにする。",
+   "tutorial": false
+  },
+  {
+   "id": "T-42",
+   "name": "魂の綿",
+   "giver": "paz",
+   "giverName": "受付パズ",
+   "map": "T119",
+   "minLevel": 62,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M152×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M152",
+     "count": 15
+    }
+   ],
+   "end": "paz",
+   "exp": 71800,
+   "meso": 5630,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "大白ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "おもちゃ箱の迷路の番犬は、魂クマ人形の綿の匂いが好き。パズ「迷路の中で番犬に道を覚えさせるのに使うの」。",
+   "tutorial": false
+  },
+  {
+   "id": "T-43",
+   "name": "オバケの帽子",
+   "giver": "ame",
+   "giverName": "薬屋アメ",
+   "map": "T100",
+   "minLevel": 65,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M153×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M153",
+     "count": 12
+    }
+   ],
+   "end": "ame",
+   "exp": 87800,
+   "meso": 6180,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "大白ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "ボウシオバケの帽子を逆さにすると、ちょうどいい飴の入れ物になる。アメ「中身はオバケが食べないように、ふた付きで」。",
+   "tutorial": false
+  },
+  {
+   "id": "T-44",
+   "name": "オバケの布の外套",
+   "giver": "wata",
+   "giverName": "防具屋ワタ",
+   "map": "T100",
+   "minLevel": 68,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M154×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M154",
+     "count": 15
+    }
+   ],
+   "end": "wata",
+   "exp": 107000,
+   "meso": 6770,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "大白ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "ダラダラオバケの布は、着ると気配が薄くなる。ワタは時の塔に入る人のための外套を考えている。",
+   "tutorial": false
+  },
+  {
+   "id": "T-45",
+   "name": "中の階の見回り",
+   "giver": "zenmai",
+   "giverName": "武器屋ゼンマイ",
+   "map": "T100",
+   "minLevel": 71,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M154×35",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M154",
+     "count": 35
+    }
+   ],
+   "end": "zenmai",
+   "exp": 129000,
+   "meso": 7350,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "時の塔の中の階でダラダラオバケが増え、ゼンマイが試し切りに行く場所がない。",
+   "tutorial": false
+  },
+  {
+   "id": "T-46",
+   "name": "黒い綿",
+   "giver": "kippu",
+   "giverName": "ティンクルの駅員キップ",
+   "map": "T101",
+   "minLevel": 74,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M155×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M155",
+     "count": 12
+    }
+   ],
+   "end": "kippu",
+   "exp": 152000,
+   "meso": 7830,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "駅の忘れ物のぬいぐるみが破れた。キップ「黒い綿しか合う色がないんです。持ち主の子が泣いていて」。",
+   "tutorial": false
+  },
+  {
+   "id": "T-47",
+   "name": "下の階の死神",
+   "giver": "toy",
+   "giverName": "町長トイ",
+   "map": "T100",
+   "minLevel": 77,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M155×35",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M155",
+     "count": 35
+    }
+   ],
+   "end": "toy",
+   "exp": 179000,
+   "meso": 8340,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "エリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "死神クマ人形が時の塔の下の階から上がってきて、町の子どもたちのおもちゃを連れていこうとする。",
+   "tutorial": false
+  },
+  {
+   "id": "T-48",
+   "name": "門番の鍵束",
+   "giver": "hakobe",
+   "giverName": "倉庫番ハコベ",
+   "map": "T100",
+   "minLevel": 80,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M156×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M156",
+     "count": 10
+    }
+   ],
+   "end": "hakobe",
+   "exp": 210000,
+   "meso": 8880,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "エリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "倉庫の古い鍵箱の鍵が、どれも合わない。時の門番の鍵は、どの錠前にも合うという言い伝えがある。",
+   "tutorial": false
+  },
+  {
+   "id": "T-49",
+   "name": "時の砂の人形",
+   "giver": "ruru",
+   "giverName": "人形師ルル",
+   "map": "T100",
+   "minLevel": 83,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M157×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M157",
+     "count": 12
+    }
+   ],
+   "end": "ruru",
+   "exp": 244000,
+   "meso": 9450,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "エリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "時の砂を詰めた人形は、年を取らない。ルル「この町の子が大人になっても、同じ顔で待っていてくれる人形を作りたいの」。",
+   "tutorial": false
+  },
+  {
+   "id": "T-50",
+   "name": "深い階の亡霊",
+   "giver": "buro",
+   "giverName": "積み木職人ブロ",
+   "map": "T100",
+   "minLevel": 86,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M157×35",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M157",
+     "count": 35
+    }
+   ],
+   "end": "buro",
+   "exp": 283000,
+   "meso": 10100,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 20
+    }
+   ],
+   "rewardText": "大白ポーション ×20",
+   "rewardUnparsed": [],
+   "story": "時の亡霊が深い階で砂をまき、ブロの組んだ塔の階段が砂に埋もれていく。",
+   "tutorial": false
+  },
+  {
+   "id": "T-51",
+   "name": "止まった振り子",
+   "giver": "gear",
+   "giverName": "受付ギア",
+   "map": "T118",
+   "minLevel": 89,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "最下層の回廊の止まった振り子を調べ、M158×15",
+   "objectives": [
+    {
+     "type": "interact",
+     "target": "T116.q_pendulum",
+     "label": "最下層の回廊の止まった振り子"
+    },
+    {
+     "type": "kill",
+     "mob": "M158",
+     "count": 15
+    }
+   ],
+   "end": "gear",
+   "exp": 328000,
+   "meso": 10700,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 2
+    }
+   ],
+   "rewardText": "大エリクサー ×2",
+   "rewardUnparsed": [],
+   "story": "からくり迷宮の時計が全部、同じ時刻で止まった。ギア「最下層の大きな振り子が止まったせいだと思うんです」。",
+   "tutorial": false
+  },
+  {
+   "id": "T-52",
+   "name": "振り子の重り",
+   "giver": "paz",
+   "giverName": "受付パズ",
+   "map": "T119",
+   "minLevel": 92,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M158×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M158",
+     "count": 12
+    }
+   ],
+   "end": "paz",
+   "exp": 378000,
+   "meso": 11400,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 2
+    }
+   ],
+   "rewardText": "大エリクサー ×2",
+   "rewardUnparsed": [],
+   "story": "迷路の仕掛け時計の重りが足りない。振り子の騎士の振り子は、重さがぴったりそろっている。",
+   "tutorial": false
+  },
+  {
+   "id": "T-53",
+   "name": "最下層の見回り",
+   "giver": "clock",
+   "giverName": "時計番のクロック婆",
+   "map": "T100",
+   "minLevel": 95,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M157×30 と M158×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M157",
+     "count": 30
+    },
+    {
+     "type": "kill",
+     "mob": "M158",
+     "count": 20
+    }
+   ],
+   "end": "clock",
+   "exp": 433000,
+   "meso": 12200,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "大エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "クロック婆は毎晩、時の塔の音を聞いて眠る。最近は最下層がうるさくて、時計の音が聞こえない。",
+   "tutorial": false
+  },
+  {
+   "id": "M-33",
+   "name": "泡の玉の薬びん",
+   "giver": "shizuku",
+   "giverName": "薬屋シズク",
+   "map": "M100",
+   "minLevel": 40,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M170×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M170",
+     "count": 12
+    }
+   ],
+   "end": "shizuku",
+   "exp": 10500,
+   "meso": 2540,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "白ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "アワぷくの泡の玉は、割れない小びんになる。シズク「海の中では、ガラスより泡の方が丈夫なんです」。",
+   "tutorial": false
+  },
+  {
+   "id": "M-48",
+   "name": "ドームの泡",
+   "giver": "ruri",
+   "giverName": "女王の侍女ルリ",
+   "map": "M100",
+   "minLevel": 40,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M170×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M170",
+     "count": 20
+    }
+   ],
+   "end": "ruri",
+   "exp": 10500,
+   "meso": 2540,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "白ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "アワぷくの泡が都のドームの外側にびっしりくっつき、女王の窓から海が見えない。ルリ「女王さまは、朝の海を見るのが好きなのです」。",
+   "tutorial": false
+  },
+  {
+   "id": "M-34",
+   "name": "浅い海のクラゲ",
+   "giver": "tsubo",
+   "giverName": "倉庫番ツボ",
+   "map": "M100",
+   "minLevel": 41,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M171×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M171",
+     "count": 20
+    }
+   ],
+   "end": "tsubo",
+   "exp": 11600,
+   "meso": 2650,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "白ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "ツボの倉庫の入口に、クラゲンがふわふわ集まってくる。ツボ「触ると痺れる。預かり物を落とす」。",
+   "tutorial": false
+  },
+  {
+   "id": "M-35",
+   "name": "イカの足の握り",
+   "giver": "sango",
+   "giverName": "武器屋サンゴ",
+   "map": "M100",
+   "minLevel": 60,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M175×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M175",
+     "count": 12
+    }
+   ],
+   "end": "sango",
+   "exp": 63000,
+   "meso": 5300,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "大白ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "イカ戦士の足は、武器の握りに巻くと水の中でもすべらない。サンゴ「海の武器屋の工夫ってやつさ」。",
+   "tutorial": false
+  },
+  {
+   "id": "M-36",
+   "name": "サメの通り道",
+   "giver": "kai_m",
+   "giverName": "防具屋カイガラ",
+   "map": "M100",
+   "minLevel": 63,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M176×30",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M176",
+     "count": 30
+    }
+   ],
+   "end": "kai_m",
+   "exp": 76900,
+   "meso": 5810,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "大白ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "カイガラは貝殻を拾いにサメの通り道を横切る。サメがいる日は、貝殻の代わりにかじられた盾を拾って帰る。",
+   "tutorial": false
+  },
+  {
+   "id": "M-37",
+   "name": "サメの歯の錨爪",
+   "giver": "norma",
+   "giverName": "潜水船の船長ノーマ",
+   "map": "M113",
+   "minLevel": 66,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M176×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M176",
+     "count": 15
+    }
+   ],
+   "end": "norma",
+   "exp": 93700,
+   "meso": 6370,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "大白ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "潜水船の錨の爪がすり減った。ノーマ「サメの歯を並べて付ければ、どんな岩にも食いつく」。",
+   "tutorial": false
+  },
+  {
+   "id": "M-38",
+   "name": "骨の海の見回り",
+   "giver": "shell",
+   "giverName": "受付シェル",
+   "map": "M114",
+   "minLevel": 69,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M177×30",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M177",
+     "count": 30
+    }
+   ],
+   "end": "shell",
+   "exp": 114000,
+   "meso": 6980,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "大白ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "沈没船への道にホネウオが群れて、挑戦者が受付まで来られない。シェル「受付が暇なのは、よくないこと」。",
+   "tutorial": false
+  },
+  {
+   "id": "M-39",
+   "name": "骨のだし",
+   "giver": "shio",
+   "giverName": "料理人シオ",
+   "map": "M100",
+   "minLevel": 75,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M177×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M177",
+     "count": 15
+    }
+   ],
+   "end": "shio",
+   "exp": 160000,
+   "meso": 8000,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "ホネウオの骨は、身が無いのにいいだしが出る。シオ「骨だけで泳いでる魚だ。うまみが逃げ場をなくしてる」。",
+   "tutorial": false
+  },
+  {
+   "id": "M-40",
+   "name": "痺れ薬",
+   "giver": "shizuku",
+   "giverName": "薬屋シズク",
+   "map": "M100",
+   "minLevel": 78,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M178×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M178",
+     "count": 12
+    }
+   ],
+   "end": "shizuku",
+   "exp": 188000,
+   "meso": 8510,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "ヤミエイのしっぽは、薄めると痛み止めになる。濃いままだと……シズクは「試したことはない」と目をそらす。",
+   "tutorial": false
+  },
+  {
+   "id": "M-41",
+   "name": "冷たい海の氷",
+   "giver": "tsubo",
+   "giverName": "倉庫番ツボ",
+   "map": "M100",
+   "minLevel": 81,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M179×30",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M179",
+     "count": 30
+    }
+   ],
+   "end": "tsubo",
+   "exp": 221000,
+   "meso": 9070,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "エリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "ツララザメが冷たい海から都のそばまで来て、倉庫の壺の中身が凍る。ツボ「壺の名前で呼ばれてるのに、壺が割れる」。",
+   "tutorial": false
+  },
+  {
+   "id": "M-42",
+   "name": "暗い海の見張り",
+   "giver": "sango",
+   "giverName": "武器屋サンゴ",
+   "map": "M100",
+   "minLevel": 84,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M178×25 と M179×15",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M178",
+     "count": 25
+    },
+    {
+     "type": "kill",
+     "mob": "M179",
+     "count": 15
+    }
+   ],
+   "end": "sango",
+   "exp": 256000,
+   "meso": 9650,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "エリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "サンゴは新しい銛を試したい。暗い海と冷たい海の境で、ヤミエイとツララザメが縄張りを争っている。",
+   "tutorial": false
+  },
+  {
+   "id": "M-43",
+   "name": "深海の見回り",
+   "giver": "kai_m",
+   "giverName": "防具屋カイガラ",
+   "map": "M100",
+   "minLevel": 87,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M180×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M180",
+     "count": 20
+    }
+   ],
+   "end": "kai_m",
+   "exp": 297000,
+   "meso": 10300,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 20
+    }
+   ],
+   "rewardText": "大白ポーション ×20",
+   "rewardUnparsed": [],
+   "story": "深海アンコウのちょうちんの光につられて、都の子どもが深海の方へ泳いでいこうとする。",
+   "tutorial": false
+  },
+  {
+   "id": "M-44",
+   "name": "溝の浮き標",
+   "giver": "marin",
+   "giverName": "近衛兵マリン",
+   "map": "M100",
+   "minLevel": 90,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "海の溝の古い浮き標を調べ、M180×15",
+   "objectives": [
+    {
+     "type": "interact",
+     "target": "M111.q_buoy",
+     "label": "海の溝の古い浮き標"
+    },
+    {
+     "type": "kill",
+     "mob": "M180",
+     "count": 15
+    }
+   ],
+   "end": "marin",
+   "exp": 344000,
+   "meso": 10900,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 2
+    }
+   ],
+   "rewardText": "大エリクサー ×2",
+   "rewardUnparsed": [],
+   "story": "海の溝の入口に立てた浮き標が、潜水船の道しるべになっている。マリン「灯りが消えた。何かがかじったんだ」。",
+   "tutorial": false
+  },
+  {
+   "id": "M-45",
+   "name": "大きなうろこの船体",
+   "giver": "norma",
+   "giverName": "潜水船の船長ノーマ",
+   "map": "M113",
+   "minLevel": 93,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M181×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M181",
+     "count": 10
+    }
+   ],
+   "end": "norma",
+   "exp": 396000,
+   "meso": 11700,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 2
+    }
+   ],
+   "rewardText": "大エリクサー ×2",
+   "rewardUnparsed": [],
+   "story": "大ウミヘビのうろこを潜水船の船体に貼れば、深い所の水の重さにも耐える。ノーマ「もっと深くへ行ってみたいのさ」。",
+   "tutorial": false
+  },
+  {
+   "id": "M-46",
+   "name": "海の溝の見回り",
+   "giver": "shell",
+   "giverName": "受付シェル",
+   "map": "M114",
+   "minLevel": 96,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M181×25",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M181",
+     "count": 25
+    }
+   ],
+   "end": "shell",
+   "exp": 454000,
+   "meso": 12400,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "大エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "大ウミヘビが沈没船の方まで来て、船の残骸に巻きついている。シェル「中の挑戦者が出てこられなくなる」。",
+   "tutorial": false
+  },
+  {
+   "id": "M-47",
+   "name": "溝の底の宴",
+   "giver": "shio",
+   "giverName": "料理人シオ",
+   "map": "M100",
+   "minLevel": 99,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M180×10 と M181×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M180",
+     "count": 10
+    },
+    {
+     "type": "collect",
+     "item": "etc.M181",
+     "count": 10
+    }
+   ],
+   "end": "shio",
+   "exp": 521000,
+   "meso": 13200,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "大エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "女王の誕生日の宴に、シオは一番深い海の材料を出したい。ちょうちんは灯りに、うろこは大皿に。",
+   "tutorial": false
+  },
+  {
+   "id": "A-23",
+   "name": "階段の番人",
+   "giver": "ishi",
+   "giverName": "倉庫番イシ",
+   "map": "P100",
+   "minLevel": 85,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M190×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M190",
+     "count": 20
+    }
+   ],
+   "end": "ishi",
+   "exp": 269000,
+   "meso": 9860,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "神殿の階段の石の番人が、野営地の倉庫の方へ一段ずつ下りてくる。イシ「石が石を運びに来たのかと思った」。",
+   "tutorial": false
+  },
+  {
+   "id": "A-34",
+   "name": "船頭の酔い止め",
+   "giver": "inori",
+   "giverName": "薬屋イノリ",
+   "map": "P100",
+   "minLevel": 85,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "雲の船の船頭ミチに酔い止めを届ける",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "p_boat",
+     "label": "雲の船の船頭ミチ"
+    }
+   ],
+   "end": "p_boat",
+   "exp": 134000,
+   "meso": 3940,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 2
+    }
+   ],
+   "rewardText": "エリクサー ×2",
+   "rewardUnparsed": [],
+   "story": "雲の船の船頭なのに、ミチは揺れに弱い。イノリ「本人は内緒にしてるつもりなの。そっと渡してあげて」。",
+   "tutorial": false
+  },
+  {
+   "id": "A-24",
+   "name": "船の重り",
+   "giver": "p_boat",
+   "giverName": "雲の船の船頭ミチ",
+   "map": "P100",
+   "minLevel": 87,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M190×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M190",
+     "count": 10
+    }
+   ],
+   "end": "p_boat",
+   "exp": 297000,
+   "meso": 10300,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "雲の船は軽すぎて、風の強い日に流される。番人の石を船底に積めば、ちょうどいい重さになる。",
+   "tutorial": false
+  },
+  {
+   "id": "A-25",
+   "name": "金色の粉",
+   "giver": "inori",
+   "giverName": "薬屋イノリ",
+   "map": "P100",
+   "minLevel": 95,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M191×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M191",
+     "count": 12
+    }
+   ],
+   "end": "inori",
+   "exp": 433000,
+   "meso": 12200,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "エリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "黄金の番人のかけらを粉にして薬に混ぜると、飲んだ人の顔色がよくなる（金色になるわけではない）。",
+   "tutorial": false
+  },
+  {
+   "id": "A-26",
+   "name": "騎士の広間",
+   "giver": "ishi",
+   "giverName": "倉庫番イシ",
+   "map": "P100",
+   "minLevel": 98,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M192×30",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M192",
+     "count": 30
+    }
+   ],
+   "end": "ishi",
+   "exp": 500000,
+   "meso": 12900,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "エリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "迷い騎士が広間から迷い出て、野営地の天幕の間を行ったり来たりする。イシ「夜中に鎧の音がすると眠れん」。",
+   "tutorial": false
+  },
+  {
+   "id": "A-27",
+   "name": "祈りの布の帆",
+   "giver": "p_boat",
+   "giverName": "雲の船の船頭ミチ",
+   "map": "P100",
+   "minLevel": 101,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M193×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M193",
+     "count": 12
+    }
+   ],
+   "end": "p_boat",
+   "exp": 571000,
+   "meso": 13700,
+   "rewards": [
+    {
+     "item": "use.xl_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "特大ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "雲の船の帆が破れた。祈りの亡霊の布は、どんな強い風でも裂けないという。ミチ「祈りの力ってやつかね」。",
+   "tutorial": false
+  },
+  {
+   "id": "A-28",
+   "name": "祈りの間",
+   "giver": "alma",
+   "giverName": "神殿の巫女アルマ",
+   "map": "P100",
+   "minLevel": 104,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M193×35",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M193",
+     "count": 35
+    }
+   ],
+   "end": "alma",
+   "exp": 659000,
+   "meso": 14300,
+   "rewards": [
+    {
+     "item": "use.xl_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "特大ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "祈りの間で亡霊たちが祈り続けている。アルマ「何を祈っているのかは分からない。でも、もう休んでいい頃です」。",
+   "tutorial": false
+  },
+  {
+   "id": "A-29",
+   "name": "神殿の石の乳鉢",
+   "giver": "inori",
+   "giverName": "薬屋イノリ",
+   "map": "P100",
+   "minLevel": 107,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M194×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M194",
+     "count": 10
+    }
+   ],
+   "end": "inori",
+   "exp": 764000,
+   "meso": 14900,
+   "rewards": [
+    {
+     "item": "use.xl_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "特大ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "イノリの乳鉢が割れた。神殿の石は、どんな硬い薬の種をすってもすり減らない。",
+   "tutorial": false
+  },
+  {
+   "id": "A-30",
+   "name": "司祭の書の写し",
+   "giver": "ishi",
+   "giverName": "倉庫番イシ",
+   "map": "P100",
+   "minLevel": 110,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M195×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M195",
+     "count": 12
+    }
+   ],
+   "end": "ishi",
+   "exp": 882000,
+   "meso": 15500,
+   "rewards": [
+    {
+     "item": "use.xl_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "特大ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "封印の司祭の書には、神殿の倉の目録がある。イシ「昔の倉番が何を預かっていたか、同じ倉番として知りたい」。",
+   "tutorial": false
+  },
+  {
+   "id": "A-31",
+   "name": "封印の回廊",
+   "giver": "p_boat",
+   "giverName": "雲の船の船頭ミチ",
+   "map": "P100",
+   "minLevel": 113,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M195×30",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M195",
+     "count": 30
+    }
+   ],
+   "end": "p_boat",
+   "exp": 1020000,
+   "meso": 16200,
+   "rewards": [
+    {
+     "item": "use.xl_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "特大ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "封印の司祭が唱える声が、雲の船の乗り場まで響く。客が「呪われる」と言って船に乗ってくれない。",
+   "tutorial": false
+  },
+  {
+   "id": "A-32",
+   "name": "残像のかけら",
+   "giver": "inori",
+   "giverName": "薬屋イノリ",
+   "map": "P100",
+   "minLevel": 116,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M196×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M196",
+     "count": 12
+    }
+   ],
+   "end": "inori",
+   "exp": 1180000,
+   "meso": 16900,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 2
+    }
+   ],
+   "rewardText": "大エリクサー ×2",
+   "rewardUnparsed": [],
+   "story": "時の残像のかけらを薬に溶かすと、ほんの少し前の自分の調子に戻れる。イノリ「疲れた冒険者向けね」。",
+   "tutorial": false
+  },
+  {
+   "id": "A-33",
+   "name": "曇った鏡",
+   "giver": "alma",
+   "giverName": "神殿の巫女アルマ",
+   "map": "P100",
+   "minLevel": 119,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "残像の間の曇った鏡を調べ、M196×25",
+   "objectives": [
+    {
+     "type": "interact",
+     "target": "P108.q_mirror",
+     "label": "残像の間の曇った鏡"
+    },
+    {
+     "type": "kill",
+     "mob": "M196",
+     "count": 25
+    }
+   ],
+   "end": "alma",
+   "exp": 1360000,
+   "meso": 17600,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "大エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "残像の間の鏡は、神殿の時が止まった日を映しているという。アルマ「曇っていて見えないの。残像が息を吹きかけるから」。",
+   "tutorial": false
+  },
+  {
+   "id": "D-31",
+   "name": "トカゲの翼の膏薬",
+   "giver": "tsume",
+   "giverName": "薬屋ツメ",
+   "map": "D100",
+   "minLevel": 98,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M200×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M200",
+     "count": 10
+    }
+   ],
+   "end": "tsume",
+   "exp": 500000,
+   "meso": 12900,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "ハネトカゲの翼の薄い皮は、傷に貼ると膏薬になる。竜に乗る村の人は、すり傷が絶えない。",
+   "tutorial": false
+  },
+  {
+   "id": "D-46",
+   "name": "研いだ鉤爪",
+   "giver": "doran",
+   "giverName": "鍛冶屋ドラン",
+   "map": "D100",
+   "minLevel": 98,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "発着場の鳥使いホークに、研ぎ直した鳥の鉤爪かけを届ける",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "hawk",
+     "label": "鳥使いホーク"
+    }
+   ],
+   "end": "hawk",
+   "exp": 250000,
+   "meso": 5180,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 2
+    }
+   ],
+   "rewardText": "エリクサー ×2",
+   "rewardUnparsed": [],
+   "story": "鳥が止まる腕当ての鉤爪かけを、ドランが研ぎ直した。ドラン「鳥の爪も竜の爪も、打てば分かる」。",
+   "tutorial": false
+  },
+  {
+   "id": "D-32",
+   "name": "村の外の森",
+   "giver": "hane",
+   "giverName": "鳥の世話係ハネ",
+   "map": "D101",
+   "minLevel": 99,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M200×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M200",
+     "count": 20
+    }
+   ],
+   "end": "hane",
+   "exp": 521000,
+   "meso": 13200,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "ハネトカゲが発着場の鳥のえさを盗みに来る。ハネ「鳥たちが怒って、羽を逆立てたまま飛ばないの」。",
+   "tutorial": false
+  },
+  {
+   "id": "D-33",
+   "name": "黒い竜の革の鞘",
+   "giver": "uroko",
+   "giverName": "武器屋ウロコ",
+   "map": "D100",
+   "minLevel": 118,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M203×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M203",
+     "count": 12
+    }
+   ],
+   "end": "uroko",
+   "exp": 1300000,
+   "meso": 17300,
+   "rewards": [
+    {
+     "item": "use.xl_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "特大ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "クロワイバーンの革は、黒くて火に強い。ウロコは竜の谷の剣にふさわしい鞘を作りたい。",
+   "tutorial": false
+  },
+  {
+   "id": "D-34",
+   "name": "竜の骨の兜",
+   "giver": "hone",
+   "giverName": "防具屋ホネ",
+   "map": "D100",
+   "minLevel": 121,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M204×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M204",
+     "count": 10
+    }
+   ],
+   "end": "hone",
+   "exp": 1500000,
+   "meso": 18100,
+   "rewards": [
+    {
+     "item": "use.xl_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "特大ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "骨竜の骨は軽くて硬い。ホネ「名前のせいで骨ばかり扱ってると思われる。……まあ、そうなんだが」。",
+   "tutorial": false
+  },
+  {
+   "id": "D-35",
+   "name": "番兵の道",
+   "giver": "su",
+   "giverName": "倉庫番ス",
+   "map": "D100",
+   "minLevel": 124,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M205×25",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M205",
+     "count": 25
+    }
+   ],
+   "end": "su",
+   "exp": 1730000,
+   "meso": 18800,
+   "rewards": [
+    {
+     "item": "use.xl_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "特大ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "番兵の道の竜の番兵が、荷を運ぶ村の人を通してくれない。ス「通行料は払ってないが、昔から通ってた道だ」。",
+   "tutorial": false
+  },
+  {
+   "id": "D-36",
+   "name": "番兵のうろこ",
+   "giver": "nest",
+   "giverName": "受付ネスト",
+   "map": "D116",
+   "minLevel": 127,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M205×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M205",
+     "count": 10
+    }
+   ],
+   "end": "nest",
+   "exp": 2000000,
+   "meso": 19600,
+   "rewards": [
+    {
+     "item": "use.xl_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "特大ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "竜の巣の入口に、目印の札を立てたい。ネスト「番兵のうろこの札なら、竜も目印だと分かってくれる」。",
+   "tutorial": false
+  },
+  {
+   "id": "D-37",
+   "name": "キメラの巣",
+   "giver": "hane",
+   "giverName": "鳥の世話係ハネ",
+   "map": "D101",
+   "minLevel": 130,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M206×30",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M206",
+     "count": 30
+    }
+   ],
+   "end": "hane",
+   "exp": 2310000,
+   "meso": 20500,
+   "rewards": [
+    {
+     "item": "use.xl_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "特大ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "キメラが巣から出て、発着場の鳥を追い回す。ハネ「頭が 3 つあるから、3 羽いっぺんに追いかけるのよ」。",
+   "tutorial": false
+  },
+  {
+   "id": "D-38",
+   "name": "毒消しの尾",
+   "giver": "tsume",
+   "giverName": "薬屋ツメ",
+   "map": "D100",
+   "minLevel": 133,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M206×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M206",
+     "count": 12
+    }
+   ],
+   "end": "tsume",
+   "exp": 2660000,
+   "meso": 21300,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 2
+    }
+   ],
+   "rewardText": "大エリクサー ×2",
+   "rewardUnparsed": [],
+   "story": "キメラの尾の毒は、少しずつ混ぜると毒消しになる。ツメ「毒を知る者が、毒を消せる」。",
+   "tutorial": false
+  },
+  {
+   "id": "D-39",
+   "name": "炎の巣の見回り",
+   "giver": "uroko",
+   "giverName": "武器屋ウロコ",
+   "map": "D100",
+   "minLevel": 136,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M207×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M207",
+     "count": 20
+    }
+   ],
+   "end": "uroko",
+   "exp": 3060000,
+   "meso": 22200,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 2
+    }
+   ],
+   "rewardText": "大エリクサー ×2",
+   "rewardUnparsed": [],
+   "story": "ウロコは新しい剣を炎竜の吐く火で鍛えたい。そのためには、まず巣の炎竜を落ち着かせないといけない。",
+   "tutorial": false
+  },
+  {
+   "id": "D-40",
+   "name": "氷の巣の見回り",
+   "giver": "hone",
+   "giverName": "防具屋ホネ",
+   "map": "D100",
+   "minLevel": 139,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M208×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M208",
+     "count": 20
+    }
+   ],
+   "end": "hone",
+   "exp": 3530000,
+   "meso": 23200,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 2
+    }
+   ],
+   "rewardText": "大エリクサー ×2",
+   "rewardUnparsed": [],
+   "story": "氷の巣から冷たい風が吹き下ろし、ホネの工房の膠（にかわ）が固まって使えない。",
+   "tutorial": false
+  },
+  {
+   "id": "D-41",
+   "name": "焦げた鳥の巣",
+   "giver": "hawk",
+   "giverName": "鳥使いホーク",
+   "map": "D101",
+   "minLevel": 142,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "雷の頂の焦げた鳥の巣を調べ、M209×15",
+   "objectives": [
+    {
+     "type": "interact",
+     "target": "D111.q_burnt",
+     "label": "雷の頂の焦げた鳥の巣"
+    },
+    {
+     "type": "kill",
+     "mob": "M209",
+     "count": 15
+    }
+   ],
+   "end": "hawk",
+   "exp": 4060000,
+   "meso": 24200,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "大エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "ホークの鳥が 1 羽、雷の頂から戻らない。巣が焦げていたら、雷竜に追われたのかもしれない。",
+   "tutorial": false
+  },
+  {
+   "id": "D-42",
+   "name": "牙の避雷針",
+   "giver": "su",
+   "giverName": "倉庫番ス",
+   "map": "D100",
+   "minLevel": 145,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M209×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M209",
+     "count": 10
+    }
+   ],
+   "end": "su",
+   "exp": 4660000,
+   "meso": 25200,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "大エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "雷竜の牙は、雷を吸い込む。倉庫の屋根に立てれば、雷の季節も預かり物が焦げない。",
+   "tutorial": false
+  },
+  {
+   "id": "D-43",
+   "name": "古竜の道",
+   "giver": "nest",
+   "giverName": "受付ネスト",
+   "map": "D116",
+   "minLevel": 148,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M210×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M210",
+     "count": 20
+    }
+   ],
+   "end": "nest",
+   "exp": 5380000,
+   "meso": 26300,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "大エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "古竜の道で古竜が昼寝をしていて、巣の卵を運ぶ道がふさがる。ネスト「起こすと昔話が始まるから、気をつけて」。",
+   "tutorial": false
+  },
+  {
+   "id": "D-44",
+   "name": "古竜のうろこの屋根",
+   "giver": "haruka",
+   "giverName": "村長ハルカ",
+   "map": "D100",
+   "minLevel": 151,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M210×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M210",
+     "count": 12
+    }
+   ],
+   "end": "haruka",
+   "exp": 6130000,
+   "meso": 27300,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "大エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "竜の背の村の屋根は、昔から抜け落ちたうろこでふいてきた。古竜のうろこは 100 年もつ。",
+   "tutorial": false
+  },
+  {
+   "id": "D-45",
+   "name": "大老の昔話",
+   "giver": "vald",
+   "giverName": "竜の大老ヴァルド",
+   "map": "D115",
+   "minLevel": 154,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M210×25 と M209×15",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M210",
+     "count": 25
+    },
+    {
+     "type": "kill",
+     "mob": "M209",
+     "count": 15
+    }
+   ],
+   "end": "vald",
+   "exp": 7060000,
+   "meso": 28100,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "大エリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "ヴァルド「わしが若い頃、古竜とは話が通じた。今のやつらは、わしの話を聞かん」。少しおとなしくさせて、話を聞く気にさせてほしい。",
+   "tutorial": false
+  },
+  {
+   "id": "H-19",
+   "name": "溶岩の道",
+   "giver": "sumi",
+   "giverName": "倉庫番スミ",
+   "map": "H100",
+   "minLevel": 110,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M220×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M220",
+     "count": 20
+    }
+   ],
+   "end": "sumi",
+   "exp": 882000,
+   "meso": 15500,
+   "rewards": [
+    {
+     "item": "use.xl_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "特大ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "溶岩スライムが溶岩の道から野営地へ流れてくる。スミ「倉庫の床が、毎朝ちょっとずつ溶けている」。",
+   "tutorial": false
+  },
+  {
+   "id": "H-20",
+   "name": "溶岩のしずくの湯たんぽ",
+   "giver": "hinoko",
+   "giverName": "薬屋ヒノコ",
+   "map": "H100",
+   "minLevel": 110,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M220×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M220",
+     "count": 10
+    }
+   ],
+   "end": "hinoko",
+   "exp": 882000,
+   "meso": 15500,
+   "rewards": [
+    {
+     "item": "use.xl_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "特大ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "溶岩のしずくを固い壺に入れると、一晩冷めない湯たんぽになる。火山の中でも、夜の野営地は冷える。",
+   "tutorial": false
+  },
+  {
+   "id": "H-30",
+   "name": "見張り表",
+   "giver": "garon",
+   "giverName": "野営地の隊長ガロン",
+   "map": "H100",
+   "minLevel": 110,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "巨像の試練の番人イグニと薬屋ヒノコに、新しい見張り表を配る",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "igni",
+     "label": "巨像の試練の番人イグニ"
+    },
+    {
+     "type": "talk",
+     "npc": "hinoko",
+     "label": "薬屋ヒノコ"
+    }
+   ],
+   "end": "garon",
+   "exp": 441000,
+   "meso": 6200,
+   "rewards": [
+    {
+     "item": "use.xl_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "特大ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "野営地の見張りの順番を組み直した。ガロン「紙で配ると燃える。口で伝えて、覚えてもらってくれ」。",
+   "tutorial": false
+  },
+  {
+   "id": "H-21",
+   "name": "鬼火の道",
+   "giver": "igni",
+   "giverName": "巨像の試練の番人イグニ",
+   "map": "H100",
+   "minLevel": 113,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M221×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M221",
+     "count": 20
+    }
+   ],
+   "end": "igni",
+   "exp": 1020000,
+   "meso": 16200,
+   "rewards": [
+    {
+     "item": "use.xl_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "特大ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "鬼火が洞から出て、試練に向かう者の道を迷わせる。イグニ「迷って着かない者は、試練の前に落ちたことになる」。",
+   "tutorial": false
+  },
+  {
+   "id": "H-22",
+   "name": "消えない火の炭",
+   "giver": "sumi",
+   "giverName": "倉庫番スミ",
+   "map": "H100",
+   "minLevel": 118,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M221×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M221",
+     "count": 12
+    }
+   ],
+   "end": "sumi",
+   "exp": 1300000,
+   "meso": 17300,
+   "rewards": [
+    {
+     "item": "use.xl_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "特大ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "鬼火の消えない火を炭に移すと、明かりにも煮炊きにも使える。スミ「名前のとおり、炭は得意だ」。",
+   "tutorial": false
+  },
+  {
+   "id": "H-23",
+   "name": "ゴーレムの間",
+   "giver": "hinoko",
+   "giverName": "薬屋ヒノコ",
+   "map": "H100",
+   "minLevel": 121,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M222×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M222",
+     "count": 20
+    }
+   ],
+   "end": "hinoko",
+   "exp": 1500000,
+   "meso": 18100,
+   "rewards": [
+    {
+     "item": "use.xl_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "特大ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "ヒノコが薬に使う火の苔は、ゴーレムの間の壁にしか生えない。炎のゴーレムが壁にもたれて動かない。",
+   "tutorial": false
+  },
+  {
+   "id": "H-24",
+   "name": "野営地のかまど",
+   "giver": "garon",
+   "giverName": "野営地の隊長ガロン",
+   "map": "H100",
+   "minLevel": 124,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M222×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M222",
+     "count": 10
+    }
+   ],
+   "end": "garon",
+   "exp": 1730000,
+   "meso": 18800,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 2
+    }
+   ],
+   "rewardText": "大エリクサー ×2",
+   "rewardUnparsed": [],
+   "story": "野営地のかまどの石が割れた。炎の石なら、どんな火にも割れない。ガロン「腹が減っては隊が動かん」。",
+   "tutorial": false
+  },
+  {
+   "id": "H-25",
+   "name": "灰の鎧",
+   "giver": "igni",
+   "giverName": "巨像の試練の番人イグニ",
+   "map": "H100",
+   "minLevel": 127,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M223×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M223",
+     "count": 12
+    }
+   ],
+   "end": "igni",
+   "exp": 2000000,
+   "meso": 19600,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 2
+    }
+   ],
+   "rewardText": "大エリクサー ×2",
+   "rewardUnparsed": [],
+   "story": "灰の兵士の鎧は、火の中では鉄より強い。イグニは試練に挑む者に貸す鎧を作り直したい。",
+   "tutorial": false
+  },
+  {
+   "id": "H-26",
+   "name": "兵舎の見回り",
+   "giver": "sumi",
+   "giverName": "倉庫番スミ",
+   "map": "H100",
+   "minLevel": 130,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M223×30",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M223",
+     "count": 30
+    }
+   ],
+   "end": "sumi",
+   "exp": 2310000,
+   "meso": 20500,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "大エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "灰の兵舎から、灰の兵士が隊列を組んで野営地の倉庫をのぞきに来る。スミ「物資を数えに来たのかもしれん」。",
+   "tutorial": false
+  },
+  {
+   "id": "H-27",
+   "name": "マグマのうろこの手袋",
+   "giver": "hinoko",
+   "giverName": "薬屋ヒノコ",
+   "map": "H100",
+   "minLevel": 133,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M224×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M224",
+     "count": 10
+    }
+   ],
+   "end": "hinoko",
+   "exp": 2660000,
+   "meso": 21300,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "大エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "マグマトカゲのうろこで手袋を作れば、煮えたぎる薬の鍋も素手でつかめる。ヒノコの指はやけどだらけ。",
+   "tutorial": false
+  },
+  {
+   "id": "H-28",
+   "name": "マグマの川",
+   "giver": "garon",
+   "giverName": "野営地の隊長ガロン",
+   "map": "H100",
+   "minLevel": 136,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M224×30",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M224",
+     "count": 30
+    }
+   ],
+   "end": "garon",
+   "exp": 3060000,
+   "meso": 22200,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "大エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "マグマの川を渡る橋を、マグマトカゲが溶かしてしまう。ガロン「橋を架けるたびに、川に流される」。",
+   "tutorial": false
+  },
+  {
+   "id": "H-29",
+   "name": "岩の古い文字",
+   "giver": "igni",
+   "giverName": "巨像の試練の番人イグニ",
+   "map": "H100",
+   "minLevel": 139,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "マグマの川の岩の古い文字を調べ、M224×20",
+   "objectives": [
+    {
+     "type": "interact",
+     "target": "H105.q_glyph",
+     "label": "マグマの川の岩の古い文字"
+    },
+    {
+     "type": "kill",
+     "mob": "M224",
+     "count": 20
+    }
+   ],
+   "end": "igni",
+   "exp": 3530000,
+   "meso": 23200,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "大エリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "マグマの川の岩に、巨像を造った人たちの文字が残っているという。イグニ「巨像は、なぜここにいるのか。それが知りたい」。",
+   "tutorial": false
+  },
+  {
+   "id": "E-25",
+   "name": "星屑の道",
+   "giver": "kuzu",
+   "giverName": "倉庫番クズ",
+   "map": "E100",
+   "minLevel": 150,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M230×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M230",
+     "count": 20
+    }
+   ],
+   "end": "kuzu",
+   "exp": 5880000,
+   "meso": 27000,
+   "rewards": [
+    {
+     "item": "use.xl_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "特大ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "星屑の精が塔の倉庫に入り込み、預かり物が全部キラキラになる。クズ「名前が星屑のクズだからって、集まってこなくていい」。",
+   "tutorial": false
+  },
+  {
+   "id": "E-26",
+   "name": "星屑の薬",
+   "giver": "hoshi",
+   "giverName": "薬屋ホシ",
+   "map": "E100",
+   "minLevel": 150,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M230×12",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M230",
+     "count": 12
+    }
+   ],
+   "end": "hoshi",
+   "exp": 5880000,
+   "meso": 27000,
+   "rewards": [
+    {
+     "item": "use.xl_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "特大ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "星屑を溶かした薬は、飲むと少しだけ遠くが見える。ホシは塔の見張りの人たちに配りたい。",
+   "tutorial": false
+  },
+  {
+   "id": "E-27",
+   "name": "塔の窓",
+   "giver": "astra",
+   "giverName": "塔の主アストラ",
+   "map": "E100",
+   "minLevel": 150,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M230×30",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M230",
+     "count": 30
+    }
+   ],
+   "end": "astra",
+   "exp": 5880000,
+   "meso": 27000,
+   "rewards": [
+    {
+     "item": "use.xl_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "特大ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "星屑の精が塔の窓にびっしり張りつき、星が見えない。アストラ「星見の塔で、星が見えないのは困る」。",
+   "tutorial": false
+  },
+  {
+   "id": "E-28",
+   "name": "崩れた鎧の修理",
+   "giver": "kuzu",
+   "giverName": "倉庫番クズ",
+   "map": "E100",
+   "minLevel": 156,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M231×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M231",
+     "count": 10
+    }
+   ],
+   "end": "kuzu",
+   "exp": 7730000,
+   "meso": 28700,
+   "rewards": [
+    {
+     "item": "use.xl_potion",
+     "count": 15
+    }
+   ],
+   "rewardText": "特大ポーション ×15",
+   "rewardUnparsed": [],
+   "story": "塔の倉庫には、昔ここで暮らした騎士の鎧が並ぶ。崩れの騎士の鎧の破片で、欠けた所を継ぎたい。",
+   "tutorial": false
+  },
+  {
+   "id": "E-29",
+   "name": "廃都の門",
+   "giver": "hoshi",
+   "giverName": "薬屋ホシ",
+   "map": "E100",
+   "minLevel": 159,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M231×25",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M231",
+     "count": 25
+    }
+   ],
+   "end": "hoshi",
+   "exp": 8820000,
+   "meso": 29600,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 2
+    }
+   ],
+   "rewardText": "大エリクサー ×2",
+   "rewardUnparsed": [],
+   "story": "廃都の門の近くにしか咲かない星の花がある。崩れの騎士たちが、まだ門を守っているつもりで通してくれない。",
+   "tutorial": false
+  },
+  {
+   "id": "E-30",
+   "name": "虚ろの書の頁",
+   "giver": "astra",
+   "giverName": "塔の主アストラ",
+   "map": "E100",
+   "minLevel": 163,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M232×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M232",
+     "count": 10
+    }
+   ],
+   "end": "astra",
+   "exp": 10500000,
+   "meso": 30800,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 2
+    }
+   ],
+   "rewardText": "大エリクサー ×2",
+   "rewardUnparsed": [],
+   "story": "虚ろの魔導士の書には、廃都の暦が書いてある。アストラ「この都がいつ崩れたのか、頁をそろえれば分かる」。",
+   "tutorial": false
+  },
+  {
+   "id": "E-31",
+   "name": "大通りの見回り",
+   "giver": "kuzu",
+   "giverName": "倉庫番クズ",
+   "map": "E100",
+   "minLevel": 166,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M232×30",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M232",
+     "count": 30
+    }
+   ],
+   "end": "kuzu",
+   "exp": 12000000,
+   "meso": 31800,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "大エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "廃都の大通りで、虚ろの魔導士が魔法の光を飛ばす。塔の倉庫から見ると、夜中に花火が上がっているよう。",
+   "tutorial": false
+  },
+  {
+   "id": "E-32",
+   "name": "天の獣の角",
+   "giver": "hoshi",
+   "giverName": "薬屋ホシ",
+   "map": "E100",
+   "minLevel": 170,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M233×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M233",
+     "count": 10
+    }
+   ],
+   "end": "hoshi",
+   "exp": 14300000,
+   "meso": 33100,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "大エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "天の獣の角を削って煎じると、どんな疲れも一晩で取れる。ホシ「この先へ行く人には、これが要るの」。",
+   "tutorial": false
+  },
+  {
+   "id": "E-33",
+   "name": "天の野",
+   "giver": "astra",
+   "giverName": "塔の主アストラ",
+   "map": "E100",
+   "minLevel": 173,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M233×25",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M233",
+     "count": 25
+    }
+   ],
+   "end": "astra",
+   "exp": 16200000,
+   "meso": 34200,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "大エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "天の野の獣が群れで走ると、塔が揺れて星図の針がずれる。アストラ「せめて塔の近くでは走らないでほしい」。",
+   "tutorial": false
+  },
+  {
+   "id": "E-34",
+   "name": "星喰いの淵の縁",
+   "giver": "kuzu",
+   "giverName": "倉庫番クズ",
+   "map": "E100",
+   "minLevel": 177,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "星喰いの淵の縁に置かれた古い道具箱を調べ、M234×15",
+   "objectives": [
+    {
+     "type": "interact",
+     "target": "E105.q_rim",
+     "label": "星喰いの淵の縁に置かれた古い道具箱"
+    },
+    {
+     "type": "kill",
+     "mob": "M234",
+     "count": 15
+    }
+   ],
+   "end": "kuzu",
+   "exp": 19200000,
+   "meso": 35600,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "大エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "先代の倉庫番は、星喰いの淵の縁に道具箱を置いたまま帰らなかった。クズ「中身の目録だけでも、倉庫に戻したい」。",
+   "tutorial": false
+  },
+  {
+   "id": "E-35",
+   "name": "星喰いの牙",
+   "giver": "hoshi",
+   "giverName": "薬屋ホシ",
+   "map": "E100",
+   "minLevel": 181,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M234×25",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M234",
+     "count": 25
+    }
+   ],
+   "end": "hoshi",
+   "exp": 22800000,
+   "meso": 37100,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "大エリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "星喰いが淵から顔を出すたびに、夜空の星が 1 つ減る（ように見える）。ホシ「星が減ると、薬に使う星屑も減るの」。",
+   "tutorial": false
+  },
+  {
+   "id": "E-36",
+   "name": "使徒の羽",
+   "giver": "kuzu",
+   "giverName": "倉庫番クズ",
+   "map": "E100",
+   "minLevel": 184,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M235×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M235",
+     "count": 10
+    }
+   ],
+   "end": "kuzu",
+   "exp": 26000000,
+   "meso": 38200,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "大エリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "終わりの使徒の羽は、倉庫の札に使うと、何年たっても字が消えない。クズ「倉庫番の仕事は、忘れないことだ」。",
+   "tutorial": false
+  },
+  {
+   "id": "E-37",
+   "name": "回廊の灯り",
+   "giver": "astra",
+   "giverName": "塔の主アストラ",
+   "map": "E100",
+   "minLevel": 188,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M235×30",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M235",
+     "count": 30
+    }
+   ],
+   "end": "astra",
+   "exp": 30800000,
+   "meso": 39800,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "大エリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "使徒の回廊の灯りが、使徒の羽ばたきで次々に消える。アストラ「あの灯りは、廃都の人がともした最後の灯りなんだ」。",
+   "tutorial": false
+  },
+  {
+   "id": "E-41",
+   "name": "淵と回廊のあいだ",
+   "giver": "hoshi",
+   "giverName": "薬屋ホシ",
+   "map": "E100",
+   "minLevel": 191,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M235×20 と M234×8",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M235",
+     "count": 20
+    },
+    {
+     "type": "collect",
+     "item": "etc.M234",
+     "count": 8
+    }
+   ],
+   "end": "hoshi",
+   "exp": 35200000,
+   "meso": 41000,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "大エリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "星喰いの淵から使徒の回廊へ抜ける道は、塔の薬の材料がそろう唯一の場所。ホシ「行けるのは、もう君くらいしかいないの」。",
+   "tutorial": false
+  },
+  {
+   "id": "E-38",
+   "name": "守り手の核",
+   "giver": "hoshi",
+   "giverName": "薬屋ホシ",
+   "map": "E100",
+   "minLevel": 194,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M236×8",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M236",
+     "count": 8
+    }
+   ],
+   "end": "hoshi",
+   "exp": 40200000,
+   "meso": 42300,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "大エリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "星の守り手の核は、触るとかすかに脈を打つ。ホシ「薬にしたら、どんな傷も治る気がする。……まだ試していないけど」。",
+   "tutorial": false
+  },
+  {
+   "id": "E-39",
+   "name": "守り手の間",
+   "giver": "astra",
+   "giverName": "塔の主アストラ",
+   "map": "E100",
+   "minLevel": 196,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M236×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M236",
+     "count": 20
+    }
+   ],
+   "end": "astra",
+   "exp": 44100000,
+   "meso": 43200,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 10
+    }
+   ],
+   "rewardText": "大エリクサー ×10",
+   "rewardUnparsed": [],
+   "story": "星の守り手は、玉座へ向かう者を誰でも止める。アストラ「守り手に、君がもう通っていい者だと覚えさせてくれ」。",
+   "tutorial": false
+  },
+  {
+   "id": "E-40",
+   "name": "果ての見回り",
+   "giver": "kuzu",
+   "giverName": "倉庫番クズ",
+   "map": "E100",
+   "minLevel": 200,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M235×30 と M236×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M235",
+     "count": 30
+    },
+    {
+     "type": "kill",
+     "mob": "M236",
+     "count": 20
+    }
+   ],
+   "end": "kuzu",
+   "exp": 50400000,
+   "meso": 45000,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 10
+    }
+   ],
+   "rewardText": "大エリクサー ×10",
+   "rewardUnparsed": [],
+   "story": "星の果てを歩き切った人にしか頼めない見回り。クズ「ここまで来た人の名前は、倉庫の一番奥の札に書いておく」。",
+   "tutorial": false
   }
  ]
 }

@@ -594,12 +594,15 @@ namespace Lumina.Core.Game
         {
             if (amount <= 0) return;
             Out.Add(GameEventType.ExpGained, value: amount);
+            int lvBefore = Character.Level;
             var info = Character.GainExp(amount, Rng, Skills.Growth(Character.Level));
             if (info != null)
             {
                 RefreshStats();
                 Character.Hp = Stats.MaxHp; Character.Mp = Stats.MaxMp;
                 Out.Add(GameEventType.LevelUp, Character.JobName, info.NewLevel, Body.X, Body.Y);
+                int fresh = NewQuestsAt(lvBefore, Character.Level);
+                if (fresh > 0) Out.Add(GameEventType.QuestAvailable, null, fresh, Body.X, Body.Y, "新しい頼みごとが " + fresh + " 件受けられるようになった");
                 AutoSave.Request("levelup");
             }
         }

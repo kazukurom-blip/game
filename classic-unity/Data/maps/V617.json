@@ -274,7 +274,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V617.q_relief",
+   "name": "古い彫り物",
+   "x": 1380,
+   "y": 524,
+   "quest": "N-46"
+  }
+ ],
  "note": "大きな石の扉。",
  "seed": "V617#0"
 }

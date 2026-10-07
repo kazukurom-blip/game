@@ -284,6 +284,74 @@ namespace Lumina.Core.Tests
             Assert.True(s.TownsVisited >= 2);
         }
 
+        // ---------------- Lv だけで受けられる頼みごと（QUESTS.md 8-4・gen_docs.mjs の TOWN_BANDS と同じ）
+        private static readonly (string Town, int Lo, int Hi)[] TownBands =
+        {
+            ("S", 3, 10), ("V1", 8, 22), ("V2", 9, 30), ("V3", 10, 35), ("V4", 10, 55), ("V5", 14, 40), ("V6", 20, 70), ("V090", 10, 40),
+            ("C", 28, 65), ("F", 40, 85), ("T", 25, 95), ("M", 40, 100), ("P", 85, 120), ("D", 98, 155), ("H", 110, 140), ("E", 150, 200),
+        };
+
+        /// <summary>依頼者のいるマップの町（大陸は町の番号の帯。V707 はクロウ街、V090 は市場）。</summary>
+        private static string TownOf(string map)
+        {
+            if (map[0] != 'V') return map.Substring(0, 1);
+            int n = int.Parse(map.Substring(1));
+            if (n == 90) return "V090";
+            if (n == 707) return "V5";
+            return n >= 100 && n < 700 ? "V" + (n / 100) : "V-road";
+        }
+
+        /// <summary>前提無し・隠しでない・毎日でない・転職/掲示板/ダンジョンの受付/長い目標/本筋でない。</summary>
+        private static bool IsFree(QuestDef q) =>
+            q.Prereqs.Count == 0 && q.HourFrom < 0 && q.NeedItem == null && q.Repeat == null && !q.Board && q.Line == null
+            && !q.Id.StartsWith("J") && !q.Id.StartsWith("R-") && !q.Id.StartsWith("PQ-") && !q.Id.StartsWith("X-") && !q.Id.StartsWith("L-");
+
+        [Fact]
+        public void EveryTownHasQuestsWithoutPrereqs()
+        {
+            var d = TestData.Get();
+            var problems = new List<string>();
+            foreach (var (town, lo, hi) in TownBands)
+            {
+                var free = d.QuestList.Where(q => TownOf(q.Map) == town && IsFree(q)).ToList();
+                for (int lv = lo; lv <= hi; lv++)
+                {
+                    int n = free.Count(q => q.MinLevel <= lv && q.MinLevel >= lv - 10);
+                    if (n < 3) problems.Add(town + " Lv" + lv + ": 前提無しで受けられる頼みごとが " + n + " 本");
+                }
+            }
+            Assert.True(problems.Count == 0, string.Join("\n", problems.Take(40)));
+            // 数えた物は、本当に Lv だけで受けられる（新しいキャラをその Lv にして、チュートリアルだけ済ませた状態で Ok）
+            var s = NewAt("V100", 1);
+            foreach (var q in d.QuestList.Where(q => IsFree(q) && !q.Tutorial))
+            {
+                s.Character.Level = q.MinLevel;
+                var r = s.Quests.CanStart(q.Id, s.Character);
+                if (r != StartResult.Ok) problems.Add(q.Id + ": Lv" + q.MinLevel + " で " + r);
+            }
+            Assert.True(problems.Count == 0, string.Join("\n", problems.Take(40)));
+        }
+
+        [Fact]
+        public void LevelUpTellsAboutNewQuests()
+        {
+            var s = NewAt("V100", 7);
+            Assert.DoesNotContain(s.Data.QuestList, q => q.MinLevel == 8 && s.Quests.CanStart(q.Id, s.Character) == StartResult.Ok);
+            s.Character.Level = 8;
+            int expect = s.Data.QuestList.Count(q => q.MinLevel == 8 && s.Quests.CanStart(q.Id, s.Character) == StartResult.Ok);
+            s.Character.Level = 7;
+            Assert.True(expect >= 3, "Lv8 で新しく受けられる物 " + expect);
+            s.Out.Events.Clear();
+            s.GainExp(s.Character.ExpToNext);
+            Assert.Equal(8, s.Character.Level);
+            var e = s.Out.Events.Single(x => x.Type == GameEventType.QuestAvailable);
+            Assert.Equal(expect, e.Value);
+            Assert.Contains(expect.ToString(), e.Text);
+            Assert.Equal(expect, s.NewQuestsAt(7, 8));
+            // 新しく受けられる物が無ければ知らせない
+            Assert.Equal(0, s.NewQuestsAt(250, 260));
+        }
+
         [Fact]
         public void DailyQuestCanBeDoneAgainTheNextDay()
         {

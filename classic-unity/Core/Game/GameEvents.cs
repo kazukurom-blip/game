@@ -60,6 +60,7 @@ namespace Lumina.Core.Game
         //   gacha / jackpot（景品の機械。Id のあとに ":" で品）・boss_warn / boss_spawn / boss_down（フィールドボス）・voyage_start / voyage_raid / voyage_clear / voyage_arrive（船の旅）
         //   emote（感情表現）・rare（珍しい個体が出た）・arcade（遊び場の点数）・season（季節）・salon（美容院）・look（見た目の品）・dungeon_task / dungeon_chest（ダンジョン）
         Fun,
+        QuestAvailable, // Lv が上がって新しく受けられる頼みごとが出た（Value = 件数、Text = 知らせの文。GameSession.NewQuestsAt）
     }
 
     public struct GameEvent

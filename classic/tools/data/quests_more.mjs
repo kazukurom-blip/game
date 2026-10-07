@@ -25,8 +25,9 @@ import * as mid from './quests_more/mid.mjs';
 import * as high from './quests_more/high.mjs';
 import * as extra from './quests_more/extra.mjs';
 import * as fill from './quests_more/fill.mjs';
+import * as anytime from './quests_more/anytime.mjs';
 
-const PARTS = [island, breeze, pom, silva, gard, crow, nemuri, market, mid, high, extra, fill];
+const PARTS = [island, breeze, pom, silva, gard, crow, nemuri, market, mid, high, extra, fill, anytime];
 // 寄り道の印（side）を付ける。寄り道の報酬は式の経験値 × SIDE_EXP・お金 × SIDE_MESO（決めた値。数が多いので、全部やっても Lv が飛ばないように。QUESTS.md 1-4）
 export const SIDE_EXP = 0.35;
 export const SIDE_MESO = 0.6;

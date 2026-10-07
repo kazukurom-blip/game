@@ -291,7 +291,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "H105.q_glyph",
+   "name": "岩の古い文字",
+   "x": 2040,
+   "y": 408,
+   "quest": "H-29"
+  }
+ ],
  "note": "",
  "seed": "H105#0"
 }
