@@ -50,6 +50,13 @@ namespace Lumina.Core.Game
         //   submerge / surface / rock_broken（深淵の大魚）・clones / shuffle（分身）・pulled（ツタ）
         //   decoy_hit / decoy_broken（身代わり人形）・ship_broken（乗船）・door_open / door_used（秘術の扉）・zone_start（毒の霧）
         Mechanic,
+        // やりこみ（GameSession.Collection.cs）
+        CardPicked,     // 図鑑のカードを拾った（Id = 敵、Value = 今の枚数（1〜5）、Text = 「◯◯のカード（3/5）」）
+        BookLevelUp,    // 図鑑の段が上がった（Value = 段、Text = 上乗せ）
+        MedalEarned,    // 勲章を手に入れた（Id = 勲章、Text = 名前）
+        MedalEquipped,  // 勲章を付けた・外した（Id = 勲章 / null）
+        JumpCleared,    // ジャンプの試練のてっぺんの宝箱を開けた（Id = マップ、Value = かかった秒、Text = 知らせ）
+        LookChanged,    // 美容院で見た目が変わった（Id = "髪/色/顔"）
     }
 
     public struct GameEvent

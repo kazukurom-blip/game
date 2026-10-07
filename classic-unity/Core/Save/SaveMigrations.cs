@@ -5,7 +5,8 @@
 //   { "version": 1, "name", "job", "level", "exp", "str", "dex", "int", "luk", "ap", "hp", "mp", "maxHp", "maxMp",
 //     "meso", "map", "x", "y", "items": [ { "id", "count" } ], "skills": { id: lv }, "quests": { id: "active"|"done" } }
 // 版 2: キャラ・持ち物・装備・場所を分けた形。
-// 版 3（今）: 版 2 ＋ ペット（pets）と実時間の回数（daily）。版 2 には無いので空で足す。
+// 版 3: 版 2 ＋ ペット（pets）と実時間の回数（daily）。版 2 には無いので空で足す。
+// 版 4（今）: 版 3 ＋ やりこみ（collection: 図鑑・勲章・記録・見た目）。版 3 には無いので空で足す（記録は 0 から）。
 using System;
 using System.Collections.Generic;
 using Lumina.Core.Util;
@@ -14,13 +15,14 @@ namespace Lumina.Core.Save
 {
     public static class SaveMigrations
     {
-        public const int CurrentVersion = 3;
+        public const int CurrentVersion = 4;
 
         private static readonly Dictionary<int, Func<Dictionary<string, object>, Dictionary<string, object>>> Steps =
             new Dictionary<int, Func<Dictionary<string, object>, Dictionary<string, object>>>
             {
                 { 1, V1ToV2 },
                 { 2, V2ToV3 },
+                { 3, V3ToV4 },
             };
 
         public static Dictionary<string, object> Migrate(Dictionary<string, object> d, int fromVersion)
@@ -34,6 +36,12 @@ namespace Lumina.Core.Save
                 d["version"] = (long)v;
             }
             return d;
+        }
+
+        private static Dictionary<string, object> V3ToV4(Dictionary<string, object> o)
+        {
+            if (!o.ContainsKey("collection")) o["collection"] = new Dictionary<string, object>();
+            return o;
         }
 
         private static Dictionary<string, object> V2ToV3(Dictionary<string, object> o)

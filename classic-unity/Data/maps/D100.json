@@ -194,20 +194,20 @@
   {
    "id": "haruka",
    "name": "村長ハルカ",
-   "x": 416,
+   "x": 384,
    "y": 516
   },
   {
    "id": "doran",
    "name": "鍛冶屋ドラン",
-   "x": 800,
+   "x": 760,
    "y": 516,
    "role": "craft"
   },
   {
    "id": "uroko",
    "name": "武器屋ウロコ",
-   "x": 1280,
+   "x": 1152,
    "y": 516,
    "role": "weapon",
    "shop": "shop.D100.weapon"
@@ -215,7 +215,7 @@
   {
    "id": "hone",
    "name": "防具屋ホネ",
-   "x": 1720,
+   "x": 1496,
    "y": 516,
    "role": "armor",
    "shop": "shop.D100.armor"
@@ -223,7 +223,7 @@
   {
    "id": "tsume",
    "name": "薬屋ツメ",
-   "x": 2152,
+   "x": 1872,
    "y": 516,
    "role": "potion",
    "shop": "shop.D100.potion"
@@ -231,9 +231,23 @@
   {
    "id": "su",
    "name": "倉庫番ス",
-   "x": 2584,
+   "x": 2240,
    "y": 516,
    "role": "storage"
+  },
+  {
+   "id": "jq_garan",
+   "name": "骨守りガラン",
+   "x": 2616,
+   "y": 516,
+   "role": "jump",
+   "travel": {
+    "to": "J005",
+    "toPortal": "sp",
+    "minLevel": 0,
+    "oneWay": false,
+    "fee": 0
+   }
   }
  ],
  "objects": [],

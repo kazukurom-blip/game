@@ -12,7 +12,7 @@ namespace Lumina.Core.Tests
         public void EveryNpcHasLines()
         {
             var d = TestData.Fresh();
-            Assert.Equal(173, d.Npcs.Count);
+            Assert.Equal(189, d.Npcs.Count); // 173 ＋ ジャンプの試練の案内人 15 ＋ 美容院 1
             foreach (var n in d.Npcs.Values) Assert.True(n.Lines.Count >= 3, n.Id + " のセリフが少ない");
             // マップの NPC にも写る
             Assert.True(d.GetMap("S000").Npcs.Single(n => n.Id == "luka").Lines.Count >= 3);

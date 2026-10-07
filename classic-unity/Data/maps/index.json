@@ -1403,6 +1403,36 @@
    "name": "星の玉座",
    "type": "ボ",
    "theme": "arena"
+  },
+  {
+   "id": "J001",
+   "name": "そよ風の木登り",
+   "type": "特",
+   "theme": "tower"
+  },
+  {
+   "id": "J002",
+   "name": "屋根伝いの夜道",
+   "type": "特",
+   "theme": "tower"
+  },
+  {
+   "id": "J003",
+   "name": "雲の柱のぼり",
+   "type": "特",
+   "theme": "tower"
+  },
+  {
+   "id": "J004",
+   "name": "ゼンマイ塔の階段",
+   "type": "特",
+   "theme": "tower"
+  },
+  {
+   "id": "J005",
+   "name": "竜骨の背のぼり",
+   "type": "特",
+   "theme": "tower"
   }
  ]
 }

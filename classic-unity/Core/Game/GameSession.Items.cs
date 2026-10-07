@@ -30,8 +30,10 @@ namespace Lumina.Core.Game
         public bool PickupDrop(DropItem d)
         {
             if (d == null || d.PickedUp || !d.Landed) return false;
+            if (Collection.MonsterBook.IsCard(d.ItemId)) return PickupCard(d); // 図鑑のカード（GameSession.Collection.cs）
             if (d.IsMeso)
             {
+                Records.MesoPicked += d.Meso;
                 Inventory.AddMeso(d.Meso);
                 d.PickedUp = true;
                 Out.Add(GameEventType.MesoPicked, null, d.Meso, d.X, d.Y);
@@ -50,6 +52,7 @@ namespace Lumina.Core.Game
                 if (rest > 0) { d.Count = rest; Out.Add(GameEventType.ItemPicked, d.ItemId, d.Count - rest, d.X, d.Y, def.Name); return true; }
             }
             d.PickedUp = true;
+            Records.ItemsPicked++;
             Out.Add(GameEventType.ItemPicked, d.ItemId, d.Count, d.X, d.Y, def.Name);
             CollectNotes(d.ItemId);
             RefreshStats();
@@ -115,7 +118,7 @@ namespace Lumina.Core.Game
             Inventory.Remove(itemId);
             if (cure.Count > 0) CureStatus(cure);
             Out.Add(GameEventType.ItemUsed, itemId);
-            if (potion) QuestEvent("use_potion");
+            if (potion) { Records.PotionsUsed++; QuestEvent("use_potion"); }
             RefreshStats();
             return true;
         }
@@ -202,6 +205,7 @@ namespace Lumina.Core.Game
             if (sdef?.Scroll == null || !Inventory.Has(scrollId)) return ScrollResult.NotScroll;
             var r = ScrollSystem.Apply(sdef, Data.Item(target.ItemId), target, Rng);
             if (r == ScrollResult.Success || r == ScrollResult.Fail || r == ScrollResult.Destroyed) Inventory.Remove(scrollId);
+            OnScrollCollection(r, target); // 書の記録（GameSession.Collection.cs）
             Out.Add(GameEventType.ScrollResult, scrollId, (long)r, text: r == ScrollResult.Success ? "書の力で強くなった" : r == ScrollResult.Destroyed ? "装備が壊れてしまった" : r == ScrollResult.Fail ? "書は失敗した" : null);
             return r;
         }

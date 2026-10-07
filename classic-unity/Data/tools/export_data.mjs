@@ -3,7 +3,8 @@
 //
 // 実行: node classic-unity/Data/tools/export_data.mjs            … 書き出す（マップは生成して検査してから）
 //       node classic-unity/Data/tools/export_data.mjs --check    … 書き出さずに、生成し直した結果がファイルと同じか・マップの検査を通るかだけ確かめる
-// 出力: classic-unity/Data/items.json, monsters.json, quests.json, shops.json, npcs.json, skills.json, maps/<ID>.json, maps/index.json
+// 出力: classic-unity/Data/items.json, monsters.json, quests.json, shops.json, npcs.json, skills.json, maps/<ID>.json, maps/index.json, worldmap.json（全体マップ）
+// ジャンプの試練のマップ J001〜J005 は world/jump.mjs（maps.mjs の外）。
 // スキル: 名前・MP・前提などは classic/docs/JOBS.md の表、動き（範囲・式・状態異常）は classic/tools/data/skills.mjs（skills_export.mjs）
 // マップ: 芽吹きの島は world/island.mjs（手で置いた）、ほかの 222 枚は world/generate.mjs（地形の型から生成。種はマップの ID）。
 //         つながり（ポータル）と出る敵は maps.mjs のとおり。NPC は world/npcs.mjs。検査は world/check.mjs。
@@ -14,13 +15,15 @@ import { fileURLToPath } from 'node:url';
 import { earlyHpMul, FRAIL_AVOID, POT_DROP, mobBase, KIND_MUL, nice, expToNext } from '../../../classic/tools/lib/curves.mjs';
 import { MONSTERS_RAW, MOB_TUNE } from '../../../classic/tools/data/monsters.mjs';
 import { MOB_SKILLS } from '../../../classic/tools/data/mob_skills.mjs';
-import { MAPS_RAW } from '../../../classic/tools/data/maps.mjs';
+import { MAPS_RAW, REGIONS } from '../../../classic/tools/data/maps.mjs';
 import { armorList, extraList, weaponList, STARTER, WEAPON_TYPES } from '../../../classic/tools/data/equips.mjs';
 import { SCROLLS, scrollsFor } from '../../../classic/tools/data/scrolls.mjs';
 import { QUESTS_RAW } from '../../../classic/tools/data/quests.mjs';
 import { NPCS, npcIdOf } from './world/npcs.mjs';
 import { buildNpcLines, checkNpcLines } from './world/npc_lines.mjs';
 import { buildWorld } from './world/world.mjs';
+import { JUMP_RAW } from './world/jump.mjs';
+import { buildWorldMap } from './world/worldmap.mjs';
 import { QUEST_GOALS } from './quest_goals.mjs';
 import { buildSkills } from './skills_export.mjs';
 import * as SYS from './systems.mjs';
@@ -480,13 +483,14 @@ write('quests.json', { note: 'export_data.mjs が quests.mjs から書き出し�
 const world = buildWorld({ MAPS_RAW, MONSTERS_RAW });
 problems.push(...world.problems);
 const mapIndex = [];
-for (const raw of MAPS_RAW) {
+for (const raw of [...MAPS_RAW, ...JUMP_RAW]) {
   const m = world.maps[raw[0]];
   if (!m) continue;
   write(`maps/${m.id}.json`, m);
   mapIndex.push({ id: m.id, name: m.name, type: m.type, theme: m.theme });
 }
 write('maps/index.json', { maps: mapIndex });
+write('worldmap.json', buildWorldMap(world.maps, [...MAPS_RAW, ...JUMP_RAW], REGIONS)); // 全体マップ（world/worldmap.mjs）
 const npcOut = [];
 const npcLines = buildNpcLines(NPCS); // セリフ（world/npc_lines.mjs → lines。Core の NpcDef.Lines・NpcData.Lines）
 problems.push(...checkNpcLines(NPCS, npcLines));
@@ -563,7 +567,7 @@ write('skills.json', {
 if (CHECK) {
   if (stale.length) problems.push(`書き出した物が古い（node classic-unity/Data/tools/export_data.mjs で書き出し直す）: ${stale.slice(0, 10).join(', ')}${stale.length > 10 ? ` ほか ${stale.length - 10}` : ''}`);
   if (problems.length) { console.error('問題:\n  ' + problems.join('\n  ')); process.exit(1); }
-  console.log(`検査 OK: マップ ${mapIndex.length}（生成 ${world.stats.generated}・島 ${mapIndex.length - world.stats.generated}）、どのポータルからも全部の足場に行ける・ポータルは両方向・湧く所は足場の上・跳べない段差なし。書き出したファイルは最新`);
+  console.log(`検査 OK: マップ ${mapIndex.length}（生成 ${world.stats.generated}・島 ${mapIndex.length - world.stats.generated - world.stats.jump}・ジャンプの試練 ${world.stats.jump}）、どのポータルからも全部の足場に行ける・ポータルは両方向・湧く所は足場の上・跳べない段差なし。書き出したファイルは最新`);
   process.exit(0);
 }
 if (problems.length) { console.error('問題:\n  ' + problems.join('\n  ')); process.exit(1); }
