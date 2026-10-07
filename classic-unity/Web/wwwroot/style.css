@@ -1,5 +1,5 @@
 /* 試遊版の見た目（仮）。800×600 の座標で書き、#ui ごと整数倍に拡大する */
-:root { --bg: #10131c; --panel: rgba(18, 22, 40, 0.94); --edge: #8a9ad0; --text: #f0f2ff; --dim: #a8b0d0; --good: #8cf08c; --bad: #ff9090; --gold: #ffd860; }
+:root { color-scheme: dark; --bg: #10131c; --panel: rgba(18, 22, 40, 0.94); --edge: #8a9ad0; --text: #f0f2ff; --dim: #a8b0d0; --good: #8cf08c; --bad: #ff9090; --gold: #ffd860; }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", sans-serif; overflow: hidden; }
 #stage { position: relative; margin: 0 auto; top: 50%; transform: translateY(-50%); }
@@ -115,3 +115,4 @@ table.eq tr { border-bottom: 1px solid #2a2e48; }
 .buff span { position: absolute; left: 0; right: 0; top: 4px; text-align: center; white-space: nowrap; text-shadow: 1px 1px 0 #000; }
 .buff small { position: absolute; right: 1px; bottom: 0; font-size: 9px; text-shadow: 1px 1px 0 #000; }
 .buff.end { animation: blink 0.5s steps(2) infinite; }
+#title .confirm { color: var(--bad); font-size: 13px; }

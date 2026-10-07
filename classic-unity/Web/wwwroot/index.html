@@ -1,26 +1,18 @@
-<!doctype html>
-<html lang="ja">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ルミナリア・クラシック 試遊版</title>
 <link rel="stylesheet" href="style.css">
-</head>
-<body>
 <div id="stage">
   <canvas id="view" width="800" height="600"></canvas>
   <div id="ui"></div>
   <div id="title">
     <div class="logo">ルミナリア・クラシック</div>
-    <div class="sub">試遊版（ブラウザ）— 中身は Unity 版と同じ C# の Core を WebAssembly で動かしています。絵は仮です。</div>
+    <div class="sub">試遊版。中身は Unity 版と同じ C# の Core を WebAssembly で動かしています。絵は仮です。キーボードで遊びます。</div>
     <div id="loadmsg">読み込んでいます…</div>
-    <div id="start" style="display:none">
+    <div id="start" hidden>
       <label>名前 <input id="name" maxlength="12" value="ぼうけんしゃ"></label>
       <div class="btns"><button id="btnCont">続きから</button><button id="btnNew">新しく始める</button></div>
+      <div id="confirmNew" class="confirm" hidden>今のセーブを消して最初から始めますか？ <button id="btnNewYes" class="warn">消して始める</button><button id="btnNewNo">やめる</button></div>
       <div class="keys">←→ 歩く ・ ↑ はしご/縄/ポータル ・ ↓ 伏せ ・ Alt/Space ジャンプ ・ Ctrl 攻撃 ・ Z 拾う ・ Enter 話す<br>I 持ち物 ・ E 装備 ・ S 能力値 ・ K スキル ・ Q クエスト ・ O 設定</div>
     </div>
   </div>
 </div>
 <script type="module" src="main.js"></script>
-</body>
-</html>

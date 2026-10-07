@@ -316,8 +316,8 @@ export class Ui {
       <label>BGM <input type="range" min="0" max="100" value="${Math.round(v.bgm * 100)}" data-vol="bgm"></label>
       <label>効果音 <input type="range" min="0" max="100" value="${Math.round(v.sfx * 100)}" data-vol="sfx"></label>
       <label><input type="checkbox" data-mute ${v.muted ? 'checked' : ''}> 消音</label>
-      <div class="btns"><button data-act="save">今すぐセーブ</button><button data-sys="reload">セーブから読み直す</button><button data-sys="export">セーブを書き出す</button></div>
-      <div class="btns"><button data-sys="newgame" class="warn">最初から（今のセーブは消える）</button><button data-sys="keys">キーの表示</button></div>
+      <div class="btns"><button data-act="save">今すぐセーブ</button><button data-sys="reload">セーブから読み直す</button><button data-sys="export">セーブをコピー</button></div>
+      <div class="btns">${this.confirmNew ? `今のセーブを消して最初から？ <button data-sys="newgameYes" class="warn">消して始める</button><button data-sys="newgameNo">やめる</button>` : `<button data-sys="newgame" class="warn">最初から（今のセーブは消える）</button>`}<button data-sys="keys">キーの表示</button></div>
       <div class="dim">セーブはこのブラウザの中（localStorage）。マップ移動・Lv アップ・クエスト完了・3 分ごとに自動で保存。<br>場所: ${esc(s.mapName)}（${esc(s.map)}）</div>
       <div class="dim" id="perf"></div></div>`;
     return this.frame('opt', '設定・セーブ (O)', body);

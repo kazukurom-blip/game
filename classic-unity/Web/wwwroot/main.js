@@ -122,14 +122,16 @@ class Game {
 
   sys(name) {
     if (name === 'reload') { const r = JSON.parse(this.api.Boot(SLOT, '', Date.now())); this.ui.msg(r.msg); this.mapId = null; this.ui.refresh(true); }
-    if (name === 'newgame') {
-      if (!confirm('今のセーブを消して最初から始めますか？')) return;
-      const name = prompt('名前', this.ui.state?.name || 'ぼうけんしゃ') || 'ぼうけんしゃ';
-      const r = JSON.parse(this.api.NewGame(SLOT, name, Date.now())); this.ui.msg(r.msg); this.mapId = null; this.ui.refresh(true);
+    if (name === 'newgame') { this.ui.confirmNew = true; this.ui.renderWins(); }
+    if (name === 'newgameYes') {
+      this.ui.confirmNew = false;
+      const r = JSON.parse(this.api.NewGame(SLOT, this.ui.state?.name || 'ぼうけんしゃ', Date.now())); this.ui.msg(r.msg); this.mapId = null; this.ui.refresh(true);
     }
+    if (name === 'newgameNo') { this.ui.confirmNew = false; this.ui.renderWins(); }
     if (name === 'export') {
-      const blob = new Blob([this.api.ExportSave()], { type: 'application/json' });
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'lumina_save.json'; a.click();
+      // ダウンロードはできない場所でも動くよう、クリップボードにコピーする
+      const text = this.api.ExportSave();
+      navigator.clipboard?.writeText(text).then(() => this.ui.msg('セーブ（JSON）をコピーした'), () => this.ui.msg('コピーできなかった', 'bad'));
     }
     if (name === 'keys') this.ui.toggleKeys();
   }
@@ -270,7 +272,7 @@ async function main() {
   let hasSave = false;
   try { hasSave = Object.keys(localStorage).some((k) => k.startsWith('lumina.saves/' + SLOT + '.json')); } catch { /* */ }
   $('loadmsg').textContent = '';
-  $('start').style.display = '';
+  $('start').hidden = false;
   $('btnCont').style.display = hasSave ? '' : 'none';
   const begin = (fresh) => {
     const name = $('name').value.trim() || 'ぼうけんしゃ';
@@ -289,7 +291,9 @@ async function main() {
     };
     requestAnimationFrame(loop);
   };
-  $('btnNew').onclick = () => { if (hasSave && !confirm('今のセーブを消して最初から始めますか？')) return; begin(true); };
+  $('btnNew').onclick = () => { if (hasSave) { $('confirmNew').hidden = false; return; } begin(true); };
+  $('btnNewYes').onclick = () => begin(true);
+  $('btnNewNo').onclick = () => { $('confirmNew').hidden = true; };
   $('btnCont').onclick = () => begin(false);
   if (params.has('autostart')) begin(params.get('autostart') === 'new');
 }
