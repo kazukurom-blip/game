@@ -75,6 +75,20 @@ namespace Lumina.Core.Tests
 
         public string NodeOf(PlayerBody p) => p.OnGround && p.Seg != null ? NodeOf(p.Seg, p.X) : null;
 
+        /// <summary>別の PhysicsMap（GameSession の物）の足場から、かたまりを求める（折れ線の ID で引く。ボット用）。</summary>
+        public string NodeOf(string chainId, double x)
+        {
+            foreach (var c in Map.Chains)
+            {
+                if (c.Id != chainId) continue;
+                var list = cuts[c];
+                int k = 0;
+                while (k < list.Count && list[k] < x) k++;
+                return Key(c, k);
+            }
+            return null;
+        }
+
         /// <summary>立てる x の範囲（壁の手前・マップの端）。</summary>
         public (double a, double b) StandRange(string node)
         {

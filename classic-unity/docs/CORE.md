@@ -33,7 +33,8 @@ classic-unity/
     tools/world/            ← マップの生成器と検査（generate.mjs・check.mjs・specs.mjs（マップごとの違い）・npcs.mjs・island.mjs（島は手で置いた））
     tools/quest_goals.mjs   ← 文章だけだったクエストの目的を、判定できる形（talk/visit/interact/collect/event）に直した表
     tools/export_golden.mjs ← テストの期待値（ブラウザ版の物理・設計書の式）→ Tests/Golden/
-  Tests/                    ← xUnit（net8.0）
+  Tests/                    ← xUnit（net8.0）。PlaytestTests.cs は通しのボットのテスト（長い物は LUMINA_LONG=1 の時だけ）
+  Tools/PlayBot/            ← 通しで遊ぶボット（net8.0 のコンソール。docs/PLAYTEST.md）。Bot/ は Tests からも一緒にビルドする
   Unity/                    ← Unity 側の見本（GameRunner・PlayerView・InputBridge・DamageNumberView・MapLoader）
 ```
 
@@ -47,6 +48,9 @@ node Data/tools/export_data.mjs --check            # 書き出さずに: 今の 
 node Data/tools/world/check.mjs                    # Data/maps/*.json の検査だけ（下の 4-8）
 node Data/tools/export_golden.mjs                  # 期待値を書き出し直す（ブラウザ版の物理・式を直したら）
 node ../classic/tools/gen_docs.mjs --check         # 設計書の表とのつじつま
+dotnet run -c Release --project Tools/PlayBot -- --lines all --tier 4 --hours 200   # 通しで遊ぶ（PLAYTEST.md。出力は .build/playbot/）
+dotnet run -c Release --project Tools/PlayBot -- --lines all --start 70 --tier 3 --hours 40                # 近道: Lv70 から 3 次転職
+LUMINA_LONG=1 dotnet test Tests/Lumina.Core.Tests.csproj --filter Category=Long                             # 長いテスト（ボットで 1 次・2 次・3 次）
 ```
 
 - .NET 8 SDK が要る（Ubuntu なら `apt-get install dotnet-sdk-8.0`）。
@@ -207,7 +211,7 @@ session.Character / Stats / Inventory / Equipment / Skills / Buffs / Status / Qu
 - `Data/quests.json`（286 本）。目的: `kill`（倒す）・`collect`（持ち物の数。完了で渡す）・`talk`（話す）・`visit`（行く）・`interact`（調べる）・`event`（操作の名前。`GameSession.QuestEvent` で知らせる）。報告先 `end`（`auto` は着いたら完了）。受ける条件の能力値 `minStats`（転職の「STR35 以上」。足りなければ `StartResult.StatTooLow`）。
 - **全部のクエストに判定できる目的がある**。文章だけだった物（手紙を届ける・灯台のランプ・化石を調べる・ダンジョンをクリア・転職 など 91 本）は `Data/tools/quest_goals.mjs` で直した。依頼者・報告先は「名前＠マップ」から NPC の ID に直してある（そのマップにいない依頼者は書き出しの時に問題として止まる）。
 - event の名前: quickslot_set / use_potion / ap_spent / sp_spent / skill_used（チュートリアル）・`job_advance.1`（`AdvanceJob` が知らせる）・`job_advance.2〜4`・`storage_deposit` / `storage_withdraw`・`pet_adopted` / `pet_fed` / `pet_closeness`・`dungeon_clear` と `dungeon_clear.<マップID>`・`boss_kill`・`quiz_cleared`。全部 Core が知らせる（4-11）。
-- 転職のクエスト（J 系）は `line`（自分の系統だけ受けられる。違えば `StartResult.WrongJob`）。`advance`（J?-7 = 3 次・J?-9 = 4 次: 完了すると転職）・`unlock`（V-13 = 倉庫の枠 +4、PET-07 = ペット 2 匹）は quest_goals.mjs。
+- 転職のクエスト（J 系）は `line`（自分の系統だけ受けられる。違えば `StartResult.WrongJob`）。1 次転職のクエスト（目的が `job_advance.1` の J?-1）は初心者だけ（転職した後は `WrongJob`。受けると終わらないクエストが残るため。PLAYTEST.md）。`advance`（J?-7 = 3 次・J?-9 = 4 次: 完了すると転職）・`unlock`（V-13 = 倉庫の枠 +4、PET-07 = ペット 2 匹）は quest_goals.mjs。
 - 報酬の経験値・お金は QUESTS.md 1-3 の式。品は名前から ID に直してある（直せない物は `rewardUnparsed` に残る。大陸のクエストの「自分の職の◯◯」など）。
 - 頭の上の電球: `NpcBulb`（2 = 緑、1 = 黄）。
 - **チュートリアル 20 本（S-01〜S-20）は、目的を機械で判定できる形に書き直し、テストで最初から最後まで遊んで通す**（歩いて岩を越える・縄を登って木箱・ポータル・狩り・拾う・隠し部屋・船で大陸へ）。
@@ -282,7 +286,8 @@ session.CureStatus(GameSession.CurableAll);       // 治すスキル（意志の
 - **製作**（ITEMS.md 4 章）: 精錬（原石 10 → 板。カジ・ツララ・ドラン）・宝石（原石 10 → 宝石。ネズ）・ミスリルの小手（攻撃力 +2）・闇の水晶（ジュエ）。`CraftsAt(npc)` が `NpcDialog.Crafts` にも入る。
 - **毎日の宝箱**: T104 おもちゃ箱の宝箱・M107 沈んだ宝箱。`Interact` で 1 日 1 回（その Lv の敵のお金 × 20 と薬 5 つずつ）。
 - **椅子**（設置）: `UseItem`（または `SitOnChair`）で座る。地上で止まっている時だけ。自然回復 1 回の量が 1.5 倍。左右・上下・ジャンプ・攻撃・スキルで立つ。`Pose.Motion = "sit"`。
-- **2〜4 次の転職**（JOBS.md 3 章）: 2 次 = J?-2 推薦状 → J?-3 修練場で試しの珠 30（20 分。外に出る・時間切れ・中で倒れるとやり直しで珠が消える）→ 試験の証 → `AdvanceJob2(枝)`（J?-4 の `job_advance.2`）。3 次 = J?-5 手紙 → J?-6 **次元の扉**（修験の雪洞 F118 は J?-6 を進めている間だけ入れる。入るとすぐもう一人の自分。20 分）→ J?-7 賢者の石（`Interact` でクイズ。黒いお守りと闇の水晶が要る）→ 完了で 3 次（`job_advance.3`、AP +5・SP +1）。4 次 = J?-8 → J?-9 紅翼の主・蒼翼の主（試験中は印を必ず落とす）→ 完了で 4 次（`job_advance.4`・極意の書 20）。転職のたびに持ち物の枠 +4（装備・消費・その他）。
+- **1 次の転職でもらう物**（JOBS.md 3-1）: `AdvanceJob` が職の武器と薬・矢・投げ星・弾を渡す（systems.json の `jobs.firstJobItems`。戦士 青銅のソード・赤ポーション 20／魔法使い 麻のワンド・青ポーション 20／弓使い 草原の弓・弓の矢 2000／盗賊 黒布のクロー・投げ星 2400／海賊 帆布のナックル・帆布の銃・弾 800）。入りきらない分は足元に落とす。
+- **2〜4 次の転職**（JOBS.md 3 章）: 2 次 = J?-2 推薦状 → J?-3 修練場で試しの珠 30（20 分。外に出る・時間切れ・中で倒れるとやり直しで珠が消える）→ 試験の証 → `AdvanceJob2(枝)`（J?-4 の `job_advance.2`）。3 次 = J?-5 手紙 → J?-6 **次元の扉**（修験の雪洞 F118 は J?-6 を進めている間か、J?-6 を受けられる間だけ入れる（依頼者が雪洞の中にいるため。`requiresAnyQuest` のクエストの依頼者がその部屋の中なら「受けられる」でも入れる）。入るとすぐもう一人の自分。20 分）→ J?-7 賢者の石（`Interact` でクイズ。黒いお守りと闇の水晶が要る）→ 完了で 3 次（`job_advance.3`、AP +5・SP +1）。4 次 = J?-8 → J?-9 紅翼の主・蒼翼の主（試験中は印を必ず落とす）→ 完了で 4 次（`job_advance.4`・極意の書 20）。転職のたびに持ち物の枠 +4（装備・消費・その他）。
 - **クイズ**: 30 問（このゲームの町・人・決まりのオリジナルの問題）から 5 問。選択肢の順番は毎回混ぜる。全問正解で `quiz_cleared`、間違えると闇の水晶を 1 つ失って終わり。
 - **極意の書**: `UseMasterBook(書, ★スキル)`。20 は 70%、30 は 50%（決めた値）。上限が上がらない組み合わせは `Invalid`（書は残る）。
 - **ボスの間・1 人用ダンジョン・試験の部屋**（`RoomRule`。MONSTERS.md 5 章・QUESTS.md 6 章）: 入る条件（鍵の品・前提クエスト・Lv の範囲・実時間の 1 日 N 回/週 1 回）はポータルで入る時に確かめ（`CanEnterRoom`）、入ったら 1 回使う。`fresh` の部屋は入るたびに作り直し（ボス・主がすぐ出る）。制限時間が切れると戻り先へ（`RoomTimeUp`）。中で倒れると戻り先で起き上がる（1 人用ダンジョンは経験値 1%）。
@@ -311,10 +316,11 @@ session.CureStatus(GameSession.CurableAll);       // 治すスキル（意志の
 - **2〜4 次のスキル**: 全部入れて効かせた（敵の強化を消す・遅延・変化の呪い・錯乱弾・秘術の扉の戻りの扉・身代わり人形・乗船の HP・隠れ足・毒の霧の設置・クローの熟練の 1 束・調合上手・MP 吸収で敵の MP を減らす）。残り: 溜めの大魔法は溜める長さを選べない（いつも 2 秒で ×2）。盗賊団・爆弾カモメは即時の攻撃。当たる範囲・ディレイ・状態異常の秒（JOBS.md に無い物）・身代わり人形の引きつける距離（450 px）・船の HP（2000+200x）・隠れ足の落ちる速さ（120 px/秒）・敵の反射の上限（最大 HP の 20%）は「似」で決めた値。
 - **攻撃の絵**: Core は攻撃の種類（振り・突き・撃ち・投げ・詠唱・殴り）を `Pose.AttackKind` で出しているが、絵の名前は ART_SPEC の `swingO1` だけ。
 - **闇隠れの「速さ −20+x」**: ブラウザ版の速さの計算（100 より下にしない）に合わせているので、遅くはならない。
-- **町と成長の仕組み（4-11）の簡略**: 1 人用ダンジョンの部屋ごとの課題（合い札・縄の組み合わせ・鍵集め・迷路のつながりが変わる 等）は無く、最後の主を倒すとクリア。ごほうびの部屋・ランダムの報酬・メダルの交換（6-7）・R-22 のメダル 2 枚は無い。修練場の職ごとの仕掛け（テレポート台・動く的・暗い倉庫 等）は無い。もう一人の自分は自分のスキルを使わない（ふつうの強敵）。市場の素材屋の 1 割高の買い取り・露店の冒険者は無い。製作は例の分だけ（手袋 6・靴 4 などの一覧はまだ）。ペットの装備・芸の絵は Unity 側。1 次転職でもらう武器（JOBS.md 3-1）はまだ渡していない。
+- **町と成長の仕組み（4-11）の簡略**: 1 人用ダンジョンの部屋ごとの課題（合い札・縄の組み合わせ・鍵集め・迷路のつながりが変わる 等）は無く、最後の主を倒すとクリア。ごほうびの部屋・ランダムの報酬・メダルの交換（6-7）・R-22 のメダル 2 枚は無い。修練場の職ごとの仕掛け（テレポート台・動く的・暗い倉庫 等）は無い。もう一人の自分は自分のスキルを使わない（ふつうの強敵）。市場の素材屋の 1 割高の買い取り・露店の冒険者は無い。製作は例の分だけ（手袋 6・靴 4 などの一覧はまだ）。ペットの装備・芸の絵は Unity 側。
 - **極意の書**: クラシックどおり★は最初 10、20 の書で 20、その後 30 の書で 30（JOBS.md の表を 10/30 に直した）。
 - **マップの見た目**: 足場の配置は生成なので、絵（タイル・背景の層・飾り）を置く時に「ここに家」「ここに風車」などの手直しが要るかもしれない。直す時は `specs.mjs`（型・層の数・横幅）か、その 1 枚だけ島のように手で置く。
 - **乗り物**: 雲の船・潜水船などは 1 人 1 行き先のまま（雲の船の駅は行き先ごとに係がいる）。複数の行き先はタクシーだけ。船の「10 分ごとに出る・乗っている 2 分」は無い（すぐ着く）。
 - **崩れる足場**（T104）は物理に無いので、おもちゃ箱の底へは地面の右端の隠しの落とし穴から入る。
 - **命中**: 初心者が当たらなすぎたので、レベルで上がる基礎の命中（5 + Lv × 0.5）を足した（`StatCalc.BaseAcc`）。Lv8・DEX 4 で Lv8 のダイダイダケに約 94%。
 - 敵の HP バー・ボスの HP バー・NPC の会話の窓・UI の窓は Unity 側の仕事（Core は値を出している）。
+- **通しの検証（docs/PLAYTEST.md）で見つけて、まだ直していない物**: Lv20〜30 で薬代が稼ぎを上回る・命中（敵の回避 Lv×0.5）で近接職の MISS が多い・投げ星が尽きた盗賊は攻撃できず詰む・乗り物でしか出入りできない地域でお金が尽きると出られない・2 次の試験（試しの珠）と 4 次の試験（紅翼の主・蒼翼の主）の難しさが職で違う・繰り返しのクエスト（R 系）は 1 回だけの扱い。案は PLAYTEST.md 3-3・4 章。

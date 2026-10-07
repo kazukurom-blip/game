@@ -97,6 +97,8 @@ namespace Lumina.Core.Town
         public string QuizLoseOnWrong, QuizStone;
         public readonly List<QuestDrop> QuestDrops = new List<QuestDrop>();
         public int InventoryPlus = 4;
+        /// <summary>1 次転職でもらう物（JOBS.md 3-1）。系統 → 品と個数。</summary>
+        public readonly Dictionary<string, List<CraftIngredient>> FirstJobItems = new Dictionary<string, List<CraftIngredient>>();
     }
 
     public sealed class ChestDef
@@ -183,6 +185,18 @@ namespace Lumina.Core.Town
                     s.Jobs.QuestDrops.Add(new QuestDrop { Quest = J.Str(x, "quest"), Mob = J.Str(x, "mob"), Item = J.Str(x, "item") });
                 }
                 s.Jobs.InventoryPlus = J.Int(jb, "inventoryPlus", 4);
+                var fj = J.Obj(jb, "firstJobItems");
+                if (fj != null)
+                    foreach (var kv in fj)
+                    {
+                        var list = new List<CraftIngredient>();
+                        foreach (var o in (List<object>)kv.Value)
+                        {
+                            var x = (Dictionary<string, object>)o;
+                            list.Add(new CraftIngredient { Item = J.Str(x, "item"), Count = J.Int(x, "count", 1) });
+                        }
+                        s.Jobs.FirstJobItems[kv.Key] = list;
+                    }
             }
             var ch = J.Obj(d, "chests");
             if (ch != null)

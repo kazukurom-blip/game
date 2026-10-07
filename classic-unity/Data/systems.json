@@ -1004,7 +1004,63 @@
     "item": "etc.M212"
    }
   ],
-  "inventoryPlus": 4
+  "inventoryPlus": 4,
+  "firstJobItems": {
+   "warrior": [
+    {
+     "item": "eq.warrior.sword1.10",
+     "count": 1
+    },
+    {
+     "item": "use.red_potion",
+     "count": 20
+    }
+   ],
+   "magician": [
+    {
+     "item": "eq.magician.wand.8",
+     "count": 1
+    },
+    {
+     "item": "use.blue_potion",
+     "count": 20
+    }
+   ],
+   "bowman": [
+    {
+     "item": "eq.bowman.bow.10",
+     "count": 1
+    },
+    {
+     "item": "use.arrow_bow",
+     "count": 2000
+    }
+   ],
+   "thief": [
+    {
+     "item": "eq.thief.claw.10",
+     "count": 1
+    },
+    {
+     "item": "use.star_iron",
+     "count": 2400
+    }
+   ],
+   "pirate": [
+    {
+     "item": "eq.pirate.knuckle.10",
+     "count": 1
+    },
+    {
+     "item": "eq.pirate.gun.10",
+     "count": 1
+    },
+    {
+     "item": "use.bullet_lead",
+     "count": 800
+    }
+   ]
+  }
  },
  "chests": {
   "T104.toybox": {

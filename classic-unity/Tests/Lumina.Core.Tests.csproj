@@ -14,4 +14,8 @@
   <ItemGroup>
     <ProjectReference Include="../Core/Lumina.Core.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- 通しで遊ぶボット（Tools/PlayBot）。Program.cs（コンソールの入口）以外を一緒にビルドする -->
+    <Compile Include="../Tools/PlayBot/Bot/**/*.cs" Link="PlayBot/%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
 </Project>

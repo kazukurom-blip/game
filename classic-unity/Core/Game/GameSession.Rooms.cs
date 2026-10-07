@@ -46,10 +46,20 @@ namespace Lumina.Core.Game
             if (r == null) return RoomEntryResult.Ok;
             if (r.RequiresItem != null && !Inventory.Has(r.RequiresItem)) return RoomEntryResult.NeedItem;
             if (r.RequiresQuest != null && !Quests.IsCompleted(r.RequiresQuest)) return RoomEntryResult.NeedQuest;
-            if (r.RequiresAnyQuest.Count > 0 && !r.RequiresAnyQuest.Exists(q => Quests.Status(q) == QuestStatus.InProgress)) return RoomEntryResult.NeedQuest;
+            if (r.RequiresAnyQuest.Count > 0 && !r.RequiresAnyQuest.Exists(q => Quests.Status(q) == QuestStatus.InProgress || CanAcceptInside(q, r.Map))) return RoomEntryResult.NeedQuest;
             if (r.LvMin > 0 && (Character.Level < r.LvMin || Character.Level > r.LvMax)) return RoomEntryResult.LevelOutOfRange;
             if (RoomEntriesLeft(mapId) <= 0) return RoomEntryResult.NoEntriesLeft;
             return RoomEntryResult.Ok;
+        }
+
+        /// <summary>
+        /// その部屋の中にいる NPC から受けるクエストで、今受けられる（修験の雪洞 F118 の J?-6 は依頼者が部屋の中にいる。
+        /// 「進めている間だけ入れる」だけだと受けに入れない。PLAYTEST.md）。
+        /// </summary>
+        private bool CanAcceptInside(string questId, string roomMap)
+        {
+            var q = Data.Quest(questId);
+            return q != null && q.Map == roomMap && Quests.CanStart(questId, Character) == StartResult.Ok;
         }
 
         private static string RoomRefusal(RoomEntryResult r, RoomRule rule, GameSession s)
