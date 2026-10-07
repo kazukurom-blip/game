@@ -22,6 +22,7 @@ classic-unity/
     World/     MapData（マップの JSON の形）・MapInstance（敵・落ちている物・湧き直し）
     Save/      SaveData・SaveSerializer・SaveMigrations・SaveStore（壊れない書き方）・FileSystem
     Collection/ MonsterBook（敵の図鑑のカード・段）・BookIndex（図鑑に載る敵と地域）・Medals（勲章の条件）・PlayRecords（記録と統計）
+    Fun/       FunData（fun.json の形）・FunState（遊び場の点数・見た目・フィールドボスの時計。セーブの fun）・Gomoku（五目並べと係の考え）・MemoryGame（神経衰弱）
     Town/      SystemsData（systems.json の形）・Storage（倉庫・共有の AccountData）・PetState・DailyLog（実時間の 1 日 N 回）・QuizSession
     Game/      GameSession（全部をまとめる。Unity が持つのはこれ 1 つ。.Combat/.Skills/.Status/.Items/.Quests/.Mechanics/.Town/.Jobs/.Rooms/.Pets/.Records/.Collection に分けてある）・PlayerInput・GameEvents・AvatarPose
     Data/      GameData（JSON を読む）・IDataSource
@@ -86,7 +87,7 @@ session.Character / Stats / Inventory / Equipment / Skills / Buffs / Status / Qu
 
 - **入力**（`PlayerInput`）: 押している間の物（Left/Right/Up/Down/Jump/Attack/Pickup）と、押した瞬間の物（JumpPressed/UpPressed/InteractPressed/SkillPressed/ItemPressed）。押した瞬間の物は Core が次の固定の更新で読むまで覚えている。キー配置は `Unity/InputBridge.cs`。
 - **座標**: Core は 1 px = 1・y は下が正。Unity（PPU = 1）では `(x, -y)`。Pixel Perfect Camera は 800×600。
-- **UI から呼ぶ操作**: `Talk(npcId)` → `NpcDialog`（受けられる・報告できるクエスト、店、宿屋、乗り物、`Say` = 話しかけるたびに変わる一言、`Hint` = 進めているクエストの残り。受けた・報告した後に窓を作り直す時は `Talk(npcId, true)` で一言を進めない）／`AcceptQuest`／`CompleteQuest`／`Buy`／`Sell`／`RestAtInn`／`Travel`／`UseItem`／`UseSkill`／`SetQuickSlot`／`EquipFromInventory`／`Unequip`／`ApplyScrollToEquipped`／`ApplyScrollToInventory`／`SpendAp`／`SpendApHp`／`SpendApMp`／`LearnSkill`／`AdvanceJob`／`AdvanceJob2`（2 次: 試験の証と枝）／`Revive`／`SaveNow`／`NpcBulb`（頭の上のマーク: 1 = 受けられる「？」、2 = 報告できる電球）。
+- **UI から呼ぶ操作**: `Talk(npcId)` → `NpcDialog`（受けられる・報告できるクエスト、店、宿屋、乗り物、`Say` = 話しかけるたびに変わる一言、`Hint` = 進めているクエストの残り。受けた・報告した後に窓を作り直す時は `Talk(npcId, true)` で一言を進めない）／`AcceptQuest`／`CompleteQuest`／`Buy`／`Sell`／`RestAtInn`／`Travel`／`UseItem`／`UseSkill`／`SetQuickSlot`／`EquipFromInventory`／`Unequip`／`ApplyScrollToEquipped`／`ApplyScrollToInventory`／`SpendAp`／`SpendApHp`／`SpendApMp`／`LearnSkill`／`AdvanceJob`／`AdvanceJob2`（2 次: 試験の証と枝）／`Revive`／`SaveNow`／`Board`・`VoyageSkip`・`Gacha`・`DoEmote` などの楽しさの要素（4-13）／`NpcBulb`（頭の上のマーク: 1 = 受けられる「？」、2 = 報告できる電球）。
   NPC のセリフ: `Data/tools/world/npc_lines.mjs` → `npcs.json` の `lines` → `NpcDef.Lines`・`NpcData.Lines`（`Game/NpcLines.cs`。先頭の `[条件]`（lv・tier・line・done・doing）が合う一言を先に、話しかけた回数で順に変える。`{name}`・`{job}`・`{lv}` を置き換える）。
   町の仕組み（4-11）: `StorageDeposit`／`StorageWithdraw`／`StorageDepositMeso`／`StorageWithdrawMeso`／`StorageExpand`／`ShopItems`（今日の品）／`Recharge`（詰め直し）／`TaxiTo`・`TaxiFee`／`Craft`・`CraftsAt`／`SitOnChair`・`StandUp`（または椅子を `UseItem`）／`FeedPet`・`TalkToPet`・`SetPetOut`・`RenamePet`（ペットの品・餌・技の本は `UseItem`）／`StartQuiz`・`AnswerQuiz`（賢者の石を `Interact` すると始まる）／`UseMasterBook`／`CanEnterRoom`・`RoomEntriesLeft`。
   読む物: `session.Storage`・`Pets`（X/Y/Motion）・`Quiz`（Current: 問題と混ぜた選択肢）・`CurrentRoom`・`RoomTimeLeft`/`RoomTimerRunning`/`RoomCleared`・`Sitting`（Pose.Motion = "sit"）・`Daily`。
@@ -245,7 +246,7 @@ session.Character / Stats / Inventory / Equipment / Skills / Buffs / Status / Qu
   `{"format":"lumina-save","seq":12,"length":3456,"crc32":"89abcdef","data":{…}}`
 - 書く順番: `.tmp` に書いて fsync → 読み直して確かめる → bak を 1 つずつ後ろへ → 今のセーブを bak1 へ → `.tmp` で一度に置き換え。**どこで落ちても、前の版か新しい版のどちらかが必ず読める**（テストで全部の手順で「落ちた」を再現。ちぎれた書き込みも）。
 - 読む順番: 今のセーブと `.tmp` のうち壊れていなくて `seq` の大きい方 → bak1 → bak2 → bak3。壊れていたら `LoadResult.Recovered` と理由（`Problems`）。全部壊れていても落ちずに「読めない」を返す。
-- 版: `version`（今は 4。版 4 で やりこみ の `collection` を足した。4-12）。古い版は `SaveMigrations` で 1 つずつ直してから読む。新しすぎる版は断る（バックアップへ）。データに無いアイテムは外してお知らせ。
+- 版: `version`（今は 5。版 4 で やりこみ の `collection`（4-12）、版 5 で 楽しさの要素の `fun`（4-13）を足した）。古い版は `SaveMigrations` で 1 つずつ直してから読む。新しすぎる版は断る（バックアップへ）。データに無いアイテムは外してお知らせ。
 - 版 3: ペット（`pets`）と実時間の回数（`daily`: ボスの間・ダンジョン・毎日の宝箱）を足した。版 2 は空で足して読む。
 - **倉庫はキャラ全員で共有**: キャラのセーブとは別の枠 `account`（同じ壊れない書き方。`SaveStore.SaveText/LoadText`、中身は `AccountData`）。`AttachSave` で読み、`SaveNow` でキャラより先に書く（間で落ちると品が両方に残る向き。消えはしない）。
 - 制限時間のある部屋（ボスの間・ダンジョン・試験）の中では、場所を戻り先にして保存する。
@@ -328,7 +329,30 @@ session.CureStatus(GameSession.CurableAll);       // 治すスキル（意志の
 - セーブの版 4: `collection`（`cards`・`variants`・`medals`・`records`・`cardRng`）。版 3 は空で足して読む（記録は 0 から）。付けている勲章は装備（メダルの欄）として残る。
 - お知らせ（GameEvents）: `CardPicked`・`BookLevelUp`・`MedalEarned`・`MedalEquipped`・`JumpCleared`。
 - 決めた値: カードの確率（ふつう 1.2%・強敵 8%・ボス 30%・大ボス 60%）・段の区切り（3・8・15・25・40・60・85・115・145・170 種）・上乗せ・勲章の能力・試練のごほうび（ITEMS.md 9 章・WORLD.md 8 章）。
-- 美容院（髪型・顔）は別の担当。
+- 美容院（髪型・顔）は 4-13。
+
+### 4-13. 楽しさの要素 — `Core/Fun/`・`GameSession.Fun.cs`（データは `Data/fun.json` ← `Data/tools/fun.mjs`、敵は `classic/tools/data/fun_mobs.mjs`）
+
+横スクロールの MMO によくある遊びの「仕組みの形」だけを借りた物（名前・文章・景品・絵はオリジナル）。既存のファイルには呼び出しだけを足した（`TickFun`・`TryInteractFun`・`OnMobSpawnedFun`（`MapInstance.OnSpawned`）・`OnMobKilledFun`・`AfterEnterMapFun`・`FunPortalOpen`・`TryUseFunItem`・`TravelFromDeck`・`WriteFunSave`/`ReadFunSave`）。乱数は本体と別（`funRng`）なので、ほかの仕組みの乱数の流れは変わらない。`session.FunEvents = false` でフィールドボス・珍しい個体・季節の敵・ダンジョンの課題を止める（通しのボットは止めている）。
+
+| 仕組み | 呼ぶ物 | 読む物・決まり |
+|---|---|---|
+| **町の機械・係**（spots） | V（`InteractPressed`）で近くの物（横 50・縦 80 px。NPC の方が近ければ NPC） | `SpotsHere()`・`SpotNear()`・`LastSpot`（V で開いた物。読んだら null に）。NPC ではなく、書き出しの時に町の地面の空いている所（NPC・ポータルから 70 px 以上）に置く。種類: gacha（大陸の 6 町）・arcade（V200）・salon（V500）・boutique・marks（V090）・season（V100。季節の間だけ） |
+| **1. 景品の機械** | `Gacha(spot, out prize)`（`GachaResult`）・`BuyGachaTicket(spot, n)`（1,500 ルド。機械と見た目の品の店） | 町ごとの表（重み → 確率。ふつう 約 70%・少し珍しい 約 25%・大当たり 約 4%）。券 `use.gacha_ticket` は店・敵（0.2%）・フィールドボス・船の襲撃・遊び場・ダンジョンの宝箱。図鑑のカード（`card.<敵>`）は持ち物でなく図鑑へ（4-12）。大当たりは `Fun` の `jackpot:<品>`（Text = 画面全体に出す文）。`Fun.Pulls`・`Fun.Jackpots` |
+| **2. フィールドボス** | — | 8 体（M420〜M427。強敵＋段階と技。mob_skills.mjs）。決まったマップに、遊んでいる時間（`PlaySec`）で `minSec`〜`maxSec`（30〜90 分）おきに 1 体。湧く 60 秒前に `boss_warn`（そのマップにいる時）、`boss_spawn:<敵>`、倒すと `boss_down:<敵>` と次の時間・専用の品（`eq.fun.boss.<敵>` 30% ほか）。時間は `Fun.BossDue`（-1 = 湧いている。マップを離れて形が消えても、戻ると出る）。`FieldBossIn()` = 今のマップで湧くまでの秒。`mob.FieldBoss` |
+| **3. 船の旅と襲撃** | `Board(npc, ticket)`（旅の無い乗り物は `Travel` と同じ）・`VoyageSkip()`・`HasVoyage(npc)`。`Travel` は今までどおりすぐ着く（「すぐ着く」を選んだ時・ボット） | 雲の船の 6 人（noa・luna・sora・kippu・hashi・p_boat）。乗ると C118（船の上・BGM ship）へ、75〜110 秒で着く。途中 2 回、空の魔物が乗り込む（`voyage_raid`）。全部倒すとお礼のお金と券（`voyage_clear`）。船の上の水夫と話して乗り物を選ぶとそのまま着く。`session.Voyage`（`To`・`Left`・`Total`・`RaidActive`）。旅の途中で保存すると着いた所から読む |
+| **4. 感情表現** | `DoEmote(id)` | 7 つ（smile・cry・angry・surprise・shy・sleepy・wink）。`Emote`・`EmoteT`（4 秒で null）。顔の部品の名前は fun.json の `emotes[].face`（Unity 側も同じ名前で顔を選ぶ） |
+| **5. 遊び場** | `StartArcade(spot, "gomoku"/"memory", "easy"/"normal")`・`GomokuPlay(x, y)`・`MemoryFlip(i)`・`MemoryContinue()`・`ArcadeExchange(spot, i)` | `session.Arcade`（`Gomoku`: `Cells`・`Result`・`WinLine`・`LastX/Y`／`Memory`: `Cards`・`Owner`・`FaceUp(i)`・`PeekA/B`・`NpcFlips`）。五目並べは 15×15・禁じ手なし・係は「自分の並び＋相手の並びを止める」の点で選ぶ（やさしいは 3 つ以下の守りを時々見のがし、ゆらぎが大きい）。神経衰弱は 8 組・係は見た札を 35% / 70% の確率で覚える。終わると点数（`Fun.Points`）・勝ちの数（`Fun.Wins`） |
+| **6. 季節の祭り** | `CurrentSeason()`（実際の日付の月・`HourOffset` 込み）・`SeasonStatus()`・`SeasonTurnIn(spot)` | 秋（9〜11 月）実りの祭り・冬（12〜2 月）雪の祭り。季節の間だけ: 町の飾り（`deco`）・祭りの係・季節の敵（M430 / M431。決めた狩り場で湧いた敵のそばに 8% で混ざる）・頼みごと（季節の品 20 個 → 初回は記念の帽子と椅子、2 回目からは 1 日 1 回券 2 枚。`Fun.SeasonFirst` に「autumn.2026」など） |
+| **7. 美容院** | `SalonChange(spot, "hair"/"hairColor"/"face"/"skin", 値, 券を使う)` | 髪型 7・髪の色 8・顔 5・肌 4。お金（5,000 / 3,000 / 8,000 / 3,000）か券。`Fun.Look`（`Hair`・`HairColor`・`Face`・`Skin`）は保存する |
+| **8. 珍しい色違いの個体** | — | どの狩り場でも、湧いた敵が 1/300 で `mob.Rare`（ボス・強敵は除く）: HP ×3・攻撃 ×1.3、倒すと経験値 ×5・ドロップを 3 回・お金 ×3・券 50%。`rare:<敵>` / `rare_down:<敵>`。図鑑の `Book.Variants`（`rare_seen`・`rare_killed`）と Flags `rare.<敵>` に残す |
+| **9. 1 人用ダンジョン** | V で仕掛けを調べる | `session.Dungeon`（入るたびに作る）: 壁で区切った部屋ごとの課題（kill = 部屋の敵を湧く所の数（3〜8）倒す・switch = 3 つのスイッチを番号の順（違えば最初から）・carry = 荷物を 25 秒のうちに出口の印へ・climb = いちばん高い足場の旗に立つ）。終わるまで次の部屋へのポータルは閉じる（`dungeon_locked`）。主を倒すとごほうびの宝箱 3 つ（`Chests`。お金と品）と踏破の印 1 つ。印は市場の交換所で品と（`MarkExchange`） |
+| **10. 見た目の品** | 持ち物の「設置」の品を `UseItem`（着ける・もう一度で外す。減らない）・`BoutiqueBuy(spot, i)` | 帽子・服・名札・吹き出し（`Fun.Look.Hat/Outfit/Tag/Bubble` = アイテムの ID。絵の名前は fun.json の `looks`）。売る・預けて持っていなければ保存の時に外す（`CheckLook`） |
+| **11. 天気** | `Weather()`・`WeatherAt(map, 時刻)`・`WeatherBgmVolume()` | rain / snow / petals / fog / null。マップの ID の決まり（fun.json の `weather.rules`）と、実時間の 1 時間ごとの決まった乱数（マップと時間の種）。中の型（洞くつ・塔・部屋・ボス・船）は降らない。雨は BGM ×0.75 |
+
+- お知らせ: `GameEventType.Fun`（Id = 上の名前。`gacha:<品>`・`jackpot:<品>`・`boss_warn`・`boss_spawn:<敵>`・`boss_down:<敵>`・`voyage_start`・`voyage_raid`・`voyage_clear`・`voyage_arrive`・`emote:<id>`・`rare:<敵>`・`rare_down:<敵>`・`arcade`・`season`・`salon`・`look`・`dungeon_task`・`dungeon_progress`・`dungeon_reset`・`dungeon_chest`・`spot`）。
+- セーブの版 5: `fun`（`points`・`look`・`boss`・`pulls`・`jackpots`・`wins`・`seasons`）。版 4 は空で足して読む（いつもの姿・点数 0）。
+- 決めた値（似）: 確率・券の値段・フィールドボスの間隔と専用の品・船の旅の秒と襲撃・遊び場の点数・美容院の値段・珍しい個体の倍率・ダンジョンの課題の数と時間・天気の確率（すべて fun.mjs）。
 
 ## 5. クラシックに比べてまだ違う所・次にやること
 
@@ -339,10 +363,10 @@ session.CureStatus(GameSession.CurableAll);       // 治すスキル（意志の
 - **2〜4 次のスキル**: 全部入れて効かせた（敵の強化を消す・遅延・変化の呪い・錯乱弾・秘術の扉の戻りの扉・身代わり人形・乗船の HP・隠れ足・毒の霧の設置・クローの熟練の 1 束・調合上手・MP 吸収で敵の MP を減らす）。残り: 溜めの大魔法は溜める長さを選べない（いつも 2 秒で ×2）。盗賊団・爆弾カモメは即時の攻撃。当たる範囲・ディレイ・状態異常の秒（JOBS.md に無い物）・身代わり人形の引きつける距離（450 px）・船の HP（2000+200x）・隠れ足の落ちる速さ（120 px/秒）・敵の反射の上限（最大 HP の 20%）は「似」で決めた値。
 - **攻撃の絵**: Core は攻撃の種類（振り・突き・撃ち・投げ・詠唱・殴り）を `Pose.AttackKind` で出しているが、絵の名前は ART_SPEC の `swingO1` だけ。
 - **闇隠れの「速さ −20+x」**: ブラウザ版の速さの計算（100 より下にしない）に合わせているので、遅くはならない。
-- **町と成長の仕組み（4-11）の簡略**: 1 人用ダンジョンの部屋ごとの課題（合い札・縄の組み合わせ・鍵集め・迷路のつながりが変わる 等）は無く、最後の主を倒すとクリア。ごほうびの部屋・ランダムの報酬・メダルの交換（6-7）・R-22 のメダル 2 枚は無い。修練場の職ごとの仕掛け（テレポート台・動く的・暗い倉庫 等）は無い。もう一人の自分は自分のスキルを使わない（ふつうの強敵）。市場の素材屋の 1 割高の買い取り・露店の冒険者は無い。製作は例の分だけ（手袋 6・靴 4 などの一覧はまだ）。ペットの装備・芸の絵は Unity 側。
+- **町と成長の仕組み（4-11）の簡略**: 1 人用ダンジョンの部屋ごとの課題は 4 種（倒す・スイッチの順・運ぶ・高い足場。4-13）だけで、合い札・縄の組み合わせ・迷路のつながりが変わる 等は無い。ごほうびの部屋は主の部屋に宝箱が出る形、交換は踏破の印（4-13）。R-22 のメダル 2 枚は無い。修練場の職ごとの仕掛け（テレポート台・動く的・暗い倉庫 等）は無い。もう一人の自分は自分のスキルを使わない（ふつうの強敵）。市場の素材屋の 1 割高の買い取り・露店の冒険者は無い。製作は例の分だけ（手袋 6・靴 4 などの一覧はまだ）。ペットの装備・芸の絵は Unity 側。
 - **極意の書**: クラシックどおり★は最初 10、20 の書で 20、その後 30 の書で 30（JOBS.md の表を 10/30 に直した）。
 - **マップの見た目**: 足場の配置は生成なので、絵（タイル・背景の層・飾り）を置く時に「ここに家」「ここに風車」などの手直しが要るかもしれない。直す時は `specs.mjs`（型・層の数・横幅）か、その 1 枚だけ島のように手で置く。
-- **乗り物**: 雲の船・潜水船などは 1 人 1 行き先のまま（雲の船の駅は行き先ごとに係がいる）。複数の行き先はタクシーだけ。船の「10 分ごとに出る・乗っている 2 分」は無い（すぐ着く）。
+- **乗り物**: 雲の船・潜水船などは 1 人 1 行き先のまま（雲の船の駅は行き先ごとに係がいる）。複数の行き先はタクシーだけ。雲の船は乗るとすぐ出る（「10 分ごとに出る」の待ちは無い）。船の上の旅は 75〜110 秒（4-13）。潜水船・大きな鳥・そりはすぐ着く。
 - **崩れる足場**（T104）は物理に無いので、おもちゃ箱の底へは地面の右端の隠しの落とし穴から入る。
 - **命中**: 初心者が当たらなすぎたので、レベルで上がる基礎の命中を足した（`Formulas.BaseAcc`・combat.mjs の `baseAcc`）。初めは 5 + Lv × 0.5 だったが、通しの検証（PLAYTEST.md）で Lv が上がるほど近接職の MISS が増えたので 5 + Lv × 1.0 に上げ、敵の回避を Lv × 0.5 → 0.36 に下げた（STATS.md 2-3 の表: DEX を Lv÷3 振った戦士は同じ Lv の敵に 100%、5 上で約 70%）。
 - 敵の HP バー・ボスの HP バー・NPC の会話の窓・UI の窓は Unity 側の仕事（Core は値を出している）。

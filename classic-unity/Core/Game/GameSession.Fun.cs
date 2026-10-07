@@ -626,7 +626,7 @@ namespace Lumina.Core.Game
             for (int i = 0; i < bounds.Count; i++)
             {
                 var (x1, x2) = bounds[i];
-                var t = new DungeonRoomTask { X1 = x1, X2 = x2, Kind = i < bounds.Count - 1 && i < tasks.Count ? tasks[i] : null };
+                var t = new DungeonRoomTask { X1 = x1, X2 = x2, Kind = i < bounds.Count - 1 && tasks.Count > 0 ? tasks[i % tasks.Count] : null };
                 t.Done = t.Kind == null;
                 // 部屋の中の足場（地面以外）
                 var plats = new List<(double x, double y, double top)>();

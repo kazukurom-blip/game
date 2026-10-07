@@ -66,6 +66,7 @@ export class Ui {
       I 持ち物 E 装備 S 能力値 K スキル Q クエスト<br>
       L 図鑑 N 勲章 U 記録 W 全体マップ<br>
       O 設定・セーブ / M ミニマップ / Esc 閉じる<br>
+      R＋1〜7 感情表現（R だけで選ぶ帯）<br>
       NPC はクリックでも話せる`;
     const q = this.el('quick');
     q.innerHTML = QUICK_KEYS.map((k, i) => `<div class="qs" data-q="${i}"><em>${k}</em><span></span><small></small></div>`).join('');

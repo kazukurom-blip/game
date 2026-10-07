@@ -41,6 +41,17 @@ export class Fun {
     this.hudEl.addEventListener('click', (e) => this.onClick(e));
     addEventListener('keyup', (e) => this.keyUp(e));
     this.patch();
+    // 町の機械・係・ダンジョンの仕掛け・季節の飾りは NPC と同じ所で描く（主人公より奥）
+    const R = game.renderer, drawNpcs = R.drawNpcs.bind(R);
+    R.drawNpcs = (g, f, ui) => {
+      const fr = this.fr;
+      if (fr) {
+        if (fr.season) this.drawSeason(g, fr.season, Math.round(R.cam.x));
+        if (fr.dungeon) this.drawDungeon(g, fr.dungeon);
+      }
+      drawNpcs(g, f, ui);
+      if (fr) for (const s of fr.spots || []) this.drawSpot(g, s, s.id === fr.near && !ui?.talking);
+    };
   }
 
   // ---------------- ほかの画面へのつなぎ（会話の窓の乗り物・Esc・会話の間は動かない）
@@ -157,9 +168,6 @@ export class Fun {
     const cx = Math.round(R.cam.x), cy = Math.round(R.cam.y);
     g.save();
     g.setTransform(S, 0, 0, S, -cx * S, -cy * S);
-    if (fr.season) this.drawSeason(g, fr.season, cx, cy);
-    for (const s of fr.spots || []) this.drawSpot(g, s, s.id === fr.near);
-    if (fr.dungeon) this.drawDungeon(g, fr.dungeon);
     // 珍しい色違いの個体（光る輪と印）・フィールドボス（名札）
     for (const m of f.mo) {
       const flags = m[9];
@@ -338,8 +346,11 @@ export class Fun {
     if (render) this.render();
   }
 
-  itemName(id) { return this.game.db.items[id]?.name || id; }
-  icon(id) { const d = this.game.db.items[id]; return `<span class="ic" style="background:${itemColor(d)}"></span>`; }
+  itemName(id) {
+    if (String(id).startsWith('card.')) return (this.game.db.monsters[id.slice(5)]?.name || id) + 'のカード（図鑑）';
+    return this.game.db.items[id]?.name || id;
+  }
+  icon(id) { const d = this.game.db.items[id]; return `<span class="ic" style="background:${String(id).startsWith('card.') ? '#f0e0b0' : itemColor(d)}"></span>`; }
 
   render() {
     const u = this.ui;
@@ -486,7 +497,7 @@ const CSS = `
 #funwin .memory { display: grid; grid-template-columns: repeat(4, 52px); gap: 4px; justify-content: center; margin: 6px 0; }
 #funwin .mc { height: 52px; font-size: 22px; background: #3a4680; } #funwin .mc.up { background: #f8f4e8; } #funwin .mc:disabled { opacity: 1; }
 #funwin .mc.mine { box-shadow: inset 0 0 0 3px #60c0ff; } #funwin .mc.npc { box-shadow: inset 0 0 0 3px #ff8060; }
-#funhud { position: absolute; right: 6px; top: 64px; width: 220px; display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+#funhud { position: absolute; left: 6px; top: 80px; width: 220px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
 #funhud .voy, #funhud .emo { pointer-events: auto; background: var(--panel); border: 1px solid var(--edge); border-radius: 3px; padding: 4px 6px; width: 100%; }
 #funhud .vbar { height: 6px; background: #222; margin: 3px 0; } #funhud .vbar i { display: block; height: 100%; background: #60c0ff; }
 #funhud .bad { color: var(--bad); font-weight: bold; }

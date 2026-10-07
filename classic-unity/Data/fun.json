@@ -1478,8 +1478,7 @@
    "D117": [
     "switch",
     "climb",
-    "carry",
-    "kill"
+    "carry"
    ]
   },
   "carrySec": 25,

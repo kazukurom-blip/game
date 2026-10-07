@@ -189,6 +189,7 @@ const BOUTIQUE = [
 const RARE = { chance: 1 / 300, hpMul: 3, atkMul: 1.3, expMul: 5, dropRolls: 3, mesoMul: 3, bonus: [{ item: 'use.gacha_ticket', chance: 0.5 }] };
 
 // ---------------------------------------------------------------- 9. 1 人用ダンジョン（壁で区切った部屋ごとの課題。最後の部屋は主）
+// 部屋の数が多いダンジョン（T121 は 8 部屋）は順にくり返す。最後の部屋（主）には課題が無い。
 // kill: 部屋の敵を（湧く所の数だけ）倒す / switch: 3 つのスイッチを番号の順に踏む（調べる） / carry: 荷物を持って時間内に出口へ / climb: いちばん高い足場の旗に触る
 const DUNGEONS = {
   V516: ['kill', 'switch', 'carry', 'climb'],
@@ -196,7 +197,7 @@ const DUNGEONS = {
   T122: ['carry', 'switch', 'kill', 'climb'],
   C119: ['climb', 'kill', 'switch', 'carry'],
   M115: ['kill', 'carry', 'switch', 'climb'],
-  D117: ['switch', 'climb', 'carry', 'kill'],
+  D117: ['switch', 'climb', 'carry'],
 };
 const DUNGEON_RULES = { carrySec: 25, chests: 3, mark: 'etc.fun.dungeon_mark', chestItems: ['use.gacha_ticket', 'use.elixir', 'use.exp_coupon', 'use.fun.hair_coupon', 'scroll.A18.60', 'scroll.A17.60'] };
 const MARK_PRIZES = [

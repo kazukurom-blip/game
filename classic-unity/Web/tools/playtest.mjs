@@ -2,7 +2,8 @@
 //   node classic-unity/Web/tools/make_dist.mjs   # 先に dist/ を作る
 //   node classic-unity/Web/tools/playtest.mjs    # 確かめる（PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers）
 // 歩く・ジャンプ・NPC と V で話す（V だけで話を聞く→受ける→閉じる・セリフが変わる・頭の上の「？」と電球）・クエストを受ける・ポータル・縄・はしご・攻撃・敵を倒す・拾う・Lv アップ・AP/SP・
-// クイックスロット・窓・セーブして読み直す・図鑑のカードを拾う・図鑑/勲章/記録/全体マップの窓・ジャンプの試練に入る、をして、コンソールのエラーとフレームの時間を確かめる。
+// クイックスロット・窓・セーブして読み直す・図鑑のカードを拾う・図鑑/勲章/記録/全体マップの窓・ジャンプの試練に入る・
+// 感情表現・景品の機械・遊び場（五目並べ・神経衰弱）・美容院・船の旅・フィールドボス・天気、をして、コンソールのエラーとフレームの時間を確かめる。
 import { createRequire } from 'node:module';
 import http from 'node:http';
 import fs from 'node:fs';
@@ -434,6 +435,110 @@ try {
     f = await F();
     check('ジャンプの試練の 1 つ目の足場に跳び乗れる', Math.abs(f.p[1] - p1.points[0][1]) < 2, `y=${f.p[1]} 足場 ${p1.points[0][1]}`);
     await shot('jump_quest');
+  }
+
+  // ---------------- 楽しさの要素: 感情表現・景品の機械・遊び場・美容院・船の旅・フィールドボス・天気（js/fun.js）
+  {
+    const FF = () => page.evaluate(() => window.game.fun.fr);
+    const openSpot = async (map, id) => {
+      await act('dbgWarp', map, 'sp'); await sleep(700);
+      const sp = (await FF()).spots.find((x) => x.id === id);
+      await act('dbgPos', String(sp.y), '', Math.round(sp.x) + 6); await sleep(400);
+      await tap('v'); await sleep(500);
+      return sp;
+    };
+    // 感情表現: R を押しながら 1
+    await page.keyboard.down('r'); await tap('1'); await page.keyboard.up('r'); await sleep(300);
+    let fr = await FF();
+    const face = await page.evaluate(() => window.game.renderer.look.parts.join(','));
+    check('R＋1 で感情表現（にっこり）・顔が変わる', fr.emote === 'smile' && face.includes('face_e_smile'), face);
+    await shot('fun_emote');
+    await sleep(4500);
+    fr = await FF();
+    check('感情表現は数秒で戻る', fr.emote == null);
+    await tap('r'); await sleep(200);
+    const pal = await page.$$eval('#funhud .emo button', (l) => l.length);
+    check('R だけで感情表現の帯（7 つ）', pal === 7, String(pal));
+    await page.keyboard.press('Escape'); await sleep(100);
+
+    // 景品の機械
+    await act('dbgMeso', '', '', 3000000);
+    await act('dbgItem', 'use.gacha_ticket', '', 5);
+    await openSpot('V100', 'gacha.V100');
+    const odds = await page.$eval('#w_fun', (e) => e.textContent).catch(() => '');
+    check('V で景品の機械の窓（確率の表示）', odds.includes('大当たり') && odds.includes('%'), odds.slice(0, 40));
+    const tickets = async () => (await U()).inv[1].filter(Boolean).find((x) => x.id === 'use.gacha_ticket')?.n ?? 0;
+    const t0 = await tickets();
+    await page.click('#w_fun button[data-f="gacha"]'); await sleep(400);
+    const res = await page.$eval('#w_fun .say.prize', (e) => e.textContent).catch(() => '');
+    const t1 = await tickets();
+    check('景品の機械を回すと券が減って景品が出る', t1 === t0 - 1 && res.length > 0, `${t0}→${t1} ${res}`);
+    await shot('fun_gacha');
+    await page.evaluate(() => window.game.fun.onEvent(['Fun', 'jackpot:x', 1, 0, 0, 'ぼうけんしゃ さんが 港のガラガラ で大当たり「港風のマント」を当てた！']));
+    await sleep(600);
+    const banner = await page.$eval('#funbanner', (e) => e.classList.contains('show') && e.textContent.includes('大当たり'));
+    check('大当たりは画面全体に知らせる', banner);
+    await shot('fun_jackpot');
+    await page.keyboard.press('Escape'); await sleep(200);
+
+    // 遊び場: 五目並べと神経衰弱
+    await openSpot('V200', 'arcade.V200');
+    await page.click('#w_fun button[data-f="arcadeStart"][data-b="gomoku"][data-n="0"]'); await sleep(300);
+    await page.click('#w_fun .gc[data-n="112"]'); await sleep(300);
+    const stones = await page.$$eval('#w_fun .gc.b, #w_fun .gc.w', (l) => l.length);
+    const cells = await page.$$eval('#w_fun .gc', (l) => l.length);
+    check('五目並べ: 置くと係も置く（15×15）', stones === 2 && cells === 225, `${stones} / ${cells}`);
+    await shot('fun_gomoku');
+    await page.click('#w_fun button[data-f="arcadeEnd"]'); await sleep(200);
+    await page.click('#w_fun button[data-f="arcadeStart"][data-b="memory"][data-n="0"]'); await sleep(300);
+    await page.click('#w_fun .mc[data-n="0"]'); await sleep(150);
+    await page.click('#w_fun .mc[data-n="1"]'); await sleep(250);
+    const up = await page.$$eval('#w_fun .mc.up', (l) => l.length);
+    const all = await page.$$eval('#w_fun .mc', (l) => l.length);
+    check('神経衰弱: 2 枚めくれる（16 枚）', up >= 2 && all === 16, `${up} / ${all}`);
+    await shot('fun_memory');
+    await page.keyboard.press('Escape'); await sleep(200);
+
+    // 美容院
+    await openSpot('V500', 'salon.V500');
+    await page.click('#w_fun button[data-f="salon"][data-b="hair:hair_bob"][data-n="0"]'); await sleep(300);
+    await page.click('#w_fun button[data-f="tab"][data-a="hairColor"]'); await sleep(100);
+    await page.click('#w_fun button[data-f="salon"][data-b="hairColor:pink"][data-n="0"]'); await sleep(300);
+    const look = await page.evaluate(() => window.game.renderer.look);
+    check('美容院で髪型と髪の色が変わる', look.parts.includes('hair_bob') && look.hairColor === 'pink', JSON.stringify(look.parts));
+    await page.keyboard.press('Escape'); await sleep(200);
+    await shot('fun_salon');
+
+    // 船の旅
+    for (let i = 0; i < 25 && (await U()).lv < 22; i++) await act('dbgExp', '', '', 99999999);
+    await act('dbgWarp', 'V310', 'sp'); await sleep(600);
+    await page.evaluate(() => { const g = window.game; const r = g.act('talk', 'noa'); g.ui.openDialog(r.dialog); });
+    await sleep(300);
+    const board = await page.$('#w_dialog button[data-act="board"]');
+    const quick = await page.$('#w_dialog button[data-act="travel"]');
+    check('雲の船の係に「船の旅で行く」と「すぐ着く」', !!board && !!quick);
+    if (board) { await board.click(); await sleep(900); }
+    let ff = await F(); fr = await FF();
+    const hudTxt = await page.$eval('#funhud', (e) => e.textContent).catch(() => '');
+    const bgm = await page.evaluate(() => window.game.map.bgm);
+    check('船の旅: 船の上（C118・BGM ship）で残り時間', ff.m === 'C118' && !!fr.voyage && hudTxt.includes('秒') && bgm === 'ship', `${ff.m} ${hudTxt}`);
+    await shot('fun_voyage');
+    await page.click('#funhud button[data-f="voyageSkip"]'); await sleep(900);
+    ff = await F();
+    check('船の旅: すぐ着くで着く', ff.m === 'C101', ff.m);
+
+    // フィールドボス
+    await act('dbgWarp', 'V303', 'sp'); await sleep(500);
+    await act('dbgBoss', 'M420', '', 2); await sleep(3500);
+    ff = await F();
+    check('フィールドボスが時間で湧く（名札と HP バー）', ff.mo.some((m) => m[1] === 'M420' && (m[9] & 256)) && !!ff.bb, String(ff.bb && ff.bb[0]));
+    await shot('fun_fieldboss');
+
+    // 天気
+    await act('dbgWarp', 'F101', 'sp'); await sleep(800);
+    fr = await FF();
+    check('雪の地域は雪が降る', fr.weather === 'snow', String(fr.weather));
+    await shot('fun_weather');
   }
 
   // ---------------- 重さ・エラー
