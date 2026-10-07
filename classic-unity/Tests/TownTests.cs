@@ -288,24 +288,23 @@ namespace Lumina.Core.Tests
         public void ThirdJobDimensionDoorCloneAndSageStoneQuiz()
         {
             var s = SecondJobWarrior(70);
-            // 長老の手紙
-            s.ChangeMap("F117");
-            Accept(s, "J1-5");
-            s.ChangeMap("V400"); s.Talk("dorga");
-            Assert.Equal(CompleteResult.Ok, s.CompleteQuest("J1-5"));
-            // 次元の扉: 試験を受けていないと修験の雪洞には入れない
+            // 次元の扉: 長老の手紙（J1-5）を届ける前は修験の雪洞に入れない
             s.ChangeMap("F117");
             var door = s.Map.Data.Portals.First(p => p.To == "F118");
             Assert.Equal(RoomEntryResult.NeedQuest, s.CanEnterRoom("F118"));
             Assert.False(s.UsePortal(door));
             Assert.Equal("F117", s.Map.Data.Id);
-            s.ChangeMap("F118");                                           // 依頼者は雪洞の中（テストなので直接）
-            Accept(s, "J1-6");
+            // 長老の手紙
+            Accept(s, "J1-5");
+            s.ChangeMap("V400"); s.Talk("dorga");
+            Assert.Equal(CompleteResult.Ok, s.CompleteQuest("J1-5"));
+            // J1-6 の依頼者は雪洞の中にいるので、J1-6 を受けられる間は入れる（入れないと受けられない。PLAYTEST.md で見つけた詰まり）
             s.ChangeMap("F117");
             Assert.Equal(RoomEntryResult.Ok, s.CanEnterRoom("F118"));
             Assert.True(s.UsePortal(door));
             Assert.Equal("F118", s.Map.Data.Id);
             Assert.True(s.RoomTimerRunning);
+            Accept(s, "J1-6");
             Assert.Contains(s.Map.Mobs, m => m.Def.Id == "M300" && m.Alive); // 入るとすぐもう一人の自分が出る
             KillWeakened(s, "M300");
             Assert.False(s.RoomTimerRunning);

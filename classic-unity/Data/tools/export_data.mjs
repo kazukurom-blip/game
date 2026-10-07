@@ -493,6 +493,7 @@ write('npcs.json', { note: 'world/npcs.mjs（位置はマップを作った時�
   }
   for (const d of SYS.JOB_TESTS.questDrops) need(d.item, '転職の試験');
   for (const it of SYS.JOB_TESTS.quiz.needItems) need(it, 'クイズ');
+  for (const list of Object.values(SYS.JOB_TESTS.firstJobItems)) for (const g of list) need(g.item, '1 次転職でもらう物');
   if (SYS.QUIZ.length !== 30) problems.push(`クイズの問題が ${SYS.QUIZ.length}（30 問）`);
   for (const q of SYS.QUIZ) if (q.choices.length !== 4 || q.answer < 0 || q.answer > 3) problems.push(`クイズ ${q.id} の形が変`);
   for (const k of SYS.PETS.kinds) need(`use.pet.${k.id}`, 'ペット');

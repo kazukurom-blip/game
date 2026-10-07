@@ -47,6 +47,8 @@ namespace Lumina.Core.Quests
             foreach (var pre in q.Prereqs) if (!IsCompleted(pre)) return StartResult.PrereqMissing;
             foreach (var kv in q.MinStats) if (c.GetStat(ParseStat(kv.Key)) < kv.Value) return StartResult.StatTooLow;
             if (q.Line != null && q.Line != c.Line) return StartResult.WrongJob; // 転職のクエストは自分の系統だけ
+            // 1 次転職のクエスト（J?-1）は初心者だけ。転職した後に別の系統の J?-1 を受けると、終わらないクエストが残る（PLAYTEST.md）
+            if (c.Tier >= 1 && q.Objectives.Exists(o => o.Type == ObjectiveType.Event && o.Target == "job_advance.1")) return StartResult.WrongJob;
             return StartResult.Ok;
         }
 

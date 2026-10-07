@@ -39,10 +39,10 @@ namespace Lumina.Core.Game
             return r;
         }
 
-        private void AfterAdvance(int tier)
+        private void AfterAdvance(int tier, bool expanded = false)
         {
             int plus = Data.Systems.Jobs.InventoryPlus;
-            Inventory.Expand(InvTab.Equip, plus); Inventory.Expand(InvTab.Use, plus); Inventory.Expand(InvTab.Etc, plus);
+            if (!expanded) { Inventory.Expand(InvTab.Equip, plus); Inventory.Expand(InvTab.Use, plus); Inventory.Expand(InvTab.Etc, plus); }
             RefreshStats();
             Out.Add(GameEventType.JobAdvanced, Character.Line, tier, text: Character.JobName);
             QuestEvent("job_advance." + tier);

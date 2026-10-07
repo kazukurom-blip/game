@@ -207,6 +207,14 @@ export const JOB_TESTS = {
     { quest: `J${k + 1}-9`, mob: 'M211', item: 'etc.M211' }, { quest: `J${k + 1}-9`, mob: 'M212', item: 'etc.M212' },
   ]),
   inventoryPlus: 4,
+  // 1 次転職でもらう物（JOBS.md 3-1 の「もらえる物」）。数は束の数ではなく個数。投げ星 ×800 ×3 は 2400 個（1 枠 500 個）
+  firstJobItems: {
+    warrior: [{ item: 'eq.warrior.sword1.10', count: 1 }, { item: 'use.red_potion', count: 20 }],
+    magician: [{ item: 'eq.magician.wand.8', count: 1 }, { item: 'use.blue_potion', count: 20 }],
+    bowman: [{ item: 'eq.bowman.bow.10', count: 1 }, { item: 'use.arrow_bow', count: 2000 }],
+    thief: [{ item: 'eq.thief.claw.10', count: 1 }, { item: 'use.star_iron', count: 2400 }],
+    pirate: [{ item: 'eq.pirate.knuckle.10', count: 1 }, { item: 'eq.pirate.gun.10', count: 1 }, { item: 'use.bullet_lead', count: 800 }],
+  },
 };
 
 // ---------------- 賢者の石のクイズ（30 問から 5 問。答えは choices の何番目か）。このゲームの知識を問うオリジナルの問題

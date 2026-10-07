@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- 自動で遊ぶボット（docs/PLAYTEST.md）。GameSession に PlayerInput と UI の操作だけを渡して遊ぶ。 -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <RootNamespace>Lumina.PlayBot</RootNamespace>
+    <TieredPGO>true</TieredPGO>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../Core/Lumina.Core.csproj" />
+    <Compile Include="../../Tests/MapReach.cs" Link="MapReach.cs" />
+  </ItemGroup>
+</Project>

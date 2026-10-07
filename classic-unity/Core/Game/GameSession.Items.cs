@@ -301,12 +301,29 @@ namespace Lumina.Core.Game
             return r;
         }
 
-        /// <summary>1 次転職（JOBS.md 3-1。試験は別）。持ち物の枠が装備・消費・その他で +4。</summary>
+        private void GiveFirstJobItems(string line)
+        {
+            if (!Data.Systems.Jobs.FirstJobItems.TryGetValue(line, out var list)) return;
+            foreach (var g in list)
+            {
+                var def = Data.Item(g.Item);
+                if (def == null) continue;
+                int rest = Inventory.Add(g.Item, g.Count);
+                if (rest < g.Count) Out.Add(GameEventType.ItemPicked, g.Item, g.Count - rest, text: def.Name);
+                if (rest > 0) Map.SpawnDrops(Body.X, Body.Y, new List<DropItem> { new DropItem { ItemId = g.Item, Count = rest } }); // 入りきらない分は足元へ
+            }
+        }
+
+        /// <summary>1 次転職（JOBS.md 3-1。試験は別）。持ち物の枠が装備・消費・その他で +4、職の武器などをもらう。</summary>
         public AdvanceResult AdvanceJob(string line)
         {
             var r = Character.AdvanceFirst(line, Rng);
             if (r != AdvanceResult.Ok) return r;
-            AfterAdvance(1); // 持ち物の枠 +4・お知らせ・job_advance.1（GameSession.Jobs.cs。2〜4 次も同じ）
+            // 転職官からもらう物（JOBS.md 3-1: 職の武器・薬・矢・投げ星・弾）。持ち物の枠を増やしてから渡す
+            int plus = Data.Systems.Jobs.InventoryPlus;
+            Inventory.Expand(InvTab.Equip, plus); Inventory.Expand(InvTab.Use, plus); Inventory.Expand(InvTab.Etc, plus);
+            GiveFirstJobItems(line);
+            AfterAdvance(1, expanded: true); // お知らせ・job_advance.1（GameSession.Jobs.cs。2〜4 次も同じ）
             return r;
         }
     }
