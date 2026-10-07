@@ -35,7 +35,7 @@ namespace Lumina.Core.Tests
         public void All234MapsLoad()
         {
             var d = TestData.Get();
-            Assert.Equal(234, d.MapIds.Count);
+            Assert.Equal(239, d.MapIds.Count); // maps.mjs の 234 ＋ ジャンプの試練 5（world/jump.mjs）
             var types = new Dictionary<string, int>();
             foreach (var m in AllMaps())
             {

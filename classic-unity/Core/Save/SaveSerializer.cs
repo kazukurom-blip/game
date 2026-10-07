@@ -73,6 +73,7 @@ namespace Lumina.Core.Save
             w.Key("daily").BeginObject();
             foreach (var kv in s.Daily) { w.Key(kv.Key).BeginArray(); foreach (var v in kv.Value) w.Number((long)v); w.EndArray(); }
             w.EndObject();
+            w.Key("collection").Value(s.Collection ?? new Dictionary<string, object>());
             w.Key("fun").Value(s.Fun ?? new Dictionary<string, object>());
             w.EndObject();
             return w.ToString();
@@ -177,6 +178,7 @@ namespace Lumina.Core.Save
                     var a = kv.Value as List<object>;
                     if (a != null && a.Count == 2) s.Daily[kv.Key] = new[] { (int)J.ToDouble(a[0]), (int)J.ToDouble(a[1]) };
                 }
+            s.Collection = J.Obj(d, "collection");
             s.Fun = J.Obj(d, "fun") ?? new Dictionary<string, object>();
             return s;
         }

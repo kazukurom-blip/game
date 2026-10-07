@@ -56,7 +56,7 @@ namespace Lumina.Core.Tests
             foreach (var m in f.Machines)
             {
                 Assert.Contains(m.Prizes, p => p.Tier == 2);
-                foreach (var p in m.Prizes) Assert.NotNull(TestData.Get().Item(p.Item));
+                foreach (var p in m.Prizes) Assert.True(TestData.Get().Item(p.Item) != null || TestData.Get().Mob(p.Item.Replace("card.", "")) != null, p.Item);
                 Assert.NotNull(f.Spot(m.Id));
             }
             foreach (var sp in f.Spots)
@@ -389,6 +389,8 @@ namespace Lumina.Core.Tests
             Assert.True(s.Character.Level > lv || s.Character.Exp - exp >= (long)(m.Def.Exp * 4));
             Assert.True(s.Flags.ContainsKey("rare." + m.Def.Id));
             Assert.Contains(s.Out.Events, e => e.Type == GameEventType.Fun && e.Id.StartsWith("rare_down:"));
+            Assert.Equal(1, s.Book.Variant(m.Def.Id, "rare_killed"));
+            Assert.True(s.Book.Variant(m.Def.Id, "rare_seen") >= 1);
             // ボス・強敵は珍しくならない
             var t = NewAt("V303", 20, d);
             t.Fun.BossDue["M420"] = 0; t.Step(new PlayerInput());

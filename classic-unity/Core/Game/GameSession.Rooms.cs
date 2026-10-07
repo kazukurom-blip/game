@@ -182,6 +182,7 @@ namespace Lumina.Core.Game
                 RoomCleared = true;
                 roomTimerOn = false;
                 Out.Add(GameEventType.DungeonCleared, r.Map, text: Map.Data.Name + "をクリアした");
+                Records.DungeonClears++;
                 QuestEvent("dungeon_clear");
                 QuestEvent("dungeon_clear." + r.Map);
                 if (r.Medal != null && Data.Item(r.Medal) != null)

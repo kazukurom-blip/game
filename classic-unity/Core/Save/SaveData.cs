@@ -1,6 +1,6 @@
 // セーブの中身（JSON にする前の形）。版番号（Version）を付け、古い版は SaveMigrations で今の版へ直してから読む。
 //
-// 今の版（4）の JSON:
+// 今の版（5）の JSON:
 // {
 //   "version": 3, "seq": 12, "savedAt": "2026-10-07T12:00:00Z", "playSec": 3600.5, "reason": "map",
 //   "character": { "name": "...", "line": "warrior", "tier": 1, "branch": 0, "level": 12, "exp": 345,
@@ -18,9 +18,11 @@
 //   "flags": { "leftIsland": false },
 //   "pets": [ { "kind": "puppy", "name": "子犬", "fullness": 80, "points": 40, "out": true, "skills": ["pickup"] } ],  … 版 3 から
 //   "daily": { "room.V516": [9410, 2], "chest.T104.toybox": [9410, 1] },   … 版 3 から（[日の番号, 回数]）
+//   "collection": { "cards": { "M001": 3 }, "medals": ["lv10"], "medal": "lv10", "records": { "kills": 120, "deaths": 1, "visited": ["S000"], … },
+//                   "cardRng": ["…", "…"] },   … 版 4 から
 //   （倉庫はキャラ全員で共有するので、ここではなく "account" の枠: Town/Storage.cs の AccountData）
 //   "rng": ["0123456789abcdef", "fedcba9876543210"],
-//   "fun": { "points": 120, "look": { "hair": "hair_bob", ... }, "boss": { "M420": 5400.5 }, ... }   … 版 4 から（楽しさの要素。Core/Fun/FunState.cs）
+//   "fun": { "points": 120, "look": { "hair": "hair_bob", ... }, "boss": { "M420": 5400.5 }, ... }   … 版 5 から（楽しさの要素。Core/Fun/FunState.cs）
 // }
 using System.Collections.Generic;
 using Lumina.Core.Items;
@@ -90,7 +92,9 @@ namespace Lumina.Core.Save
         public List<SavedPet> Pets = new List<SavedPet>();
         public Dictionary<string, int[]> Daily = new Dictionary<string, int[]>();
 
-        // 版 4: 楽しさの要素（遊び場の点数・見た目・フィールドボスの時計など。中身は Core/Fun/FunState.cs が読み書きする）
+        // 版 4: やりこみ（図鑑のカード・勲章・記録と統計）。中身の形は GameSession.Collection.cs の CollectionToDict
+        public Dictionary<string, object> Collection;
+        // 版 5: 楽しさの要素（遊び場の点数・見た目・フィールドボスの時計など。中身は Core/Fun/FunState.cs が読み書きする）
         public Dictionary<string, object> Fun = new Dictionary<string, object>();
     }
 }

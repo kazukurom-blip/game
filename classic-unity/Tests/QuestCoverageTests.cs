@@ -132,7 +132,8 @@ namespace Lumina.Core.Tests
         {
             var d = TestData.Get();
             var givers = new HashSet<string>(d.QuestList.Select(q => q.Giver));
-            var none = d.Npcs.Keys.Where(id => !givers.Contains(id)).ToList();
+            // ジャンプの試練の案内人（jq_*。world/jump.mjs）は乗り物の係なので除く
+            var none = d.Npcs.Keys.Where(id => !givers.Contains(id) && !id.StartsWith("jq_")).ToList();
             // 雲の船（航行中, C118）の水夫カゼだけは、乗り物がすぐ着くので会えない（WORLD.md 4 章・CORE.md 5 章）
             Assert.Equal(new[] { "kaze" }, none.ToArray());
             Assert.True(d.QuestList.Count >= 600, "クエストが " + d.QuestList.Count + " 本");

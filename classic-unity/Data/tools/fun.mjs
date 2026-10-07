@@ -95,7 +95,8 @@ const CARD_MOBS = {
 // ---------------------------------------------------------------- 1. 景品の機械
 // tier: 0 ふつう / 1 少し珍しい / 2 大当たり。w は重み（確率 = w ÷ 合計。窓に出す）
 const P = (item, w, tier = 0, n = 1) => ({ item, n, tier, w });
-const cards = (town) => CARD_MOBS[town].map((m) => P(`etc.fun.card.${m}`, 8));
+// 図鑑のカード（card.<敵>）は持ち物ではなく図鑑に入る（Core の GameSession.Collection.cs）
+const cards = (town) => CARD_MOBS[town].map((m) => P(`card.${m}`, 8));
 const GACHA = [
   { town: 'V100', name: '港のガラガラ', prizes: [
     ...cards('V100'), P('use.orange_potion', 14, 0, 10), P('use.blue_potion', 12, 0, 10), P('use.speed_tonic', 8, 0, 3),
@@ -241,12 +242,6 @@ export function funItems(MONSTERS_RAW) {
   for (const [id, name, slot, lv, stats, desc] of FUN_EQUIPS) {
     out.push({ id, name, tab: 'equip', maxStack: 1, slot, job: 'common', reqLevel: lv, stats: parseStats(stats), upgrades: 7, price: 0, sellPrice: Math.max(1, lv * 20), desc });
   }
-  for (const list of Object.values(CARD_MOBS)) {
-    for (const m of list) {
-      const row = MONSTERS_RAW.find((r) => r[0] === m);
-      out.push({ id: `etc.fun.card.${m}`, name: `${row ? row[1] : m}のカード`, tab: 'etc', maxStack: 100, price: 0, sellPrice: 10, card: m, desc: `景品の機械で出る、${row ? row[1] : m}の絵のカード。集めて飾る` });
-    }
-  }
   return out;
 }
 
@@ -274,7 +269,7 @@ function placeSpot(map, used) {
 /** fun.json の中身。world = buildWorld の結果、items = 書き出す品の一覧（ID の確かめ用）。 */
 export function buildFun({ world, items, MONSTERS_RAW, problems }) {
   const has = (id) => items.some((i) => i.id === id);
-  const need = (id, where) => { if (!has(id)) problems.push(`楽しさの要素 ${where}: アイテム ${id} が無い`); };
+  const need = (id, where) => { if (id.startsWith('card.')) { mob(id.slice(5), where); return; } if (!has(id)) problems.push(`楽しさの要素 ${where}: アイテム ${id} が無い`); };
   const mob = (id, where) => { if (!MONSTERS_RAW.some((r) => r[0] === id)) problems.push(`楽しさの要素 ${where}: 敵 ${id} が無い`); };
   const spots = [];
   const usedBy = {};

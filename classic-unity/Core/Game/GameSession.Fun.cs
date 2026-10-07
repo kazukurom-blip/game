@@ -163,18 +163,21 @@ namespace Lumina.Core.Game
             double r = FunRng.NextDouble() * total;
             foreach (var p in m.Prizes) { r -= p.Weight; if (r < 0) { prize = p; break; } }
             prize ??= m.Prizes[m.Prizes.Count - 1];
-            if (!RoomFor(prize.Item, prize.Count)) { prize = null; return GachaResult.InventoryFull; }
+            bool card = Lumina.Core.Collection.MonsterBook.IsCard(prize.Item); // 図鑑のカードは持ち物ではなく図鑑へ
+            if (!card && !RoomFor(prize.Item, prize.Count)) { prize = null; return GachaResult.InventoryFull; }
             Inventory.Remove(Data.Fun.Ticket);
             Fun.Pulls++;
             var def = Data.Item(prize.Item);
-            GiveItem(prize.Item, prize.Count, Body.X, Body.Y);
+            if (card) PickupCard(new DropItem { ItemId = prize.Item, X = Body.X, Y = Body.Y });
+            else GiveItem(prize.Item, prize.Count, Body.X, Body.Y);
+            string pname = card ? (Data.Mob(Lumina.Core.Collection.MonsterBook.MobOfCard(prize.Item))?.Name + "のカード") : def?.Name;
             if (prize.Tier >= 2)
             {
                 Fun.Jackpots++;
-                Out.Add(GameEventType.Fun, "jackpot:" + prize.Item, prize.Count, Body.X, Body.Y, Character.Name + " さんが " + m.Name + " で大当たり「" + def?.Name + "」を当てた！");
+                Out.Add(GameEventType.Fun, "jackpot:" + prize.Item, prize.Count, Body.X, Body.Y, Character.Name + " さんが " + m.Name + " で大当たり「" + pname + "」を当てた！");
                 AutoSave.Request("gacha");
             }
-            else Out.Add(GameEventType.Fun, "gacha:" + prize.Item, prize.Tier, Body.X, Body.Y, (prize.Tier == 1 ? "少し珍しい！ " : "") + def?.Name + (prize.Count > 1 ? " ×" + prize.Count : "") + " が出た");
+            else Out.Add(GameEventType.Fun, "gacha:" + prize.Item, prize.Tier, Body.X, Body.Y, (prize.Tier == 1 ? "少し珍しい！ " : "") + pname + (prize.Count > 1 ? " ×" + prize.Count : "") + " が出た");
             RefreshStats();
             return GachaResult.Ok;
         }
@@ -546,6 +549,7 @@ namespace Lumina.Core.Game
                 m.MaxHpOverride = (int)Math.Round(m.Def.Hp * f.RareHpMul);
                 m.Hp = m.MaxHpOverride;
                 m.AtkScale *= f.RareAtkMul;
+                Book.AddVariant(m.Def.Id, "rare_seen"); // 図鑑: 珍しい個体を見た数
                 Out.Add(GameEventType.Fun, "rare:" + m.Def.Id, m.Uid, m.X, m.Y, "珍しい色違いの「" + m.Def.Name + "」が現れた！");
             }
             // 季節の敵: 季節のマップでは、湧いた敵のそばにたまに季節の敵が混ざる
@@ -571,6 +575,7 @@ namespace Lumina.Core.Game
                 foreach (var d in drops) if (d.IsMeso) d.Meso = (long)Math.Round(d.Meso * f.RareMesoMul);
                 foreach (var b in f.RareBonus) if (FunRng.Chance(b.Chance)) drops.Add(new DropItem { ItemId = b.Item, Count = b.Count });
                 Flags["rare." + def.Id] = true;
+                Book.AddVariant(def.Id, "rare_killed"); // 図鑑: 珍しい個体を倒した数
                 Out.Add(GameEventType.Fun, "rare_down:" + def.Id, 0, mob.X, mob.Y, "珍しい「" + def.Name + "」を倒した！");
             }
             // フィールドボス

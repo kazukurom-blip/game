@@ -22,7 +22,7 @@
    "kind": "gacha",
    "map": "T100",
    "name": "ぜんまい仕掛けの景品箱",
-   "x": 1368,
+   "x": 1400,
    "y": 520
   },
   {
@@ -54,8 +54,8 @@
    "kind": "arcade",
    "map": "V200",
    "name": "遊び場の係コマ爺",
-   "x": 1796,
-   "y": 432
+   "x": 1495,
+   "y": 384
   },
   {
    "id": "salon.V500",
@@ -215,19 +215,19 @@
     "name": "港のガラガラ",
     "prizes": [
      {
-      "item": "etc.fun.card.M001",
+      "item": "card.M001",
       "n": 1,
       "tier": 0,
       "w": 8
      },
      {
-      "item": "etc.fun.card.M005",
+      "item": "card.M005",
       "n": 1,
       "tier": 0,
       "w": 8
      },
      {
-      "item": "etc.fun.card.M030",
+      "item": "card.M030",
       "n": 1,
       "tier": 0,
       "w": 8
@@ -300,19 +300,19 @@
     "name": "雲の上のくじ箱",
     "prizes": [
      {
-      "item": "etc.fun.card.M100",
+      "item": "card.M100",
       "n": 1,
       "tier": 0,
       "w": 8
      },
      {
-      "item": "etc.fun.card.M101",
+      "item": "card.M101",
       "n": 1,
       "tier": 0,
       "w": 8
      },
      {
-      "item": "etc.fun.card.M102",
+      "item": "card.M102",
       "n": 1,
       "tier": 0,
       "w": 8
@@ -385,19 +385,19 @@
     "name": "ぜんまい仕掛けの景品箱",
     "prizes": [
      {
-      "item": "etc.fun.card.M140",
+      "item": "card.M140",
       "n": 1,
       "tier": 0,
       "w": 8
      },
      {
-      "item": "etc.fun.card.M141",
+      "item": "card.M141",
       "n": 1,
       "tier": 0,
       "w": 8
      },
      {
-      "item": "etc.fun.card.M145",
+      "item": "card.M145",
       "n": 1,
       "tier": 0,
       "w": 8
@@ -470,19 +470,19 @@
     "name": "雪の村の福引き",
     "prizes": [
      {
-      "item": "etc.fun.card.M120",
+      "item": "card.M120",
       "n": 1,
       "tier": 0,
       "w": 8
      },
      {
-      "item": "etc.fun.card.M123",
+      "item": "card.M123",
       "n": 1,
       "tier": 0,
       "w": 8
      },
      {
-      "item": "etc.fun.card.M124",
+      "item": "card.M124",
       "n": 1,
       "tier": 0,
       "w": 8
@@ -555,19 +555,19 @@
     "name": "海の底の貝くじ",
     "prizes": [
      {
-      "item": "etc.fun.card.M170",
+      "item": "card.M170",
       "n": 1,
       "tier": 0,
       "w": 8
      },
      {
-      "item": "etc.fun.card.M175",
+      "item": "card.M175",
       "n": 1,
       "tier": 0,
       "w": 8
      },
      {
-      "item": "etc.fun.card.M176",
+      "item": "card.M176",
       "n": 1,
       "tier": 0,
       "w": 8
@@ -640,19 +640,19 @@
     "name": "竜の背の宝くじ",
     "prizes": [
      {
-      "item": "etc.fun.card.M200",
+      "item": "card.M200",
       "n": 1,
       "tier": 0,
       "w": 8
      },
      {
-      "item": "etc.fun.card.M201",
+      "item": "card.M201",
       "n": 1,
       "tier": 0,
       "w": 8
      },
      {
-      "item": "etc.fun.card.M202",
+      "item": "card.M202",
       "n": 1,
       "tier": 0,
       "w": 8

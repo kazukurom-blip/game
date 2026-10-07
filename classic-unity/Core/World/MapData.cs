@@ -16,8 +16,10 @@
 //   "timedSpawns": [ { "mob": "M007", "x": 800, "y": 640, "intervalSec": 600 } ],     // 強敵・ボス
 //   "npcs":      [ { "id": "luka", "name": "案内人ルカ", "x": 200, "y": 640, "shop": null, "role": "guide" } ],
 //                 // travel（乗り物 1 つ）/ taxi（{ "dests": [ { "to", "toPortal", "fee" } ], "beginnerDiv": 10 }）/ inn（宿屋の料金）
-//   "objects":   [ { "id": "S001.crate", "name": "木箱", "x": 500, "y": 512 } ]       // 調べられる物（"quest": そのクエストの間だけ見つかる隠し物）
+//   "objects":   [ { "id": "S001.crate", "name": "木箱", "x": 500, "y": 512 } ],      // 調べられる物（"quest": そのクエストの間だけ見つかる隠し物）
 //   timedSpawns の "quest": クエスト専用の敵（そのクエストを進めている間だけ湧く。QUESTS.md 8 章）
+//   "jump":      { "town": "V200", "stages": 3, "floors": [y…], "first": { "meso", "items": [{ "item", "count" }] }, "daily": {…}, "medal": "jump.J001" }
+//                 // ジャンプの試練だけ（Data/tools/world/jump.mjs）
 // }
 using System;
 using System.Collections.Generic;
@@ -99,6 +101,32 @@ namespace Lumina.Core.World
         public string Quest;
     }
 
+    /// <summary>ごほうび（お金と品）。</summary>
+    public sealed class RewardData
+    {
+        public long Meso;
+        public readonly List<(string item, int count)> Items = new List<(string, int)>();
+        public static RewardData FromDict(Dictionary<string, object> d)
+        {
+            var r = new RewardData();
+            if (d == null) return r;
+            r.Meso = J.Long(d, "meso");
+            foreach (var o in J.Arr(d, "items")) { var x = (Dictionary<string, object>)o; r.Items.Add((J.Str(x, "item"), Math.Max(1, J.Int(x, "count", 1)))); }
+            return r;
+        }
+    }
+
+    /// <summary>ジャンプの試練（Data/tools/world/jump.mjs）。てっぺんの宝箱（"&lt;マップ&gt;.chest"）を調べるとクリア。</summary>
+    public sealed class JumpCourseData
+    {
+        public string Town, Medal;
+        public int Stages;
+        /// <summary>段の床の高さ（下から。0 = 地面、最後 = てっぺん）</summary>
+        public readonly List<double> Floors = new List<double>();
+        public RewardData First, Daily;
+        public string ChestId;
+    }
+
     public sealed class MapData
     {
         public string Id, Name, Region, Type, Bgm, ReturnMap;
@@ -118,6 +146,8 @@ namespace Lumina.Core.World
         public double RespawnSec = 7;
 
         public bool IsTown => Type == "町";
+        /// <summary>ジャンプの試練のマップなら、その決まり（無ければ null）。</summary>
+        public JumpCourseData Jump;
 
         public static MapData FromJson(string json) => FromDict(Json.ParseObject(json));
 
@@ -203,6 +233,16 @@ namespace Lumina.Core.World
             {
                 var r = (Dictionary<string, object>)o;
                 m.Objects.Add(new MapObjectData { Id = J.Str(r, "id"), Name = J.Str(r, "name", ""), X = J.Num(r, "x"), Y = J.Num(r, "y"), Quest = J.Str(r, "quest") });
+            }
+            var jq = J.Obj(d, "jump");
+            if (jq != null)
+            {
+                m.Jump = new JumpCourseData
+                {
+                    Town = J.Str(jq, "town"), Medal = J.Str(jq, "medal"), Stages = J.Int(jq, "stages"),
+                    First = RewardData.FromDict(J.Obj(jq, "first")), Daily = RewardData.FromDict(J.Obj(jq, "daily")), ChestId = m.Id + ".chest",
+                };
+                foreach (var f in J.Arr(jq, "floors")) m.Jump.Floors.Add(J.ToDouble(f));
             }
             return m;
         }

@@ -176,11 +176,11 @@ export class Fun {
     const st = this.game.ui.state;
     if (!p[6] && p[5]) {
       const tag = this.lookOf(fr.look?.tag);
-      if (tag && st) { const [bg, fg] = TAG_STYLE[tag] || TAG_STYLE.wood; this.tag(g, st.name, p[0], p[1] + 4, fg, bg, true); }
+      if (tag && st) { const [bg, fg] = TAG_STYLE[tag] || TAG_STYLE.wood; this.tag(g, st.name, p[0], p[1] + 2, fg, bg, true); }
       if (fr.emote) {
         const em = this.emotes.find((x) => x.id === fr.emote);
         const [bg, fg] = BUBBLE_STYLE[this.lookOf(fr.look?.bubble)] || ['#ffffff', '#404050'];
-        this.bubble(g, em?.name || fr.emote, p[0], p[1] - 92, bg, fg);
+        this.bubble(g, em?.name || fr.emote, p[0], p[1] - (st?.medal ? 116 : 96), bg, fg);
       }
     }
     g.restore();

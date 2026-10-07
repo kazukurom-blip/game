@@ -91,10 +91,12 @@ namespace Lumina.Core.Character
         /// <summary>基礎の命中（レベルで自然に上がる分）。DEX に振らない近接職でも同じくらいの Lv の敵にほぼ当たるように（STATS.md 2-3。式は Formulas.BaseAcc）</summary>
         public static double BaseAcc(int level) => Formulas.BaseAcc(level);
 
-        public static FinalStats Compute(CharacterState c, Equipment eq, SkillBook book, BuffSet buffs, Inventory inv, GameData data)
+        /// <param name="extra">装備と同じに足す能力（図鑑の段・付けている勲章。GameSession.Collection.cs）。無ければ null</param>
+        public static FinalStats Compute(CharacterState c, Equipment eq, SkillBook book, BuffSet buffs, Inventory inv, GameData data, StatBlock extra = null)
         {
             var f = new FinalStats();
             var es = eq?.TotalStats() ?? new StatBlock();
+            if (extra != null) es.Add(extra);
             var bs = buffs?.TotalStats() ?? new StatBlock();
             var wdef = eq?.WeaponDef;
             f.WeaponType = wdef?.WeaponType ?? "素手";

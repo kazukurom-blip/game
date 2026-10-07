@@ -174,6 +174,9 @@ namespace Lumina.Web
                 for (int i = 0; i < qz.Current.Choices.Count; i++) { if (i > 0) C(); S(qz.Current.Choices[i]); }
                 sb.Append("]]");
             }
+            // ジャンプの試練: 今の段, 段の数, 入ってからの秒
+            var jq = s.Map.Data.Jump;
+            if (jq != null) { sb.Append(",\"jq\":["); I(s.JumpStage); C(); I(jq.Stages); C(); N(s.JumpElapsed); sb.Append(']'); }
             // 部屋の制限時間
             if (s.RoomTimerRunning) { sb.Append(",\"rt\":"); N(s.RoomTimeLeft); }
             // ペット

@@ -232,7 +232,7 @@
   {
    "id": "sue",
    "name": "ナイフ屋スー",
-   "x": 408,
+   "x": 384,
    "y": 504,
    "role": "weapon",
    "shop": "shop.V500.weapon"
@@ -240,7 +240,7 @@
   {
    "id": "kuroe",
    "name": "防具屋クロエ",
-   "x": 896,
+   "x": 712,
    "y": 504,
    "role": "armor",
    "shop": "shop.V500.armor"
@@ -248,7 +248,7 @@
   {
    "id": "kusuri",
    "name": "薬屋クスリ",
-   "x": 1240,
+   "x": 1112,
    "y": 504,
    "role": "potion",
    "shop": "shop.V500.potion"
@@ -256,26 +256,26 @@
   {
    "id": "kinko",
    "name": "倉庫番キンコ",
-   "x": 1656,
+   "x": 1408,
    "y": 504,
    "role": "storage"
   },
   {
    "id": "tetsu",
    "name": "駅員テツ",
-   "x": 2064,
+   "x": 1840,
    "y": 504
   },
   {
    "id": "bolt",
    "name": "工事の親方ボルト",
-   "x": 2408,
+   "x": 2264,
    "y": 504
   },
   {
    "id": "taxi_crow",
    "name": "タクシーの運転手ネオ",
-   "x": 2912,
+   "x": 2608,
    "y": 504,
    "role": "taxi",
    "taxi": {
@@ -310,16 +310,30 @@
    }
   },
   {
+   "id": "jq_yotaka",
+   "name": "屋根番ヨタカ",
+   "x": 2936,
+   "y": 504,
+   "role": "jump",
+   "travel": {
+    "to": "J002",
+    "toPortal": "sp",
+    "minLevel": 0,
+    "oneWay": false,
+    "fee": 0
+   }
+  },
+  {
    "id": "yami",
    "name": "影の頭領ヤミ",
-   "x": 1104,
+   "x": 936,
    "y": 376,
    "role": "job"
   },
   {
    "id": "nez",
    "name": "情報屋ネズ",
-   "x": 2288,
+   "x": 2408,
    "y": 376,
    "role": "craft"
   }

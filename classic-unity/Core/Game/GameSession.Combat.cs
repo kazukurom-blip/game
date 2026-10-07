@@ -546,6 +546,7 @@ namespace Lumina.Core.Game
                 num.Value = res.Damage; Out.Damage[Out.Damage.Count - 1] = num;
             }
             mob.Hp -= res.Damage;
+            OnDamageCollection(mob, res.Damage); // 最大ダメージ・ボスの撃破時間の始まり（GameSession.Collection.cs）
             MobAI.OnHit(mob, res.Damage, Body.X);
             if (res.Damage > 0) StatusSystem.BreakOnHit(mob, Out); // 凍結・眠りは攻撃で解ける
             Out.Add(GameEventType.MobHit, mob.Def.Id, res.Damage, mob.X, mob.HeadY);
@@ -578,6 +579,7 @@ namespace Lumina.Core.Game
             RecordKill(def); // 冒険の記録: 倒した敵の種類（GameSession.Records.cs）
             var drops = DropRoller.Roll(def, Data, Rng, 1 + Stats.Mods.DropPct / 100, 1 + Stats.Mods.MesoPct / 100);
             AddQuestDrops(def, drops);   // 転職の試験の印（GameSession.Rooms.cs）
+            OnKillCollection(mob, drops); // 記録・図鑑のカード（GameSession.Collection.cs）
             OnMobKilledTown(mob);        // boss_kill・ダンジョンのクリア
             OnMobKilledFun(mob, drops);  // 珍しい個体・フィールドボス・船の襲撃・券・ダンジョンの課題（GameSession.Fun.cs）
             if (drops.Count > 0)

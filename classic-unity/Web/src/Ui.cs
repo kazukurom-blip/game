@@ -92,7 +92,7 @@ namespace Lumina.Web
                 ("inv", inv), ("eq", eq), ("skills", skills), ("quick", quick), ("quests", active), ("done", done), ("buffs", buffs), ("status", status),
                 ("map", s.Map.Data.Id), ("mapName", s.Map.Data.Name), ("play", Math.Round(s.PlaySec)), ("lines", lines), ("sitting", s.Sitting),
                 ("dead", s.Dead), ("storage", D(("slots", s.Storage.Slots), ("meso", s.Storage.Meso), ("items", StorageItems(s)))),
-                ("pets", Pets(s)));
+                ("pets", Pets(s)), ("medal", s.Medal != null ? s.Data.Item(s.Medal)?.Name : null), ("bookLv", s.Book.Level));
             return Json.Serialize(d2);
         }
 
