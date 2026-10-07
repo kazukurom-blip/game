@@ -183,8 +183,19 @@ export function expandDrums(song, sec) {
 // ---------------------------------------------------------------- 曲全体
 // 返り値: { bpm, secPerBeat, intro: {len, events}, loop: {len, events} }
 // event = { t(秒), d(秒), track, inst, midi|null, vel }
+// song.swing（0〜0.25）: 裏の 8 分（拍の半分の位置）を後ろへずらす（スイング・シャッフル）。0.17 くらいで 3 連のはね
+// song.jingle: くり返さない短い曲（order.loop の区間を 1 回だけ鳴らす。ループの長さの検査はしない）
+export function swingBeat(b, sw) {
+  if (!sw) return b;
+  const i = Math.floor(b + 1e-9), f = b - i;
+  if (Math.abs(f - 0.5) < 1e-6) return i + 0.5 + sw;
+  if (f > 0 && f < 0.5) return i + f * (0.5 + sw) / 0.5;
+  if (f > 0.5) return i + 0.5 + sw + (f - 0.5) * (0.5 - sw) / 0.5;
+  return b;
+}
 export function compileSong(song) {
   const spb = 60 / song.bpm;
+  const sw = song.swing || 0;
   const r = rng(song.seed ?? 1);
   const segment = (names) => {
     const events = [];
@@ -200,14 +211,15 @@ export function compileSong(song) {
         if (!mix) continue;
         for (const n of expandPart(song, sec, tName)) {
           const jitter = tr.human ? (r() - 0.5) * tr.human : 0;
-          events.push({ t: (beat0 + n.beat) * spb + jitter, d: n.beats * spb * (tr.gate ?? 1), track: tName, inst: tr.inst, midi: n.midi + (tr.transpose || 0), vel: n.vel * mix * (1 + (r() - 0.5) * (tr.velHuman ?? 0.08)) });
+          const b0 = beat0 + n.beat, b1 = b0 + n.beats;
+          events.push({ t: swingBeat(b0, sw) * spb + jitter, d: (swingBeat(b1, sw) - swingBeat(b0, sw)) * spb * (tr.gate ?? 1), track: tName, inst: tr.inst, midi: n.midi + (tr.transpose || 0), vel: n.vel * mix * (1 + (r() - 0.5) * (tr.velHuman ?? 0.08)) });
         }
       }
       const dt = Object.entries(song.tracks).find(([, t]) => t.inst === 'drums');
       if (dt) {
         const mix = (sec.mix?.[dt[0]] ?? 1) * (dt[1].vol ?? 1);
         for (const h of expandDrums(song, sec)) {
-          events.push({ t: (beat0 + h.beat) * spb + (r() - 0.5) * 0.006, d: h.beats * spb, track: dt[0], inst: h.inst, midi: null, vel: h.vel * mix * (1 + (r() - 0.5) * 0.12) });
+          events.push({ t: swingBeat(beat0 + h.beat, sw) * spb + (r() - 0.5) * 0.006, d: h.beats * spb, track: dt[0], inst: h.inst, midi: null, vel: h.vel * mix * (1 + (r() - 0.5) * 0.12) });
         }
       }
       beat0 += nb * song.beatsPerBar;

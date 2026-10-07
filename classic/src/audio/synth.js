@@ -1,7 +1,8 @@
 // サンプルを使わない小さなゲーム音源。AudioContext でも OfflineAudioContext でも動く。
 // 楽器: piano / strings / brass / flute / bell / musicbox / accordion / guitar / bass / pad / harp / marimba /
-//       clarinet / spicc（短いストリングス）/ pizz（ピチカート）/ choir（合唱風）
-// 太鼓: kick / snare / block / rim / hat / shaker / tamb / tri / crash / tom / tomlo / timp / taiko / drip / tick / clap
+//       clarinet / spicc（短いストリングス）/ pizz（ピチカート）/ choir（合唱風）/ epiano / whistle / organ / kalimba
+// 太鼓: kick / snare / block / rim / hat / shaker / tamb / tri / crash / tom / tomlo / timp / taiko / drip / tick / clap /
+//       brush / ride / anvil / ratchet / bubble
 // どの楽器も note(S, dest, t, midi, dur, vel) の形。S = makeEngine() が返す、その ctx 用の入れ物。
 
 import { midiToFreq } from './score.js';
@@ -348,6 +349,66 @@ export const INSTRUMENTS = {
     cleanup(os[0], all);
   },
 
+  // エレピ風（FM のような柔らかい鍵盤。夜の街・地下鉄）
+  epiano(S, dest, t, m, dur, v) {
+    const f = midiToFreq(m);
+    const ring = Math.min(dur, 3);
+    const end = t + ring + 0.6;
+    const car = osc(S, 'sine', f, t, end), mod = osc(S, 'sine', f * 2, t, end);
+    const mg = gain(S, 0);
+    mg.gain.setValueAtTime(f * 1.6, t); mg.gain.setTargetAtTime(f * 0.25, t + 0.005, 0.18);
+    mod.connect(mg); mg.connect(car.frequency);
+    const tine = osc(S, 'sine', f * 7, t, t + 0.4);
+    const tg = gain(S); tg.gain.setValueAtTime(0.05 * v, t); tg.gain.setTargetAtTime(0, t, 0.04);
+    const g = gain(S);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.26 * v, t + 0.004);
+    g.gain.setTargetAtTime(0.1 * v, t + 0.004, 0.6);
+    g.gain.cancelAndHoldAtTime?.(t + ring);
+    g.gain.setTargetAtTime(0, t + ring, 0.09);
+    car.connect(g); tine.connect(tg); tg.connect(dest); g.connect(dest);
+    cleanup(car, [car, mod, mg, g]); cleanup(tine, [tine, tg]);
+  },
+
+  // 口笛風（ほぼサイン波、強めのビブラート）
+  whistle(S, dest, t, m, dur, v) {
+    const f = midiToFreq(m);
+    const end = t + dur + 0.25;
+    const o = osc(S, wave(S, 'whistle', [1, 0.06, 0.02]), f, t, end);
+    o.frequency.setValueAtTime(f * 0.97, t); o.frequency.exponentialRampToValueAtTime(f, t + 0.04);
+    const vib = vibrato(S, o, f, t, end, 0.008, 5.8, Math.min(0.2, dur * 0.4));
+    const g = gain(S);
+    adsr(g.gain, t, dur, 0.26 * v, 0.03, 0.1, 0.85, 0.08);
+    o.connect(g); g.connect(dest);
+    cleanup(o, [o, g, vib.l, vib.g]);
+  },
+
+  // 小さなパイプオルガン（神殿）
+  organ(S, dest, t, m, dur, v) {
+    const f = midiToFreq(m);
+    const end = t + dur + 0.4;
+    const o1 = osc(S, wave(S, 'organ', [1, 0.6, 0.15, 0.35, 0.05, 0.12, 0, 0.08]), f, t, end);
+    const o2 = osc(S, 'sine', f / 2, t, end, 3);
+    const lp = filt(S, 'lowpass', Math.min(6000, f * 5), 0.5);
+    const g = gain(S);
+    adsr(g.gain, t, dur, 0.12 * v, 0.06, 0.1, 0.95, 0.25);
+    const g2 = gain(S, 0.5);
+    o1.connect(lp); o2.connect(g2); g2.connect(lp); lp.connect(g); g.connect(dest);
+    cleanup(o1, [o1, o2, g2, lp, g]);
+  },
+
+  // カリンバ風（親指ピアノ。海の中・おもちゃ）
+  kalimba(S, dest, t, m, dur, v) {
+    const f = midiToFreq(m);
+    const all = [];
+    for (const [r, a, d] of [[1, 1, 0.5], [5.95, 0.12, 0.05], [3.0, 0.05, 0.08]]) {
+      const o = osc(S, 'sine', f * r, t, t + d * 6 + 0.05);
+      const g = gain(S);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.25 * v * a, t + 0.002); g.gain.setTargetAtTime(0, t + 0.002, d);
+      o.connect(g); g.connect(dest); all.push(o, g);
+    }
+    cleanup(all[0], all);
+  },
+
   // 指弾きのベース
   bass(S, dest, t, m, dur, v) {
     const f = midiToFreq(m);
@@ -412,6 +473,19 @@ export const DRUMS = {
   drip(S, d, t, v) { toneHit(S, d, t, { f: 900, f1: 2100, dur: 0.07, vol: 0.12 * v }); toneHit(S, d, t + 0.09, { f: 1500, f1: 2600, dur: 0.04, vol: 0.03 * v }); },
   // 時計のカチ
   tick(S, d, t, v) { toneHit(S, d, t, { f: 3800, dur: 0.012, vol: 0.08 * v, type: 'square' }); },
+  // ブラシ（ジャズのスネアをこする）
+  brush(S, d, t, v) { noiseHit(S, d, t, { dur: 0.14, vol: 0.08 * v, type: 'bandpass', f: 4200, q: 0.7, a: 0.02, off: 1.1 }); },
+  // ライド（ジャズのシンバル）
+  ride(S, d, t, v) {
+    noiseHit(S, d, t, { dur: 0.5, vol: 0.05 * v, type: 'highpass', f: 7500, q: 0.6, off: 1.3 });
+    toneHit(S, d, t, { f: 3350, dur: 0.25, vol: 0.016 * v }); toneHit(S, d, t, { f: 5020, dur: 0.18, vol: 0.01 * v });
+  },
+  // 金床（かーん。焔の坑道）
+  anvil(S, d, t, v) { for (const [f, a, dd] of [[1180, 1, 0.5], [2960, 0.5, 0.3], [4870, 0.25, 0.15]]) toneHit(S, d, t, { f, dur: dd, vol: 0.09 * v * a }); noiseHit(S, d, t, { dur: 0.02, vol: 0.08 * v, type: 'highpass', f: 3000 }); },
+  // 歯車のジジ（おもちゃの工場）
+  ratchet(S, d, t, v) { for (let i = 0; i < 4; i++) toneHit(S, d, t + i * 0.018, { f: 2400 + i * 120, dur: 0.008, vol: 0.06 * v, type: 'square' }); },
+  // 泡（海の中）
+  bubble(S, d, t, v) { toneHit(S, d, t, { f: 380, f1: 1200, dur: 0.09, vol: 0.1 * v }); },
   clap(S, d, t, v) { for (let i = 0; i < 3; i++) noiseHit(S, d, t + i * 0.011, { dur: i === 2 ? 0.12 : 0.02, vol: 0.18 * v, type: 'bandpass', f: 1400, q: 1.2, off: 0.2 + i * 0.13 }); },
 };
 

@@ -3,6 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { ROOT } from './audio_render.mjs';
+import { eventsManifest } from '../../src/audio/events.js';
 
 export const MANIFEST = path.join(ROOT, 'classic-unity/Audio/audio_manifest.json');
 const MAPS_DIR = path.join(ROOT, 'classic-unity/Data/maps');
@@ -36,10 +37,12 @@ export function updateManifest(part) {
   let cur = {};
   try { cur = JSON.parse(fs.readFileSync(MANIFEST, 'utf8')); } catch { /* 初めて */ }
   const out = {
-    about: 'ルミナリア・クラシックの音の一覧（自動で作る: node classic/tools/render_bgm.mjs / render_sfx.mjs）。パスはこのファイルからの相対。BGM の file はループ部分だけ（AudioSource.loop=true でそのままくり返せる）。intro があれば先に鳴らし、終わる時刻に file を PlayScheduled でつなぐ。',
+    about: 'ルミナリア・クラシックの音の一覧（自動で作る: node classic/tools/render_bgm.mjs / render_sfx.mjs）。パスはこのファイルからの相対。BGM の file はループ部分だけ（AudioSource.loop=true でそのままくり返せる）。intro があれば先に鳴らし、終わる時刻に file を PlayScheduled でつなぐ。jingle はくり返さない短い曲（loop=false。BGM の上に鳴らし、その間 BGM を小さく）。events は Core の GameEventType → 鳴らす音の対応表。',
     bgm: { ...(cur.bgm || {}), ...(part.bgm || {}) },
+    jingle: { ...(cur.jingle || {}), ...(part.jingle || {}) },
     sfx: { ...(cur.sfx || {}), ...(part.sfx || {}) },
     bgmFallback: {},
+    events: eventsManifest(),
   };
   // マップが使っているのにまだ無い曲 → 代わりの曲
   const used = mapBgm();
@@ -50,5 +53,5 @@ export function updateManifest(part) {
   }
   fs.mkdirSync(path.dirname(MANIFEST), { recursive: true });
   fs.writeFileSync(MANIFEST, JSON.stringify(out, null, 2) + '\n');
-  console.log(`→ ${path.relative(ROOT, MANIFEST)}（BGM ${Object.keys(out.bgm).length} 曲・効果音 ${Object.keys(out.sfx).length} 個・代わりの曲 ${Object.keys(out.bgmFallback).length}）`);
+  console.log(`→ ${path.relative(ROOT, MANIFEST)}（BGM ${Object.keys(out.bgm).length} 曲・ジングル ${Object.keys(out.jingle).length}・効果音 ${Object.keys(out.sfx).length} 個・代わりの曲 ${Object.keys(out.bgmFallback).length}）`);
 }

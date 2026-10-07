@@ -8,6 +8,8 @@
 //        わずかなずれがあるので、0.02（-34dBFS）までは許す）
 //     つなぎ目の前後 20ms が曲全体の大きさより 24dB 以上小さくならない（音が途切れない）
 // - 効果音は 4 秒以内、頭と終わりがほぼ無音（鳴らし始め・終わりにプチ音が出ない）
+// - ジングルは 10 秒以内・loop=false、頭と終わりがほぼ無音、試聴 mp3 がある
+// - マップが使う曲が全部ある（bgmFallback が空）、events の対応表の ID がすべて一覧にある
 import fs from 'node:fs';
 import path from 'node:path';
 import { ROOT, decode, peakOf, db, seam, seamOkPcm, seamOkCodec } from '../tools/lib/audio_render.mjs';
@@ -70,6 +72,25 @@ for (const [id, e] of Object.entries(man.bgm || {})) {
   }
 }
 
+console.log('ジングル');
+for (const [id, e] of Object.entries(man.jingle || {})) {
+  const f = path.join(base, e.file);
+  if (!ok(fs.existsSync(f), `${id}: ${e.file} が無い`)) continue;
+  total += fs.statSync(f).size;
+  ok(e.loop === false, `${id}: ジングルなのに loop が false でない`);
+  const { chs, sr } = decode(f);
+  const n = chs[0].length;
+  const pk = db(peakOf(chs));
+  ok(pk <= PEAK_MAX, `${id}: 最大 ${pk.toFixed(2)} dBFS`);
+  ok(n / sr <= 10, `${id}: ${(n / sr).toFixed(2)} 秒（10 秒まで）`);
+  ok(Math.abs(n - e.samples) <= 1, `${id}: 読み戻した長さ ${n} ≠ 一覧の ${e.samples}`);
+  const head = Math.max(...chs.map((c) => Math.abs(c[0]))), tail = Math.max(...chs.map((c) => Math.abs(c[n - 1])));
+  ok(head < 0.01 && tail < 0.01, `${id}: 頭 ${head.toFixed(4)} / 終わり ${tail.toFixed(4)} が無音でない`);
+  const prev = path.join(ROOT, 'classic/assets/audio/preview', `${id}.mp3`);
+  ok(fs.existsSync(prev), `${id}: 試聴 mp3 が無い`);
+  console.log(`  ${id.padEnd(18)} ${(n / sr).toFixed(2)} 秒 最大 ${pk.toFixed(2)} dBFS`);
+}
+
 console.log('効果音');
 for (const [id, e] of Object.entries(man.sfx || {})) {
   const f = path.join(base, e.file);
@@ -88,6 +109,16 @@ for (const f of [MANIFEST, ...fs.readdirSync(path.join(base, 'BGM')).map((x) => 
   ok(fs.statSync(f).size <= 5e6, `${path.relative(ROOT, f)} が 5MB を超える`);
 }
 for (const [id, fb] of Object.entries(man.bgmFallback || {})) ok(man.bgm[fb], `代わりの曲 ${id} → ${fb} が無い`);
+// マップが使っている曲がすべてそろっている（代わりの曲が要らない）
+ok(Object.keys(man.bgmFallback || {}).length === 0, `まだ無い曲がある（代わりの曲 ${Object.keys(man.bgmFallback || {}).join(', ')}）`);
+// お知らせ → 音の対応表の ID が一覧にある
+const evIds = (v) => (v == null ? [] : typeof v === 'string' ? [v] : [...['byId', 'byValue', 'byText'].flatMap((k) => Object.values(v[k] || {}).flatMap(evIds)), ...evIds(v.default ?? null), ...evIds(v.fixed ?? null)]);
+if (ok(man.events && man.events.sfx, '一覧に events（お知らせ → 音の対応表）が無い')) {
+  for (const [ev, v] of Object.entries(man.events.sfx)) for (const id of evIds(v)) ok(man.sfx[id], `events.sfx.${ev}: ${id} の ogg が一覧に無い`);
+  for (const [ev, v] of Object.entries(man.events.jingle || {})) for (const id of evIds(v)) ok(man.jingle?.[id], `events.jingle.${ev}: ${id} の ogg が一覧に無い`);
+  for (const t of ['weaponSfx', 'statusSfx']) for (const id of Object.values(man.events[t] || {})) ok(man.sfx[id], `events.${t}: ${id} の ogg が一覧に無い`);
+  for (const t of ['element', 'kind', 'motion', 'projectile', 'weapon']) for (const id of Object.values(man.events.skillSfx?.[t] || {})) ok(man.sfx[id], `events.skillSfx.${t}: ${id} の ogg が一覧に無い`);
+}
 
 console.log(`\n合計 ${(total / 1e6).toFixed(2)} MB`);
 console.log(`${checks} 件中 ${checks - fails} 件 OK${fails ? `、${fails} 件 NG` : ''}`);
