@@ -1,0 +1,135 @@
+{
+ "id": "T108",
+ "name": "積み木の広場",
+ "region": "T",
+ "type": "ボ",
+ "lv": [
+  42,
+  60
+ ],
+ "width": 2000,
+ "height": 408,
+ "bgm": "boss_mid",
+ "bg": "block_plaza",
+ "theme": "arena",
+ "returnMap": "T100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     328
+    ],
+    [
+     2000,
+     328
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     160,
+     200
+    ],
+    [
+     600,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "p2",
+   "points": [
+    [
+     1400,
+     200
+    ],
+    [
+     1840,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 456,
+   "top": 200,
+   "bottom": 308,
+   "ladder": false
+  },
+  {
+   "x": 1752,
+   "top": 200,
+   "bottom": 308,
+   "ladder": false
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 328
+  },
+  {
+   "name": "to_T107",
+   "type": "visible",
+   "x": 56,
+   "y": 328,
+   "to": "T107",
+   "toPortal": "to_T108"
+  }
+ ],
+ "spawns": [
+  {
+   "mob": "M147",
+   "x": 1472,
+   "y": 200
+  },
+  {
+   "mob": "M147",
+   "x": 324,
+   "y": 328
+  },
+  {
+   "mob": "M147",
+   "x": 540,
+   "y": 328
+  },
+  {
+   "mob": "M147",
+   "x": 1164,
+   "y": 328
+  },
+  {
+   "mob": "M147",
+   "x": 1380,
+   "y": 328
+  },
+  {
+   "mob": "M147",
+   "x": 1652,
+   "y": 328
+  }
+ ],
+ "mobMax": 6,
+ "respawnSec": 7,
+ "timedSpawns": [
+  {
+   "mob": "M159",
+   "x": 1000,
+   "y": 328,
+   "intervalSec": 2700
+  }
+ ],
+ "npcs": [],
+ "objects": [],
+ "note": "からくり大王が 45 分ごとに出る。",
+ "seed": "T108#0"
+}

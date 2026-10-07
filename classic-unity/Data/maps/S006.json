@@ -9,7 +9,9 @@
  ],
  "width": 1800,
  "height": 720,
- "bgm": "island_field",
+ "bgm": "field_island",
+ "bg": "cliff",
+ "theme": "island",
  "returnMap": "S003",
  "footholds": [
   {
@@ -68,16 +70,19 @@
  ],
  "ropes": [
   {
+   "ladder": false,
    "x": 420,
    "top": 520,
    "bottom": 616
   },
   {
+   "ladder": false,
    "x": 900,
    "top": 400,
    "bottom": 500
   },
   {
+   "ladder": false,
    "x": 700,
    "top": 280,
    "bottom": 380

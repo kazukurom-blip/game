@@ -1,0 +1,82 @@
+{
+ "id": "D116",
+ "name": "竜の巣の卵（入口）",
+ "region": "D",
+ "type": "特",
+ "width": 1040,
+ "height": 340,
+ "bgm": "pq",
+ "bg": "nest_gate",
+ "theme": "room",
+ "returnMap": "D100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     260
+    ],
+    [
+     1040,
+     260
+    ]
+   ]
+  },
+  {
+   "id": "s1",
+   "points": [
+    [
+     216,
+     200
+    ],
+    [
+     456,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 260
+  },
+  {
+   "name": "to_D104",
+   "type": "visible",
+   "x": 56,
+   "y": 260,
+   "to": "D104",
+   "toPortal": "to_D116"
+  },
+  {
+   "name": "to_D117",
+   "type": "visible",
+   "x": 976,
+   "y": 260,
+   "to": "D117",
+   "toPortal": "to_D116"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "nest",
+   "name": "受付ネスト",
+   "x": 328,
+   "y": 260
+  }
+ ],
+ "objects": [],
+ "note": "1 人用ダンジョン「竜の巣の卵」（Lv100〜120）の受付。",
+ "seed": "D116#0"
+}

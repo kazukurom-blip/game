@@ -1,0 +1,81 @@
+{
+ "id": "M113",
+ "name": "マリナの船着き場",
+ "region": "M",
+ "type": "移",
+ "width": 1320,
+ "height": 336,
+ "bgm": "town_marina",
+ "bg": "sub_dock",
+ "theme": "room",
+ "returnMap": "M100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     256
+    ],
+    [
+     1320,
+     256
+    ]
+   ]
+  },
+  {
+   "id": "s1",
+   "points": [
+    [
+     728,
+     200
+    ],
+    [
+     920,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 256
+  },
+  {
+   "name": "to_M100",
+   "type": "visible",
+   "x": 56,
+   "y": 256,
+   "to": "M100",
+   "toPortal": "to_M113"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "norma",
+   "name": "潜水船の船長ノーマ",
+   "x": 328,
+   "y": 256,
+   "travel": {
+    "to": "V100",
+    "toPortal": "sp",
+    "minLevel": 0,
+    "oneWay": false,
+    "fee": 1500
+   }
+  }
+ ],
+ "objects": [],
+ "note": "ブリーズ港への潜水船。",
+ "seed": "M113#0"
+}

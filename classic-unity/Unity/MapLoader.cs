@@ -9,7 +9,8 @@
 //
 // 座標: Core は 1 px = 1、y は下が正 → GameRunner.ToUnity(x, y) で (x, -y)。
 // マップの広さ: session.Map.Data.Width / Height（カメラはこの中だけ動かす。FEEL.md 8 章）。
-// 背景・BGM: session.Map.Data.Bgm（曲の ID）。背景の層はまだデータに無い（ブラウザ版の background を後で移す）。
+// 背景・BGM: session.Map.Data.Bgm（曲の ID。SOUND.md）、Background（背景の種類: beach・forest・cave …）、
+//            Theme（地形の型: town・field・cave・tower …）。背景の絵そのものはまだ無い（ブラウザ版の background を後で移す）。
 // ============================================================================
 using System.Collections.Generic;
 using Lumina.Core.Game;

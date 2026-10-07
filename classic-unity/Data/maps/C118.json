@@ -1,0 +1,147 @@
+{
+ "id": "C118",
+ "name": "雲の船（航行中）",
+ "region": "C",
+ "type": "移",
+ "width": 1880,
+ "height": 600,
+ "bgm": "ship",
+ "bg": "cloud_ship",
+ "theme": "ship",
+ "returnMap": "C100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     472
+    ],
+    [
+     160,
+     472
+    ],
+    [
+     224,
+     520
+    ],
+    [
+     1560,
+     520
+    ],
+    [
+     1624,
+     472
+    ],
+    [
+     1880,
+     472
+    ]
+   ]
+  },
+  {
+   "id": "cabin",
+   "points": [
+    [
+     1034,
+     464
+    ],
+    [
+     1354,
+     464
+    ]
+   ]
+  },
+  {
+   "id": "nest1",
+   "points": [
+    [
+     426,
+     328
+    ],
+    [
+     626,
+     328
+    ]
+   ]
+  },
+  {
+   "id": "nest2",
+   "points": [
+    [
+     756,
+     328
+    ],
+    [
+     936,
+     328
+    ]
+   ]
+  },
+  {
+   "id": "yard",
+   "points": [
+    [
+     557,
+     200
+    ],
+    [
+     797,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 506,
+   "top": 328,
+   "bottom": 500,
+   "ladder": false
+  },
+  {
+   "x": 804,
+   "top": 328,
+   "bottom": 500,
+   "ladder": false
+  },
+  {
+   "x": 733,
+   "top": 200,
+   "bottom": 500,
+   "ladder": false
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 472
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "kaze",
+   "name": "雲の船の水夫カゼ",
+   "x": 328,
+   "y": 520,
+   "travel": {
+    "to": "C101",
+    "toPortal": "sp",
+    "minLevel": 0,
+    "oneWay": false,
+    "fee": 0
+   }
+  }
+ ],
+ "objects": [],
+ "note": "船の上。たまに空の魔物（ホシの子・ツキの子）が乗り込んでくる。",
+ "seed": "C118#0"
+}

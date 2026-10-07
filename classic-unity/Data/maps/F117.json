@@ -1,0 +1,118 @@
+{
+ "id": "F117",
+ "name": "長老の家",
+ "region": "F",
+ "type": "特",
+ "width": 1440,
+ "height": 408,
+ "bgm": "town_hyoga",
+ "bg": "elder_house",
+ "theme": "room",
+ "returnMap": "F100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     328
+    ],
+    [
+     1440,
+     328
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     159,
+     200
+    ],
+    [
+     531,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 455,
+   "top": 200,
+   "bottom": 308,
+   "ladder": true
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 328
+  },
+  {
+   "name": "to_F100",
+   "type": "visible",
+   "x": 56,
+   "y": 328,
+   "to": "F100",
+   "toPortal": "to_F117"
+  },
+  {
+   "name": "to_F118",
+   "type": "visible",
+   "x": 1376,
+   "y": 328,
+   "to": "F118",
+   "toPortal": "to_F117"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "glen",
+   "name": "戦士の長老グレン",
+   "x": 328,
+   "y": 328,
+   "role": "job"
+  },
+  {
+   "id": "frost",
+   "name": "魔法使いの長老フロスト",
+   "x": 496,
+   "y": 328,
+   "role": "job"
+  },
+  {
+   "id": "heine",
+   "name": "弓使いの長老ハイネ",
+   "x": 608,
+   "y": 328,
+   "role": "job"
+  },
+  {
+   "id": "mist",
+   "name": "盗賊の長老ミスト",
+   "x": 752,
+   "y": 328,
+   "role": "job"
+  },
+  {
+   "id": "keel",
+   "name": "海賊の長老キール",
+   "x": 888,
+   "y": 328,
+   "role": "job"
+  }
+ ],
+ "objects": [],
+ "note": "3 次転職の長老たち（職ごとに 1 人）。",
+ "seed": "F117#0"
+}

@@ -1,0 +1,177 @@
+{
+ "id": "V107",
+ "name": "潮風号",
+ "region": "V",
+ "type": "町",
+ "width": 1840,
+ "height": 600,
+ "bgm": "town_port",
+ "bg": "ship",
+ "theme": "ship",
+ "returnMap": "V107",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     472
+    ],
+    [
+     160,
+     472
+    ],
+    [
+     224,
+     520
+    ],
+    [
+     1520,
+     520
+    ],
+    [
+     1584,
+     472
+    ],
+    [
+     1840,
+     472
+    ]
+   ]
+  },
+  {
+   "id": "cabin",
+   "points": [
+    [
+     1012,
+     464
+    ],
+    [
+     1325,
+     464
+    ]
+   ]
+  },
+  {
+   "id": "nest1",
+   "points": [
+    [
+     415,
+     328
+    ],
+    [
+     615,
+     328
+    ]
+   ]
+  },
+  {
+   "id": "nest2",
+   "points": [
+    [
+     738,
+     328
+    ],
+    [
+     918,
+     328
+    ]
+   ]
+  },
+  {
+   "id": "yard",
+   "points": [
+    [
+     542,
+     200
+    ],
+    [
+     782,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 495,
+   "top": 328,
+   "bottom": 500,
+   "ladder": false
+  },
+  {
+   "x": 842,
+   "top": 328,
+   "bottom": 500,
+   "ladder": false
+  },
+  {
+   "x": 654,
+   "top": 200,
+   "bottom": 500,
+   "ladder": false
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 472
+  },
+  {
+   "name": "town",
+   "type": "town",
+   "x": 960,
+   "y": 520
+  },
+  {
+   "name": "to_V100",
+   "type": "visible",
+   "x": 56,
+   "y": 472,
+   "to": "V100",
+   "toPortal": "to_V107"
+  },
+  {
+   "name": "to_V108",
+   "type": "visible",
+   "x": 1776,
+   "y": 472,
+   "to": "V108",
+   "toPortal": "to_V107"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "rio",
+   "name": "キャプテン・リオ",
+   "x": 440,
+   "y": 520,
+   "role": "job"
+  },
+  {
+   "id": "battsu",
+   "name": "砲手バッツ",
+   "x": 920,
+   "y": 520
+  },
+  {
+   "id": "guri",
+   "name": "料理人グリ",
+   "x": 1400,
+   "y": 520,
+   "role": "potion",
+   "shop": "shop.V107.potion"
+  }
+ ],
+ "objects": [],
+ "note": "港に停まった大きな海賊の船。海賊の転職官と船の店。",
+ "seed": "V107#0"
+}

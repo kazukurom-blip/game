@@ -1,0 +1,225 @@
+{
+ "id": "V600",
+ "name": "ねむり谷",
+ "region": "V",
+ "type": "町",
+ "width": 2800,
+ "height": 448,
+ "bgm": "town_nemuri",
+ "bg": "valley_village",
+ "theme": "town",
+ "returnMap": "V600",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     368
+    ],
+    [
+     1424,
+     368
+    ],
+    [
+     1488,
+     344
+    ],
+    [
+     1720,
+     344
+    ],
+    [
+     1784,
+     368
+    ],
+    [
+     2800,
+     368
+    ]
+   ]
+  },
+  {
+   "id": "s1",
+   "points": [
+    [
+     752,
+     316
+    ],
+    [
+     1064,
+     316
+    ]
+   ]
+  },
+  {
+   "id": "s2",
+   "points": [
+    [
+     2080,
+     320
+    ],
+    [
+     2376,
+     320
+    ]
+   ]
+  },
+  {
+   "id": "s3",
+   "points": [
+    [
+     312,
+     308
+    ],
+    [
+     624,
+     308
+    ]
+   ]
+  },
+  {
+   "id": "p4",
+   "points": [
+    [
+     314,
+     200
+    ],
+    [
+     779,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "p5",
+   "points": [
+    [
+     2104,
+     200
+    ],
+    [
+     2457,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 434,
+   "top": 200,
+   "bottom": 288,
+   "ladder": true
+  },
+  {
+   "x": 2320,
+   "top": 200,
+   "bottom": 300,
+   "ladder": true
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 1368,
+   "y": 368
+  },
+  {
+   "name": "town",
+   "type": "town",
+   "x": 1440,
+   "y": 362
+  },
+  {
+   "name": "to_V601",
+   "type": "visible",
+   "x": 56,
+   "y": 368,
+   "to": "V601",
+   "toPortal": "to_V600"
+  },
+  {
+   "name": "to_V602",
+   "type": "visible",
+   "x": 2736,
+   "y": 368,
+   "to": "V602",
+   "toPortal": "to_V600"
+  },
+  {
+   "name": "to_V619",
+   "type": "visible",
+   "x": 1408,
+   "y": 368,
+   "to": "V619",
+   "toPortal": "to_V600"
+  },
+  {
+   "name": "to_V620",
+   "type": "visible",
+   "x": 1840,
+   "y": 368,
+   "to": "V620",
+   "toPortal": "to_V600"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "nemu",
+   "name": "宿屋のネム",
+   "x": 368,
+   "y": 368,
+   "inn": 100
+  },
+  {
+   "id": "mayu",
+   "name": "薬屋のマユ",
+   "x": 712,
+   "y": 368,
+   "role": "potion",
+   "shop": "shop.V600.potion"
+  },
+  {
+   "id": "koro",
+   "name": "雑貨屋のコロ",
+   "x": 1056,
+   "y": 368
+  },
+  {
+   "id": "yuu",
+   "name": "温泉番ユウ",
+   "x": 1336,
+   "y": 368
+  },
+  {
+   "id": "sig",
+   "name": "封印の番人シグ",
+   "x": 1744,
+   "y": 353
+  },
+  {
+   "id": "doc",
+   "name": "学者ドク",
+   "x": 2088,
+   "y": 368
+  },
+  {
+   "id": "nagi",
+   "name": "倉庫番ナギ",
+   "x": 2432,
+   "y": 368,
+   "role": "storage"
+  }
+ ],
+ "objects": [],
+ "note": "深い森の底の小さな村。宿屋・薬屋・雑貨屋。地下ダンジョンの入口。",
+ "seed": "V600#0"
+}

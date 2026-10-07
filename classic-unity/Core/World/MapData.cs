@@ -2,7 +2,8 @@
 //
 // {
 //   "id": "S001", "name": "はじめの小道", "region": "S", "type": "狩",   // 種類: 町/狩/洞/ボ/特/移
-//   "lv": [1, 2], "width": 1600, "height": 720, "bgm": "island_field",
+//   "lv": [1, 2], "width": 1600, "height": 720, "bgm": "field_island",      // 曲は SOUND.md の ID
+//   "bg": "grass", "theme": "field",            // 背景の種類・地形の型（Data/tools/world/specs.mjs）
 //   "returnMap": "S003",                       // 死んだ時・帰還の書で戻る町
 //   "footholds": [ { "id": "g", "ground": true, "points": [[0,640],[1600,640]] } ],   // 点は左から右へ
 //   "ropes":     [ { "x": 600, "top": 512, "bottom": 616, "ladder": false } ],         // top/bottom は足元の y
@@ -13,7 +14,7 @@
 //                 // to が無く toPortal だけ → 同じマップの中の別の位置へ（隠し部屋など）
 //   "spawns":    [ { "mob": "M001", "x": 300, "y": 640 } ], "mobMax": 8, "respawnSec": 7,
 //   "timedSpawns": [ { "mob": "M007", "x": 800, "y": 640, "intervalSec": 600 } ],     // 強敵・ボス
-//   "npcs":      [ { "id": "luka", "name": "案内人ルカ", "x": 200, "y": 640, "shop": null } ],
+//   "npcs":      [ { "id": "luka", "name": "案内人ルカ", "x": 200, "y": 640, "shop": null, "role": "guide" } ],
 //   "objects":   [ { "id": "S001.crate", "name": "木箱", "x": 500, "y": 512 } ]       // 調べられる物
 // }
 using System;
@@ -62,6 +63,8 @@ namespace Lumina.Core.World
     public sealed class NpcData
     {
         public string Id, Name, Shop;
+        /// <summary>見た目・会話の手がかり（weapon / armor / potion / storage / taxi / guide / job）。無ければ null</summary>
+        public string Role;
         public double X, Y;
         public int InnFee = -1;          // 宿屋（休むと HP/MP 全回復）の料金。-1 = 宿屋でない
         public TravelData Travel;
@@ -71,6 +74,8 @@ namespace Lumina.Core.World
     public sealed class MapData
     {
         public string Id, Name, Region, Type, Bgm, ReturnMap;
+        /// <summary>背景の種類（beach・forest・cave …）と地形の型（town・field・cave・tower …）</summary>
+        public string Background, Theme;
         public int LvMin, LvMax;
         public double Width, Height;
         public readonly List<FootholdData> Footholds = new List<FootholdData>();
@@ -94,6 +99,7 @@ namespace Lumina.Core.World
             {
                 Id = J.Str(d, "id"), Name = J.Str(d, "name", ""), Region = J.Str(d, "region", ""), Type = J.Str(d, "type", "狩"),
                 Bgm = J.Str(d, "bgm", ""), ReturnMap = J.Str(d, "returnMap"),
+                Background = J.Str(d, "bg", ""), Theme = J.Str(d, "theme", ""),
                 Width = J.Num(d, "width", 800), Height = J.Num(d, "height", 600),
                 MobMax = J.Int(d, "mobMax", 10), RespawnSec = J.Num(d, "respawnSec", 7),
             };
@@ -142,7 +148,7 @@ namespace Lumina.Core.World
             foreach (var o in J.Arr(d, "npcs"))
             {
                 var r = (Dictionary<string, object>)o;
-                var npc = new NpcData { Id = J.Str(r, "id"), Name = J.Str(r, "name", ""), Shop = J.Str(r, "shop"), X = J.Num(r, "x"), Y = J.Num(r, "y"), InnFee = J.Int(r, "inn", -1) };
+                var npc = new NpcData { Id = J.Str(r, "id"), Name = J.Str(r, "name", ""), Shop = J.Str(r, "shop"), Role = J.Str(r, "role"), X = J.Num(r, "x"), Y = J.Num(r, "y"), InnFee = J.Int(r, "inn", -1) };
                 var tr = J.Obj(r, "travel");
                 if (tr != null)
                 {

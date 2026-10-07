@@ -1,34 +1,40 @@
 {
+ "note": "world/npcs.mjs（位置はマップを作った時に決まる）",
  "npcs": [
   {
    "id": "luka",
    "name": "案内人ルカ",
    "map": "S000",
-   "x": 260
+   "x": 260,
+   "y": 640
   },
   {
    "id": "ganzo",
    "name": "縄職人ガンゾ",
    "map": "S001",
-   "x": 560
+   "x": 560,
+   "y": 640
   },
   {
    "id": "poppo",
    "name": "はしご番のポッポ",
    "map": "S002",
-   "x": 300
+   "x": 300,
+   "y": 640
   },
   {
    "id": "yomogi",
    "name": "村長ヨモギ",
    "map": "S003",
-   "x": 1180
+   "x": 1180,
+   "y": 640
   },
   {
    "id": "tata",
    "name": "雑貨屋タタ",
    "map": "S003",
    "x": 620,
+   "y": 640,
    "shop": "shop.S003.general"
   },
   {
@@ -36,6 +42,7 @@
    "name": "薬屋ニナ",
    "map": "S003",
    "x": 820,
+   "y": 640,
    "shop": "shop.S003.potion"
   },
   {
@@ -43,43 +50,57 @@
    "name": "宿屋のモモ",
    "map": "S003",
    "x": 1450,
+   "y": 630,
    "inn": 30
   },
   {
    "id": "tobio",
    "name": "漁師トビオ",
    "map": "S003",
-   "x": 1720
+   "x": 1720,
+   "y": 620
   },
   {
    "id": "riri",
    "name": "少女リリ",
    "map": "S003",
-   "x": 1900
+   "x": 1900,
+   "y": 620
   },
   {
    "id": "gen",
    "name": "ゲン爺",
    "map": "S003",
-   "x": 1320
+   "x": 1320,
+   "y": 640
   },
   {
    "id": "piko",
    "name": "学者見習いピコ",
    "map": "S003",
-   "x": 2000
+   "x": 2000,
+   "y": 620
+  },
+  {
+   "id": "luka_S003",
+   "name": "案内人ルカ",
+   "map": "S003",
+   "x": 1060,
+   "y": 640
   },
   {
    "id": "baldo",
    "name": "教官バルド",
    "map": "S011",
-   "x": 500
+   "x": 500,
+   "y": 640
   },
   {
    "id": "kai",
    "name": "船長カイ",
    "map": "S010",
    "x": 900,
+   "y": 640,
    "travel": {
     "to": "V100",
     "toPortal": "sp",
@@ -93,7 +114,1266 @@
    "id": "olga",
    "name": "港長オルガ",
    "map": "V100",
-   "x": 1250
+   "x": 328,
+   "y": 368,
+   "role": "guide"
+  },
+  {
+   "id": "jan",
+   "name": "武器屋ジャン",
+   "map": "V100",
+   "x": 592,
+   "y": 368,
+   "role": "weapon"
+  },
+  {
+   "id": "mire",
+   "name": "防具屋ミレ",
+   "map": "V100",
+   "x": 824,
+   "y": 368,
+   "role": "armor"
+  },
+  {
+   "id": "pola",
+   "name": "薬屋ポーラ",
+   "map": "V100",
+   "x": 1096,
+   "y": 344,
+   "role": "potion",
+   "shop": "shop.V100.potion"
+  },
+  {
+   "id": "dan",
+   "name": "倉庫番ダン",
+   "map": "V100",
+   "x": 1384,
+   "y": 344,
+   "role": "storage"
+  },
+  {
+   "id": "marco",
+   "name": "タクシーの運転手マルコ",
+   "map": "V100",
+   "x": 1648,
+   "y": 368,
+   "role": "taxi"
+  },
+  {
+   "id": "rokko",
+   "name": "船乗りロッコ",
+   "map": "V100",
+   "x": 1912,
+   "y": 368
+  },
+  {
+   "id": "uo",
+   "name": "釣り好きのウオ爺",
+   "map": "V100",
+   "x": 2136,
+   "y": 368
+  },
+  {
+   "id": "ichiba",
+   "name": "市場の案内人",
+   "map": "V100",
+   "x": 2440,
+   "y": 368,
+   "role": "guide"
+  },
+  {
+   "id": "minato",
+   "name": "潜水船の係ミナト",
+   "map": "V100",
+   "x": 2704,
+   "y": 368,
+   "travel": {
+    "to": "M113",
+    "toPortal": "sp",
+    "minLevel": 40,
+    "oneWay": false,
+    "fee": 1500
+   }
+  },
+  {
+   "id": "sol",
+   "name": "灯台守ソル",
+   "map": "V102",
+   "x": 328,
+   "y": 1164
+  },
+  {
+   "id": "rio",
+   "name": "キャプテン・リオ",
+   "map": "V107",
+   "x": 440,
+   "y": 520,
+   "role": "job"
+  },
+  {
+   "id": "battsu",
+   "name": "砲手バッツ",
+   "map": "V107",
+   "x": 920,
+   "y": 520
+  },
+  {
+   "id": "guri",
+   "name": "料理人グリ",
+   "map": "V107",
+   "x": 1400,
+   "y": 520,
+   "role": "potion",
+   "shop": "shop.V107.potion"
+  },
+  {
+   "id": "rio_V108",
+   "name": "キャプテン・リオ",
+   "map": "V108",
+   "x": 328,
+   "y": 520,
+   "role": "job"
+  },
+  {
+   "id": "horn",
+   "name": "古道具屋ホルン",
+   "map": "V090",
+   "x": 400,
+   "y": 360,
+   "role": "weapon"
+  },
+  {
+   "id": "scri",
+   "name": "書の行商人スクリ",
+   "map": "V090",
+   "x": 904,
+   "y": 360
+  },
+  {
+   "id": "jue",
+   "name": "宝石商ジュエ",
+   "map": "V090",
+   "x": 1184,
+   "y": 360
+  },
+  {
+   "id": "mate",
+   "name": "素材屋マテ",
+   "map": "V090",
+   "x": 1528,
+   "y": 360
+  },
+  {
+   "id": "board",
+   "name": "掲示板係ボード",
+   "map": "V090",
+   "x": 2000,
+   "y": 336
+  },
+  {
+   "id": "yomi",
+   "name": "占い師ヨミ",
+   "map": "V090",
+   "x": 2400,
+   "y": 360
+  },
+  {
+   "id": "erna",
+   "name": "弓の師範エルナ",
+   "map": "V200",
+   "x": 352,
+   "y": 336,
+   "role": "job"
+  },
+  {
+   "id": "toma",
+   "name": "弓の武器屋トマ",
+   "map": "V200",
+   "x": 592,
+   "y": 336,
+   "role": "weapon"
+  },
+  {
+   "id": "lana",
+   "name": "防具屋ラナ",
+   "map": "V200",
+   "x": 944,
+   "y": 336,
+   "role": "armor"
+  },
+  {
+   "id": "popo",
+   "name": "薬屋ポポ",
+   "map": "V200",
+   "x": 1224,
+   "y": 384,
+   "role": "potion",
+   "shop": "shop.V200.potion"
+  },
+  {
+   "id": "chiko",
+   "name": "ペット屋チコ",
+   "map": "V200",
+   "x": 1536,
+   "y": 384
+  },
+  {
+   "id": "hako",
+   "name": "倉庫番ハコ",
+   "map": "V200",
+   "x": 1856,
+   "y": 432,
+   "role": "storage"
+  },
+  {
+   "id": "bob",
+   "name": "風車守ボブ",
+   "map": "V200",
+   "x": 1936,
+   "y": 200
+  },
+  {
+   "id": "marsa",
+   "name": "農家のマーサ",
+   "map": "V200",
+   "x": 2136,
+   "y": 432
+  },
+  {
+   "id": "sui",
+   "name": "花売りのスイ",
+   "map": "V200",
+   "x": 2432,
+   "y": 480
+  },
+  {
+   "id": "taro",
+   "name": "牧場の少年タロ",
+   "map": "V200",
+   "x": 2728,
+   "y": 480
+  },
+  {
+   "id": "erna_V211",
+   "name": "弓の師範エルナ",
+   "map": "V211",
+   "x": 328,
+   "y": 336,
+   "role": "job"
+  },
+  {
+   "id": "fin",
+   "name": "試験官フィン",
+   "map": "V211",
+   "x": 472,
+   "y": 336
+  },
+  {
+   "id": "orfe",
+   "name": "大魔導師オルフェ",
+   "map": "V300",
+   "x": 688,
+   "y": 376,
+   "role": "job"
+  },
+  {
+   "id": "mint",
+   "name": "魔法の武器屋ミント",
+   "map": "V300",
+   "x": 376,
+   "y": 496,
+   "role": "weapon"
+  },
+  {
+   "id": "fio",
+   "name": "ローブ屋フィオ",
+   "map": "V300",
+   "x": 800,
+   "y": 496,
+   "role": "armor"
+  },
+  {
+   "id": "herb",
+   "name": "薬草屋ハーブ",
+   "map": "V300",
+   "x": 1736,
+   "y": 496,
+   "role": "potion",
+   "shop": "shop.V300.potion"
+  },
+  {
+   "id": "kura",
+   "name": "倉庫番クラ",
+   "map": "V300",
+   "x": 2160,
+   "y": 496,
+   "role": "storage"
+  },
+  {
+   "id": "libra",
+   "name": "司書リブラ",
+   "map": "V300",
+   "x": 1016,
+   "y": 376
+  },
+  {
+   "id": "tia",
+   "name": "妖精の使いティア",
+   "map": "V300",
+   "x": 2040,
+   "y": 376
+  },
+  {
+   "id": "wood",
+   "name": "木こりの青年ウッド",
+   "map": "V300",
+   "x": 1320,
+   "y": 632
+  },
+  {
+   "id": "noa",
+   "name": "駅員ノア",
+   "map": "V310",
+   "x": 328,
+   "y": 260,
+   "travel": {
+    "to": "C101",
+    "toPortal": "sp",
+    "minLevel": 20,
+    "oneWay": false,
+    "fee": 1000
+   }
+  },
+  {
+   "id": "orfe_V311",
+   "name": "大魔導師オルフェ",
+   "map": "V311",
+   "x": 328,
+   "y": 256,
+   "role": "job"
+  },
+  {
+   "id": "sera",
+   "name": "試験官セラ",
+   "map": "V311",
+   "x": 472,
+   "y": 256
+  },
+  {
+   "id": "dorga",
+   "name": "戦士長ドルガ",
+   "map": "V400",
+   "x": 560,
+   "y": 388,
+   "role": "job"
+  },
+  {
+   "id": "gantetsu",
+   "name": "武器屋ガンテツ",
+   "map": "V400",
+   "x": 392,
+   "y": 532,
+   "role": "weapon"
+  },
+  {
+   "id": "hagane",
+   "name": "防具屋ハガネ",
+   "map": "V400",
+   "x": 808,
+   "y": 532,
+   "role": "armor"
+  },
+  {
+   "id": "ginger",
+   "name": "薬屋ジンジャー",
+   "map": "V400",
+   "x": 1160,
+   "y": 532,
+   "role": "potion",
+   "shop": "shop.V400.potion"
+  },
+  {
+   "id": "iwa",
+   "name": "倉庫番イワ",
+   "map": "V400",
+   "x": 1544,
+   "y": 532,
+   "role": "storage"
+  },
+  {
+   "id": "rossi",
+   "name": "発掘隊長ロッシ",
+   "map": "V400",
+   "x": 1896,
+   "y": 532
+  },
+  {
+   "id": "toto",
+   "name": "祈祷師トト",
+   "map": "V400",
+   "x": 2040,
+   "y": 388
+  },
+  {
+   "id": "kaji",
+   "name": "鍛冶屋カジ",
+   "map": "V400",
+   "x": 2312,
+   "y": 532
+  },
+  {
+   "id": "dorga_V413",
+   "name": "戦士長ドルガ",
+   "map": "V413",
+   "x": 328,
+   "y": 328,
+   "role": "job"
+  },
+  {
+   "id": "block",
+   "name": "試験官ブロック",
+   "map": "V413",
+   "x": 472,
+   "y": 328
+  },
+  {
+   "id": "yami",
+   "name": "影の頭領ヤミ",
+   "map": "V500",
+   "x": 1104,
+   "y": 376,
+   "role": "job"
+  },
+  {
+   "id": "sue",
+   "name": "ナイフ屋スー",
+   "map": "V500",
+   "x": 432,
+   "y": 504,
+   "role": "weapon"
+  },
+  {
+   "id": "kuroe",
+   "name": "防具屋クロエ",
+   "map": "V500",
+   "x": 928,
+   "y": 504,
+   "role": "armor"
+  },
+  {
+   "id": "kusuri",
+   "name": "薬屋クスリ",
+   "map": "V500",
+   "x": 1408,
+   "y": 504,
+   "role": "potion",
+   "shop": "shop.V500.potion"
+  },
+  {
+   "id": "kinko",
+   "name": "倉庫番キンコ",
+   "map": "V500",
+   "x": 1904,
+   "y": 504,
+   "role": "storage"
+  },
+  {
+   "id": "tetsu",
+   "name": "駅員テツ",
+   "map": "V500",
+   "x": 2392,
+   "y": 504
+  },
+  {
+   "id": "bolt",
+   "name": "工事の親方ボルト",
+   "map": "V500",
+   "x": 2880,
+   "y": 504
+  },
+  {
+   "id": "nez",
+   "name": "情報屋ネズ",
+   "map": "V500",
+   "x": 2288,
+   "y": 376
+  },
+  {
+   "id": "yami_V513",
+   "name": "影の頭領ヤミ",
+   "map": "V513",
+   "x": 328,
+   "y": 248,
+   "role": "job"
+  },
+  {
+   "id": "jill",
+   "name": "試験官ジル",
+   "map": "V513",
+   "x": 472,
+   "y": 248
+  },
+  {
+   "id": "rat",
+   "name": "受付ラット",
+   "map": "V515",
+   "x": 328,
+   "y": 200
+  },
+  {
+   "id": "kago",
+   "name": "荷物番のカゴ",
+   "map": "V707",
+   "x": 320,
+   "y": 668
+  },
+  {
+   "id": "nemu",
+   "name": "宿屋のネム",
+   "map": "V600",
+   "x": 368,
+   "y": 368,
+   "inn": 100
+  },
+  {
+   "id": "mayu",
+   "name": "薬屋のマユ",
+   "map": "V600",
+   "x": 712,
+   "y": 368,
+   "role": "potion",
+   "shop": "shop.V600.potion"
+  },
+  {
+   "id": "koro",
+   "name": "雑貨屋のコロ",
+   "map": "V600",
+   "x": 1056,
+   "y": 368
+  },
+  {
+   "id": "yuu",
+   "name": "温泉番ユウ",
+   "map": "V600",
+   "x": 1336,
+   "y": 368
+  },
+  {
+   "id": "sig",
+   "name": "封印の番人シグ",
+   "map": "V600",
+   "x": 1744,
+   "y": 353
+  },
+  {
+   "id": "doc",
+   "name": "学者ドク",
+   "map": "V600",
+   "x": 2088,
+   "y": 368
+  },
+  {
+   "id": "nagi",
+   "name": "倉庫番ナギ",
+   "map": "V600",
+   "x": 2432,
+   "y": 368,
+   "role": "storage"
+  },
+  {
+   "id": "stella",
+   "name": "都の巫女ステラ",
+   "map": "C100",
+   "x": 600,
+   "y": 508
+  },
+  {
+   "id": "hana",
+   "name": "庭師ハナ",
+   "map": "C100",
+   "x": 408,
+   "y": 644
+  },
+  {
+   "id": "xeno",
+   "name": "塔の魔導師ゼノ",
+   "map": "C100",
+   "x": 2144,
+   "y": 508
+  },
+  {
+   "id": "kumo",
+   "name": "武器屋クモ",
+   "map": "C100",
+   "x": 840,
+   "y": 644,
+   "role": "weapon"
+  },
+  {
+   "id": "shiro",
+   "name": "防具屋シロ",
+   "map": "C100",
+   "x": 1200,
+   "y": 644,
+   "role": "armor"
+  },
+  {
+   "id": "hikari",
+   "name": "薬屋ヒカリ",
+   "map": "C100",
+   "x": 1528,
+   "y": 644,
+   "role": "potion",
+   "shop": "shop.C100.potion"
+  },
+  {
+   "id": "tsumu",
+   "name": "倉庫番ツム",
+   "map": "C100",
+   "x": 2000,
+   "y": 644,
+   "role": "storage"
+  },
+  {
+   "id": "ceres_taxi",
+   "name": "タクシーの運転手フワ",
+   "map": "C100",
+   "x": 2400,
+   "y": 644,
+   "travel": {
+    "to": "F100",
+    "toPortal": "sp",
+    "minLevel": 40,
+    "oneWay": false,
+    "fee": 2000
+   }
+  },
+  {
+   "id": "luna",
+   "name": "駅員ルナ",
+   "map": "C101",
+   "x": 328,
+   "y": 336,
+   "travel": {
+    "to": "V310",
+    "toPortal": "sp",
+    "minLevel": 0,
+    "oneWay": false,
+    "fee": 1000
+   }
+  },
+  {
+   "id": "sora",
+   "name": "ティンクル行きの係ソラ",
+   "map": "C101",
+   "x": 472,
+   "y": 336,
+   "travel": {
+    "to": "T101",
+    "toPortal": "sp",
+    "minLevel": 0,
+    "oneWay": false,
+    "fee": 1000
+   }
+  },
+  {
+   "id": "hashi",
+   "name": "天の階段の船頭",
+   "map": "C101",
+   "x": 608,
+   "y": 336,
+   "travel": {
+    "to": "P100",
+    "toPortal": "sp",
+    "minLevel": 80,
+    "oneWay": false,
+    "fee": 2000
+   }
+  },
+  {
+   "id": "tsubasa",
+   "name": "大きな鳥の係ツバサ",
+   "map": "C101",
+   "x": 752,
+   "y": 336,
+   "travel": {
+    "to": "D101",
+    "toPortal": "sp",
+    "minLevel": 90,
+    "oneWay": false,
+    "fee": 3000
+   }
+  },
+  {
+   "id": "nefe",
+   "name": "受付ネフェ",
+   "map": "C117",
+   "x": 328,
+   "y": 256
+  },
+  {
+   "id": "kaze",
+   "name": "雲の船の水夫カゼ",
+   "map": "C118",
+   "x": 328,
+   "y": 520,
+   "travel": {
+    "to": "C101",
+    "toPortal": "sp",
+    "minLevel": 0,
+    "oneWay": false,
+    "fee": 0
+   }
+  },
+  {
+   "id": "van",
+   "name": "村長ヴァン",
+   "map": "F100",
+   "x": 336,
+   "y": 352
+  },
+  {
+   "id": "borg",
+   "name": "猟師ボルグ",
+   "map": "F100",
+   "x": 600,
+   "y": 352
+  },
+  {
+   "id": "yuki",
+   "name": "雪ん子ユキ",
+   "map": "F100",
+   "x": 864,
+   "y": 352
+  },
+  {
+   "id": "zack",
+   "name": "坑道の番人ザック",
+   "map": "F100",
+   "x": 1160,
+   "y": 352
+  },
+  {
+   "id": "tsurara",
+   "name": "武器屋ツララ",
+   "map": "F100",
+   "x": 1328,
+   "y": 352,
+   "role": "weapon"
+  },
+  {
+   "id": "mofu",
+   "name": "防具屋モフ",
+   "map": "F100",
+   "x": 1664,
+   "y": 328,
+   "role": "armor"
+  },
+  {
+   "id": "danro",
+   "name": "薬屋ダンロ",
+   "map": "F100",
+   "x": 1944,
+   "y": 352,
+   "role": "potion",
+   "shop": "shop.F100.potion"
+  },
+  {
+   "id": "yukimi",
+   "name": "倉庫番ユキミ",
+   "map": "F100",
+   "x": 2200,
+   "y": 352,
+   "role": "storage"
+  },
+  {
+   "id": "hyoga_taxi",
+   "name": "そりの御者トナ",
+   "map": "F100",
+   "x": 2464,
+   "y": 352,
+   "travel": {
+    "to": "C100",
+    "toPortal": "sp",
+    "minLevel": 40,
+    "oneWay": false,
+    "fee": 2000
+   }
+  },
+  {
+   "id": "glen",
+   "name": "戦士の長老グレン",
+   "map": "F117",
+   "x": 328,
+   "y": 328,
+   "role": "job"
+  },
+  {
+   "id": "frost",
+   "name": "魔法使いの長老フロスト",
+   "map": "F117",
+   "x": 496,
+   "y": 328,
+   "role": "job"
+  },
+  {
+   "id": "heine",
+   "name": "弓使いの長老ハイネ",
+   "map": "F117",
+   "x": 608,
+   "y": 328,
+   "role": "job"
+  },
+  {
+   "id": "mist",
+   "name": "盗賊の長老ミスト",
+   "map": "F117",
+   "x": 752,
+   "y": 328,
+   "role": "job"
+  },
+  {
+   "id": "keel",
+   "name": "海賊の長老キール",
+   "map": "F117",
+   "x": 888,
+   "y": 328,
+   "role": "job"
+  },
+  {
+   "id": "glen_F107",
+   "name": "戦士の長老グレン",
+   "map": "F107",
+   "x": 328,
+   "y": 772,
+   "role": "job"
+  },
+  {
+   "id": "frost_F107",
+   "name": "魔法使いの長老フロスト",
+   "map": "F107",
+   "x": 472,
+   "y": 772,
+   "role": "job"
+  },
+  {
+   "id": "heine_F107",
+   "name": "弓使いの長老ハイネ",
+   "map": "F107",
+   "x": 576,
+   "y": 772,
+   "role": "job"
+  },
+  {
+   "id": "mist_F107",
+   "name": "盗賊の長老ミスト",
+   "map": "F107",
+   "x": 736,
+   "y": 772,
+   "role": "job"
+  },
+  {
+   "id": "keel_F107",
+   "name": "海賊の長老キール",
+   "map": "F107",
+   "x": 888,
+   "y": 742,
+   "role": "job"
+  },
+  {
+   "id": "dorga_F118",
+   "name": "戦士長ドルガ",
+   "map": "F118",
+   "x": 304,
+   "y": 200,
+   "role": "job"
+  },
+  {
+   "id": "orfe_F118",
+   "name": "大魔導師オルフェ",
+   "map": "F118",
+   "x": 400,
+   "y": 200,
+   "role": "job"
+  },
+  {
+   "id": "erna_F118",
+   "name": "弓の師範エルナ",
+   "map": "F118",
+   "x": 496,
+   "y": 200,
+   "role": "job"
+  },
+  {
+   "id": "yami_F118",
+   "name": "影の頭領ヤミ",
+   "map": "F118",
+   "x": 592,
+   "y": 200,
+   "role": "job"
+  },
+  {
+   "id": "rio_F118",
+   "name": "キャプテン・リオ",
+   "map": "F118",
+   "x": 688,
+   "y": 200,
+   "role": "job"
+  },
+  {
+   "id": "toy",
+   "name": "町長トイ",
+   "map": "T100",
+   "x": 344,
+   "y": 520
+  },
+  {
+   "id": "ruru",
+   "name": "人形師ルル",
+   "map": "T100",
+   "x": 736,
+   "y": 520
+  },
+  {
+   "id": "buro",
+   "name": "積み木職人ブロ",
+   "map": "T100",
+   "x": 1096,
+   "y": 520
+  },
+  {
+   "id": "clock",
+   "name": "時計番のクロック婆",
+   "map": "T100",
+   "x": 536,
+   "y": 376
+  },
+  {
+   "id": "zenmai",
+   "name": "武器屋ゼンマイ",
+   "map": "T100",
+   "x": 1440,
+   "y": 520,
+   "role": "weapon"
+  },
+  {
+   "id": "wata",
+   "name": "防具屋ワタ",
+   "map": "T100",
+   "x": 1848,
+   "y": 520,
+   "role": "armor"
+  },
+  {
+   "id": "ame",
+   "name": "薬屋アメ",
+   "map": "T100",
+   "x": 2216,
+   "y": 520,
+   "role": "potion",
+   "shop": "shop.T100.potion"
+  },
+  {
+   "id": "hakobe",
+   "name": "倉庫番ハコベ",
+   "map": "T100",
+   "x": 2576,
+   "y": 520,
+   "role": "storage"
+  },
+  {
+   "id": "kippu",
+   "name": "ティンクルの駅員キップ",
+   "map": "T101",
+   "x": 328,
+   "y": 260,
+   "travel": {
+    "to": "C101",
+    "toPortal": "sp",
+    "minLevel": 0,
+    "oneWay": false,
+    "fee": 1000
+   }
+  },
+  {
+   "id": "gear",
+   "name": "受付ギア",
+   "map": "T118",
+   "x": 328,
+   "y": 328
+  },
+  {
+   "id": "paz",
+   "name": "受付パズ",
+   "map": "T119",
+   "x": 328,
+   "y": 336
+  },
+  {
+   "id": "ruri",
+   "name": "女王の侍女ルリ",
+   "map": "M100",
+   "x": 664,
+   "y": 388
+  },
+  {
+   "id": "awaji",
+   "name": "泡職人アワジ",
+   "map": "M100",
+   "x": 368,
+   "y": 532
+  },
+  {
+   "id": "shio",
+   "name": "料理人シオ",
+   "map": "M100",
+   "x": 784,
+   "y": 532
+  },
+  {
+   "id": "marin",
+   "name": "近衛兵マリン",
+   "map": "M100",
+   "x": 2200,
+   "y": 388
+  },
+  {
+   "id": "sango",
+   "name": "武器屋サンゴ",
+   "map": "M100",
+   "x": 1248,
+   "y": 532,
+   "role": "weapon"
+  },
+  {
+   "id": "kai_m",
+   "name": "防具屋カイガラ",
+   "map": "M100",
+   "x": 1632,
+   "y": 532,
+   "role": "armor"
+  },
+  {
+   "id": "shizuku",
+   "name": "薬屋シズク",
+   "map": "M100",
+   "x": 2104,
+   "y": 532,
+   "role": "potion",
+   "shop": "shop.M100.potion"
+  },
+  {
+   "id": "tsubo",
+   "name": "倉庫番ツボ",
+   "map": "M100",
+   "x": 2512,
+   "y": 532,
+   "role": "storage"
+  },
+  {
+   "id": "norma",
+   "name": "潜水船の船長ノーマ",
+   "map": "M113",
+   "x": 328,
+   "y": 256,
+   "travel": {
+    "to": "V100",
+    "toPortal": "sp",
+    "minLevel": 0,
+    "oneWay": false,
+    "fee": 1500
+   }
+  },
+  {
+   "id": "shell",
+   "name": "受付シェル",
+   "map": "M114",
+   "x": 328,
+   "y": 200
+  },
+  {
+   "id": "alma",
+   "name": "神殿の巫女アルマ",
+   "map": "P100",
+   "x": 352,
+   "y": 360
+  },
+  {
+   "id": "inori",
+   "name": "薬屋イノリ",
+   "map": "P100",
+   "x": 648,
+   "y": 360,
+   "role": "potion",
+   "shop": "shop.P100.potion"
+  },
+  {
+   "id": "ishi",
+   "name": "倉庫番イシ",
+   "map": "P100",
+   "x": 952,
+   "y": 336,
+   "role": "storage"
+  },
+  {
+   "id": "p_boat",
+   "name": "雲の船の船頭ミチ",
+   "map": "P100",
+   "x": 1248,
+   "y": 360,
+   "travel": {
+    "to": "C101",
+    "toPortal": "sp",
+    "minLevel": 0,
+    "oneWay": false,
+    "fee": 2000
+   }
+  },
+  {
+   "id": "haruka",
+   "name": "村長ハルカ",
+   "map": "D100",
+   "x": 416,
+   "y": 516
+  },
+  {
+   "id": "doran",
+   "name": "鍛冶屋ドラン",
+   "map": "D100",
+   "x": 800,
+   "y": 516
+  },
+  {
+   "id": "uroko",
+   "name": "武器屋ウロコ",
+   "map": "D100",
+   "x": 1280,
+   "y": 516,
+   "role": "weapon"
+  },
+  {
+   "id": "hone",
+   "name": "防具屋ホネ",
+   "map": "D100",
+   "x": 1720,
+   "y": 516,
+   "role": "armor"
+  },
+  {
+   "id": "tsume",
+   "name": "薬屋ツメ",
+   "map": "D100",
+   "x": 2152,
+   "y": 516,
+   "role": "potion",
+   "shop": "shop.D100.potion"
+  },
+  {
+   "id": "su",
+   "name": "倉庫番ス",
+   "map": "D100",
+   "x": 2584,
+   "y": 516,
+   "role": "storage"
+  },
+  {
+   "id": "hawk",
+   "name": "鳥使いホーク",
+   "map": "D101",
+   "x": 328,
+   "y": 328,
+   "travel": {
+    "to": "E100",
+    "toPortal": "sp",
+    "minLevel": 150,
+    "oneWay": false,
+    "fee": 5000,
+    "requiresQuest": "L-12"
+   }
+  },
+  {
+   "id": "hane",
+   "name": "鳥の世話係ハネ",
+   "map": "D101",
+   "x": 464,
+   "y": 328,
+   "travel": {
+    "to": "C101",
+    "toPortal": "sp",
+    "minLevel": 0,
+    "oneWay": false,
+    "fee": 3000
+   }
+  },
+  {
+   "id": "vald",
+   "name": "竜の大老ヴァルド",
+   "map": "D115",
+   "x": 328,
+   "y": 248,
+   "role": "job"
+  },
+  {
+   "id": "nest",
+   "name": "受付ネスト",
+   "map": "D116",
+   "x": 328,
+   "y": 260
+  },
+  {
+   "id": "garon",
+   "name": "野営地の隊長ガロン",
+   "map": "H100",
+   "x": 392,
+   "y": 344
+  },
+  {
+   "id": "igni",
+   "name": "巨像の試練の番人イグニ",
+   "map": "H100",
+   "x": 768,
+   "y": 344
+  },
+  {
+   "id": "hinoko",
+   "name": "薬屋ヒノコ",
+   "map": "H100",
+   "x": 1152,
+   "y": 344,
+   "role": "potion",
+   "shop": "shop.H100.potion"
+  },
+  {
+   "id": "sumi",
+   "name": "倉庫番スミ",
+   "map": "H100",
+   "x": 1528,
+   "y": 344,
+   "role": "storage"
+  },
+  {
+   "id": "astra",
+   "name": "塔の主アストラ",
+   "map": "E100",
+   "x": 440,
+   "y": 516
+  },
+  {
+   "id": "hoshi",
+   "name": "薬屋ホシ",
+   "map": "E100",
+   "x": 920,
+   "y": 516,
+   "role": "potion",
+   "shop": "shop.E100.potion"
+  },
+  {
+   "id": "kuzu",
+   "name": "倉庫番クズ",
+   "map": "E100",
+   "x": 1424,
+   "y": 516,
+   "role": "storage"
   }
  ]
 }

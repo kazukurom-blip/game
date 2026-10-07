@@ -1,0 +1,302 @@
+{
+ "id": "V400",
+ "name": "ガルド岩台",
+ "region": "V",
+ "type": "町",
+ "width": 2700,
+ "height": 612,
+ "bgm": "town_gard",
+ "bg": "rock_town",
+ "theme": "townTall",
+ "returnMap": "V400",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     532
+    ],
+    [
+     2700,
+     532
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     173,
+     388
+    ],
+    [
+     1095,
+     388
+    ]
+   ]
+  },
+  {
+   "id": "p2",
+   "points": [
+    [
+     1584,
+     388
+    ],
+    [
+     2502,
+     388
+    ]
+   ]
+  },
+  {
+   "id": "p3",
+   "points": [
+    [
+     221,
+     252
+    ],
+    [
+     1244,
+     252
+    ]
+   ]
+  },
+  {
+   "id": "p4",
+   "points": [
+    [
+     1525,
+     252
+    ],
+    [
+     2532,
+     252
+    ]
+   ]
+  },
+  {
+   "id": "s5",
+   "points": [
+    [
+     1472,
+     436
+    ],
+    [
+     1632,
+     436
+    ]
+   ]
+  },
+  {
+   "id": "s6",
+   "points": [
+    [
+     1360,
+     484
+    ],
+    [
+     1520,
+     484
+    ]
+   ]
+  },
+  {
+   "id": "s10",
+   "points": [
+    [
+     512,
+     204
+    ],
+    [
+     680,
+     204
+    ]
+   ]
+  },
+  {
+   "id": "s11",
+   "points": [
+    [
+     2104,
+     200
+    ],
+    [
+     2288,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 245,
+   "top": 388,
+   "bottom": 512,
+   "ladder": false
+  },
+  {
+   "x": 869,
+   "top": 388,
+   "bottom": 512,
+   "ladder": false
+  },
+  {
+   "x": 1752,
+   "top": 388,
+   "bottom": 512,
+   "ladder": false
+  },
+  {
+   "x": 309,
+   "top": 252,
+   "bottom": 368,
+   "ladder": false
+  },
+  {
+   "x": 1085,
+   "top": 252,
+   "bottom": 368,
+   "ladder": false
+  },
+  {
+   "x": 1661,
+   "top": 252,
+   "bottom": 368,
+   "ladder": false
+  },
+  {
+   "x": 2245,
+   "top": 252,
+   "bottom": 368,
+   "ladder": false
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 1376,
+   "y": 532
+  },
+  {
+   "name": "town",
+   "type": "town",
+   "x": 1392,
+   "y": 532
+  },
+  {
+   "name": "to_V401",
+   "type": "visible",
+   "x": 56,
+   "y": 532,
+   "to": "V401",
+   "toPortal": "to_V400"
+  },
+  {
+   "name": "to_V402",
+   "type": "visible",
+   "x": 2640,
+   "y": 532,
+   "to": "V402",
+   "toPortal": "to_V400"
+  },
+  {
+   "name": "to_V408",
+   "type": "visible",
+   "x": 736,
+   "y": 252,
+   "to": "V408",
+   "toPortal": "to_V400"
+  },
+  {
+   "name": "to_V413",
+   "type": "visible",
+   "x": 1336,
+   "y": 532,
+   "to": "V413",
+   "toPortal": "to_V400"
+  },
+  {
+   "name": "to_V414",
+   "type": "visible",
+   "x": 632,
+   "y": 388,
+   "to": "V414",
+   "toPortal": "to_V400"
+  },
+  {
+   "name": "to_V090",
+   "type": "visible",
+   "x": 1968,
+   "y": 532,
+   "to": "V090",
+   "toPortal": "to_V400"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "gantetsu",
+   "name": "武器屋ガンテツ",
+   "x": 392,
+   "y": 532,
+   "role": "weapon"
+  },
+  {
+   "id": "hagane",
+   "name": "防具屋ハガネ",
+   "x": 808,
+   "y": 532,
+   "role": "armor"
+  },
+  {
+   "id": "ginger",
+   "name": "薬屋ジンジャー",
+   "x": 1160,
+   "y": 532,
+   "role": "potion",
+   "shop": "shop.V400.potion"
+  },
+  {
+   "id": "iwa",
+   "name": "倉庫番イワ",
+   "x": 1544,
+   "y": 532,
+   "role": "storage"
+  },
+  {
+   "id": "rossi",
+   "name": "発掘隊長ロッシ",
+   "x": 1896,
+   "y": 532
+  },
+  {
+   "id": "kaji",
+   "name": "鍛冶屋カジ",
+   "x": 2312,
+   "y": 532
+  },
+  {
+   "id": "dorga",
+   "name": "戦士長ドルガ",
+   "x": 560,
+   "y": 388,
+   "role": "job"
+  },
+  {
+   "id": "toto",
+   "name": "祈祷師トト",
+   "x": 2040,
+   "y": 388
+  }
+ ],
+ "objects": [],
+ "note": "赤い岩の台地の町。戦士の転職官、武器屋（剣・斧・鈍器・槍）。",
+ "seed": "V400#0"
+}

@@ -1,0 +1,81 @@
+{
+ "id": "T101",
+ "name": "ティンクルの駅",
+ "region": "T",
+ "type": "移",
+ "width": 1120,
+ "height": 340,
+ "bgm": "town_tinkle",
+ "bg": "toy_station",
+ "theme": "room",
+ "returnMap": "T100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     260
+    ],
+    [
+     1120,
+     260
+    ]
+   ]
+  },
+  {
+   "id": "s1",
+   "points": [
+    [
+     216,
+     200
+    ],
+    [
+     440,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 260
+  },
+  {
+   "name": "to_T100",
+   "type": "visible",
+   "x": 56,
+   "y": 260,
+   "to": "T100",
+   "toPortal": "to_T101"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "kippu",
+   "name": "ティンクルの駅員キップ",
+   "x": 328,
+   "y": 260,
+   "travel": {
+    "to": "C101",
+    "toPortal": "sp",
+    "minLevel": 0,
+    "oneWay": false,
+    "fee": 1000
+   }
+  }
+ ],
+ "objects": [],
+ "note": "セレスへの雲の船。",
+ "seed": "T101#0"
+}

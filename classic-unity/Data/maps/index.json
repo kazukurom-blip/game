@@ -3,67 +3,1406 @@
   {
    "id": "S000",
    "name": "目覚めの浜",
-   "type": "特"
+   "type": "特",
+   "theme": "island"
   },
   {
    "id": "S001",
    "name": "はじめの小道",
-   "type": "狩"
+   "type": "狩",
+   "theme": "island"
   },
   {
    "id": "S002",
    "name": "はしごの丘",
-   "type": "狩"
+   "type": "狩",
+   "theme": "island"
   },
   {
    "id": "S003",
    "name": "芽吹き村",
-   "type": "町"
+   "type": "町",
+   "theme": "island"
   },
   {
    "id": "S004",
    "name": "村の畑",
-   "type": "狩"
+   "type": "狩",
+   "theme": "island"
   },
   {
    "id": "S005",
    "name": "キノコの林",
-   "type": "狩"
+   "type": "狩",
+   "theme": "island"
   },
   {
    "id": "S006",
    "name": "東の崖",
-   "type": "狩"
+   "type": "狩",
+   "theme": "island"
   },
   {
    "id": "S007",
    "name": "スライムの泉",
-   "type": "狩"
+   "type": "狩",
+   "theme": "island"
   },
   {
    "id": "S008",
    "name": "島の高台",
-   "type": "狩"
+   "type": "狩",
+   "theme": "island"
   },
   {
    "id": "S009",
    "name": "大コロ貝の浜",
-   "type": "狩"
+   "type": "狩",
+   "theme": "island"
   },
   {
    "id": "S010",
    "name": "旅立ちの桟橋",
-   "type": "移"
+   "type": "移",
+   "theme": "island"
   },
   {
    "id": "S011",
    "name": "村の訓練所",
-   "type": "特"
+   "type": "特",
+   "theme": "island"
   },
   {
    "id": "V100",
    "name": "ブリーズ港",
-   "type": "町"
+   "type": "町",
+   "theme": "town"
+  },
+  {
+   "id": "V101",
+   "name": "港の南の浜",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "V102",
+   "name": "灯台の下",
+   "type": "狩",
+   "theme": "tower"
+  },
+  {
+   "id": "V103",
+   "name": "港の北の小道",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "V104",
+   "name": "岩場の入江",
+   "type": "狩",
+   "theme": "cliff"
+  },
+  {
+   "id": "V105",
+   "name": "しずくの洞窟",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "V106",
+   "name": "港の外れの沼",
+   "type": "狩",
+   "theme": "swamp"
+  },
+  {
+   "id": "V107",
+   "name": "潮風号",
+   "type": "町",
+   "theme": "ship"
+  },
+  {
+   "id": "V108",
+   "name": "潮風号の甲板",
+   "type": "特",
+   "theme": "ship"
+  },
+  {
+   "id": "V109",
+   "name": "港の裏山",
+   "type": "狩",
+   "theme": "cliff"
+  },
+  {
+   "id": "V090",
+   "name": "にぎわい市場",
+   "type": "町",
+   "theme": "town"
+  },
+  {
+   "id": "V700",
+   "name": "港の街道 1",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "V701",
+   "name": "港の街道 2",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "V702",
+   "name": "丘と森の街道",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "V703",
+   "name": "森と岩の街道 1",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "V704",
+   "name": "森と岩の街道 2",
+   "type": "狩",
+   "theme": "cliff"
+  },
+  {
+   "id": "V705",
+   "name": "岩と街の街道",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "V706",
+   "name": "沼の街道",
+   "type": "狩",
+   "theme": "swamp"
+  },
+  {
+   "id": "V707",
+   "name": "中央の分かれ道",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "V708",
+   "name": "ねむりの森の入口",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "V200",
+   "name": "ポム丘",
+   "type": "町",
+   "theme": "townHill"
+  },
+  {
+   "id": "V201",
+   "name": "ポム丘の南の原",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "V202",
+   "name": "風車の原",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "V203",
+   "name": "花畑",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "V204",
+   "name": "ミドリダケの林",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "V205",
+   "name": "アオダケの森",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "V206",
+   "name": "クマバチの巣",
+   "type": "狩",
+   "theme": "cave"
+  },
+  {
+   "id": "V207",
+   "name": "カカシの畑",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "V208",
+   "name": "キノコの広場",
+   "type": "ボ",
+   "theme": "arena"
+  },
+  {
+   "id": "V209",
+   "name": "ポム丘の狩り場 1",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "V210",
+   "name": "ポム丘の狩り場 2",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "V211",
+   "name": "弓の修練場",
+   "type": "特",
+   "theme": "room"
+  },
+  {
+   "id": "V212",
+   "name": "ポム丘の東の丘",
+   "type": "狩",
+   "theme": "cliff"
+  },
+  {
+   "id": "V300",
+   "name": "シルワ森都",
+   "type": "町",
+   "theme": "townTall"
+  },
+  {
+   "id": "V301",
+   "name": "森の入口",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "V302",
+   "name": "スライムの池",
+   "type": "狩",
+   "theme": "swamp"
+  },
+  {
+   "id": "V303",
+   "name": "ヒトツメの森",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "V304",
+   "name": "妖精の木立",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "V305",
+   "name": "つるの迷い道",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "V306",
+   "name": "サルの木",
+   "type": "狩",
+   "theme": "tower"
+  },
+  {
+   "id": "V307",
+   "name": "深い森",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "V308",
+   "name": "フクロウの夜森",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "V309",
+   "name": "大樹の根元",
+   "type": "ボ",
+   "theme": "arena"
+  },
+  {
+   "id": "V310",
+   "name": "森都の駅",
+   "type": "移",
+   "theme": "room"
+  },
+  {
+   "id": "V311",
+   "name": "魔法の修練場",
+   "type": "特",
+   "theme": "room"
+  },
+  {
+   "id": "V312",
+   "name": "木の上の小道",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "V400",
+   "name": "ガルド岩台",
+   "type": "町",
+   "theme": "townTall"
+  },
+  {
+   "id": "V401",
+   "name": "岩台の西の道",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "V402",
+   "name": "切り株の丘",
+   "type": "狩",
+   "theme": "cliff"
+  },
+  {
+   "id": "V403",
+   "name": "斧の原",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "V404",
+   "name": "黒い斧の丘",
+   "type": "狩",
+   "theme": "cliff"
+  },
+  {
+   "id": "V405",
+   "name": "イノシシの谷",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "V406",
+   "name": "燃える岩場",
+   "type": "狩",
+   "theme": "cliff"
+  },
+  {
+   "id": "V407",
+   "name": "鉄の牧場",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "V408",
+   "name": "発掘場の入口",
+   "type": "狩",
+   "theme": "cave"
+  },
+  {
+   "id": "V409",
+   "name": "発掘場（骨犬の層）",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "V410",
+   "name": "発掘場（ミイラの層）",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "V411",
+   "name": "古い戦場",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "V412",
+   "name": "大将の墓所",
+   "type": "ボ",
+   "theme": "arena"
+  },
+  {
+   "id": "V413",
+   "name": "戦士の修練場",
+   "type": "特",
+   "theme": "room"
+  },
+  {
+   "id": "V414",
+   "name": "岩台の頂",
+   "type": "狩",
+   "theme": "cliff"
+  },
+  {
+   "id": "V500",
+   "name": "クロウ街",
+   "type": "町",
+   "theme": "townTall"
+  },
+  {
+   "id": "V501",
+   "name": "路地裏",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "V502",
+   "name": "工事現場 1",
+   "type": "狩",
+   "theme": "cave"
+  },
+  {
+   "id": "V503",
+   "name": "工事現場 2",
+   "type": "狩",
+   "theme": "tower"
+  },
+  {
+   "id": "V504",
+   "name": "工事現場 3",
+   "type": "狩",
+   "theme": "tower"
+  },
+  {
+   "id": "V505",
+   "name": "地下鉄の入口",
+   "type": "狩",
+   "theme": "cave"
+  },
+  {
+   "id": "V506",
+   "name": "地下鉄 1 番線",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "V507",
+   "name": "地下鉄 2 番線",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "V508",
+   "name": "沼の入口",
+   "type": "狩",
+   "theme": "swamp"
+  },
+  {
+   "id": "V509",
+   "name": "ワニの沼",
+   "type": "狩",
+   "theme": "swamp"
+  },
+  {
+   "id": "V510",
+   "name": "深い沼",
+   "type": "狩",
+   "theme": "swamp"
+  },
+  {
+   "id": "V511",
+   "name": "下水道",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "V512",
+   "name": "下水の奥",
+   "type": "ボ",
+   "theme": "arena"
+  },
+  {
+   "id": "V513",
+   "name": "盗賊のアジト",
+   "type": "特",
+   "theme": "room"
+  },
+  {
+   "id": "V514",
+   "name": "クロウ街の屋上",
+   "type": "狩",
+   "theme": "townTall"
+  },
+  {
+   "id": "V516",
+   "name": "裏路地の試練",
+   "type": "特",
+   "theme": "rooms"
+  },
+  {
+   "id": "V515",
+   "name": "裏路地の試練（入口）",
+   "type": "特",
+   "theme": "room"
+  },
+  {
+   "id": "V600",
+   "name": "ねむり谷",
+   "type": "町",
+   "theme": "town"
+  },
+  {
+   "id": "V601",
+   "name": "谷の森",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "V602",
+   "name": "アリの巣 入口",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "V603",
+   "name": "アリの巣 1",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "V604",
+   "name": "アリの巣 2",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "V605",
+   "name": "アリの巣 広間",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "V606",
+   "name": "地下の広間",
+   "type": "ボ",
+   "theme": "arena"
+  },
+  {
+   "id": "V607",
+   "name": "冷たい目の通路",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "V608",
+   "name": "ドレイクの洞窟 1",
+   "type": "洞",
+   "theme": "cliff"
+  },
+  {
+   "id": "V609",
+   "name": "ドレイクの洞窟 2",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "V610",
+   "name": "赤い洞窟",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "V611",
+   "name": "氷の洞窟",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "V612",
+   "name": "石の寺跡",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "V613",
+   "name": "黒い寺跡",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "V614",
+   "name": "苔の寺跡",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "V615",
+   "name": "牛の戦場",
+   "type": "洞",
+   "theme": "field"
+  },
+  {
+   "id": "V616",
+   "name": "牛の砦",
+   "type": "洞",
+   "theme": "tower"
+  },
+  {
+   "id": "V617",
+   "name": "封印の門",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "V618",
+   "name": "封印の間",
+   "type": "ボ",
+   "theme": "arena"
+  },
+  {
+   "id": "V619",
+   "name": "谷の温泉",
+   "type": "特",
+   "theme": "room"
+  },
+  {
+   "id": "V620",
+   "name": "谷の沼",
+   "type": "狩",
+   "theme": "swamp"
+  },
+  {
+   "id": "C100",
+   "name": "セレス",
+   "type": "町",
+   "theme": "townTall"
+  },
+  {
+   "id": "C101",
+   "name": "セレスの駅",
+   "type": "移",
+   "theme": "room"
+  },
+  {
+   "id": "C102",
+   "name": "雲の公園",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "C103",
+   "name": "星の庭",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "C104",
+   "name": "月の庭",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "C105",
+   "name": "日の庭",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "C106",
+   "name": "ハラペコの園",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "C107",
+   "name": "雲の塔 20 階",
+   "type": "洞",
+   "theme": "tower"
+  },
+  {
+   "id": "C108",
+   "name": "雲の塔 15 階",
+   "type": "洞",
+   "theme": "tower"
+  },
+  {
+   "id": "C109",
+   "name": "雲の塔 10 階",
+   "type": "洞",
+   "theme": "tower"
+  },
+  {
+   "id": "C110",
+   "name": "雲の塔 5 階",
+   "type": "洞",
+   "theme": "tower"
+  },
+  {
+   "id": "C111",
+   "name": "雲の塔 1 階",
+   "type": "洞",
+   "theme": "tower"
+  },
+  {
+   "id": "C112",
+   "name": "雲の上の道",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "C113",
+   "name": "天馬の丘",
+   "type": "狩",
+   "theme": "cliff"
+  },
+  {
+   "id": "C114",
+   "name": "雲の庭",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "C115",
+   "name": "祭壇への道",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "C116",
+   "name": "雲の祭壇",
+   "type": "ボ",
+   "theme": "arena"
+  },
+  {
+   "id": "C117",
+   "name": "雲の女神の塔（入口）",
+   "type": "特",
+   "theme": "room"
+  },
+  {
+   "id": "C119",
+   "name": "雲の女神の塔",
+   "type": "特",
+   "theme": "rooms"
+  },
+  {
+   "id": "C118",
+   "name": "雲の船（航行中）",
+   "type": "移",
+   "theme": "ship"
+  },
+  {
+   "id": "F100",
+   "name": "ヒョウガ村",
+   "type": "町",
+   "theme": "town"
+  },
+  {
+   "id": "F101",
+   "name": "村の外れ",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "F102",
+   "name": "氷の谷",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "F103",
+   "name": "白い牙の森",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "F104",
+   "name": "イエティの洞くつ",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "F105",
+   "name": "ペンギンの雪原",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "F106",
+   "name": "黒い雪の谷",
+   "type": "狩",
+   "theme": "cliff"
+  },
+  {
+   "id": "F107",
+   "name": "雪の頂への道",
+   "type": "狩",
+   "theme": "cliff"
+  },
+  {
+   "id": "F108",
+   "name": "雪の森の奥",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "F109",
+   "name": "獣の住処",
+   "type": "狩",
+   "theme": "cliff"
+  },
+  {
+   "id": "F110",
+   "name": "雪の頂の巣",
+   "type": "ボ",
+   "theme": "arena"
+  },
+  {
+   "id": "F111",
+   "name": "つぶれ坑道の入口",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "F112",
+   "name": "坑道 1",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "F113",
+   "name": "坑道 2",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "F114",
+   "name": "坑道 3",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "F115",
+   "name": "坑道の奥",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "F116",
+   "name": "焔の門",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "F117",
+   "name": "長老の家",
+   "type": "特",
+   "theme": "room"
+  },
+  {
+   "id": "F118",
+   "name": "修験の雪洞",
+   "type": "特",
+   "theme": "room"
+  },
+  {
+   "id": "T100",
+   "name": "ティンクル",
+   "type": "町",
+   "theme": "townTall"
+  },
+  {
+   "id": "T101",
+   "name": "ティンクルの駅",
+   "type": "移",
+   "theme": "room"
+  },
+  {
+   "id": "T102",
+   "name": "積み木の道",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "T103",
+   "name": "ぬいぐるみの広場",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "T104",
+   "name": "ブロックの庭",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "T105",
+   "name": "時計の小道",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "T106",
+   "name": "ネジの倉庫",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "T107",
+   "name": "木馬の回廊",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "T108",
+   "name": "積み木の広場",
+   "type": "ボ",
+   "theme": "arena"
+  },
+  {
+   "id": "T109",
+   "name": "おもちゃの工場",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "T110",
+   "name": "時計虫の部屋",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "T111",
+   "name": "工場の奥",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "T112",
+   "name": "時の塔 上の階",
+   "type": "洞",
+   "theme": "tower"
+  },
+  {
+   "id": "T113",
+   "name": "時の塔 中の階",
+   "type": "洞",
+   "theme": "tower"
+  },
+  {
+   "id": "T114",
+   "name": "時の塔 下の階",
+   "type": "洞",
+   "theme": "tower"
+  },
+  {
+   "id": "T115",
+   "name": "時の塔 深い階",
+   "type": "洞",
+   "theme": "tower"
+  },
+  {
+   "id": "T116",
+   "name": "時の塔 最下層の回廊",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "T117",
+   "name": "時の門",
+   "type": "ボ",
+   "theme": "arena"
+  },
+  {
+   "id": "T118",
+   "name": "からくり迷宮（入口）",
+   "type": "特",
+   "theme": "room"
+  },
+  {
+   "id": "T119",
+   "name": "おもちゃ箱の迷路（入口）",
+   "type": "特",
+   "theme": "room"
+  },
+  {
+   "id": "T121",
+   "name": "からくり迷宮",
+   "type": "特",
+   "theme": "rooms"
+  },
+  {
+   "id": "T122",
+   "name": "おもちゃ箱の迷路",
+   "type": "特",
+   "theme": "rooms"
+  },
+  {
+   "id": "T120",
+   "name": "海底エレベーター",
+   "type": "移",
+   "theme": "room"
+  },
+  {
+   "id": "M100",
+   "name": "マリナ",
+   "type": "町",
+   "theme": "townTall"
+  },
+  {
+   "id": "M101",
+   "name": "浅い海",
+   "type": "狩",
+   "theme": "swamp"
+  },
+  {
+   "id": "M102",
+   "name": "サンゴの森",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "M103",
+   "name": "カニの岩場",
+   "type": "狩",
+   "theme": "cliff"
+  },
+  {
+   "id": "M104",
+   "name": "タコの洞くつ",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "M105",
+   "name": "イカの海",
+   "type": "狩",
+   "theme": "swamp"
+  },
+  {
+   "id": "M106",
+   "name": "サメの通り道",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "M107",
+   "name": "骨の海",
+   "type": "狩",
+   "theme": "swamp"
+  },
+  {
+   "id": "M108",
+   "name": "暗い海",
+   "type": "狩",
+   "theme": "swamp"
+  },
+  {
+   "id": "M109",
+   "name": "冷たい海",
+   "type": "狩",
+   "theme": "swamp"
+  },
+  {
+   "id": "M110",
+   "name": "深海",
+   "type": "狩",
+   "theme": "cave"
+  },
+  {
+   "id": "M111",
+   "name": "海の溝",
+   "type": "狩",
+   "theme": "cliff"
+  },
+  {
+   "id": "M112",
+   "name": "溝の底",
+   "type": "ボ",
+   "theme": "arena"
+  },
+  {
+   "id": "M115",
+   "name": "沈没船",
+   "type": "特",
+   "theme": "rooms"
+  },
+  {
+   "id": "M113",
+   "name": "マリナの船着き場",
+   "type": "移",
+   "theme": "room"
+  },
+  {
+   "id": "M114",
+   "name": "沈没船の救出（入口）",
+   "type": "特",
+   "theme": "room"
+  },
+  {
+   "id": "P100",
+   "name": "神殿前の野営地",
+   "type": "町",
+   "theme": "town"
+  },
+  {
+   "id": "P101",
+   "name": "神殿の階段",
+   "type": "狩",
+   "theme": "cliff"
+  },
+  {
+   "id": "P102",
+   "name": "石の回廊",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "P103",
+   "name": "黄金の回廊",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "P104",
+   "name": "騎士の広間",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "P105",
+   "name": "祈りの間",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "P106",
+   "name": "ゴーレムの間",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "P107",
+   "name": "封印の回廊",
+   "type": "洞",
+   "theme": "tower"
+  },
+  {
+   "id": "P108",
+   "name": "残像の間",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "P109",
+   "name": "神殿の祭壇",
+   "type": "ボ",
+   "theme": "arena"
+  },
+  {
+   "id": "D100",
+   "name": "竜の背の村",
+   "type": "町",
+   "theme": "townTall"
+  },
+  {
+   "id": "D101",
+   "name": "鳥の発着場",
+   "type": "移",
+   "theme": "room"
+  },
+  {
+   "id": "D102",
+   "name": "村の外の森",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "D103",
+   "name": "ワイバーンの森 1",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "D104",
+   "name": "ワイバーンの森 2",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "D105",
+   "name": "黒い翼の谷",
+   "type": "狩",
+   "theme": "cliff"
+  },
+  {
+   "id": "D106",
+   "name": "骨の谷",
+   "type": "狩",
+   "theme": "cliff"
+  },
+  {
+   "id": "D107",
+   "name": "番兵の道",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "D108",
+   "name": "キメラの巣",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "D109",
+   "name": "炎の巣",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "D110",
+   "name": "氷の巣",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "D111",
+   "name": "雷の頂",
+   "type": "狩",
+   "theme": "cliff"
+  },
+  {
+   "id": "D112",
+   "name": "古竜の道",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "D113",
+   "name": "黒竜の洞くつ（試練の道）",
+   "type": "特",
+   "theme": "cave"
+  },
+  {
+   "id": "D114",
+   "name": "黒竜の洞くつ 最奥",
+   "type": "ボ",
+   "theme": "arena"
+  },
+  {
+   "id": "D117",
+   "name": "竜の巣",
+   "type": "特",
+   "theme": "rooms"
+  },
+  {
+   "id": "D115",
+   "name": "竜の聖堂",
+   "type": "特",
+   "theme": "room"
+  },
+  {
+   "id": "D116",
+   "name": "竜の巣の卵（入口）",
+   "type": "特",
+   "theme": "room"
+  },
+  {
+   "id": "H100",
+   "name": "焔の門前の野営地",
+   "type": "町",
+   "theme": "town"
+  },
+  {
+   "id": "H101",
+   "name": "溶岩の道",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "H102",
+   "name": "鬼火の洞",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "H103",
+   "name": "炎のゴーレムの間",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "H104",
+   "name": "灰の兵舎",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "H105",
+   "name": "マグマの川",
+   "type": "洞",
+   "theme": "swamp"
+  },
+  {
+   "id": "H106",
+   "name": "巨像の試練",
+   "type": "特",
+   "theme": "tower"
+  },
+  {
+   "id": "H107",
+   "name": "焔の祭壇",
+   "type": "ボ",
+   "theme": "arena"
+  },
+  {
+   "id": "E100",
+   "name": "星見の塔",
+   "type": "町",
+   "theme": "townTall"
+  },
+  {
+   "id": "E101",
+   "name": "星屑の道",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "E102",
+   "name": "廃都の門",
+   "type": "狩",
+   "theme": "cliff"
+  },
+  {
+   "id": "E103",
+   "name": "廃都の大通り",
+   "type": "狩",
+   "theme": "field"
+  },
+  {
+   "id": "E104",
+   "name": "天の野",
+   "type": "狩",
+   "theme": "forest"
+  },
+  {
+   "id": "E105",
+   "name": "星喰いの淵",
+   "type": "狩",
+   "theme": "cliff"
+  },
+  {
+   "id": "E106",
+   "name": "使徒の回廊",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "E107",
+   "name": "守り手の間",
+   "type": "洞",
+   "theme": "cave"
+  },
+  {
+   "id": "E108",
+   "name": "星の玉座",
+   "type": "ボ",
+   "theme": "arena"
   }
  ]
 }

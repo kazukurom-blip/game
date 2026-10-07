@@ -1,0 +1,123 @@
+{
+ "id": "C116",
+ "name": "雲の祭壇",
+ "region": "C",
+ "type": "ボ",
+ "lv": [
+  65,
+  75
+ ],
+ "width": 1920,
+ "height": 544,
+ "bgm": "boss_mid",
+ "bg": "cloud_altar",
+ "theme": "arena",
+ "returnMap": "C100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     464
+    ],
+    [
+     1920,
+     464
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     160,
+     320
+    ],
+    [
+     576,
+     320
+    ]
+   ]
+  },
+  {
+   "id": "p2",
+   "points": [
+    [
+     1344,
+     320
+    ],
+    [
+     1760,
+     320
+    ]
+   ]
+  },
+  {
+   "id": "p3",
+   "points": [
+    [
+     780,
+     200
+    ],
+    [
+     1140,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 416,
+   "top": 320,
+   "bottom": 444,
+   "ladder": false
+  },
+  {
+   "x": 1400,
+   "top": 320,
+   "bottom": 444,
+   "ladder": false
+  },
+  {
+   "x": 964,
+   "top": 200,
+   "bottom": 444,
+   "ladder": false
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 464
+  },
+  {
+   "name": "to_C115",
+   "type": "visible",
+   "x": 56,
+   "y": 464,
+   "to": "C115",
+   "toPortal": "to_C116"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [
+  {
+   "mob": "M119",
+   "x": 920,
+   "y": 464,
+   "intervalSec": 3600
+  }
+ ],
+ "npcs": [],
+ "objects": [],
+ "note": "雲の魔女。",
+ "seed": "C116#0"
+}

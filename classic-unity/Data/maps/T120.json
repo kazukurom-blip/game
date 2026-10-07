@@ -1,0 +1,75 @@
+{
+ "id": "T120",
+ "name": "海底エレベーター",
+ "region": "T",
+ "type": "移",
+ "width": 1160,
+ "height": 332,
+ "bgm": "field_toy",
+ "bg": "elevator",
+ "theme": "room",
+ "returnMap": "T100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     252
+    ],
+    [
+     1160,
+     252
+    ]
+   ]
+  },
+  {
+   "id": "s1",
+   "points": [
+    [
+     464,
+     200
+    ],
+    [
+     680,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 252
+  },
+  {
+   "name": "to_T100",
+   "type": "visible",
+   "x": 56,
+   "y": 252,
+   "to": "T100",
+   "toPortal": "to_T120"
+  },
+  {
+   "name": "to_M100",
+   "type": "visible",
+   "x": 1096,
+   "y": 252,
+   "to": "M100",
+   "toPortal": "to_T120"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [],
+ "objects": [],
+ "note": "ティンクルの地下から海底のマリナへ降りる大きな昇降機。",
+ "seed": "T120#0"
+}

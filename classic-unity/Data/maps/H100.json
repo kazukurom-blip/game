@@ -1,0 +1,174 @@
+{
+ "id": "H100",
+ "name": "焔の門前の野営地",
+ "region": "H",
+ "type": "町",
+ "width": 1920,
+ "height": 424,
+ "bgm": "camp",
+ "bg": "volcano_camp",
+ "theme": "town",
+ "returnMap": "H100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     344
+    ],
+    [
+     1920,
+     344
+    ]
+   ]
+  },
+  {
+   "id": "s1",
+   "points": [
+    [
+     1216,
+     296
+    ],
+    [
+     1480,
+     296
+    ]
+   ]
+  },
+  {
+   "id": "s2",
+   "points": [
+    [
+     736,
+     284
+    ],
+    [
+     1016,
+     284
+    ]
+   ]
+  },
+  {
+   "id": "s3",
+   "points": [
+    [
+     416,
+     284
+    ],
+    [
+     624,
+     284
+    ]
+   ]
+  },
+  {
+   "id": "p4",
+   "points": [
+    [
+     572,
+     200
+    ],
+    [
+     814,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "p5",
+   "points": [
+    [
+     1224,
+     208
+    ],
+    [
+     1516,
+     208
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 724,
+   "top": 200,
+   "bottom": 324,
+   "ladder": true
+  },
+  {
+   "x": 1448,
+   "top": 208,
+   "bottom": 276,
+   "ladder": true
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 960,
+   "y": 344
+  },
+  {
+   "name": "town",
+   "type": "town",
+   "x": 1000,
+   "y": 344
+  },
+  {
+   "name": "to_F116",
+   "type": "visible",
+   "x": 56,
+   "y": 344,
+   "to": "F116",
+   "toPortal": "to_H100"
+  },
+  {
+   "name": "to_H101",
+   "type": "visible",
+   "x": 1856,
+   "y": 344,
+   "to": "H101",
+   "toPortal": "to_H100"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "garon",
+   "name": "野営地の隊長ガロン",
+   "x": 392,
+   "y": 344
+  },
+  {
+   "id": "igni",
+   "name": "巨像の試練の番人イグニ",
+   "x": 768,
+   "y": 344
+  },
+  {
+   "id": "hinoko",
+   "name": "薬屋ヒノコ",
+   "x": 1152,
+   "y": 344,
+   "role": "potion",
+   "shop": "shop.H100.potion"
+  },
+  {
+   "id": "sumi",
+   "name": "倉庫番スミ",
+   "x": 1528,
+   "y": 344,
+   "role": "storage"
+  }
+ ],
+ "objects": [],
+ "note": "火山の入口の野営地。薬屋・倉庫・帰還の書の店。",
+ "seed": "H100#0"
+}

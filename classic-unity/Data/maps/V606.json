@@ -1,0 +1,135 @@
+{
+ "id": "V606",
+ "name": "地下の広間",
+ "region": "V",
+ "type": "ボ",
+ "lv": [
+  40,
+  50
+ ],
+ "width": 1840,
+ "height": 416,
+ "bgm": "boss_mid",
+ "bg": "cave_hall",
+ "theme": "arena",
+ "returnMap": "V600",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     336
+    ],
+    [
+     1840,
+     336
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     160,
+     200
+    ],
+    [
+     552,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "p2",
+   "points": [
+    [
+     1288,
+     200
+    ],
+    [
+     1680,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 296,
+   "top": 200,
+   "bottom": 316,
+   "ladder": false
+  },
+  {
+   "x": 1472,
+   "top": 200,
+   "bottom": 316,
+   "ladder": false
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 336
+  },
+  {
+   "name": "to_V605",
+   "type": "visible",
+   "x": 56,
+   "y": 336,
+   "to": "V605",
+   "toPortal": "to_V606"
+  }
+ ],
+ "spawns": [
+  {
+   "mob": "M071",
+   "x": 256,
+   "y": 200
+  },
+  {
+   "mob": "M071",
+   "x": 368,
+   "y": 200
+  },
+  {
+   "mob": "M071",
+   "x": 1328,
+   "y": 200
+  },
+  {
+   "mob": "M071",
+   "x": 532,
+   "y": 336
+  },
+  {
+   "mob": "M071",
+   "x": 748,
+   "y": 336
+  },
+  {
+   "mob": "M071",
+   "x": 940,
+   "y": 336
+  }
+ ],
+ "mobMax": 6,
+ "respawnSec": 7,
+ "timedSpawns": [
+  {
+   "mob": "M088",
+   "x": 920,
+   "y": 336,
+   "intervalSec": 3600
+  }
+ ],
+ "npcs": [],
+ "objects": [],
+ "note": "ゾンビダケの王が出る。",
+ "seed": "V606#0"
+}

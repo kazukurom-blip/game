@@ -1,0 +1,82 @@
+{
+ "id": "C117",
+ "name": "雲の女神の塔（入口）",
+ "region": "C",
+ "type": "特",
+ "width": 1120,
+ "height": 336,
+ "bgm": "pq",
+ "bg": "goddess_tower_gate",
+ "theme": "room",
+ "returnMap": "C100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     256
+    ],
+    [
+     1120,
+     256
+    ]
+   ]
+  },
+  {
+   "id": "s1",
+   "points": [
+    [
+     496,
+     200
+    ],
+    [
+     736,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 256
+  },
+  {
+   "name": "to_C100",
+   "type": "visible",
+   "x": 56,
+   "y": 256,
+   "to": "C100",
+   "toPortal": "to_C117"
+  },
+  {
+   "name": "to_C119",
+   "type": "visible",
+   "x": 1056,
+   "y": 256,
+   "to": "C119",
+   "toPortal": "to_C117"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "nefe",
+   "name": "受付ネフェ",
+   "x": 328,
+   "y": 256
+  }
+ ],
+ "objects": [],
+ "note": "1 人用ダンジョン「雲の女神の塔」（Lv51〜70）の受付。",
+ "seed": "C117#0"
+}

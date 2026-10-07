@@ -1,5 +1,5 @@
 {
- "note": "ITEMS.md 6 章（島の店だけ。ほかの町は後で足す）",
+ "note": "ITEMS.md 6 章（島の店と、町の薬屋。武器屋・防具屋の品ぞろえは後で足す）",
  "shops": [
   {
    "id": "shop.S003.general",
@@ -46,6 +46,237 @@
     },
     {
      "item": "use.blue_potion"
+    }
+   ]
+  },
+  {
+   "id": "shop.V100.potion",
+   "name": "ブリーズ港の薬屋",
+   "items": [
+    {
+     "item": "use.red_potion"
+    },
+    {
+     "item": "use.orange_potion"
+    },
+    {
+     "item": "use.blue_potion"
+    }
+   ]
+  },
+  {
+   "id": "shop.V107.potion",
+   "name": "潮風号の薬屋",
+   "items": [
+    {
+     "item": "use.red_potion"
+    },
+    {
+     "item": "use.orange_potion"
+    },
+    {
+     "item": "use.blue_potion"
+    }
+   ]
+  },
+  {
+   "id": "shop.V200.potion",
+   "name": "ポム丘の薬屋",
+   "items": [
+    {
+     "item": "use.red_potion"
+    },
+    {
+     "item": "use.orange_potion"
+    },
+    {
+     "item": "use.blue_potion"
+    }
+   ]
+  },
+  {
+   "id": "shop.V300.potion",
+   "name": "シルワ森都の薬屋",
+   "items": [
+    {
+     "item": "use.red_potion"
+    },
+    {
+     "item": "use.orange_potion"
+    },
+    {
+     "item": "use.blue_potion"
+    }
+   ]
+  },
+  {
+   "id": "shop.V400.potion",
+   "name": "ガルド岩台の薬屋",
+   "items": [
+    {
+     "item": "use.red_potion"
+    },
+    {
+     "item": "use.orange_potion"
+    },
+    {
+     "item": "use.blue_potion"
+    }
+   ]
+  },
+  {
+   "id": "shop.V500.potion",
+   "name": "クロウ街の薬屋",
+   "items": [
+    {
+     "item": "use.red_potion"
+    },
+    {
+     "item": "use.orange_potion"
+    },
+    {
+     "item": "use.blue_potion"
+    }
+   ]
+  },
+  {
+   "id": "shop.V600.potion",
+   "name": "ねむり谷の薬屋",
+   "items": [
+    {
+     "item": "use.orange_potion"
+    },
+    {
+     "item": "use.white_potion"
+    },
+    {
+     "item": "use.blue_potion"
+    }
+   ]
+  },
+  {
+   "id": "shop.C100.potion",
+   "name": "セレスの薬屋",
+   "items": [
+    {
+     "item": "use.orange_potion"
+    },
+    {
+     "item": "use.white_potion"
+    },
+    {
+     "item": "use.blue_potion"
+    },
+    {
+     "item": "use.mana_elixir"
+    }
+   ]
+  },
+  {
+   "id": "shop.F100.potion",
+   "name": "ヒョウガ村の薬屋",
+   "items": [
+    {
+     "item": "use.white_potion"
+    },
+    {
+     "item": "use.big_white_potion"
+    },
+    {
+     "item": "use.mana_elixir"
+    }
+   ]
+  },
+  {
+   "id": "shop.T100.potion",
+   "name": "ティンクルの薬屋",
+   "items": [
+    {
+     "item": "use.orange_potion"
+    },
+    {
+     "item": "use.white_potion"
+    },
+    {
+     "item": "use.blue_potion"
+    },
+    {
+     "item": "use.mana_elixir"
+    }
+   ]
+  },
+  {
+   "id": "shop.M100.potion",
+   "name": "マリナの薬屋",
+   "items": [
+    {
+     "item": "use.white_potion"
+    },
+    {
+     "item": "use.big_white_potion"
+    },
+    {
+     "item": "use.mana_elixir"
+    }
+   ]
+  },
+  {
+   "id": "shop.P100.potion",
+   "name": "神殿前の野営地の薬屋",
+   "items": [
+    {
+     "item": "use.big_white_potion"
+    },
+    {
+     "item": "use.xl_potion"
+    },
+    {
+     "item": "use.mana_elixir"
+    },
+    {
+     "item": "use.blue_secret"
+    }
+   ]
+  },
+  {
+   "id": "shop.D100.potion",
+   "name": "竜の背の村の薬屋",
+   "items": [
+    {
+     "item": "use.big_white_potion"
+    },
+    {
+     "item": "use.xl_potion"
+    },
+    {
+     "item": "use.mana_elixir"
+    },
+    {
+     "item": "use.blue_secret"
+    }
+   ]
+  },
+  {
+   "id": "shop.H100.potion",
+   "name": "焔の門前の野営地の薬屋",
+   "items": [
+    {
+     "item": "use.xl_potion"
+    },
+    {
+     "item": "use.blue_secret"
+    }
+   ]
+  },
+  {
+   "id": "shop.E100.potion",
+   "name": "星見の塔の薬屋",
+   "items": [
+    {
+     "item": "use.xl_potion"
+    },
+    {
+     "item": "use.blue_secret"
     }
    ]
   }

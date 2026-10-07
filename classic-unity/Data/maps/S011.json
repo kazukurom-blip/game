@@ -5,7 +5,9 @@
  "type": "特",
  "width": 1000,
  "height": 720,
- "bgm": "island_field",
+ "bgm": "town_beginner",
+ "bg": "room",
+ "theme": "island",
  "returnMap": "S003",
  "footholds": [
   {

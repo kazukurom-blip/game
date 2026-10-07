@@ -1,0 +1,306 @@
+{
+ "id": "C100",
+ "name": "セレス",
+ "region": "C",
+ "type": "町",
+ "width": 2800,
+ "height": 724,
+ "bgm": "town_ceres",
+ "bg": "cloud_city",
+ "theme": "townTall",
+ "returnMap": "C100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     644
+    ],
+    [
+     2800,
+     644
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     225,
+     508
+    ],
+    [
+     1151,
+     508
+    ]
+   ]
+  },
+  {
+   "id": "p2",
+   "points": [
+    [
+     1743,
+     508
+    ],
+    [
+     2517,
+     508
+    ]
+   ]
+  },
+  {
+   "id": "p3",
+   "points": [
+    [
+     282,
+     396
+    ],
+    [
+     1361,
+     396
+    ]
+   ]
+  },
+  {
+   "id": "p4",
+   "points": [
+    [
+     1726,
+     396
+    ],
+    [
+     2596,
+     396
+    ]
+   ]
+  },
+  {
+   "id": "p5",
+   "points": [
+    [
+     549,
+     260
+    ],
+    [
+     1354,
+     260
+    ]
+   ]
+  },
+  {
+   "id": "p6",
+   "points": [
+    [
+     1485,
+     260
+    ],
+    [
+     2309,
+     260
+    ]
+   ]
+  },
+  {
+   "id": "s7",
+   "points": [
+    [
+     1152,
+     200
+    ],
+    [
+     1352,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "s8",
+   "points": [
+    [
+     296,
+     340
+    ],
+    [
+     456,
+     340
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 361,
+   "top": 508,
+   "bottom": 624,
+   "ladder": false
+  },
+  {
+   "x": 929,
+   "top": 508,
+   "bottom": 624,
+   "ladder": false
+  },
+  {
+   "x": 2103,
+   "top": 508,
+   "bottom": 624,
+   "ladder": true
+  },
+  {
+   "x": 794,
+   "top": 396,
+   "bottom": 488,
+   "ladder": false
+  },
+  {
+   "x": 1122,
+   "top": 396,
+   "bottom": 488,
+   "ladder": false
+  },
+  {
+   "x": 2262,
+   "top": 396,
+   "bottom": 488,
+   "ladder": true
+  },
+  {
+   "x": 645,
+   "top": 260,
+   "bottom": 376,
+   "ladder": false
+  },
+  {
+   "x": 1741,
+   "top": 260,
+   "bottom": 376,
+   "ladder": true
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 1400,
+   "y": 644
+  },
+  {
+   "name": "town",
+   "type": "town",
+   "x": 1440,
+   "y": 644
+  },
+  {
+   "name": "to_C101",
+   "type": "visible",
+   "x": 56,
+   "y": 644,
+   "to": "C101",
+   "toPortal": "to_C100"
+  },
+  {
+   "name": "to_C102",
+   "type": "visible",
+   "x": 2736,
+   "y": 644,
+   "to": "C102",
+   "toPortal": "to_C100"
+  },
+  {
+   "name": "to_C107",
+   "type": "visible",
+   "x": 984,
+   "y": 260,
+   "to": "C107",
+   "toPortal": "to_C100"
+  },
+  {
+   "name": "to_C112",
+   "type": "visible",
+   "x": 1600,
+   "y": 644,
+   "to": "C112",
+   "toPortal": "to_C100"
+  },
+  {
+   "name": "to_C117",
+   "type": "visible",
+   "x": 696,
+   "y": 508,
+   "to": "C117",
+   "toPortal": "to_C100"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "hana",
+   "name": "庭師ハナ",
+   "x": 408,
+   "y": 644
+  },
+  {
+   "id": "kumo",
+   "name": "武器屋クモ",
+   "x": 840,
+   "y": 644,
+   "role": "weapon"
+  },
+  {
+   "id": "shiro",
+   "name": "防具屋シロ",
+   "x": 1200,
+   "y": 644,
+   "role": "armor"
+  },
+  {
+   "id": "hikari",
+   "name": "薬屋ヒカリ",
+   "x": 1528,
+   "y": 644,
+   "role": "potion",
+   "shop": "shop.C100.potion"
+  },
+  {
+   "id": "tsumu",
+   "name": "倉庫番ツム",
+   "x": 2000,
+   "y": 644,
+   "role": "storage"
+  },
+  {
+   "id": "ceres_taxi",
+   "name": "タクシーの運転手フワ",
+   "x": 2400,
+   "y": 644,
+   "travel": {
+    "to": "F100",
+    "toPortal": "sp",
+    "minLevel": 40,
+    "oneWay": false,
+    "fee": 2000
+   }
+  },
+  {
+   "id": "stella",
+   "name": "都の巫女ステラ",
+   "x": 600,
+   "y": 508
+  },
+  {
+   "id": "xeno",
+   "name": "塔の魔導師ゼノ",
+   "x": 2144,
+   "y": 508
+  }
+ ],
+ "objects": [],
+ "note": "雲の上の白い町。武器屋・防具屋・薬屋・倉庫・市場の入口。",
+ "seed": "C100#0"
+}

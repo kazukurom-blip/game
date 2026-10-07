@@ -9,7 +9,9 @@
  ],
  "width": 2400,
  "height": 720,
- "bgm": "island_field",
+ "bgm": "field_island",
+ "bg": "forest",
+ "theme": "island",
  "returnMap": "S003",
  "footholds": [
   {
@@ -47,11 +49,11 @@
    "points": [
     [
      300,
-     560
+     576
     ],
     [
      600,
-     560
+     576
     ]
    ]
   },
@@ -125,7 +127,7 @@
   {
    "mob": "M003",
    "x": 450,
-   "y": 560
+   "y": 576
   },
   {
    "mob": "M005",

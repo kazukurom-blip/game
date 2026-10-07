@@ -1,0 +1,269 @@
+{
+ "id": "T100",
+ "name": "ティンクル",
+ "region": "T",
+ "type": "町",
+ "width": 2960,
+ "height": 600,
+ "bgm": "town_tinkle",
+ "bg": "toy_town",
+ "theme": "townTall",
+ "returnMap": "T100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     520
+    ],
+    [
+     2960,
+     520
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     177,
+     376
+    ],
+    [
+     1043,
+     376
+    ]
+   ]
+  },
+  {
+   "id": "p2",
+   "points": [
+    [
+     1655,
+     376
+    ],
+    [
+     2483,
+     376
+    ]
+   ]
+  },
+  {
+   "id": "p3",
+   "points": [
+    [
+     395,
+     256
+    ],
+    [
+     1304,
+     256
+    ]
+   ]
+  },
+  {
+   "id": "p4",
+   "points": [
+    [
+     1736,
+     256
+    ],
+    [
+     2757,
+     256
+    ]
+   ]
+  },
+  {
+   "id": "s5",
+   "points": [
+    [
+     2416,
+     200
+    ],
+    [
+     2656,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "s6",
+   "points": [
+    [
+     1048,
+     204
+    ],
+    [
+     1240,
+     204
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 385,
+   "top": 376,
+   "bottom": 500,
+   "ladder": true
+  },
+  {
+   "x": 2391,
+   "top": 376,
+   "bottom": 500,
+   "ladder": true
+  },
+  {
+   "x": 779,
+   "top": 256,
+   "bottom": 356,
+   "ladder": true
+  },
+  {
+   "x": 1139,
+   "top": 256,
+   "bottom": 500,
+   "ladder": true
+  },
+  {
+   "x": 1912,
+   "top": 256,
+   "bottom": 356,
+   "ladder": true
+  },
+  {
+   "x": 2496,
+   "top": 256,
+   "bottom": 500,
+   "ladder": true
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 1472,
+   "y": 520
+  },
+  {
+   "name": "town",
+   "type": "town",
+   "x": 1536,
+   "y": 520
+  },
+  {
+   "name": "to_T101",
+   "type": "visible",
+   "x": 56,
+   "y": 520,
+   "to": "T101",
+   "toPortal": "to_T100"
+  },
+  {
+   "name": "to_T102",
+   "type": "visible",
+   "x": 2896,
+   "y": 520,
+   "to": "T102",
+   "toPortal": "to_T100"
+  },
+  {
+   "name": "to_T112",
+   "type": "visible",
+   "x": 848,
+   "y": 256,
+   "to": "T112",
+   "toPortal": "to_T100"
+  },
+  {
+   "name": "to_T118",
+   "type": "visible",
+   "x": 1512,
+   "y": 520,
+   "to": "T118",
+   "toPortal": "to_T100"
+  },
+  {
+   "name": "to_T119",
+   "type": "visible",
+   "x": 608,
+   "y": 376,
+   "to": "T119",
+   "toPortal": "to_T100"
+  },
+  {
+   "name": "to_T120",
+   "type": "visible",
+   "x": 2144,
+   "y": 520,
+   "to": "T120",
+   "toPortal": "to_T100"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "toy",
+   "name": "町長トイ",
+   "x": 344,
+   "y": 520
+  },
+  {
+   "id": "ruru",
+   "name": "人形師ルル",
+   "x": 736,
+   "y": 520
+  },
+  {
+   "id": "buro",
+   "name": "積み木職人ブロ",
+   "x": 1096,
+   "y": 520
+  },
+  {
+   "id": "zenmai",
+   "name": "武器屋ゼンマイ",
+   "x": 1440,
+   "y": 520,
+   "role": "weapon"
+  },
+  {
+   "id": "wata",
+   "name": "防具屋ワタ",
+   "x": 1848,
+   "y": 520,
+   "role": "armor"
+  },
+  {
+   "id": "ame",
+   "name": "薬屋アメ",
+   "x": 2216,
+   "y": 520,
+   "role": "potion",
+   "shop": "shop.T100.potion"
+  },
+  {
+   "id": "hakobe",
+   "name": "倉庫番ハコベ",
+   "x": 2576,
+   "y": 520,
+   "role": "storage"
+  },
+  {
+   "id": "clock",
+   "name": "時計番のクロック婆",
+   "x": 536,
+   "y": 376
+  }
+ ],
+ "objects": [],
+ "note": "おもちゃの町。武器屋・防具屋・薬屋・倉庫。時の塔の入口。",
+ "seed": "T100#0"
+}

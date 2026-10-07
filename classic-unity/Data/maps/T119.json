@@ -1,0 +1,89 @@
+{
+ "id": "T119",
+ "name": "おもちゃ箱の迷路（入口）",
+ "region": "T",
+ "type": "特",
+ "width": 1320,
+ "height": 416,
+ "bgm": "pq",
+ "bg": "toy_gate",
+ "theme": "room",
+ "returnMap": "T100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     336
+    ],
+    [
+     1320,
+     336
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     635,
+     200
+    ],
+    [
+     1077,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 723,
+   "top": 200,
+   "bottom": 316,
+   "ladder": true
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 336
+  },
+  {
+   "name": "to_T100",
+   "type": "visible",
+   "x": 56,
+   "y": 336,
+   "to": "T100",
+   "toPortal": "to_T119"
+  },
+  {
+   "name": "to_T122",
+   "type": "visible",
+   "x": 1256,
+   "y": 336,
+   "to": "T122",
+   "toPortal": "to_T119"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "paz",
+   "name": "受付パズ",
+   "x": 328,
+   "y": 336
+  }
+ ],
+ "objects": [],
+ "note": "1 人用ダンジョン「おもちゃ箱の迷路」（Lv51〜70）の受付。",
+ "seed": "T119#0"
+}

@@ -1,0 +1,222 @@
+{
+ "id": "V200",
+ "name": "ポム丘",
+ "region": "V",
+ "type": "町",
+ "width": 3080,
+ "height": 560,
+ "bgm": "town_pom",
+ "bg": "windmill_town",
+ "theme": "townHill",
+ "returnMap": "V200",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     336
+    ],
+    [
+     1056,
+     336
+    ],
+    [
+     1120,
+     384
+    ],
+    [
+     1608,
+     384
+    ],
+    [
+     1672,
+     432
+    ],
+    [
+     2208,
+     432
+    ],
+    [
+     2272,
+     480
+    ],
+    [
+     3080,
+     480
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     463,
+     200
+    ],
+    [
+     928,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "p2",
+   "points": [
+    [
+     1656,
+     200
+    ],
+    [
+     2213,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 719,
+   "top": 200,
+   "bottom": 316,
+   "ladder": true
+  },
+  {
+   "x": 1816,
+   "top": 200,
+   "bottom": 412,
+   "ladder": true
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 1536,
+   "y": 384
+  },
+  {
+   "name": "town",
+   "type": "town",
+   "x": 1576,
+   "y": 384
+  },
+  {
+   "name": "to_V201",
+   "type": "visible",
+   "x": 56,
+   "y": 336,
+   "to": "V201",
+   "toPortal": "to_V200"
+  },
+  {
+   "name": "to_V202",
+   "type": "visible",
+   "x": 3016,
+   "y": 480,
+   "to": "V202",
+   "toPortal": "to_V200"
+  },
+  {
+   "name": "to_V209",
+   "type": "visible",
+   "x": 1296,
+   "y": 384,
+   "to": "V209",
+   "toPortal": "to_V200"
+  },
+  {
+   "name": "to_V211",
+   "type": "visible",
+   "x": 1720,
+   "y": 432,
+   "to": "V211",
+   "toPortal": "to_V200"
+  },
+  {
+   "name": "to_V090",
+   "type": "visible",
+   "x": 664,
+   "y": 200,
+   "to": "V090",
+   "toPortal": "to_V200"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "erna",
+   "name": "弓の師範エルナ",
+   "x": 352,
+   "y": 336,
+   "role": "job"
+  },
+  {
+   "id": "toma",
+   "name": "弓の武器屋トマ",
+   "x": 592,
+   "y": 336,
+   "role": "weapon"
+  },
+  {
+   "id": "lana",
+   "name": "防具屋ラナ",
+   "x": 944,
+   "y": 336,
+   "role": "armor"
+  },
+  {
+   "id": "popo",
+   "name": "薬屋ポポ",
+   "x": 1224,
+   "y": 384,
+   "role": "potion",
+   "shop": "shop.V200.potion"
+  },
+  {
+   "id": "chiko",
+   "name": "ペット屋チコ",
+   "x": 1536,
+   "y": 384
+  },
+  {
+   "id": "hako",
+   "name": "倉庫番ハコ",
+   "x": 1856,
+   "y": 432,
+   "role": "storage"
+  },
+  {
+   "id": "marsa",
+   "name": "農家のマーサ",
+   "x": 2136,
+   "y": 432
+  },
+  {
+   "id": "sui",
+   "name": "花売りのスイ",
+   "x": 2432,
+   "y": 480
+  },
+  {
+   "id": "taro",
+   "name": "牧場の少年タロ",
+   "x": 2728,
+   "y": 480
+  },
+  {
+   "id": "bob",
+   "name": "風車守ボブ",
+   "x": 1936,
+   "y": 200
+  }
+ ],
+ "objects": [],
+ "note": "なだらかな丘と風車の町。弓使いの転職官。ペットの店。武器屋は弓・クロスボウ。",
+ "seed": "V200#0"
+}

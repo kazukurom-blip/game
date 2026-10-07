@@ -1,0 +1,104 @@
+{
+ "id": "V618",
+ "name": "封印の間",
+ "region": "V",
+ "type": "ボ",
+ "lv": [
+  65,
+  75
+ ],
+ "width": 1880,
+ "height": 416,
+ "bgm": "boss_big",
+ "bg": "seal_room",
+ "theme": "arena",
+ "returnMap": "V600",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     336
+    ],
+    [
+     1880,
+     336
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     160,
+     200
+    ],
+    [
+     564,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "p2",
+   "points": [
+    [
+     1316,
+     200
+    ],
+    [
+     1720,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 216,
+   "top": 200,
+   "bottom": 316,
+   "ladder": false
+  },
+  {
+   "x": 1492,
+   "top": 200,
+   "bottom": 316,
+   "ladder": false
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 336
+  },
+  {
+   "name": "to_V617",
+   "type": "visible",
+   "x": 56,
+   "y": 336,
+   "to": "V617",
+   "toPortal": "to_V618"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [
+  {
+   "mob": "M089",
+   "x": 936,
+   "y": 336,
+   "intervalSec": 43200
+  }
+ ],
+ "npcs": [],
+ "objects": [],
+ "note": "黒角の魔獣。1 日 2 回まで。",
+ "seed": "V618#0"
+}

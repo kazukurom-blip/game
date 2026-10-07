@@ -5,7 +5,9 @@
  "type": "町",
  "width": 2400,
  "height": 720,
- "bgm": "island_town",
+ "bgm": "town_beginner",
+ "bg": "village",
+ "theme": "island",
  "returnMap": "S003",
  "footholds": [
   {
@@ -155,6 +157,12 @@
    "name": "学者見習いピコ",
    "x": 2000,
    "y": 620
+  },
+  {
+   "id": "luka_S003",
+   "name": "案内人ルカ",
+   "x": 1060,
+   "y": 640
   }
  ],
  "objects": [],

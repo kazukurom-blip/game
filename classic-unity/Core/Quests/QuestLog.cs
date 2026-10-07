@@ -23,7 +23,7 @@ namespace Lumina.Core.Quests
         public string QuestId; public int ObjectiveIndex; public int Count, Need;
     }
 
-    public enum StartResult { Ok, Unknown, AlreadyStarted, AlreadyCompleted, LevelTooLow, PrereqMissing, GiverNotHere }
+    public enum StartResult { Ok, Unknown, AlreadyStarted, AlreadyCompleted, LevelTooLow, PrereqMissing, GiverNotHere, StatTooLow }
 
     public sealed class QuestLog
     {
@@ -45,7 +45,20 @@ namespace Lumina.Core.Quests
             if (st == QuestStatus.Completed) return StartResult.AlreadyCompleted;
             if (c.Level < q.MinLevel) return StartResult.LevelTooLow;
             foreach (var pre in q.Prereqs) if (!IsCompleted(pre)) return StartResult.PrereqMissing;
+            foreach (var kv in q.MinStats) if (c.GetStat(ParseStat(kv.Key)) < kv.Value) return StartResult.StatTooLow;
             return StartResult.Ok;
+        }
+
+        private static Combat.Stat ParseStat(string s)
+        {
+            switch (s)
+            {
+                case "STR": return Combat.Stat.STR;
+                case "DEX": return Combat.Stat.DEX;
+                case "INT": return Combat.Stat.INT;
+                case "LUK": return Combat.Stat.LUK;
+                default: return Combat.Stat.None;
+            }
         }
 
         public StartResult Start(string id, CharacterState c)

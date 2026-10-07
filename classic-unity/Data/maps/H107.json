@@ -1,0 +1,104 @@
+{
+ "id": "H107",
+ "name": "焔の祭壇",
+ "region": "H",
+ "type": "ボ",
+ "lv": [
+  135,
+  150
+ ],
+ "width": 1800,
+ "height": 408,
+ "bgm": "boss_big",
+ "bg": "fire_altar",
+ "theme": "arena",
+ "returnMap": "H100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     328
+    ],
+    [
+     1800,
+     328
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     160,
+     200
+    ],
+    [
+     540,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "p2",
+   "points": [
+    [
+     1260,
+     200
+    ],
+    [
+     1640,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 296,
+   "top": 200,
+   "bottom": 308,
+   "ladder": false
+  },
+  {
+   "x": 1356,
+   "top": 200,
+   "bottom": 308,
+   "ladder": false
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 328
+  },
+  {
+   "name": "to_H106",
+   "type": "visible",
+   "x": 56,
+   "y": 328,
+   "to": "H106",
+   "toPortal": "to_H107"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [
+  {
+   "mob": "M229",
+   "x": 896,
+   "y": 328,
+   "intervalSec": 86400
+  }
+ ],
+ "npcs": [],
+ "objects": [],
+ "note": "焔の巨像。1 日 1 回。",
+ "seed": "H107#0"
+}

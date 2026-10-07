@@ -1,0 +1,135 @@
+{
+ "id": "V512",
+ "name": "下水の奥",
+ "region": "V",
+ "type": "ボ",
+ "lv": [
+  40,
+  48
+ ],
+ "width": 1920,
+ "height": 416,
+ "bgm": "boss_mid",
+ "bg": "sewer",
+ "theme": "arena",
+ "returnMap": "V500",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     336
+    ],
+    [
+     1920,
+     336
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     160,
+     200
+    ],
+    [
+     576,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "p2",
+   "points": [
+    [
+     1344,
+     200
+    ],
+    [
+     1760,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 288,
+   "top": 200,
+   "bottom": 316,
+   "ladder": false
+  },
+  {
+   "x": 1704,
+   "top": 200,
+   "bottom": 316,
+   "ladder": false
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 336
+  },
+  {
+   "name": "to_V511",
+   "type": "visible",
+   "x": 56,
+   "y": 336,
+   "to": "V511",
+   "toPortal": "to_V512"
+  }
+ ],
+ "spawns": [
+  {
+   "mob": "M067",
+   "x": 224,
+   "y": 200
+  },
+  {
+   "mob": "M067",
+   "x": 360,
+   "y": 200
+  },
+  {
+   "mob": "M067",
+   "x": 1384,
+   "y": 200
+  },
+  {
+   "mob": "M067",
+   "x": 484,
+   "y": 336
+  },
+  {
+   "mob": "M067",
+   "x": 932,
+   "y": 336
+  },
+  {
+   "mob": "M067",
+   "x": 1460,
+   "y": 336
+  }
+ ],
+ "mobMax": 6,
+ "respawnSec": 7,
+ "timedSpawns": [
+  {
+   "mob": "M069",
+   "x": 960,
+   "y": 336,
+   "intervalSec": 3600
+  }
+ ],
+ "npcs": [],
+ "objects": [],
+ "note": "下水の大ワニの寝床。",
+ "seed": "V512#0"
+}

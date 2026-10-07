@@ -289,6 +289,7 @@ namespace Lumina.Core.Game
             Inventory.Expand(InvTab.Equip, 4); Inventory.Expand(InvTab.Use, 4); Inventory.Expand(InvTab.Etc, 4);
             RefreshStats();
             Out.Add(GameEventType.JobAdvanced, line, 1, text: Character.JobName);
+            QuestEvent("job_advance.1"); // 転職のクエスト（J1-1 など）
             AutoSave.Request("job");
             return r;
         }

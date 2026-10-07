@@ -9,7 +9,9 @@
  ],
  "width": 2200,
  "height": 720,
- "bgm": "island_field",
+ "bgm": "field_island",
+ "bg": "beach",
+ "theme": "island",
  "returnMap": "S003",
  "footholds": [
   {

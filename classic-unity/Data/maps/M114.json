@@ -1,0 +1,69 @@
+{
+ "id": "M114",
+ "name": "沈没船の救出（入口）",
+ "region": "M",
+ "type": "特",
+ "width": 1120,
+ "height": 280,
+ "bgm": "pq",
+ "bg": "sunken_gate",
+ "theme": "room",
+ "returnMap": "M100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     200
+    ],
+    [
+     1120,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 200
+  },
+  {
+   "name": "to_M100",
+   "type": "visible",
+   "x": 56,
+   "y": 200,
+   "to": "M100",
+   "toPortal": "to_M114"
+  },
+  {
+   "name": "to_M115",
+   "type": "visible",
+   "x": 1056,
+   "y": 200,
+   "to": "M115",
+   "toPortal": "to_M114"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "shell",
+   "name": "受付シェル",
+   "x": 328,
+   "y": 200
+  }
+ ],
+ "objects": [],
+ "note": "1 人用ダンジョン「沈没船の救出」（Lv70〜90）の受付。",
+ "seed": "M114#0"
+}

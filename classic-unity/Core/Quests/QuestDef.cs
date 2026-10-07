@@ -1,5 +1,7 @@
 // クエストの定義（Data/quests.json）。QUESTS.md の決まり。
 // 目的の種類: kill（倒す）/ collect（集める＝持ち物にある数）/ talk（話す）/ visit（行く）/ interact（調べる）/ event（操作をする）
+// event の名前は Data/tools/quest_goals.mjs の先頭（GameSession.QuestEvent で知らせる）。
+// minStats: 受ける条件の能力値（転職のクエスト「STR35 以上で話す」など）。
 using System.Collections.Generic;
 using Lumina.Core.Util;
 
@@ -28,6 +30,8 @@ namespace Lumina.Core.Quests
         public readonly List<string> Prereqs = new List<string>();
         public readonly List<QuestObjective> Objectives = new List<QuestObjective>();
         public readonly List<QuestReward> Rewards = new List<QuestReward>();
+        /// <summary>受ける条件の能力値（"STR" → 35 など。AP で振った素の値で比べる）</summary>
+        public readonly Dictionary<string, int> MinStats = new Dictionary<string, int>();
 
         /// <summary>目的を果たしたら、NPC に話さなくても完了する</summary>
         public bool AutoComplete => End == "auto";
@@ -72,6 +76,8 @@ namespace Lumina.Core.Quests
                 }
                 q.Objectives.Add(new QuestObjective { Type = type, Target = target, Count = J.Int(od, "count", 1), Label = J.Str(od, "label") });
             }
+            var ms = J.Obj(d, "minStats");
+            if (ms != null) foreach (var kv in ms) q.MinStats[kv.Key] = (int)J.ToDouble(kv.Value);
             foreach (var o in J.Arr(d, "rewards"))
             {
                 var rd = (Dictionary<string, object>)o;

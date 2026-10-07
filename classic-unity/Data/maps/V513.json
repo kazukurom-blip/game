@@ -1,0 +1,112 @@
+{
+ "id": "V513",
+ "name": "盗賊のアジト",
+ "region": "V",
+ "type": "特",
+ "width": 1080,
+ "height": 328,
+ "bgm": "pq",
+ "bg": "hideout",
+ "theme": "room",
+ "returnMap": "V500",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     248
+    ],
+    [
+     1080,
+     248
+    ]
+   ]
+  },
+  {
+   "id": "s1",
+   "points": [
+    [
+     456,
+     200
+    ],
+    [
+     640,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 248
+  },
+  {
+   "name": "to_V500",
+   "type": "visible",
+   "x": 56,
+   "y": 248,
+   "to": "V500",
+   "toPortal": "to_V513"
+  }
+ ],
+ "spawns": [
+  {
+   "mob": "M301",
+   "x": 576,
+   "y": 200
+  },
+  {
+   "mob": "M301",
+   "x": 268,
+   "y": 248
+  },
+  {
+   "mob": "M301",
+   "x": 396,
+   "y": 248
+  },
+  {
+   "mob": "M301",
+   "x": 620,
+   "y": 248
+  },
+  {
+   "mob": "M301",
+   "x": 740,
+   "y": 248
+  },
+  {
+   "mob": "M301",
+   "x": 900,
+   "y": 248
+  }
+ ],
+ "mobMax": 6,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "yami_V513",
+   "name": "影の頭領ヤミ",
+   "x": 328,
+   "y": 248,
+   "role": "job"
+  },
+  {
+   "id": "jill",
+   "name": "試験官ジル",
+   "x": 472,
+   "y": 248
+  }
+ ],
+ "objects": [],
+ "note": "盗賊の 2 次の試験の場所。",
+ "seed": "V513#0"
+}

@@ -1,0 +1,154 @@
+{
+ "id": "V208",
+ "name": "キノコの広場",
+ "region": "V",
+ "type": "ボ",
+ "lv": [
+  25,
+  35
+ ],
+ "width": 1960,
+ "height": 536,
+ "bgm": "boss_mid",
+ "bg": "mushroom_plaza",
+ "theme": "arena",
+ "returnMap": "V200",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     456
+    ],
+    [
+     1960,
+     456
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     160,
+     312
+    ],
+    [
+     588,
+     312
+    ]
+   ]
+  },
+  {
+   "id": "p2",
+   "points": [
+    [
+     1372,
+     312
+    ],
+    [
+     1800,
+     312
+    ]
+   ]
+  },
+  {
+   "id": "p3",
+   "points": [
+    [
+     800,
+     200
+    ],
+    [
+     1160,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 224,
+   "top": 312,
+   "bottom": 436,
+   "ladder": false
+  },
+  {
+   "x": 1476,
+   "top": 312,
+   "bottom": 436,
+   "ladder": false
+  },
+  {
+   "x": 872,
+   "top": 200,
+   "bottom": 436,
+   "ladder": false
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 456
+  },
+  {
+   "name": "to_V205",
+   "type": "visible",
+   "x": 56,
+   "y": 456,
+   "to": "V205",
+   "toPortal": "to_V208"
+  }
+ ],
+ "spawns": [
+  {
+   "mob": "M024",
+   "x": 384,
+   "y": 312
+  },
+  {
+   "mob": "M021",
+   "x": 1716,
+   "y": 312
+  },
+  {
+   "mob": "M021",
+   "x": 972,
+   "y": 456
+  },
+  {
+   "mob": "M021",
+   "x": 1204,
+   "y": 456
+  },
+  {
+   "mob": "M021",
+   "x": 1548,
+   "y": 456
+  },
+  {
+   "mob": "M024",
+   "x": 1692,
+   "y": 456
+  }
+ ],
+ "mobMax": 6,
+ "respawnSec": 7,
+ "timedSpawns": [
+  {
+   "mob": "M029",
+   "x": 976,
+   "y": 456,
+   "intervalSec": 3600
+  }
+ ],
+ "npcs": [],
+ "objects": [],
+ "note": "キノコの女王が 1 時間ごとに出る広場。",
+ "seed": "V208#0"
+}

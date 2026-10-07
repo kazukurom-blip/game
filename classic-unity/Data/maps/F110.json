@@ -1,0 +1,123 @@
+{
+ "id": "F110",
+ "name": "雪の頂の巣",
+ "region": "F",
+ "type": "ボ",
+ "lv": [
+  80,
+  90
+ ],
+ "width": 1800,
+ "height": 528,
+ "bgm": "boss_big",
+ "bg": "snow_nest",
+ "theme": "arena",
+ "returnMap": "F100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     448
+    ],
+    [
+     1800,
+     448
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     160,
+     312
+    ],
+    [
+     540,
+     312
+    ]
+   ]
+  },
+  {
+   "id": "p2",
+   "points": [
+    [
+     1260,
+     312
+    ],
+    [
+     1640,
+     312
+    ]
+   ]
+  },
+  {
+   "id": "p3",
+   "points": [
+    [
+     720,
+     200
+    ],
+    [
+     1080,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 320,
+   "top": 312,
+   "bottom": 428,
+   "ladder": false
+  },
+  {
+   "x": 1396,
+   "top": 312,
+   "bottom": 428,
+   "ladder": false
+  },
+  {
+   "x": 872,
+   "top": 200,
+   "bottom": 428,
+   "ladder": false
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 448
+  },
+  {
+   "name": "to_F109",
+   "type": "visible",
+   "x": 56,
+   "y": 448,
+   "to": "F109",
+   "toPortal": "to_F110"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [
+  {
+   "mob": "M139",
+   "x": 912,
+   "y": 448,
+   "intervalSec": 3600
+  }
+ ],
+ "npcs": [],
+ "objects": [],
+ "note": "雪原の大狼。",
+ "seed": "F110#0"
+}

@@ -1,0 +1,185 @@
+{
+ "id": "E100",
+ "name": "星見の塔",
+ "region": "E",
+ "type": "町",
+ "width": 1840,
+ "height": 596,
+ "bgm": "camp",
+ "bg": "star_tower",
+ "theme": "townTall",
+ "returnMap": "E100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     516
+    ],
+    [
+     1840,
+     516
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     326,
+     380
+    ],
+    [
+     843,
+     380
+    ]
+   ]
+  },
+  {
+   "id": "p2",
+   "points": [
+    [
+     1009,
+     380
+    ],
+    [
+     1616,
+     380
+    ]
+   ]
+  },
+  {
+   "id": "p3",
+   "points": [
+    [
+     194,
+     252
+    ],
+    [
+     822,
+     252
+    ]
+   ]
+  },
+  {
+   "id": "p4",
+   "points": [
+    [
+     1106,
+     252
+    ],
+    [
+     1694,
+     252
+    ]
+   ]
+  },
+  {
+   "id": "s5",
+   "points": [
+    [
+     448,
+     204
+    ],
+    [
+     624,
+     204
+    ]
+   ]
+  },
+  {
+   "id": "s6",
+   "points": [
+    [
+     1208,
+     200
+    ],
+    [
+     1400,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 574,
+   "top": 380,
+   "bottom": 496,
+   "ladder": true
+  },
+  {
+   "x": 1377,
+   "top": 380,
+   "bottom": 496,
+   "ladder": true
+  },
+  {
+   "x": 666,
+   "top": 252,
+   "bottom": 360,
+   "ladder": true
+  },
+  {
+   "x": 1482,
+   "top": 252,
+   "bottom": 360,
+   "ladder": true
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 920,
+   "y": 516
+  },
+  {
+   "name": "town",
+   "type": "town",
+   "x": 960,
+   "y": 516
+  },
+  {
+   "name": "to_E101",
+   "type": "visible",
+   "x": 56,
+   "y": 516,
+   "to": "E101",
+   "toPortal": "to_E100"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "astra",
+   "name": "塔の主アストラ",
+   "x": 440,
+   "y": 516
+  },
+  {
+   "id": "hoshi",
+   "name": "薬屋ホシ",
+   "x": 920,
+   "y": 516,
+   "role": "potion",
+   "shop": "shop.E100.potion"
+  },
+  {
+   "id": "kuzu",
+   "name": "倉庫番クズ",
+   "x": 1424,
+   "y": 516,
+   "role": "storage"
+  }
+ ],
+ "objects": [],
+ "note": "最後の町。竜の背の村から鳥で来る（Lv150 以上・クエスト）。",
+ "seed": "E100#0"
+}

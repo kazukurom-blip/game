@@ -1,0 +1,75 @@
+{
+ "id": "D115",
+ "name": "竜の聖堂",
+ "region": "D",
+ "type": "特",
+ "width": 1280,
+ "height": 328,
+ "bgm": "town_dragon",
+ "bg": "dragon_shrine",
+ "theme": "room",
+ "returnMap": "D100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     248
+    ],
+    [
+     1280,
+     248
+    ]
+   ]
+  },
+  {
+   "id": "s1",
+   "points": [
+    [
+     912,
+     200
+    ],
+    [
+     1104,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 248
+  },
+  {
+   "name": "to_D100",
+   "type": "visible",
+   "x": 56,
+   "y": 248,
+   "to": "D100",
+   "toPortal": "to_D115"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "vald",
+   "name": "竜の大老ヴァルド",
+   "x": 328,
+   "y": 248,
+   "role": "job"
+  }
+ ],
+ "objects": [],
+ "note": "4 次転職の大老。",
+ "seed": "D115#0"
+}

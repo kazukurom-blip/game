@@ -1,10 +1,13 @@
 // ゲームのデータ（JSON）を、設計書の元データ classic/tools/data/*.mjs と式 classic/tools/lib/*.mjs から書き出す。
 // Unity 版の Core（classic-unity/Core）はこの JSON を読む。数値は gen_docs.mjs（設計書の表）と同じ式で作る。
 //
-// 実行: node classic-unity/Data/tools/export_data.mjs
+// 実行: node classic-unity/Data/tools/export_data.mjs            … 書き出す（マップは生成して検査してから）
+//       node classic-unity/Data/tools/export_data.mjs --check    … 書き出さずに、生成し直した結果がファイルと同じか・マップの検査を通るかだけ確かめる
 // 出力: classic-unity/Data/items.json, monsters.json, quests.json, shops.json, npcs.json, maps/<ID>.json, maps/index.json
 // 手で書くデータ: classic-unity/Data/skills.json（JOBS.md から）
-// マップの足場の配置は仮（このファイルの ISLAND）。つながり（ポータル）は maps.mjs のとおり。
+// マップ: 芽吹きの島は world/island.mjs（手で置いた）、ほかの 222 枚は world/generate.mjs（地形の型から生成。種はマップの ID）。
+//         つながり（ポータル）と出る敵は maps.mjs のとおり。NPC は world/npcs.mjs。検査は world/check.mjs。
+// クエスト: 文章だけの目的は quest_goals.mjs で判定できる形に直す。
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -14,14 +17,24 @@ import { MAPS_RAW } from '../../../classic/tools/data/maps.mjs';
 import { armorList, extraList, weaponList, STARTER, WEAPON_TYPES } from '../../../classic/tools/data/equips.mjs';
 import { SCROLLS, scrollsFor } from '../../../classic/tools/data/scrolls.mjs';
 import { QUESTS_RAW } from '../../../classic/tools/data/quests.mjs';
+import { NPCS, npcIdOf, POTION_SHOPS } from './world/npcs.mjs';
+import { buildWorld } from './world/world.mjs';
+import { QUEST_GOALS } from './quest_goals.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.resolve(HERE, '..');
 const problems = [];
+const CHECK = process.argv.includes('--check');
+const stale = [];
 const write = (name, obj) => {
   const p = path.join(OUT, name);
+  const text = JSON.stringify(obj, null, 1) + '\n';
+  if (CHECK) {
+    if (!fs.existsSync(p) || fs.readFileSync(p, 'utf8') !== text) stale.push(name);
+    return;
+  }
   fs.mkdirSync(path.dirname(p), { recursive: true });
-  fs.writeFileSync(p, JSON.stringify(obj, null, 1) + '\n');
+  fs.writeFileSync(p, text);
 };
 
 // ---------------- 共通の言葉 → コードの名前
@@ -254,32 +267,22 @@ const monsters = MONSTERS_RAW.map(([id, name, lv, kind, move, atkType, el, etc, 
 });
 write('monsters.json', { note: 'export_data.mjs が monsters.mjs と curves.mjs から書き出した（MONSTERS.md の表と同じ値）。手で直さない。', monsters });
 
-// ---------------- NPC
-const NPCS = [
-  ['luka', '案内人ルカ', 'S000', 260],
-  ['ganzo', '縄職人ガンゾ', 'S001', 560],
-  ['poppo', 'はしご番のポッポ', 'S002', 300],
-  ['yomogi', '村長ヨモギ', 'S003', 1180],
-  ['tata', '雑貨屋タタ', 'S003', 620, { shop: 'shop.S003.general' }],
-  ['nina', '薬屋ニナ', 'S003', 820, { shop: 'shop.S003.potion' }],
-  ['momo', '宿屋のモモ', 'S003', 1450, { inn: 30 }],
-  ['tobio', '漁師トビオ', 'S003', 1720],
-  ['riri', '少女リリ', 'S003', 1900],
-  ['gen', 'ゲン爺', 'S003', 1320],
-  ['piko', '学者見習いピコ', 'S003', 2000],
-  ['baldo', '教官バルド', 'S011', 500],
-  ['kai', '船長カイ', 'S010', 900, { travel: { to: 'V100', toPortal: 'sp', minLevel: 7, oneWay: true, fee: 0, requiresQuest: 'S-19' } }],
-  ['olga', '港長オルガ', 'V100', 1250],
-];
+// ---------------- NPC（world/npcs.mjs。位置はマップを作った時に決まる → 下のマップの所で書き出す）
 const NPC_BY_NAME = new Map(NPCS.map(([id, name]) => [name, id]));
-write('npcs.json', { npcs: NPCS.map(([id, name, map, x, extra]) => ({ id, name, map, x, ...(extra || {}) })) });
 
 // ---------------- 店
 const shops = [
   { id: 'shop.S003.general', name: '芽吹き村の雑貨屋', items: items.filter((i) => i.id.startsWith('eq.starter.') && i.price > 0).map((i) => ({ item: i.id })) },
   { id: 'shop.S003.potion', name: '芽吹き村の薬屋', items: [{ item: 'use.red_potion' }, { item: 'use.blue_potion' }] },
 ];
-write('shops.json', { note: 'ITEMS.md 6 章（島の店だけ。ほかの町は後で足す）', shops });
+// 町の薬屋（地域の Lv に合わせた薬）。武器屋・防具屋の品ぞろえはまだ（NPC の role だけ）
+for (const [mid, list] of Object.entries(POTION_SHOPS)) {
+  const town = MAPS_RAW.find((m) => m[0] === mid);
+  for (const it of list) if (!items.some((x) => x.id === it)) problems.push(`店の品 ${it} が無い`);
+  shops.push({ id: `shop.${mid}.potion`, name: `${town ? town[1] : mid}の薬屋`, items: list.map((item) => ({ item })) });
+}
+for (const n of NPCS) if (n[3]?.shop && !shops.some((sh) => sh.id === n[3].shop)) problems.push(`NPC ${n[0]} の店 ${n[3].shop} が無い`);
+write('shops.json', { note: 'ITEMS.md 6 章（島の店と、町の薬屋。武器屋・防具屋の品ぞろえは後で足す）', shops });
 
 // ---------------- クエスト
 const QSIZE = { 小: [0.06, 10], 中: [0.12, 25], 大: [0.25, 60], 特: [0.5, 150] };
@@ -349,108 +352,61 @@ const quests = QUESTS_RAW.map(([id, name, giver, map, lv, pre, goal, size, items
   const exp = Math.max(QMIN[size] || 0, nice(expToNext(Math.min(lv, 199)) * ef));
   const meso = nice(mobBase(lv).meso * mf);
   const r = parseRewards(itemsText);
-  const tut = TUTORIAL[id] || {};
-  const giverId = NPC_BY_NAME.get(giver) || giver;
-  const objectives = tut.objectives || parseGoal(goal);
+  const tut = TUTORIAL[id] || QUEST_GOALS[id] || {};
+  const giverId = npcIdOf(giver, map) || NPC_BY_NAME.get(giver) || giver;
+  if (!NPCS.some((n) => n[0] === giverId && n[2] === map)) problems.push(`クエスト ${id} の依頼者 ${giver} が ${map} にいない`);
+  const objectives = tut.parsed ? [...parseGoal(goal), ...tut.objectives] : tut.objectives || parseGoal(goal);
+  if (!objectives.length) problems.push(`クエスト ${id} の目的が無い`);
   if (!objectives.length && id.startsWith('S-')) problems.push(`クエスト ${id} の目的が読めない`);
   return {
     id, name, giver: giverId, giverName: giver, map, minLevel: lv, prereqs: pre === '-' ? [] : pre.split(/[・,]/).map((s) => s.trim()),
     size, goalText: goal.replace(/\[\[(k|i|m):([A-Z0-9]+)(?::(\d+))?\]\]/g, (_, t, a, n) => `${a}${n ? '×' + n : ''}`), objectives,
-    end: tut.end || giverId, exp, meso: meso + r.meso, rewards: r.rewards, rewardText: itemsText, rewardUnparsed: r.rest, story,
+    end: tut.end || giverId, ...(tut.minStats ? { minStats: tut.minStats } : {}), exp, meso: meso + r.meso, rewards: r.rewards, rewardText: itemsText, rewardUnparsed: r.rest, story,
     tutorial: id.startsWith('S-'),
   };
 });
-write('quests.json', { note: 'export_data.mjs が quests.mjs から書き出した。報酬の経験値・お金は QUESTS.md 1-3 の式。チュートリアル（S-01〜S-20）の目的は機械で判定できる形に書き直してある。', quests });
+write('quests.json', { note: 'export_data.mjs が quests.mjs から書き出した。報酬の経験値・お金は QUESTS.md 1-3 の式。チュートリアル（S-01〜S-20）と文章だけの目的（quest_goals.mjs）は機械で判定できる形に書き直してある。', quests });
 
-// ---------------- マップ（芽吹きの島 12 ＋ ブリーズ港の仮）
-const G = 640; // 地面の高さ
-const RAW = Object.fromEntries(MAPS_RAW.map((m) => [m[0], m]));
-const ISLAND = {
-  S000: { width: 1400, footholds: [{ id: 'g', ground: true, points: [[0, G], [1400, G]] }, { id: 'rock', points: [[620, 600], [680, 600]] }],
-    walls: [{ x: 620, top: 600, bottom: G }, { x: 680, top: 600, bottom: G }], portals: { S001: 1350 }, spawn: 120,
-    objects: [] },
-  S001: { width: 1800, footholds: [{ id: 'g', ground: true, points: [[0, G], [1800, G]] }, { id: 'step', points: [[780, 592], [1080, 592]] }, { id: 'upper', points: [[1200, 512], [1560, 512]] }],
-    ropes: [{ x: 1340, top: 512, bottom: 616 }], portals: { S000: 60, S002: 1740 },
-    spawns: [['M001', 320], ['M001', 700], ['M001', 900, 592], ['M001', 1500]], mobMax: 6,
-    objects: [{ id: 'S001.crate', name: '木箱', x: 1480, y: 512 }] },
-  S002: { width: 2000, footholds: [{ id: 'g', ground: true, points: [[0, G], [2000, G]] }, { id: 'hill', points: [[560, 496], [1100, 496]] }],
-    ropes: [{ x: 700, top: 496, bottom: 624, ladder: true }], portals: { S001: 60, S003: 1940 },
-    spawns: [['M001', 400], ['M002', 900], ['M002', 1300], ['M001', 800, 496], ['M002', 1000, 496], ['M002', 1600]], mobMax: 8 },
-  S003: { width: 2400, footholds: [{ id: 'g', ground: true, points: [[0, G], [1400, G], [1500, 620], [2400, 620]] }, { id: 'roof', points: [[1550, 556], [1850, 556]] }],
-    portals: { S002: 60, S004: 300, S011: 1000, S010: 2150, S006: 2340 }, spawn: 1200, town: 1200 },
-  S004: { width: 2400, footholds: [{ id: 'g', ground: true, points: [[0, G], [2400, G]] }, { id: 'f1', points: [[400, 576], [800, 576]] }, { id: 'f2', points: [[1200, 576], [1700, 576]] }, { id: 'f3', points: [[1800, 512], [2200, 512]] }],
-    portals: { S003: 60, S005: 2340 },
-    spawns: [['M001', 300], ['M002', 600], ['M002', 600, 576], ['M003', 1000], ['M003', 1400, 576], ['M002', 1600], ['M003', 2000, 512], ['M001', 2100]], mobMax: 10 },
-  S005: { width: 2400, footholds: [{ id: 'g', ground: true, points: [[0, G], [600, G], [664, 608], [1300, 608], [1364, G], [2400, G]] }, { id: 'root1', points: [[300, 560], [600, 560]] }, { id: 'root2', points: [[800, 544], [1150, 544]] }, { id: 'root3', points: [[1500, 576], [1900, 576]] }],
-    portals: { S004: 60, S007: 1000, S008: 2340 },
-    spawns: [['M003', 400], ['M003', 450, 560], ['M005', 900, 544], ['M005', 1200], ['M003', 1600, 576], ['M005', 1800], ['M005', 2100]], mobMax: 10 },
-  S006: { width: 1800, footholds: [{ id: 'g', ground: true, points: [[0, G], [1800, G]] }, { id: 't1', points: [[200, 520], [1600, 520]] }, { id: 't2', points: [[300, 400], [1400, 400]] }, { id: 't3', points: [[500, 280], [1250, 280]] }],
-    ropes: [{ x: 420, top: 520, bottom: 616 }, { x: 900, top: 400, bottom: 500 }, { x: 700, top: 280, bottom: 380 }],
-    portals: { S003: 60, S008: [1200, 280] },
-    spawns: [['M004', 500], ['M004', 1200], ['M004', 600, 520], ['M005', 1100, 520], ['M004', 1400, 520], ['M005', 500, 400], ['M004', 1000, 400], ['M005', 1200, 400], ['M004', 800, 280], ['M005', 1000, 280]], mobMax: 12 },
-  S007: { width: 1800, footholds: [{ id: 'g', ground: true, points: [[0, G], [1800, G]] }, { id: 'pond', points: [[600, 576], [1000, 576]] }, { id: 'room', points: [[1500, 300], [1760, 300]] }],
-    walls: [{ x: 1500, top: 200, bottom: 300 }, { x: 1760, top: 200, bottom: 300 }],
-    portals: { S005: 60 }, extraPortals: [
-      { name: 'secret', type: 'hidden', x: 1720, y: G, toPortal: 'room' },
-      { name: 'room', type: 'visible', x: 1540, y: 300, toPortal: 'secret' },
-    ],
-    spawns: [['M005', 400], ['M005', 700, 576], ['M006', 900, 576], ['M005', 1200], ['M006', 1400], ['M006', 300]], mobMax: 8,
-    objects: [{ id: 'S007.box', name: 'ゲン爺の箱', x: 1680, y: 300 }] },
-  S008: { width: 2000, footholds: [{ id: 'g', ground: true, points: [[0, G], [500, G], [700, 540], [1300, 540], [1500, G], [2000, G]] }],
-    portals: { S005: 60, S006: [1000, 540], S009: 1940 },
-    spawns: [['M006', 300], ['M006', 800, 540], ['M004', 1150, 540], ['M006', 1700], ['M004', 1850]], mobMax: 8,
-    objects: [{ id: 'S008.view', name: '見晴らし台', x: 900, y: 540 }] },
-  S009: { width: 2200, footholds: [{ id: 'g', ground: true, points: [[0, G], [2200, G]] }, { id: 'rock', points: [[900, 576], [1200, 576]] }],
-    portals: { S008: 60 },
-    spawns: [['M004', 400], ['M006', 700], ['M004', 1000, 576], ['M006', 1400], ['M004', 1800]], mobMax: 8,
-    timed: [['M007', 1600, G, 600]] },
-  S010: { width: 1200, footholds: [{ id: 'g', ground: true, points: [[0, G], [1200, G]] }], portals: { S003: 60 } },
-  S011: { width: 1000, footholds: [{ id: 'g', ground: true, points: [[0, G], [1000, G]] }], portals: { S003: 60 } },
-  V100: { width: 2400, footholds: [{ id: 'g', ground: true, points: [[0, G], [2400, G]] }], portals: {}, spawn: 1200, town: 1200, note: '仮（大陸のマップはまだ作っていない。島からの船の着く所だけ）' },
-};
-
+// ---------------- マップ（234 枚）と NPC の位置
+const world = buildWorld({ MAPS_RAW, MONSTERS_RAW });
+problems.push(...world.problems);
 const mapIndex = [];
-for (const [mid, L] of Object.entries(ISLAND)) {
-  const raw = RAW[mid];
-  const [, name, type, lv, links] = raw;
-  const yAt = (x) => { // 地面の高さ（折れ線）
-    const pts = L.footholds[0].points;
-    for (let i = 0; i < pts.length - 1; i++) if (x >= pts[i][0] && x <= pts[i + 1][0]) return pts[i][1] + (pts[i + 1][1] - pts[i][1]) * (x - pts[i][0]) / (pts[i + 1][0] - pts[i][0]);
-    return G;
-  };
-  const portals = [];
-  const sx = L.spawn ?? 120;
-  portals.push({ name: 'sp', type: 'spawn', x: sx, y: yAt(sx) });
-  if (L.town) portals.push({ name: 'town', type: 'town', x: L.town, y: yAt(L.town) });
-  for (const [to, pos] of Object.entries(L.portals)) {
-    const [x, y] = Array.isArray(pos) ? pos : [pos, yAt(pos)];
-    portals.push({ name: `to_${to}`, type: 'visible', x, y, to, toPortal: `to_${mid}` });
-  }
-  for (const p of L.extraPortals || []) portals.push(p);
-  // つながりの検査: maps.mjs の links と同じか（V100 は島の外へのつながりを入れていない）
-  if (mid.startsWith('S')) {
-    const have = Object.keys(L.portals).sort().join(',');
-    const want = [...links].sort().join(',');
-    if (have !== want) problems.push(`${mid} のポータル ${have} が maps.mjs のつながり ${want} と違う`);
-  }
-  const npcs = NPCS.filter((n) => n[2] === mid).map(([id, nm, , x, extra]) => ({ id, name: nm, x, y: yAt(x), ...(extra || {}) }));
-  const spawns = (L.spawns || []).map(([mob, x, y]) => ({ mob, x, y: y ?? yAt(x) }));
-  for (const s of spawns) if (!raw[5].includes(s.mob)) problems.push(`${mid} に ${s.mob} は出ない（maps.mjs）`);
-  for (const mob of raw[5]) if (!spawns.some((s) => s.mob === mob) && !(L.timed || []).some((t) => t[0] === mob)) problems.push(`${mid} の敵 ${mob} の湧く所が無い`);
-  const data = {
-    id: mid, name, region: mid[0], type, lv: lv || undefined, width: L.width, height: 720, bgm: type === '町' ? 'island_town' : 'island_field',
-    returnMap: mid.startsWith('S') ? 'S003' : mid,
-    footholds: L.footholds, ropes: L.ropes || [], walls: L.walls || [], portals,
-    spawns, mobMax: L.mobMax || 0, respawnSec: 7,
-    timedSpawns: (L.timed || []).map(([mob, x, y, sec]) => ({ mob, x, y, intervalSec: sec })),
-    npcs, objects: L.objects || [], note: L.note || raw[6],
-  };
-  write(`maps/${mid}.json`, data);
-  mapIndex.push({ id: mid, name, type });
+for (const raw of MAPS_RAW) {
+  const m = world.maps[raw[0]];
+  if (!m) continue;
+  write(`maps/${m.id}.json`, m);
+  mapIndex.push({ id: m.id, name: m.name, type: m.type, theme: m.theme });
 }
-// 島の中でポータルが両方向につながっているか
-for (const [mid, L] of Object.entries(ISLAND)) for (const to of Object.keys(L.portals)) if (!ISLAND[to]?.portals[mid]) problems.push(`${mid} → ${to} の戻りのポータルが無い`);
 write('maps/index.json', { maps: mapIndex });
+const npcOut = [];
+for (const [id, name, map, extra = {}] of NPCS) {
+  const placed = world.maps[map]?.npcs.find((n) => n.id === id);
+  const { tier: _t, x: _x, ...rest } = extra;
+  npcOut.push({ id, name, map, x: placed?.x ?? extra.x, y: placed?.y, ...rest });
+}
+write('npcs.json', { note: 'world/npcs.mjs（位置はマップを作った時に決まる）', npcs: npcOut });
 
+// クエストの目的が指す物があるか
+{
+  const objIds = new Set(Object.values(world.maps).flatMap((m) => (m.objects || []).map((o) => o.id)));
+  const npcIds = new Set(NPCS.map((n) => n[0]));
+  for (const q of quests) {
+    if (!npcIds.has(q.end) && q.end !== 'auto') problems.push(`クエスト ${q.id} の報告先 ${q.end} がいない`);
+    for (const o of q.objectives) {
+      if (o.type === 'talk' && !npcIds.has(o.npc)) problems.push(`クエスト ${q.id}: 話す相手 ${o.npc} がいない`);
+      if (o.type === 'interact' && !objIds.has(o.target)) problems.push(`クエスト ${q.id}: 調べる物 ${o.target} がマップに無い`);
+      if (o.type === 'visit' && !world.maps[o.map]) problems.push(`クエスト ${q.id}: マップ ${o.map} が無い`);
+      if (o.type === 'collect' && !items.some((i) => i.id === o.item)) problems.push(`クエスト ${q.id}: アイテム ${o.item} が無い`);
+      if (o.type === 'kill' && !monsters.some((mm) => mm.id === o.mob)) problems.push(`クエスト ${q.id}: 敵 ${o.mob} がいない`);
+    }
+  }
+}
+
+if (CHECK) {
+  if (stale.length) problems.push(`書き出した物が古い（node classic-unity/Data/tools/export_data.mjs で書き出し直す）: ${stale.slice(0, 10).join(', ')}${stale.length > 10 ? ` ほか ${stale.length - 10}` : ''}`);
+  if (problems.length) { console.error('問題:\n  ' + problems.join('\n  ')); process.exit(1); }
+  console.log(`検査 OK: マップ ${mapIndex.length}（生成 ${world.stats.generated}・島 ${mapIndex.length - world.stats.generated}）、どのポータルからも全部の足場に行ける・ポータルは両方向・湧く所は足場の上・跳べない段差なし。書き出したファイルは最新`);
+  process.exit(0);
+}
 if (problems.length) { console.error('問題:\n  ' + problems.join('\n  ')); process.exit(1); }
-console.log(`書き出した: アイテム ${items.length}、敵 ${monsters.length}、クエスト ${quests.length}、マップ ${mapIndex.length}、NPC ${NPCS.length}、店 ${shops.length}`);
+console.log(`書き出した: アイテム ${items.length}、敵 ${monsters.length}、クエスト ${quests.length}、マップ ${mapIndex.length}（検査 OK）、NPC ${NPCS.length}、店 ${shops.length}`);

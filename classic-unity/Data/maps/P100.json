@@ -1,0 +1,189 @@
+{
+ "id": "P100",
+ "name": "神殿前の野営地",
+ "region": "P",
+ "type": "町",
+ "width": 1600,
+ "height": 440,
+ "bgm": "camp",
+ "bg": "temple_camp",
+ "theme": "town",
+ "returnMap": "P100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     360
+    ],
+    [
+     872,
+     360
+    ],
+    [
+     936,
+     336
+    ],
+    [
+     1168,
+     336
+    ],
+    [
+     1232,
+     360
+    ],
+    [
+     1600,
+     360
+    ]
+   ]
+  },
+  {
+   "id": "s1",
+   "points": [
+    [
+     592,
+     300
+    ],
+    [
+     832,
+     300
+    ]
+   ]
+  },
+  {
+   "id": "s2",
+   "points": [
+    [
+     216,
+     300
+    ],
+    [
+     488,
+     300
+    ]
+   ]
+  },
+  {
+   "id": "s3",
+   "points": [
+    [
+     616,
+     248
+    ],
+    [
+     832,
+     248
+    ]
+   ]
+  },
+  {
+   "id": "p4",
+   "points": [
+    [
+     236,
+     200
+    ],
+    [
+     476,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "p5",
+   "points": [
+    [
+     1024,
+     200
+    ],
+    [
+     1291,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 404,
+   "top": 200,
+   "bottom": 280,
+   "ladder": true
+  },
+  {
+   "x": 1136,
+   "top": 200,
+   "bottom": 316,
+   "ladder": true
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 800,
+   "y": 360
+  },
+  {
+   "name": "town",
+   "type": "town",
+   "x": 840,
+   "y": 360
+  },
+  {
+   "name": "to_P101",
+   "type": "visible",
+   "x": 56,
+   "y": 360,
+   "to": "P101",
+   "toPortal": "to_P100"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "alma",
+   "name": "神殿の巫女アルマ",
+   "x": 352,
+   "y": 360
+  },
+  {
+   "id": "inori",
+   "name": "薬屋イノリ",
+   "x": 648,
+   "y": 360,
+   "role": "potion",
+   "shop": "shop.P100.potion"
+  },
+  {
+   "id": "ishi",
+   "name": "倉庫番イシ",
+   "x": 952,
+   "y": 336,
+   "role": "storage"
+  },
+  {
+   "id": "p_boat",
+   "name": "雲の船の船頭ミチ",
+   "x": 1248,
+   "y": 360,
+   "travel": {
+    "to": "C101",
+    "toPortal": "sp",
+    "minLevel": 0,
+    "oneWay": false,
+    "fee": 2000
+   }
+  }
+ ],
+ "objects": [],
+ "note": "小さな野営地。薬屋と倉庫だけ。セレスの「天の階段」からの雲の船で来る。",
+ "seed": "P100#0"
+}

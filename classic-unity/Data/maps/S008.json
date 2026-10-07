@@ -9,7 +9,9 @@
  ],
  "width": 2000,
  "height": 720,
- "bgm": "island_field",
+ "bgm": "field_island",
+ "bg": "highland",
+ "theme": "island",
  "returnMap": "S003",
  "footholds": [
   {
@@ -113,6 +115,12 @@
    "id": "S008.view",
    "name": "見晴らし台",
    "x": 900,
+   "y": 540
+  },
+  {
+   "id": "S008.stele",
+   "name": "古い石碑",
+   "x": 1200,
    "y": 540
   }
  ],

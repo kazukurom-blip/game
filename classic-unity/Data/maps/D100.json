@@ -1,0 +1,239 @@
+{
+ "id": "D100",
+ "name": "竜の背の村",
+ "region": "D",
+ "type": "町",
+ "width": 3000,
+ "height": 596,
+ "bgm": "town_dragon",
+ "bg": "dragon_bone_village",
+ "theme": "townTall",
+ "returnMap": "D100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     516
+    ],
+    [
+     3000,
+     516
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     390,
+     372
+    ],
+    [
+     1226,
+     372
+    ]
+   ]
+  },
+  {
+   "id": "p2",
+   "points": [
+    [
+     1607,
+     372
+    ],
+    [
+     2747,
+     372
+    ]
+   ]
+  },
+  {
+   "id": "p3",
+   "points": [
+    [
+     395,
+     260
+    ],
+    [
+     1347,
+     260
+    ]
+   ]
+  },
+  {
+   "id": "p4",
+   "points": [
+    [
+     1711,
+     260
+    ],
+    [
+     2826,
+     260
+    ]
+   ]
+  },
+  {
+   "id": "s5",
+   "points": [
+    [
+     592,
+     200
+    ],
+    [
+     768,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "s6",
+   "points": [
+    [
+     2288,
+     212
+    ],
+    [
+     2464,
+     212
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 470,
+   "top": 372,
+   "bottom": 496,
+   "ladder": false
+  },
+  {
+   "x": 1783,
+   "top": 372,
+   "bottom": 496,
+   "ladder": false
+  },
+  {
+   "x": 2351,
+   "top": 372,
+   "bottom": 496,
+   "ladder": false
+  },
+  {
+   "x": 659,
+   "top": 260,
+   "bottom": 352,
+   "ladder": true
+  },
+  {
+   "x": 1107,
+   "top": 260,
+   "bottom": 352,
+   "ladder": false
+  },
+  {
+   "x": 2031,
+   "top": 260,
+   "bottom": 352,
+   "ladder": true
+  },
+  {
+   "x": 2479,
+   "top": 260,
+   "bottom": 352,
+   "ladder": false
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 1496,
+   "y": 516
+  },
+  {
+   "name": "town",
+   "type": "town",
+   "x": 1536,
+   "y": 516
+  },
+  {
+   "name": "to_D101",
+   "type": "visible",
+   "x": 56,
+   "y": 516,
+   "to": "D101",
+   "toPortal": "to_D100"
+  },
+  {
+   "name": "to_D102",
+   "type": "visible",
+   "x": 2936,
+   "y": 516,
+   "to": "D102",
+   "toPortal": "to_D100"
+  },
+  {
+   "name": "to_D115",
+   "type": "visible",
+   "x": 872,
+   "y": 260,
+   "to": "D115",
+   "toPortal": "to_D100"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "haruka",
+   "name": "村長ハルカ",
+   "x": 416,
+   "y": 516
+  },
+  {
+   "id": "doran",
+   "name": "鍛冶屋ドラン",
+   "x": 800,
+   "y": 516
+  },
+  {
+   "id": "uroko",
+   "name": "武器屋ウロコ",
+   "x": 1280,
+   "y": 516,
+   "role": "weapon"
+  },
+  {
+   "id": "hone",
+   "name": "防具屋ホネ",
+   "x": 1720,
+   "y": 516,
+   "role": "armor"
+  },
+  {
+   "id": "tsume",
+   "name": "薬屋ツメ",
+   "x": 2152,
+   "y": 516,
+   "role": "potion",
+   "shop": "shop.D100.potion"
+  },
+  {
+   "id": "su",
+   "name": "倉庫番ス",
+   "x": 2584,
+   "y": 516,
+   "role": "storage"
+  }
+ ],
+ "objects": [],
+ "note": "大きな竜の骨の上に建つ村。武器屋・防具屋・薬屋・倉庫。",
+ "seed": "D100#0"
+}

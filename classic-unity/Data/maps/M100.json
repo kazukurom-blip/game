@@ -1,0 +1,267 @@
+{
+ "id": "M100",
+ "name": "マリナ",
+ "region": "M",
+ "type": "町",
+ "width": 2920,
+ "height": 612,
+ "bgm": "town_marina",
+ "bg": "bubble_dome",
+ "theme": "townTall",
+ "returnMap": "M100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     532
+    ],
+    [
+     2920,
+     532
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     145,
+     388
+    ],
+    [
+     1033,
+     388
+    ]
+   ]
+  },
+  {
+   "id": "p2",
+   "points": [
+    [
+     1722,
+     388
+    ],
+    [
+     2684,
+     388
+    ]
+   ]
+  },
+  {
+   "id": "p3",
+   "points": [
+    [
+     290,
+     260
+    ],
+    [
+     1416,
+     260
+    ]
+   ]
+  },
+  {
+   "id": "p4",
+   "points": [
+    [
+     1528,
+     260
+    ],
+    [
+     2640,
+     260
+    ]
+   ]
+  },
+  {
+   "id": "s5",
+   "points": [
+    [
+     1816,
+     204
+    ],
+    [
+     2000,
+     204
+    ]
+   ]
+  },
+  {
+   "id": "s6",
+   "points": [
+    [
+     1120,
+     200
+    ],
+    [
+     1328,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 409,
+   "top": 388,
+   "bottom": 512,
+   "ladder": false
+  },
+  {
+   "x": 2058,
+   "top": 388,
+   "bottom": 512,
+   "ladder": true
+  },
+  {
+   "x": 2306,
+   "top": 388,
+   "bottom": 512,
+   "ladder": false
+  },
+  {
+   "x": 514,
+   "top": 260,
+   "bottom": 368,
+   "ladder": true
+  },
+  {
+   "x": 1338,
+   "top": 260,
+   "bottom": 512,
+   "ladder": false
+  },
+  {
+   "x": 1672,
+   "top": 260,
+   "bottom": 512,
+   "ladder": true
+  },
+  {
+   "x": 2240,
+   "top": 260,
+   "bottom": 368,
+   "ladder": true
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 1456,
+   "y": 532
+  },
+  {
+   "name": "town",
+   "type": "town",
+   "x": 1496,
+   "y": 532
+  },
+  {
+   "name": "to_T120",
+   "type": "visible",
+   "x": 56,
+   "y": 532,
+   "to": "T120",
+   "toPortal": "to_M100"
+  },
+  {
+   "name": "to_M101",
+   "type": "visible",
+   "x": 2856,
+   "y": 532,
+   "to": "M101",
+   "toPortal": "to_M100"
+  },
+  {
+   "name": "to_M107",
+   "type": "visible",
+   "x": 856,
+   "y": 260,
+   "to": "M107",
+   "toPortal": "to_M100"
+  },
+  {
+   "name": "to_M113",
+   "type": "visible",
+   "x": 1720,
+   "y": 532,
+   "to": "M113",
+   "toPortal": "to_M100"
+  },
+  {
+   "name": "to_M114",
+   "type": "visible",
+   "x": 592,
+   "y": 388,
+   "to": "M114",
+   "toPortal": "to_M100"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "awaji",
+   "name": "泡職人アワジ",
+   "x": 368,
+   "y": 532
+  },
+  {
+   "id": "shio",
+   "name": "料理人シオ",
+   "x": 784,
+   "y": 532
+  },
+  {
+   "id": "sango",
+   "name": "武器屋サンゴ",
+   "x": 1248,
+   "y": 532,
+   "role": "weapon"
+  },
+  {
+   "id": "kai_m",
+   "name": "防具屋カイガラ",
+   "x": 1632,
+   "y": 532,
+   "role": "armor"
+  },
+  {
+   "id": "shizuku",
+   "name": "薬屋シズク",
+   "x": 2104,
+   "y": 532,
+   "role": "potion",
+   "shop": "shop.M100.potion"
+  },
+  {
+   "id": "tsubo",
+   "name": "倉庫番ツボ",
+   "x": 2512,
+   "y": 532,
+   "role": "storage"
+  },
+  {
+   "id": "ruri",
+   "name": "女王の侍女ルリ",
+   "x": 664,
+   "y": 388
+  },
+  {
+   "id": "marin",
+   "name": "近衛兵マリン",
+   "x": 2200,
+   "y": 388
+  }
+ ],
+ "objects": [],
+ "note": "泡のドームの中の町。武器屋・防具屋・薬屋・倉庫。",
+ "seed": "M100#0"
+}

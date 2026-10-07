@@ -1,0 +1,97 @@
+{
+ "id": "F118",
+ "name": "修験の雪洞",
+ "region": "F",
+ "type": "特",
+ "width": 1000,
+ "height": 280,
+ "bgm": "pq",
+ "bg": "snow_cave",
+ "theme": "room",
+ "returnMap": "F100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     200
+    ],
+    [
+     1000,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 200
+  },
+  {
+   "name": "to_F117",
+   "type": "visible",
+   "x": 56,
+   "y": 200,
+   "to": "F117",
+   "toPortal": "to_F118"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [
+  {
+   "mob": "M300",
+   "x": 768,
+   "y": 200,
+   "intervalSec": 900
+  }
+ ],
+ "npcs": [
+  {
+   "id": "dorga_F118",
+   "name": "戦士長ドルガ",
+   "x": 304,
+   "y": 200,
+   "role": "job"
+  },
+  {
+   "id": "orfe_F118",
+   "name": "大魔導師オルフェ",
+   "x": 400,
+   "y": 200,
+   "role": "job"
+  },
+  {
+   "id": "erna_F118",
+   "name": "弓の師範エルナ",
+   "x": 496,
+   "y": 200,
+   "role": "job"
+  },
+  {
+   "id": "yami_F118",
+   "name": "影の頭領ヤミ",
+   "x": 592,
+   "y": 200,
+   "role": "job"
+  },
+  {
+   "id": "rio_F118",
+   "name": "キャプテン・リオ",
+   "x": 688,
+   "y": 200,
+   "role": "job"
+  }
+ ],
+ "objects": [],
+ "note": "3 次の試験「もう一人の自分」と戦う部屋。",
+ "seed": "F118#0"
+}

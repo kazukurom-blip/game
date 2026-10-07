@@ -1,0 +1,123 @@
+{
+ "id": "M112",
+ "name": "溝の底",
+ "region": "M",
+ "type": "ボ",
+ "lv": [
+  110,
+  125
+ ],
+ "width": 1840,
+ "height": 536,
+ "bgm": "boss_big",
+ "bg": "trench_bottom",
+ "theme": "arena",
+ "returnMap": "M100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     456
+    ],
+    [
+     1840,
+     456
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     160,
+     320
+    ],
+    [
+     552,
+     320
+    ]
+   ]
+  },
+  {
+   "id": "p2",
+   "points": [
+    [
+     1288,
+     320
+    ],
+    [
+     1680,
+     320
+    ]
+   ]
+  },
+  {
+   "id": "p3",
+   "points": [
+    [
+     740,
+     200
+    ],
+    [
+     1100,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 408,
+   "top": 320,
+   "bottom": 436,
+   "ladder": false
+  },
+  {
+   "x": 1376,
+   "top": 320,
+   "bottom": 436,
+   "ladder": false
+  },
+  {
+   "x": 852,
+   "top": 200,
+   "bottom": 436,
+   "ladder": false
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 456
+  },
+  {
+   "name": "to_M111",
+   "type": "visible",
+   "x": 56,
+   "y": 456,
+   "to": "M111",
+   "toPortal": "to_M112"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [
+  {
+   "mob": "M189",
+   "x": 920,
+   "y": 456,
+   "intervalSec": 43200
+  }
+ ],
+ "npcs": [],
+ "objects": [],
+ "note": "深淵の大魚。1 日 2 回。",
+ "seed": "M112#0"
+}

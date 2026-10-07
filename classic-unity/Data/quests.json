@@ -1,5 +1,5 @@
 {
- "note": "export_data.mjs が quests.mjs から書き出した。報酬の経験値・お金は QUESTS.md 1-3 の式。チュートリアル（S-01〜S-20）の目的は機械で判定できる形に書き直してある。",
+ "note": "export_data.mjs が quests.mjs から書き出した。報酬の経験値・お金は QUESTS.md 1-3 の式。チュートリアル（S-01〜S-20）と文章だけの目的（quest_goals.mjs）は機械で判定できる形に書き直してある。",
  "quests": [
   {
    "id": "S-01",
@@ -687,7 +687,14 @@
    ],
    "size": "小",
    "goalText": "推薦状を見せる",
-   "objectives": [],
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "special.letter_breeze",
+     "count": 1,
+     "label": "推薦状を見せる"
+    }
+   ],
    "end": "olga",
    "exp": 32,
    "meso": 136,
@@ -716,8 +723,14 @@
    ],
    "size": "小",
    "goalText": "ポム丘の弓の師範エルナに手紙を届ける",
-   "objectives": [],
-   "end": "olga",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "erna",
+     "label": "弓の師範エルナに手紙を届ける"
+    }
+   ],
+   "end": "erna",
    "exp": 32,
    "meso": 136,
    "rewards": [],
@@ -729,7 +742,7 @@
   {
    "id": "V-03",
    "name": "森の町への手紙",
-   "giver": "弓の師範エルナ",
+   "giver": "erna",
    "giverName": "弓の師範エルナ",
    "map": "V200",
    "minLevel": 8,
@@ -738,8 +751,14 @@
    ],
    "size": "小",
    "goalText": "シルワ森都の大魔導師オルフェに手紙を届ける",
-   "objectives": [],
-   "end": "弓の師範エルナ",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "orfe",
+     "label": "大魔導師オルフェに手紙を届ける"
+    }
+   ],
+   "end": "orfe",
    "exp": 46,
    "meso": 166,
    "rewards": [],
@@ -751,7 +770,7 @@
   {
    "id": "V-04",
    "name": "岩の町への手紙",
-   "giver": "大魔導師オルフェ",
+   "giver": "orfe",
    "giverName": "大魔導師オルフェ",
    "map": "V300",
    "minLevel": 8,
@@ -760,8 +779,14 @@
    ],
    "size": "小",
    "goalText": "ガルド岩台の戦士長ドルガに手紙を届ける",
-   "objectives": [],
-   "end": "大魔導師オルフェ",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "dorga",
+     "label": "戦士長ドルガに手紙を届ける"
+    }
+   ],
+   "end": "dorga",
    "exp": 46,
    "meso": 166,
    "rewards": [],
@@ -773,7 +798,7 @@
   {
    "id": "V-05",
    "name": "霧の町への手紙",
-   "giver": "戦士長ドルガ",
+   "giver": "dorga",
    "giverName": "戦士長ドルガ",
    "map": "V400",
    "minLevel": 9,
@@ -782,8 +807,14 @@
    ],
    "size": "小",
    "goalText": "クロウ街の影の頭領ヤミに手紙を届ける",
-   "objectives": [],
-   "end": "戦士長ドルガ",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "yami",
+     "label": "影の頭領ヤミに手紙を届ける"
+    }
+   ],
+   "end": "yami",
    "exp": 67,
    "meso": 204,
    "rewards": [],
@@ -795,7 +826,7 @@
   {
    "id": "V-06",
    "name": "海賊の船への手紙",
-   "giver": "影の頭領ヤミ",
+   "giver": "yami",
    "giverName": "影の頭領ヤミ",
    "map": "V500",
    "minLevel": 9,
@@ -804,8 +835,14 @@
    ],
    "size": "中",
    "goalText": "潮風号のキャプテン・リオに手紙を届け、オルガに報告する",
-   "objectives": [],
-   "end": "影の頭領ヤミ",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "rio",
+     "label": "キャプテン・リオに手紙を届ける"
+    }
+   ],
+   "end": "olga",
    "exp": 133,
    "meso": 510,
    "rewards": [],
@@ -819,7 +856,7 @@
   {
    "id": "V-07",
    "name": "灯台のランプ",
-   "giver": "灯台守ソル",
+   "giver": "sol",
    "giverName": "灯台守ソル",
    "map": "V102",
    "minLevel": 9,
@@ -833,9 +870,14 @@
      "type": "collect",
      "item": "etc.M011",
      "count": 10
+    },
+    {
+     "type": "interact",
+     "target": "V102.lamp",
+     "label": "灯台のてっぺんのランプを掃除する"
     }
    ],
-   "end": "灯台守ソル",
+   "end": "sol",
    "exp": 133,
    "meso": 510,
    "rewards": [
@@ -852,7 +894,7 @@
   {
    "id": "V-08",
    "name": "浜のカニ退治",
-   "giver": "船乗りロッコ",
+   "giver": "rokko",
    "giverName": "船乗りロッコ",
    "map": "V100",
    "minLevel": 8,
@@ -868,7 +910,7 @@
      "count": 20
     }
    ],
-   "end": "船乗りロッコ",
+   "end": "rokko",
    "exp": 46,
    "meso": 166,
    "rewards": [
@@ -885,7 +927,7 @@
   {
    "id": "V-09",
    "name": "タコの墨",
-   "giver": "薬屋ポーラ",
+   "giver": "pola",
    "giverName": "薬屋ポーラ",
    "map": "V100",
    "minLevel": 12,
@@ -901,7 +943,7 @@
      "count": 15
     }
    ],
-   "end": "薬屋ポーラ",
+   "end": "pola",
    "exp": 332,
    "meso": 745,
    "rewards": [
@@ -918,7 +960,7 @@
   {
    "id": "V-10",
    "name": "しずくの洞窟の小部屋",
-   "giver": "釣り好きのウオ爺",
+   "giver": "uo",
    "giverName": "釣り好きのウオ爺",
    "map": "V100",
    "minLevel": 15,
@@ -929,11 +971,12 @@
    "goalText": "V105 の行き止まりの水たまりを調べる",
    "objectives": [
     {
-     "type": "visit",
-     "map": "V105"
+     "type": "interact",
+     "target": "V105.pool",
+     "label": "行き止まりの水たまりを調べる"
     }
    ],
-   "end": "釣り好きのウオ爺",
+   "end": "uo",
    "exp": 756,
    "meso": 968,
    "rewards": [
@@ -950,7 +993,7 @@
   {
    "id": "V-11",
    "name": "イワカメの甲羅",
-   "giver": "防具屋ミレ",
+   "giver": "mire",
    "giverName": "防具屋ミレ",
    "map": "V100",
    "minLevel": 15,
@@ -966,7 +1009,7 @@
      "count": 20
     }
    ],
-   "end": "防具屋ミレ",
+   "end": "mire",
    "exp": 756,
    "meso": 968,
    "rewards": [],
@@ -980,7 +1023,7 @@
   {
    "id": "V-12",
    "name": "ヤドカリの家",
-   "giver": "船乗りロッコ",
+   "giver": "rokko",
    "giverName": "船乗りロッコ",
    "map": "V100",
    "minLevel": 18,
@@ -996,7 +1039,7 @@
      "count": 15
     }
    ],
-   "end": "船乗りロッコ",
+   "end": "rokko",
    "exp": 1340,
    "meso": 1260,
    "rewards": [
@@ -1013,7 +1056,7 @@
   {
    "id": "V-13",
    "name": "倉庫の使い方",
-   "giver": "倉庫番ダン",
+   "giver": "dan",
    "giverName": "倉庫番ダン",
    "map": "V100",
    "minLevel": 10,
@@ -1022,8 +1065,19 @@
    ],
    "size": "小",
    "goalText": "倉庫に何か 1 つ預け、もう一度取り出す",
-   "objectives": [],
-   "end": "倉庫番ダン",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "storage_deposit",
+     "label": "倉庫に 1 つ預ける"
+    },
+    {
+     "type": "event",
+     "event": "storage_withdraw",
+     "label": "倉庫から取り出す"
+    }
+   ],
+   "end": "dan",
    "exp": 96,
    "meso": 250,
    "rewards": [],
@@ -1064,7 +1118,7 @@
   {
    "id": "B-01",
    "name": "風車の帆",
-   "giver": "風車守ボブ",
+   "giver": "bob",
    "giverName": "風車守ボブ",
    "map": "V200",
    "minLevel": 8,
@@ -1080,7 +1134,7 @@
      "count": 10
     }
    ],
-   "end": "風車守ボブ",
+   "end": "bob",
    "exp": 46,
    "meso": 166,
    "rewards": [
@@ -1097,7 +1151,7 @@
   {
    "id": "B-02",
    "name": "花畑のリボン",
-   "giver": "花売りのスイ",
+   "giver": "sui",
    "giverName": "花売りのスイ",
    "map": "V200",
    "minLevel": 11,
@@ -1111,7 +1165,7 @@
      "count": 10
     }
    ],
-   "end": "花売りのスイ",
+   "end": "sui",
    "exp": 126,
    "meso": 273,
    "rewards": [],
@@ -1125,7 +1179,7 @@
   {
    "id": "B-03",
    "name": "キノコのスープ",
-   "giver": "農家のマーサ",
+   "giver": "marsa",
    "giverName": "農家のマーサ",
    "map": "V200",
    "minLevel": 10,
@@ -1139,7 +1193,7 @@
      "count": 15
     }
    ],
-   "end": "農家のマーサ",
+   "end": "marsa",
    "exp": 96,
    "meso": 250,
    "rewards": [
@@ -1156,7 +1210,7 @@
   {
    "id": "B-04",
    "name": "ハチドリの羽",
-   "giver": "弓の師範エルナ",
+   "giver": "erna",
    "giverName": "弓の師範エルナ",
    "map": "V200",
    "minLevel": 13,
@@ -1170,7 +1224,7 @@
      "count": 20
     }
    ],
-   "end": "弓の師範エルナ",
+   "end": "erna",
    "exp": 437,
    "meso": 813,
    "rewards": [
@@ -1187,7 +1241,7 @@
   {
    "id": "B-05",
    "name": "アオダケの森",
-   "giver": "牧場の少年タロ",
+   "giver": "taro",
    "giverName": "牧場の少年タロ",
    "map": "V200",
    "minLevel": 15,
@@ -1201,7 +1255,7 @@
      "count": 30
     }
    ],
-   "end": "牧場の少年タロ",
+   "end": "taro",
    "exp": 756,
    "meso": 968,
    "rewards": [
@@ -1218,7 +1272,7 @@
   {
    "id": "B-06",
    "name": "クマバチの巣",
-   "giver": "農家のマーサ",
+   "giver": "marsa",
    "giverName": "農家のマーサ",
    "map": "V200",
    "minLevel": 17,
@@ -1234,7 +1288,7 @@
      "count": 20
     }
    ],
-   "end": "農家のマーサ",
+   "end": "marsa",
    "exp": 1110,
    "meso": 1150,
    "rewards": [
@@ -1251,7 +1305,7 @@
   {
    "id": "B-07",
    "name": "ノネズミ退治",
-   "giver": "農家のマーサ",
+   "giver": "marsa",
    "giverName": "農家のマーサ",
    "map": "V200",
    "minLevel": 19,
@@ -1267,7 +1321,7 @@
      "count": 40
     }
    ],
-   "end": "農家のマーサ",
+   "end": "marsa",
    "exp": 1630,
    "meso": 1370,
    "rewards": [
@@ -1284,7 +1338,7 @@
   {
    "id": "B-08",
    "name": "動き出したカカシ",
-   "giver": "風車守ボブ",
+   "giver": "bob",
    "giverName": "風車守ボブ",
    "map": "V200",
    "minLevel": 21,
@@ -1305,7 +1359,7 @@
      "count": 10
     }
    ],
-   "end": "風車守ボブ",
+   "end": "bob",
    "exp": 4780,
    "meso": 3820,
    "rewards": [
@@ -1322,7 +1376,7 @@
   {
    "id": "B-09",
    "name": "キノコの女王",
-   "giver": "牧場の少年タロ",
+   "giver": "taro",
    "giverName": "牧場の少年タロ",
    "map": "V200",
    "minLevel": 28,
@@ -1338,7 +1392,7 @@
      "count": 1
     }
    ],
-   "end": "牧場の少年タロ",
+   "end": "taro",
    "exp": 26200,
    "meso": 14600,
    "rewards": [
@@ -1355,7 +1409,7 @@
   {
    "id": "B-10",
    "name": "鈴のブタ",
-   "giver": "牧場の少年タロ",
+   "giver": "taro",
    "giverName": "牧場の少年タロ",
    "map": "V200",
    "minLevel": 9,
@@ -1364,11 +1418,13 @@
    "goalText": "V202 で鈴の音のするブタっぺを見つけて話しかける（3 回連れ戻す）",
    "objectives": [
     {
-     "type": "visit",
-     "map": "V202"
+     "type": "interact",
+     "target": "V202.bellpig",
+     "label": "鈴の音のするブタっぺを連れ戻す",
+     "count": 3
     }
    ],
-   "end": "牧場の少年タロ",
+   "end": "taro",
    "exp": 67,
    "meso": 204,
    "rewards": [],
@@ -1382,7 +1438,7 @@
   {
    "id": "B-11",
    "name": "巣の見回り",
-   "giver": "弓の師範エルナ",
+   "giver": "erna",
    "giverName": "弓の師範エルナ",
    "map": "V200",
    "minLevel": 20,
@@ -1398,7 +1454,7 @@
      "count": 30
     }
    ],
-   "end": "弓の師範エルナ",
+   "end": "erna",
    "exp": 1980,
    "meso": 11500,
    "rewards": [],
@@ -1410,7 +1466,7 @@
   {
    "id": "B-12",
    "name": "風車のてっぺん",
-   "giver": "風車守ボブ",
+   "giver": "bob",
    "giverName": "風車守ボブ",
    "map": "V200",
    "minLevel": 12,
@@ -1421,11 +1477,12 @@
    "goalText": "V202 の風車の羽を跳び渡り、てっぺんの旗に触る（ジャンプの道）",
    "objectives": [
     {
-     "type": "visit",
-     "map": "V202"
+     "type": "interact",
+     "target": "V202.flag",
+     "label": "風車のてっぺんの旗に触る"
     }
    ],
-   "end": "風車守ボブ",
+   "end": "bob",
    "exp": 332,
    "meso": 745,
    "rewards": [],
@@ -1439,7 +1496,7 @@
   {
    "id": "B-13",
    "name": "キノコ図鑑",
-   "giver": "農家のマーサ",
+   "giver": "marsa",
    "giverName": "農家のマーサ",
    "map": "V200",
    "minLevel": 16,
@@ -1465,7 +1522,7 @@
      "count": 20
     }
    ],
-   "end": "農家のマーサ",
+   "end": "marsa",
    "exp": 1910,
    "meso": 2540,
    "rewards": [
@@ -1484,7 +1541,7 @@
   {
    "id": "B-14",
    "name": "丘の東の見張り小屋",
-   "giver": "牧場の少年タロ",
+   "giver": "taro",
    "giverName": "牧場の少年タロ",
    "map": "V200",
    "minLevel": 18,
@@ -1495,11 +1552,12 @@
    "goalText": "V212 の見張り小屋の望遠鏡をのぞく",
    "objectives": [
     {
-     "type": "visit",
-     "map": "V212"
+     "type": "interact",
+     "target": "V212.telescope",
+     "label": "見張り小屋の望遠鏡をのぞく"
     }
    ],
-   "end": "牧場の少年タロ",
+   "end": "taro",
    "exp": 672,
    "meso": 504,
    "rewards": [],
@@ -1511,7 +1569,7 @@
   {
    "id": "W-01",
    "name": "森の図書館",
-   "giver": "司書リブラ",
+   "giver": "libra",
    "giverName": "司書リブラ",
    "map": "V300",
    "minLevel": 8,
@@ -1520,19 +1578,22 @@
    "goalText": "V301・V302・V303 で光る本を 1 冊ずつ拾う",
    "objectives": [
     {
-     "type": "visit",
-     "map": "V301"
+     "type": "interact",
+     "target": "V301.book",
+     "label": "森の入口の光る本"
     },
     {
-     "type": "visit",
-     "map": "V302"
+     "type": "interact",
+     "target": "V302.book",
+     "label": "スライムの池の光る本"
     },
     {
-     "type": "visit",
-     "map": "V303"
+     "type": "interact",
+     "target": "V303.book",
+     "label": "ヒトツメの森の光る本"
     }
    ],
-   "end": "司書リブラ",
+   "end": "libra",
    "exp": 46,
    "meso": 166,
    "rewards": [
@@ -1549,7 +1610,7 @@
   {
    "id": "W-02",
    "name": "緑のしずく",
-   "giver": "薬草屋ハーブ",
+   "giver": "herb",
    "giverName": "薬草屋ハーブ",
    "map": "V300",
    "minLevel": 12,
@@ -1563,7 +1624,7 @@
      "count": 20
     }
    ],
-   "end": "薬草屋ハーブ",
+   "end": "herb",
    "exp": 166,
    "meso": 298,
    "rewards": [
@@ -1580,7 +1641,7 @@
   {
    "id": "W-03",
    "name": "ヒトツメのしっぽ",
-   "giver": "薬草屋ハーブ",
+   "giver": "herb",
    "giverName": "薬草屋ハーブ",
    "map": "V300",
    "minLevel": 15,
@@ -1596,7 +1657,7 @@
      "count": 20
     }
    ],
-   "end": "薬草屋ハーブ",
+   "end": "herb",
    "exp": 756,
    "meso": 968,
    "rewards": [
@@ -1613,7 +1674,7 @@
   {
    "id": "W-04",
    "name": "妖精の粉",
-   "giver": "妖精の使いティア",
+   "giver": "tia",
    "giverName": "妖精の使いティア",
    "map": "V300",
    "minLevel": 20,
@@ -1627,7 +1688,7 @@
      "count": 20
     }
    ],
-   "end": "妖精の使いティア",
+   "end": "tia",
    "exp": 1980,
    "meso": 11500,
    "rewards": [],
@@ -1639,7 +1700,7 @@
   {
    "id": "W-05",
    "name": "女王の薬",
-   "giver": "妖精の使いティア",
+   "giver": "tia",
    "giverName": "妖精の使いティア",
    "map": "V300",
    "minLevel": 21,
@@ -1653,9 +1714,14 @@
      "type": "collect",
      "item": "etc.M032",
      "count": 15
+    },
+    {
+     "type": "talk",
+     "npc": "herb",
+     "label": "薬草屋ハーブに薬を作ってもらう"
     }
    ],
-   "end": "妖精の使いティア",
+   "end": "tia",
    "exp": 4780,
    "meso": 3820,
    "rewards": [
@@ -1672,7 +1738,7 @@
   {
    "id": "W-06",
    "name": "つるの迷い道の地図",
-   "giver": "木こりの青年ウッド",
+   "giver": "wood",
    "giverName": "木こりの青年ウッド",
    "map": "V300",
    "minLevel": 22,
@@ -1681,11 +1747,12 @@
    "goalText": "V305 の一番奥の切り株に印を付けて戻る",
    "objectives": [
     {
-     "type": "visit",
-     "map": "V305"
+     "type": "interact",
+     "target": "V305.stump",
+     "label": "一番奥の切り株に印を付ける"
     }
    ],
-   "end": "木こりの青年ウッド",
+   "end": "wood",
    "exp": 2640,
    "meso": 1690,
    "rewards": [
@@ -1702,7 +1769,7 @@
   {
    "id": "W-07",
    "name": "サルの木の実",
-   "giver": "木こりの青年ウッド",
+   "giver": "wood",
    "giverName": "木こりの青年ウッド",
    "map": "V300",
    "minLevel": 24,
@@ -1718,7 +1785,7 @@
      "count": 25
     }
    ],
-   "end": "木こりの青年ウッド",
+   "end": "wood",
    "exp": 3530,
    "meso": 1910,
    "rewards": [
@@ -1735,7 +1802,7 @@
   {
    "id": "W-08",
    "name": "クマの毛皮",
-   "giver": "ローブ屋フィオ",
+   "giver": "fio",
    "giverName": "ローブ屋フィオ",
    "map": "V300",
    "minLevel": 27,
@@ -1749,7 +1816,7 @@
      "count": 20
     }
    ],
-   "end": "ローブ屋フィオ",
+   "end": "fio",
    "exp": 5450,
    "meso": 2290,
    "rewards": [],
@@ -1763,7 +1830,7 @@
   {
    "id": "W-09",
    "name": "夜の森の便",
-   "giver": "駅員ノア",
+   "giver": "noa",
    "giverName": "駅員ノア",
    "map": "V310",
    "minLevel": 25,
@@ -1777,7 +1844,7 @@
      "count": 30
     }
    ],
-   "end": "駅員ノア",
+   "end": "noa",
    "exp": 4080,
    "meso": 2030,
    "rewards": [],
@@ -1791,7 +1858,7 @@
   {
    "id": "W-10",
    "name": "木の上の小道",
-   "giver": "魔法の武器屋ミント",
+   "giver": "mint",
    "giverName": "魔法の武器屋ミント",
    "map": "V300",
    "minLevel": 13,
@@ -1809,7 +1876,7 @@
      "map": "V312"
     }
    ],
-   "end": "魔法の武器屋ミント",
+   "end": "mint",
    "exp": 218,
    "meso": 325,
    "rewards": [
@@ -1826,7 +1893,7 @@
   {
    "id": "W-11",
    "name": "雲の船の切符",
-   "giver": "駅員ノア",
+   "giver": "noa",
    "giverName": "駅員ノア",
    "map": "V310",
    "minLevel": 20,
@@ -1836,10 +1903,16 @@
    "objectives": [
     {
      "type": "visit",
-     "map": "C100"
+     "map": "C100",
+     "label": "雲の船でセレスへ"
+    },
+    {
+     "type": "talk",
+     "npc": "stella",
+     "label": "都の巫女ステラに会う"
     }
    ],
-   "end": "駅員ノア",
+   "end": "stella",
    "exp": 1980,
    "meso": 1500,
    "rewards": [],
@@ -1851,7 +1924,7 @@
   {
    "id": "W-12",
    "name": "古いインク",
-   "giver": "司書リブラ",
+   "giver": "libra",
    "giverName": "司書リブラ",
    "map": "V300",
    "minLevel": 30,
@@ -1867,7 +1940,7 @@
      "count": 20
     }
    ],
-   "end": "司書リブラ",
+   "end": "libra",
    "exp": 8400,
    "meso": 2750,
    "rewards": [
@@ -1884,7 +1957,7 @@
   {
    "id": "W-13",
    "name": "森の奥の異変",
-   "giver": "大魔導師オルフェ",
+   "giver": "orfe",
    "giverName": "大魔導師オルフェ",
    "map": "V300",
    "minLevel": 38,
@@ -1900,7 +1973,7 @@
      "count": 40
     }
    ],
-   "end": "大魔導師オルフェ",
+   "end": "orfe",
    "exp": 48500,
    "meso": 9310,
    "rewards": [
@@ -1917,7 +1990,7 @@
   {
    "id": "W-14",
    "name": "大樹の声",
-   "giver": "妖精の使いティア",
+   "giver": "tia",
    "giverName": "妖精の使いティア",
    "map": "V300",
    "minLevel": 40,
@@ -1938,7 +2011,7 @@
      "count": 30
     }
    ],
-   "end": "妖精の使いティア",
+   "end": "tia",
    "exp": 62500,
    "meso": 10100,
    "rewards": [],
@@ -1950,7 +2023,7 @@
   {
    "id": "W-15",
    "name": "森の主",
-   "giver": "大魔導師オルフェ",
+   "giver": "orfe",
    "giverName": "大魔導師オルフェ",
    "map": "V300",
    "minLevel": 42,
@@ -1966,7 +2039,7 @@
      "count": 1
     }
    ],
-   "end": "大魔導師オルフェ",
+   "end": "orfe",
    "exp": 153000,
    "meso": 27600,
    "rewards": [
@@ -1987,7 +2060,7 @@
   {
    "id": "G-01",
    "name": "焚き火の枝",
-   "giver": "鍛冶屋カジ",
+   "giver": "kaji",
    "giverName": "鍛冶屋カジ",
    "map": "V400",
    "minLevel": 6,
@@ -2001,7 +2074,7 @@
      "count": 15
     }
    ],
-   "end": "鍛冶屋カジ",
+   "end": "kaji",
    "exp": 22,
    "meso": 111,
    "rewards": [
@@ -2018,7 +2091,7 @@
   {
    "id": "G-02",
    "name": "固い枝",
-   "giver": "鍛冶屋カジ",
+   "giver": "kaji",
    "giverName": "鍛冶屋カジ",
    "map": "V400",
    "minLevel": 11,
@@ -2034,7 +2107,7 @@
      "count": 20
     }
    ],
-   "end": "鍛冶屋カジ",
+   "end": "kaji",
    "exp": 126,
    "meso": 273,
    "rewards": [
@@ -2051,7 +2124,7 @@
   {
    "id": "G-03",
    "name": "斧の刃の回収",
-   "giver": "武器屋ガンテツ",
+   "giver": "gantetsu",
    "giverName": "武器屋ガンテツ",
    "map": "V400",
    "minLevel": 17,
@@ -2065,7 +2138,7 @@
      "count": 20
     }
    ],
-   "end": "武器屋ガンテツ",
+   "end": "gantetsu",
    "exp": 1110,
    "meso": 1150,
    "rewards": [],
@@ -2079,7 +2152,7 @@
   {
    "id": "G-04",
    "name": "黒い斧の丘",
-   "giver": "戦士長ドルガ",
+   "giver": "dorga",
    "giverName": "戦士長ドルガ",
    "map": "V400",
    "minLevel": 22,
@@ -2093,7 +2166,7 @@
      "count": 40
     }
    ],
-   "end": "戦士長ドルガ",
+   "end": "dorga",
    "exp": 2640,
    "meso": 1690,
    "rewards": [
@@ -2110,7 +2183,7 @@
   {
    "id": "G-05",
    "name": "イノシシの牙",
-   "giver": "防具屋ハガネ",
+   "giver": "hagane",
    "giverName": "防具屋ハガネ",
    "map": "V400",
    "minLevel": 25,
@@ -2124,7 +2197,7 @@
      "count": 25
     }
    ],
-   "end": "防具屋ハガネ",
+   "end": "hagane",
    "exp": 4080,
    "meso": 2030,
    "rewards": [],
@@ -2138,7 +2211,7 @@
   {
    "id": "G-06",
    "name": "頂の祈りの石",
-   "giver": "祈祷師トト",
+   "giver": "toto",
    "giverName": "祈祷師トト",
    "map": "V400",
    "minLevel": 26,
@@ -2156,7 +2229,7 @@
      "count": 30
     }
    ],
-   "end": "祈祷師トト",
+   "end": "toto",
    "exp": 4720,
    "meso": 17160,
    "rewards": [],
@@ -2168,7 +2241,7 @@
   {
    "id": "G-07",
    "name": "焦げた牙",
-   "giver": "薬屋ジンジャー",
+   "giver": "ginger",
    "giverName": "薬屋ジンジャー",
    "map": "V400",
    "minLevel": 32,
@@ -2182,7 +2255,7 @@
      "count": 30
     }
    ],
-   "end": "薬屋ジンジャー",
+   "end": "ginger",
    "exp": 10800,
    "meso": 3000,
    "rewards": [
@@ -2199,7 +2272,7 @@
   {
    "id": "G-08",
    "name": "発掘場の調査",
-   "giver": "発掘隊長ロッシ",
+   "giver": "rossi",
    "giverName": "発掘隊長ロッシ",
    "map": "V400",
    "minLevel": 30,
@@ -2213,7 +2286,7 @@
      "count": 40
     }
    ],
-   "end": "発掘隊長ロッシ",
+   "end": "rossi",
    "exp": 8400,
    "meso": 2750,
    "rewards": [
@@ -2230,7 +2303,7 @@
   {
    "id": "G-09",
    "name": "化石の部屋",
-   "giver": "発掘隊長ロッシ",
+   "giver": "rossi",
    "giverName": "発掘隊長ロッシ",
    "map": "V400",
    "minLevel": 33,
@@ -2241,11 +2314,22 @@
    "goalText": "V409 の左端の壁の隠し部屋で化石を 3 つ調べる",
    "objectives": [
     {
-     "type": "visit",
-     "map": "V409"
+     "type": "interact",
+     "target": "V409.fossil1",
+     "label": "化石（大きな骨）"
+    },
+    {
+     "type": "interact",
+     "target": "V409.fossil2",
+     "label": "化石（貝）"
+    },
+    {
+     "type": "interact",
+     "target": "V409.fossil3",
+     "label": "化石（羽）"
     }
    ],
-   "end": "発掘隊長ロッシ",
+   "end": "rossi",
    "exp": 25800,
    "meso": 7510,
    "rewards": [
@@ -2262,7 +2346,7 @@
   {
    "id": "G-10",
    "name": "古い包帯",
-   "giver": "祈祷師トト",
+   "giver": "toto",
    "giverName": "祈祷師トト",
    "map": "V400",
    "minLevel": 36,
@@ -2278,7 +2362,7 @@
      "count": 30
     }
    ],
-   "end": "祈祷師トト",
+   "end": "toto",
    "exp": 18000,
    "meso": 3560,
    "rewards": [
@@ -2295,7 +2379,7 @@
   {
    "id": "G-11",
    "name": "鉄のたてがみ",
-   "giver": "防具屋ハガネ",
+   "giver": "hagane",
    "giverName": "防具屋ハガネ",
    "map": "V400",
    "minLevel": 37,
@@ -2311,7 +2395,7 @@
      "count": 20
     }
    ],
-   "end": "防具屋ハガネ",
+   "end": "hagane",
    "exp": 42800,
    "meso": 8920,
    "rewards": [],
@@ -2325,7 +2409,7 @@
   {
    "id": "G-12",
    "name": "隊長の勲章",
-   "giver": "発掘隊長ロッシ",
+   "giver": "rossi",
    "giverName": "発掘隊長ロッシ",
    "map": "V400",
    "minLevel": 45,
@@ -2341,7 +2425,7 @@
      "count": 10
     }
    ],
-   "end": "発掘隊長ロッシ",
+   "end": "rossi",
    "exp": 103000,
    "meso": 12600,
    "rewards": [
@@ -2358,7 +2442,7 @@
   {
    "id": "G-13",
    "name": "ガイコツ大将",
-   "giver": "戦士長ドルガ",
+   "giver": "dorga",
    "giverName": "戦士長ドルガ",
    "map": "V400",
    "minLevel": 52,
@@ -2374,7 +2458,7 @@
      "count": 1
     }
    ],
-   "end": "戦士長ドルガ",
+   "end": "dorga",
    "exp": 399000,
    "meso": 41500,
    "rewards": [],
@@ -2388,7 +2472,7 @@
   {
    "id": "G-14",
    "name": "鍛冶屋の弟子入り",
-   "giver": "鍛冶屋カジ",
+   "giver": "kaji",
    "giverName": "鍛冶屋カジ",
    "map": "V400",
    "minLevel": 20,
@@ -2397,8 +2481,15 @@
    ],
    "size": "中",
    "goalText": "青銅の原石 10 個を集め、カジに板にしてもらう",
-   "objectives": [],
-   "end": "鍛冶屋カジ",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.ore.bronze",
+     "count": 10,
+     "label": "青銅の原石を 10 個"
+    }
+   ],
+   "end": "kaji",
    "exp": 1980,
    "meso": 1500,
    "rewards": [],
@@ -2413,7 +2504,7 @@
   {
    "id": "K-01",
    "name": "路地裏のコウモリ",
-   "giver": "情報屋ネズ",
+   "giver": "nez",
    "giverName": "情報屋ネズ",
    "map": "V500",
    "minLevel": 14,
@@ -2427,7 +2518,7 @@
      "count": 25
     }
    ],
-   "end": "情報屋ネズ",
+   "end": "nez",
    "exp": 287,
    "meso": 355,
    "rewards": [
@@ -2444,7 +2535,7 @@
   {
    "id": "K-02",
    "name": "ネジ集め",
-   "giver": "工事の親方ボルト",
+   "giver": "bolt",
    "giverName": "工事の親方ボルト",
    "map": "V500",
    "minLevel": 17,
@@ -2458,7 +2549,7 @@
      "count": 20
     }
    ],
-   "end": "工事の親方ボルト",
+   "end": "bolt",
    "exp": 556,
    "meso": 10461,
    "rewards": [],
@@ -2470,7 +2561,7 @@
   {
    "id": "K-03",
    "name": "鉄骨の上の忘れ物",
-   "giver": "工事の親方ボルト",
+   "giver": "bolt",
    "giverName": "工事の親方ボルト",
    "map": "V500",
    "minLevel": 20,
@@ -2481,11 +2572,12 @@
    "goalText": "V504 のてっぺんの道具箱を取ってくる（ジャンプの道）",
    "objectives": [
     {
-     "type": "visit",
-     "map": "V504"
+     "type": "interact",
+     "target": "V504.toolbox",
+     "label": "てっぺんの道具箱を取ってくる"
     }
    ],
-   "end": "工事の親方ボルト",
+   "end": "bolt",
    "exp": 1980,
    "meso": 1500,
    "rewards": [
@@ -2504,7 +2596,7 @@
   {
    "id": "K-04",
    "name": "ガラクタロボ",
-   "giver": "工事の親方ボルト",
+   "giver": "bolt",
    "giverName": "工事の親方ボルト",
    "map": "V500",
    "minLevel": 28,
@@ -2525,7 +2617,7 @@
      "count": 10
     }
    ],
-   "end": "工事の親方ボルト",
+   "end": "bolt",
    "exp": 13100,
    "meso": 5850,
    "rewards": [
@@ -2542,7 +2634,7 @@
   {
    "id": "K-05",
    "name": "地下鉄の切符",
-   "giver": "駅員テツ",
+   "giver": "tetsu",
    "giverName": "駅員テツ",
    "map": "V500",
    "minLevel": 20,
@@ -2556,7 +2648,7 @@
      "count": 20
     }
    ],
-   "end": "駅員テツ",
+   "end": "tetsu",
    "exp": 990,
    "meso": 10600,
    "rewards": [],
@@ -2568,7 +2660,7 @@
   {
    "id": "K-06",
    "name": "亡霊のかけら",
-   "giver": "駅員テツ",
+   "giver": "tetsu",
    "giverName": "駅員テツ",
    "map": "V500",
    "minLevel": 25,
@@ -2584,7 +2676,7 @@
      "count": 20
     }
    ],
-   "end": "駅員テツ",
+   "end": "tetsu",
    "exp": 4080,
    "meso": 2030,
    "rewards": [
@@ -2601,7 +2693,7 @@
   {
    "id": "K-07",
    "name": "2 番線の奥",
-   "giver": "駅員テツ",
+   "giver": "tetsu",
    "giverName": "駅員テツ",
    "map": "V500",
    "minLevel": 30,
@@ -2617,7 +2709,7 @@
      "count": 40
     }
    ],
-   "end": "駅員テツ",
+   "end": "tetsu",
    "exp": 17500,
    "meso": 6600,
    "rewards": [
@@ -2634,7 +2726,7 @@
   {
    "id": "K-08",
    "name": "電車の落とし物",
-   "giver": "駅員テツ",
+   "giver": "tetsu",
    "giverName": "駅員テツ",
    "map": "V500",
    "minLevel": 23,
@@ -2643,11 +2735,12 @@
    "goalText": "V506 の停まった電車の中の落とし物を探す",
    "objectives": [
     {
-     "type": "visit",
-     "map": "V506"
+     "type": "interact",
+     "target": "V506.lost",
+     "label": "停まった電車の中の落とし物"
     }
    ],
-   "end": "駅員テツ",
+   "end": "tetsu",
    "exp": 3060,
    "meso": 1800,
    "rewards": [],
@@ -2661,7 +2754,7 @@
   {
    "id": "K-09",
    "name": "ヘビの皮",
-   "giver": "ナイフ屋スー",
+   "giver": "sue",
    "giverName": "ナイフ屋スー",
    "map": "V500",
    "minLevel": 21,
@@ -2675,7 +2768,7 @@
      "count": 25
     }
    ],
-   "end": "ナイフ屋スー",
+   "end": "sue",
    "exp": 2290,
    "meso": 1590,
    "rewards": [],
@@ -2689,7 +2782,7 @@
   {
    "id": "K-10",
    "name": "ワニの皮",
-   "giver": "ナイフ屋スー",
+   "giver": "sue",
    "giverName": "ナイフ屋スー",
    "map": "V500",
    "minLevel": 26,
@@ -2705,7 +2798,7 @@
      "count": 25
     }
    ],
-   "end": "ナイフ屋スー",
+   "end": "sue",
    "exp": 4720,
    "meso": 2160,
    "rewards": [],
@@ -2719,7 +2812,7 @@
   {
    "id": "K-11",
    "name": "泥の人形",
-   "giver": "情報屋ネズ",
+   "giver": "nez",
    "giverName": "情報屋ネズ",
    "map": "V500",
    "minLevel": 34,
@@ -2733,7 +2826,7 @@
      "count": 30
     }
    ],
-   "end": "情報屋ネズ",
+   "end": "nez",
    "exp": 29000,
    "meso": 7840,
    "rewards": [
@@ -2750,7 +2843,7 @@
   {
    "id": "K-12",
    "name": "下水の大ワニ",
-   "giver": "情報屋ネズ",
+   "giver": "nez",
    "giverName": "情報屋ネズ",
    "map": "V500",
    "minLevel": 40,
@@ -2766,7 +2859,7 @@
      "count": 1
     }
    ],
-   "end": "情報屋ネズ",
+   "end": "nez",
    "exp": 125000,
    "meso": 25400,
    "rewards": [
@@ -2783,7 +2876,7 @@
   {
    "id": "K-13",
    "name": "屋上の配達",
-   "giver": "情報屋ネズ",
+   "giver": "nez",
    "giverName": "情報屋ネズ",
    "map": "V500",
    "minLevel": 16,
@@ -2793,14 +2886,16 @@
    "objectives": [
     {
      "type": "visit",
-     "map": "V514"
+     "map": "V514",
+     "label": "屋上を渡る"
     },
     {
-     "type": "visit",
-     "map": "V707"
+     "type": "talk",
+     "npc": "kago",
+     "label": "荷物番のカゴに包みを届ける"
     }
    ],
-   "end": "情報屋ネズ",
+   "end": "kago",
    "exp": 458,
    "meso": 423,
    "rewards": [
@@ -2817,15 +2912,21 @@
   {
    "id": "K-14",
    "name": "情報屋の試験",
-   "giver": "情報屋ネズ",
+   "giver": "nez",
    "giverName": "情報屋ネズ",
    "map": "V500",
    "minLevel": 21,
    "prereqs": [],
    "size": "中",
    "goalText": "1 人用ダンジョン「裏路地の試練」を 1 回クリアする",
-   "objectives": [],
-   "end": "情報屋ネズ",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "dungeon_clear.V516",
+     "label": "裏路地の試練をクリアする"
+    }
+   ],
+   "end": "nez",
    "exp": 2290,
    "meso": 1590,
    "rewards": [],
@@ -2839,7 +2940,7 @@
   {
    "id": "N-01",
    "name": "谷の宿",
-   "giver": "宿屋のネム",
+   "giver": "nemu",
    "giverName": "宿屋のネム",
    "map": "V600",
    "minLevel": 20,
@@ -2853,7 +2954,7 @@
      "count": 30
     }
    ],
-   "end": "宿屋のネム",
+   "end": "nemu",
    "exp": 990,
    "meso": 600,
    "rewards": [],
@@ -2867,7 +2968,7 @@
   {
    "id": "N-02",
    "name": "アリの巣の入口",
-   "giver": "温泉番ユウ",
+   "giver": "yuu",
    "giverName": "温泉番ユウ",
    "map": "V600",
    "minLevel": 23,
@@ -2881,7 +2982,7 @@
      "count": 25
     }
    ],
-   "end": "温泉番ユウ",
+   "end": "yuu",
    "exp": 3060,
    "meso": 1800,
    "rewards": [],
@@ -2895,7 +2996,7 @@
   {
    "id": "N-03",
    "name": "ジロリの目",
-   "giver": "学者ドク",
+   "giver": "doc",
    "giverName": "学者ドク",
    "map": "V600",
    "minLevel": 27,
@@ -2909,7 +3010,7 @@
      "count": 30
     }
    ],
-   "end": "学者ドク",
+   "end": "doc",
    "exp": 5450,
    "meso": 22290,
    "rewards": [],
@@ -2921,7 +3022,7 @@
   {
    "id": "N-04",
    "name": "冷たい目玉",
-   "giver": "学者ドク",
+   "giver": "doc",
    "giverName": "学者ドク",
    "map": "V600",
    "minLevel": 32,
@@ -2937,7 +3038,7 @@
      "count": 30
     }
    ],
-   "end": "学者ドク",
+   "end": "doc",
    "exp": 10800,
    "meso": 3000,
    "rewards": [
@@ -2954,7 +3055,7 @@
   {
    "id": "N-05",
    "name": "学者の研究所",
-   "giver": "学者ドク",
+   "giver": "doc",
    "giverName": "学者ドク",
    "map": "V600",
    "minLevel": 25,
@@ -2963,11 +3064,12 @@
    "goalText": "V601 の大木のうろの研究所に入り、日記を持ってくる",
    "objectives": [
     {
-     "type": "visit",
-     "map": "V601"
+     "type": "interact",
+     "target": "V601.diary",
+     "label": "大木のうろの研究所の日記"
     }
    ],
-   "end": "学者ドク",
+   "end": "doc",
    "exp": 4080,
    "meso": 2030,
    "rewards": [],
@@ -2981,7 +3083,7 @@
   {
    "id": "N-06",
    "name": "眠りの鱗粉",
-   "giver": "薬屋のマユ",
+   "giver": "mayu",
    "giverName": "薬屋のマユ",
    "map": "V600",
    "minLevel": 30,
@@ -2995,7 +3097,7 @@
      "count": 30
     }
    ],
-   "end": "薬屋のマユ",
+   "end": "mayu",
    "exp": 8400,
    "meso": 2750,
    "rewards": [
@@ -3012,7 +3114,7 @@
   {
    "id": "N-07",
    "name": "ドレイクのうろこ",
-   "giver": "学者ドク",
+   "giver": "doc",
    "giverName": "学者ドク",
    "map": "V600",
    "minLevel": 36,
@@ -3028,7 +3130,7 @@
      "count": 30
     }
    ],
-   "end": "学者ドク",
+   "end": "doc",
    "exp": 37500,
    "meso": 8540,
    "rewards": [
@@ -3045,7 +3147,7 @@
   {
    "id": "N-08",
    "name": "ドレイクの角",
-   "giver": "雑貨屋のコロ",
+   "giver": "koro",
    "giverName": "雑貨屋のコロ",
    "map": "V600",
    "minLevel": 42,
@@ -3059,7 +3161,7 @@
      "count": 30
     }
    ],
-   "end": "雑貨屋のコロ",
+   "end": "koro",
    "exp": 76300,
    "meso": 11100,
    "rewards": [
@@ -3076,7 +3178,7 @@
   {
    "id": "N-09",
    "name": "寺跡の石",
-   "giver": "封印の番人シグ",
+   "giver": "sig",
    "giverName": "封印の番人シグ",
    "map": "V600",
    "minLevel": 46,
@@ -3090,7 +3192,7 @@
      "count": 30
     }
    ],
-   "end": "封印の番人シグ",
+   "end": "sig",
    "exp": 114000,
    "meso": 13100,
    "rewards": [
@@ -3107,7 +3209,7 @@
   {
    "id": "N-10",
    "name": "苔の寺跡",
-   "giver": "封印の番人シグ",
+   "giver": "sig",
    "giverName": "封印の番人シグ",
    "map": "V600",
    "minLevel": 54,
@@ -3123,7 +3225,7 @@
      "count": 30
     }
    ],
-   "end": "封印の番人シグ",
+   "end": "sig",
    "exp": 233000,
    "meso": 17600,
    "rewards": [
@@ -3140,7 +3242,7 @@
   {
    "id": "N-11",
    "name": "牛頭の砦",
-   "giver": "封印の番人シグ",
+   "giver": "sig",
    "giverName": "封印の番人シグ",
    "map": "V600",
    "minLevel": 60,
@@ -3156,7 +3258,7 @@
      "count": 50
     }
    ],
-   "end": "封印の番人シグ",
+   "end": "sig",
    "exp": 375000,
    "meso": 21200,
    "rewards": [
@@ -3173,7 +3275,7 @@
   {
    "id": "N-12",
    "name": "封印の鍵",
-   "giver": "封印の番人シグ",
+   "giver": "sig",
    "giverName": "封印の番人シグ",
    "map": "V600",
    "minLevel": 62,
@@ -3194,7 +3296,7 @@
      "count": 20
     }
    ],
-   "end": "封印の番人シグ",
+   "end": "sig",
    "exp": 428000,
    "meso": 22500,
    "rewards": [],
@@ -3208,7 +3310,7 @@
   {
    "id": "N-13",
    "name": "黒角の魔獣",
-   "giver": "封印の番人シグ",
+   "giver": "sig",
    "giverName": "封印の番人シグ",
    "map": "V600",
    "minLevel": 65,
@@ -3224,7 +3326,7 @@
      "count": 1
     }
    ],
-   "end": "封印の番人シグ",
+   "end": "sig",
    "exp": 1050000,
    "meso": 61800,
    "rewards": [],
@@ -3239,7 +3341,7 @@
   {
    "id": "N-14",
    "name": "闇の水晶",
-   "giver": "封印の番人シグ",
+   "giver": "sig",
    "giverName": "封印の番人シグ",
    "map": "V600",
    "minLevel": 68,
@@ -3258,7 +3360,7 @@
      "count": 10
     }
    ],
-   "end": "封印の番人シグ",
+   "end": "sig",
    "exp": 305000,
    "meso": 11300,
    "rewards": [],
@@ -3272,7 +3374,7 @@
   {
    "id": "N-15",
    "name": "ゾンビダケの王",
-   "giver": "温泉番ユウ",
+   "giver": "yuu",
    "giverName": "温泉番ユウ",
    "map": "V600",
    "minLevel": 45,
@@ -3288,7 +3390,7 @@
      "count": 1
     }
    ],
-   "end": "温泉番ユウ",
+   "end": "yuu",
    "exp": 206000,
    "meso": 31500,
    "rewards": [
@@ -3305,15 +3407,31 @@
   {
    "id": "C-01",
    "name": "雲の都",
-   "giver": "都の巫女ステラ",
+   "giver": "stella",
    "giverName": "都の巫女ステラ",
    "map": "C100",
    "minLevel": 28,
    "prereqs": [],
    "size": "小",
    "goalText": "駅員ルナ・受付ネフェ・天の階段の船頭と話す",
-   "objectives": [],
-   "end": "都の巫女ステラ",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "luna",
+     "label": "駅員ルナ"
+    },
+    {
+     "type": "talk",
+     "npc": "nefe",
+     "label": "受付ネフェ"
+    },
+    {
+     "type": "talk",
+     "npc": "hashi",
+     "label": "天の階段の船頭"
+    }
+   ],
+   "end": "stella",
    "exp": 3140,
    "meso": 974,
    "rewards": [
@@ -3330,7 +3448,7 @@
   {
    "id": "C-02",
    "name": "星のかけら",
-   "giver": "都の巫女ステラ",
+   "giver": "stella",
    "giverName": "都の巫女ステラ",
    "map": "C100",
    "minLevel": 30,
@@ -3346,7 +3464,7 @@
      "count": 30
     }
    ],
-   "end": "都の巫女ステラ",
+   "end": "stella",
    "exp": 8400,
    "meso": 22750,
    "rewards": [],
@@ -3358,7 +3476,7 @@
   {
    "id": "C-03",
    "name": "月のかけら",
-   "giver": "都の巫女ステラ",
+   "giver": "stella",
    "giverName": "都の巫女ステラ",
    "map": "C100",
    "minLevel": 36,
@@ -3374,7 +3492,7 @@
      "count": 30
     }
    ],
-   "end": "都の巫女ステラ",
+   "end": "stella",
    "exp": 18000,
    "meso": 33560,
    "rewards": [],
@@ -3386,7 +3504,7 @@
   {
    "id": "C-04",
    "name": "日のかけら",
-   "giver": "都の巫女ステラ",
+   "giver": "stella",
    "giverName": "都の巫女ステラ",
    "map": "C100",
    "minLevel": 43,
@@ -3402,7 +3520,7 @@
      "count": 30
     }
    ],
-   "end": "都の巫女ステラ",
+   "end": "stella",
    "exp": 84500,
    "meso": 11500,
    "rewards": [],
@@ -3416,7 +3534,7 @@
   {
    "id": "C-05",
    "name": "植物園の手入れ",
-   "giver": "庭師ハナ",
+   "giver": "hana",
    "giverName": "庭師ハナ",
    "map": "C100",
    "minLevel": 38,
@@ -3435,7 +3553,7 @@
      "count": 20
     }
    ],
-   "end": "庭師ハナ",
+   "end": "hana",
    "exp": 23300,
    "meso": 3880,
    "rewards": [
@@ -3452,15 +3570,26 @@
   {
    "id": "C-06",
    "name": "塔を降りる手紙",
-   "giver": "駅員ルナ",
+   "giver": "luna",
    "giverName": "駅員ルナ",
    "map": "C101",
    "minLevel": 40,
    "prereqs": [],
    "size": "中",
    "goalText": "雲の塔を 1 階まで降り、ヒョウガ村の村長ヴァンに手紙を届ける",
-   "objectives": [],
-   "end": "駅員ルナ",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "C111",
+     "label": "雲の塔を 1 階まで降りる"
+    },
+    {
+     "type": "talk",
+     "npc": "van",
+     "label": "村長ヴァンに手紙を届ける"
+    }
+   ],
+   "end": "van",
    "exp": 30000,
    "meso": 4230,
    "rewards": [],
@@ -3472,7 +3601,7 @@
   {
    "id": "C-07",
    "name": "見張り石のかけら",
-   "giver": "駅員ルナ",
+   "giver": "luna",
    "giverName": "駅員ルナ",
    "map": "C101",
    "minLevel": 42,
@@ -3486,7 +3615,7 @@
      "count": 30
     }
    ],
-   "end": "駅員ルナ",
+   "end": "luna",
    "exp": 36600,
    "meso": 4610,
    "rewards": [
@@ -3503,7 +3632,7 @@
   {
    "id": "C-08",
    "name": "炎と氷の石",
-   "giver": "塔の魔導師ゼノ",
+   "giver": "xeno",
    "giverName": "塔の魔導師ゼノ",
    "map": "C100",
    "minLevel": 50,
@@ -3522,7 +3651,7 @@
      "count": 20
     }
    ],
-   "end": "塔の魔導師ゼノ",
+   "end": "xeno",
    "exp": 170000,
    "meso": 15600,
    "rewards": [
@@ -3543,7 +3672,7 @@
   {
    "id": "C-09",
    "name": "子天馬の羽",
-   "giver": "都の巫女ステラ",
+   "giver": "stella",
    "giverName": "都の巫女ステラ",
    "map": "C100",
    "minLevel": 54,
@@ -3559,7 +3688,7 @@
      "count": 30
     }
    ],
-   "end": "都の巫女ステラ",
+   "end": "stella",
    "exp": 233000,
    "meso": 17600,
    "rewards": [],
@@ -3573,7 +3702,7 @@
   {
    "id": "C-10",
    "name": "雲の綿",
-   "giver": "庭師ハナ",
+   "giver": "hana",
    "giverName": "庭師ハナ",
    "map": "C100",
    "minLevel": 56,
@@ -3589,7 +3718,7 @@
      "count": 40
     }
    ],
-   "end": "庭師ハナ",
+   "end": "hana",
    "exp": 273000,
    "meso": 18800,
    "rewards": [],
@@ -3603,7 +3732,7 @@
   {
    "id": "C-11",
    "name": "塔の守り人",
-   "giver": "塔の魔導師ゼノ",
+   "giver": "xeno",
    "giverName": "塔の魔導師ゼノ",
    "map": "C100",
    "minLevel": 60,
@@ -3619,7 +3748,7 @@
      "count": 50
     }
    ],
-   "end": "塔の魔導師ゼノ",
+   "end": "xeno",
    "exp": 375000,
    "meso": 21200,
    "rewards": [
@@ -3636,7 +3765,7 @@
   {
    "id": "C-12",
    "name": "雲の魔女",
-   "giver": "都の巫女ステラ",
+   "giver": "stella",
    "giverName": "都の巫女ステラ",
    "map": "C100",
    "minLevel": 68,
@@ -3652,7 +3781,7 @@
      "count": 1
     }
    ],
-   "end": "都の巫女ステラ",
+   "end": "stella",
    "exp": 1270000,
    "meso": 67700,
    "rewards": [],
@@ -3666,7 +3795,7 @@
   {
    "id": "F-01",
    "name": "雪の村",
-   "giver": "村長ヴァン",
+   "giver": "van",
    "giverName": "村長ヴァン",
    "map": "F100",
    "minLevel": 40,
@@ -3682,7 +3811,7 @@
      "count": 20
     }
    ],
-   "end": "村長ヴァン",
+   "end": "van",
    "exp": 30000,
    "meso": 4230,
    "rewards": [
@@ -3699,7 +3828,7 @@
   {
    "id": "F-02",
    "name": "白い牙",
-   "giver": "猟師ボルグ",
+   "giver": "borg",
    "giverName": "猟師ボルグ",
    "map": "F100",
    "minLevel": 48,
@@ -3713,7 +3842,7 @@
      "count": 40
     }
    ],
-   "end": "猟師ボルグ",
+   "end": "borg",
    "exp": 66800,
    "meso": 5960,
    "rewards": [
@@ -3730,7 +3859,7 @@
   {
    "id": "F-03",
    "name": "雪の玉",
-   "giver": "雪ん子ユキ",
+   "giver": "yuki",
    "giverName": "雪ん子ユキ",
    "map": "F100",
    "minLevel": 45,
@@ -3744,7 +3873,7 @@
      "count": 20
     }
    ],
-   "end": "雪ん子ユキ",
+   "end": "yuki",
    "exp": 24700,
    "meso": 2100,
    "rewards": [],
@@ -3758,7 +3887,7 @@
   {
    "id": "F-04",
    "name": "イエティの角",
-   "giver": "猟師ボルグ",
+   "giver": "borg",
    "giverName": "猟師ボルグ",
    "map": "F100",
    "minLevel": 50,
@@ -3774,7 +3903,7 @@
      "count": 30
     }
    ],
-   "end": "猟師ボルグ",
+   "end": "borg",
    "exp": 170000,
    "meso": 15600,
    "rewards": [
@@ -3791,7 +3920,7 @@
   {
    "id": "F-05",
    "name": "ペンギンの兵隊",
-   "giver": "雪ん子ユキ",
+   "giver": "yuki",
    "giverName": "雪ん子ユキ",
    "map": "F100",
    "minLevel": 52,
@@ -3807,7 +3936,7 @@
      "count": 40
     }
    ],
-   "end": "雪ん子ユキ",
+   "end": "yuki",
    "exp": 95600,
    "meso": 36910,
    "rewards": [],
@@ -3819,7 +3948,7 @@
   {
    "id": "F-06",
    "name": "黒い雪",
-   "giver": "村長ヴァン",
+   "giver": "van",
    "giverName": "村長ヴァン",
    "map": "F100",
    "minLevel": 56,
@@ -3835,7 +3964,7 @@
      "count": 30
     }
    ],
-   "end": "村長ヴァン",
+   "end": "van",
    "exp": 273000,
    "meso": 18800,
    "rewards": [
@@ -3852,7 +3981,7 @@
   {
    "id": "F-07",
    "name": "坑道の通行証",
-   "giver": "坑道の番人ザック",
+   "giver": "zack",
    "giverName": "坑道の番人ザック",
    "map": "F100",
    "minLevel": 55,
@@ -3866,7 +3995,7 @@
      "count": 50
     }
    ],
-   "end": "坑道の番人ザック",
+   "end": "zack",
    "exp": 253000,
    "meso": 18200,
    "rewards": [],
@@ -3880,7 +4009,7 @@
   {
    "id": "F-08",
    "name": "さびたつるはし",
-   "giver": "坑道の番人ザック",
+   "giver": "zack",
    "giverName": "坑道の番人ザック",
    "map": "F100",
    "minLevel": 63,
@@ -3896,7 +4025,7 @@
      "count": 30
     }
    ],
-   "end": "坑道の番人ザック",
+   "end": "zack",
    "exp": 458000,
    "meso": 23200,
    "rewards": [
@@ -3913,7 +4042,7 @@
   {
    "id": "F-09",
    "name": "骨の兵の印",
-   "giver": "坑道の番人ザック",
+   "giver": "zack",
    "giverName": "坑道の番人ザック",
    "map": "F100",
    "minLevel": 68,
@@ -3934,7 +4063,7 @@
      "count": 20
     }
    ],
-   "end": "坑道の番人ザック",
+   "end": "zack",
    "exp": 635000,
    "meso": 27100,
    "rewards": [
@@ -3951,7 +4080,7 @@
   {
    "id": "F-10",
    "name": "将軍の骨",
-   "giver": "坑道の番人ザック",
+   "giver": "zack",
    "giverName": "坑道の番人ザック",
    "map": "F100",
    "minLevel": 78,
@@ -3967,7 +4096,7 @@
      "count": 40
     }
    ],
-   "end": "坑道の番人ザック",
+   "end": "zack",
    "exp": 1120000,
    "meso": 34100,
    "rewards": [],
@@ -3981,7 +4110,7 @@
   {
    "id": "F-11",
    "name": "雪の森のオオカミ男",
-   "giver": "猟師ボルグ",
+   "giver": "borg",
    "giverName": "猟師ボルグ",
    "map": "F100",
    "minLevel": 72,
@@ -3997,7 +4126,7 @@
      "count": 50
     }
    ],
-   "end": "猟師ボルグ",
+   "end": "borg",
    "exp": 808000,
    "meso": 30000,
    "rewards": [
@@ -4014,7 +4143,7 @@
   {
    "id": "F-12",
    "name": "ライカンの長",
-   "giver": "猟師ボルグ",
+   "giver": "borg",
    "giverName": "猟師ボルグ",
    "map": "F100",
    "minLevel": 78,
@@ -4030,7 +4159,7 @@
      "count": 20
     }
    ],
-   "end": "猟師ボルグ",
+   "end": "borg",
    "exp": 1120000,
    "meso": 34100,
    "rewards": [
@@ -4047,7 +4176,7 @@
   {
    "id": "F-13",
    "name": "雪原の大狼",
-   "giver": "村長ヴァン",
+   "giver": "van",
    "giverName": "村長ヴァン",
    "map": "F100",
    "minLevel": 82,
@@ -4063,7 +4192,7 @@
      "count": 1
     }
    ],
-   "end": "村長ヴァン",
+   "end": "van",
    "exp": 2760000,
    "meso": 92600,
    "rewards": [],
@@ -4078,15 +4207,31 @@
   {
    "id": "T-01",
    "name": "おもちゃの町",
-   "giver": "町長トイ",
+   "giver": "toy",
    "giverName": "町長トイ",
    "map": "T100",
    "minLevel": 25,
    "prereqs": [],
    "size": "小",
    "goalText": "時計番のクロック婆・受付ギア・受付パズと話す",
-   "objectives": [],
-   "end": "町長トイ",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "clock",
+     "label": "時計番のクロック婆"
+    },
+    {
+     "type": "talk",
+     "npc": "gear",
+     "label": "受付ギア"
+    },
+    {
+     "type": "talk",
+     "npc": "paz",
+     "label": "受付パズ"
+    }
+   ],
+   "end": "toy",
    "exp": 2040,
    "meso": 812,
    "rewards": [
@@ -4103,7 +4248,7 @@
   {
    "id": "T-02",
    "name": "ボタンの目",
-   "giver": "人形師ルル",
+   "giver": "ruru",
    "giverName": "人形師ルル",
    "map": "T100",
    "minLevel": 26,
@@ -4117,7 +4262,7 @@
      "count": 30
     }
    ],
-   "end": "人形師ルル",
+   "end": "ruru",
    "exp": 4720,
    "meso": 22160,
    "rewards": [],
@@ -4129,7 +4274,7 @@
   {
    "id": "T-03",
    "name": "ピンクの綿",
-   "giver": "人形師ルル",
+   "giver": "ruru",
    "giverName": "人形師ルル",
    "map": "T100",
    "minLevel": 29,
@@ -4145,7 +4290,7 @@
      "count": 30
     }
    ],
-   "end": "人形師ルル",
+   "end": "ruru",
    "exp": 7270,
    "meso": 2590,
    "rewards": [],
@@ -4159,7 +4304,7 @@
   {
    "id": "T-04",
    "name": "積み木を直す",
-   "giver": "積み木職人ブロ",
+   "giver": "buro",
    "giverName": "積み木職人ブロ",
    "map": "T100",
    "minLevel": 32,
@@ -4173,7 +4318,7 @@
      "count": 30
     }
    ],
-   "end": "積み木職人ブロ",
+   "end": "buro",
    "exp": 10800,
    "meso": 3000,
    "rewards": [
@@ -4190,7 +4335,7 @@
   {
    "id": "T-05",
    "name": "ゼンマイの音",
-   "giver": "時計番のクロック婆",
+   "giver": "clock",
    "giverName": "時計番のクロック婆",
    "map": "T100",
    "minLevel": 35,
@@ -4204,7 +4349,7 @@
      "count": 30
     }
    ],
-   "end": "時計番のクロック婆",
+   "end": "clock",
    "exp": 15800,
    "meso": 33410,
    "rewards": [],
@@ -4216,7 +4361,7 @@
   {
    "id": "T-06",
    "name": "ネジ集め",
-   "giver": "積み木職人ブロ",
+   "giver": "buro",
    "giverName": "積み木職人ブロ",
    "map": "T100",
    "minLevel": 38,
@@ -4237,7 +4382,7 @@
      "count": 20
     }
    ],
-   "end": "積み木職人ブロ",
+   "end": "buro",
    "exp": 48500,
    "meso": 9310,
    "rewards": [
@@ -4254,7 +4399,7 @@
   {
    "id": "T-07",
    "name": "木馬兵",
-   "giver": "町長トイ",
+   "giver": "toy",
    "giverName": "町長トイ",
    "map": "T100",
    "minLevel": 42,
@@ -4268,7 +4413,7 @@
      "count": 40
     }
    ],
-   "end": "町長トイ",
+   "end": "toy",
    "exp": 36600,
    "meso": 4610,
    "rewards": [
@@ -4285,7 +4430,7 @@
   {
    "id": "T-08",
    "name": "工場の異変",
-   "giver": "町長トイ",
+   "giver": "toy",
    "giverName": "町長トイ",
    "map": "T100",
    "minLevel": 46,
@@ -4301,7 +4446,7 @@
      "count": 40
     }
    ],
-   "end": "町長トイ",
+   "end": "toy",
    "exp": 114000,
    "meso": 13100,
    "rewards": [
@@ -4318,7 +4463,7 @@
   {
    "id": "T-09",
    "name": "時計の針",
-   "giver": "時計番のクロック婆",
+   "giver": "clock",
    "giverName": "時計番のクロック婆",
    "map": "T100",
    "minLevel": 50,
@@ -4334,7 +4479,7 @@
      "count": 30
     }
    ],
-   "end": "時計番のクロック婆",
+   "end": "clock",
    "exp": 170000,
    "meso": 65600,
    "rewards": [],
@@ -4346,7 +4491,7 @@
   {
    "id": "T-10",
    "name": "隊長のバネ",
-   "giver": "積み木職人ブロ",
+   "giver": "buro",
    "giverName": "積み木職人ブロ",
    "map": "T100",
    "minLevel": 54,
@@ -4362,7 +4507,7 @@
      "count": 20
     }
    ],
-   "end": "積み木職人ブロ",
+   "end": "buro",
    "exp": 233000,
    "meso": 17600,
    "rewards": [
@@ -4379,7 +4524,7 @@
   {
    "id": "T-11",
    "name": "時の塔の亡霊",
-   "giver": "時計番のクロック婆",
+   "giver": "clock",
    "giverName": "時計番のクロック婆",
    "map": "T100",
    "minLevel": 62,
@@ -4400,7 +4545,7 @@
      "count": 40
     }
    ],
-   "end": "時計番のクロック婆",
+   "end": "clock",
    "exp": 428000,
    "meso": 22500,
    "rewards": [
@@ -4417,7 +4562,7 @@
   {
    "id": "T-12",
    "name": "死神のぬいぐるみ",
-   "giver": "時計番のクロック婆",
+   "giver": "clock",
    "giverName": "時計番のクロック婆",
    "map": "T100",
    "minLevel": 72,
@@ -4433,7 +4578,7 @@
      "count": 30
     }
    ],
-   "end": "時計番のクロック婆",
+   "end": "clock",
    "exp": 808000,
    "meso": 30000,
    "rewards": [
@@ -4450,7 +4595,7 @@
   {
    "id": "T-13",
    "name": "時の鍵",
-   "giver": "時計番のクロック婆",
+   "giver": "clock",
    "giverName": "時計番のクロック婆",
    "map": "T100",
    "minLevel": 100,
@@ -4476,7 +4621,7 @@
      "count": 20
     }
    ],
-   "end": "時計番のクロック婆",
+   "end": "clock",
    "exp": 3250000,
    "meso": 54000,
    "rewards": [],
@@ -4490,7 +4635,7 @@
   {
    "id": "T-14",
    "name": "時計塔の魔物",
-   "giver": "町長トイ",
+   "giver": "toy",
    "giverName": "町長トイ",
    "map": "T100",
    "minLevel": 110,
@@ -4506,7 +4651,7 @@
      "count": 1
     }
    ],
-   "end": "町長トイ",
+   "end": "toy",
    "exp": 10500000,
    "meso": 155000,
    "rewards": [],
@@ -4520,15 +4665,26 @@
   {
    "id": "M-01",
    "name": "泡の都",
-   "giver": "女王の侍女ルリ",
+   "giver": "ruri",
    "giverName": "女王の侍女ルリ",
    "map": "M100",
    "minLevel": 40,
    "prereqs": [],
    "size": "小",
    "goalText": "町を回り、潜水船の船長ノーマと受付シェルに会う",
-   "objectives": [],
-   "end": "女王の侍女ルリ",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "norma",
+     "label": "潜水船の船長ノーマ"
+    },
+    {
+     "type": "talk",
+     "npc": "shell",
+     "label": "受付シェル"
+    }
+   ],
+   "end": "ruri",
    "exp": 15000,
    "meso": 1690,
    "rewards": [
@@ -4545,7 +4701,7 @@
   {
    "id": "M-02",
    "name": "泡の玉",
-   "giver": "泡職人アワジ",
+   "giver": "awaji",
    "giverName": "泡職人アワジ",
    "map": "M100",
    "minLevel": 42,
@@ -4559,7 +4715,7 @@
      "count": 30
     }
    ],
-   "end": "泡職人アワジ",
+   "end": "awaji",
    "exp": 36600,
    "meso": 4610,
    "rewards": [
@@ -4576,7 +4732,7 @@
   {
    "id": "M-03",
    "name": "クラゲの足",
-   "giver": "女王の侍女ルリ",
+   "giver": "ruri",
    "giverName": "女王の侍女ルリ",
    "map": "M100",
    "minLevel": 45,
@@ -4590,7 +4746,7 @@
      "count": 30
     }
    ],
-   "end": "女王の侍女ルリ",
+   "end": "ruri",
    "exp": 49400,
    "meso": 5240,
    "rewards": [
@@ -4607,7 +4763,7 @@
   {
    "id": "M-04",
    "name": "ヨロイガニ",
-   "giver": "料理人シオ",
+   "giver": "shio",
    "giverName": "料理人シオ",
    "map": "M100",
    "minLevel": 50,
@@ -4621,7 +4777,7 @@
      "count": 30
     }
    ],
-   "end": "料理人シオ",
+   "end": "shio",
    "exp": 81600,
    "meso": 6500,
    "rewards": [],
@@ -4635,7 +4791,7 @@
   {
    "id": "M-05",
    "name": "タコの洞くつ",
-   "giver": "泡職人アワジ",
+   "giver": "awaji",
    "giverName": "泡職人アワジ",
    "map": "M100",
    "minLevel": 55,
@@ -4651,7 +4807,7 @@
      "count": 50
     }
    ],
-   "end": "泡職人アワジ",
+   "end": "awaji",
    "exp": 253000,
    "meso": 18200,
    "rewards": [
@@ -4668,7 +4824,7 @@
   {
    "id": "M-06",
    "name": "イカ戦士",
-   "giver": "近衛兵マリン",
+   "giver": "marin",
    "giverName": "近衛兵マリン",
    "map": "M100",
    "minLevel": 58,
@@ -4682,7 +4838,7 @@
      "count": 50
     }
    ],
-   "end": "近衛兵マリン",
+   "end": "marin",
    "exp": 320000,
    "meso": 69900,
    "rewards": [],
@@ -4694,7 +4850,7 @@
   {
    "id": "M-07",
    "name": "サメの歯",
-   "giver": "料理人シオ",
+   "giver": "shio",
    "giverName": "料理人シオ",
    "map": "M100",
    "minLevel": 62,
@@ -4710,7 +4866,7 @@
      "count": 30
     }
    ],
-   "end": "料理人シオ",
+   "end": "shio",
    "exp": 428000,
    "meso": 22500,
    "rewards": [
@@ -4727,7 +4883,7 @@
   {
    "id": "M-08",
    "name": "骨の海",
-   "giver": "近衛兵マリン",
+   "giver": "marin",
    "giverName": "近衛兵マリン",
    "map": "M100",
    "minLevel": 70,
@@ -4743,7 +4899,7 @@
      "count": 60
     }
    ],
-   "end": "近衛兵マリン",
+   "end": "marin",
    "exp": 725000,
    "meso": 28800,
    "rewards": [
@@ -4760,7 +4916,7 @@
   {
    "id": "M-09",
    "name": "沈んだ宝箱",
-   "giver": "潜水船の船長ノーマ",
+   "giver": "norma",
    "giverName": "潜水船の船長ノーマ",
    "map": "M113",
    "minLevel": 70,
@@ -4769,11 +4925,12 @@
    "goalText": "M107 の大きな骨の口の中の宝箱を開ける",
    "objectives": [
     {
-     "type": "visit",
-     "map": "M107"
+     "type": "interact",
+     "target": "M107.chest",
+     "label": "大きな骨の口の中の宝箱を開ける"
     }
    ],
-   "end": "潜水船の船長ノーマ",
+   "end": "norma",
    "exp": 348000,
    "meso": 112000,
    "rewards": [],
@@ -4787,7 +4944,7 @@
   {
    "id": "M-10",
    "name": "暗い海の光",
-   "giver": "女王の侍女ルリ",
+   "giver": "ruri",
    "giverName": "女王の侍女ルリ",
    "map": "M100",
    "minLevel": 80,
@@ -4808,7 +4965,7 @@
      "count": 10
     }
    ],
-   "end": "女王の侍女ルリ",
+   "end": "ruri",
    "exp": 1250000,
    "meso": 35500,
    "rewards": [
@@ -4825,7 +4982,7 @@
   {
    "id": "M-11",
    "name": "冷たい海",
-   "giver": "近衛兵マリン",
+   "giver": "marin",
    "giverName": "近衛兵マリン",
    "map": "M100",
    "minLevel": 83,
@@ -4841,7 +4998,7 @@
      "count": 60
     }
    ],
-   "end": "近衛兵マリン",
+   "end": "marin",
    "exp": 1450000,
    "meso": 37800,
    "rewards": [
@@ -4858,7 +5015,7 @@
   {
    "id": "M-12",
    "name": "海の溝のうろこ",
-   "giver": "近衛兵マリン",
+   "giver": "marin",
    "giverName": "近衛兵マリン",
    "map": "M100",
    "minLevel": 95,
@@ -4874,7 +5031,7 @@
      "count": 30
     }
    ],
-   "end": "近衛兵マリン",
+   "end": "marin",
    "exp": 2580000,
    "meso": 48600,
    "rewards": [
@@ -4891,7 +5048,7 @@
   {
    "id": "M-13",
    "name": "深淵の大魚",
-   "giver": "女王の侍女ルリ",
+   "giver": "ruri",
    "giverName": "女王の侍女ルリ",
    "map": "M100",
    "minLevel": 110,
@@ -4907,7 +5064,7 @@
      "count": 1
     }
    ],
-   "end": "女王の侍女ルリ",
+   "end": "ruri",
    "exp": 10500000,
    "meso": 155000,
    "rewards": [],
@@ -4921,7 +5078,7 @@
   {
    "id": "A-01",
    "name": "天の階段",
-   "giver": "神殿の巫女アルマ",
+   "giver": "alma",
    "giverName": "神殿の巫女アルマ",
    "map": "P100",
    "minLevel": 85,
@@ -4935,7 +5092,7 @@
      "count": 40
     }
    ],
-   "end": "神殿の巫女アルマ",
+   "end": "alma",
    "exp": 768000,
    "meso": 16400,
    "rewards": [
@@ -4952,7 +5109,7 @@
   {
    "id": "A-02",
    "name": "黄金のかけら",
-   "giver": "神殿の巫女アルマ",
+   "giver": "alma",
    "giverName": "神殿の巫女アルマ",
    "map": "P100",
    "minLevel": 92,
@@ -4968,7 +5125,7 @@
      "count": 30
     }
    ],
-   "end": "神殿の巫女アルマ",
+   "end": "alma",
    "exp": 2250000,
    "meso": 145700,
    "rewards": [],
@@ -4980,7 +5137,7 @@
   {
    "id": "A-03",
    "name": "騎士の紋章",
-   "giver": "神殿の巫女アルマ",
+   "giver": "alma",
    "giverName": "神殿の巫女アルマ",
    "map": "P100",
    "minLevel": 96,
@@ -4996,7 +5153,7 @@
      "count": 30
     }
    ],
-   "end": "神殿の巫女アルマ",
+   "end": "alma",
    "exp": 2700000,
    "meso": 49700,
    "rewards": [],
@@ -5010,7 +5167,7 @@
   {
    "id": "A-04",
    "name": "祈りの布",
-   "giver": "神殿の巫女アルマ",
+   "giver": "alma",
    "giverName": "神殿の巫女アルマ",
    "map": "P100",
    "minLevel": 100,
@@ -5026,7 +5183,7 @@
      "count": 30
     }
    ],
-   "end": "神殿の巫女アルマ",
+   "end": "alma",
    "exp": 3250000,
    "meso": 54000,
    "rewards": [
@@ -5043,7 +5200,7 @@
   {
    "id": "A-05",
    "name": "神殿の石",
-   "giver": "神殿の巫女アルマ",
+   "giver": "alma",
    "giverName": "神殿の巫女アルマ",
    "map": "P100",
    "minLevel": 106,
@@ -5059,7 +5216,7 @@
      "count": 60
     }
    ],
-   "end": "神殿の巫女アルマ",
+   "end": "alma",
    "exp": 4330000,
    "meso": 58700,
    "rewards": [
@@ -5076,7 +5233,7 @@
   {
    "id": "A-06",
    "name": "司祭の書",
-   "giver": "神殿の巫女アルマ",
+   "giver": "alma",
    "giverName": "神殿の巫女アルマ",
    "map": "P100",
    "minLevel": 110,
@@ -5092,7 +5249,7 @@
      "count": 30
     }
    ],
-   "end": "神殿の巫女アルマ",
+   "end": "alma",
    "exp": 5250000,
    "meso": 212000,
    "rewards": [],
@@ -5104,7 +5261,7 @@
   {
    "id": "A-07",
    "name": "残像のかけら",
-   "giver": "神殿の巫女アルマ",
+   "giver": "alma",
    "giverName": "神殿の巫女アルマ",
    "map": "P100",
    "minLevel": 114,
@@ -5120,7 +5277,7 @@
      "count": 30
     }
    ],
-   "end": "神殿の巫女アルマ",
+   "end": "alma",
    "exp": 6380000,
    "meso": 65600,
    "rewards": [],
@@ -5134,7 +5291,7 @@
   {
    "id": "A-08",
    "name": "神殿の守護神",
-   "giver": "神殿の巫女アルマ",
+   "giver": "alma",
    "giverName": "神殿の巫女アルマ",
    "map": "P100",
    "minLevel": 120,
@@ -5150,7 +5307,7 @@
      "count": 1
     }
    ],
-   "end": "神殿の巫女アルマ",
+   "end": "alma",
    "exp": 17000000,
    "meso": 178000,
    "rewards": [],
@@ -5164,15 +5321,31 @@
   {
    "id": "D-01",
    "name": "竜の背の村",
-   "giver": "村長ハルカ",
+   "giver": "haruka",
    "giverName": "村長ハルカ",
    "map": "D100",
    "minLevel": 98,
    "prereqs": [],
    "size": "小",
    "goalText": "鳥使いホーク・鍛冶屋ドラン・大老ヴァルドに会う",
-   "objectives": [],
-   "end": "村長ハルカ",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "hawk",
+     "label": "鳥使いホーク"
+    },
+    {
+     "type": "talk",
+     "npc": "doran",
+     "label": "鍛冶屋ドラン"
+    },
+    {
+     "type": "talk",
+     "npc": "vald",
+     "label": "竜の大老ヴァルド"
+    }
+   ],
+   "end": "haruka",
    "exp": 714000,
    "meso": 8630,
    "rewards": [
@@ -5189,7 +5362,7 @@
   {
    "id": "D-02",
    "name": "トカゲの翼",
-   "giver": "鳥使いホーク",
+   "giver": "hawk",
    "giverName": "鳥使いホーク",
    "map": "D101",
    "minLevel": 100,
@@ -5203,7 +5376,7 @@
      "count": 30
     }
    ],
-   "end": "鳥使いホーク",
+   "end": "hawk",
    "exp": 1560000,
    "meso": 122500,
    "rewards": [],
@@ -5215,7 +5388,7 @@
   {
    "id": "D-03",
    "name": "青い竜の革",
-   "giver": "鍛冶屋ドラン",
+   "giver": "doran",
    "giverName": "鍛冶屋ドラン",
    "map": "D100",
    "minLevel": 106,
@@ -5229,7 +5402,7 @@
      "count": 30
     }
    ],
-   "end": "鍛冶屋ドラン",
+   "end": "doran",
    "exp": 4330000,
    "meso": 58700,
    "rewards": [
@@ -5246,7 +5419,7 @@
   {
    "id": "D-04",
    "name": "赤い竜の革",
-   "giver": "鍛冶屋ドラン",
+   "giver": "doran",
    "giverName": "鍛冶屋ドラン",
    "map": "D100",
    "minLevel": 110,
@@ -5262,7 +5435,7 @@
      "count": 30
     }
    ],
-   "end": "鍛冶屋ドラン",
+   "end": "doran",
    "exp": 5250000,
    "meso": 62000,
    "rewards": [
@@ -5279,7 +5452,7 @@
   {
    "id": "D-05",
    "name": "黒い翼の谷",
-   "giver": "村長ハルカ",
+   "giver": "haruka",
    "giverName": "村長ハルカ",
    "map": "D100",
    "minLevel": 116,
@@ -5293,7 +5466,7 @@
      "count": 60
     }
    ],
-   "end": "村長ハルカ",
+   "end": "haruka",
    "exp": 7000000,
    "meso": 67400,
    "rewards": [
@@ -5310,7 +5483,7 @@
   {
    "id": "D-06",
    "name": "骨竜",
-   "giver": "村長ハルカ",
+   "giver": "haruka",
    "giverName": "村長ハルカ",
    "map": "D100",
    "minLevel": 121,
@@ -5326,7 +5499,7 @@
      "count": 30
     }
    ],
-   "end": "村長ハルカ",
+   "end": "haruka",
    "exp": 8930000,
    "meso": 72200,
    "rewards": [
@@ -5343,7 +5516,7 @@
   {
    "id": "D-07",
    "name": "番兵の道",
-   "giver": "竜の大老ヴァルド",
+   "giver": "vald",
    "giverName": "竜の大老ヴァルド",
    "map": "D115",
    "minLevel": 126,
@@ -5359,7 +5532,7 @@
      "count": 60
     }
    ],
-   "end": "竜の大老ヴァルド",
+   "end": "vald",
    "exp": 11400000,
    "meso": 277400,
    "rewards": [],
@@ -5371,7 +5544,7 @@
   {
    "id": "D-08",
    "name": "洞くつの封印",
-   "giver": "竜の大老ヴァルド",
+   "giver": "vald",
    "giverName": "竜の大老ヴァルド",
    "map": "D115",
    "minLevel": 150,
@@ -5399,9 +5572,14 @@
     {
      "type": "visit",
      "map": "D113"
+    },
+    {
+     "type": "interact",
+     "target": "D113.seal",
+     "label": "封印の石に素材をはめる"
     }
    ],
-   "end": "竜の大老ヴァルド",
+   "end": "vald",
    "exp": 35000000,
    "meso": 108000,
    "rewards": [],
@@ -5415,7 +5593,7 @@
   {
    "id": "D-09",
    "name": "三つ首の黒竜",
-   "giver": "竜の大老ヴァルド",
+   "giver": "vald",
    "giverName": "竜の大老ヴァルド",
    "map": "D115",
    "minLevel": 155,
@@ -5431,7 +5609,7 @@
      "count": 1
     }
    ],
-   "end": "竜の大老ヴァルド",
+   "end": "vald",
    "exp": 87500000,
    "meso": 284000,
    "rewards": [],
@@ -5446,7 +5624,7 @@
   {
    "id": "D-10",
    "name": "キメラの尾",
-   "giver": "鍛冶屋ドラン",
+   "giver": "doran",
    "giverName": "鍛冶屋ドラン",
    "map": "D100",
    "minLevel": 131,
@@ -5462,7 +5640,7 @@
      "count": 30
     }
    ],
-   "end": "鍛冶屋ドラン",
+   "end": "doran",
    "exp": 14400000,
    "meso": 83000,
    "rewards": [],
@@ -5476,7 +5654,7 @@
   {
    "id": "D-11",
    "name": "古竜の言葉",
-   "giver": "村長ハルカ",
+   "giver": "haruka",
    "giverName": "村長ハルカ",
    "map": "D100",
    "minLevel": 147,
@@ -5492,7 +5670,7 @@
      "count": 20
     }
    ],
-   "end": "村長ハルカ",
+   "end": "haruka",
    "exp": 30500000,
    "meso": 404000,
    "rewards": [],
@@ -5504,7 +5682,7 @@
   {
    "id": "H-01",
    "name": "坑道の調査",
-   "giver": "野営地の隊長ガロン",
+   "giver": "garon",
    "giverName": "野営地の隊長ガロン",
    "map": "H100",
    "minLevel": 110,
@@ -5525,7 +5703,7 @@
      "count": 40
     }
    ],
-   "end": "野営地の隊長ガロン",
+   "end": "garon",
    "exp": 5250000,
    "meso": 62000,
    "rewards": [
@@ -5542,7 +5720,7 @@
   {
    "id": "H-02",
    "name": "巨像の試練",
-   "giver": "巨像の試練の番人イグニ",
+   "giver": "igni",
    "giverName": "巨像の試練の番人イグニ",
    "map": "H100",
    "minLevel": 125,
@@ -5553,11 +5731,12 @@
    "goalText": "H106 の迷路とジャンプの道を抜け、奥の石碑に触る",
    "objectives": [
     {
-     "type": "visit",
-     "map": "H106"
+     "type": "interact",
+     "target": "H106.stele",
+     "label": "迷路とジャンプの道の奥の石碑に触る"
     }
    ],
-   "end": "巨像の試練の番人イグニ",
+   "end": "igni",
    "exp": 10800000,
    "meso": 76400,
    "rewards": [],
@@ -5569,7 +5748,7 @@
   {
    "id": "H-03",
    "name": "焔の目",
-   "giver": "巨像の試練の番人イグニ",
+   "giver": "igni",
    "giverName": "巨像の試練の番人イグニ",
    "map": "H100",
    "minLevel": 130,
@@ -5590,7 +5769,7 @@
      "count": 30
     }
    ],
-   "end": "巨像の試練の番人イグニ",
+   "end": "igni",
    "exp": 13800000,
    "meso": 81800,
    "rewards": [],
@@ -5604,7 +5783,7 @@
   {
    "id": "H-04",
    "name": "焔の巨像",
-   "giver": "野営地の隊長ガロン",
+   "giver": "garon",
    "giverName": "野営地の隊長ガロン",
    "map": "H100",
    "minLevel": 140,
@@ -5620,7 +5799,7 @@
      "count": 1
     }
    ],
-   "end": "野営地の隊長ガロン",
+   "end": "garon",
    "exp": 44000000,
    "meso": 235000,
    "rewards": [],
@@ -5634,7 +5813,7 @@
   {
    "id": "H-05",
    "name": "灰の兵舎",
-   "giver": "野営地の隊長ガロン",
+   "giver": "garon",
    "giverName": "野営地の隊長ガロン",
    "map": "H100",
    "minLevel": 124,
@@ -5650,7 +5829,7 @@
      "count": 60
     }
    ],
-   "end": "野営地の隊長ガロン",
+   "end": "garon",
    "exp": 10300000,
    "meso": 75300,
    "rewards": [
@@ -5667,7 +5846,7 @@
   {
    "id": "H-06",
    "name": "溶岩のしずく",
-   "giver": "野営地の隊長ガロン",
+   "giver": "garon",
    "giverName": "野営地の隊長ガロン",
    "map": "H100",
    "minLevel": 112,
@@ -5681,7 +5860,7 @@
      "count": 30
     }
    ],
-   "end": "野営地の隊長ガロン",
+   "end": "garon",
    "exp": 2770000,
    "meso": 176600,
    "rewards": [],
@@ -5693,7 +5872,7 @@
   {
    "id": "E-01",
    "name": "星への道",
-   "giver": "鳥使いホーク",
+   "giver": "hawk",
    "giverName": "鳥使いホーク",
    "map": "D101",
    "minLevel": 150,
@@ -5705,10 +5884,16 @@
    "objectives": [
     {
      "type": "visit",
-     "map": "E100"
+     "map": "E100",
+     "label": "大きな鳥で星見の塔へ"
+    },
+    {
+     "type": "talk",
+     "npc": "astra",
+     "label": "塔の主アストラに会う"
     }
    ],
-   "end": "鳥使いホーク",
+   "end": "astra",
    "exp": 16800000,
    "meso": 45000,
    "rewards": [
@@ -5725,7 +5910,7 @@
   {
    "id": "E-02",
    "name": "星屑",
-   "giver": "塔の主アストラ",
+   "giver": "astra",
    "giverName": "塔の主アストラ",
    "map": "E100",
    "minLevel": 152,
@@ -5741,7 +5926,7 @@
      "count": 40
     }
    ],
-   "end": "塔の主アストラ",
+   "end": "astra",
    "exp": 38300000,
    "meso": 610000,
    "rewards": [],
@@ -5753,7 +5938,7 @@
   {
    "id": "E-03",
    "name": "廃都の門",
-   "giver": "塔の主アストラ",
+   "giver": "astra",
    "giverName": "塔の主アストラ",
    "map": "E100",
    "minLevel": 158,
@@ -5769,7 +5954,7 @@
      "count": 80
     }
    ],
-   "end": "塔の主アストラ",
+   "end": "astra",
    "exp": 50300000,
    "meso": 117000,
    "rewards": [
@@ -5786,7 +5971,7 @@
   {
    "id": "E-04",
    "name": "虚ろの書",
-   "giver": "塔の主アストラ",
+   "giver": "astra",
    "giverName": "塔の主アストラ",
    "map": "E100",
    "minLevel": 165,
@@ -5802,7 +5987,7 @@
      "count": 40
     }
    ],
-   "end": "塔の主アストラ",
+   "end": "astra",
    "exp": 68300000,
    "meso": 126000,
    "rewards": [],
@@ -5816,7 +6001,7 @@
   {
    "id": "E-05",
    "name": "天の野",
-   "giver": "塔の主アストラ",
+   "giver": "astra",
    "giverName": "塔の主アストラ",
    "map": "E100",
    "minLevel": 172,
@@ -5832,7 +6017,7 @@
      "count": 80
     }
    ],
-   "end": "塔の主アストラ",
+   "end": "astra",
    "exp": 92500000,
    "meso": 135000,
    "rewards": [
@@ -5849,7 +6034,7 @@
   {
    "id": "E-06",
    "name": "星喰いの淵",
-   "giver": "塔の主アストラ",
+   "giver": "astra",
    "giverName": "塔の主アストラ",
    "map": "E100",
    "minLevel": 180,
@@ -5865,7 +6050,7 @@
      "count": 40
     }
    ],
-   "end": "塔の主アストラ",
+   "end": "astra",
    "exp": 130000000,
    "meso": 1147000,
    "rewards": [],
@@ -5877,7 +6062,7 @@
   {
    "id": "E-07",
    "name": "使徒の羽",
-   "giver": "塔の主アストラ",
+   "giver": "astra",
    "giverName": "塔の主アストラ",
    "map": "E100",
    "minLevel": 190,
@@ -5893,7 +6078,7 @@
      "count": 40
     }
    ],
-   "end": "塔の主アストラ",
+   "end": "astra",
    "exp": 200000000,
    "meso": 163000,
    "rewards": [],
@@ -5907,7 +6092,7 @@
   {
    "id": "E-08",
    "name": "守り手の核",
-   "giver": "塔の主アストラ",
+   "giver": "astra",
    "giverName": "塔の主アストラ",
    "map": "E100",
    "minLevel": 196,
@@ -5923,7 +6108,7 @@
      "count": 20
     }
    ],
-   "end": "塔の主アストラ",
+   "end": "astra",
    "exp": 263000000,
    "meso": 173000,
    "rewards": [],
@@ -5935,7 +6120,7 @@
   {
    "id": "E-09",
    "name": "七つの封印のかけら",
-   "giver": "塔の主アストラ",
+   "giver": "astra",
    "giverName": "塔の主アストラ",
    "map": "E100",
    "minLevel": 198,
@@ -5981,7 +6166,7 @@
      "count": 1
     }
    ],
-   "end": "塔の主アストラ",
+   "end": "astra",
    "exp": 575000000,
    "meso": 441000,
    "rewards": [],
@@ -5995,7 +6180,7 @@
   {
    "id": "E-10",
    "name": "最後の封印",
-   "giver": "塔の主アストラ",
+   "giver": "astra",
    "giverName": "塔の主アストラ",
    "map": "E100",
    "minLevel": 200,
@@ -6011,7 +6196,7 @@
      "count": 1
     }
    ],
-   "end": "塔の主アストラ",
+   "end": "astra",
    "exp": 600000000,
    "meso": 450000,
    "rewards": [],
@@ -6026,7 +6211,7 @@
   {
    "id": "L-01",
    "name": "星の夢",
-   "giver": "luka",
+   "giver": "luka_S003",
    "giverName": "案内人ルカ",
    "map": "S003",
    "minLevel": 5,
@@ -6037,11 +6222,12 @@
    "goalText": "S008 の古い石碑を調べる",
    "objectives": [
     {
-     "type": "visit",
-     "map": "S008"
+     "type": "interact",
+     "target": "S008.stele",
+     "label": "島の高台の古い石碑を調べる"
     }
    ],
-   "end": "luka",
+   "end": "luka_S003",
    "exp": 8,
    "meso": 90,
    "rewards": [],
@@ -6066,6 +6252,11 @@
     {
      "type": "visit",
      "map": "V090"
+    },
+    {
+     "type": "talk",
+     "npc": "yomi",
+     "label": "占い師ヨミの露店を訪ねる"
     }
    ],
    "end": "olga",
@@ -6085,7 +6276,7 @@
   {
    "id": "L-03",
    "name": "カカシのかけら",
-   "giver": "風車守ボブ",
+   "giver": "bob",
    "giverName": "風車守ボブ",
    "map": "V200",
    "minLevel": 22,
@@ -6094,8 +6285,14 @@
    ],
    "size": "中",
    "goalText": "カカシから出た黒いかけらを、シルワの司書リブラに見せる",
-   "objectives": [],
-   "end": "風車守ボブ",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "libra",
+     "label": "黒いかけらを司書リブラに見せる"
+    }
+   ],
+   "end": "libra",
    "exp": 2640,
    "meso": 1690,
    "rewards": [],
@@ -6107,7 +6304,7 @@
   {
    "id": "L-04",
    "name": "学者の研究",
-   "giver": "学者ドク",
+   "giver": "doc",
    "giverName": "学者ドク",
    "map": "V600",
    "minLevel": 35,
@@ -6123,7 +6320,7 @@
      "count": 20
     }
    ],
-   "end": "学者ドク",
+   "end": "doc",
    "exp": 33000,
    "meso": 8180,
    "rewards": [],
@@ -6137,7 +6334,7 @@
   {
    "id": "L-05",
    "name": "魔獣の正体",
-   "giver": "封印の番人シグ",
+   "giver": "sig",
    "giverName": "封印の番人シグ",
    "map": "V600",
    "minLevel": 65,
@@ -6148,11 +6345,12 @@
    "goalText": "黒角の魔獣が落とした黒い角を C100 の巫女ステラに見せる",
    "objectives": [
     {
-     "type": "visit",
-     "map": "C100"
+     "type": "talk",
+     "npc": "stella",
+     "label": "黒い角を都の巫女ステラに見せる"
     }
    ],
-   "end": "封印の番人シグ",
+   "end": "stella",
    "exp": 523000,
    "meso": 24700,
    "rewards": [],
@@ -6164,7 +6362,7 @@
   {
    "id": "L-06",
    "name": "雲の上の言い伝え",
-   "giver": "都の巫女ステラ",
+   "giver": "stella",
    "giverName": "都の巫女ステラ",
    "map": "C100",
    "minLevel": 70,
@@ -6175,19 +6373,22 @@
    "goalText": "F100 の村長ヴァン、T100 の時計番、M100 の侍女ルリに話を聞く",
    "objectives": [
     {
-     "type": "visit",
-     "map": "F100"
+     "type": "talk",
+     "npc": "van",
+     "label": "ヒョウガ村の村長ヴァン"
     },
     {
-     "type": "visit",
-     "map": "T100"
+     "type": "talk",
+     "npc": "clock",
+     "label": "ティンクルの時計番"
     },
     {
-     "type": "visit",
-     "map": "M100"
+     "type": "talk",
+     "npc": "ruri",
+     "label": "マリナの侍女ルリ"
     }
    ],
-   "end": "都の巫女ステラ",
+   "end": "stella",
    "exp": 725000,
    "meso": 28800,
    "rewards": [],
@@ -6199,7 +6400,7 @@
   {
    "id": "L-07",
    "name": "時の塔の記憶",
-   "giver": "時計番のクロック婆",
+   "giver": "clock",
    "giverName": "時計番のクロック婆",
    "map": "T100",
    "minLevel": 90,
@@ -6210,11 +6411,12 @@
    "goalText": "T115 の古い時計を調べる",
    "objectives": [
     {
-     "type": "visit",
-     "map": "T115"
+     "type": "interact",
+     "target": "T115.clock",
+     "label": "時の塔の古い時計を調べる"
     }
    ],
-   "end": "時計番のクロック婆",
+   "end": "clock",
    "exp": 2050000,
    "meso": 43800,
    "rewards": [
@@ -6231,7 +6433,7 @@
   {
    "id": "L-08",
    "name": "海の底の歌",
-   "giver": "女王の侍女ルリ",
+   "giver": "ruri",
    "giverName": "女王の侍女ルリ",
    "map": "M100",
    "minLevel": 100,
@@ -6246,7 +6448,7 @@
      "map": "M111"
     }
    ],
-   "end": "女王の侍女ルリ",
+   "end": "ruri",
    "exp": 3250000,
    "meso": 54000,
    "rewards": [
@@ -6263,7 +6465,7 @@
   {
    "id": "L-09",
    "name": "神殿の予言",
-   "giver": "神殿の巫女アルマ",
+   "giver": "alma",
    "giverName": "神殿の巫女アルマ",
    "map": "P100",
    "minLevel": 120,
@@ -6278,7 +6480,7 @@
      "map": "P108"
     }
    ],
-   "end": "神殿の巫女アルマ",
+   "end": "alma",
    "exp": 8500000,
    "meso": 71300,
    "rewards": [],
@@ -6290,7 +6492,7 @@
   {
    "id": "L-10",
    "name": "焔の中の声",
-   "giver": "野営地の隊長ガロン",
+   "giver": "garon",
    "giverName": "野営地の隊長ガロン",
    "map": "H100",
    "minLevel": 140,
@@ -6299,8 +6501,20 @@
    ],
    "size": "大",
    "goalText": "巨像の目を巫女アルマに届ける",
-   "objectives": [],
-   "end": "野営地の隊長ガロン",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M229",
+     "count": 1,
+     "label": "巨像の目"
+    },
+    {
+     "type": "talk",
+     "npc": "alma",
+     "label": "神殿の巫女アルマに届ける"
+    }
+   ],
+   "end": "alma",
    "exp": 22000000,
    "meso": 94000,
    "rewards": [],
@@ -6312,7 +6526,7 @@
   {
    "id": "L-11",
    "name": "黒竜の封印の歌",
-   "giver": "竜の大老ヴァルド",
+   "giver": "vald",
    "giverName": "竜の大老ヴァルド",
    "map": "D115",
    "minLevel": 150,
@@ -6321,8 +6535,14 @@
    ],
    "size": "大",
    "goalText": "海の底の歌をヴァルドに伝える",
-   "objectives": [],
-   "end": "竜の大老ヴァルド",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "ruri",
+     "label": "マリナで海の底の歌を聞く"
+    }
+   ],
+   "end": "vald",
    "exp": 35000000,
    "meso": 108000,
    "rewards": [],
@@ -6334,7 +6554,7 @@
   {
    "id": "L-12",
    "name": "星の果てへ",
-   "giver": "竜の大老ヴァルド",
+   "giver": "vald",
    "giverName": "竜の大老ヴァルド",
    "map": "D115",
    "minLevel": 150,
@@ -6343,8 +6563,14 @@
    ],
    "size": "大",
    "goalText": "鳥使いホークに頼み、星の果てへ渡る準備をする",
-   "objectives": [],
-   "end": "竜の大老ヴァルド",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "hawk",
+     "label": "鳥使いホークに頼む"
+    }
+   ],
+   "end": "vald",
    "exp": 35000000,
    "meso": 108000,
    "rewards": [],
@@ -6356,15 +6582,21 @@
   {
    "id": "PET-01",
    "name": "はじめてのペット",
-   "giver": "ペット屋チコ",
+   "giver": "chiko",
    "giverName": "ペット屋チコ",
    "map": "V200",
    "minLevel": 10,
    "prereqs": [],
    "size": "小",
    "goalText": "ペット（子犬・子猫・子うさぎ・子パンダ・子ペンギン から 1 匹）を 1 万ルドで迎える",
-   "objectives": [],
-   "end": "ペット屋チコ",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "pet_adopted",
+     "label": "ペットを迎える"
+    }
+   ],
+   "end": "chiko",
    "exp": 96,
    "meso": 250,
    "rewards": [
@@ -6381,7 +6613,7 @@
   {
    "id": "PET-02",
    "name": "ごはんの時間",
-   "giver": "ペット屋チコ",
+   "giver": "chiko",
    "giverName": "ペット屋チコ",
    "map": "V200",
    "minLevel": 10,
@@ -6390,8 +6622,15 @@
    ],
    "size": "小",
    "goalText": "ペットに餌を 3 回あげる",
-   "objectives": [],
-   "end": "ペット屋チコ",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "pet_fed",
+     "label": "ペットに餌をあげる",
+     "count": 3
+    }
+   ],
+   "end": "chiko",
    "exp": 96,
    "meso": 250,
    "rewards": [
@@ -6408,7 +6647,7 @@
   {
    "id": "PET-03",
    "name": "お散歩",
-   "giver": "ペット屋チコ",
+   "giver": "chiko",
    "giverName": "ペット屋チコ",
    "map": "V200",
    "minLevel": 12,
@@ -6431,7 +6670,7 @@
      "map": "V203"
     }
    ],
-   "end": "ペット屋チコ",
+   "end": "chiko",
    "exp": 166,
    "meso": 298,
    "rewards": [],
@@ -6445,7 +6684,7 @@
   {
    "id": "PET-04",
    "name": "拾う芸",
-   "giver": "ペット屋チコ",
+   "giver": "chiko",
    "giverName": "ペット屋チコ",
    "map": "V200",
    "minLevel": 15,
@@ -6454,8 +6693,15 @@
    ],
    "size": "中",
    "goalText": "ペットの親密度を 10 にする",
-   "objectives": [],
-   "end": "ペット屋チコ",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "pet_closeness",
+     "label": "ペットの親密度を 10 にする",
+     "count": 10
+    }
+   ],
+   "end": "chiko",
    "exp": 756,
    "meso": 968,
    "rewards": [],
@@ -6469,7 +6715,7 @@
   {
    "id": "PET-05",
    "name": "もっと遠くまで",
-   "giver": "ペット屋チコ",
+   "giver": "chiko",
    "giverName": "ペット屋チコ",
    "map": "V200",
    "minLevel": 25,
@@ -6478,8 +6724,15 @@
    ],
    "size": "中",
    "goalText": "ペットの親密度を 15 にする",
-   "objectives": [],
-   "end": "ペット屋チコ",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "pet_closeness",
+     "label": "ペットの親密度を 15 にする",
+     "count": 15
+    }
+   ],
+   "end": "chiko",
    "exp": 4080,
    "meso": 2030,
    "rewards": [],
@@ -6493,7 +6746,7 @@
   {
    "id": "PET-06",
    "name": "薬の世話",
-   "giver": "ペット屋チコ",
+   "giver": "chiko",
    "giverName": "ペット屋チコ",
    "map": "V200",
    "minLevel": 35,
@@ -6502,8 +6755,15 @@
    ],
    "size": "大",
    "goalText": "ペットの親密度を 20 にする",
-   "objectives": [],
-   "end": "ペット屋チコ",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "pet_closeness",
+     "label": "ペットの親密度を 20 にする",
+     "count": 20
+    }
+   ],
+   "end": "chiko",
    "exp": 33000,
    "meso": 8180,
    "rewards": [],
@@ -6517,7 +6777,7 @@
   {
    "id": "PET-07",
    "name": "2 匹目のペット",
-   "giver": "ペット屋チコ",
+   "giver": "chiko",
    "giverName": "ペット屋チコ",
    "map": "V200",
    "minLevel": 50,
@@ -6526,8 +6786,15 @@
    ],
    "size": "大",
    "goalText": "ペットの親密度を 25 にする",
-   "objectives": [],
-   "end": "ペット屋チコ",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "pet_closeness",
+     "label": "ペットの親密度を 25 にする",
+     "count": 25
+    }
+   ],
+   "end": "chiko",
    "exp": 170000,
    "meso": 15600,
    "rewards": [],
@@ -6541,7 +6808,7 @@
   {
    "id": "PET-08",
    "name": "子竜の卵",
-   "giver": "鍛冶屋ドラン",
+   "giver": "doran",
    "giverName": "鍛冶屋ドラン",
    "map": "D100",
    "minLevel": 100,
@@ -6557,7 +6824,7 @@
      "count": 20
     }
    ],
-   "end": "鍛冶屋ドラン",
+   "end": "doran",
    "exp": 3250000,
    "meso": 54000,
    "rewards": [],
@@ -6571,7 +6838,7 @@
   {
    "id": "R-01",
    "name": "募集: コロ貝とキノコ",
-   "giver": "掲示板係ボード",
+   "giver": "board",
    "giverName": "掲示板係ボード",
    "map": "V090",
    "minLevel": 10,
@@ -6585,7 +6852,7 @@
      "count": 40
     }
    ],
-   "end": "掲示板係ボード",
+   "end": "board",
    "exp": 96,
    "meso": 250,
    "rewards": [],
@@ -6599,7 +6866,7 @@
   {
    "id": "R-02",
    "name": "募集: 港の掃除",
-   "giver": "掲示板係ボード",
+   "giver": "board",
    "giverName": "掲示板係ボード",
    "map": "V090",
    "minLevel": 15,
@@ -6613,7 +6880,7 @@
      "count": 40
     }
    ],
-   "end": "掲示板係ボード",
+   "end": "board",
    "exp": 378,
    "meso": 387,
    "rewards": [],
@@ -6627,7 +6894,7 @@
   {
    "id": "R-03",
    "name": "募集: 丘の害獣",
-   "giver": "掲示板係ボード",
+   "giver": "board",
    "giverName": "掲示板係ボード",
    "map": "V090",
    "minLevel": 20,
@@ -6641,7 +6908,7 @@
      "count": 40
     }
    ],
-   "end": "掲示板係ボード",
+   "end": "board",
    "exp": 990,
    "meso": 600,
    "rewards": [],
@@ -6655,7 +6922,7 @@
   {
    "id": "R-04",
    "name": "募集: 地下鉄の見回り",
-   "giver": "掲示板係ボード",
+   "giver": "board",
    "giverName": "掲示板係ボード",
    "map": "V090",
    "minLevel": 25,
@@ -6669,7 +6936,7 @@
      "count": 50
     }
    ],
-   "end": "掲示板係ボード",
+   "end": "board",
    "exp": 2040,
    "meso": 812,
    "rewards": [],
@@ -6683,7 +6950,7 @@
   {
    "id": "R-05",
    "name": "募集: 発掘場の護衛",
-   "giver": "掲示板係ボード",
+   "giver": "board",
    "giverName": "掲示板係ボード",
    "map": "V090",
    "minLevel": 30,
@@ -6697,7 +6964,7 @@
      "count": 50
     }
    ],
-   "end": "掲示板係ボード",
+   "end": "board",
    "exp": 4200,
    "meso": 1100,
    "rewards": [],
@@ -6711,7 +6978,7 @@
   {
    "id": "R-06",
    "name": "募集: 雲の公園",
-   "giver": "掲示板係ボード",
+   "giver": "board",
    "giverName": "掲示板係ボード",
    "map": "V090",
    "minLevel": 35,
@@ -6725,7 +6992,7 @@
      "count": 50
     }
    ],
-   "end": "掲示板係ボード",
+   "end": "board",
    "exp": 7920,
    "meso": 1360,
    "rewards": [],
@@ -6739,7 +7006,7 @@
   {
    "id": "R-07",
    "name": "募集: 洞窟の竜",
-   "giver": "掲示板係ボード",
+   "giver": "board",
    "giverName": "掲示板係ボード",
    "map": "V090",
    "minLevel": 40,
@@ -6753,7 +7020,7 @@
      "count": 50
     }
    ],
-   "end": "掲示板係ボード",
+   "end": "board",
    "exp": 15000,
    "meso": 1690,
    "rewards": [],
@@ -6767,7 +7034,7 @@
   {
    "id": "R-08",
    "name": "募集: 雪原の狼",
-   "giver": "掲示板係ボード",
+   "giver": "board",
    "giverName": "掲示板係ボード",
    "map": "V090",
    "minLevel": 50,
@@ -6781,7 +7048,7 @@
      "count": 60
     }
    ],
-   "end": "掲示板係ボード",
+   "end": "board",
    "exp": 40800,
    "meso": 2600,
    "rewards": [],
@@ -6795,7 +7062,7 @@
   {
    "id": "R-09",
    "name": "募集: 海の見張り",
-   "giver": "掲示板係ボード",
+   "giver": "board",
    "giverName": "掲示板係ボード",
    "map": "V090",
    "minLevel": 60,
@@ -6809,7 +7076,7 @@
      "count": 60
     }
    ],
-   "end": "掲示板係ボード",
+   "end": "board",
    "exp": 90000,
    "meso": 3530,
    "rewards": [],
@@ -6823,7 +7090,7 @@
   {
    "id": "R-10",
    "name": "募集: 時の塔",
-   "giver": "掲示板係ボード",
+   "giver": "board",
    "giverName": "掲示板係ボード",
    "map": "V090",
    "minLevel": 70,
@@ -6837,7 +7104,7 @@
      "count": 60
     }
    ],
-   "end": "掲示板係ボード",
+   "end": "board",
    "exp": 174000,
    "meso": 4800,
    "rewards": [],
@@ -6851,7 +7118,7 @@
   {
    "id": "R-11",
    "name": "募集: 坑道の骨",
-   "giver": "掲示板係ボード",
+   "giver": "board",
    "giverName": "掲示板係ボード",
    "map": "V090",
    "minLevel": 75,
@@ -6865,7 +7132,7 @@
      "count": 60
     }
    ],
-   "end": "掲示板係ボード",
+   "end": "board",
    "exp": 229000,
    "meso": 5330,
    "rewards": [],
@@ -6879,7 +7146,7 @@
   {
    "id": "R-12",
    "name": "募集: 暗い海",
-   "giver": "掲示板係ボード",
+   "giver": "board",
    "giverName": "掲示板係ボード",
    "map": "V090",
    "minLevel": 80,
@@ -6893,7 +7160,7 @@
      "count": 60
     }
    ],
-   "end": "掲示板係ボード",
+   "end": "board",
    "exp": 300000,
    "meso": 5920,
    "rewards": [],
@@ -6907,7 +7174,7 @@
   {
    "id": "R-13",
    "name": "募集: 神殿の番人",
-   "giver": "掲示板係ボード",
+   "giver": "board",
    "giverName": "掲示板係ボード",
    "map": "V090",
    "minLevel": 90,
@@ -6921,7 +7188,7 @@
      "count": 60
     }
    ],
-   "end": "掲示板係ボード",
+   "end": "board",
    "exp": 492000,
    "meso": 7300,
    "rewards": [],
@@ -6935,7 +7202,7 @@
   {
    "id": "R-14",
    "name": "募集: 祈りの間",
-   "giver": "掲示板係ボード",
+   "giver": "board",
    "giverName": "掲示板係ボード",
    "map": "V090",
    "minLevel": 100,
@@ -6949,7 +7216,7 @@
      "count": 60
     }
    ],
-   "end": "掲示板係ボード",
+   "end": "board",
    "exp": 780000,
    "meso": 9000,
    "rewards": [],
@@ -6963,7 +7230,7 @@
   {
    "id": "R-15",
    "name": "募集: 翼竜の森",
-   "giver": "掲示板係ボード",
+   "giver": "board",
    "giverName": "掲示板係ボード",
    "map": "V090",
    "minLevel": 110,
@@ -6977,7 +7244,7 @@
      "count": 60
     }
    ],
-   "end": "掲示板係ボード",
+   "end": "board",
    "exp": 1260000,
    "meso": 10300,
    "rewards": [],
@@ -6991,7 +7258,7 @@
   {
    "id": "R-16",
    "name": "募集: 火山の兵",
-   "giver": "掲示板係ボード",
+   "giver": "board",
    "giverName": "掲示板係ボード",
    "map": "V090",
    "minLevel": 125,
@@ -7005,7 +7272,7 @@
      "count": 60
     }
    ],
-   "end": "掲示板係ボード",
+   "end": "board",
    "exp": 2590000,
    "meso": 12700,
    "rewards": [],
@@ -7019,7 +7286,7 @@
   {
    "id": "R-17",
    "name": "募集: 竜の巣",
-   "giver": "掲示板係ボード",
+   "giver": "board",
    "giverName": "掲示板係ボード",
    "map": "V090",
    "minLevel": 135,
@@ -7033,7 +7300,7 @@
      "count": 60
     }
    ],
-   "end": "掲示板係ボード",
+   "end": "board",
    "exp": 4180000,
    "meso": 14600,
    "rewards": [],
@@ -7047,7 +7314,7 @@
   {
    "id": "R-18",
    "name": "募集: 古竜の道",
-   "giver": "掲示板係ボード",
+   "giver": "board",
    "giverName": "掲示板係ボード",
    "map": "V090",
    "minLevel": 148,
@@ -7061,7 +7328,7 @@
      "count": 60
     }
    ],
-   "end": "掲示板係ボード",
+   "end": "board",
    "exp": 7680000,
    "meso": 17500,
    "rewards": [],
@@ -7075,7 +7342,7 @@
   {
    "id": "R-19",
    "name": "募集: 廃都",
-   "giver": "掲示板係ボード",
+   "giver": "board",
    "giverName": "掲示板係ボード",
    "map": "V090",
    "minLevel": 165,
@@ -7089,7 +7356,7 @@
      "count": 80
     }
    ],
-   "end": "掲示板係ボード",
+   "end": "board",
    "exp": 16400000,
    "meso": 21000,
    "rewards": [],
@@ -7103,7 +7370,7 @@
   {
    "id": "R-20",
    "name": "募集: 星喰い",
-   "giver": "掲示板係ボード",
+   "giver": "board",
    "giverName": "掲示板係ボード",
    "map": "V090",
    "minLevel": 185,
@@ -7117,7 +7384,7 @@
      "count": 80
     }
    ],
-   "end": "掲示板係ボード",
+   "end": "board",
    "exp": 38700000,
    "meso": 25700,
    "rewards": [],
@@ -7131,15 +7398,21 @@
   {
    "id": "R-21",
    "name": "週の大募集: ボス",
-   "giver": "掲示板係ボード",
+   "giver": "board",
    "giverName": "掲示板係ボード",
    "map": "V090",
    "minLevel": 30,
    "prereqs": [],
    "size": "大",
    "goalText": "自分の Lv に合った地域のボスを 1 体倒す（週 1 回）",
-   "objectives": [],
-   "end": "掲示板係ボード",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "boss_kill",
+     "label": "地域のボスを 1 体倒す"
+    }
+   ],
+   "end": "board",
    "exp": 17500,
    "meso": 6600,
    "rewards": [],
@@ -7153,15 +7426,21 @@
   {
    "id": "R-22",
    "name": "日課: 1 人用ダンジョン",
-   "giver": "掲示板係ボード",
+   "giver": "board",
    "giverName": "掲示板係ボード",
    "map": "V090",
    "minLevel": 21,
    "prereqs": [],
    "size": "中",
    "goalText": "1 人用ダンジョンをどれか 1 回クリア（1 日 1 回）",
-   "objectives": [],
-   "end": "掲示板係ボード",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "dungeon_clear",
+     "label": "1 人用ダンジョンをどれか 1 回クリアする"
+    }
+   ],
+   "end": "board",
    "exp": 2290,
    "meso": 1590,
    "rewards": [],
@@ -7175,15 +7454,21 @@
   {
    "id": "PQ-1",
    "name": "裏路地の試練",
-   "giver": "受付ラット",
+   "giver": "rat",
    "giverName": "受付ラット",
    "map": "V515",
    "minLevel": 21,
    "prereqs": [],
    "size": "中",
    "goalText": "ダンジョン「裏路地の試練」を最後までクリア（1 日 5 回まで）",
-   "objectives": [],
-   "end": "受付ラット",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "dungeon_clear.V516",
+     "label": "裏路地の試練をクリアする"
+    }
+   ],
+   "end": "rat",
    "exp": 2290,
    "meso": 1590,
    "rewards": [
@@ -7202,15 +7487,21 @@
   {
    "id": "PQ-2",
    "name": "からくり迷宮",
-   "giver": "受付ギア",
+   "giver": "gear",
    "giverName": "受付ギア",
    "map": "T118",
    "minLevel": 35,
    "prereqs": [],
    "size": "中",
    "goalText": "ダンジョン「からくり迷宮」を最後までクリア（1 日 5 回まで）",
-   "objectives": [],
-   "end": "受付ギア",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "dungeon_clear.T121",
+     "label": "からくり迷宮をクリアする"
+    }
+   ],
+   "end": "gear",
    "exp": 15800,
    "meso": 3410,
    "rewards": [
@@ -7229,15 +7520,21 @@
   {
    "id": "PQ-3",
    "name": "おもちゃ箱の迷路",
-   "giver": "受付パズ",
+   "giver": "paz",
    "giverName": "受付パズ",
    "map": "T119",
    "minLevel": 51,
    "prereqs": [],
    "size": "中",
    "goalText": "ダンジョン「おもちゃ箱の迷路」を出口まで（1 日 5 回まで）",
-   "objectives": [],
-   "end": "受付パズ",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "dungeon_clear.T122",
+     "label": "おもちゃ箱の迷路の出口まで"
+    }
+   ],
+   "end": "paz",
    "exp": 88300,
    "meso": 6700,
    "rewards": [
@@ -7256,15 +7553,21 @@
   {
    "id": "PQ-4",
    "name": "雲の女神の塔",
-   "giver": "受付ネフェ",
+   "giver": "nefe",
    "giverName": "受付ネフェ",
    "map": "C117",
    "minLevel": 51,
    "prereqs": [],
    "size": "大",
    "goalText": "ダンジョン「雲の女神の塔」を最上階まで（1 日 5 回まで）",
-   "objectives": [],
-   "end": "受付ネフェ",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "dungeon_clear.C119",
+     "label": "雲の女神の塔の最上階まで"
+    }
+   ],
+   "end": "nefe",
    "exp": 184000,
    "meso": 16100,
    "rewards": [
@@ -7283,15 +7586,21 @@
   {
    "id": "PQ-5",
    "name": "沈没船の救出",
-   "giver": "受付シェル",
+   "giver": "shell",
    "giverName": "受付シェル",
    "map": "M114",
    "minLevel": 70,
    "prereqs": [],
    "size": "大",
    "goalText": "ダンジョン「沈没船の救出」を最後まで（1 日 5 回まで）",
-   "objectives": [],
-   "end": "受付シェル",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "dungeon_clear.M115",
+     "label": "沈没船の救出をクリアする"
+    }
+   ],
+   "end": "shell",
    "exp": 725000,
    "meso": 28800,
    "rewards": [
@@ -7310,15 +7619,21 @@
   {
    "id": "PQ-6",
    "name": "竜の巣の卵",
-   "giver": "受付ネスト",
+   "giver": "nest",
    "giverName": "受付ネスト",
    "map": "D116",
    "minLevel": 100,
    "prereqs": [],
    "size": "大",
    "goalText": "ダンジョン「竜の巣の卵」を最後まで（1 日 5 回まで）",
-   "objectives": [],
-   "end": "受付ネスト",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "dungeon_clear.D117",
+     "label": "竜の巣の卵をクリアする"
+    }
+   ],
+   "end": "nest",
    "exp": 3250000,
    "meso": 54000,
    "rewards": [
@@ -7337,15 +7652,24 @@
   {
    "id": "J1-1",
    "name": "戦士への道",
-   "giver": "戦士長ドルガ",
+   "giver": "dorga",
    "giverName": "戦士長ドルガ",
    "map": "V400",
    "minLevel": 10,
    "prereqs": [],
    "size": "小",
    "goalText": "STR35 以上で 戦士長ドルガ と話す",
-   "objectives": [],
-   "end": "戦士長ドルガ",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "job_advance.1",
+     "label": "1 次の職になる"
+    }
+   ],
+   "end": "dorga",
+   "minStats": {
+    "STR": 35
+   },
    "exp": 96,
    "meso": 250,
    "rewards": [],
@@ -7360,7 +7684,7 @@
   {
    "id": "J1-2",
    "name": "推薦状",
-   "giver": "戦士長ドルガ",
+   "giver": "dorga",
    "giverName": "戦士長ドルガ",
    "map": "V400",
    "minLevel": 30,
@@ -7369,8 +7693,14 @@
    ],
    "size": "小",
    "goalText": "2 次の試験官への推薦状を受け取る",
-   "objectives": [],
-   "end": "戦士長ドルガ",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "dorga",
+     "label": "推薦状を受け取る"
+    }
+   ],
+   "end": "dorga",
    "exp": 4200,
    "meso": 1100,
    "rewards": [],
@@ -7384,7 +7714,7 @@
   {
    "id": "J1-3",
    "name": "試しの珠",
-   "giver": "戦士長ドルガ",
+   "giver": "dorga_V413",
    "giverName": "戦士長ドルガ",
    "map": "V413",
    "minLevel": 30,
@@ -7400,7 +7730,7 @@
      "count": 30
     }
    ],
-   "end": "戦士長ドルガ",
+   "end": "dorga_V413",
    "exp": 8400,
    "meso": 2750,
    "rewards": [],
@@ -7414,7 +7744,7 @@
   {
    "id": "J1-4",
    "name": "道を選ぶ",
-   "giver": "戦士長ドルガ",
+   "giver": "dorga",
    "giverName": "戦士長ドルガ",
    "map": "V400",
    "minLevel": 30,
@@ -7423,8 +7753,14 @@
    ],
    "size": "中",
    "goalText": "試験の証を渡し、2 次の職を選ぶ",
-   "objectives": [],
-   "end": "戦士長ドルガ",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "job_advance.2",
+     "label": "試験の証を渡し、2 次の職を選ぶ"
+    }
+   ],
+   "end": "dorga",
    "exp": 8400,
    "meso": 2750,
    "rewards": [
@@ -7441,7 +7777,7 @@
   {
    "id": "J1-5",
    "name": "長老の手紙",
-   "giver": "戦士の長老グレン",
+   "giver": "glen",
    "giverName": "戦士の長老グレン",
    "map": "F117",
    "minLevel": 70,
@@ -7450,8 +7786,14 @@
    ],
    "size": "小",
    "goalText": "戦士の長老グレンの手紙を 戦士長ドルガ に届ける",
-   "objectives": [],
-   "end": "戦士の長老グレン",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "dorga",
+     "label": "長老の手紙を届ける"
+    }
+   ],
+   "end": "dorga",
    "exp": 174000,
    "meso": 4800,
    "rewards": [],
@@ -7463,7 +7805,7 @@
   {
    "id": "J1-6",
    "name": "もう一人の自分",
-   "giver": "戦士長ドルガ",
+   "giver": "dorga_F118",
    "giverName": "戦士長ドルガ",
    "map": "F118",
    "minLevel": 70,
@@ -7479,7 +7821,7 @@
      "count": 1
     }
    ],
-   "end": "戦士長ドルガ",
+   "end": "dorga_F118",
    "exp": 725000,
    "meso": 28800,
    "rewards": [
@@ -7496,7 +7838,7 @@
   {
    "id": "J1-7",
    "name": "賢者の石",
-   "giver": "戦士の長老グレン",
+   "giver": "glen_F107",
    "giverName": "戦士の長老グレン",
    "map": "F107",
    "minLevel": 70,
@@ -7505,8 +7847,25 @@
    ],
    "size": "大",
    "goalText": "黒いお守りと闇の水晶（N-14）を賢者の石に捧げ、5 問のクイズに答える",
-   "objectives": [],
-   "end": "戦士の長老グレン",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M300",
+     "count": 1,
+     "label": "黒いお守りを捧げる"
+    },
+    {
+     "type": "interact",
+     "target": "F107.sage_stone",
+     "label": "賢者の石に捧げる"
+    },
+    {
+     "type": "event",
+     "event": "quiz_cleared",
+     "label": "5 問のクイズに答える"
+    }
+   ],
+   "end": "glen_F107",
    "exp": 725000,
    "meso": 28800,
    "rewards": [
@@ -7525,7 +7884,7 @@
   {
    "id": "J1-8",
    "name": "大老への推薦状",
-   "giver": "戦士の長老グレン",
+   "giver": "glen",
    "giverName": "戦士の長老グレン",
    "map": "F117",
    "minLevel": 120,
@@ -7536,11 +7895,12 @@
    "goalText": "竜の大老ヴァルドへの推薦状を受け取り、D115 へ届ける",
    "objectives": [
     {
-     "type": "visit",
-     "map": "D115"
+     "type": "talk",
+     "npc": "vald",
+     "label": "竜の大老ヴァルドに推薦状を届ける"
     }
    ],
-   "end": "戦士の長老グレン",
+   "end": "vald",
    "exp": 2040000,
    "meso": 11900,
    "rewards": [],
@@ -7552,7 +7912,7 @@
   {
    "id": "J1-9",
    "name": "紅と蒼の印",
-   "giver": "竜の大老ヴァルド",
+   "giver": "vald",
    "giverName": "竜の大老ヴァルド",
    "map": "D115",
    "minLevel": 120,
@@ -7571,9 +7931,21 @@
      "type": "kill",
      "mob": "M212",
      "count": 1
+    },
+    {
+     "type": "collect",
+     "item": "etc.M211",
+     "count": 1,
+     "label": "紅の印を渡す"
+    },
+    {
+     "type": "collect",
+     "item": "etc.M212",
+     "count": 1,
+     "label": "蒼の印を渡す"
     }
    ],
-   "end": "竜の大老ヴァルド",
+   "end": "vald",
    "exp": 17000000,
    "meso": 178000,
    "rewards": [],
@@ -7588,15 +7960,24 @@
   {
    "id": "J2-1",
    "name": "魔法使いへの道",
-   "giver": "大魔導師オルフェ",
+   "giver": "orfe",
    "giverName": "大魔導師オルフェ",
    "map": "V300",
    "minLevel": 8,
    "prereqs": [],
    "size": "小",
    "goalText": "INT20 以上で 大魔導師オルフェ と話す",
-   "objectives": [],
-   "end": "大魔導師オルフェ",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "job_advance.1",
+     "label": "1 次の職になる"
+    }
+   ],
+   "end": "orfe",
+   "minStats": {
+    "INT": 20
+   },
    "exp": 46,
    "meso": 166,
    "rewards": [],
@@ -7611,7 +7992,7 @@
   {
    "id": "J2-2",
    "name": "推薦状",
-   "giver": "大魔導師オルフェ",
+   "giver": "orfe",
    "giverName": "大魔導師オルフェ",
    "map": "V300",
    "minLevel": 30,
@@ -7620,8 +8001,14 @@
    ],
    "size": "小",
    "goalText": "2 次の試験官への推薦状を受け取る",
-   "objectives": [],
-   "end": "大魔導師オルフェ",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "orfe",
+     "label": "推薦状を受け取る"
+    }
+   ],
+   "end": "orfe",
    "exp": 4200,
    "meso": 1100,
    "rewards": [],
@@ -7635,7 +8022,7 @@
   {
    "id": "J2-3",
    "name": "試しの珠",
-   "giver": "大魔導師オルフェ",
+   "giver": "orfe_V311",
    "giverName": "大魔導師オルフェ",
    "map": "V311",
    "minLevel": 30,
@@ -7651,7 +8038,7 @@
      "count": 30
     }
    ],
-   "end": "大魔導師オルフェ",
+   "end": "orfe_V311",
    "exp": 8400,
    "meso": 2750,
    "rewards": [],
@@ -7665,7 +8052,7 @@
   {
    "id": "J2-4",
    "name": "道を選ぶ",
-   "giver": "大魔導師オルフェ",
+   "giver": "orfe",
    "giverName": "大魔導師オルフェ",
    "map": "V300",
    "minLevel": 30,
@@ -7674,8 +8061,14 @@
    ],
    "size": "中",
    "goalText": "試験の証を渡し、2 次の職を選ぶ",
-   "objectives": [],
-   "end": "大魔導師オルフェ",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "job_advance.2",
+     "label": "試験の証を渡し、2 次の職を選ぶ"
+    }
+   ],
+   "end": "orfe",
    "exp": 8400,
    "meso": 2750,
    "rewards": [
@@ -7692,7 +8085,7 @@
   {
    "id": "J2-5",
    "name": "長老の手紙",
-   "giver": "魔法使いの長老フロスト",
+   "giver": "frost",
    "giverName": "魔法使いの長老フロスト",
    "map": "F117",
    "minLevel": 70,
@@ -7701,8 +8094,14 @@
    ],
    "size": "小",
    "goalText": "魔法使いの長老フロストの手紙を 大魔導師オルフェ に届ける",
-   "objectives": [],
-   "end": "魔法使いの長老フロスト",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "orfe",
+     "label": "長老の手紙を届ける"
+    }
+   ],
+   "end": "orfe",
    "exp": 174000,
    "meso": 4800,
    "rewards": [],
@@ -7714,7 +8113,7 @@
   {
    "id": "J2-6",
    "name": "もう一人の自分",
-   "giver": "大魔導師オルフェ",
+   "giver": "orfe_F118",
    "giverName": "大魔導師オルフェ",
    "map": "F118",
    "minLevel": 70,
@@ -7730,7 +8129,7 @@
      "count": 1
     }
    ],
-   "end": "大魔導師オルフェ",
+   "end": "orfe_F118",
    "exp": 725000,
    "meso": 28800,
    "rewards": [
@@ -7747,7 +8146,7 @@
   {
    "id": "J2-7",
    "name": "賢者の石",
-   "giver": "魔法使いの長老フロスト",
+   "giver": "frost_F107",
    "giverName": "魔法使いの長老フロスト",
    "map": "F107",
    "minLevel": 70,
@@ -7756,8 +8155,25 @@
    ],
    "size": "大",
    "goalText": "黒いお守りと闇の水晶（N-14）を賢者の石に捧げ、5 問のクイズに答える",
-   "objectives": [],
-   "end": "魔法使いの長老フロスト",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M300",
+     "count": 1,
+     "label": "黒いお守りを捧げる"
+    },
+    {
+     "type": "interact",
+     "target": "F107.sage_stone",
+     "label": "賢者の石に捧げる"
+    },
+    {
+     "type": "event",
+     "event": "quiz_cleared",
+     "label": "5 問のクイズに答える"
+    }
+   ],
+   "end": "frost_F107",
    "exp": 725000,
    "meso": 28800,
    "rewards": [
@@ -7776,7 +8192,7 @@
   {
    "id": "J2-8",
    "name": "大老への推薦状",
-   "giver": "魔法使いの長老フロスト",
+   "giver": "frost",
    "giverName": "魔法使いの長老フロスト",
    "map": "F117",
    "minLevel": 120,
@@ -7787,11 +8203,12 @@
    "goalText": "竜の大老ヴァルドへの推薦状を受け取り、D115 へ届ける",
    "objectives": [
     {
-     "type": "visit",
-     "map": "D115"
+     "type": "talk",
+     "npc": "vald",
+     "label": "竜の大老ヴァルドに推薦状を届ける"
     }
    ],
-   "end": "魔法使いの長老フロスト",
+   "end": "vald",
    "exp": 2040000,
    "meso": 11900,
    "rewards": [],
@@ -7803,7 +8220,7 @@
   {
    "id": "J2-9",
    "name": "紅と蒼の印",
-   "giver": "竜の大老ヴァルド",
+   "giver": "vald",
    "giverName": "竜の大老ヴァルド",
    "map": "D115",
    "minLevel": 120,
@@ -7822,9 +8239,21 @@
      "type": "kill",
      "mob": "M212",
      "count": 1
+    },
+    {
+     "type": "collect",
+     "item": "etc.M211",
+     "count": 1,
+     "label": "紅の印を渡す"
+    },
+    {
+     "type": "collect",
+     "item": "etc.M212",
+     "count": 1,
+     "label": "蒼の印を渡す"
     }
    ],
-   "end": "竜の大老ヴァルド",
+   "end": "vald",
    "exp": 17000000,
    "meso": 178000,
    "rewards": [],
@@ -7839,15 +8268,24 @@
   {
    "id": "J3-1",
    "name": "弓使いへの道",
-   "giver": "弓の師範エルナ",
+   "giver": "erna",
    "giverName": "弓の師範エルナ",
    "map": "V200",
    "minLevel": 10,
    "prereqs": [],
    "size": "小",
    "goalText": "DEX25 以上で 弓の師範エルナ と話す",
-   "objectives": [],
-   "end": "弓の師範エルナ",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "job_advance.1",
+     "label": "1 次の職になる"
+    }
+   ],
+   "end": "erna",
+   "minStats": {
+    "DEX": 25
+   },
    "exp": 96,
    "meso": 250,
    "rewards": [],
@@ -7862,7 +8300,7 @@
   {
    "id": "J3-2",
    "name": "推薦状",
-   "giver": "弓の師範エルナ",
+   "giver": "erna",
    "giverName": "弓の師範エルナ",
    "map": "V200",
    "minLevel": 30,
@@ -7871,8 +8309,14 @@
    ],
    "size": "小",
    "goalText": "2 次の試験官への推薦状を受け取る",
-   "objectives": [],
-   "end": "弓の師範エルナ",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "erna",
+     "label": "推薦状を受け取る"
+    }
+   ],
+   "end": "erna",
    "exp": 4200,
    "meso": 1100,
    "rewards": [],
@@ -7886,7 +8330,7 @@
   {
    "id": "J3-3",
    "name": "試しの珠",
-   "giver": "弓の師範エルナ",
+   "giver": "erna_V211",
    "giverName": "弓の師範エルナ",
    "map": "V211",
    "minLevel": 30,
@@ -7902,7 +8346,7 @@
      "count": 30
     }
    ],
-   "end": "弓の師範エルナ",
+   "end": "erna_V211",
    "exp": 8400,
    "meso": 2750,
    "rewards": [],
@@ -7916,7 +8360,7 @@
   {
    "id": "J3-4",
    "name": "道を選ぶ",
-   "giver": "弓の師範エルナ",
+   "giver": "erna",
    "giverName": "弓の師範エルナ",
    "map": "V200",
    "minLevel": 30,
@@ -7925,8 +8369,14 @@
    ],
    "size": "中",
    "goalText": "試験の証を渡し、2 次の職を選ぶ",
-   "objectives": [],
-   "end": "弓の師範エルナ",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "job_advance.2",
+     "label": "試験の証を渡し、2 次の職を選ぶ"
+    }
+   ],
+   "end": "erna",
    "exp": 8400,
    "meso": 2750,
    "rewards": [
@@ -7943,7 +8393,7 @@
   {
    "id": "J3-5",
    "name": "長老の手紙",
-   "giver": "弓使いの長老ハイネ",
+   "giver": "heine",
    "giverName": "弓使いの長老ハイネ",
    "map": "F117",
    "minLevel": 70,
@@ -7952,8 +8402,14 @@
    ],
    "size": "小",
    "goalText": "弓使いの長老ハイネの手紙を 弓の師範エルナ に届ける",
-   "objectives": [],
-   "end": "弓使いの長老ハイネ",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "erna",
+     "label": "長老の手紙を届ける"
+    }
+   ],
+   "end": "erna",
    "exp": 174000,
    "meso": 4800,
    "rewards": [],
@@ -7965,7 +8421,7 @@
   {
    "id": "J3-6",
    "name": "もう一人の自分",
-   "giver": "弓の師範エルナ",
+   "giver": "erna_F118",
    "giverName": "弓の師範エルナ",
    "map": "F118",
    "minLevel": 70,
@@ -7981,7 +8437,7 @@
      "count": 1
     }
    ],
-   "end": "弓の師範エルナ",
+   "end": "erna_F118",
    "exp": 725000,
    "meso": 28800,
    "rewards": [
@@ -7998,7 +8454,7 @@
   {
    "id": "J3-7",
    "name": "賢者の石",
-   "giver": "弓使いの長老ハイネ",
+   "giver": "heine_F107",
    "giverName": "弓使いの長老ハイネ",
    "map": "F107",
    "minLevel": 70,
@@ -8007,8 +8463,25 @@
    ],
    "size": "大",
    "goalText": "黒いお守りと闇の水晶（N-14）を賢者の石に捧げ、5 問のクイズに答える",
-   "objectives": [],
-   "end": "弓使いの長老ハイネ",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M300",
+     "count": 1,
+     "label": "黒いお守りを捧げる"
+    },
+    {
+     "type": "interact",
+     "target": "F107.sage_stone",
+     "label": "賢者の石に捧げる"
+    },
+    {
+     "type": "event",
+     "event": "quiz_cleared",
+     "label": "5 問のクイズに答える"
+    }
+   ],
+   "end": "heine_F107",
    "exp": 725000,
    "meso": 28800,
    "rewards": [
@@ -8027,7 +8500,7 @@
   {
    "id": "J3-8",
    "name": "大老への推薦状",
-   "giver": "弓使いの長老ハイネ",
+   "giver": "heine",
    "giverName": "弓使いの長老ハイネ",
    "map": "F117",
    "minLevel": 120,
@@ -8038,11 +8511,12 @@
    "goalText": "竜の大老ヴァルドへの推薦状を受け取り、D115 へ届ける",
    "objectives": [
     {
-     "type": "visit",
-     "map": "D115"
+     "type": "talk",
+     "npc": "vald",
+     "label": "竜の大老ヴァルドに推薦状を届ける"
     }
    ],
-   "end": "弓使いの長老ハイネ",
+   "end": "vald",
    "exp": 2040000,
    "meso": 11900,
    "rewards": [],
@@ -8054,7 +8528,7 @@
   {
    "id": "J3-9",
    "name": "紅と蒼の印",
-   "giver": "竜の大老ヴァルド",
+   "giver": "vald",
    "giverName": "竜の大老ヴァルド",
    "map": "D115",
    "minLevel": 120,
@@ -8073,9 +8547,21 @@
      "type": "kill",
      "mob": "M212",
      "count": 1
+    },
+    {
+     "type": "collect",
+     "item": "etc.M211",
+     "count": 1,
+     "label": "紅の印を渡す"
+    },
+    {
+     "type": "collect",
+     "item": "etc.M212",
+     "count": 1,
+     "label": "蒼の印を渡す"
     }
    ],
-   "end": "竜の大老ヴァルド",
+   "end": "vald",
    "exp": 17000000,
    "meso": 178000,
    "rewards": [],
@@ -8090,15 +8576,24 @@
   {
    "id": "J4-1",
    "name": "盗賊への道",
-   "giver": "影の頭領ヤミ",
+   "giver": "yami",
    "giverName": "影の頭領ヤミ",
    "map": "V500",
    "minLevel": 10,
    "prereqs": [],
    "size": "小",
    "goalText": "DEX25 以上で 影の頭領ヤミ と話す",
-   "objectives": [],
-   "end": "影の頭領ヤミ",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "job_advance.1",
+     "label": "1 次の職になる"
+    }
+   ],
+   "end": "yami",
+   "minStats": {
+    "DEX": 25
+   },
    "exp": 96,
    "meso": 250,
    "rewards": [],
@@ -8113,7 +8608,7 @@
   {
    "id": "J4-2",
    "name": "推薦状",
-   "giver": "影の頭領ヤミ",
+   "giver": "yami",
    "giverName": "影の頭領ヤミ",
    "map": "V500",
    "minLevel": 30,
@@ -8122,8 +8617,14 @@
    ],
    "size": "小",
    "goalText": "2 次の試験官への推薦状を受け取る",
-   "objectives": [],
-   "end": "影の頭領ヤミ",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "yami",
+     "label": "推薦状を受け取る"
+    }
+   ],
+   "end": "yami",
    "exp": 4200,
    "meso": 1100,
    "rewards": [],
@@ -8137,7 +8638,7 @@
   {
    "id": "J4-3",
    "name": "試しの珠",
-   "giver": "影の頭領ヤミ",
+   "giver": "yami_V513",
    "giverName": "影の頭領ヤミ",
    "map": "V513",
    "minLevel": 30,
@@ -8153,7 +8654,7 @@
      "count": 30
     }
    ],
-   "end": "影の頭領ヤミ",
+   "end": "yami_V513",
    "exp": 8400,
    "meso": 2750,
    "rewards": [],
@@ -8167,7 +8668,7 @@
   {
    "id": "J4-4",
    "name": "道を選ぶ",
-   "giver": "影の頭領ヤミ",
+   "giver": "yami",
    "giverName": "影の頭領ヤミ",
    "map": "V500",
    "minLevel": 30,
@@ -8176,8 +8677,14 @@
    ],
    "size": "中",
    "goalText": "試験の証を渡し、2 次の職を選ぶ",
-   "objectives": [],
-   "end": "影の頭領ヤミ",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "job_advance.2",
+     "label": "試験の証を渡し、2 次の職を選ぶ"
+    }
+   ],
+   "end": "yami",
    "exp": 8400,
    "meso": 2750,
    "rewards": [
@@ -8194,7 +8701,7 @@
   {
    "id": "J4-5",
    "name": "長老の手紙",
-   "giver": "盗賊の長老ミスト",
+   "giver": "mist",
    "giverName": "盗賊の長老ミスト",
    "map": "F117",
    "minLevel": 70,
@@ -8203,8 +8710,14 @@
    ],
    "size": "小",
    "goalText": "盗賊の長老ミストの手紙を 影の頭領ヤミ に届ける",
-   "objectives": [],
-   "end": "盗賊の長老ミスト",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "yami",
+     "label": "長老の手紙を届ける"
+    }
+   ],
+   "end": "yami",
    "exp": 174000,
    "meso": 4800,
    "rewards": [],
@@ -8216,7 +8729,7 @@
   {
    "id": "J4-6",
    "name": "もう一人の自分",
-   "giver": "影の頭領ヤミ",
+   "giver": "yami_F118",
    "giverName": "影の頭領ヤミ",
    "map": "F118",
    "minLevel": 70,
@@ -8232,7 +8745,7 @@
      "count": 1
     }
    ],
-   "end": "影の頭領ヤミ",
+   "end": "yami_F118",
    "exp": 725000,
    "meso": 28800,
    "rewards": [
@@ -8249,7 +8762,7 @@
   {
    "id": "J4-7",
    "name": "賢者の石",
-   "giver": "盗賊の長老ミスト",
+   "giver": "mist_F107",
    "giverName": "盗賊の長老ミスト",
    "map": "F107",
    "minLevel": 70,
@@ -8258,8 +8771,25 @@
    ],
    "size": "大",
    "goalText": "黒いお守りと闇の水晶（N-14）を賢者の石に捧げ、5 問のクイズに答える",
-   "objectives": [],
-   "end": "盗賊の長老ミスト",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M300",
+     "count": 1,
+     "label": "黒いお守りを捧げる"
+    },
+    {
+     "type": "interact",
+     "target": "F107.sage_stone",
+     "label": "賢者の石に捧げる"
+    },
+    {
+     "type": "event",
+     "event": "quiz_cleared",
+     "label": "5 問のクイズに答える"
+    }
+   ],
+   "end": "mist_F107",
    "exp": 725000,
    "meso": 28800,
    "rewards": [
@@ -8278,7 +8808,7 @@
   {
    "id": "J4-8",
    "name": "大老への推薦状",
-   "giver": "盗賊の長老ミスト",
+   "giver": "mist",
    "giverName": "盗賊の長老ミスト",
    "map": "F117",
    "minLevel": 120,
@@ -8289,11 +8819,12 @@
    "goalText": "竜の大老ヴァルドへの推薦状を受け取り、D115 へ届ける",
    "objectives": [
     {
-     "type": "visit",
-     "map": "D115"
+     "type": "talk",
+     "npc": "vald",
+     "label": "竜の大老ヴァルドに推薦状を届ける"
     }
    ],
-   "end": "盗賊の長老ミスト",
+   "end": "vald",
    "exp": 2040000,
    "meso": 11900,
    "rewards": [],
@@ -8305,7 +8836,7 @@
   {
    "id": "J4-9",
    "name": "紅と蒼の印",
-   "giver": "竜の大老ヴァルド",
+   "giver": "vald",
    "giverName": "竜の大老ヴァルド",
    "map": "D115",
    "minLevel": 120,
@@ -8324,9 +8855,21 @@
      "type": "kill",
      "mob": "M212",
      "count": 1
+    },
+    {
+     "type": "collect",
+     "item": "etc.M211",
+     "count": 1,
+     "label": "紅の印を渡す"
+    },
+    {
+     "type": "collect",
+     "item": "etc.M212",
+     "count": 1,
+     "label": "蒼の印を渡す"
     }
    ],
-   "end": "竜の大老ヴァルド",
+   "end": "vald",
    "exp": 17000000,
    "meso": 178000,
    "rewards": [],
@@ -8341,15 +8884,24 @@
   {
    "id": "J5-1",
    "name": "海賊への道",
-   "giver": "キャプテン・リオ",
+   "giver": "rio",
    "giverName": "キャプテン・リオ",
    "map": "V107",
    "minLevel": 10,
    "prereqs": [],
    "size": "小",
    "goalText": "DEX20 以上で キャプテン・リオ と話す",
-   "objectives": [],
-   "end": "キャプテン・リオ",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "job_advance.1",
+     "label": "1 次の職になる"
+    }
+   ],
+   "end": "rio",
+   "minStats": {
+    "DEX": 20
+   },
    "exp": 96,
    "meso": 250,
    "rewards": [],
@@ -8364,7 +8916,7 @@
   {
    "id": "J5-2",
    "name": "推薦状",
-   "giver": "キャプテン・リオ",
+   "giver": "rio",
    "giverName": "キャプテン・リオ",
    "map": "V107",
    "minLevel": 30,
@@ -8373,8 +8925,14 @@
    ],
    "size": "小",
    "goalText": "2 次の試験官への推薦状を受け取る",
-   "objectives": [],
-   "end": "キャプテン・リオ",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "rio",
+     "label": "推薦状を受け取る"
+    }
+   ],
+   "end": "rio",
    "exp": 4200,
    "meso": 1100,
    "rewards": [],
@@ -8388,7 +8946,7 @@
   {
    "id": "J5-3",
    "name": "試しの珠",
-   "giver": "キャプテン・リオ",
+   "giver": "rio_V108",
    "giverName": "キャプテン・リオ",
    "map": "V108",
    "minLevel": 30,
@@ -8404,7 +8962,7 @@
      "count": 30
     }
    ],
-   "end": "キャプテン・リオ",
+   "end": "rio_V108",
    "exp": 8400,
    "meso": 2750,
    "rewards": [],
@@ -8418,7 +8976,7 @@
   {
    "id": "J5-4",
    "name": "道を選ぶ",
-   "giver": "キャプテン・リオ",
+   "giver": "rio",
    "giverName": "キャプテン・リオ",
    "map": "V107",
    "minLevel": 30,
@@ -8427,8 +8985,14 @@
    ],
    "size": "中",
    "goalText": "試験の証を渡し、2 次の職を選ぶ",
-   "objectives": [],
-   "end": "キャプテン・リオ",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "job_advance.2",
+     "label": "試験の証を渡し、2 次の職を選ぶ"
+    }
+   ],
+   "end": "rio",
    "exp": 8400,
    "meso": 2750,
    "rewards": [
@@ -8445,7 +9009,7 @@
   {
    "id": "J5-5",
    "name": "長老の手紙",
-   "giver": "海賊の長老キール",
+   "giver": "keel",
    "giverName": "海賊の長老キール",
    "map": "F117",
    "minLevel": 70,
@@ -8454,8 +9018,14 @@
    ],
    "size": "小",
    "goalText": "海賊の長老キールの手紙を キャプテン・リオ に届ける",
-   "objectives": [],
-   "end": "海賊の長老キール",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "rio",
+     "label": "長老の手紙を届ける"
+    }
+   ],
+   "end": "rio",
    "exp": 174000,
    "meso": 4800,
    "rewards": [],
@@ -8467,7 +9037,7 @@
   {
    "id": "J5-6",
    "name": "もう一人の自分",
-   "giver": "キャプテン・リオ",
+   "giver": "rio_F118",
    "giverName": "キャプテン・リオ",
    "map": "F118",
    "minLevel": 70,
@@ -8483,7 +9053,7 @@
      "count": 1
     }
    ],
-   "end": "キャプテン・リオ",
+   "end": "rio_F118",
    "exp": 725000,
    "meso": 28800,
    "rewards": [
@@ -8500,7 +9070,7 @@
   {
    "id": "J5-7",
    "name": "賢者の石",
-   "giver": "海賊の長老キール",
+   "giver": "keel_F107",
    "giverName": "海賊の長老キール",
    "map": "F107",
    "minLevel": 70,
@@ -8509,8 +9079,25 @@
    ],
    "size": "大",
    "goalText": "黒いお守りと闇の水晶（N-14）を賢者の石に捧げ、5 問のクイズに答える",
-   "objectives": [],
-   "end": "海賊の長老キール",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M300",
+     "count": 1,
+     "label": "黒いお守りを捧げる"
+    },
+    {
+     "type": "interact",
+     "target": "F107.sage_stone",
+     "label": "賢者の石に捧げる"
+    },
+    {
+     "type": "event",
+     "event": "quiz_cleared",
+     "label": "5 問のクイズに答える"
+    }
+   ],
+   "end": "keel_F107",
    "exp": 725000,
    "meso": 28800,
    "rewards": [
@@ -8529,7 +9116,7 @@
   {
    "id": "J5-8",
    "name": "大老への推薦状",
-   "giver": "海賊の長老キール",
+   "giver": "keel",
    "giverName": "海賊の長老キール",
    "map": "F117",
    "minLevel": 120,
@@ -8540,11 +9127,12 @@
    "goalText": "竜の大老ヴァルドへの推薦状を受け取り、D115 へ届ける",
    "objectives": [
     {
-     "type": "visit",
-     "map": "D115"
+     "type": "talk",
+     "npc": "vald",
+     "label": "竜の大老ヴァルドに推薦状を届ける"
     }
    ],
-   "end": "海賊の長老キール",
+   "end": "vald",
    "exp": 2040000,
    "meso": 11900,
    "rewards": [],
@@ -8556,7 +9144,7 @@
   {
    "id": "J5-9",
    "name": "紅と蒼の印",
-   "giver": "竜の大老ヴァルド",
+   "giver": "vald",
    "giverName": "竜の大老ヴァルド",
    "map": "D115",
    "minLevel": 120,
@@ -8575,9 +9163,21 @@
      "type": "kill",
      "mob": "M212",
      "count": 1
+    },
+    {
+     "type": "collect",
+     "item": "etc.M211",
+     "count": 1,
+     "label": "紅の印を渡す"
+    },
+    {
+     "type": "collect",
+     "item": "etc.M212",
+     "count": 1,
+     "label": "蒼の印を渡す"
     }
    ],
-   "end": "竜の大老ヴァルド",
+   "end": "vald",
    "exp": 17000000,
    "meso": 178000,
    "rewards": [],

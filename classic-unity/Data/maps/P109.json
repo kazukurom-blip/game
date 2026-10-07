@@ -1,0 +1,123 @@
+{
+ "id": "P109",
+ "name": "神殿の祭壇",
+ "region": "P",
+ "type": "ボ",
+ "lv": [
+  120,
+  135
+ ],
+ "width": 1960,
+ "height": 544,
+ "bgm": "boss_big",
+ "bg": "temple_altar",
+ "theme": "arena",
+ "returnMap": "P100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     464
+    ],
+    [
+     1960,
+     464
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     160,
+     328
+    ],
+    [
+     588,
+     328
+    ]
+   ]
+  },
+  {
+   "id": "p2",
+   "points": [
+    [
+     1372,
+     328
+    ],
+    [
+     1800,
+     328
+    ]
+   ]
+  },
+  {
+   "id": "p3",
+   "points": [
+    [
+     800,
+     200
+    ],
+    [
+     1160,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 352,
+   "top": 328,
+   "bottom": 444,
+   "ladder": false
+  },
+  {
+   "x": 1748,
+   "top": 328,
+   "bottom": 444,
+   "ladder": false
+  },
+  {
+   "x": 960,
+   "top": 200,
+   "bottom": 444,
+   "ladder": false
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 464
+  },
+  {
+   "name": "to_P108",
+   "type": "visible",
+   "x": 56,
+   "y": 464,
+   "to": "P108",
+   "toPortal": "to_P109"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [
+  {
+   "mob": "M199",
+   "x": 1000,
+   "y": 464,
+   "intervalSec": 43200
+  }
+ ],
+ "npcs": [],
+ "objects": [],
+ "note": "神殿の守護神。1 日 2 回。",
+ "seed": "P109#0"
+}

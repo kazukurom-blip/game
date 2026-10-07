@@ -25,7 +25,9 @@ classic-unity/
     Util/      Json（小さな読み書き）・Rng（決まった乱数）・Expr（スキルの式）
   Data/                     ← ゲームのデータ（JSON）。Unity では Assets/Resources/Lumina/ へコピー
     items.json monsters.json quests.json shops.json npcs.json skills.json maps/*.json
-    tools/export_data.mjs   ← classic/tools/data/*.mjs → JSON（skills.json だけは手で書く。元は JOBS.md）
+    tools/export_data.mjs   ← classic/tools/data/*.mjs → JSON（skills.json だけは手で書く。元は JOBS.md）。--check で「書き出し直しが要らないか」と検査だけ
+    tools/world/            ← マップの生成器と検査（generate.mjs・check.mjs・specs.mjs（マップごとの違い）・npcs.mjs・island.mjs（島は手で置いた））
+    tools/quest_goals.mjs   ← 文章だけだったクエストの目的を、判定できる形（talk/visit/interact/collect/event）に直した表
     tools/export_golden.mjs ← テストの期待値（ブラウザ版の物理・設計書の式）→ Tests/Golden/
   Tests/                    ← xUnit（net8.0）
   Unity/                    ← Unity 側の見本（GameRunner・PlayerView・InputBridge・DamageNumberView・MapLoader）
@@ -36,7 +38,9 @@ classic-unity/
 ```
 cd classic-unity
 dotnet test Tests/Lumina.Core.Tests.csproj          # 全部のテスト
-node Data/tools/export_data.mjs                    # データを書き出し直す（classic/tools/data を直したら）
+node Data/tools/export_data.mjs                    # データを書き出し直す（classic/tools/data・tools/world を直したら）
+node Data/tools/export_data.mjs --check            # 書き出さずに: 生成し直した結果がファイルと同じか（種が決まっているので同じになる）＋マップの検査
+node Data/tools/world/check.mjs                    # Data/maps/*.json の検査だけ（下の 4-8）
 node Data/tools/export_golden.mjs                  # 期待値を書き出し直す（ブラウザ版の物理・式を直したら）
 node ../classic/tools/gen_docs.mjs --check         # 設計書の表とのつじつま
 ```
@@ -134,15 +138,24 @@ session.Character / Stats / Inventory / Equipment / Skills / Buffs / Quests / Qu
 
 ### 4-7. クエスト（QUESTS.md）
 
-- `Data/quests.json`（286 本）。目的: `kill`（倒す）・`collect`（持ち物の数。完了で渡す）・`talk`（話す）・`visit`（行く）・`interact`（調べる）・`event`（操作: quickslot_set / use_potion / ap_spent / sp_spent / skill_used）。報告先 `end`（`auto` は着いたら完了）。
+- `Data/quests.json`（286 本）。目的: `kill`（倒す）・`collect`（持ち物の数。完了で渡す）・`talk`（話す）・`visit`（行く）・`interact`（調べる）・`event`（操作の名前。`GameSession.QuestEvent` で知らせる）。報告先 `end`（`auto` は着いたら完了）。受ける条件の能力値 `minStats`（転職の「STR35 以上」。足りなければ `StartResult.StatTooLow`）。
+- **全部のクエストに判定できる目的がある**。文章だけだった物（手紙を届ける・灯台のランプ・化石を調べる・ダンジョンをクリア・転職 など 91 本）は `Data/tools/quest_goals.mjs` で直した。依頼者・報告先は「名前＠マップ」から NPC の ID に直してある（そのマップにいない依頼者は書き出しの時に問題として止まる）。
+- event の名前: quickslot_set / use_potion / ap_spent / sp_spent / skill_used（チュートリアル）・`job_advance.1`（`AdvanceJob` が知らせる）・`job_advance.2〜4`・`storage_deposit` / `storage_withdraw`・`pet_adopted` / `pet_fed` / `pet_closeness`・`dungeon_clear` と `dungeon_clear.<マップID>`・`boss_kill`・`quiz_cleared`。`job_advance.1` 以外は、その仕組み（倉庫・ペット・1 人用ダンジョン・2 次以降の転職・クイズ）ができた時に呼ぶ（今は呼ぶ所が無い）。
 - 報酬の経験値・お金は QUESTS.md 1-3 の式。品は名前から ID に直してある（直せない物は `rewardUnparsed` に残る。大陸のクエストの「自分の職の◯◯」など）。
 - 頭の上の電球: `NpcBulb`（2 = 緑、1 = 黄）。
 - **チュートリアル 20 本（S-01〜S-20）は、目的を機械で判定できる形に書き直し、テストで最初から最後まで遊んで通す**（歩いて岩を越える・縄を登って木箱・ポータル・狩り・拾う・隠し部屋・船で大陸へ）。
 
 ### 4-8. ワールド（WORLD.md）
 
-- マップの JSON の形は `Core/World/MapData.cs` の先頭。足場（折れ線）・縄/はしご・壁・ポータル・湧く所・強敵・NPC（店・宿屋・乗り物）・調べる物。
-- 初心者の島 12 マップ（S000〜S011）＋ブリーズ港（V100、島から船で着くだけの仮）。**足場の配置は仮**、つながりは `maps.mjs` のとおり（書き出しの時とテストで検査）。どのマップからもポータルで町へ戻れる。
+- マップの JSON の形は `Core/World/MapData.cs` の先頭。足場（折れ線）・縄/はしご・壁・ポータル・湧く所・強敵・NPC（店・宿屋・乗り物・role）・調べる物・BGM（SOUND.md の曲の ID）・背景の種類（`bg` → `Background`）・地形の型（`theme` → `Theme`）。
+- **234 枚すべてある**（WORLD.md 5 章の表と同じ。つながりと出る敵は `maps.mjs` のとおり）。芽吹きの島 12 枚はチュートリアルに合わせて手で置いた物（`tools/world/island.mjs`）。ほかの 222 枚は**地形の型から生成**（`tools/world/generate.mjs`）。マップごとの違い（型・横幅・層の数・縄かはしごか・背景・曲・隠し部屋・調べる物）は `tools/world/specs.mjs` のデータ。種はマップの ID なので、何度作っても同じ。
+- 地形の型: 町（平ら）・高い町（地面の上に 2〜3 段）・丘の町（段々）・平原・森（跳んで上がる根や枝の階段）・岩山/雪山（段々の地面＋岩棚）・沼/海（浮き島）・洞くつ（全幅の層＋はしご）・塔（左右交互の層）・船・ボスの間・部屋・1 人用ダンジョン（壁で区切った部屋をポータルで進む）。
+- 手触りの決まり（FEEL.md）: 跳んで上がる段差は 40〜60 px（設計の上限 64）、64〜80 px の「跳べそうで跳べない」段差は作らない、80 px 以上は縄・はしご（上端は足場の高さちょうど、下端は下の足場の 20 px 上）、坂は 45 度まで。狩り場は横長で 3 層以上・湧く所 8 以上。
+- **検査**（`tools/world/check.mjs`。生成器は通るまで種を変えて作り直す）: どのポータル（出現の位置も）からも全部の足場に行ける・ポータルの行き先が両方向で合っている・maps.mjs のつながりと同じ・湧く所/強敵/NPC/調べる物が足場の上・maps.mjs の敵が全部湧く・縄の両端・跳べない段差なし。動きのモデルは物理と同じ数値（その場ジャンプ・↓ジャンプ・端から落ちる・縄・同じマップの中のポータル）。
+- **テストは本物の物理でも確かめる**（`Tests/MapReach.cs`・`WorldMapTests.cs`）: 全マップで、足場の上の 16 px おきの位置から PlayerPhysics で動いて行ける所を調べ、どのポータルからも全部の足場に行けること。代表の 17 枚は 1 つの体で全部の足場を順に回り、全部のポータルの前に立つ（歩いて止まる → 動く、を続けて）。
+- 戻る町（`returnMap`）: ポータルでたどって一番近い町。島は芽吹き村。
+- NPC は `tools/world/npcs.mjs`（167 人）。位置は生成の時に決まる（高い町では `tier` の段に）。同じ人が別のマップにもいる時（転職官が修練場にいる）は `dorga_V413` のような別の ID。乗り物の NPC（雲の船・潜水船・大きな鳥・そり）は `travel`。町の薬屋には店（`shop.<町>.potion`）がある。
+- 隠し部屋（WORLD.md 6 章）: S007・V102（灯台のてっぺん）・V105・V409・V506・V601・M107。隠しポータル（`hidden`）で入り、部屋のポータルで戻る。
 
 ### 4-9. セーブ（いちばん大事）
 
@@ -163,6 +176,9 @@ session.Character / Stats / Inventory / Equipment / Skills / Buffs / Quests / Qu
 - **弓が矢なしの時**: クラシックは弱い殴りになるが、今は撃てない（お知らせだけ）。
 - **闇隠れの「速さ −20+x」**: ブラウザ版の速さの計算（100 より下にしない）に合わせているので、遅くはならない。
 - **ペット・倉庫・椅子・製作・2 次以降の転職の試験・1 人用ダンジョン・ボス**は未実装（データの形は広げられる）。
-- **大陸のマップ**は未作成（V100 の仮だけ）。大陸のクエストはデータとしては読めるが、目的の一部（「手紙を届ける」など文章だけの物）は `event` に直していない。
+- **マップの見た目**: 足場の配置は生成なので、絵（タイル・背景の層・飾り）を置く時に「ここに家」「ここに風車」などの手直しが要るかもしれない。直す時は `specs.mjs`（型・層の数・横幅）か、その 1 枚だけ島のように手で置く。
+- **まだ呼ぶ所が無い event**: 倉庫・ペット・1 人用ダンジョンのクリア・2〜4 次転職・クイズ・ボスを倒した時（`boss_kill`）。クエストのデータは用意済み。
+- **店**: 町の薬屋だけ。武器屋・防具屋・倉庫番・タクシーは NPC（`role`）だけで品ぞろえ・仕組みはまだ。乗り物の NPC は 1 人 1 行き先（雲の船の駅は行き先ごとに係がいる）。
+- **一方通行のポータル**（雲の塔の窓の滑り台・崩れる足場の下の「おもちゃ箱の底」）は作っていない（検査は「両方向」が決まり）。
 - **命中**: 初心者が当たらなすぎたので、レベルで上がる基礎の命中（5 + Lv × 0.5）を足した（`StatCalc.BaseAcc`）。Lv8・DEX 4 で Lv8 のダイダイダケに約 94%。
 - 敵の HP バー・ボスの HP バー・NPC の会話の窓・UI の窓は Unity 側の仕事（Core は値を出している）。

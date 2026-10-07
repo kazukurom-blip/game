@@ -1,0 +1,123 @@
+{
+ "id": "D114",
+ "name": "黒竜の洞くつ 最奥",
+ "region": "D",
+ "type": "ボ",
+ "lv": [
+  155,
+  170
+ ],
+ "width": 2200,
+ "height": 536,
+ "bgm": "boss_final",
+ "bg": "black_dragon_lair",
+ "theme": "arena",
+ "returnMap": "D100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     456
+    ],
+    [
+     2200,
+     456
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     160,
+     320
+    ],
+    [
+     640,
+     320
+    ]
+   ]
+  },
+  {
+   "id": "p2",
+   "points": [
+    [
+     1560,
+     320
+    ],
+    [
+     2040,
+     320
+    ]
+   ]
+  },
+  {
+   "id": "p3",
+   "points": [
+    [
+     920,
+     200
+    ],
+    [
+     1280,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 488,
+   "top": 320,
+   "bottom": 436,
+   "ladder": false
+  },
+  {
+   "x": 1944,
+   "top": 320,
+   "bottom": 436,
+   "ladder": false
+  },
+  {
+   "x": 1192,
+   "top": 200,
+   "bottom": 436,
+   "ladder": false
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 456
+  },
+  {
+   "name": "to_D113",
+   "type": "visible",
+   "x": 56,
+   "y": 456,
+   "to": "D113",
+   "toPortal": "to_D114"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [
+  {
+   "mob": "M219",
+   "x": 1096,
+   "y": 456,
+   "intervalSec": 604800
+  }
+ ],
+ "npcs": [],
+ "objects": [],
+ "note": "三つ首の黒竜。週 1 回。",
+ "seed": "D114#0"
+}

@@ -1,0 +1,154 @@
+{
+ "id": "V309",
+ "name": "大樹の根元",
+ "region": "V",
+ "type": "ボ",
+ "lv": [
+  40,
+  50
+ ],
+ "width": 1840,
+ "height": 528,
+ "bgm": "boss_mid",
+ "bg": "great_tree",
+ "theme": "arena",
+ "returnMap": "V300",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     448
+    ],
+    [
+     1840,
+     448
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     160,
+     312
+    ],
+    [
+     552,
+     312
+    ]
+   ]
+  },
+  {
+   "id": "p2",
+   "points": [
+    [
+     1288,
+     312
+    ],
+    [
+     1680,
+     312
+    ]
+   ]
+  },
+  {
+   "id": "p3",
+   "points": [
+    [
+     740,
+     200
+    ],
+    [
+     1100,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 472,
+   "top": 312,
+   "bottom": 428,
+   "ladder": false
+  },
+  {
+   "x": 1592,
+   "top": 312,
+   "bottom": 428,
+   "ladder": false
+  },
+  {
+   "x": 1044,
+   "top": 200,
+   "bottom": 428,
+   "ladder": false
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 448
+  },
+  {
+   "name": "to_V307",
+   "type": "visible",
+   "x": 56,
+   "y": 448,
+   "to": "V307",
+   "toPortal": "to_V309"
+  }
+ ],
+ "spawns": [
+  {
+   "mob": "M035",
+   "x": 908,
+   "y": 200
+  },
+  {
+   "mob": "M036",
+   "x": 1448,
+   "y": 312
+  },
+  {
+   "mob": "M035",
+   "x": 260,
+   "y": 448
+  },
+  {
+   "mob": "M036",
+   "x": 660,
+   "y": 448
+  },
+  {
+   "mob": "M035",
+   "x": 884,
+   "y": 448
+  },
+  {
+   "mob": "M036",
+   "x": 1004,
+   "y": 448
+  }
+ ],
+ "mobMax": 6,
+ "respawnSec": 7,
+ "timedSpawns": [
+  {
+   "mob": "M039",
+   "x": 920,
+   "y": 448,
+   "intervalSec": 3600
+  }
+ ],
+ "npcs": [],
+ "objects": [],
+ "note": "大樹の怪のいる場所（クエストで扉が開く）。",
+ "seed": "V309#0"
+}

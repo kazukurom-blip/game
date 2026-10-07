@@ -1,0 +1,135 @@
+{
+ "id": "V412",
+ "name": "大将の墓所",
+ "region": "V",
+ "type": "ボ",
+ "lv": [
+  50,
+  60
+ ],
+ "width": 1800,
+ "height": 416,
+ "bgm": "boss_mid",
+ "bg": "tomb",
+ "theme": "arena",
+ "returnMap": "V400",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     336
+    ],
+    [
+     1800,
+     336
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     160,
+     200
+    ],
+    [
+     540,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "p2",
+   "points": [
+    [
+     1260,
+     200
+    ],
+    [
+     1640,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 464,
+   "top": 200,
+   "bottom": 316,
+   "ladder": false
+  },
+  {
+   "x": 1324,
+   "top": 200,
+   "bottom": 316,
+   "ladder": false
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 336
+  },
+  {
+   "name": "to_V411",
+   "type": "visible",
+   "x": 56,
+   "y": 336,
+   "to": "V411",
+   "toPortal": "to_V412"
+  }
+ ],
+ "spawns": [
+  {
+   "mob": "M049",
+   "x": 248,
+   "y": 200
+  },
+  {
+   "mob": "M048",
+   "x": 400,
+   "y": 200
+  },
+  {
+   "mob": "M048",
+   "x": 1348,
+   "y": 200
+  },
+  {
+   "mob": "M048",
+   "x": 396,
+   "y": 336
+  },
+  {
+   "mob": "M048",
+   "x": 1228,
+   "y": 336
+  },
+  {
+   "mob": "M048",
+   "x": 1676,
+   "y": 336
+  }
+ ],
+ "mobMax": 6,
+ "respawnSec": 7,
+ "timedSpawns": [
+  {
+   "mob": "M059",
+   "x": 896,
+   "y": 336,
+   "intervalSec": 3600
+  }
+ ],
+ "npcs": [],
+ "objects": [],
+ "note": "ガイコツ大将の墓。",
+ "seed": "V412#0"
+}

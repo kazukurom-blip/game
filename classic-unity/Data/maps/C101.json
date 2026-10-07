@@ -1,0 +1,127 @@
+{
+ "id": "C101",
+ "name": "セレスの駅",
+ "region": "C",
+ "type": "移",
+ "width": 1760,
+ "height": 416,
+ "bgm": "town_ceres",
+ "bg": "cloud_station",
+ "theme": "room",
+ "returnMap": "C100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     336
+    ],
+    [
+     1760,
+     336
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     509,
+     200
+    ],
+    [
+     1014,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 669,
+   "top": 200,
+   "bottom": 316,
+   "ladder": true
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 336
+  },
+  {
+   "name": "to_C100",
+   "type": "visible",
+   "x": 56,
+   "y": 336,
+   "to": "C100",
+   "toPortal": "to_C101"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "luna",
+   "name": "駅員ルナ",
+   "x": 328,
+   "y": 336,
+   "travel": {
+    "to": "V310",
+    "toPortal": "sp",
+    "minLevel": 0,
+    "oneWay": false,
+    "fee": 1000
+   }
+  },
+  {
+   "id": "sora",
+   "name": "ティンクル行きの係ソラ",
+   "x": 472,
+   "y": 336,
+   "travel": {
+    "to": "T101",
+    "toPortal": "sp",
+    "minLevel": 0,
+    "oneWay": false,
+    "fee": 1000
+   }
+  },
+  {
+   "id": "hashi",
+   "name": "天の階段の船頭",
+   "x": 608,
+   "y": 336,
+   "travel": {
+    "to": "P100",
+    "toPortal": "sp",
+    "minLevel": 80,
+    "oneWay": false,
+    "fee": 2000
+   }
+  },
+  {
+   "id": "tsubasa",
+   "name": "大きな鳥の係ツバサ",
+   "x": 752,
+   "y": 336,
+   "travel": {
+    "to": "D101",
+    "toPortal": "sp",
+    "minLevel": 90,
+    "oneWay": false,
+    "fee": 3000
+   }
+  }
+ ],
+ "objects": [],
+ "note": "雲の船の駅。シルワ・ティンクル・竜の背の村・神殿の階段へ。",
+ "seed": "C101#0"
+}

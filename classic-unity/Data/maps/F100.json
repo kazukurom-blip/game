@@ -1,0 +1,226 @@
+{
+ "id": "F100",
+ "name": "ヒョウガ村",
+ "region": "F",
+ "type": "町",
+ "width": 2800,
+ "height": 432,
+ "bgm": "town_hyoga",
+ "bg": "snow_village",
+ "theme": "town",
+ "returnMap": "F100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     352
+    ],
+    [
+     1528,
+     352
+    ],
+    [
+     1592,
+     328
+    ],
+    [
+     1792,
+     328
+    ],
+    [
+     1856,
+     352
+    ],
+    [
+     2800,
+     352
+    ]
+   ]
+  },
+  {
+   "id": "s1",
+   "points": [
+    [
+     544,
+     304
+    ],
+    [
+     800,
+     304
+    ]
+   ]
+  },
+  {
+   "id": "s2",
+   "points": [
+    [
+     248,
+     304
+    ],
+    [
+     480,
+     304
+    ]
+   ]
+  },
+  {
+   "id": "s3",
+   "points": [
+    [
+     2080,
+     300
+    ],
+    [
+     2352,
+     300
+    ]
+   ]
+  },
+  {
+   "id": "p4",
+   "points": [
+    [
+     1044,
+     200
+    ],
+    [
+     1873,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 1116,
+   "top": 200,
+   "bottom": 332,
+   "ladder": true
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 1360,
+   "y": 352
+  },
+  {
+   "name": "town",
+   "type": "town",
+   "x": 1440,
+   "y": 352
+  },
+  {
+   "name": "to_F101",
+   "type": "visible",
+   "x": 56,
+   "y": 352,
+   "to": "F101",
+   "toPortal": "to_F100"
+  },
+  {
+   "name": "to_F107",
+   "type": "visible",
+   "x": 2736,
+   "y": 352,
+   "to": "F107",
+   "toPortal": "to_F100"
+  },
+  {
+   "name": "to_F111",
+   "type": "visible",
+   "x": 1400,
+   "y": 352,
+   "to": "F111",
+   "toPortal": "to_F100"
+  },
+  {
+   "name": "to_F117",
+   "type": "visible",
+   "x": 1872,
+   "y": 352,
+   "to": "F117",
+   "toPortal": "to_F100"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "van",
+   "name": "村長ヴァン",
+   "x": 336,
+   "y": 352
+  },
+  {
+   "id": "borg",
+   "name": "猟師ボルグ",
+   "x": 600,
+   "y": 352
+  },
+  {
+   "id": "yuki",
+   "name": "雪ん子ユキ",
+   "x": 864,
+   "y": 352
+  },
+  {
+   "id": "zack",
+   "name": "坑道の番人ザック",
+   "x": 1160,
+   "y": 352
+  },
+  {
+   "id": "tsurara",
+   "name": "武器屋ツララ",
+   "x": 1328,
+   "y": 352,
+   "role": "weapon"
+  },
+  {
+   "id": "mofu",
+   "name": "防具屋モフ",
+   "x": 1664,
+   "y": 328,
+   "role": "armor"
+  },
+  {
+   "id": "danro",
+   "name": "薬屋ダンロ",
+   "x": 1944,
+   "y": 352,
+   "role": "potion",
+   "shop": "shop.F100.potion"
+  },
+  {
+   "id": "yukimi",
+   "name": "倉庫番ユキミ",
+   "x": 2200,
+   "y": 352,
+   "role": "storage"
+  },
+  {
+   "id": "hyoga_taxi",
+   "name": "そりの御者トナ",
+   "x": 2464,
+   "y": 352,
+   "travel": {
+    "to": "C100",
+    "toPortal": "sp",
+    "minLevel": 40,
+    "oneWay": false,
+    "fee": 2000
+   }
+  }
+ ],
+ "objects": [],
+ "note": "雪山の中腹の村。3 次転職の長老たち。武器屋・防具屋・薬屋・倉庫。",
+ "seed": "F100#0"
+}

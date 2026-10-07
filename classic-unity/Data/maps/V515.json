@@ -1,0 +1,69 @@
+{
+ "id": "V515",
+ "name": "裏路地の試練（入口）",
+ "region": "V",
+ "type": "特",
+ "width": 1080,
+ "height": 280,
+ "bgm": "pq",
+ "bg": "alley",
+ "theme": "room",
+ "returnMap": "V500",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     200
+    ],
+    [
+     1080,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 200
+  },
+  {
+   "name": "to_V500",
+   "type": "visible",
+   "x": 56,
+   "y": 200,
+   "to": "V500",
+   "toPortal": "to_V515"
+  },
+  {
+   "name": "to_V516",
+   "type": "visible",
+   "x": 1016,
+   "y": 200,
+   "to": "V516",
+   "toPortal": "to_V515"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "rat",
+   "name": "受付ラット",
+   "x": 328,
+   "y": 200
+  }
+ ],
+ "objects": [],
+ "note": "1 人用ダンジョン「裏路地の試練」（Lv21〜30）の受付。",
+ "seed": "V515#0"
+}

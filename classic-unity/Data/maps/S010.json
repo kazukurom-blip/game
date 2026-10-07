@@ -5,7 +5,9 @@
  "type": "移",
  "width": 1200,
  "height": 720,
- "bgm": "island_field",
+ "bgm": "town_beginner",
+ "bg": "pier",
+ "theme": "island",
  "returnMap": "S003",
  "footholds": [
   {

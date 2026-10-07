@@ -204,7 +204,7 @@ namespace Lumina.Core.Tests
             Assert.Equal(StartResult.Ok, log.CanStart("S-13", c));
             // 電球: ルカの S-01 は終わった。次は本筋の L-01（Lv5・S-06 の後）
             Assert.DoesNotContain(log.AvailableFrom("luka", c), x => x.Id == "S-01");
-            Assert.Contains(log.AvailableFrom("luka", c), x => x.Id == "L-01");
+            Assert.Contains(log.AvailableFrom("luka_S003", c), x => x.Id == "L-01"); // 村にいるルカ（S003）
             Assert.Contains(log.AvailableFrom("riri", c), x => x.Id == "S-10");
         }
 

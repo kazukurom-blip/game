@@ -1,0 +1,104 @@
+{
+ "id": "E108",
+ "name": "星の玉座",
+ "region": "E",
+ "type": "ボ",
+ "lv": [
+  200,
+  200
+ ],
+ "width": 2280,
+ "height": 416,
+ "bgm": "boss_final",
+ "bg": "star_throne",
+ "theme": "arena",
+ "returnMap": "E100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     336
+    ],
+    [
+     2280,
+     336
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     160,
+     200
+    ],
+    [
+     640,
+     200
+    ]
+   ]
+  },
+  {
+   "id": "p2",
+   "points": [
+    [
+     1640,
+     200
+    ],
+    [
+     2120,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 304,
+   "top": 200,
+   "bottom": 316,
+   "ladder": false
+  },
+  {
+   "x": 2056,
+   "top": 200,
+   "bottom": 316,
+   "ladder": false
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 336
+  },
+  {
+   "name": "to_E107",
+   "type": "visible",
+   "x": 56,
+   "y": 336,
+   "to": "E107",
+   "toPortal": "to_E108"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [
+  {
+   "mob": "M239",
+   "x": 1136,
+   "y": 336,
+   "intervalSec": 604800
+  }
+ ],
+ "npcs": [],
+ "objects": [],
+ "note": "星を呑む者。週 1 回。",
+ "seed": "E108#0"
+}

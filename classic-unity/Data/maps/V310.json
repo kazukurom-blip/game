@@ -1,0 +1,81 @@
+{
+ "id": "V310",
+ "name": "森都の駅",
+ "region": "V",
+ "type": "移",
+ "width": 1400,
+ "height": 340,
+ "bgm": "town_silva",
+ "bg": "station",
+ "theme": "room",
+ "returnMap": "V300",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     260
+    ],
+    [
+     1400,
+     260
+    ]
+   ]
+  },
+  {
+   "id": "s1",
+   "points": [
+    [
+     640,
+     200
+    ],
+    [
+     848,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 260
+  },
+  {
+   "name": "to_V300",
+   "type": "visible",
+   "x": 56,
+   "y": 260,
+   "to": "V300",
+   "toPortal": "to_V310"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "noa",
+   "name": "駅員ノア",
+   "x": 328,
+   "y": 260,
+   "travel": {
+    "to": "C101",
+    "toPortal": "sp",
+    "minLevel": 20,
+    "oneWay": false,
+    "fee": 1000
+   }
+  }
+ ],
+ "objects": [],
+ "note": "セレスへの雲の船の乗り場（10 分ごと、Lv20 以上）。",
+ "seed": "V310#0"
+}

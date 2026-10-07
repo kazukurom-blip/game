@@ -1,0 +1,54 @@
+{
+ "id": "V619",
+ "name": "谷の温泉",
+ "region": "V",
+ "type": "特",
+ "width": 1000,
+ "height": 280,
+ "bgm": "town_nemuri",
+ "bg": "hot_spring",
+ "theme": "room",
+ "returnMap": "V600",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     200
+    ],
+    [
+     1000,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 200
+  },
+  {
+   "name": "to_V600",
+   "type": "visible",
+   "x": 56,
+   "y": 200,
+   "to": "V600",
+   "toPortal": "to_V619"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [],
+ "objects": [],
+ "note": "座ると HP/MP の回復が 3 倍。",
+ "seed": "V619#0"
+}

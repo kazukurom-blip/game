@@ -1,0 +1,89 @@
+{
+ "id": "T118",
+ "name": "からくり迷宮（入口）",
+ "region": "T",
+ "type": "特",
+ "width": 1400,
+ "height": 408,
+ "bgm": "pq",
+ "bg": "toy_gate",
+ "theme": "room",
+ "returnMap": "T100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     328
+    ],
+    [
+     1400,
+     328
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     771,
+     200
+    ],
+    [
+     1202,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 1075,
+   "top": 200,
+   "bottom": 308,
+   "ladder": true
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 328
+  },
+  {
+   "name": "to_T100",
+   "type": "visible",
+   "x": 56,
+   "y": 328,
+   "to": "T100",
+   "toPortal": "to_T118"
+  },
+  {
+   "name": "to_T121",
+   "type": "visible",
+   "x": 1336,
+   "y": 328,
+   "to": "T121",
+   "toPortal": "to_T118"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "gear",
+   "name": "受付ギア",
+   "x": 328,
+   "y": 328
+  }
+ ],
+ "objects": [],
+ "note": "1 人用ダンジョン「からくり迷宮」（Lv35〜50）の受付。",
+ "seed": "T118#0"
+}

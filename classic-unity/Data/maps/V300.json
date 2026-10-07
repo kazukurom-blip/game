@@ -1,0 +1,300 @@
+{
+ "id": "V300",
+ "name": "シルワ森都",
+ "region": "V",
+ "type": "町",
+ "width": 2640,
+ "height": 712,
+ "bgm": "town_silva",
+ "bg": "treetown",
+ "theme": "townTall",
+ "returnMap": "V300",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     632
+    ],
+    [
+     2640,
+     632
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     247,
+     496
+    ],
+    [
+     1013,
+     496
+    ]
+   ]
+  },
+  {
+   "id": "p2",
+   "points": [
+    [
+     1510,
+     496
+    ],
+    [
+     2408,
+     496
+    ]
+   ]
+  },
+  {
+   "id": "p3",
+   "points": [
+    [
+     292,
+     376
+    ],
+    [
+     1293,
+     376
+    ]
+   ]
+  },
+  {
+   "id": "p4",
+   "points": [
+    [
+     1616,
+     376
+    ],
+    [
+     2475,
+     376
+    ]
+   ]
+  },
+  {
+   "id": "p5",
+   "points": [
+    [
+     172,
+     256
+    ],
+    [
+     974,
+     256
+    ]
+   ]
+  },
+  {
+   "id": "p6",
+   "points": [
+    [
+     1430,
+     256
+    ],
+    [
+     2447,
+     256
+    ]
+   ]
+  },
+  {
+   "id": "s7",
+   "points": [
+    [
+     1072,
+     324
+    ],
+    [
+     1256,
+     324
+    ]
+   ]
+  },
+  {
+   "id": "s8",
+   "points": [
+    [
+     1800,
+     200
+    ],
+    [
+     1976,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 735,
+   "top": 496,
+   "bottom": 612,
+   "ladder": false
+  },
+  {
+   "x": 1646,
+   "top": 496,
+   "bottom": 612,
+   "ladder": false
+  },
+  {
+   "x": 420,
+   "top": 376,
+   "bottom": 476,
+   "ladder": false
+  },
+  {
+   "x": 1092,
+   "top": 376,
+   "bottom": 612,
+   "ladder": false
+  },
+  {
+   "x": 2248,
+   "top": 376,
+   "bottom": 476,
+   "ladder": true
+  },
+  {
+   "x": 644,
+   "top": 256,
+   "bottom": 356,
+   "ladder": true
+  },
+  {
+   "x": 1782,
+   "top": 256,
+   "bottom": 356,
+   "ladder": false
+  },
+  {
+   "x": 2086,
+   "top": 256,
+   "bottom": 356,
+   "ladder": true
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 1320,
+   "y": 632
+  },
+  {
+   "name": "town",
+   "type": "town",
+   "x": 1360,
+   "y": 632
+  },
+  {
+   "name": "to_V301",
+   "type": "visible",
+   "x": 56,
+   "y": 632,
+   "to": "V301",
+   "toPortal": "to_V300"
+  },
+  {
+   "name": "to_V312",
+   "type": "visible",
+   "x": 2576,
+   "y": 632,
+   "to": "V312",
+   "toPortal": "to_V300"
+  },
+  {
+   "name": "to_V310",
+   "type": "visible",
+   "x": 576,
+   "y": 256,
+   "to": "V310",
+   "toPortal": "to_V300"
+  },
+  {
+   "name": "to_V311",
+   "type": "visible",
+   "x": 1504,
+   "y": 632,
+   "to": "V311",
+   "toPortal": "to_V300"
+  },
+  {
+   "name": "to_V090",
+   "type": "visible",
+   "x": 496,
+   "y": 496,
+   "to": "V090",
+   "toPortal": "to_V300"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "wood",
+   "name": "木こりの青年ウッド",
+   "x": 1320,
+   "y": 632
+  },
+  {
+   "id": "mint",
+   "name": "魔法の武器屋ミント",
+   "x": 376,
+   "y": 496,
+   "role": "weapon"
+  },
+  {
+   "id": "fio",
+   "name": "ローブ屋フィオ",
+   "x": 800,
+   "y": 496,
+   "role": "armor"
+  },
+  {
+   "id": "herb",
+   "name": "薬草屋ハーブ",
+   "x": 1736,
+   "y": 496,
+   "role": "potion",
+   "shop": "shop.V300.potion"
+  },
+  {
+   "id": "kura",
+   "name": "倉庫番クラ",
+   "x": 2160,
+   "y": 496,
+   "role": "storage"
+  },
+  {
+   "id": "orfe",
+   "name": "大魔導師オルフェ",
+   "x": 688,
+   "y": 376,
+   "role": "job"
+  },
+  {
+   "id": "libra",
+   "name": "司書リブラ",
+   "x": 1016,
+   "y": 376
+  },
+  {
+   "id": "tia",
+   "name": "妖精の使いティア",
+   "x": 2040,
+   "y": 376
+  }
+ ],
+ "objects": [],
+ "note": "大きな木の上にある町。縄と吊り橋で上下に広い。魔法使いの転職官、魔法の店。雲の船の駅。",
+ "seed": "V300#0"
+}

@@ -1,0 +1,102 @@
+{
+ "id": "D101",
+ "name": "鳥の発着場",
+ "region": "D",
+ "type": "移",
+ "width": 1280,
+ "height": 408,
+ "bgm": "town_dragon",
+ "bg": "bird_port",
+ "theme": "room",
+ "returnMap": "D100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     328
+    ],
+    [
+     1280,
+     328
+    ]
+   ]
+  },
+  {
+   "id": "p1",
+   "points": [
+    [
+     348,
+     200
+    ],
+    [
+     776,
+     200
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 508,
+   "top": 200,
+   "bottom": 308,
+   "ladder": true
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 136,
+   "y": 328
+  },
+  {
+   "name": "to_D100",
+   "type": "visible",
+   "x": 56,
+   "y": 328,
+   "to": "D100",
+   "toPortal": "to_D101"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "hawk",
+   "name": "鳥使いホーク",
+   "x": 328,
+   "y": 328,
+   "travel": {
+    "to": "E100",
+    "toPortal": "sp",
+    "minLevel": 150,
+    "oneWay": false,
+    "fee": 5000,
+    "requiresQuest": "L-12"
+   }
+  },
+  {
+   "id": "hane",
+   "name": "鳥の世話係ハネ",
+   "x": 464,
+   "y": 328,
+   "travel": {
+    "to": "C101",
+    "toPortal": "sp",
+    "minLevel": 0,
+    "oneWay": false,
+    "fee": 3000
+   }
+  }
+ ],
+ "objects": [],
+ "note": "セレスとの間を大きな鳥が運ぶ。",
+ "seed": "D101#0"
+}
