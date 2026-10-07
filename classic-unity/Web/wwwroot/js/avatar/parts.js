@@ -16,6 +16,10 @@ export const COLORS = {
     brown: { light: '#e0a060', mid: '#b4692e', dark: '#84441c', line: '#4e240c' },
     black: { light: '#6a6a8a', mid: '#3e3e58', dark: '#26263a', line: '#121220' },
     blond: { light: '#fff0a0', mid: '#f0c850', dark: '#c89030', line: '#7a5014' },
+    // 美容院の色（試遊版で足した）
+    red: { light: '#ff9c80', mid: '#e05a3c', dark: '#a8321e', line: '#5c140a' },
+    silver: { light: '#ffffff', mid: '#d4d8e4', dark: '#a0a6b8', line: '#4c5064' },
+    blue: { light: '#a8c8ff', mid: '#5a82e0', dark: '#3450a8', line: '#141e5c' },
   },
   top: {
     blue: { light: '#a8dcff', mid: '#5cb0f0', dark: '#3478c8', line: '#1c4280' },
@@ -129,6 +133,52 @@ function drawHairBack(buf, f, hair) {
   buf.sprite(['.HH.', 'HrrH', 'HrrH', '.HH.'], C.x - 10, C.y + 6, pal);
 }
 
+// ---------------------------------------------------------------- 美容院の髪型・顔（試遊版で足した仮の形）
+// 短い髪: とがった髪の前髪の上 12 行だけ（もみあげ無し）
+const HAIR_FRONT_SHORT = HAIR_FRONT.slice(0, 12).concat(['HrrrH.....................', '.HHH......................']);
+function drawHairFrontShort(buf, f, hair) {
+  if (f.view === 'back') return;
+  const C = headC(f);
+  buf.sprite(HAIR_FRONT_SHORT, C.x - 13, C.y - 13, { H: hair.line, r: hair.dark, m: hair.mid, l: hair.light });
+}
+// 長い髪: 背中に流れる髪（横向き）・背中から見ると肩の下まで
+const HAIR_LONG_SIDE = ['.HHHH.', 'HrrrrH', 'HrrrrH', 'HrrmrH', 'HrrmrH', 'HrrrrH', 'HrrrrH', 'HrrrrH', '.HrrrH', '.HrrH.', '..HH..'];
+function drawHairBackLong(buf, f, hair) {
+  const C = headC(f);
+  const pal = { H: hair.line, r: hair.dark, m: hair.mid, l: hair.light };
+  if (f.view === 'back') {
+    buf.sprite(HAIR_BACKVIEW, C.x - 12, C.y - 13, pal);
+    buf.sprite(['HrrrrrrrrrrrrrrrrrH', 'HrrrrrrrrrrrrrrrrrH', '.HrrrrrrrrrrrrrrrH.', '.HrrrrrrrrrrrrrrrH.', '..HrrrrHHHrrrrrrH..', '...HHHH...HHHHHH...'], C.x - 9, C.y + 5, pal);
+    return;
+  }
+  buf.sprite(HAIR_LONG_SIDE, C.x - 12, C.y + 2, pal);
+}
+// おだんご: 短い髪＋頭の後ろの上に丸
+function drawBun(buf, f, hair) {
+  const C = headC(f);
+  const bx = f.view === 'back' ? C.x : C.x - 8;
+  blob(buf, bx, C.y - 13, 4.2, 3.8, hair);
+}
+// 顔: にっこり（目を弓の形）・きりっと（細い目と眉）
+function drawFaceSmile(buf, f, eye) {
+  if (f.view === 'back') return;
+  const C = headC(f);
+  const pal = { e: eye.line };
+  buf.sprite(['.e.', 'e.e'], C.x + 4, C.y + 1, pal);
+  buf.sprite(['e.', '.e'], C.x + 0, C.y + 1, pal);
+  buf.px(C.x + 5, C.y + 6, eye.mouth); buf.px(C.x + 6, C.y + 6, eye.mouth); buf.px(C.x + 4, C.y + 5, eye.mouth); buf.px(C.x + 7, C.y + 5, eye.mouth);
+  buf.px(C.x + 8, C.y + 4, '#ffb4a0');
+}
+function drawFaceSharp(buf, f, eye) {
+  if (f.view === 'back') return;
+  const C = headC(f);
+  const pal = { e: eye.line, w: eye.white, i: eye.iris, j: eye.iris2 };
+  buf.sprite(['eee.', '.eee'], C.x + 3, C.y - 3, pal); // 眉
+  buf.sprite(['eee', 'ewi', 'eij', '.e.'], C.x + 4, C.y + 0, pal);
+  buf.sprite(['ee', 'we', 'je'], C.x - 0, C.y + 0, pal);
+  buf.px(C.x + 5, C.y + 6, eye.mouth);
+}
+
 // ---------------------------------------------------------------- 体（肌）: 腕・脚・胴
 const shoulderOf = (arm) => arm.s;
 function drawArm(buf, arm, skin, back) {
@@ -215,6 +265,29 @@ export const CODE_PARTS = {
     draws: [
       { layer: 'hairBack', z: 0, fn: (b, f, L) => drawHairBack(b, f, L.hairC) },
       { layer: 'hairFront', z: 0, fn: (b, f, L) => drawHairFront(b, f, L.hairC) },
+    ],
+  },
+  face_smile: { slot: 'face', draws: [{ layer: 'face', z: 0, fn: (b, f, L) => drawFaceSmile(b, f, COLORS.eye) }] },
+  face_sharp: { slot: 'face', draws: [{ layer: 'face', z: 0, fn: (b, f, L) => drawFaceSharp(b, f, COLORS.eye) }] },
+  hair_short: {
+    slot: 'hair',
+    draws: [
+      { layer: 'hairBack', z: 0, fn: (b, f, L) => drawHairBack(b, f, L.hairC) },
+      { layer: 'hairFront', z: 0, fn: (b, f, L) => drawHairFrontShort(b, f, L.hairC) },
+    ],
+  },
+  hair_long: {
+    slot: 'hair',
+    draws: [
+      { layer: 'hairBack', z: 0, fn: (b, f, L) => drawHairBackLong(b, f, L.hairC) },
+      { layer: 'hairFront', z: 0, fn: (b, f, L) => drawHairFront(b, f, L.hairC) },
+    ],
+  },
+  hair_bun: {
+    slot: 'hair',
+    draws: [
+      { layer: 'hairBack', z: 0, fn: (b, f, L) => { drawHairBack(b, f, L.hairC); drawBun(b, f, L.hairC); } },
+      { layer: 'hairFront', z: 0, fn: (b, f, L) => drawHairFrontShort(b, f, L.hairC) },
     ],
   },
   top_tee: {
