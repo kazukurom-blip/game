@@ -5103,6 +5103,7 @@
    ],
    "ammo": true,
    "rangeBonus": true,
+   "chainable": true,
    "range": {
     "front": 250,
     "back": 0,
@@ -7147,7 +7148,8 @@
      "hp": "x*100",
      "wdef": "10*x"
     },
-    "ship": true
+    "ship": true,
+    "shipHp": "2000+200*x"
    }
   },
   {

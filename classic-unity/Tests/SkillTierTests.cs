@@ -34,12 +34,17 @@ namespace Lumina.Core.Tests
             { JobLine.Beginner, "片手剣" }, { JobLine.Warrior, "片手剣" }, { JobLine.Magician, "ワンド" }, { JobLine.Bowman, "弓" }, { JobLine.Thief, "クロー" }, { JobLine.Pirate, "ナックル" },
         };
 
+        // 試しの場のデータはこのクラスの中で 1 つを使い回す（読み込みが重いので。データは書き換えない。
+        // 同じクラスのテストは並んで走らないので、マップを後から読む所がぶつからない）
+        private static GameData arena;
+        private static GameData Arena() => arena ??= SkillTests.Arena();
+
         /// <summary>系統・段階・枝・武器を決めた試しのキャラ（Lv 200、SP はたっぷり）。</summary>
         private static GameSession Hero(string line, int tier, int branch, string weaponType)
         {
             var w = WeaponItem[weaponType];
             AmmoItem.TryGetValue(weaponType, out var ammo);
-            var s = SkillTests.Hero(line, w, ammo, 200);
+            var s = SkillTests.Hero(line, w, ammo, 200, Arena());
             s.Character.Tier = line == JobLine.Beginner ? 0 : tier;
             s.Character.Branch = Math.Max(0, branch);
             for (int t = 0; t < 5; t++) s.Character.Sp[t] = 999;

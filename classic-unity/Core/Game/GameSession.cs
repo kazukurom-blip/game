@@ -70,6 +70,7 @@ namespace Lumina.Core.Game
         {
             Data = data;
             Inventory = new Inventory(data.Item);
+            Inventory.ExtraStack = d => d.AmmoKind == "star" ? (Stats?.Mods.StarBundle ?? 0) : 0; // クローの熟練: 投げ星の 1 束 +
             Equipment = new Equipment(data.Item);
             Skills = new SkillBook(data);
             Quests = new QuestLog(data);
@@ -147,6 +148,7 @@ namespace Lumina.Core.Game
             RefreshStats();
             var inp = input;
             input.ConsumePressed();
+            if (Status.Confused) { bool l = inp.Left; inp.Left = inp.Right; inp.Right = l; } // 錯乱: 左右が逆
 
             if (Dead)
             {
@@ -162,11 +164,12 @@ namespace Lumina.Core.Game
             if (inp.SkillPressed != null) UseSkill(inp.SkillPressed);
             // 攻撃スキルのキーを押しっぱなし: 終わるたびにくり返す（嵐の連射・弾幕も）
             else if (inp.SkillHeld != null && Attack == null && Data.Skill(inp.SkillHeld)?.IsAttack == true) UseSkill(inp.SkillHeld, true);
-            if (inp.InteractPressed) InteractNearby();
+            if (inp.InteractPressed && !TryFillRift()) InteractNearby();
 
             // ポータル: ↑を押した瞬間、足元にポータルがあれば入る（縄より先）
             if (inp.UpPressed && !Body.OnRope)
             {
+                if (Status.CanMove && TryUseDoor()) { Pose = poseTracker.Update(Body, Attack, Dead, dt, Status.Mask); return; } // 秘術の扉
                 var p = Map.Data.FindPortalAt(Body.X, Body.Y);
                 if (p != null && Status.CanMove && UsePortal(p)) { Pose = poseTracker.Update(Body, Attack, Dead, dt, Status.Mask); return; }
             }
@@ -178,6 +181,7 @@ namespace Lumina.Core.Game
             Body.AttackLock = Attack != null && Attack.OnGround && !Attack.Finished;
             if (Attack != null && Attack.Dashing) { Body.AttackLock = false; if (Body.OnGround) Body.Vx = Attack.Facing * Attack.DashSpeed; } // 突進
             Body.NoJump = !Status.CanJump;
+            Body.SlowFall = Buffs.SlowFall; // 隠れ足
             var pin = new PhysicsInput
             {
                 Left = inp.Left, Right = inp.Right, Up = inp.Up, Down = inp.Down, Jump = inp.Jump,
@@ -202,6 +206,7 @@ namespace Lumina.Core.Game
             TickPendingHits(dt);
 
             StepMobs(dt);
+            TickMechanics(dt);
             Map.StepWorld(dt, Rng);
 
             pickupT -= dt;
@@ -245,6 +250,9 @@ namespace Lumina.Core.Game
                     Stats.Wdef = (int)Math.Floor(Stats.Wdef * cm);
                     Stats.Mdef = (int)Math.Floor(Stats.Mdef * cm);
                 }
+                // 遅延: 速さ −power（SlowMinSpeed より下げない）
+                double sd = Status.SpeedDown;
+                if (sd > 0) Stats.Speed = Math.Max(SlowMinSpeed, Stats.Speed - (int)Math.Round(sd));
             }
             if (Body != null) Body.SetMoveStats(Stats.Speed, Stats.Jump);
             if (Character.Hp > Stats.MaxHp) Character.Hp = Stats.MaxHp;
@@ -271,6 +279,7 @@ namespace Lumina.Core.Game
             PrevX = Body.X; PrevY = Body.Y; // マップをまたいで補間しない
             Body.InvT = 0; Body.Events.Clear();
             Attack = null;
+            Zones.Clear(); // 毒の霧はそのマップに置いた物
             RefreshStats();
             if (!first)
             {

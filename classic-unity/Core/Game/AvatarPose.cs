@@ -15,9 +15,16 @@ namespace Lumina.Core.Game
         public bool Visible;      // 無敵の点滅で消えるフレームは false
         public bool Dead;         // 倒れている（墓石を出す）
         public AttackMotion AttackKind; // 攻撃中なら、どの種類の攻撃か（今は絵は swingO1 だけ）
-        /// <summary>頭の上に出す状態異常のアイコン（ビット: 1 &lt;&lt; (int)StatusKind。毒・気絶・暗闇・封印・呪い・弱り・凍結・眠り の順）</summary>
+        /// <summary>頭の上に出す状態異常のアイコン（ビット: 1 &lt;&lt; (int)StatusKind。毒・気絶・暗闇・封印・呪い・弱り・凍結・眠り・遅延・変化・錯乱 の順）</summary>
         public int StatusIcons;
         public bool HasStatus(Status.StatusKind k) => (StatusIcons & (1 << (int)k)) != 0;
+        /// <summary>変化の呪い: 主人公の絵の代わりに変わった姿（PolymorphForm の敵の絵）で描く</summary>
+        public bool Polymorphed => HasStatus(Status.StatusKind.Polymorph);
+        public string PolymorphForm => Polymorphed ? GameSession.PolymorphMobId : null;
+        /// <summary>錯乱: 頭の上に回る星など（左右の入れ替えは Core がする）</summary>
+        public bool Confused => HasStatus(Status.StatusKind.Confuse);
+        /// <summary>遅延: 足元の時計など</summary>
+        public bool Slowed => HasStatus(Status.StatusKind.Slow);
 
         public override string ToString() => Motion + "[" + Frame + "]" + (FacingRight ? "→" : "←") + (Visible ? "" : " (点滅)");
     }

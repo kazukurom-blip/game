@@ -167,7 +167,7 @@ export function buildSkills(problems) {
     for (const name of Object.keys(mechs)) if (!seenMech.has(job + '/' + name)) problems.push(`スキル: skills.mjs の ${job}「${name}」が JOBS.md に無い`);
 
   // 式が読めて、Lv 1〜最大で数になるか
-  const EXPR_KEYS = /^(mp|hp|hpPct|meso|cooldown|damage|spell|fixed|hits|targets|sec|chance|power|atk|def|defPct|healPct|healMpPct|summonSec|summonHeal|teleport|instantKill|pct|cap|amount|vx|vy|mul|exp|healPerHit|hotHp|magicGuard|booster|.*Pct|.*Rate|.*Damage|.*Regen|level.*|ap.*|range|mastery|stunCrit|chainStar|dodge|berserk|guard|execute|starBundle|potion.*|stealthAttack|mesoOnHit|elementResist|resistPierce|watk|wdef|acc|avoid|speed|jump|str|dex|int|luk|matk|mdef)$/;
+  const EXPR_KEYS = /^(mp|hp|hpPct|meso|cooldown|damage|spell|fixed|hits|targets|sec|chance|power|atk|def|defPct|healPct|healMpPct|summonSec|summonHeal|teleport|instantKill|pct|cap|amount|vx|vy|mul|exp|healPerHit|hotHp|magicGuard|booster|.*Pct|.*Rate|.*Damage|.*Regen|level.*|ap.*|range|mastery|stunCrit|chainStar|dodge|berserk|guard|execute|starBundle|shipHp|potion.*|stealthAttack|mesoOnHit|elementResist|resistPierce|watk|wdef|acc|avoid|speed|jump|str|dex|int|luk|matk|mdef)$/;
   const walk = (s, o, top) => {
     if (!o || typeof o !== 'object') return;
     for (const [k, v] of Object.entries(o)) {

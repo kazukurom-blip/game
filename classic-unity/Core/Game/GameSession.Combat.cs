@@ -14,7 +14,7 @@ using Lumina.Core.World;
 
 namespace Lumina.Core.Game
 {
-    public enum SkillUseResult { Ok, Unknown, NotLearned, Passive, Dead, OnRope, Busy, Cooldown, WrongWeapon, NoMp, NoHp, NoAmmo, Stunned, Sealed, NoMeso, NotReady }
+    public enum SkillUseResult { Ok, Unknown, NotLearned, Passive, Dead, OnRope, Busy, Cooldown, WrongWeapon, NoMp, NoHp, NoAmmo, Stunned, Sealed, NoMeso, NotReady, Polymorphed }
 
     public sealed partial class GameSession
     {
@@ -128,6 +128,7 @@ namespace Lumina.Core.Game
             if (def.Kind == SkillKind.Passive) return F(SkillUseResult.Passive, "常に効くスキル");
             if (Dead) return F(SkillUseResult.Dead, null);
             // 状態異常: 気絶・凍結・眠りは動けない、封印はスキル不可（治すスキルだけは使える）
+            if (!def.Cure && Status.Polymorphed && Status.CanMove) return F(SkillUseResult.Polymorphed, "姿が変わっていてスキルが使えない");
             if (!def.Cure && !Status.CanAct) return F(SkillUseResult.Stunned, "動けない");
             if (!def.Cure && Status.Has(StatusKind.Seal)) return F(SkillUseResult.Sealed, "封印されていてスキルが使えない");
             if (Body.OnRope) return F(SkillUseResult.OnRope, "縄・はしごでは使えない");
@@ -251,6 +252,7 @@ namespace Lumina.Core.Game
                 NoAmmo = b.NoAmmo, NoMp = b.NoMp, Infinity = b.Infinity,
                 Reflect = b.Reflect?.Eval(x, lv) ?? 0, MagicReflect = b.MagicReflect?.Eval(x, lv) ?? 0, DamageReduce = b.DamageReduce?.Eval(x, lv) ?? 0,
                 Invincible = b.Invincible, StatusImmune = b.StatusImmune, Revive = b.Revive, SlowFall = b.SlowFall, Transform = b.Transform, Ship = b.Ship,
+                ShipHp = b.ShipHp?.EvalInt(x, lv) ?? 0,
                 MesoGuardPct = b.MesoGuardPct?.Eval(x, lv) ?? 0, MesoGuardCost = b.MesoGuardCost?.Eval(x, lv) ?? 0,
                 ShadowPartner = b.ShadowPartner?.Eval(x, lv) ?? 0,
                 HpDrain = b.HpDrain?.EvalInt(x, lv) ?? 0, HpDrainInterval = b.HpDrainInterval,
@@ -258,6 +260,7 @@ namespace Lumina.Core.Game
             };
             if (b.OnHitStatus.Count > 0) ab.OnHitStatus = b.OnHitStatus.ConvertAll(st => st.Eval(x, lv, def.Id));
             if (ab.Combo) { var old = Buffs.Get(def.Id); if (old != null) ab.Orbs = old.Orbs; } // かけ直しても玉は残す
+            ab.ShipMaxHp = ab.ShipHp;
             ab.Remaining = ab.Total;
             if (ab.Total <= 0) return;
             Buffs.Apply(ab);
@@ -290,7 +293,7 @@ namespace Lumina.Core.Game
                 maxTargets = 1; hits = 1;
             }
             var alive = new List<Mob>();
-            foreach (var m in Map.Mobs) if (m.Alive && !m.Hidden) alive.Add(m);
+            foreach (var m in Map.Mobs) if (m.Alive && !m.Hidden && !m.Charmed) alive.Add(m); // 錯乱弾で味方にした敵には当てない
             List<Mob> targets;
             if (def != null && def.Explode > 0)
             {
@@ -329,6 +332,7 @@ namespace Lumina.Core.Game
                 if (l > 0) AfterTargetHit(mob, def, x, d);
             }
             if (def != null && def.MesoExplosion) landed += MesoExplosion(def, x, range, maxTargets);
+            if (def != null && def.Zone > 0) AddZone(def, x, range, maxTargets);
             AfterAttack(def, x, targets, landed, dealt, a);
             Out.Add(GameEventType.AttackHit, a.SkillId, landed, Body.X, Body.Y);
         }
@@ -341,7 +345,7 @@ namespace Lumina.Core.Game
             {
                 var res = SkillDamage(mob, def, x, mul, a);
                 DamageMob(mob, res, stack++);
-                if (!res.Miss) { landed++; dealt += res.Damage; OnEachHit(mob, def, x); }
+                if (!res.Miss) { landed++; dealt += res.Damage; OnEachHit(mob, def, x); ReflectFromMob(mob, res.Damage, def != null && def.Magic); }
             }
             // 影分身: 同じ攻撃をもう一度（威力 50%）
             double sp = Stats.Mods.ShadowPartner;
@@ -438,8 +442,7 @@ namespace Lumina.Core.Game
                 if (def.Push > 0 && mob.Alive && !mob.Def.IsBoss)
                     MobAI.Place(mob, Map.Physics, Math.Max(10, Math.Min(Map.Data.Width - 10, mob.X + Attack.Facing * def.Push)), mob.Y);
                 if (def.Knockback && mob.Alive && !mob.Def.IsBoss && !mob.Def.NoKnockback) { mob.KnockT = Mob.KnockTime; mob.KnockDir = Attack.Facing; }
-                if (def.Magic && m.MpEaterChance > 0 && Rng.Chance(m.MpEaterChance))
-                    HealMp((int)Math.Floor(mob.Def.Mp * m.MpEaterPct / 100)); // 敵の MP は減らさない（敵の MP は未実装）
+                if (def.Magic && m.MpEaterChance > 0 && Rng.Chance(m.MpEaterChance)) DrainMobMp(mob, m.MpEaterPct);
             }
             bool physical = def == null || def.Damage != null;
             if (physical) foreach (var st in m.OnHitStatus) TryInflict(mob, st);
@@ -462,12 +465,12 @@ namespace Lumina.Core.Game
                     Out.Add(GameEventType.MobHit, targets[0].Def.Id, res.Damage, targets[0].X, targets[0].HeadY, "final_attack");
                 }
                 // 星の連投: 二つ星投げの時、同じ攻撃をもう 1 体へ
-                if (def != null && def.Id.EndsWith(".lucky_seven") && m.ChainStarChance > 0 && targets.Count > 0 && Rng.Chance(m.ChainStarChance))
+                if (def != null && def.Chainable && m.ChainStarChance > 0 && targets.Count > 0 && Rng.Chance(m.ChainStarChance))
                 {
                     var c = targets[0].Box;
                     var near = new Rect(c.CenterX - 200, c.CenterY - 80, c.CenterX + 200, c.CenterY + 80);
                     var rest = new List<Mob>();
-                    foreach (var mb in Map.Mobs) if (mb.Alive && !mb.Hidden && !targets.Contains(mb)) rest.Add(mb);
+                    foreach (var mb in Map.Mobs) if (mb.Alive && !mb.Hidden && !mb.Charmed && !targets.Contains(mb)) rest.Add(mb);
                     var next = Targeting.Pick(rest, mb => mb.Box, near, c.CenterX, a.Facing, 1);
                     if (next.Count > 0) HitMobRepeatedly(next[0], def, x, def.HitCount(x), 1, a, 0);
                 }
@@ -503,8 +506,7 @@ namespace Lumina.Core.Game
                     Out.Add(GameEventType.MobHit, mob.Def.Id, 0, mob.X, mob.HeadY, "steal");
                 }
             }
-            if (def.DispelChance != null && Rng.Chance(def.DispelChance.Eval(x, lv) / 100))
-                Out.Add(GameEventType.MobHit, mob.Def.Id, 0, mob.X, mob.HeadY, "dispel"); // 敵の強化（バフ）は未実装なので、お知らせだけ
+            if (def.DispelChance != null && Rng.Chance(def.DispelChance.Eval(x, lv) / 100)) DispelMob(mob, def.DispelWhat, def.Id);
             if (def.MarkExp != null || def.MarkDamage != null)
                 marks[mob] = new MobMark { DamagePct = def.MarkDamage?.Eval(x, lv) ?? 0, ExpPct = def.MarkExp?.Eval(x, lv) ?? 0, Until = PlaySec + (def.MarkSec?.Eval(x, lv) ?? 30) };
             if (def.Cure) CureSelf(def.Id);
@@ -534,6 +536,12 @@ namespace Lumina.Core.Game
             };
             Out.Damage.Add(num);
             if (res.Miss) { mob.AggroT = Mob.AggroTime; return; }
+            if (mob.GuardMul < 1 && res.Damage > 0)
+            {
+                // 時の裂け目が閉じていない間は、ダメージがほとんど通らない
+                res.Damage = Math.Max(1, (int)Math.Floor(res.Damage * mob.GuardMul));
+                num.Value = res.Damage; Out.Damage[Out.Damage.Count - 1] = num;
+            }
             mob.Hp -= res.Damage;
             MobAI.OnHit(mob, res.Damage, Body.X);
             if (res.Damage > 0) StatusSystem.BreakOnHit(mob, Out); // 凍結・眠りは攻撃で解ける
@@ -545,6 +553,13 @@ namespace Lumina.Core.Game
         {
             MobAI.Kill(mob);
             var def = mob.Def;
+            if (mob.Mechanic)
+            {
+                // 仕掛けの物（分身・光る岩・時計虫）: 経験値・ドロップ・クエストの数にならない
+                Out.Add(GameEventType.MobDied, def.Id, 0, mob.X, mob.Y);
+                BossMechanics.OnKilled(mob, Map, Out);
+                return;
+            }
             Out.Add(GameEventType.MobDied, def.Id, def.Exp, mob.X, mob.Y);
             // 経験値（自分より 20 Lv 以上低い敵は 1 Lv ごとに -5%、最低 10%）。聖なる御印・挑発・狙い撃ちで +%
             double mul = 1;
@@ -586,16 +601,21 @@ namespace Lumina.Core.Game
         {
             var sense = new PlayerSense { X = Body.X, Y = Body.Y, Chain = Body.Seg?.Chain, Hidden = Dead || Stats.Stealth };
             var pbox = PlayerBox;
+            var decoy = ActiveDecoy;
             // 呼び出しで Mobs が増えるので、今いる分だけ回す
             int count = Map.Mobs.Count;
             for (int i = 0; i < count && i < Map.Mobs.Count; i++)
             {
                 var m = Map.Mobs[i];
                 if (m.Alive) TickMobStatus(m, dt);
-                MobAI.Step(m, Map.Physics, sense, dt, Rng);
-                // 技（飛び道具・魔法の予兆・ボスの技・段階）
-                MobCombat.Step(m, Map, sense, Body.OnGround, dt, Rng, Out);
+                // 見ている相手: ふつうは主人公。身代わり人形の近くなら人形、錯乱弾で操った敵は近くの敵（GameSession.Mechanics.cs）
+                var ms = SenseFor(m, sense, decoy);
+                MobAI.Step(m, Map.Physics, ms, dt, Rng);
+                // 技（飛び道具・魔法の予兆・ボスの技・段階）。操った敵は技を使わない
+                MobCombat.Step(m, Map, m.Charmed ? new PlayerSense { X = ms.X, Y = ms.Y, Hidden = true } : ms, Body.OnGround, dt, Rng, Out);
                 if (!m.Alive || Dead || m.Hidden) continue;
+                if (m.Charmed) { StepCharmed(m); continue; }
+                if (decoy != null && m.Def.Touch) TouchDecoy(m, decoy);
                 // 触れるとダメージ（状態異常つきの敵もいる）。守りの構えで返す相手として敵を渡す
                 if (m.Def.Touch && !sense.Hidden && Body.InvT <= 0 && m.Box.Overlaps(pbox))
                     HitPlayer(m.Atk, m.Def.Lv, m.Acc, false, m.X, m.Def.TouchStatus, source: m);
@@ -604,6 +624,7 @@ namespace Lumina.Core.Game
             {
                 foreach (var p in Map.Projectiles)
                 {
+                    if (!p.Dead && decoy != null && p.Box.Overlaps(DecoyBox(decoy))) { p.Dead = true; HitDecoy(decoy, p.Atk); continue; }
                     if (p.Dead || !p.Box.Overlaps(pbox) || Stats.Stealth) continue;
                     p.Dead = true;
                     if (Body.InvT <= 0) HitPlayer(p.Atk, p.MobLv, p.MobAcc, p.Magic, p.FromX, p.Status, p.SkillId, p.MobUid);
@@ -669,6 +690,7 @@ namespace Lumina.Core.Game
             Character.Mp -= mpDmg;
             Character.Hp -= hpDmg;
             Out.Damage.Add(new DamageNumber { Kind = DamageKind.Taken, Value = damage, X = Body.X, Y = headY });
+            OnShipHit(damage);
             PlayerPhysics.Hurt(Body, fromX);
             Attack = null;
             poseTracker.AlertLeft = PoseTracker.AlertTime;

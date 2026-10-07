@@ -81,15 +81,18 @@ namespace Lumina.Core.Game
                 return true;
             }
             bool did = false;
-            if (u.Hp > 0) { HealHp(u.Hp); did = true; }
-            if (u.Mp > 0) { HealMp(u.Mp); did = true; }
-            if (u.HpPct > 0) { HealHp((int)Math.Floor(Stats.MaxHp * u.HpPct)); did = true; }
-            if (u.MpPct > 0) { HealMp((int)Math.Floor(Stats.MaxMp * u.MpPct)); did = true; }
+            // 調合上手: 薬の回復量 +%・効き目の時間 +%
+            double heal = 1 + Stats.Mods.PotionPct / 100, time = 1 + Stats.Mods.PotionTimePct / 100;
+            if (u.Hp > 0) { HealHp((int)Math.Floor(u.Hp * heal)); did = true; }
+            if (u.Mp > 0) { HealMp((int)Math.Floor(u.Mp * heal)); did = true; }
+            if (u.HpPct > 0) { HealHp((int)Math.Floor(Stats.MaxHp * u.HpPct * heal)); did = true; }
+            if (u.MpPct > 0) { HealMp((int)Math.Floor(Stats.MaxMp * u.MpPct * heal)); did = true; }
             bool potion = did;
             if (u.Buff != null && u.BuffSec > 0)
             {
-                Buffs.Apply(new ActiveBuff { Id = itemId, Name = def.Name, Stats = u.Buff.Clone(), Total = u.BuffSec, Remaining = u.BuffSec });
-                Out.Add(GameEventType.BuffStarted, itemId, (long)u.BuffSec);
+                double sec = u.BuffSec * time;
+                Buffs.Apply(new ActiveBuff { Id = itemId, Name = def.Name, Stats = u.Buff.Clone(), Total = sec, Remaining = sec });
+                Out.Add(GameEventType.BuffStarted, itemId, (long)sec);
                 did = true;
             }
             // 解毒薬・目薬・聖水・万能薬（治す物が無くても使える。クラシックどおり）

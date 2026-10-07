@@ -65,11 +65,51 @@ namespace Lumina.Core.Mobs
         public bool Summoned => SummonerUid != 0;
         public double FlyTargetY;      // 飛ぶ敵が漂う高さ（家からのずれ）
 
-        public int MaxHp => Def.Hp;
+        // 強化（敵の技 type: buff）。主人公の崩しで消える
+        public readonly MobBuffs Buffs = new MobBuffs();
+        /// <summary>今の MP（-1 = まだ減っていない = 最大）。MP 吸収で減る</summary>
+        public int Mp = -1;
+        public int CurMp => Mp < 0 ? Def.Mp : Mp;
+        /// <summary>変化の呪いで変わった姿（変化の間だけ効く。null = 元のまま）</summary>
+        public MobDef PolyDef;
+
+        // ボスの仕掛け（Mobs/BossMechanics.cs）
+        public int MaxHpOverride;      // 分身・光る岩の HP（0 = Def.Hp）
+        public int CloneOf;            // 分身なら本物の Uid（0 = 分身でない）
+        public int OwnerUid;           // 仕掛けの物を出したボスの Uid
+        public double AtkScale = 1;    // 攻撃力の倍率（分身は 0.5）
+        public bool Mechanic;          // 仕掛けの物（分身・光る岩・時計虫）: 倒しても経験値・ドロップ・クエストの数にならない
+        public string MechanicKind;    // "clone" / "rock" / "shard"（Unity 側の絵の選び方）
+        public double GuardMul = 1;    // 受けるダメージの倍率（時の裂け目が閉じていない間 0.1 など）
+        public bool Submerged; public double SubmergeT, SubmergeTotal; // 深く潜っている（当たらない・技を使わない）
+        public double ShuffleT;        // 分身と入れ替わるまで
+        public int ClonePhase = -1, SubmergePhase = -1; // 分身を出した・潜った段階（同じ段階で 2 回しない）
+        public double HealAcc;         // 潜っている間の回復の端数
+
+        public int MaxHp => MaxHpOverride > 0 ? MaxHpOverride : Def.Hp;
         public BossPhaseDef PhaseDef => Def.Boss != null && Def.Boss.Phases.Count > 0 ? Def.Boss.Phases[Math.Min(Phase, Def.Boss.Phases.Count - 1)] : null;
-        public double MoveSpeed => Def.Speed * (PhaseDef?.SpeedMul ?? 1);
+        /// <summary>今の姿（変化の間は変わった姿の定義）。攻撃力・防御・速さはこちらの値</summary>
+        public MobDef Form => PolyDef != null && Status.Polymorphed ? PolyDef : Def;
+        /// <summary>変化している時の姿の敵の ID（Unity 側はこの敵の絵で描く。変化していなければ null）</summary>
+        public string FormId => Form != Def ? Form.Id : null;
+        /// <summary>錯乱弾で操られている（主人公の味方。主人公に当たらず、近くの敵に体当たりする）</summary>
+        public bool Charmed => Status.Confused;
+        /// <summary>本物だけにある影（分身には無い）</summary>
+        public bool HasShadow => CloneOf == 0;
+        /// <summary>動く速さ（ボスの段階・速さの強化・遅延込み。遅延でも元の 2 割より下げない）</summary>
+        public double MoveSpeed
+        {
+            get
+            {
+                double v = Form.Speed * (PhaseDef?.SpeedMul ?? 1) * (1 + Buffs.Pct(MobBuffKind.Speed) / 100);
+                double slow = Status.SpeedDown;
+                return slow > 0 && v > 0 ? Math.Max(v * 0.2, v - slow) : v;
+            }
+        }
         /// <summary>かかっている状態異常のビット（頭の上のアイコン用。1 &lt;&lt; (int)StatusKind）</summary>
         public int StatusIcons => Status.Mask;
+        /// <summary>かかっている強化のビット（1 &lt;&lt; (int)MobBuffKind）</summary>
+        public int BuffIcons => Buffs.Mask;
 
         /// <summary>属性の倍率（ボスの段階で弱点が変わる時はそちら）</summary>
         public double ElementMul(string element)
@@ -95,16 +135,19 @@ namespace Lumina.Core.Mobs
 
         public DefenderInfo Defender => new DefenderInfo
         {
-            Level = Def.Lv, Def = Math.Max(0, (int)Math.Round((Def.Def - DefDown) * DefMul)), Mdef = (int)Math.Round(Def.Mdef * DefMul), Avoid = Def.Avoid, ElementMul = ElementMul,
+            Level = Def.Lv,
+            Def = Math.Max(0, (int)Math.Round((Form.Def - DefDown) * DefMul * (1 + Buffs.Pct(MobBuffKind.Def) / 100))),
+            Mdef = (int)Math.Round(Form.Mdef * DefMul * (1 + Buffs.Pct(MobBuffKind.Mdef) / 100)),
+            Avoid = Form.Avoid, ElementMul = ElementMul,
         };
         private double DefMul => (PhaseDef?.DefMul ?? 1) * Status.DefMul;
         private double AtkMul => (PhaseDef?.AtkMul ?? 1) * Status.AtkMul;
-        /// <summary>物理の攻撃力（かく乱・呪い・ボスの段階込み）</summary>
-        public int Atk => Math.Max(1, (int)Math.Round((Def.Atk - AtkDown) * AtkMul));
+        /// <summary>物理の攻撃力（かく乱・呪い・ボスの段階・攻撃の強化・変化込み）</summary>
+        public int Atk => Math.Max(1, (int)Math.Round((Form.Atk - AtkDown) * AtkMul * AtkScale * (1 + Buffs.Pct(MobBuffKind.Atk) / 100)));
         /// <summary>魔法の攻撃力（無い敵は物理の値）</summary>
-        public int Matk => Def.Matk > 0 ? Math.Max(1, (int)Math.Round(Def.Matk * AtkMul)) : Atk;
+        public int Matk => Form.Matk > 0 ? Math.Max(1, (int)Math.Round(Form.Matk * AtkMul * AtkScale * (1 + Buffs.Pct(MobBuffKind.Matk) / 100))) : Atk;
         /// <summary>命中（暗闇で下がる）</summary>
-        public int Acc => (int)Math.Round(Def.Acc * Status.AccMul);
+        public int Acc => (int)Math.Round(Form.Acc * Status.AccMul);
 
         /// <summary>動きの名前（Unity 側の絵の選び方）: stand / move / fly / hit1 / die1 / attack1（近接・飛び道具の構え）/ skill1（魔法・全体・呼び出しの詠唱）</summary>
         public string Motion
@@ -160,6 +203,7 @@ namespace Lumina.Core.Mobs
             if (m.DebuffT > 0) { m.DebuffT -= dt; if (m.DebuffT <= 0) { m.AtkDown = 0; m.DefDown = 0; } }
             if (m.AttackCooldown > 0) m.AttackCooldown -= dt;
             if (m.AggroT > 0) m.AggroT -= dt;
+            if (m.Submerged) return; // 深く潜っている（深淵の大魚）: その場で動かない
             StepHop(m, dt, rng);
 
             // ひるみ・押される

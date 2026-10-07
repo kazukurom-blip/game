@@ -11,14 +11,25 @@
 //                 summon = 手下を呼ぶ（mobs を順に count 体、呼んだ手下は max 体まで）
 //                 heal   = 自分の HP を pct% 治す
 //                 dive   = 消えて主人公の所に予兆 → windup 秒後にそこへ出て当たる（潜る・急降下）
+//                 buff   = 自分（allies: true なら w 幅の中の仲間も）を強化する。buff: { atk, matk, def, mdef, speed（すべて +%）, reflect, magicReflect（受けたダメージの % を返す）, sec }
+//                          主人公の鎧崩し（def・reflect）・魔法崩し（matk・mdef・magicReflect）・力崩し（atk）・解除（全部）で消える
 //   range         主人公がこの横の距離（px）にいる時だけ使う（area global・summon・heal は無視）
 //   cd            待ち時間（秒）。windup = 構え・予兆の時間（秒）
 //   pct           敵の攻撃力（magic: true なら魔法攻撃力）の何 % か（0 なら状態異常だけ）
-//   status        { kind: poison|stun|darkness|seal|curse|weak|freeze|sleep, sec, chance(0〜1), power }
+//   status        { kind: poison|stun|darkness|seal|curse|weak|freeze|sleep|slow|polymorph|confuse, sec, chance(0〜1), power }
+//                 slow = 速さ -power（既定 20）、polymorph = 姿が変わって攻撃・スキル不可、confuse = 左右が逆になる
+//   pull          当たったら主人公を敵の方へ px 引き寄せる（ツタ）
+//   suck          { w, speed }: 予兆の間、敵のまわり w 幅の中の主人公を中心へ speed px/秒 で吸い込む（渦潮。当たるのは中心の w×h だけ）
+//   shelter       { at: [マップの横幅の割合 …], w }: その位置の w 幅（盾の陰）にいると当たらない（全滅の炎）
 //   phases        使う段階（0 から。無ければ全部）
 //   weight        同時に使える技が複数ある時の選ばれやすさ（既定 1）
 // touchStatus: 触れた時の状態異常（{ kind, sec, chance, power }）
-// boss.phases: [{ hp: この割合以下で始まる（最初は 1）, name, atkMul, defMul, speedMul, rate(技の速さ), elements(弱点の上書き), healPct(始まった時に治す), summon: { mobs, count } }]
+// boss.phases: [{ hp: この割合以下で始まる（最初は 1）, name, atkMul, defMul, speedMul, rate(技の速さ), elements(弱点の上書き), healPct(始まった時に治す), summon: { mobs, count },
+//               clones: { count, hpPct, shuffle }（分身: 本物と同じ姿で影が無い。HP は本物の最大 HP の hpPct%、shuffle 秒ごとに本物と分身が入れ替わる）,
+//               submerge: { sec, healPct, rocks, rockHpPct }（深く潜る: sec 秒消えて、その間に最大 HP の healPct% を少しずつ治す。まわりに光る岩を rocks 個。全部壊すと回復が止まって出てくる） }]
+// boss.rifts: { phase, count, mob, limit, guard, expose }（時の裂け目: phase の段階の間、床に count 個の裂け目。本体の受けるダメージ × guard。
+//               部屋の mob（呼ばれる）を倒すと「時のかけら」を 1 つ持つ。裂け目の上で調べるキーではめる。limit 秒で全部はめないと元に戻る。
+//               全部はめると expose 秒、本体が無防備（ダメージがふつうに通る）。その後また裂け目が開く）
 
 const S = (kind, sec, chance = 1, power = 0) => ({ kind, sec, chance, ...(power ? { power } : {}) });
 
@@ -38,13 +49,17 @@ export const MOB_SKILLS = {
   M083: { attacks: [{ id: 'dust', name: '眠りの鱗粉', type: 'magic', range: 260, cd: 5, windup: 1.0, pct: 60, w: 90, h: 90, status: S('sleep', 3, 0.5) }] },
   M106: { attacks: [{ id: 'fireball', name: '火の玉', type: 'shot', magic: true, range: 350, cd: 3, windup: 0.5, pct: 100, speed: 260 }] },
   M107: { attacks: [{ id: 'iceball', name: '氷の玉', type: 'shot', magic: true, range: 350, cd: 3, windup: 0.5, pct: 100, speed: 260, status: S('freeze', 1.5, 0.15) }] },
+  M154: { attacks: [{ id: 'daze', name: '惑わしの息', type: 'magic', range: 300, cd: 4, windup: 0.8, pct: 90, w: 80, h: 90, status: S('confuse', 4, 0.3) }] },
   M153: { attacks: [{ id: 'hex', name: 'のろい', type: 'magic', range: 300, cd: 4, windup: 0.8, pct: 90, w: 70, h: 90, status: S('curse', 8, 0.3) }] },
   M171: { touchStatus: S('stun', 2, 0.3) },
   M172: { touchStatus: S('poison', 8, 0.4) },
   M174: { attacks: [{ id: 'ink', name: '墨', type: 'shot', range: 320, cd: 3.5, windup: 0.3, pct: 100, status: S('darkness', 6, 0.5) }] },
   M178: { attacks: [{ id: 'gloom', name: '闇のもや', type: 'magic', range: 300, cd: 4, windup: 0.8, pct: 100, w: 80, h: 90, status: S('darkness', 6, 0.4) }] },
   M193: { attacks: [{ id: 'pray', name: '祈りののろい', type: 'magic', range: 300, cd: 4, windup: 0.9, pct: 100, w: 80, h: 100, status: S('curse', 10, 0.4) }] },
-  M195: { attacks: [{ id: 'seal', name: '封印の魔法', type: 'magic', range: 320, cd: 5, windup: 0.9, pct: 80, w: 80, h: 100, status: S('seal', 4, 0.5) }] },
+  M195: { attacks: [
+    { id: 'seal', name: '封印の魔法', type: 'magic', range: 320, cd: 5, windup: 0.9, pct: 80, w: 80, h: 100, status: S('seal', 4, 0.5) },
+    { id: 'bless', name: '守りの祈り', type: 'buff', allies: true, w: 400, range: 400, cd: 18, windup: 0.8, buff: { def: 40, mdef: 40, sec: 15 } },
+  ] },
   M232: { attacks: [{ id: 'void', name: '虚ろの光', type: 'magic', range: 320, cd: 4, windup: 0.8, pct: 100, w: 80, h: 100, status: S('seal', 3, 0.3) }] },
 
   // ===== 地域のボス（MONSTERS.md 5-1） =====
@@ -76,7 +91,7 @@ export const MOB_SKILLS = {
     attacks: [
       { id: 'root', name: '突き出す根', type: 'magic', range: 500, cd: 4, windup: 1.0, pct: 120, w: 80, h: 120 },
       { id: 'seeds', name: '種の雨', type: 'magic', range: 600, cd: 9, windup: 1.2, pct: 90, w: 60, h: 120, count: 3, spread: 150 },
-      { id: 'vine', name: 'からむツタ', type: 'magic', range: 400, cd: 10, windup: 0.9, pct: 60, w: 120, h: 60, status: S('weak', 4) },
+      { id: 'vine', name: 'からむツタ', type: 'magic', range: 400, cd: 10, windup: 0.9, pct: 60, w: 120, h: 60, status: S('weak', 4), pull: 200 },
     ],
     boss: { phases: [{ hp: 1, name: '大樹' }, { hp: 0.4, name: '燃える枝', rate: 1.5, elements: { fire: 2 } }] },
   },
@@ -85,6 +100,7 @@ export const MOB_SKILLS = {
       { id: 'cleave', name: '大剣の振り下ろし', type: 'melee', range: 170, cd: 4, windup: 0.7, pct: 150, w: 170, h: 110 },
       { id: 'call', name: '骨の兵呼び', type: 'summon', mobs: ['M048'], count: 2, max: 6, cd: 18, windup: 0.8 },
       { id: 'arrows', name: '骨の矢の雨', type: 'magic', physical: true, range: 600, cd: 12, windup: 1.2, pct: 90, w: 60, h: 140, count: 5, spread: 120 },
+      { id: 'guard', name: '骨の守り', type: 'buff', range: 600, cd: 20, windup: 0.8, buff: { def: 60, sec: 15 } },
     ],
     boss: { phases: [{ hp: 1, name: '兜' }, { hp: 0.5, name: '兜が落ちた', elements: { holy: 3 } }] },
   },
@@ -101,6 +117,7 @@ export const MOB_SKILLS = {
       { id: 'swoop', name: '急降下', type: 'dive', range: 600, cd: 9, windup: 1.0, pct: 150, w: 120, h: 100, phases: [1, 2] },
       { id: 'flame', name: '黒い炎の雨', type: 'magic', range: 800, cd: 14, windup: 1.4, pct: 120, w: 260, h: 160 },
       { id: 'seal', name: '封印', type: 'magic', range: 400, cd: 15, windup: 1.0, pct: 0, w: 120, h: 120, status: S('seal', 3) },
+      { id: 'rage', name: '怒りの咆哮', type: 'buff', range: 800, cd: 25, windup: 1.0, buff: { atk: 30, speed: 30, sec: 15 }, phases: [2] },
     ],
     boss: { phases: [{ hp: 1, name: '地上' }, { hp: 0.66, name: '空', speedMul: 1.2 }, { hp: 0.33, name: '怒り', rate: 1.5, atkMul: 1.1 }] },
   },
@@ -109,8 +126,10 @@ export const MOB_SKILLS = {
       { id: 'thunder', name: '雷', type: 'magic', range: 600, cd: 3, windup: 0.8, pct: 120, w: 60, h: 200 },
       { id: 'stone', name: '石化の光', type: 'shot', magic: true, range: 400, cd: 8, windup: 0.6, pct: 50, speed: 300, status: S('stun', 2, 0.7) },
       { id: 'call', name: 'ホシの子呼び', type: 'summon', mobs: ['M100'], count: 2, max: 4, cd: 20, windup: 0.8 },
+      { id: 'veil', name: '雲の衣', type: 'buff', range: 800, cd: 25, windup: 0.8, buff: { mdef: 60, magicReflect: 20, sec: 15 } },
+      { id: 'change', name: '変化の光', type: 'shot', magic: true, range: 400, cd: 14, windup: 0.6, pct: 0, speed: 280, status: S('polymorph', 4, 0.5) },
     ],
-    boss: { phases: [{ hp: 1, name: '魔女' }, { hp: 0.5, name: '分身', rate: 1.3 }] },
+    boss: { phases: [{ hp: 1, name: '魔女' }, { hp: 0.5, name: '分身', rate: 1.3, clones: { count: 2, hpPct: 2, shuffle: 8 } }] },
   },
   M139: { // 雪原の大狼
     attacks: [
@@ -125,22 +144,32 @@ export const MOB_SKILLS = {
       { id: 'stop', name: '時を止める', type: 'area', global: true, cd: 20, windup: 2.0, pct: 0, status: S('stun', 3) },
       { id: 'hand', name: '時計の針', type: 'melee', range: 220, cd: 4, windup: 0.7, pct: 140, w: 220, h: 80 },
       { id: 'call', name: '時の亡霊呼び', type: 'summon', mobs: ['M157'], count: 2, max: 4, cd: 25, windup: 0.8 },
+      { id: 'late', name: '時の遅れ', type: 'magic', range: 500, cd: 12, windup: 1.0, pct: 0, w: 200, h: 120, status: S('slow', 6, 1, 40) },
     ],
-    boss: { phases: [{ hp: 1, name: '時計' }, { hp: 0.5, name: '乗り手', rate: 1.3, atkMul: 1.1 }] },
+    boss: {
+      phases: [{ hp: 1, name: '時計' }, { hp: 0.5, name: '乗り手', rate: 1.3, atkMul: 1.1 }],
+      rifts: { phase: 0, count: 3, mob: 'M149', limit: 60, guard: 0.1, expose: 20 },
+    },
   },
   M189: { // 深淵の大魚
     attacks: [
-      { id: 'whirl', name: '渦潮', type: 'area', w: 360, cd: 10, windup: 1.2, pct: 100 },
+      { id: 'whirl', name: '渦潮', type: 'area', w: 140, cd: 10, windup: 1.6, pct: 100, suck: { w: 600, speed: 110 } },
       { id: 'school', name: '小魚の群れ', type: 'shot', range: 600, cd: 8, windup: 0.8, pct: 80, speed: 320, life: 2.5, count: 3, spread: 60 },
       { id: 'call', name: '小魚呼び', type: 'summon', mobs: ['M170'], count: 3, max: 6, cd: 25, windup: 0.8 },
     ],
-    boss: { phases: [{ hp: 1, name: '浅瀬' }, { hp: 0.75, name: '潜る', healPct: 5 }, { hp: 0.5, name: '深く潜る', healPct: 5 }, { hp: 0.25, name: '溝の底', healPct: 5, rate: 1.3 }] },
+    boss: { phases: [
+      { hp: 1, name: '浅瀬' },
+      { hp: 0.75, name: '潜る', submerge: { sec: 30, healPct: 5, rocks: 3, rockHpPct: 0.5 } },
+      { hp: 0.5, name: '深く潜る', submerge: { sec: 30, healPct: 5, rocks: 3, rockHpPct: 0.5 } },
+      { hp: 0.25, name: '溝の底', rate: 1.3, submerge: { sec: 30, healPct: 5, rocks: 4, rockHpPct: 0.5 } },
+    ] },
   },
   M199: { // 神殿の守護神
     attacks: [
       { id: 'fist', name: '石の拳', type: 'melee', range: 140, cd: 3, windup: 0.6, pct: 140, w: 140, h: 100 },
       { id: 'pillar', name: '光の柱', type: 'magic', range: 600, cd: 6, windup: 1.2, pct: 150, w: 100, h: 220 },
       { id: 'seal', name: '封印', type: 'magic', range: 400, cd: 15, windup: 1.0, pct: 0, w: 140, h: 120, status: S('seal', 3) },
+      { id: 'mirror', name: '光の鏡', type: 'buff', range: 800, cd: 25, windup: 1.0, buff: { reflect: 20, def: 40, sec: 12 }, phases: [1, 2] },
     ],
     boss: { phases: [
       { hp: 1, name: '石', elements: { lightning: 1.5 } },
@@ -160,7 +189,7 @@ export const MOB_SKILLS = {
       { id: 'wave', name: '気絶の波', type: 'area', global: true, groundOnly: true, cd: 18, windup: 1.5, pct: 60, status: S('stun', 1.5), phases: [0] },
       { id: 'mend', name: '回復の腕', type: 'heal', pct: 2, cd: 30, windup: 1.5, phases: [0] },
       { id: 'rain', name: '火の雨', type: 'area', global: true, safeHeight: 150, cd: 10, windup: 1.5, pct: 100, phases: [1, 2] },
-      { id: 'doom', name: '全滅の炎', type: 'area', global: true, cd: 60, windup: 5, pct: 300, phases: [2] },
+      { id: 'doom', name: '全滅の炎', type: 'area', global: true, cd: 60, windup: 5, pct: 300, phases: [2], shelter: { at: [0.06, 0.94], w: 90 } },
     ],
     boss: { phases: [{ hp: 1, name: '腕' }, { hp: 0.6, name: '上半身' }, { hp: 0.3, name: '怒り', atkMul: 1.2, speedMul: 1.2, rate: 1.3 }] },
   },
@@ -181,6 +210,7 @@ export const MOB_SKILLS = {
       { id: 'meteor', name: '星の雨', type: 'magic', range: 900, cd: 10, windup: 1.4, pct: 120, w: 80, h: 200, count: 5, spread: 140, phases: [2, 3] },
       { id: 'nova', name: '星の爆発', type: 'area', global: true, safeHeight: 150, cd: 18, windup: 2.0, pct: 150, phases: [3] },
       { id: 'void', name: '虚無', type: 'area', global: true, cd: 25, windup: 2.0, pct: 0, status: S('seal', 4), phases: [3] },
+      { id: 'daze', name: '惑いの星', type: 'area', global: true, cd: 22, windup: 1.5, pct: 0, status: S('confuse', 4), phases: [2, 3] },
     ],
     boss: { phases: [
       { hp: 1, name: '影', summon: { mobs: ['M234'], count: 4 } },
