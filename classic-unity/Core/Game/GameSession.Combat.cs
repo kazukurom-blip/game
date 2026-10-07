@@ -8,11 +8,13 @@ using Lumina.Core.Mobs;
 using Lumina.Core.Physics;
 using Lumina.Core.Quests;
 using Lumina.Core.Skills;
+using Lumina.Core.Status;
+using Lumina.Core.Util;
 using Lumina.Core.World;
 
 namespace Lumina.Core.Game
 {
-    public enum SkillUseResult { Ok, Unknown, NotLearned, Passive, Dead, OnRope, Busy, Cooldown, WrongWeapon, NoMp, NoHp, NoAmmo, NoMeso, NotReady }
+    public enum SkillUseResult { Ok, Unknown, NotLearned, Passive, Dead, OnRope, Busy, Cooldown, WrongWeapon, NoMp, NoHp, NoAmmo, Stunned, Sealed, NoMeso, NotReady }
 
     public sealed partial class GameSession
     {
@@ -66,7 +68,7 @@ namespace Lumina.Core.Game
             }
         }
 
-        public bool CanAttackNow => !Dead && !Body.OnRope && Attack == null;
+        public bool CanAttackNow => !Dead && !Body.OnRope && Attack == null && Status.CanAct;
 
         /// <summary>ふつうの攻撃を始める（攻撃キーを押している間くり返す）。</summary>
         public bool StartBasicAttack()
@@ -125,6 +127,9 @@ namespace Lumina.Core.Game
             if (x <= 0) return F(SkillUseResult.NotLearned, "まだ覚えていない");
             if (def.Kind == SkillKind.Passive) return F(SkillUseResult.Passive, "常に効くスキル");
             if (Dead) return F(SkillUseResult.Dead, null);
+            // 状態異常: 気絶・凍結・眠りは動けない、封印はスキル不可（治すスキルだけは使える）
+            if (!def.Cure && !Status.CanAct) return F(SkillUseResult.Stunned, "動けない");
+            if (!def.Cure && Status.Has(StatusKind.Seal)) return F(SkillUseResult.Sealed, "封印されていてスキルが使えない");
             if (Body.OnRope) return F(SkillUseResult.OnRope, "縄・はしごでは使えない");
             if (def.IsAttack && Attack != null) return F(SkillUseResult.Busy, null);
             if (Skills.CooldownLeft(id) > 0) return F(SkillUseResult.Cooldown, "待ち時間 " + Math.Ceiling(Skills.CooldownLeft(id)) + " 秒");
@@ -285,7 +290,7 @@ namespace Lumina.Core.Game
                 maxTargets = 1; hits = 1;
             }
             var alive = new List<Mob>();
-            foreach (var m in Map.Mobs) if (m.Alive) alive.Add(m);
+            foreach (var m in Map.Mobs) if (m.Alive && !m.Hidden) alive.Add(m);
             List<Mob> targets;
             if (def != null && def.Explode > 0)
             {
@@ -376,6 +381,22 @@ namespace Lumina.Core.Game
                 bonus *= 1 + m.StealthAttackPct / 100;
             }
             if (marks.TryGetValue(mob, out var mk) && mk.Until > PlaySec) bonus *= 1 + mk.DamagePct / 100;
+            // 気絶の極み: 気絶している敵へのクリティカル率 +%
+            if (m.StunCrit > 0 && mob.Status.Has(StatusKind.Stun))
+            {
+                double cr = Stats.CritRate, cd = Stats.CritDamage;
+                Stats.CritRate = Math.Min(1, cr + m.StunCrit / 100);
+                Stats.CritDamage = Math.Max(2.0, cd);
+                try { return SkillDamageCore(mob, def, x, mul, a, defender, element, bonus); }
+                finally { Stats.CritRate = cr; Stats.CritDamage = cd; }
+            }
+            return SkillDamageCore(mob, def, x, mul, a, defender, element, bonus);
+        }
+
+        private HitResult SkillDamageCore(Mob mob, SkillDef def, int x, double mul, AttackAction a, DefenderInfo defender, string element, double bonus)
+        {
+            var m = Stats.Mods;
+            int lv = Character.Level;
             if (def == null)
             {
                 if (a != null && a.Whack) return DamageCalc.Physical(Stats, lv, defender, 100 * bonus, Rng, BowWhackMul, element);
@@ -446,7 +467,7 @@ namespace Lumina.Core.Game
                     var c = targets[0].Box;
                     var near = new Rect(c.CenterX - 200, c.CenterY - 80, c.CenterX + 200, c.CenterY + 80);
                     var rest = new List<Mob>();
-                    foreach (var mb in Map.Mobs) if (mb.Alive && !targets.Contains(mb)) rest.Add(mb);
+                    foreach (var mb in Map.Mobs) if (mb.Alive && !mb.Hidden && !targets.Contains(mb)) rest.Add(mb);
                     var next = Targeting.Pick(rest, mb => mb.Box, near, c.CenterX, a.Facing, 1);
                     if (next.Count > 0) HitMobRepeatedly(next[0], def, x, def.HitCount(x), 1, a, 0);
                 }
@@ -515,6 +536,7 @@ namespace Lumina.Core.Game
             if (res.Miss) { mob.AggroT = Mob.AggroTime; return; }
             mob.Hp -= res.Damage;
             MobAI.OnHit(mob, res.Damage, Body.X);
+            if (res.Damage > 0) StatusSystem.BreakOnHit(mob, Out); // 凍結・眠りは攻撃で解ける
             Out.Add(GameEventType.MobHit, mob.Def.Id, res.Damage, mob.X, mob.HeadY);
             if (mob.Hp <= 0) KillMob(mob);
         }
@@ -531,6 +553,7 @@ namespace Lumina.Core.Game
             double expPct = Stats.Mods.ExpPct;
             if (marks.TryGetValue(mob, out var mk)) { if (mk.Until > PlaySec) expPct += mk.ExpPct; marks.Remove(mob); }
             mul *= 1 + expPct / 100;
+            mul *= Status.ExpMul; // 呪い: 経験値 −50%
             stolenFrom.Remove(mob);
             GainExp((long)Math.Max(1, Math.Round(def.Exp * mul)));
             foreach (var note in Quests.Progress(ObjectiveType.Kill, def.Id)) OnQuestNote(note);
@@ -563,45 +586,39 @@ namespace Lumina.Core.Game
         {
             var sense = new PlayerSense { X = Body.X, Y = Body.Y, Chain = Body.Seg?.Chain, Hidden = Dead || Stats.Stealth };
             var pbox = PlayerBox;
-            foreach (var m in Map.Mobs)
+            // 呼び出しで Mobs が増えるので、今いる分だけ回す
+            int count = Map.Mobs.Count;
+            for (int i = 0; i < count && i < Map.Mobs.Count; i++)
             {
+                var m = Map.Mobs[i];
+                if (m.Alive) TickMobStatus(m, dt);
                 MobAI.Step(m, Map.Physics, sense, dt, Rng);
-                if (!m.Alive || Dead) continue;
-                // 遠くから撃つ敵（遠・魔）: 前にいて近ければ 3 秒ごとに撃つ
-                if ((m.Def.Ranged || (m.Def.Magic && !m.Def.Touch)) && !sense.Hidden && m.AttackCooldown <= 0 && m.State != MobState.Hit)
-                {
-                    double dx = Body.X - m.X;
-                    bool inFront = (m.AggroT > 0 || m.Def.ChaseOnSight || m.Def.Move == MobMove.Stand) && Math.Abs(dx) < 300 && Math.Abs(Body.Y - m.Y) < 60;
-                    if (inFront)
-                    {
-                        m.Facing = dx >= 0 ? 1 : -1;
-                        m.AttackCooldown = 3;
-                        Map.Projectiles.Add(new MobProjectile
-                        {
-                            X = m.X + m.Facing * m.Def.Width / 2, Y = m.Y - m.Def.Height / 2, Vx = m.Facing * 300, Life = 1.2,
-                            Atk = m.Def.Magic ? Math.Max(1, m.Def.Matk) : m.Atk, MobLv = m.Def.Lv, MobAcc = m.Def.Acc, Magic = m.Def.Magic, FromX = m.X,
-                        });
-                    }
-                }
+                // 技（飛び道具・魔法の予兆・ボスの技・段階）
+                MobCombat.Step(m, Map, sense, Body.OnGround, dt, Rng, Out);
+                if (!m.Alive || Dead || m.Hidden) continue;
+                // 触れるとダメージ（状態異常つきの敵もいる）。守りの構えで返す相手として敵を渡す
                 if (m.Def.Touch && !sense.Hidden && Body.InvT <= 0 && m.Box.Overlaps(pbox))
-                    TakeHit(m.Atk, m.Def.Lv, m.Def.Acc, false, m.X, m);
+                    HitPlayer(m.Atk, m.Def.Lv, m.Acc, false, m.X, m.Def.TouchStatus, source: m);
             }
-            if (Dead) return;
-            foreach (var p in Map.Projectiles)
+            if (!Dead)
             {
-                if (p.Dead || !p.Box.Overlaps(pbox) || Stats.Stealth) continue;
-                p.Dead = true;
-                if (Body.InvT <= 0) TakeHit(p.Atk, p.MobLv, p.MobAcc, p.Magic, p.FromX);
+                foreach (var p in Map.Projectiles)
+                {
+                    if (p.Dead || !p.Box.Overlaps(pbox) || Stats.Stealth) continue;
+                    p.Dead = true;
+                    if (Body.InvT <= 0) HitPlayer(p.Atk, p.MobLv, p.MobAcc, p.Magic, p.FromX, p.Status, p.SkillId, p.MobUid);
+                }
             }
+            StepHazards(dt);
         }
 
         /// <summary>
         /// 敵の攻撃を受ける（避けた時は MISS）。煙玉・影の身代わり・守りの盾で受けない。不屈・聖なる守り・属性への耐性で減り、
         /// 守りの構え・魔力の反射で返し、お金の盾・魔力の盾で一部をお金・MP で受ける。source = 攻撃した敵（分かる時）。
         /// </summary>
-        public void TakeHit(int atk, int mobLv, int mobAcc, bool magic, double fromX, Mob source = null)
+        public bool TakeHit(int atk, int mobLv, int mobAcc, bool magic, double fromX, Mob source = null)
         {
-            if (Dead || Body.InvT > 0) return;
+            if (Dead || Body.InvT > 0) return false;
             var mods = Stats.Mods;
             double headY = Body.Y - PlayerBody.Height;
             bool front = (fromX - Body.X) * Body.Facing >= 0;
@@ -609,7 +626,7 @@ namespace Lumina.Core.Game
             {
                 Out.Damage.Add(new DamageNumber { Kind = DamageKind.Miss, X = Body.X, Y = headY });
                 Body.InvT = 0.6;
-                return;
+                return false;
             }
             if (!magic && mods.GuardChance > 0 && front && Rng.Chance(mods.GuardChance))
             {
@@ -618,14 +635,14 @@ namespace Lumina.Core.Game
                 Out.Add(GameEventType.Message, "guard", text: "盾で防いだ");
                 if (source != null) TryInflict(source, new StatusRequest { Type = "stun", Chance = 100, Sec = 2, SkillId = "guard" });
                 Body.InvT = 0.6;
-                return;
+                return false;
             }
             var res = DamageCalc.Taken(atk, mobLv, mobAcc, magic, Stats, Character.Level, Character.Line == JobLine.Warrior, Rng);
             if (res.Miss)
             {
                 Out.Damage.Add(new DamageNumber { Kind = DamageKind.Miss, X = Body.X, Y = headY });
                 Body.InvT = 0.6; // 避けた後すぐまた当たらないように（ふっとびは無し）
-                return;
+                return false;
             }
             double dmg = res.Damage;
             dmg *= 1 - Math.Min(90, mods.DamageTakenPct) / 100;
@@ -656,7 +673,9 @@ namespace Lumina.Core.Game
             Attack = null;
             poseTracker.AlertLeft = PoseTracker.AlertTime;
             Out.Add(GameEventType.Hurt, value: damage, x: Body.X, y: Body.Y);
+            StatusSystem.BreakOnHit(this, Out); // 凍結・眠りは攻撃を受けると解ける
             if (Character.Hp <= 0) Die();
+            return true;
         }
     }
 }

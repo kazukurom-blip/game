@@ -108,6 +108,7 @@ namespace Lumina.View
                 case DamageKind.Heal: return Green;
                 case DamageKind.MpHeal: return new Color32(80, 160, 255, 255);
                 case DamageKind.Miss: return Gray;
+                case DamageKind.Poison: return new Color32(150, 210, 90, 255); // 毒で減った分
                 default: return Orange;
             }
         }

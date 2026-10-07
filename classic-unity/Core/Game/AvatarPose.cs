@@ -15,6 +15,9 @@ namespace Lumina.Core.Game
         public bool Visible;      // 無敵の点滅で消えるフレームは false
         public bool Dead;         // 倒れている（墓石を出す）
         public AttackMotion AttackKind; // 攻撃中なら、どの種類の攻撃か（今は絵は swingO1 だけ）
+        /// <summary>頭の上に出す状態異常のアイコン（ビット: 1 &lt;&lt; (int)StatusKind。毒・気絶・暗闇・封印・呪い・弱り・凍結・眠り の順）</summary>
+        public int StatusIcons;
+        public bool HasStatus(Status.StatusKind k) => (StatusIcons & (1 << (int)k)) != 0;
 
         public override string ToString() => Motion + "[" + Frame + "]" + (FacingRight ? "→" : "←") + (Visible ? "" : " (点滅)");
     }
@@ -27,10 +30,10 @@ namespace Lumina.Core.Game
         private double climbT;
         public double AlertLeft;
 
-        public AvatarPose Update(PlayerBody body, AttackAction attack, bool dead, double dt)
+        public AvatarPose Update(PlayerBody body, AttackAction attack, bool dead, double dt, int statusIcons = 0)
         {
             if (AlertLeft > 0) AlertLeft -= dt;
-            var p = new AvatarPose { FacingRight = body.Facing > 0, Visible = body.BlinkVisible, Dead = dead };
+            var p = new AvatarPose { FacingRight = body.Facing > 0, Visible = body.BlinkVisible, Dead = dead, StatusIcons = statusIcons };
             string m;
             if (dead) m = "dead";
             else if (attack != null && !attack.Finished) m = "swingO1";

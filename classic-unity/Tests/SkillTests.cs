@@ -20,7 +20,7 @@ namespace Lumina.Core.Tests
     {
         // ---------------- 試しの場（平らな広い地面と、動かない的）
 
-        private static GameData Arena()
+        internal static GameData Arena()
         {
             var d = TestData.Fresh();
             d.AddMap(MapData.FromJson("{\"id\":\"T_ARENA\",\"name\":\"試しの場\",\"region\":\"T\",\"type\":\"特\",\"width\":3000,\"height\":800,"
@@ -36,7 +36,7 @@ namespace Lumina.Core.Tests
             return d;
         }
 
-        private static GameSession Hero(string line, string weapon = null, string ammo = null, int level = 30)
+        internal static GameSession Hero(string line, string weapon = null, string ammo = null, int level = 30)
         {
             var data = Arena();
             var s = GameSession.NewGame(data, "試し", 7);
@@ -54,17 +54,17 @@ namespace Lumina.Core.Tests
             return s;
         }
 
-        private static void Learn(GameSession s, string id, int level)
+        internal static void Learn(GameSession s, string id, int level)
         {
             var def = s.Data.Skill(id);
             foreach (var p in def.Prereqs) if (s.Skills.Level(p.Skill) < p.Level) Learn(s, p.Skill, p.Level);
             while (s.Skills.Level(id) < level) Assert.Equal(LearnResult.Ok, s.LearnSkill(id));
         }
 
-        private static Mob Dummy(GameSession s, double dx, double dy = 0) => s.Map.Spawn("T_DUMMY", s.Body.X + dx, s.Body.Y + dy);
+        internal static Mob Dummy(GameSession s, double dx, double dy = 0) => s.Map.Spawn("T_DUMMY", s.Body.X + dx, s.Body.Y + dy);
 
         /// <summary>スキルを使い、当たるまで進める。出たダメージの数字を返す。</summary>
-        private static List<DamageNumber> Cast(GameSession s, string id)
+        internal static List<DamageNumber> Cast(GameSession s, string id)
         {
             var nums = new List<DamageNumber>();
             s.Out.Clear();
@@ -85,7 +85,7 @@ namespace Lumina.Core.Tests
         public void AllFirstJobSkillsAreInData()
         {
             var d = TestData.Get();
-            var first = d.SkillList.Where(x => !x.Sample).ToList();
+            var first = d.SkillList.Where(x => x.Tier <= 1).ToList();
             Assert.Equal(3, first.Count(x => x.Job == JobLine.Beginner));
             foreach (var line in JobLine.FirstJobs) Assert.Equal(6, first.Count(x => x.Job == line && x.Tier == 1));
             Assert.Equal(33, first.Count);
@@ -118,7 +118,7 @@ namespace Lumina.Core.Tests
             Assert.Equal(5.0, ls.WeaponMul);
             Assert.Equal(20, d.Skill("bowman.double_shot").MaxLevel);
             Assert.Equal(-20 + 3, d.Skill("thief.dark_sight").Buff.Stats["speed"].EvalInt(3));
-            Assert.Equal(600 - 60 * 5, d.Skill("common4.will").CooldownSec(5));
+            Assert.Equal(600 - 60 * 5, d.Skill("champion.will").CooldownSec(5));
         }
 
         // ---------------- 覚える
@@ -254,13 +254,13 @@ namespace Lumina.Core.Tests
             Assert.Equal(SkillUseResult.NoMp, s.UseSkill("magician.energy_bolt"));
             Assert.Contains(s.Out.Events, e => e.Type == GameEventType.SkillFailed);
             // 待ち時間（4 次の見本: 意志の力 600-60x 秒）
-            s.Character.Tier = 4; s.Character.Line = JobLine.Warrior; s.Character.Sp[4] = 5;
+            s.Character.Tier = 4; s.Character.Line = JobLine.Warrior; s.Character.Branch = 0; s.Character.Sp[4] = 5;
             s.Character.Mp = 1000;
-            Learn(s, "common4.will", 5);
-            Assert.Equal(SkillUseResult.Ok, s.UseSkill("common4.will"));
-            Assert.Equal(SkillUseResult.Cooldown, s.UseSkill("common4.will"));
+            Learn(s, "champion.will", 5);
+            Assert.Equal(SkillUseResult.Ok, s.UseSkill("champion.will"));
+            Assert.Equal(SkillUseResult.Cooldown, s.UseSkill("champion.will"));
             s.Step(new PlayerInput(), 60 * 300 + 1);
-            Assert.Equal(SkillUseResult.Ok, s.UseSkill("common4.will"));
+            Assert.Equal(SkillUseResult.Ok, s.UseSkill("champion.will"));
         }
 
         // ---------------- 弓使い
@@ -300,7 +300,16 @@ namespace Lumina.Core.Tests
             s.Inventory.Remove("use.arrow_bow", s.Inventory.Count("use.arrow_bow"));
             s.RefreshStats();
             Assert.Equal(SkillUseResult.NoAmmo, s.UseSkill("bowman.double_shot"));
-            Assert.False(s.StartBasicAttack());
+            // ふつうの攻撃は弱い殴りになる（クラシックどおり。矢は減らない）
+            s.Map.Mobs.Clear();
+            Dummy(s, 40);
+            Assert.True(s.StartBasicAttack());
+            Assert.True(s.Attack.Whack);
+            Assert.Equal(AttackMotion.Swing, s.Attack.Motion);
+            int whack = 0;
+            for (int i = 0; i < 60 && s.Attack != null; i++) { s.Step(new PlayerInput()); whack += s.Out.Damage.Where(n => n.Kind == DamageKind.Dealt).Sum(n => n.Value); s.Out.Damage.Clear(); }
+            var bowRange = Formulas.PhysRange(3.4, s.Stats.Dex, s.Stats.Str, s.Stats.Watk, s.Stats.Mastery);
+            Assert.InRange(whack, 1, bowRange.Max / 2); // 弓で撃つより弱い
         }
 
         // ---------------- 盗賊
@@ -352,7 +361,7 @@ namespace Lumina.Core.Tests
             Assert.True(s.Stats.Stealth);
             int hp = s.Character.Hp;
             s.Step(new PlayerInput(), 120);
-            Assert.Equal(hp, s.Character.Hp);
+            Assert.True(s.Character.Hp >= hp, "闇隠れ中は触れても減らない"); // 自然回復で増えることはある
             s.Step(new PlayerInput { Attack = true }, 1);
             s.RefreshStats();
             Assert.False(s.Stats.Stealth);
@@ -446,14 +455,14 @@ namespace Lumina.Core.Tests
         public void HealSummonAndBooster()
         {
             var s = Hero(JobLine.Magician, "eq.magician.wand.8");
-            s.Character.Tier = 4; s.Character.Sp[2] = 30; s.Character.Sp[4] = 30;
+            s.Character.Tier = 4; s.Character.Branch = 2; s.Character.Sp[2] = 30; s.Character.Sp[4] = 30;
             Learn(s, "cleric.heal", 10);
             s.Character.Hp = 100;
             s.UseSkill("cleric.heal");
             Assert.Equal(Math.Min(s.Stats.MaxHp, 100 + s.Stats.MaxHp * 30 / 100), s.Character.Hp);
             Assert.Contains(s.Out.Damage, d => d.Kind == DamageKind.Heal);
             // 召喚（見本: 闇の獣。系統が違っても仕組みは同じ）
-            s.Character.Line = JobLine.Warrior;
+            s.Character.Line = JobLine.Warrior; s.Character.Branch = 2;
             Learn(s, "darkknight.beholder", 2);
             s.Character.Hp = 100;
             Assert.Equal(SkillUseResult.Ok, s.UseSkill("darkknight.beholder"));
@@ -462,7 +471,8 @@ namespace Lumina.Core.Tests
             Assert.Equal(100 + 140, s.Character.Hp);
             s.Step(new PlayerInput(), 60 * 41);
             Assert.Null(s.Buffs.Summon); // 30x 秒で帰る
-            // 加速（見本: 剣の加速）: 剣の時だけ
+            // 加速（剣の加速）: 剣の時だけ（ファイター）
+            s.Character.Branch = 0; s.Character.Sp[2] = 30;
             Assert.Equal(SkillUseResult.WrongWeapon, Try(s, "fighter.sword_booster"));
             s.Unequip(EquipSlot.Weapon);
             s.Inventory.Add("eq.warrior.sword1.10");

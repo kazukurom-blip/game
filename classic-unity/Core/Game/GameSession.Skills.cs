@@ -1,10 +1,8 @@
 // スキル固有の動き（GameSession の続き）: 闘気・気合い・召喚の攻撃・テレポート・回復・遅れて当たる攻撃・状態異常の受け渡し。
 //
-// 状態異常（毒・気絶・凍結 …）そのものは別担当（Core/Status/）。ここは「何を・何%で・何秒」を決めて渡すだけ:
-//   session.MobStatusHook  = (mob, req) => …   // 敵にかける（確率はここで振った後。req.NoBoss・毒のボス 1/10 などは受け取る側で）
-//   session.SelfStatusHook = req => …          // 自分にかける（竜の咆哮の「2 秒動けない」）
-//   session.CureStatusHook = () => …           // 自分の状態異常を治す（意志の力・解除）
-//   session.StatusImmune                       // 聖なる盾がかかっている間は true（受ける側で見る）
+// 状態異常（毒・気絶・凍結 …）は Core/Status/（StatusSystem）。スキルのデータの種類（type）を StatusKind に直してかける:
+//   poison・burn → 毒、stun・bind → 気絶（動けない）、darkness → 暗闇、seal → 封印、freeze → 凍結。
+//   slow（遅延）・polymorph（変化の呪い）・charm（錯乱弾）は StatusKind に無いので、お知らせ（MobHit "status:種類"）と MobStatusHook だけ。
 using System;
 using System.Collections.Generic;
 using Lumina.Core.Character;
@@ -13,6 +11,8 @@ using Lumina.Core.Items;
 using Lumina.Core.Mobs;
 using Lumina.Core.Physics;
 using Lumina.Core.Skills;
+using Lumina.Core.Status;
+using Lumina.Core.Util;
 using Lumina.Core.World;
 
 namespace Lumina.Core.Game
@@ -30,11 +30,21 @@ namespace Lumina.Core.Game
         public const int EnergyMax = 100, EnergyPerHit = 10;
         public const double EnergyFullSec = 60; // 満タンが続く時間（似）
 
-        // TODO(status): 状態異常の担当がここにつなぐ（つながっていなければ何も起きない。お知らせの MobHit "status:種類" だけ出る）
+        /// <summary>StatusKind に無い状態異常（遅延・変化・錯乱）を受け取る所（今は誰もつないでいない）。</summary>
         public Action<Mob, StatusRequest> MobStatusHook;
-        public Action<StatusRequest> SelfStatusHook;
-        public Action CureStatusHook;
+        /// <summary>聖なる盾がかかっている間は状態異常を受けない。</summary>
         public bool StatusImmune => Stats?.Mods.StatusImmune ?? false;
+
+        /// <summary>スキルのデータの状態異常の名前 → StatusKind（無ければ false）。</summary>
+        public static bool SkillStatusKind(string type, out StatusKind kind)
+        {
+            switch (type)
+            {
+                case "burn": kind = StatusKind.Poison; return true;   // 燃焼 = 火の毒
+                case "bind": kind = StatusKind.Stun; return true;     // 動けない
+                default: return StatusSystem.TryParse(type, out kind);
+            }
+        }
 
         private readonly List<PendingHit> pendingHits = new List<PendingHit>();
         private readonly Dictionary<Mob, MobMark> marks = new Dictionary<Mob, MobMark>();
@@ -48,20 +58,23 @@ namespace Lumina.Core.Game
             if (mob == null || !mob.Alive) return;
             if (r.NoBoss && mob.Def.IsBoss) return;
             if (!Rng.Chance(r.Chance / 100)) return;
-            Out.Add(GameEventType.MobHit, mob.Def.Id, 0, mob.X, mob.HeadY, "status:" + r.Type);
-            MobStatusHook?.Invoke(mob, r); // TODO(status): 実際にかける
+            if (SkillStatusKind(r.Type, out var kind)) ApplyStatus(mob, kind, r.Sec, r.Power);
+            else
+            {
+                Out.Add(GameEventType.MobHit, mob.Def.Id, 0, mob.X, mob.HeadY, "status:" + r.Type);
+                MobStatusHook?.Invoke(mob, r); // 遅延・変化の呪い・錯乱弾（敵の速さ・姿・味方化はまだ無い）
+            }
         }
 
         private void InflictSelf(StatusRequest r)
         {
             if (!Rng.Chance(r.Chance / 100)) return;
-            SelfStatusHook?.Invoke(r); // TODO(status): 竜の咆哮の「自分は 2 秒動けない」など
+            if (SkillStatusKind(r.Type, out var kind)) ApplyStatus(kind, r.Sec, r.Power); // 竜の咆哮: 自分は 2 秒動けない
         }
 
         private void CureSelf(string skillId)
         {
-            CureStatusHook?.Invoke(); // TODO(status): 気絶・暗闇・毒・封印・呪い・誘惑を治す
-            Out.Add(GameEventType.Message, skillId, text: "状態異常が治った");
+            if (CureStatus(CurableAll) > 0) Out.Add(GameEventType.Message, skillId, text: "状態異常が治った");
         }
 
         // ---------------- 闘気（クルセイダー・チャンピオン）

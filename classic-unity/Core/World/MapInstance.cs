@@ -32,11 +32,57 @@ namespace Lumina.Core.World
 
     public sealed class MobProjectile
     {
-        public double X, Y, Vx, Life;
+        public double X, Y, Vx, Vy, Life;
         public int Atk, MobLv, MobAcc; public bool Magic;
         public double FromX;
         public bool Dead;
-        public Rect Box => new Rect(X - 8, Y - 8, X + 8, Y + 8);
+        public int MobUid;              // 撃った敵
+        public string SkillId;          // 技の ID（絵の選び方: Unity 側は敵の ID と技の ID で選ぶ）
+        public StatusInflict Status;    // 当たった時の状態異常
+        public double Size = 8;         // 当たりの半分の大きさ
+        public Rect Box => new Rect(X - Size, Y - Size, X + Size, Y + Size);
+    }
+
+    public enum HazardKind { Melee, Magic, Area, Dive }
+
+    /// <summary>
+    /// 敵の技の当たる所（MONSTERS.md 2 章「足元に予兆を出してから当たる」）。
+    /// 出てから Warn 秒は予兆だけ（Unity 側は Box に予兆の絵を出す。Progress が 0→1）。Warn が 0 になった瞬間に当たる。
+    /// Linger &gt; 0 なら、その後もその場に残って、中にいる間は状態異常をかけ続ける（毒の沼など）。
+    /// </summary>
+    public sealed class MobHazard
+    {
+        public int Uid, MobUid;
+        public string MobId, SkillId, Name;
+        public HazardKind Kind;
+        public Rect Box;                // 当たる四角（Global なら画面全体）
+        public bool Global, GroundOnly;
+        public double SafeAboveY = double.NaN; // この y より上（小さい）に足元があれば当たらない
+        public double Warn, WarnTotal;  // 予兆の残り・全体
+        public double Linger, LingerT;  // 残る時間・残りの時間
+        public double TickT;
+        public bool Fired, Done;
+        public int Atk, MobLv, MobAcc; public bool Magic; public double FromX;
+        public StatusInflict Status;
+        /// <summary>予兆を描くか（近接は構えの絵だけで、地面の印は出さない）</summary>
+        public bool ShowWarning => Kind != HazardKind.Melee;
+        public double Progress => WarnTotal > 0 ? Math.Min(1, Math.Max(0, 1 - Warn / WarnTotal)) : 1;
+    }
+
+    /// <summary>ボスの HP バーに出す値（MONSTERS.md 5 章「段階ごとに色が変わる」）。</summary>
+    public struct BossBarInfo
+    {
+        public int Uid;
+        public string MobId, Name;
+        public int Level;
+        public long Hp, MaxHp;
+        public double Ratio;            // 全体の HP の割合（0〜1）
+        public int Phase, PhaseCount;   // 今の段階（0〜）と段階の数。色は Phase で変える
+        public string PhaseName;
+        public double PhaseTop, PhaseBottom; // 今の段階の HP の範囲（割合）
+        public double PhaseRatio;       // 段階の中での残り（1→0）。段階ごとのバーに使う
+        public int StatusIcons;         // かかっている状態異常のビット
+        public bool Casting; public string CastName; public double CastProgress; // 大技の詠唱のバー
     }
 
     public sealed class MapInstance
@@ -46,6 +92,7 @@ namespace Lumina.Core.World
         public readonly List<Mob> Mobs = new List<Mob>();
         public readonly List<DropItem> Drops = new List<DropItem>();
         public readonly List<MobProjectile> Projectiles = new List<MobProjectile>();
+        public readonly List<MobHazard> Hazards = new List<MobHazard>();
         private readonly GameData data;
         private int nextUid = 1;
         private double respawnT;
@@ -75,7 +122,12 @@ namespace Lumina.Core.World
         {
             Mobs.RemoveAll(m => m.Removed || m.State == MobState.Die);
             Projectiles.Clear();
-            foreach (var m in Mobs) { m.AggroT = 0; m.StunT = 0; m.KnockT = 0; if (m.State == MobState.Hit) m.State = MobState.Stand; }
+            Hazards.Clear();
+            foreach (var m in Mobs)
+            {
+                m.AggroT = 0; m.StunT = 0; m.KnockT = 0; if (m.State == MobState.Hit) m.State = MobState.Stand;
+                m.Casting = null; m.Hidden = false;
+            }
             FillSpawns(rng);
             respawnT = 0;
         }
@@ -101,7 +153,7 @@ namespace Lumina.Core.World
 
         public int AliveCount
         {
-            get { int n = 0; foreach (var m in Mobs) if (m.Alive && !m.Timed) n++; return n; }
+            get { int n = 0; foreach (var m in Mobs) if (m.Alive && !m.Timed && !m.Summoned) n++; return n; }
         }
 
         private void FillSpawns(IRandom rng)
@@ -154,10 +206,12 @@ namespace Lumina.Core.World
             foreach (var p in Projectiles)
             {
                 p.X += p.Vx * dt;
+                p.Y += p.Vy * dt;
                 p.Life -= dt;
                 if (p.Life <= 0 || p.X < 0 || p.X > Data.Width) p.Dead = true;
             }
             Projectiles.RemoveAll(p => p.Dead);
+            Hazards.RemoveAll(h => h.Done);
         }
 
         /// <summary>倒れた敵の位置から物を落とす（何番目かで左右と時間をずらす）。</summary>
@@ -208,5 +262,35 @@ namespace Lumina.Core.World
         }
 
         public Mob FindMob(int uid) => Mobs.Find(m => m.Uid == uid);
+
+        /// <summary>このボスが呼んだ手下で生きている数。</summary>
+        public int SummonCount(int bossUid) { int n = 0; foreach (var m in Mobs) if (m.Alive && m.SummonerUid == bossUid) n++; return n; }
+
+        /// <summary>ボスの HP バー（生きているボス・大ボス・ダンジョンの主の 1 体目。いなければ null）。</summary>
+        public BossBarInfo? BossBar
+        {
+            get
+            {
+                Mob b = null;
+                foreach (var m in Mobs)
+                {
+                    if (!m.Alive || m.Def.Boss == null) continue;
+                    if (b == null || (m.Def.IsBoss && !b.Def.IsBoss)) b = m;
+                }
+                if (b == null) return null;
+                var phases = b.Def.Boss.Phases;
+                int ph = Math.Min(b.Phase, phases.Count - 1);
+                double top = phases[ph].Hp, bottom = ph + 1 < phases.Count ? phases[ph + 1].Hp : 0;
+                double ratio = b.MaxHp > 0 ? Math.Max(0, (double)b.Hp / b.MaxHp) : 0;
+                return new BossBarInfo
+                {
+                    Uid = b.Uid, MobId = b.Def.Id, Name = b.Def.Name, Level = b.Def.Lv, Hp = b.Hp, MaxHp = b.MaxHp, Ratio = ratio,
+                    Phase = ph, PhaseCount = phases.Count, PhaseName = phases[ph].Name, PhaseTop = top, PhaseBottom = bottom,
+                    PhaseRatio = top - bottom > 1e-9 ? Math.Max(0, Math.Min(1, (ratio - bottom) / (top - bottom))) : 0,
+                    StatusIcons = b.StatusIcons,
+                    Casting = b.Casting != null, CastName = b.Casting?.Name, CastProgress = b.Casting != null && b.CastTotal > 0 ? 1 - b.CastT / b.CastTotal : 0,
+                };
+            }
+        }
     }
 }
