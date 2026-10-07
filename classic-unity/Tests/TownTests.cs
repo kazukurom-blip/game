@@ -370,12 +370,18 @@ namespace Lumina.Core.Tests
             Assert.Contains(log, e => e.Type == GameEventType.JobAdvanced && e.Value == 4);
             Assert.Equal(1, s.Inventory.Count("use.master_book.20"));
             // 極意の書: ★のスキルの上限が上がる（★でない・今の上限以下の書は使えない＝書は残る）。
-            // このデータの★は最初から上限 20 なので、20 の書は使えず 30 の書だけ効く
+            // ★は最初 10。書は 10 ずつ（20 の書 → 30 の書）。30 の書を先には使えない
             Assert.Equal(MasterBookResult.Invalid, s.UseMasterBook("use.master_book.30", "champion.rush"));
             var star = TestData.Get().SkillList.First(k => k.Job == "warrior" && k.Tier == 4 && k.MasterLevel >= 30 && k.Branch == 0);
-            Assert.Equal(MasterBookResult.Invalid, s.UseMasterBook("use.master_book.20", star.Id));
-            Assert.Equal(1, s.Inventory.Count("use.master_book.20"));
+            Assert.Equal(10, s.Skills.MaxLevel(star));
             s.Inventory.Add("use.master_book.30");
+            Assert.Equal(MasterBookResult.Invalid, s.UseMasterBook("use.master_book.30", star.Id));
+            Assert.Equal(1, s.Inventory.Count("use.master_book.30"));
+            MasterBookResult r20;
+            int tries = 0;
+            do { s.Inventory.Add("use.master_book.20"); r20 = s.UseMasterBook("use.master_book.20", star.Id); } while (r20 == MasterBookResult.Failed && ++tries < 100);
+            Assert.Equal(MasterBookResult.Ok, r20);
+            Assert.Equal(20, s.Skills.MaxLevel(star));
             var r = s.UseMasterBook("use.master_book.30", star.Id);
             Assert.NotEqual(MasterBookResult.Invalid, r);
             Assert.Equal(0, s.Inventory.Count("use.master_book.30"));

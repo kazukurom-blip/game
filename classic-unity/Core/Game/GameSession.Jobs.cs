@@ -143,7 +143,7 @@ namespace Lumina.Core.Game
             var s = Data.Skill(skillId);
             if (def == null || def.MasterBookCap <= 0 || !Inventory.Has(itemId) || s == null || s.MasterLevel <= 0) return MasterBookResult.Invalid;
             if (Skills.CanLearn(skillId, Character) == Lumina.Core.Skills.LearnResult.WrongJob) return MasterBookResult.Invalid;
-            if (def.MasterBookCap <= Skills.MaxLevel(s) || def.MasterBookCap > s.MasterLevel) return MasterBookResult.Invalid;
+            if (def.MasterBookCap != Skills.MaxLevel(s) + 10 || def.MasterBookCap > s.MasterLevel) return MasterBookResult.Invalid;
             Inventory.Remove(itemId);
             bool ok = Skills.UseMasteryBook(skillId, def.MasterBookCap, def.MasterBookRate, Rng);
             Out.Add(GameEventType.ItemUsed, itemId, ok ? 1 : 0, text: ok ? s.Name + "の上限が " + def.MasterBookCap + " になった" : "極意の書は失敗した");

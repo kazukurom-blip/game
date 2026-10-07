@@ -45,7 +45,7 @@ namespace Lumina.Core.Skills
         public bool UseMasteryBook(string id, int cap, double successRate, IRandom rng)
         {
             var s = data.Skill(id);
-            if (s == null || s.MasterLevel <= 0 || cap <= MaxLevel(s) || cap > s.MasterLevel) return false;
+            if (s == null || s.MasterLevel <= 0 || cap != MaxLevel(s) + 10 || cap > s.MasterLevel) return false; // 書は 10 ずつ（10→20→30）。30 の書は 20 の書の後
             if (!rng.Chance(successRate)) return false;
             Masters[id] = cap;
             return true;

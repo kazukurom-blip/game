@@ -68,7 +68,12 @@ namespace Lumina.Core.Tests
             return s;
         }
 
-        private static void Max(GameSession s, string id) => SkillTests.Learn(s, id, s.Skills.MaxLevel(s.Data.Skill(id)));
+        private static void Max(GameSession s, string id)
+        {
+            var def = s.Data.Skill(id);
+            if (def.MasterLevel > 0) s.Skills.UseMasteryBook(id, 20, 1, s.Rng); // ★は 20 の書を使った後の上限で確かめる
+            SkillTests.Learn(s, id, s.Skills.MaxLevel(def));
+        }
 
         private static void Use(GameSession s, string id)
         {

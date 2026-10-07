@@ -78,7 +78,7 @@ export function buildSkills(problems) {
       seenMech.add(job + '/' + name);
       const m = clone(m0);
       const id = `${prefix}.${m.id}`;
-      // 最大 Lv（★は「20/30」= 最初 20、極意の書で 30）
+      // 最大 Lv（★は「10/30」= 最初 10、極意の書 20・30 で上がる）
       const ml = /^(\d+)(?:\/(\d+))?$/.exec(r.maxLv);
       if (!ml) { problems.push(`スキル: ${id} の最大Lv が読めない: ${r.maxLv}`); continue; }
       const maxLevel = parseInt(ml[1], 10);

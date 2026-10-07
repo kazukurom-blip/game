@@ -64,6 +64,7 @@ namespace Lumina.Core.Tests
         private static void Max(GameSession s, string id)
         {
             var def = s.Data.Skill(id);
+            if (def.MasterLevel > 0) s.Skills.UseMasteryBook(id, 20, 1, s.Rng); // ★は 20 の書を使った後の上限で確かめる
             SkillTests.Learn(s, id, s.Skills.MaxLevel(def));
         }
 
@@ -180,12 +181,14 @@ namespace Lumina.Core.Tests
             Assert.Equal(LearnResult.Ok, s.LearnSkill("page.sword_mastery"));
             Assert.Equal(LearnResult.Ok, s.LearnSkill("paladin.blast"));
             s.Character.Branch = 0; // チャンピオン
-            SkillTests.Learn(s, "champion.brandish", 20);
+            SkillTests.Learn(s, "champion.brandish", 10);
             Assert.Equal(LearnResult.MaxLevel, s.LearnSkill("champion.brandish"));
             Assert.False(s.Skills.UseMasteryBook("champion.rush", 30, 1, s.Rng)); // ★でない
+            Assert.False(s.Skills.UseMasteryBook("champion.brandish", 30, 1, s.Rng)); // 30 の書は 20 の書の後
+            Assert.True(s.Skills.UseMasteryBook("champion.brandish", 20, 1, s.Rng));
             Assert.True(s.Skills.UseMasteryBook("champion.brandish", 30, 1, s.Rng));
             Assert.Equal(LearnResult.Ok, s.LearnSkill("champion.brandish"));
-            Assert.Equal(21, s.Skills.Level("champion.brandish"));
+            Assert.Equal(11, s.Skills.Level("champion.brandish"));
             // 保存しても残る
             var back = SaveSerializer.FromJson(SaveSerializer.ToJson(s.ToSaveData("t")));
             var g = GameSession.FromSave(s.Data, back);
