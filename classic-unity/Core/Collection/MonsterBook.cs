@@ -15,6 +15,37 @@ namespace Lumina.Core.Collection
 
         /// <summary>敵の ID → 持っているカードの数（0〜5）</summary>
         public readonly Dictionary<string, int> Cards = new Dictionary<string, int>();
+        /// <summary>同じ敵の別の記録（例: 珍しい色違いの個体を見た・倒した数）。敵の ID → 記録の名前 → 数。図鑑の窓は敵の行の下に並べる。
+        /// 中身を決めるのは使う側（今は空）。セーブの "collection.variants" にそのまま残る。</summary>
+        public readonly Dictionary<string, Dictionary<string, long>> Variants = new Dictionary<string, Dictionary<string, long>>();
+
+        public long Variant(string mobId, string key) => mobId != null && Variants.TryGetValue(mobId, out var v) && v.TryGetValue(key, out var n) ? n : 0;
+        public void AddVariant(string mobId, string key, long n = 1)
+        {
+            if (!Variants.TryGetValue(mobId, out var v)) Variants[mobId] = v = new Dictionary<string, long>();
+            v[key] = (v.TryGetValue(key, out var c) ? c : 0) + n;
+        }
+
+        public Dictionary<string, object> VariantsToDict()
+        {
+            var d = new Dictionary<string, object>();
+            foreach (var kv in Variants)
+            {
+                var o = new Dictionary<string, object>();
+                foreach (var x in kv.Value) o[x.Key] = x.Value;
+                d[kv.Key] = o;
+            }
+            return d;
+        }
+
+        public void ReadVariants(Dictionary<string, object> d)
+        {
+            Variants.Clear();
+            if (d == null) return;
+            foreach (var kv in d)
+                if (kv.Value is Dictionary<string, object> o)
+                    foreach (var x in o) AddVariant(kv.Key, x.Key, (long)Util.J.ToDouble(x.Value));
+        }
 
         public static bool IsCard(string itemId) => itemId != null && itemId.StartsWith(CardPrefix, StringComparison.Ordinal);
         public static string CardId(string mobId) => CardPrefix + mobId;

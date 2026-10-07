@@ -88,7 +88,7 @@ session.Character / Stats / Inventory / Equipment / Skills / Buffs / Status / Qu
   NPC のセリフ: `Data/tools/world/npc_lines.mjs` → `npcs.json` の `lines` → `NpcDef.Lines`・`NpcData.Lines`（`Game/NpcLines.cs`。先頭の `[条件]`（lv・tier・line・done・doing）が合う一言を先に、話しかけた回数で順に変える。`{name}`・`{job}`・`{lv}` を置き換える）。
   町の仕組み（4-11）: `StorageDeposit`／`StorageWithdraw`／`StorageDepositMeso`／`StorageWithdrawMeso`／`StorageExpand`／`ShopItems`（今日の品）／`Recharge`（詰め直し）／`TaxiTo`・`TaxiFee`／`Craft`・`CraftsAt`／`SitOnChair`・`StandUp`（または椅子を `UseItem`）／`FeedPet`・`TalkToPet`・`SetPetOut`・`RenamePet`（ペットの品・餌・技の本は `UseItem`）／`StartQuiz`・`AnswerQuiz`（賢者の石を `Interact` すると始まる）／`UseMasterBook`／`CanEnterRoom`・`RoomEntriesLeft`。
   読む物: `session.Storage`・`Pets`（X/Y/Motion）・`Quiz`（Current: 問題と混ぜた選択肢）・`CurrentRoom`・`RoomTimeLeft`/`RoomTimerRunning`/`RoomCleared`・`Sitting`（Pose.Motion = "sit"）・`Daily`。
-- **セーブ**: 自動（マップ移動・Lv アップ・クエスト完了・転職・起き上がり・3 分ごと）。アプリを閉じる時・裏に回った時は Unity 側で `SaveNow`。
+- **セーブ**: 自動（マップ移動・Lv アップ・クエスト完了・転職・起き上がり・1 分ごと）。アプリを閉じる時・裏に回った時は Unity 側で `SaveNow`。
 
 ## 4. 仕組みの説明
 
@@ -209,12 +209,16 @@ session.Character / Stats / Inventory / Equipment / Skills / Buffs / Status / Qu
 
 ### 4-7. クエスト（QUESTS.md）
 
-- `Data/quests.json`（286 本）。目的: `kill`（倒す）・`collect`（持ち物の数。完了で渡す）・`talk`（話す）・`visit`（行く）・`interact`（調べる）・`event`（操作の名前。`GameSession.QuestEvent` で知らせる）。報告先 `end`（`auto` は着いたら完了）。受ける条件の能力値 `minStats`（転職の「STR35 以上」。足りなければ `StartResult.StatTooLow`）。
+- `Data/quests.json`（624 本。うち 338 本は寄り道の追加 = `classic/tools/data/quests_more.mjs`、QUESTS.md 8 章）。目的: `kill`（倒す）・`collect`（持ち物の数。完了で渡す）・`talk`（話す）・`visit`（行く）・`interact`（調べる）・`event`（操作の名前。`GameSession.QuestEvent` で知らせる）。報告先 `end`（`auto` は着いたら完了）。受ける条件の能力値 `minStats`（転職の「STR35 以上」。足りなければ `StartResult.StatTooLow`）。
 - **全部のクエストに判定できる目的がある**。文章だけだった物（手紙を届ける・灯台のランプ・化石を調べる・ダンジョンをクリア・転職 など 91 本）は `Data/tools/quest_goals.mjs` で直した。依頼者・報告先は「名前＠マップ」から NPC の ID に直してある（そのマップにいない依頼者は書き出しの時に問題として止まる）。
 - event の名前: quickslot_set / use_potion / ap_spent / sp_spent / skill_used（チュートリアル）・`job_advance.1`（`AdvanceJob` が知らせる）・`job_advance.2〜4`・`storage_deposit` / `storage_withdraw`・`pet_adopted` / `pet_fed` / `pet_closeness`・`dungeon_clear` と `dungeon_clear.<マップID>`・`boss_kill`・`quiz_cleared`。全部 Core が知らせる（4-11）。
 - 転職のクエスト（J 系）は `line`（自分の系統だけ受けられる。違えば `StartResult.WrongJob`）。1 次転職のクエスト（目的が `job_advance.1` の J?-1）は初心者だけ（転職した後は `WrongJob`。受けると終わらないクエストが残るため。PLAYTEST.md）。`advance`（J?-7 = 3 次・J?-9 = 4 次: 完了すると転職）・`unlock`（V-13 = 倉庫の枠 +4、PET-07 = ペット 2 匹）は quest_goals.mjs。
 - 報酬の経験値・お金は QUESTS.md 1-3 の式。品は名前から ID に直してある（直せない物は `rewardUnparsed` に残る。大陸のクエストの「自分の職の◯◯」など）。
 - **繰り返しのクエスト（R 系。QUESTS.md 5 章）**: quests.json の `repeat`（`daily` / `weekly`）・`board`（掲示板の日替わり）。`BoardToday()` が今日の 3 本（受けられる Lv の物のうち Lv の近い 5 本から日付で選ぶ）。掲示板に出ていない物は `StartResult.NotToday`。完了すると `Daily` に記録し（キー `quest.<ID>`。セーブの `Daily` に入る）、その日（週）のうちは `AlreadyCompleted`、次の日（週）にまた受けられる。報酬の券（`use.exp_coupon`・`use.drop_coupon`）は使うと 30 分のバフ（`ActiveBuff.ExpPct` / `DropPct` = +100%）、店で売ると 5,000 / 5 万ルド（「または お金」）。
+- **寄り道の追加（QUESTS.md 8 章）の決まり**: `ordered`（目的を上から順にしか数えない。ヒント → 見つける。集める物は順番に入れない）・`hours`（受けられる時間。`GameSession.HourOffset` = 9 で日本の時間。夜をまたいでよい。外れると `StartResult.WrongTime`）・`needItem`（その品を持っているか着けていると受けられる。無ければ `MissingItem`）。毎日のクエストは `repeat: daily`（掲示板と同じ `Daily` の記録）。調べる物の `quest` はそのクエストを進めている間だけ見つかる（ほかの時は「何も見つからない」）。`timedSpawns` の `quest` はクエスト専用の敵: そのクエストを進めている間だけ湧き（10 秒で湧き直す）、進めていなければ消える（`MapInstance.QuestActive`）。
+- **長い目標（冒険の記録）**: event `kinds_killed`（倒した敵の種類）・`bosses_killed`（ボス・強敵の種類）・`towns_visited`・`maps_visited`・`quests_done`（1 回だけのクエスト）。記録は `Flags` の `kill.<敵>`・`visit.<マップ>`（セーブに入る）。数は受ける前の分も数える（`QuestLog.SetAtLeast`。`GameSession.Records.cs`）。
+- **装備のメダルの欄**（`EquipSlot.Medal`・`"medal"`）: 称号の代わり。限定の品（`questOnly`）は店に並ばず敵も落とさない（`QuestCoverageTests`）。
+- **確かめ**（`Tests/QuestCoverageTests.cs`）: 全クエストで依頼者・報告先がそのマップにいる・倒す敵がどこかに湧く（専用の敵はそのクエストの間）・集める品を落とす敵が湧く（か店・報酬・製作）・行く所・調べる物がある・知っている操作だけ・前提の Lv・前提が輪にならない・NPC 全員に依頼（雲の船の上のカゼだけ除く）・限定の品・隠しの順番・専用ボス・隠しの条件・長い目標・毎日。
 - 頭の上の電球: `NpcBulb`（2 = 緑、1 = 黄）。
 - **チュートリアル 20 本（S-01〜S-20）は、目的を機械で判定できる形に書き直し、テストで最初から最後まで遊んで通す**（歩いて岩を越える・縄を登って木箱・ポータル・狩り・拾う・隠し部屋・船で大陸へ）。
 
@@ -228,7 +232,7 @@ session.Character / Stats / Inventory / Equipment / Skills / Buffs / Status / Qu
 - **テストは本物の物理でも確かめる**（`Tests/MapReach.cs`・`WorldMapTests.cs`）: 全マップで、足場の上の 16 px おきの位置から PlayerPhysics で動いて行ける所を調べ、どのポータルからも全部の足場に行けること。代表の 17 枚は 1 つの体で全部の足場を順に回り、全部のポータルの前に立つ（歩いて止まる → 動く、を続けて）。
 - ボス（monsters.json の `boss` を持つ 22 体: 地域ボス 12・大ボス 3・ダンジョンの主など 7）は、ボスの間（1 人用ダンジョンは最後の部屋・試験の部屋）の `timedSpawns` に置いてある。間隔は WORLD.md の特徴の欄（「1 時間ごと」「1 日 2 回」「週 1 回」）から。
 - 戻る町（`returnMap`）: ポータルでたどって一番近い町。島は芽吹き村。
-- NPC は `tools/world/npcs.mjs`（167 人）。位置は生成の時に決まる（高い町では `tier` の段に）。同じ人が別のマップにもいる時（転職官が修練場にいる）は `dorga_V413` のような別の ID。乗り物の NPC（雲の船・潜水船・大きな鳥・そり）は `travel`。町の薬屋には店（`shop.<町>.potion`）がある。
+- NPC は `tools/world/npcs.mjs`（175 人。谷の温泉の仙人・市場の冒険の記録係を足した）。クエストの隠し物・専用の敵は生成の後に `world.mjs` の `placeQuestExtras` が足場の上に置く（乱数を使わないので、ほかの足場は変わらない）。位置は生成の時に決まる（高い町では `tier` の段に）。同じ人が別のマップにもいる時（転職官が修練場にいる）は `dorga_V413` のような別の ID。乗り物の NPC（雲の船・潜水船・大きな鳥・そり）は `travel`。町の薬屋には店（`shop.<町>.potion`）がある。
 - 隠し部屋（WORLD.md 6 章）: S007・V102（灯台のてっぺん）・V105・V409・V506・V601・M107・T104（おもちゃ箱の底）。隠しポータル（`hidden`）で入り、部屋のポータルで戻る。
 - **一方通行のポータル**（`oneWay: true`）: 雲の塔 C107〜C110 の窓（`window`）→ C111 の `slide_in`（type `landing` = 着くだけの位置。入れない）。T104 の落とし穴（`secret`、同じマップの中）→ おもちゃ箱の底 → 部屋の出口は出現の位置（`sp`）へ。specs.mjs の `slide` / `landing` / `secret.oneWay`。検査（check.mjs・WorldMapTests）: 一方通行は戻りが要らない（着く先から戻れたら間違い）・ふつうのポータルの着く先は landing でない・landing はどこかの一方通行の着く先・maps.mjs のつながりの比べには入れない。
 - 町の店の人（武器屋・防具屋・薬屋/雑貨・ペット屋・市場）には export_data.mjs が `shop` を付ける（品ぞろえは systems.mjs）。タクシーの運転手（大陸の 6 町）は `taxi`（行き先 5 つと料金）。

@@ -334,7 +334,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "F102.q_trap",
+   "name": "壊れた罠",
+   "x": 492,
+   "y": 524,
+   "quest": "F-14"
+  }
+ ],
  "note": "滑る氷の床。",
  "seed": "F102#3"
 }

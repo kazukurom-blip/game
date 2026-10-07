@@ -370,7 +370,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V414.q_totem",
+   "name": "頂のトーテム",
+   "x": 1360,
+   "y": 200,
+   "quest": "G-30"
+  }
+ ],
  "note": "町の上の高い岩。縄で登る。",
  "seed": "V414#0"
 }

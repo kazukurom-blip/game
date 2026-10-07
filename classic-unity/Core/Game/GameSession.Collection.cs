@@ -1,4 +1,4 @@
-// やりこみ要素（GameSession の続き）: 敵の図鑑（カード）・勲章（称号）・記録と統計・ジャンプの試練・全体マップの印・見た目（美容院）・椅子の収集。
+// やりこみ要素（GameSession の続き）: 敵の図鑑（カード）・勲章（称号）・記録と統計・ジャンプの試練・全体マップの印・椅子の収集。
 // 中身の形は Core/Collection/（MonsterBook・BookIndex・Medals・PlayRecords）。保存は SaveData.Collection（版 4）。
 using System;
 using System.Collections.Generic;
@@ -12,17 +12,7 @@ using Lumina.Core.World;
 
 namespace Lumina.Core.Game
 {
-    public enum MedalResult { Ok, NotEarned, Unknown }
-    public enum LookResult { Ok, NoStylistHere, NotEnoughMeso, Unknown, Same }
-
-    /// <summary>見た目（美容院で変える）。名前は Web の avatar/parts.js・Unity 側の部品の名前。</summary>
-    public sealed class LookState
-    {
-        public static readonly string[] Hairs = { "spiky", "short", "long", "bun" };
-        public static readonly string[] HairColors = { "brown", "black", "blond", "red", "silver", "blue" };
-        public static readonly string[] Faces = { "basic", "smile", "sharp" };
-        public string Hair = "spiky", HairColor = "brown", Face = "basic";
-    }
+    public enum MedalResult { Ok, NotEarned, Unknown, InventoryFull }
 
     public sealed partial class GameSession
     {
@@ -30,14 +20,10 @@ namespace Lumina.Core.Game
         public readonly MonsterBook Book = new MonsterBook();
         /// <summary>記録と統計</summary>
         public readonly PlayRecords Records = new PlayRecords();
-        /// <summary>手に入れた勲章（手に入れた順）</summary>
+        /// <summary>条件で手に入れた勲章（medals.mjs の ID。手に入れた順）。品をなくしても勲章の窓からもらい直せる</summary>
         public readonly List<string> MedalsEarned = new List<string>();
-        /// <summary>付けている勲章（無ければ null）</summary>
-        public string Medal { get; private set; }
-        /// <summary>見た目（美容院）</summary>
-        public readonly LookState Look = new LookState();
-        /// <summary>美容院の料金（1 回）</summary>
-        public const long LookFee = 3000;
+        /// <summary>付けている勲章（メダルの欄の品の ID。無ければ null）</summary>
+        public string Medal => Equipment.Get(EquipSlot.Medal)?.ItemId;
 
         /// <summary>カードを落とす乱数（ふつうのドロップの乱数とは別。図鑑を足しても今までの乱数の流れは変わらない）</summary>
         private Rng cardRng;
@@ -49,48 +35,87 @@ namespace Lumina.Core.Game
 
         private StatBlock collectionBonus;
         private int bonusBookLv = -1;
-        private string bonusMedal;
         private double medalT;
         private readonly Dictionary<int, double> bossFirstHit = new Dictionary<int, double>();
         /// <summary>ジャンプの試練に入った時間（PlaySec）。てっぺんの宝箱で、かかった秒を記録する</summary>
         private double jumpStartT = -1;
         private string jumpMap;
 
-        // ---------------- 能力（図鑑の段＋付けている勲章）
+        // ---------------- 能力（図鑑の段。勲章の能力はメダルの欄の装備として足される）
 
         private StatBlock CollectionBonus()
         {
             int lv = Book.Level;
-            if (collectionBonus == null || lv != bonusBookLv || bonusMedal != Medal)
-            {
-                var b = MonsterBook.BonusFor(lv);
-                var m = Medals.Get(Medal);
-                if (m != null) b.Add(m.Bonus);
-                collectionBonus = b; bonusBookLv = lv; bonusMedal = Medal;
-            }
+            if (collectionBonus == null || lv != bonusBookLv) { collectionBonus = MonsterBook.BonusFor(lv); bonusBookLv = lv; }
             return collectionBonus;
         }
 
-        private void ApplyMedalPct(FinalStats st)
+        // ---------------- 勲章（メダルの品）
+
+        /// <summary>勲章の一覧（データの順: 条件で手に入る物 → クエストでもらう物）</summary>
+        public List<ItemDef> MedalList()
         {
-            var m = Medals.Get(Medal);
-            if (m == null) return;
-            st.Mods.ExpPct += m.ExpPct; st.Mods.MesoPct += m.MesoPct; st.Mods.DropPct += m.DropPct;
+            var l = new List<ItemDef>();
+            foreach (var it in Data.Items.Values) if (it.IsMedal && it.MedalAuto) l.Add(it);
+            foreach (var it in Data.Items.Values) if (it.IsMedal && !it.MedalAuto) l.Add(it);
+            return l;
         }
 
-        // ---------------- 勲章
-
-        public bool HasMedal(string id) => MedalsEarned.Contains(id);
-
-        /// <summary>勲章を付ける（手に入れた物だけ）。id = null か "" で外す。</summary>
-        public MedalResult EquipMedal(string id)
+        /// <summary>その勲章を手に入れているか（条件で手に入れた・クエストのメダルを持っている/付けている）</summary>
+        public bool HasMedal(string idOrItem)
         {
-            if (string.IsNullOrEmpty(id)) { Medal = null; RefreshStats(); Out.Add(GameEventType.MedalEquipped, null); return MedalResult.Ok; }
-            if (Medals.Get(id) == null) return MedalResult.Unknown;
-            if (!HasMedal(id)) return MedalResult.NotEarned;
-            Medal = id;
+            string item = idOrItem.StartsWith(Medals.ItemPrefix, StringComparison.Ordinal) ? idOrItem : Medals.ItemPrefix + idOrItem;
+            var r = Medals.OfItem(item);
+            if (r != null && MedalsEarned.Contains(r.Id)) return true;
+            return HasOrWears(item);
+        }
+
+        /// <summary>手に入れた勲章の数</summary>
+        public int MedalCount()
+        {
+            int n = MedalsEarned.Count;
+            foreach (var it in Data.Items.Values) if (it.IsMedal && !it.MedalAuto && HasOrWears(it.Id)) n++;
+            return n;
+        }
+
+        /// <summary>勲章を付ける（メダルの欄）。null か "" で外す。
+        /// 条件で手に入れた勲章は持ち物に入らない（付けた時だけメダルの欄に出てきて、外すと勲章の窓に戻る）。クエストのメダルは持ち物の品として付け外しする。</summary>
+        public MedalResult EquipMedal(string itemId)
+        {
+            var cur = Equipment.Get(EquipSlot.Medal);
+            bool curAuto = cur != null && Data.Item(cur.ItemId)?.MedalAuto == true;
+            if (string.IsNullOrEmpty(itemId))
+            {
+                if (cur == null) return MedalResult.Ok;
+                if (curAuto) Equipment.SetRaw(EquipSlot.Medal, null);
+                else if (Unequip(EquipSlot.Medal) != EquipResult.Ok) return MedalResult.InventoryFull;
+                RefreshStats();
+                Out.Add(GameEventType.MedalEquipped, null);
+                return MedalResult.Ok;
+            }
+            var def = Data.Item(itemId);
+            if (def == null || !def.IsMedal) return MedalResult.Unknown;
+            if (cur?.ItemId == itemId) return MedalResult.Ok;
+            if (def.MedalAuto)
+            {
+                var rule = Medals.OfItem(itemId);
+                if (rule == null || !MedalsEarned.Contains(rule.Id)) return MedalResult.NotEarned;
+                if (cur != null && !curAuto && Unequip(EquipSlot.Medal) != EquipResult.Ok) return MedalResult.InventoryFull;
+                if (Inventory.Has(itemId)) // 前に「外す」で持ち物に入った物
+                    for (int i = 0; i < Inventory.SlotCount(InvTab.Equip); i++) if (Inventory.Get(InvTab.Equip, i)?.ItemId == itemId) { Inventory.TakeAt(InvTab.Equip, i, 1); break; }
+                Equipment.SetRaw(EquipSlot.Medal, ItemInstance.NewEquip(def));
+            }
+            else
+            {
+                int slot = -1;
+                for (int i = 0; i < Inventory.SlotCount(InvTab.Equip); i++) if (Inventory.Get(InvTab.Equip, i)?.ItemId == itemId) { slot = i; break; }
+                if (slot < 0) return MedalResult.NotEarned;
+                if (curAuto) Equipment.SetRaw(EquipSlot.Medal, null);
+                if (EquipFromInventory(slot) != EquipResult.Ok) return MedalResult.InventoryFull;
+            }
             RefreshStats();
-            Out.Add(GameEventType.MedalEquipped, id, text: Medals.Get(id).Name);
+            Out.Add(GameEventType.MedalEquipped, itemId, text: def.Name);
+            Out.Add(GameEventType.EquipChanged, itemId);
             return MedalResult.Ok;
         }
 
@@ -99,16 +124,18 @@ namespace Lumina.Core.Game
         {
             int n = 0;
             if (Inventory.Meso > Records.MaxMeso) Records.MaxMeso = Inventory.Meso;
-            foreach (var m in Medals.All)
+            foreach (var r in Medals.Rules.Values)
             {
-                if (HasMedal(m.Id)) continue;
+                if (MedalsEarned.Contains(r.Id)) continue;
+                var def = Data.Item(r.ItemId);
+                if (def == null) continue;
                 bool ok;
-                try { ok = m.Test(this); } catch (Exception) { ok = false; }
+                try { ok = r.Test(this); } catch (Exception) { ok = false; }
                 if (!ok) continue;
-                MedalsEarned.Add(m.Id);
+                MedalsEarned.Add(r.Id);
                 n++;
-                Out.Add(GameEventType.MedalEarned, m.Id, x: Body?.X ?? 0, y: Body?.Y ?? 0, text: m.Name);
-                if (m.RewardMeso > 0) { Inventory.AddMeso(m.RewardMeso); Out.Add(GameEventType.MesoPicked, m.Id, m.RewardMeso); }
+                Out.Add(GameEventType.MedalEarned, def.Id, x: Body?.X ?? 0, y: Body?.Y ?? 0, text: def.Name);
+                if (def.MedalMeso > 0) { Inventory.AddMeso(def.MedalMeso); Out.Add(GameEventType.MesoPicked, def.Id, def.MedalMeso); }
             }
             if (n > 0) AutoSave.Request("medal");
             return n;
@@ -129,25 +156,19 @@ namespace Lumina.Core.Game
             CheckMedals();
         }
 
-        // 勲章の条件で使う数
-        public long QuestsDone()
-        {
-            long n = 0;
-            foreach (var kv in Quests.Entries) if (kv.Value.Status == QuestStatus.Completed) n++;
-            return n;
-        }
-
-        private int bossKinds = -1;
+        // 勲章の条件で使う数（訪ねたマップ・クエストの数は GameSession.Records.cs の冒険の記録）
+        private int bossTypes = -1;
         /// <summary>ボスの種類の数（図鑑に載るボス・大ボス・段階のある敵）</summary>
-        public long BossKinds()
+        public long BossTypes()
         {
-            if (bossKinds < 0) { bossKinds = 0; foreach (var e in BookIndex.Entries) if (IsBossDef(Data.Mob(e.Mob))) bossKinds++; }
-            return bossKinds;
+            if (bossTypes < 0) { bossTypes = 0; foreach (var e in BookIndex.Entries) if (IsBossDef(Data.Mob(e.Mob))) bossTypes++; }
+            return bossTypes;
         }
-        public long BossKindsKilled()
+        /// <summary>倒したボスの種類（冒険の記録の Flags "kill.*"）</summary>
+        public long BossTypesKilled()
         {
             long n = 0;
-            foreach (var e in BookIndex.Entries) if (IsBossDef(Data.Mob(e.Mob)) && Records.KillsOf(e.Mob) > 0) n++;
+            foreach (var e in BookIndex.Entries) if (IsBossDef(Data.Mob(e.Mob)) && Flags.TryGetValue("kill." + e.Mob, out var k) && k) n++;
             return n;
         }
         private static bool IsBossDef(MobDef d) => d != null && (d.IsBoss || d.Boss != null);
@@ -162,19 +183,8 @@ namespace Lumina.Core.Game
             foreach (var v in Records.BossBest.Values) if (best == 0 || v < best) best = v;
             return best;
         }
-        private int townCount = -1;
-        public long TownCount()
-        {
-            if (townCount < 0) { townCount = 0; foreach (var n in Data.WorldMap.Maps.Values) if (n.Type == "町") townCount++; }
-            return townCount;
-        }
-        public long TownsVisited()
-        {
-            long n = 0;
-            foreach (var id in Records.Visited) if (Data.WorldMap.Node(id)?.Type == "町") n++;
-            return n;
-        }
-        public long DungeonClears() => Records.DungeonClears;
+        /// <summary>行ったことのあるマップ（冒険の記録の Flags "visit.*"）</summary>
+        public bool Visited(string mapId) => Flags.TryGetValue("visit." + mapId, out var v) && v;
 
         // ---------------- 倒した・殴った・拾った・書・マップ（各所から呼ぶ）
 
@@ -235,7 +245,6 @@ namespace Lumina.Core.Game
 
         private void OnVisitCollection(string mapId)
         {
-            Records.Visited.Add(mapId);
             var md = Data.GetMap(mapId);
             if (md?.Jump != null) { if (jumpMap != mapId) { jumpStartT = PlaySec; jumpMap = mapId; } }
             else { jumpMap = null; jumpStartT = -1; }
@@ -302,24 +311,6 @@ namespace Lumina.Core.Game
             return s >= 60 ? (s / 60) + " 分 " + (s % 60) + " 秒" : s + " 秒";
         }
 
-        // ---------------- 見た目（美容院）
-
-        /// <summary>美容院（role "beauty" の NPC）で見た目を変える（1 回 LookFee ルド）。null の所は変えない。</summary>
-        public LookResult ChangeLook(string npcId, string hair, string hairColor, string face)
-        {
-            var n = Map.Npc(npcId);
-            if (n == null || n.Role != "beauty" || Dead) return LookResult.NoStylistHere;
-            if ((hair != null && Array.IndexOf(LookState.Hairs, hair) < 0) || (hairColor != null && Array.IndexOf(LookState.HairColors, hairColor) < 0) || (face != null && Array.IndexOf(LookState.Faces, face) < 0)) return LookResult.Unknown;
-            string h = hair ?? Look.Hair, c = hairColor ?? Look.HairColor, f = face ?? Look.Face;
-            if (h == Look.Hair && c == Look.HairColor && f == Look.Face) return LookResult.Same;
-            if (Inventory.Meso < LookFee) return LookResult.NotEnoughMeso;
-            Inventory.AddMeso(-LookFee);
-            Look.Hair = h; Look.HairColor = c; Look.Face = f;
-            Out.Add(GameEventType.LookChanged, h + "/" + c + "/" + f, LookFee, text: "見た目が変わった");
-            AutoSave.Request("look");
-            return LookResult.Ok;
-        }
-
         // ---------------- 全体マップの印
 
         public const int MarkAvailable = 1, MarkCompletable = 2, MarkObjective = 4, MarkHere = 8, MarkVisited = 16;
@@ -329,7 +320,7 @@ namespace Lumina.Core.Game
         {
             var m = new Dictionary<string, int>();
             void Set(string map, int bit) { if (map == null) return; m[map] = (m.TryGetValue(map, out var v) ? v : 0) | bit; }
-            foreach (var id in Records.Visited) Set(id, MarkVisited);
+            foreach (var kv in Flags) if (kv.Value && kv.Key.StartsWith("visit.", StringComparison.Ordinal)) Set(kv.Key.Substring(6), MarkVisited);
             foreach (var n in Data.Npcs.Values)
             {
                 int b = NpcBulb(n.Id);
@@ -366,10 +357,9 @@ namespace Lumina.Core.Game
             var d = new Dictionary<string, object>
             {
                 { "cards", Book.ToDict() },
+                { "variants", Book.VariantsToDict() },
                 { "medals", MedalsEarned.ConvertAll(x => (object)x) },
-                { "medal", Medal },
                 { "records", Records.ToDict() },
-                { "look", new Dictionary<string, object> { { "hair", Look.Hair }, { "hairColor", Look.HairColor }, { "face", Look.Face } } },
                 { "cardRng", new List<object> { Save.SaveSerializer.UlongToHex(CardRng.State0), Save.SaveSerializer.UlongToHex(CardRng.State1) } },
             };
             return d;
@@ -380,18 +370,9 @@ namespace Lumina.Core.Game
             cardRng = new Rng(seed ^ 0x5DEECE66DUL);
             if (d == null) return;
             Book.Read(J.Obj(d, "cards"));
-            foreach (var id in J.StrList(d, "medals")) if (Medals.Get(id) != null && !MedalsEarned.Contains(id)) MedalsEarned.Add(id);
-            var md = J.Str(d, "medal");
-            Medal = md != null && MedalsEarned.Contains(md) ? md : null;
+            Book.ReadVariants(J.Obj(d, "variants"));
+            foreach (var id in J.StrList(d, "medals")) if (!MedalsEarned.Contains(id)) MedalsEarned.Add(id);
             Records.Read(J.Obj(d, "records"));
-            var lk = J.Obj(d, "look");
-            if (lk != null)
-            {
-                string h = J.Str(lk, "hair"), c = J.Str(lk, "hairColor"), f = J.Str(lk, "face");
-                if (Array.IndexOf(LookState.Hairs, h) >= 0) Look.Hair = h;
-                if (Array.IndexOf(LookState.HairColors, c) >= 0) Look.HairColor = c;
-                if (Array.IndexOf(LookState.Faces, f) >= 0) Look.Face = f;
-            }
             var cr = J.Arr(d, "cardRng");
             if (cr.Count == 2)
             {

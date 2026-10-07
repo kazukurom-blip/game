@@ -328,7 +328,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V509.q_leaf",
+   "name": "葉っぱの道",
+   "x": 2652,
+   "y": 412,
+   "quest": "Y-06"
+  }
+ ],
  "note": "沼の浮き島。",
  "seed": "V509#0"
 }

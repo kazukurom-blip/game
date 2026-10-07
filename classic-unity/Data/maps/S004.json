@@ -147,6 +147,14 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "S004.q_flowerbed",
+   "name": "小さな花壇",
+   "x": 2040,
+   "y": 640,
+   "quest": "IS-07"
+  }
+ ],
  "note": "平らで低い足場。初めての狩り。"
 }

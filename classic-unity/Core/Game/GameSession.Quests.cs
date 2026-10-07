@@ -72,6 +72,7 @@ namespace Lumina.Core.Game
             OnQuestAcceptedTown(q); // 試験の部屋の時間・ペットの親密度（GameSession.Rooms.cs）
             // 今いるマップが「行く」目的なら、もう着いている
             foreach (var note in Quests.Progress(ObjectiveType.Visit, Map.Data.Id)) OnQuestNote(note);
+            SyncRecords(); // 長い目標（敵の種類・町など）は今までの分も数える
             CheckAutoComplete();
             return r;
         }
@@ -111,6 +112,7 @@ namespace Lumina.Core.Game
                 Out.Add(GameEventType.ItemPicked, rw.Item, rw.Count, text: Data.Item(rw.Item).Name);
             }
             GainExp(q.Exp);
+            SyncRecords(); // 「クエストを N 本終える」の長い目標
             OnQuestFinishedTown(q); // 3・4 次の転職・開く物（GameSession.Jobs.cs）
             RefreshStats();
             AutoSave.Request("quest");
@@ -172,6 +174,7 @@ namespace Lumina.Core.Game
 
         private void OnVisitMap(string mapId)
         {
+            RecordVisit(mapId); // 冒険の記録（GameSession.Records.cs）
             OnVisitCollection(mapId); // 訪れたマップ・ジャンプの試練の時間（GameSession.Collection.cs）
             foreach (var note in Quests.Progress(ObjectiveType.Visit, mapId)) OnQuestNote(note);
             CheckAutoComplete();
@@ -201,6 +204,12 @@ namespace Lumina.Core.Game
             MapObjectData found = null;
             foreach (var o in Map.Data.Objects) if (o.Id == objectId) found = o;
             if (found == null || Math.Abs(found.X - Body.X) > 32 || Math.Abs(found.Y - Body.Y) > 48) return false;
+            if (found.Quest != null && Quests.Status(found.Quest) != QuestStatus.InProgress)
+            {
+                // クエストの隠し物: 受けていない時は見つからない（QUESTS.md 8 章）
+                Out.Add(GameEventType.Message, objectId, text: "何も見つからない");
+                return true;
+            }
             Out.Add(GameEventType.Message, objectId, text: found.Name + "を調べた");
             foreach (var note in Quests.Progress(ObjectiveType.Interact, objectId)) OnQuestNote(note);
             CheckAutoComplete();

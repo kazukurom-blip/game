@@ -281,7 +281,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "C106.q_basket",
+   "name": "置き忘れた籠",
+   "x": 408,
+   "y": 564,
+   "quest": "C-22"
+  }
+ ],
  "note": "植物園。",
  "seed": "C106#1"
 }

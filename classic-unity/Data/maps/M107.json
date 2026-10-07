@@ -377,7 +377,15 @@
  ],
  "mobMax": 18,
  "respawnSec": 7,
- "timedSpawns": [],
+ "timedSpawns": [
+  {
+   "mob": "M410",
+   "x": 1360,
+   "y": 724,
+   "intervalSec": 10,
+   "quest": "M-18"
+  }
+ ],
  "npcs": [],
  "objects": [
   {
@@ -385,6 +393,13 @@
    "name": "沈んだ宝箱",
    "x": 2410,
    "y": 320
+  },
+  {
+   "id": "M107.q_bell",
+   "name": "鐘楼の札",
+   "x": 2470,
+   "y": 320,
+   "quest": "M-15"
   }
  ],
  "note": "沈んだ骨の山。",

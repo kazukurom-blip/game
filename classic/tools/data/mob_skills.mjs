@@ -240,4 +240,116 @@ export const MOB_SKILLS = {
     ],
     boss: { phases: [{ hp: 1, name: '影' }] },
   },
+
+  // ===== クエスト専用のボス（QUESTS.md 8 章。そのクエストの間だけ湧く） =====
+  M400: { // ころがり大岩ガニ
+    attacks: [{ id: 'roll', name: '丸まって転がる', type: 'dive', range: 500, cd: 7, windup: 1.2, pct: 120, w: 120, h: 60 }],
+    boss: { phases: [{ hp: 1, name: '大岩ガニ' }] },
+  },
+  M401: { // ヤドカリの親分
+    attacks: [
+      { id: 'pinch', name: '大ばさみ', type: 'melee', range: 90, cd: 3, windup: 0.5, pct: 130, w: 90, h: 70 },
+      { id: 'call', name: '子分呼び', type: 'summon', mobs: ['M014'], count: 2, max: 4, cd: 20, windup: 0.8 },
+    ],
+    boss: { phases: [{ hp: 1, name: '親分' }, { hp: 0.4, name: '殻にこもる', defMul: 2, rate: 0.8 }] },
+  },
+  M402: { // わらの大王
+    attacks: [
+      { id: 'straw', name: 'わらの雨', type: 'magic', range: 500, cd: 6, windup: 1.0, pct: 90, w: 60, h: 120, count: 3, spread: 140 },
+      { id: 'call', name: 'カカシ兵の行進', type: 'summon', mobs: ['M027'], count: 2, max: 4, cd: 22, windup: 0.8 },
+    ],
+    boss: { phases: [{ hp: 1, name: '大王' }, { hp: 0.5, name: '冠が光る', rate: 1.3, elements: { fire: 1.8 } }] },
+  },
+  M403: { // 夜泣きの古ツタ
+    attacks: [
+      { id: 'vine', name: 'からむツタ', type: 'magic', range: 450, cd: 7, windup: 0.9, pct: 70, w: 120, h: 60, status: S('slow', 4, 1, 30), pull: 180 },
+      { id: 'sob', name: '夜泣き', type: 'area', w: 360, cd: 12, windup: 1.2, pct: 40, status: S('sleep', 2, 0.4) },
+    ],
+    boss: { phases: [{ hp: 1, name: '古ツタ' }] },
+  },
+  M404: { // よみがえった化石竜
+    attacks: [
+      { id: 'bite', name: '骨の顎', type: 'melee', range: 110, cd: 3, windup: 0.6, pct: 140, w: 110, h: 80 },
+      { id: 'quake', name: '地響き', type: 'area', global: true, groundOnly: true, cd: 14, windup: 1.4, pct: 70, status: S('stun', 1) },
+    ],
+    boss: { phases: [{ hp: 1, name: '骨' }, { hp: 0.5, name: 'かけらの光', atkMul: 1.2, speedMul: 1.2, summon: { mobs: ['M046'], count: 2 } }] },
+  },
+  M405: { // 回送電車の車掌
+    attacks: [
+      { id: 'ticket', name: '切符の改め', type: 'shot', magic: true, range: 400, cd: 3, windup: 0.4, pct: 100, speed: 300, status: S('seal', 3, 0.3) },
+      { id: 'rush', name: '回送電車', type: 'area', global: true, safeHeight: 60, cd: 15, windup: 1.6, pct: 120 },
+    ],
+    boss: { phases: [{ hp: 1, name: '車掌' }] },
+  },
+  M406: { // 眠りの女王蛾
+    attacks: [
+      { id: 'dust', name: '眠りの鱗粉', type: 'magic', range: 400, cd: 6, windup: 1.0, pct: 70, w: 140, h: 120, status: S('sleep', 3, 0.5) },
+      { id: 'call', name: '蛾の群れ', type: 'summon', mobs: ['M083'], count: 3, max: 6, cd: 20, windup: 0.8 },
+    ],
+    boss: { phases: [{ hp: 1, name: '女王蛾' }, { hp: 0.4, name: '霧の中', rate: 1.3 }] },
+  },
+  M407: { // 迷子の雷雲ゴロン
+    attacks: [
+      { id: 'bolt', name: '泣き雷', type: 'magic', range: 500, cd: 4, windup: 0.9, pct: 110, w: 70, h: 160, count: 2, spread: 180, status: S('stun', 1, 0.3) },
+      { id: 'rain', name: '大粒の涙', type: 'area', w: 400, cd: 10, windup: 1.0, pct: 60, status: S('slow', 4, 1, 20) },
+    ],
+    boss: { phases: [{ hp: 1, name: 'しくしく' }, { hp: 0.5, name: 'わんわん', rate: 1.4 }] },
+  },
+  M408: { // 氷柱の牙王
+    attacks: [
+      { id: 'fang', name: '氷の牙', type: 'melee', range: 110, cd: 3, windup: 0.5, pct: 140, w: 110, h: 80, status: S('freeze', 1.5, 0.3) },
+      { id: 'howl', name: '遠吠え', type: 'area', w: 500, cd: 14, windup: 1.0, pct: 0, status: S('weak', 5, 0.8) },
+      { id: 'call', name: '群れ呼び', type: 'summon', mobs: ['M121'], count: 2, max: 4, cd: 25, windup: 0.8, phases: [1] },
+    ],
+    boss: { phases: [{ hp: 1, name: '牙王' }, { hp: 0.5, name: '吹雪', speedMul: 1.3, atkMul: 1.1 }] },
+  },
+  M409: { // ぜんまい楽隊長
+    attacks: [
+      { id: 'baton', name: '指揮棒の音符', type: 'shot', range: 450, cd: 2.5, windup: 0.4, pct: 100, speed: 300, count: 3, spread: 50 },
+      { id: 'march', name: '行進の合図', type: 'summon', mobs: ['M148'], count: 2, max: 4, cd: 20, windup: 0.8 },
+    ],
+    boss: { phases: [{ hp: 1, name: '行進' }, { hp: 0.4, name: '早送り', rate: 1.5, speedMul: 1.3 }] },
+  },
+  M410: { // 沈み鐘の亡霊
+    attacks: [
+      { id: 'bell', name: '鐘の音', type: 'area', global: true, cd: 12, windup: 1.4, pct: 60, status: S('stun', 1.5, 0.6) },
+      { id: 'wave', name: '亡霊の波', type: 'shot', magic: true, range: 450, cd: 3.5, windup: 0.5, pct: 110, speed: 260, life: 1.6 },
+    ],
+    boss: { phases: [{ hp: 1, name: '亡霊' }, { hp: 0.5, name: '鐘が割れる', rate: 1.3, clones: { count: 1, hpPct: 3, shuffle: 10 } }] },
+  },
+  M411: { // 石板食いの大紙魚
+    attacks: [
+      { id: 'dive', name: '石の床に潜る', type: 'dive', range: 600, cd: 8, windup: 1.2, pct: 150, w: 120, h: 70 },
+      { id: 'dust', name: '銀の粉', type: 'area', w: 300, cd: 10, windup: 0.8, pct: 60, status: S('darkness', 5, 0.6) },
+    ],
+    boss: { phases: [{ hp: 1, name: '紙魚' }] },
+  },
+  M412: { // はぐれ骨竜の古兵
+    attacks: [
+      { id: 'spear', name: '古い槍', type: 'melee', range: 140, cd: 3, windup: 0.6, pct: 140, w: 140, h: 70 },
+      { id: 'shield', name: '骨の盾を構える', type: 'buff', cd: 20, windup: 0.5, buff: { def: 50, reflect: 10, sec: 8 } },
+    ],
+    boss: { phases: [{ hp: 1, name: '古兵' }, { hp: 0.5, name: '竜の記憶', atkMul: 1.2, summon: { mobs: ['M204'], count: 1 } }] },
+  },
+  M413: { // 灰かぶりの鍛冶霊
+    attacks: [
+      { id: 'hammer', name: '金槌の一撃', type: 'melee', range: 100, cd: 3, windup: 0.6, pct: 150, w: 100, h: 90, status: S('stun', 1, 0.3) },
+      { id: 'sparks', name: '火の粉', type: 'magic', range: 500, cd: 6, windup: 0.9, pct: 100, w: 60, h: 120, count: 3, spread: 120, linger: 4 },
+    ],
+    boss: { phases: [{ hp: 1, name: '鍛冶霊' }] },
+  },
+  M414: { // 流れ星の亡霊騎士
+    attacks: [
+      { id: 'slash', name: '星の剣', type: 'melee', range: 120, cd: 3, windup: 0.5, pct: 140, w: 120, h: 80 },
+      { id: 'meteor', name: '流れ星', type: 'magic', range: 600, cd: 7, windup: 1.2, pct: 120, w: 80, h: 160, count: 3, spread: 160 },
+    ],
+    boss: { phases: [{ hp: 1, name: '騎士' }, { hp: 0.6, name: '星の盾', defMul: 2 }, { hp: 0.3, name: '燃え尽きる前に', rate: 1.4, atkMul: 1.2 }] },
+  },
+  M415: { // 化けダヌキの大泥棒
+    attacks: [
+      { id: 'leaf', name: '木の葉手裏剣', type: 'shot', range: 450, cd: 2.5, windup: 0.4, pct: 100, speed: 320, count: 2, spread: 40 },
+      { id: 'drum', name: '腹つづみ', type: 'area', w: 320, cd: 12, windup: 1.0, pct: 60, status: S('confuse', 3, 0.5) },
+    ],
+    boss: { phases: [{ hp: 1, name: '大泥棒' }, { hp: 0.5, name: '化け分身', clones: { count: 2, hpPct: 2, shuffle: 8 } }] },
+  },
 };

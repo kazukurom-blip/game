@@ -1,4 +1,4 @@
-// やりこみ要素のテスト: 敵の図鑑（カード）・勲章・記録・ジャンプの試練（本物の物理で登れる・難しすぎない）・全体マップの印・美容院・セーブの版 4。
+// やりこみ要素のテスト: 敵の図鑑（カード）・勲章・記録・ジャンプの試練（本物の物理で登れる・難しすぎない）・全体マップの印・セーブの版 4。
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -108,6 +108,7 @@ namespace Lumina.Core.Tests
             Assert.Contains(s.Out.Events, e => e.Type == GameEventType.JumpCleared && e.Id == "J001");
             Assert.Equal(meso + s.Map.Data.Jump.First.Meso, s.Inventory.Meso);
             Assert.True(s.HasMedal("jump.J001"));
+            Assert.True(s.HasMedal("eq.medal.jump.J001"));
             Assert.True(s.Records.JumpBest["J001"] > 0);
             // 同じ日はもう無い・次の日は小さなごほうび
             meso = s.Inventory.Meso;
@@ -180,30 +181,44 @@ namespace Lumina.Core.Tests
         [Fact]
         public void MedalsAreEarnedAndOneCanBeWorn()
         {
-            Assert.True(Medals.All.Count >= 40, "勲章 " + Medals.All.Count);
-            Assert.Equal(Medals.All.Count, Medals.All.Select(m => m.Id).Distinct().Count());
-            Assert.Equal(Medals.All.Count, Medals.All.Select(m => m.Name).Distinct().Count());
             var h = Harness.NewGame();
             var s = h.S;
-            Assert.Equal(MedalResult.NotEarned, s.EquipMedal("lv10"));
+            // 勲章 = メダルの品（条件で手に入る物＋クエストのメダル）。条件はどれも品があり、品にはどれも条件がある
+            var list = s.MedalList();
+            Assert.True(list.Count(m => m.MedalAuto) >= 40, "条件の勲章 " + list.Count(m => m.MedalAuto));
+            Assert.Contains(list, m => !m.MedalAuto); // クエストのメダルも並ぶ
+            Assert.Equal(list.Count, list.Select(m => m.Name).Distinct().Count());
+            foreach (var r in Medals.Rules.Values) Assert.True(s.Data.Item(r.ItemId)?.MedalAuto == true, r.ItemId + " の品が無い");
+            foreach (var m in list.Where(m => m.MedalAuto)) Assert.NotNull(Medals.OfItem(m.Id));
+            Assert.Equal(MedalResult.NotEarned, s.EquipMedal("eq.medal.lv10"));
             s.GainExp(100000); // Lv が 1 つずつ上がる
             for (int i = 0; i < 12; i++) { s.GainExp(s.Character.ExpToNext); }
             h.Idle(40);
             Assert.True(s.Character.Level >= 10);
             Assert.True(s.HasMedal("lv10"));
-            Assert.Contains(h.Log, e => e.Type == GameEventType.MedalEarned && e.Id == "lv10");
+            Assert.Contains(h.Log, e => e.Type == GameEventType.MedalEarned && e.Id == "eq.medal.lv10");
+            int items = s.Inventory.All().Count();
             int hp = s.Stats.MaxHp;
-            Assert.Equal(MedalResult.Ok, s.EquipMedal("lv10"));
+            Assert.Equal(MedalResult.Ok, s.EquipMedal("eq.medal.lv10"));
             Assert.Equal(hp + 50, s.Stats.MaxHp);
-            Assert.Equal("lv10", s.Medal);
+            Assert.Equal("eq.medal.lv10", s.Medal);
+            // 付け替えても能力は重ならない（メダルの欄は 1 つ）・条件の勲章は持ち物に入らない
+            Assert.True(s.HasMedal("lv30") == false);
+            s.Inventory.Add("eq.medal.hunter1"); // クエストのメダル
+            Assert.Equal(MedalResult.Ok, s.EquipMedal("eq.medal.hunter1"));
+            Assert.Equal(hp, s.Stats.MaxHp);
+            Assert.Equal(MedalResult.Ok, s.EquipMedal("eq.medal.lv10"));
+            Assert.True(s.Inventory.Has("eq.medal.hunter1")); // クエストのメダルは持ち物へ戻る
             Assert.Equal(MedalResult.Ok, s.EquipMedal(null));
             Assert.Equal(hp, s.Stats.MaxHp);
+            Assert.Equal(items + 1, s.Inventory.All().Count());
+            Assert.Null(s.Medal);
             // 進みのヒント
             var q = Medals.Get("kill100").Progress(s);
             Assert.Equal(100, q.need);
         }
 
-        // ---------------- 記録・全体マップ・美容院・セーブ
+        // ---------------- 記録・全体マップ・セーブ
 
         [Fact]
         public void WorldMapDataAndMarks()
@@ -224,32 +239,15 @@ namespace Lumina.Core.Tests
         }
 
         [Fact]
-        public void LookChangesAtTheStylist()
-        {
-            var h = Harness.NewGame();
-            var s = h.S;
-            Assert.Equal(LookResult.NoStylistHere, s.ChangeLook("shion", "long", null, null));
-            s.ChangeMap("V100");
-            var n = s.Map.Data.Npcs.Single(x => x.Id == "shion");
-            s.Teleport(n.X, n.Y);
-            Assert.Equal(LookResult.NotEnoughMeso, s.ChangeLook("shion", "long", "red", "smile"));
-            s.Inventory.AddMeso(10000);
-            Assert.Equal(LookResult.Ok, s.ChangeLook("shion", "long", "red", "smile"));
-            Assert.Equal("long", s.Look.Hair); Assert.Equal("red", s.Look.HairColor); Assert.Equal("smile", s.Look.Face);
-            Assert.Equal(LookResult.Unknown, s.ChangeLook("shion", "mohawk", null, null));
-        }
-
-        [Fact]
         public void CollectionSurvivesSaveAndOldSavesLoad()
         {
             var h = Harness.NewGame();
             var s = h.S;
             for (int i = 0; i < 3; i++) s.Book.Add("M002");
             s.Records.Deaths = 4; s.Records.MaxDamage = 1234; s.Records.BossBest["M007"] = 42.5;
-            s.Records.Visited.Add("V100"); s.Records.JumpClears["J001"] = 2; s.Records.JumpBest["J001"] = 90;
+ s.Flags["visit.V100"] = true; s.Records.JumpClears["J001"] = 2; s.Records.JumpBest["J001"] = 90;
             h.Idle(40); // 勲章の判定
-            s.EquipMedal("card1");
-            s.Look.Hair = "bun";
+            Assert.Equal(MedalResult.Ok, s.EquipMedal("eq.medal.card1"));
             var json = SaveSerializer.ToJson(s.ToSaveData("t"));
             Assert.Contains("\"version\":4", json);
             var g = GameSession.FromSave(TestData.Get(), SaveSerializer.FromJson(json));
@@ -257,11 +255,10 @@ namespace Lumina.Core.Tests
             Assert.Equal(4, g.Records.Deaths);
             Assert.Equal(1234, g.Records.MaxDamage);
             Assert.Equal(42.5, g.Records.BossBest["M007"]);
-            Assert.Contains("V100", g.Records.Visited);
+            Assert.True(g.Visited("V100"));
             Assert.Equal(2, g.Records.JumpClears["J001"]);
-            Assert.Equal("card1", g.Medal);
+            Assert.Equal("eq.medal.card1", g.Medal);
             Assert.True(g.HasMedal("card1"));
-            Assert.Equal("bun", g.Look.Hair);
             // 版 3 のセーブ（collection が無い）も読める
             var v3 = json.Replace("\"version\":4", "\"version\":3");
             int at = v3.IndexOf(",\"collection\":", StringComparison.Ordinal);

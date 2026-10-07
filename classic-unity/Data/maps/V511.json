@@ -343,9 +343,25 @@
  ],
  "mobMax": 19,
  "respawnSec": 7,
- "timedSpawns": [],
+ "timedSpawns": [
+  {
+   "mob": "M415",
+   "x": 1460,
+   "y": 760,
+   "intervalSec": 10,
+   "quest": "Y-07"
+  }
+ ],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V511.q_door",
+   "name": "葉っぱでふさいだ扉",
+   "x": 438,
+   "y": 760,
+   "quest": "Y-06"
+  }
+ ],
  "note": "水路と配管の迷路。",
  "seed": "V511#0"
 }

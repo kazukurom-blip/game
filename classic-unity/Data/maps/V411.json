@@ -299,7 +299,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V411.q_bone",
+   "name": "隅の骨",
+   "x": 2142,
+   "y": 628,
+   "quest": "G-34"
+  }
+ ],
  "note": "地下 3 層。昔の戦の跡。",
  "seed": "V411#0"
 }

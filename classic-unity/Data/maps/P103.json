@@ -257,7 +257,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "P103.q_tablet",
+   "name": "欠けた石板",
+   "x": 1904,
+   "y": 636,
+   "quest": "A-09"
+  }
+ ],
  "note": "",
  "seed": "P103#0"
 }

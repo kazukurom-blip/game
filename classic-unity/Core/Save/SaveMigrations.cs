@@ -6,7 +6,7 @@
 //     "meso", "map", "x", "y", "items": [ { "id", "count" } ], "skills": { id: lv }, "quests": { id: "active"|"done" } }
 // 版 2: キャラ・持ち物・装備・場所を分けた形。
 // 版 3: 版 2 ＋ ペット（pets）と実時間の回数（daily）。版 2 には無いので空で足す。
-// 版 4（今）: 版 3 ＋ やりこみ（collection: 図鑑・勲章・記録・見た目）。版 3 には無いので空で足す（記録は 0 から）。
+// 版 4（今）: 版 3 ＋ やりこみ（collection: 図鑑・勲章・記録）。版 3 には無いので空で足す（記録は 0 から）。
 using System;
 using System.Collections.Generic;
 using Lumina.Core.Util;

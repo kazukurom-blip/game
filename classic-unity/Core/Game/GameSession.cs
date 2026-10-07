@@ -63,6 +63,8 @@ namespace Lumina.Core.Game
         public SaveStore Store { get; private set; }
         public string Slot { get; private set; }
         public Func<DateTime> Clock = () => DateTime.UtcNow;
+        /// <summary>隠しクエストの「時間」を決める時差（時間）。既定は日本の時間（UTC+9）</summary>
+        public double HourOffset = 9;
 
         private PlayerInput input;
         private bool prevJump;
@@ -79,6 +81,8 @@ namespace Lumina.Core.Game
             Quests = new QuestLog(data);
             Quests.RepeatReady = q => Daily.Used(RepeatKey(q), Clock(), q.Weekly) == 0;
             Quests.Offered = q => BoardToday().Contains(q.Id);
+            Quests.HourNow = () => Clock().AddHours(HourOffset).Hour;   // 隠しクエストの時間（QUESTS.md 8 章）
+            Quests.HasItem = HasOrWears;                               // 隠しクエストの「持って話す」品（着けていてもよい）
             Rng = new Rng(seed);
         }
 
@@ -248,8 +252,7 @@ namespace Lumina.Core.Game
         /// <summary>最終の能力を計算し直す（装備・バフ・AP・スキルが変わった時。毎フレームも呼ばれる）。</summary>
         public void RefreshStats()
         {
-            Stats = StatCalc.Compute(Character, Equipment, Skills, Buffs, Inventory, Data, CollectionBonus());
-            ApplyMedalPct(Stats); // 付けている勲章の経験値・お金・ドロップ +%（GameSession.Collection.cs）
+            Stats = StatCalc.Compute(Character, Equipment, Skills, Buffs, Inventory, Data, CollectionBonus()); // 図鑑の段の上乗せ（GameSession.Collection.cs）
             if (Status.Any)
             {
                 // 暗闇: 命中 −50%。呪い: 攻撃力・魔力・防御 −20%（STATS.md 4-3）
@@ -321,6 +324,7 @@ namespace Lumina.Core.Game
             else
             {
                 m = new MapInstance(md, Data);
+                m.QuestActive = q => Quests.Status(q) == QuestStatus.InProgress; // クエスト専用の敵（QUESTS.md 8 章）
                 m.InitialSpawn(Rng);
             }
             mapCache.Insert(0, m);
@@ -601,7 +605,7 @@ namespace Lumina.Core.Game
             }
             g.ReadTownSave(s);
             g.ReadCollection(s.Collection, r0 ^ r1);
-            g.Records.Visited.Add(md.Id);
+            g.Flags["visit." + md.Id] = true;
             g.RefreshStats();
             if (c.Hp <= 0) c.Hp = Math.Max(1, g.Stats.MaxHp / 2);
             g.Out.Clear();

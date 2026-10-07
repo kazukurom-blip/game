@@ -275,7 +275,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "M110.q_feather",
+   "name": "岩に引っかかった羽",
+   "x": 366,
+   "y": 636,
+   "quest": "Y-19"
+  }
+ ],
  "note": "",
  "seed": "M110#0"
 }

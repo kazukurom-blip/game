@@ -248,7 +248,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "P107.q_feather",
+   "name": "金色の羽",
+   "x": 760,
+   "y": 200,
+   "quest": "Y-20"
+  }
+ ],
  "note": "",
  "seed": "P107#0"
 }

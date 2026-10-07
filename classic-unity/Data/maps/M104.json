@@ -294,7 +294,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "M104.q_map",
+   "name": "墨だまり",
+   "x": 2550,
+   "y": 620,
+   "quest": "Y-13"
+  }
+ ],
  "note": "",
  "seed": "M104#0"
 }

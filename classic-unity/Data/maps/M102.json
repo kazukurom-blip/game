@@ -401,7 +401,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "M102.q_pot",
+   "name": "沈んだ壺",
+   "x": 432,
+   "y": 560,
+   "quest": "M-23"
+  }
+ ],
  "note": "",
  "seed": "M102#3"
 }

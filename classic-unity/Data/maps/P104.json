@@ -231,7 +231,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "P104.q_bite",
+   "name": "柱のかじりあと",
+   "x": 532,
+   "y": 200,
+   "quest": "A-10"
+  }
+ ],
  "note": "",
  "seed": "P104#0"
 }

@@ -317,7 +317,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "E101.q_crater",
+   "name": "小さな穴",
+   "x": 2618,
+   "y": 532,
+   "quest": "E-12"
+  }
+ ],
  "note": "",
  "seed": "E101#2"
 }

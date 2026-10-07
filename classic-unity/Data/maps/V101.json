@@ -324,7 +324,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V101.q_shell_sign",
+   "name": "貝がらの目印",
+   "x": 2312,
+   "y": 540,
+   "quest": "V-17"
+  }
+ ],
  "note": "砂浜。平らで狩りやすい。",
  "seed": "V101#5"
 }

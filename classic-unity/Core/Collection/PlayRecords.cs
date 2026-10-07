@@ -1,5 +1,5 @@
 // 記録と統計（倒した数・倒れた回数・拾ったお金・最大ダメージ・ボスの最短撃破 …）。遊んだ時間は GameSession.PlaySec。
-// 訪れたマップ（全体マップの「行ったことのある所」・勲章「全町を訪ねた」）・見つけた隠しポータル・ジャンプの試練の記録・持ったことのある椅子もここ。
+// 訪れたマップ・倒した敵の種類は冒険の記録（GameSession.Records.cs の Flags "visit.*" / "kill.*"）を使う。ここは見つけた隠しポータル・ジャンプの試練の記録・持ったことのある椅子もここ。
 using System;
 using System.Collections.Generic;
 using Lumina.Core.Util;
@@ -16,7 +16,6 @@ namespace Lumina.Core.Collection
         public readonly Dictionary<string, long> KillsBy = new Dictionary<string, long>();
         /// <summary>ボスの最短撃破（秒。最初に攻撃してから倒れるまで）</summary>
         public readonly Dictionary<string, double> BossBest = new Dictionary<string, double>();
-        public readonly HashSet<string> Visited = new HashSet<string>();
         public readonly HashSet<string> Hidden = new HashSet<string>();
         public readonly HashSet<string> Chairs = new HashSet<string>();
         /// <summary>ジャンプの試練: マップ → クリアした回数・最短（秒）</summary>
@@ -59,7 +58,7 @@ namespace Lumina.Core.Collection
             };
             var kb = new Dictionary<string, object>(); foreach (var kv in KillsBy) kb[kv.Key] = kv.Value; d["killsBy"] = kb;
             var bb = new Dictionary<string, object>(); foreach (var kv in BossBest) bb[kv.Key] = Math.Round(kv.Value, 2); d["bossBest"] = bb;
-            d["visited"] = Sorted(Visited); d["hidden"] = Sorted(Hidden); d["chairs"] = Sorted(Chairs);
+            d["hidden"] = Sorted(Hidden); d["chairs"] = Sorted(Chairs);
             var jc = new Dictionary<string, object>();
             foreach (var kv in JumpClears) jc[kv.Key] = new List<object> { (long)kv.Value, JumpBest.TryGetValue(kv.Key, out var b) ? Math.Round(b, 2) : 0.0 };
             d["jumps"] = jc;
@@ -81,7 +80,6 @@ namespace Lumina.Core.Collection
             BestUpgrade = J.Int(d, "bestUpgrade"); MaxMeso = J.Long(d, "maxMeso"); DungeonClears = J.Long(d, "dungeons");
             var kb = J.Obj(d, "killsBy"); if (kb != null) foreach (var kv in kb) KillsBy[kv.Key] = (long)J.ToDouble(kv.Value);
             var bb = J.Obj(d, "bossBest"); if (bb != null) foreach (var kv in bb) BossBest[kv.Key] = J.ToDouble(kv.Value);
-            foreach (var x in J.StrList(d, "visited")) Visited.Add(x);
             foreach (var x in J.StrList(d, "hidden")) Hidden.Add(x);
             foreach (var x in J.StrList(d, "chairs")) Chairs.Add(x);
             var jc = J.Obj(d, "jumps");

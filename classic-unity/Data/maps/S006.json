@@ -169,6 +169,14 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "S006.q_cairn",
+   "name": "崖の上の石積み",
+   "x": 875,
+   "y": 280,
+   "quest": "IS-09"
+  }
+ ],
  "note": "縄が 3 本。上の段ほど敵が多い。"
 }

@@ -19,7 +19,7 @@
 //   "pets": [ { "kind": "puppy", "name": "子犬", "fullness": 80, "points": 40, "out": true, "skills": ["pickup"] } ],  … 版 3 から
 //   "daily": { "room.V516": [9410, 2], "chest.T104.toybox": [9410, 1] },   … 版 3 から（[日の番号, 回数]）
 //   "collection": { "cards": { "M001": 3 }, "medals": ["lv10"], "medal": "lv10", "records": { "kills": 120, "deaths": 1, "visited": ["S000"], … },
-//                   "look": { "hair": "spiky", "hairColor": "brown", "face": "basic" }, "cardRng": ["…", "…"] },   … 版 4 から
+//                   "cardRng": ["…", "…"] },   … 版 4 から
 //   （倉庫はキャラ全員で共有するので、ここではなく "account" の枠: Town/Storage.cs の AccountData）
 //   "rng": ["0123456789abcdef", "fedcba9876543210"]
 // }
@@ -91,7 +91,7 @@ namespace Lumina.Core.Save
         public List<SavedPet> Pets = new List<SavedPet>();
         public Dictionary<string, int[]> Daily = new Dictionary<string, int[]>();
 
-        // 版 4: やりこみ（図鑑のカード・勲章・記録と統計・訪れたマップ・見た目）。中身の形は GameSession.Collection.cs の CollectionToDict
+        // 版 4: やりこみ（図鑑のカード・勲章・記録と統計）。中身の形は GameSession.Collection.cs の CollectionToDict
         public Dictionary<string, object> Collection;
     }
 }

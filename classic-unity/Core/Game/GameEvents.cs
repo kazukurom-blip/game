@@ -56,7 +56,6 @@ namespace Lumina.Core.Game
         MedalEarned,    // 勲章を手に入れた（Id = 勲章、Text = 名前）
         MedalEquipped,  // 勲章を付けた・外した（Id = 勲章 / null）
         JumpCleared,    // ジャンプの試練のてっぺんの宝箱を開けた（Id = マップ、Value = かかった秒、Text = 知らせ）
-        LookChanged,    // 美容院で見た目が変わった（Id = "髪/色/顔"）
     }
 
     public struct GameEvent

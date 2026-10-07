@@ -313,7 +313,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "C102.q_scorch",
+   "name": "焦げあと",
+   "x": 2482,
+   "y": 528,
+   "quest": "C-14"
+  }
+ ],
  "note": "雲のベンチ。",
  "seed": "C102#1"
 }

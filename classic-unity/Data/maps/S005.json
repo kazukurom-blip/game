@@ -159,6 +159,14 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "S005.q_carving",
+   "name": "枝の刻み目",
+   "x": 939,
+   "y": 544,
+   "quest": "IS-09"
+  }
+ ],
  "note": "木の根の段差。"
 }

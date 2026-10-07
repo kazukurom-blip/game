@@ -399,7 +399,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "M106.q_bell",
+   "name": "鐘の破片",
+   "x": 2698,
+   "y": 508,
+   "quest": "M-15"
+  }
+ ],
  "note": "",
  "seed": "M106#4"
 }

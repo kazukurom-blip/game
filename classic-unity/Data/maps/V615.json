@@ -361,7 +361,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V615.q_grave",
+   "name": "小さな墓",
+   "x": 2890,
+   "y": 568,
+   "quest": "N-32"
+  }
+ ],
  "note": "牛頭の兵の野営地。",
  "seed": "V615#4"
 }

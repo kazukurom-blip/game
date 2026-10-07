@@ -280,7 +280,8 @@ export function checkMap(map, opts = {}) {
   for (const n of map.npcs || []) on(`NPC ${n.id}`, n.x, n.y);
   for (const o of map.objects || []) on(`調べる物 ${o.id}`, o.x, o.y);
   if (opts.mobs) {
-    const have = new Set([...(map.spawns || []), ...(map.timedSpawns || [])].map((s) => s.mob));
+    // クエスト専用の敵（quest 付き。quests_more.mjs の QUEST_SPAWNS）は maps.mjs の敵の一覧に入れない
+    const have = new Set([...(map.spawns || []), ...(map.timedSpawns || []).filter((s) => !s.quest)].map((s) => s.mob));
     for (const m of opts.mobs) if (!have.has(m)) P(`敵 ${m} の湧く所が無い`);
     for (const m of have) if (!opts.mobs.includes(m)) P(`敵 ${m} は maps.mjs ではここに出ない`);
   }

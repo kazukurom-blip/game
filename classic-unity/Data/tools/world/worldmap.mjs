@@ -99,7 +99,7 @@ export function buildWorldMap(maps, raw, regions) {
     out.regions.push({ id: rid, name, note, maps: ids });
     for (const id of ids) {
       const r = RAW[id], m = maps[id];
-      const mobs = [...new Set([...(m.spawns || []), ...(m.timedSpawns || [])].map((s) => s.mob))];
+      const mobs = [...new Set([...(m.spawns || []), ...(m.timedSpawns || []).filter((s) => !s.quest)].map((s) => s.mob))]; // クエストの間だけ湧く専用の敵は入れない（図鑑にも載らない）
       out.maps[id] = { region: rid, x: pos[id].x, y: pos[id].y, name: m.name, type: m.jump ? '試' : r[2], lv: r[3] || null, town: m.returnMap || null, bgm: m.bgm || null, mobs };
     }
   }

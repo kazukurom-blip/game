@@ -307,7 +307,7 @@ namespace Lumina.Core.Tests
             Run(61);
             Assert.Equal("quest", Saved.Last());
             int before = Saves();
-            Run(60 * 180 + 5);                      // 3 分ごと
+            Run(60 * 60 + 5);                       // 1 分ごと
             Assert.Equal(before + 1, Saves());
             Assert.Equal("timer", Saved.Last());
             Assert.Equal("S001", store.Load("c").Data.Map);

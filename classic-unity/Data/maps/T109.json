@@ -267,7 +267,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "T109.q_score",
+   "name": "楽譜の切れ端",
+   "x": 2210,
+   "y": 648,
+   "quest": "T-16"
+  }
+ ],
  "note": "ベルトコンベアの床。",
  "seed": "T109#0"
 }

@@ -108,7 +108,15 @@
  ],
  "mobMax": 8,
  "respawnSec": 7,
- "timedSpawns": [],
+ "timedSpawns": [
+  {
+   "mob": "M400",
+   "x": 1360,
+   "y": 570,
+   "intervalSec": 10,
+   "quest": "IS-10"
+  }
+ ],
  "npcs": [],
  "objects": [
   {
@@ -122,6 +130,20 @@
    "name": "古い石碑",
    "x": 1200,
    "y": 540
+  },
+  {
+   "id": "S008.q_stump",
+   "name": "古い切り株",
+   "x": 300,
+   "y": 640,
+   "quest": "IS-11"
+  },
+  {
+   "id": "S008.q_starstone",
+   "name": "星見の石",
+   "x": 670,
+   "y": 555,
+   "quest": "IS-14"
   }
  ],
  "note": "島で一番高い所。遠くに大陸が見える。"

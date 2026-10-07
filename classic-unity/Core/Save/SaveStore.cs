@@ -267,11 +267,11 @@ namespace Lumina.Core.Save
     }
 
     /// <summary>
-    /// 自動セーブの決まり: マップ移動・レベルアップ・クエスト完了の後すぐ（1 秒以内に 1 回にまとめる）と、遊んでいる時間の 3 分ごと。
+    /// 自動セーブの決まり: マップ移動・レベルアップ・クエスト完了の後すぐ（1 秒以内に 1 回にまとめる）と、遊んでいる時間の 1 分ごと（ユーザーの希望）。
     /// </summary>
     public sealed class AutoSaver
     {
-        public double IntervalSec = 180;
+        public double IntervalSec = 60;
         public double MinGapSec = 1;
         private double sinceLast;
         private string pending;

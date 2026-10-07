@@ -215,6 +215,10 @@ export const NPCS = [
   ['hoshi', '薬屋ホシ', 'E100', { role: 'potion', shop: 'shop.E100.potion' }],
   ['kuzu', '倉庫番クズ', 'E100', { role: 'storage' }],
 
+  // ===== クエストの追加（QUESTS.md 8 章）で足した人 =====
+  ['sennin', '湯けむりの仙人', 'V619'],          // 谷の温泉の湯けむりの奥（隠しの依頼者。N-22〜N-24）
+  ['memori', '冒険の記録係メモリ', 'V090'],      // 長い目標（敵の種類・町・クエストの数）とメダル（X 系）
+
   // ===== ジャンプの試練（world/jump.mjs の J001〜J005。町の案内人から入り、試練の下と上の案内人で町へ戻る） =====
   ['jq_mokuren', '木登り名人モクレン', 'V200', { role: 'jump', ...TRV('J001') }],
   ['jq_mokuren_J001', '木登り名人モクレン', 'J001', { x: 200, role: 'jump', ...TRV('V200', { homeward: true }) }],
@@ -231,9 +235,6 @@ export const NPCS = [
   ['jq_garan', '骨守りガラン', 'D100', { role: 'jump', ...TRV('J005') }],
   ['jq_garan_J005', '骨守りガラン', 'J005', { x: 200, role: 'jump', ...TRV('D100', { homeward: true }) }],
   ['jq_garan_J005_top', '骨守りガラン', 'J005', { x: 960, top: true, role: 'jump', ...TRV('D100', { homeward: true }) }],
-
-  // ===== 美容院（髪型・髪の色・顔を変える。GameSession.ChangeLook） =====
-  ['shion', '髪結いのシオン', 'V100', { role: 'beauty' }],
 ];
 
 /** 「名前@マップ」→ ID（クエストの依頼者を直す）。マップに同じ名前がいなければ名前だけで探す。 */

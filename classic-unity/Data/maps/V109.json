@@ -326,7 +326,15 @@
  ],
  "mobMax": 16,
  "respawnSec": 7,
- "timedSpawns": [],
+ "timedSpawns": [
+  {
+   "mob": "M401",
+   "x": 1220,
+   "y": 692,
+   "intervalSec": 10,
+   "quest": "V-19"
+  }
+ ],
  "npcs": [],
  "objects": [],
  "note": "縄の多い岩山。",

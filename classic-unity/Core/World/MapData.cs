@@ -16,7 +16,8 @@
 //   "timedSpawns": [ { "mob": "M007", "x": 800, "y": 640, "intervalSec": 600 } ],     // 強敵・ボス
 //   "npcs":      [ { "id": "luka", "name": "案内人ルカ", "x": 200, "y": 640, "shop": null, "role": "guide" } ],
 //                 // travel（乗り物 1 つ）/ taxi（{ "dests": [ { "to", "toPortal", "fee" } ], "beginnerDiv": 10 }）/ inn（宿屋の料金）
-//   "objects":   [ { "id": "S001.crate", "name": "木箱", "x": 500, "y": 512 } ],      // 調べられる物
+//   "objects":   [ { "id": "S001.crate", "name": "木箱", "x": 500, "y": 512 } ],      // 調べられる物（"quest": そのクエストの間だけ見つかる隠し物）
+//   timedSpawns の "quest": クエスト専用の敵（そのクエストを進めている間だけ湧く。QUESTS.md 8 章）
 //   "jump":      { "town": "V200", "stages": 3, "floors": [y…], "first": { "meso", "items": [{ "item", "count" }] }, "daily": {…}, "medal": "jump.J001" }
 //                 // ジャンプの試練だけ（Data/tools/world/jump.mjs）
 // }
@@ -58,7 +59,12 @@ namespace Lumina.Core.World
         public bool IsEnterable => Type != PortalType.Spawn && Type != PortalType.Town && Type != PortalType.Landing && (To != null || ToPortal != null);
     }
 
-    public sealed class SpawnData { public string Mob; public double X, Y; public double IntervalSec; }
+    public sealed class SpawnData
+    {
+        public string Mob; public double X, Y; public double IntervalSec;
+        /// <summary>クエスト専用の敵（強敵・ボス）: このクエストを進めている間だけ湧く。null ならいつも</summary>
+        public string Quest;
+    }
     /// <summary>乗り物（船など）。NPC に話して乗る。</summary>
     public sealed class TravelData
     {
@@ -88,7 +94,12 @@ namespace Lumina.Core.World
         /// <summary>話しかけた時のセリフ（npcs.json の lines を GameData.GetMap が写す）。先頭の [条件] は Game/NpcLines.cs</summary>
         public readonly List<string> Lines = new List<string>();
     }
-    public sealed class MapObjectData { public string Id, Name; public double X, Y; }
+    public sealed class MapObjectData
+    {
+        public string Id, Name; public double X, Y;
+        /// <summary>クエストの隠し物: このクエストを進めている間だけ見つかる（ほかの時は調べても何も無い）。null ならいつも</summary>
+        public string Quest;
+    }
 
     /// <summary>ごほうび（お金と品）。</summary>
     public sealed class RewardData
@@ -190,7 +201,7 @@ namespace Lumina.Core.World
             foreach (var o in J.Arr(d, "timedSpawns"))
             {
                 var r = (Dictionary<string, object>)o;
-                m.TimedSpawns.Add(new SpawnData { Mob = J.Str(r, "mob"), X = J.Num(r, "x"), Y = J.Num(r, "y"), IntervalSec = J.Num(r, "intervalSec", 600) });
+                m.TimedSpawns.Add(new SpawnData { Mob = J.Str(r, "mob"), X = J.Num(r, "x"), Y = J.Num(r, "y"), IntervalSec = J.Num(r, "intervalSec", 600), Quest = J.Str(r, "quest") });
             }
             foreach (var o in J.Arr(d, "npcs"))
             {
@@ -221,7 +232,7 @@ namespace Lumina.Core.World
             foreach (var o in J.Arr(d, "objects"))
             {
                 var r = (Dictionary<string, object>)o;
-                m.Objects.Add(new MapObjectData { Id = J.Str(r, "id"), Name = J.Str(r, "name", ""), X = J.Num(r, "x"), Y = J.Num(r, "y") });
+                m.Objects.Add(new MapObjectData { Id = J.Str(r, "id"), Name = J.Str(r, "name", ""), X = J.Num(r, "x"), Y = J.Num(r, "y"), Quest = J.Str(r, "quest") });
             }
             var jq = J.Obj(d, "jump");
             if (jq != null)

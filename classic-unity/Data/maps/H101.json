@@ -231,7 +231,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "H101.q_feather",
+   "name": "焦げた羽",
+   "x": 2040,
+   "y": 492,
+   "quest": "Y-21"
+  }
+ ],
  "note": "",
  "seed": "H101#0"
 }
