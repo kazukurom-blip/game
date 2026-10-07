@@ -31,6 +31,11 @@ namespace Lumina.Core.Quests
         public string Line;
         /// <summary>完了すると転職する段階（3 / 4。JOBS.md 3-3・3-4）。0 = しない</summary>
         public int Advance;
+        /// <summary>繰り返しのクエスト（R 系。QUESTS.md 5 章）: "daily" = 1 日 1 回、"weekly" = 週 1 回。null = 1 回だけ</summary>
+        public string Repeat;
+        /// <summary>募集の掲示板の日替わり（毎日、自分の Lv に合う 3 本だけが受けられる）</summary>
+        public bool Board;
+        public bool Weekly => Repeat == "weekly";
         /// <summary>完了すると開く物（storage+4 = 倉庫の枠 +4、pet.second = ペットを 2 匹）</summary>
         public string Unlock;
         public readonly List<string> Prereqs = new List<string>();
@@ -64,6 +69,7 @@ namespace Lumina.Core.Quests
                 RewardText = J.Str(d, "rewardText", ""), Story = J.Str(d, "story", ""), MinLevel = J.Int(d, "minLevel", 1),
                 Exp = J.Long(d, "exp"), Meso = J.Long(d, "meso"), Tutorial = J.Bool(d, "tutorial"),
                 Line = J.Str(d, "line"), Advance = J.Int(d, "advance"), Unlock = J.Str(d, "unlock"),
+                Repeat = J.Str(d, "repeat"), Board = J.Bool(d, "board"),
             };
             if (q.End == null) q.End = q.Giver;
             q.Prereqs.AddRange(J.StrList(d, "prereqs"));

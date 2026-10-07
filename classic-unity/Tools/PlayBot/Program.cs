@@ -8,7 +8,7 @@
 // --hours H  ゲームの中の時間 H 時間で打ち切り    --seed S   乱数の種
 // --start L  近道: Lv L（30・70・120）まで育ったキャラから（PLAYTEST.md 1-4）
 // --out DIR  系統ごとのログ（<line>.log）・Lv の表（<line>.csv）・まとめ（summary.md）。既定は .build/playbot/
-// --verbose  考えたことを全部ログに出す        --tracefight  空振りを全部ログに出す
+// --verbose  考えたことを全部ログに出す        --tracefight  空振りを全部ログに出す   --tracehurt  被弾を全部ログに出す
 // --noacc    命中のために DEX を振らない       --above N / --below N  狩る敵の Lv（自分より N 上まで倒す・N 下の所で狩る）
 // --probe MAP,x,y,tx,ty  調べる用: そのマップの x,y から tx,ty まで歩かせて、動きを全部出す
 using System;
@@ -69,7 +69,7 @@ namespace Lumina.PlayBot
                     bot.Say("近道: " + bot.StatLine());
                 }
                 else bot = new Bot(data, line, br, seed + (ulong)i * 7919);
-                bot.StopTier = tier; bot.StopLevel = level; bot.MaxGameSec = bot.Sec + hours * 3600; bot.Log = log; bot.Verbose = verbose; bot.TraceFight = opt.ContainsKey("tracefight");
+                bot.StopTier = tier; bot.StopLevel = level; bot.MaxGameSec = bot.Sec + hours * 3600; bot.Log = log; bot.Verbose = verbose; bot.TraceFight = opt.ContainsKey("tracefight"); bot.TraceHurt = opt.ContainsKey("tracehurt");
                 bots[i] = bot;
                 RunBot(bot);
                 File.WriteAllText(Path.Combine(outDir, line + ".csv"), bot.LevelCsv());

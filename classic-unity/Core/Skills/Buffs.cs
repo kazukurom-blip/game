@@ -23,6 +23,7 @@ namespace Lumina.Core.Skills
         public bool Charge;          // 付与
         public List<StatusRequest> OnHitStatus;
         public double StatPct, HpPct, MpPct, ExpPct, MesoPct, CritRate, CritDamage, MpCostPct;
+        public double DropPct;       // ドロップ 2 倍の券（+100%）
         public bool NoAmmo, NoMp;
         public double Infinity, InfinityT; // 無限の魔力: Infinity 秒ごとに +4%
         public double Reflect, MagicReflect, DamageReduce;
@@ -122,6 +123,7 @@ namespace Lumina.Core.Skills
         public double MpPct => Max(b => b.MpPct);
         public double ExpPct => Sum(b => b.ExpPct);
         public double MesoPct => Sum(b => b.MesoPct);
+        public double DropPct => Max(b => b.DropPct);
         public double CritRate => Sum(b => b.CritRate);
         public double CritDamage => Sum(b => b.CritDamage);
         public double MpCostPct => Max(b => b.MpCostPct);

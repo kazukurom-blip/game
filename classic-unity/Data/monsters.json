@@ -37,11 +37,11 @@
     },
     {
      "item": "use.red_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -109,11 +109,11 @@
     },
     {
      "item": "use.red_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -183,11 +183,11 @@
     },
     {
      "item": "use.red_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -239,7 +239,7 @@
    "mdef": 1,
    "avoid": 2,
    "acc": 11,
-   "meso": 7,
+   "meso": 8,
    "mesoChance": 0.6,
    "speedStat": -45,
    "speed": 55,
@@ -255,11 +255,11 @@
     },
     {
      "item": "use.red_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -311,7 +311,7 @@
    "mdef": 2,
    "avoid": 2,
    "acc": 13,
-   "meso": 11,
+   "meso": 13,
    "mesoChance": 0.6,
    "speedStat": -30,
    "speed": 70,
@@ -327,11 +327,11 @@
     },
     {
      "item": "use.red_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -385,7 +385,7 @@
    "mdef": 3,
    "avoid": 3,
    "acc": 16,
-   "meso": 17,
+   "meso": 22,
    "mesoChance": 0.6,
    "speedStat": -30,
    "speed": 70,
@@ -401,11 +401,11 @@
     },
     {
      "item": "use.red_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -455,9 +455,9 @@
    "matk": 0,
    "def": 10,
    "mdef": 8,
-   "avoid": 5,
+   "avoid": 4,
    "acc": 19,
-   "meso": 150,
+   "meso": 214,
    "mesoChance": 0.6,
    "speedStat": -40,
    "speed": 60,
@@ -473,11 +473,11 @@
     },
     {
      "item": "use.red_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -537,7 +537,7 @@
    "mdef": 3,
    "avoid": 3,
    "acc": 15,
-   "meso": 14,
+   "meso": 17,
    "mesoChance": 0.6,
    "speedStat": -25,
    "speed": 75,
@@ -553,11 +553,11 @@
     },
     {
      "item": "use.red_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -607,9 +607,9 @@
    "matk": 0,
    "def": 4,
    "mdef": 3,
-   "avoid": 6,
+   "avoid": 4,
    "acc": 18,
-   "meso": 20,
+   "meso": 28,
    "mesoChance": 0.6,
    "speedStat": -25,
    "speed": 75,
@@ -625,11 +625,11 @@
     },
     {
      "item": "use.red_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -674,23 +674,23 @@
    "elements": {
     "lightning": 1.5
    },
-   "hp": 197,
+   "hp": 180,
    "mp": 24,
    "exp": 37,
    "atk": 25,
    "matk": 0,
    "def": 10,
    "mdef": 8,
-   "avoid": 6,
+   "avoid": 5,
    "acc": 22,
-   "meso": 30,
+   "meso": 47,
    "mesoChance": 0.6,
    "speedStat": -30,
    "speed": 70,
    "chaseOnSight": false,
    "width": 36,
    "height": 36,
-   "pushed": 20,
+   "pushed": 18,
    "noKnockback": false,
    "drops": [
     {
@@ -699,11 +699,11 @@
     },
     {
      "item": "use.red_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -767,23 +767,23 @@
    "elements": {
     "lightning": 1.5
    },
-   "hp": 528,
+   "hp": 422,
    "mp": 30,
    "exp": 82,
    "atk": 35,
    "matk": 0,
    "def": 18,
    "mdef": 14,
-   "avoid": 7,
+   "avoid": 5,
    "acc": 26,
-   "meso": 39,
+   "meso": 70,
    "mesoChance": 0.6,
    "speedStat": -50,
    "speed": 50,
    "chaseOnSight": false,
    "width": 39,
    "height": 31,
-   "pushed": 53,
+   "pushed": 42,
    "noKnockback": false,
    "drops": [
     {
@@ -792,11 +792,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -847,23 +847,23 @@
    "ranged": false,
    "magic": false,
    "elements": {},
-   "hp": 518,
+   "hp": 383,
    "mp": 36,
    "exp": 76,
    "atk": 39,
    "matk": 0,
    "def": 17,
    "mdef": 13,
-   "avoid": 9,
+   "avoid": 7,
    "acc": 30,
-   "meso": 50,
+   "meso": 91,
    "mesoChance": 0.6,
    "speedStat": -25,
    "speed": 75,
    "chaseOnSight": false,
    "width": 44,
    "height": 44,
-   "pushed": 52,
+   "pushed": 38,
    "noKnockback": false,
    "drops": [
     {
@@ -872,11 +872,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -936,7 +936,7 @@
    "mdef": 3,
    "avoid": 3,
    "acc": 15,
-   "meso": 14,
+   "meso": 17,
    "mesoChance": 0.6,
    "speedStat": -25,
    "speed": 75,
@@ -952,11 +952,11 @@
     },
     {
      "item": "use.red_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -1008,9 +1008,9 @@
    "matk": 0,
    "def": 8,
    "mdef": 6,
-   "avoid": 5,
+   "avoid": 4,
    "acc": 19,
-   "meso": 25,
+   "meso": 36,
    "mesoChance": 0.6,
    "speedStat": -30,
    "speed": 70,
@@ -1026,11 +1026,11 @@
     },
     {
      "item": "use.red_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -1077,23 +1077,23 @@
    "ranged": false,
    "magic": false,
    "elements": {},
-   "hp": 166,
+   "hp": 159,
    "mp": 22,
    "exp": 32,
    "atk": 24,
    "matk": 0,
    "def": 9,
    "mdef": 7,
-   "avoid": 5,
+   "avoid": 4,
    "acc": 20,
-   "meso": 27,
+   "meso": 41,
    "mesoChance": 0.6,
    "speedStat": -25,
    "speed": 75,
    "chaseOnSight": false,
    "width": 44,
    "height": 44,
-   "pushed": 17,
+   "pushed": 16,
    "noKnockback": false,
    "drops": [
     {
@@ -1102,11 +1102,11 @@
     },
     {
      "item": "use.red_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -1153,23 +1153,23 @@
    "ranged": false,
    "magic": false,
    "elements": {},
-   "hp": 164,
+   "hp": 143,
    "mp": 26,
    "exp": 31,
    "atk": 25,
    "matk": 0,
    "def": 6,
    "mdef": 5,
-   "avoid": 9,
+   "avoid": 6,
    "acc": 23,
-   "meso": 33,
+   "meso": 53,
    "mesoChance": 0.6,
    "speedStat": -25,
    "speed": 75,
    "chaseOnSight": false,
    "width": 31,
    "height": 27,
-   "pushed": 16,
+   "pushed": 14,
    "noKnockback": false,
    "drops": [
     {
@@ -1178,11 +1178,11 @@
     },
     {
      "item": "use.red_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -1231,23 +1231,23 @@
    "elements": {
     "fire": 1.5
    },
-   "hp": 330,
+   "hp": 264,
    "mp": 30,
    "exp": 54,
    "atk": 31,
    "matk": 0,
    "def": 13,
    "mdef": 10,
-   "avoid": 7,
+   "avoid": 5,
    "acc": 26,
-   "meso": 39,
+   "meso": 70,
    "mesoChance": 0.6,
    "speedStat": -30,
    "speed": 70,
    "chaseOnSight": false,
    "width": 36,
    "height": 36,
-   "pushed": 33,
+   "pushed": 26,
    "noKnockback": false,
    "drops": [
     {
@@ -1256,11 +1256,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -1313,23 +1313,23 @@
    "elements": {
     "fire": 1.5
    },
-   "hp": 446,
+   "hp": 338,
    "mp": 34,
    "exp": 68,
    "atk": 36,
    "matk": 0,
    "def": 15,
    "mdef": 12,
-   "avoid": 8,
+   "avoid": 6,
    "acc": 29,
-   "meso": 46,
+   "meso": 83,
    "mesoChance": 0.6,
    "speedStat": -35,
    "speed": 65,
    "chaseOnSight": false,
    "width": 34,
    "height": 30,
-   "pushed": 45,
+   "pushed": 34,
    "noKnockback": false,
    "drops": [
     {
@@ -1338,11 +1338,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -1393,23 +1393,23 @@
    "ranged": false,
    "magic": false,
    "elements": {},
-   "hp": 602,
+   "hp": 433,
    "mp": 38,
    "exp": 85,
    "atk": 42,
    "matk": 0,
    "def": 18,
    "mdef": 15,
-   "avoid": 9,
+   "avoid": 7,
    "acc": 32,
-   "meso": 55,
+   "meso": 99,
    "mesoChance": 0.6,
    "speedStat": -5,
    "speed": 95,
    "chaseOnSight": false,
    "width": 44,
    "height": 44,
-   "pushed": 60,
+   "pushed": 43,
    "noKnockback": false,
    "drops": [
     {
@@ -1418,11 +1418,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -1475,23 +1475,23 @@
    "elements": {
     "fire": 1.5
    },
-   "hp": 1240,
+   "hp": 864,
    "mp": 42,
    "exp": 158,
    "atk": 52,
    "matk": 0,
    "def": 30,
    "mdef": 24,
-   "avoid": 10,
+   "avoid": 8,
    "acc": 34,
-   "meso": 64,
+   "meso": 115,
    "mesoChance": 0.6,
    "speedStat": 0,
    "speed": 0,
    "chaseOnSight": false,
    "width": 52,
    "height": 73,
-   "pushed": 124,
+   "pushed": 86,
    "noKnockback": false,
    "drops": [
     {
@@ -1500,11 +1500,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -1574,9 +1574,9 @@
    "matk": 0,
    "def": 52,
    "mdef": 42,
-   "avoid": 15,
+   "avoid": 11,
    "acc": 47,
-   "meso": 3300,
+   "meso": 5940,
    "mesoChance": 0.6,
    "speedStat": -22,
    "speed": 78,
@@ -1592,11 +1592,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -1687,23 +1687,23 @@
    "ranged": false,
    "magic": false,
    "elements": {},
-   "hp": 330,
+   "hp": 264,
    "mp": 30,
    "exp": 54,
    "atk": 31,
    "matk": 0,
    "def": 13,
    "mdef": 10,
-   "avoid": 7,
+   "avoid": 5,
    "acc": 26,
-   "meso": 39,
+   "meso": 70,
    "mesoChance": 0.6,
    "speedStat": -25,
    "speed": 75,
    "chaseOnSight": false,
    "width": 44,
    "height": 44,
-   "pushed": 33,
+   "pushed": 26,
    "noKnockback": false,
    "drops": [
     {
@@ -1712,11 +1712,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -1769,23 +1769,23 @@
    "elements": {
     "dark": 1.5
    },
-   "hp": 490,
+   "hp": 343,
    "mp": 130,
    "exp": 71,
    "atk": 40,
    "matk": 45,
    "def": 12,
    "mdef": 16,
-   "avoid": 15,
+   "avoid": 9,
    "acc": 33,
-   "meso": 60,
+   "meso": 108,
    "mesoChance": 0.6,
    "speedStat": -22,
    "speed": 78,
    "chaseOnSight": false,
    "width": 31,
    "height": 27,
-   "pushed": 49,
+   "pushed": 34,
    "noKnockback": false,
    "drops": [
     {
@@ -1794,11 +1794,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -1863,23 +1863,23 @@
    "elements": {
     "fire": 1.5
    },
-   "hp": 855,
+   "hp": 595,
    "mp": 44,
    "exp": 116,
    "atk": 50,
    "matk": 0,
    "def": 22,
    "mdef": 18,
-   "avoid": 11,
+   "avoid": 8,
    "acc": 36,
-   "meso": 68,
+   "meso": 122,
    "mesoChance": 0.6,
    "speedStat": -42,
    "speed": 58,
    "chaseOnSight": false,
    "width": 30,
    "height": 24,
-   "pushed": 86,
+   "pushed": 60,
    "noKnockback": false,
    "drops": [
     {
@@ -1888,11 +1888,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -1943,23 +1943,23 @@
    "ranged": false,
    "magic": false,
    "elements": {},
-   "hp": 197,
+   "hp": 180,
    "mp": 24,
    "exp": 37,
    "atk": 25,
    "matk": 0,
    "def": 10,
    "mdef": 8,
-   "avoid": 6,
+   "avoid": 5,
    "acc": 22,
-   "meso": 30,
+   "meso": 47,
    "mesoChance": 0.6,
    "speedStat": -30,
    "speed": 70,
    "chaseOnSight": false,
    "width": 36,
    "height": 36,
-   "pushed": 20,
+   "pushed": 18,
    "noKnockback": false,
    "drops": [
     {
@@ -1968,11 +1968,11 @@
     },
     {
      "item": "use.red_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -2019,23 +2019,23 @@
    "ranged": true,
    "magic": false,
    "elements": {},
-   "hp": 1040,
+   "hp": 722,
    "mp": 48,
    "exp": 141,
    "atk": 55,
    "matk": 0,
    "def": 25,
    "mdef": 20,
-   "avoid": 12,
+   "avoid": 9,
    "acc": 39,
-   "meso": 76,
+   "meso": 138,
    "mesoChance": 0.6,
    "speedStat": -27,
    "speed": 73,
    "chaseOnSight": false,
    "width": 36,
    "height": 36,
-   "pushed": 104,
+   "pushed": 72,
    "noKnockback": false,
    "drops": [
     {
@@ -2044,11 +2044,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -2113,23 +2113,23 @@
    "elements": {
     "fire": 1.5
    },
-   "hp": 2250,
+   "hp": 1550,
    "mp": 54,
    "exp": 282,
    "atk": 71,
    "matk": 0,
    "def": 41,
    "mdef": 33,
-   "avoid": 13,
+   "avoid": 10,
    "acc": 43,
-   "meso": 92,
+   "meso": 165,
    "mesoChance": 0.6,
    "speedStat": -32,
    "speed": 68,
    "chaseOnSight": true,
    "width": 57,
    "height": 57,
-   "pushed": 225,
+   "pushed": 155,
    "noKnockback": false,
    "drops": [
     {
@@ -2138,11 +2138,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -2193,23 +2193,23 @@
    "ranged": false,
    "magic": false,
    "elements": {},
-   "hp": 892,
+   "hp": 614,
    "mp": 52,
    "exp": 128,
    "atk": 55,
    "matk": 0,
    "def": 17,
    "mdef": 13,
-   "avoid": 19,
+   "avoid": 12,
    "acc": 41,
-   "meso": 86,
+   "meso": 155,
    "mesoChance": 0.6,
    "speedStat": -22,
    "speed": 78,
    "chaseOnSight": false,
    "width": 31,
    "height": 27,
-   "pushed": 89,
+   "pushed": 61,
    "noKnockback": false,
    "drops": [
     {
@@ -2218,11 +2218,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -2282,9 +2282,9 @@
    "matk": 254,
    "def": 99,
    "mdef": 129,
-   "avoid": 22,
+   "avoid": 16,
    "acc": 68,
-   "meso": 6290,
+   "meso": 10300,
    "mesoChance": 0.6,
    "speedStat": 0,
    "speed": 0,
@@ -2300,11 +2300,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -2432,7 +2432,7 @@
    "mdef": 1,
    "avoid": 2,
    "acc": 12,
-   "meso": 9,
+   "meso": 10,
    "mesoChance": 0.6,
    "speedStat": -25,
    "speed": 75,
@@ -2448,11 +2448,11 @@
     },
     {
      "item": "use.red_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -2504,9 +2504,9 @@
    "matk": 0,
    "def": 8,
    "mdef": 6,
-   "avoid": 5,
+   "avoid": 4,
    "acc": 19,
-   "meso": 25,
+   "meso": 36,
    "mesoChance": 0.6,
    "speedStat": -25,
    "speed": 75,
@@ -2522,11 +2522,11 @@
     },
     {
      "item": "use.red_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -2575,23 +2575,23 @@
    "elements": {
     "fire": 1.5
    },
-   "hp": 446,
+   "hp": 338,
    "mp": 34,
    "exp": 68,
    "atk": 36,
    "matk": 0,
    "def": 15,
    "mdef": 12,
-   "avoid": 8,
+   "avoid": 6,
    "acc": 29,
-   "meso": 46,
+   "meso": 83,
    "mesoChance": 0.6,
    "speedStat": -25,
    "speed": 75,
    "chaseOnSight": false,
    "width": 44,
    "height": 44,
-   "pushed": 45,
+   "pushed": 34,
    "noKnockback": false,
    "drops": [
     {
@@ -2600,11 +2600,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -2657,23 +2657,23 @@
    "elements": {
     "fire": 1.5
    },
-   "hp": 855,
+   "hp": 595,
    "mp": 44,
    "exp": 116,
    "atk": 50,
    "matk": 0,
    "def": 22,
    "mdef": 18,
-   "avoid": 11,
+   "avoid": 8,
    "acc": 36,
-   "meso": 68,
+   "meso": 122,
    "mesoChance": 0.6,
    "speedStat": -22,
    "speed": 78,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 86,
+   "pushed": 60,
    "noKnockback": false,
    "drops": [
     {
@@ -2682,11 +2682,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -2737,23 +2737,23 @@
    "ranged": false,
    "magic": false,
    "elements": {},
-   "hp": 1150,
+   "hp": 796,
    "mp": 50,
    "exp": 155,
    "atk": 58,
    "matk": 0,
    "def": 26,
    "mdef": 21,
-   "avoid": 12,
+   "avoid": 9,
    "acc": 40,
-   "meso": 81,
+   "meso": 146,
    "mesoChance": 0.6,
    "speedStat": -2,
    "speed": 98,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 115,
+   "pushed": 80,
    "noKnockback": false,
    "drops": [
     {
@@ -2762,11 +2762,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -2820,23 +2820,23 @@
     "ice": 1.5,
     "fire": 0.5
    },
-   "hp": 2240,
+   "hp": 1550,
    "mp": 64,
    "exp": 290,
    "atk": 81,
    "matk": 0,
    "def": 38,
    "mdef": 31,
-   "avoid": 16,
+   "avoid": 12,
    "acc": 50,
-   "meso": 120,
+   "meso": 213,
    "mesoChance": 0.6,
    "speedStat": -2,
    "speed": 98,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 224,
+   "pushed": 155,
    "noKnockback": false,
    "drops": [
     {
@@ -2845,11 +2845,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -2902,23 +2902,23 @@
    "elements": {
     "holy": 1.5
    },
-   "hp": 1900,
+   "hp": 1290,
    "mp": 60,
    "exp": 252,
    "atk": 75,
    "matk": 0,
    "def": 35,
    "mdef": 28,
-   "avoid": 15,
+   "avoid": 11,
    "acc": 47,
-   "meso": 110,
+   "meso": 198,
    "mesoChance": 0.6,
    "speedStat": -22,
    "speed": 78,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 190,
+   "pushed": 129,
    "noKnockback": false,
    "drops": [
     {
@@ -2927,11 +2927,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -2985,23 +2985,23 @@
     "holy": 1.5,
     "fire": 1.5
    },
-   "hp": 3100,
+   "hp": 2240,
    "mp": 72,
    "exp": 382,
    "atk": 94,
    "matk": 0,
    "def": 46,
    "mdef": 37,
-   "avoid": 17,
+   "avoid": 13,
    "acc": 55,
-   "meso": 142,
+   "meso": 247,
    "mesoChance": 0.6,
    "speedStat": -22,
    "speed": 78,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 310,
+   "pushed": 224,
    "noKnockback": false,
    "drops": [
     {
@@ -3010,11 +3010,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -3067,23 +3067,23 @@
    "elements": {
     "holy": 1.5
    },
-   "hp": 4930,
+   "hp": 3820,
    "mp": 84,
    "exp": 570,
    "atk": 117,
    "matk": 0,
    "def": 59,
    "mdef": 47,
-   "avoid": 20,
+   "avoid": 15,
    "acc": 64,
-   "meso": 184,
+   "meso": 308,
    "mesoChance": 0.6,
    "speedStat": -19,
    "speed": 81,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 493,
+   "pushed": 382,
    "noKnockback": false,
    "drops": [
     {
@@ -3092,11 +3092,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -3154,23 +3154,23 @@
    "elements": {
     "holy": 1.5
    },
-   "hp": 11900,
+   "hp": 10100,
    "mp": 96,
    "exp": 1230,
    "atk": 155,
    "matk": 0,
    "def": 104,
    "mdef": 83,
-   "avoid": 24,
+   "avoid": 17,
    "acc": 72,
-   "meso": 239,
+   "meso": 385,
    "mesoChance": 0.6,
    "speedStat": -29,
    "speed": 71,
    "chaseOnSight": true,
    "width": 57,
    "height": 57,
-   "pushed": 1190,
+   "pushed": 1010,
    "noKnockback": false,
    "drops": [
     {
@@ -3179,11 +3179,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -3253,23 +3253,23 @@
    "elements": {
     "lightning": 1.5
    },
-   "hp": 5840,
+   "hp": 4300,
    "mp": 76,
    "exp": 659,
    "atk": 112,
    "matk": 0,
    "def": 70,
    "mdef": 56,
-   "avoid": 18,
+   "avoid": 13,
    "acc": 58,
-   "meso": 155,
+   "meso": 266,
    "mesoChance": 0.6,
    "speedStat": -24,
    "speed": 76,
    "chaseOnSight": true,
    "width": 57,
    "height": 57,
-   "pushed": 584,
+   "pushed": 430,
    "noKnockback": false,
    "drops": [
     {
@@ -3278,11 +3278,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -3342,9 +3342,9 @@
    "matk": 0,
    "def": 138,
    "mdef": 110,
-   "avoid": 27,
+   "avoid": 20,
    "acc": 82,
-   "meso": 9090,
+   "meso": 14100,
    "mesoChance": 0.6,
    "speedStat": -14,
    "speed": 86,
@@ -3360,11 +3360,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -3490,23 +3490,23 @@
    "elements": {
     "holy": 1.5
    },
-   "hp": 195,
+   "hp": 163,
    "mp": 28,
    "exp": 36,
    "atk": 26,
    "matk": 0,
    "def": 7,
    "mdef": 6,
-   "avoid": 10,
+   "avoid": 6,
    "acc": 25,
-   "meso": 35,
+   "meso": 61,
    "mesoChance": 0.6,
    "speedStat": -25,
    "speed": 75,
    "chaseOnSight": false,
    "width": 31,
    "height": 27,
-   "pushed": 20,
+   "pushed": 16,
    "noKnockback": false,
    "drops": [
     {
@@ -3515,11 +3515,11 @@
     },
     {
      "item": "use.red_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -3566,23 +3566,23 @@
    "ranged": false,
    "magic": false,
    "elements": {},
-   "hp": 518,
+   "hp": 383,
    "mp": 36,
    "exp": 76,
    "atk": 39,
    "matk": 0,
    "def": 17,
    "mdef": 13,
-   "avoid": 9,
+   "avoid": 7,
    "acc": 30,
-   "meso": 50,
+   "meso": 91,
    "mesoChance": 0.6,
    "speedStat": -5,
    "speed": 95,
    "chaseOnSight": false,
    "width": 44,
    "height": 44,
-   "pushed": 52,
+   "pushed": 38,
    "noKnockback": false,
    "drops": [
     {
@@ -3591,11 +3591,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.bronze",
@@ -3646,23 +3646,23 @@
    "ranged": false,
    "magic": false,
    "elements": {},
-   "hp": 774,
+   "hp": 540,
    "mp": 42,
    "exp": 105,
    "atk": 47,
    "matk": 0,
    "def": 21,
    "mdef": 17,
-   "avoid": 10,
+   "avoid": 8,
    "acc": 34,
-   "meso": 64,
+   "meso": 115,
    "mesoChance": 0.6,
    "speedStat": -42,
    "speed": 58,
    "chaseOnSight": false,
    "width": 30,
    "height": 24,
-   "pushed": 77,
+   "pushed": 54,
    "noKnockback": false,
    "drops": [
     {
@@ -3671,11 +3671,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -3732,23 +3732,23 @@
    "elements": {
     "holy": 1.5
    },
-   "hp": 944,
+   "hp": 655,
    "mp": 46,
    "exp": 128,
    "atk": 52,
    "matk": 0,
    "def": 24,
    "mdef": 19,
-   "avoid": 11,
+   "avoid": 8,
    "acc": 37,
-   "meso": 72,
+   "meso": 130,
    "mesoChance": 0.6,
    "speedStat": -32,
    "speed": 68,
    "chaseOnSight": false,
    "width": 34,
    "height": 30,
-   "pushed": 94,
+   "pushed": 66,
    "noKnockback": false,
    "drops": [
     {
@@ -3757,11 +3757,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -3814,23 +3814,23 @@
    "elements": {
     "lightning": 1.5
    },
-   "hp": 1270,
+   "hp": 877,
    "mp": 52,
    "exp": 171,
    "atk": 61,
    "matk": 0,
    "def": 28,
    "mdef": 22,
-   "avoid": 13,
+   "avoid": 9,
    "acc": 41,
-   "meso": 86,
+   "meso": 155,
    "mesoChance": 0.6,
    "speedStat": -22,
    "speed": 78,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 127,
+   "pushed": 88,
    "noKnockback": false,
    "drops": [
     {
@@ -3839,11 +3839,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -3896,23 +3896,23 @@
    "elements": {
     "lightning": 1.5
    },
-   "hp": 2490,
+   "hp": 1700,
    "mp": 56,
    "exp": 311,
    "atk": 74,
    "matk": 0,
    "def": 44,
    "mdef": 35,
-   "avoid": 14,
+   "avoid": 10,
    "acc": 44,
-   "meso": 97,
+   "meso": 175,
    "mesoChance": 0.6,
    "speedStat": -32,
    "speed": 68,
    "chaseOnSight": true,
    "width": 57,
    "height": 57,
-   "pushed": 249,
+   "pushed": 170,
    "noKnockback": false,
    "drops": [
     {
@@ -3921,11 +3921,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -3978,23 +3978,23 @@
    "elements": {
     "holy": 1.5
    },
-   "hp": 1900,
+   "hp": 1290,
    "mp": 190,
    "exp": 252,
    "atk": 75,
    "matk": 82,
    "def": 35,
    "mdef": 45,
-   "avoid": 15,
+   "avoid": 11,
    "acc": 47,
-   "meso": 110,
+   "meso": 198,
    "mesoChance": 0.6,
    "speedStat": -32,
    "speed": 68,
    "chaseOnSight": false,
    "width": 34,
    "height": 30,
-   "pushed": 190,
+   "pushed": 129,
    "noKnockback": false,
    "drops": [
     {
@@ -4003,11 +4003,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -4070,23 +4070,23 @@
    "ranged": false,
    "magic": false,
    "elements": {},
-   "hp": 2630,
+   "hp": 1860,
    "mp": 68,
    "exp": 333,
    "atk": 87,
    "matk": 0,
    "def": 42,
    "mdef": 34,
-   "avoid": 17,
+   "avoid": 12,
    "acc": 53,
-   "meso": 131,
+   "meso": 230,
    "mesoChance": 0.6,
    "speedStat": -34,
    "speed": 66,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 263,
+   "pushed": 186,
    "noKnockback": false,
    "drops": [
     {
@@ -4095,11 +4095,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -4163,9 +4163,9 @@
    "matk": 0,
    "def": 83,
    "mdef": 66,
-   "avoid": 19,
+   "avoid": 14,
    "acc": 61,
-   "meso": 5070,
+   "meso": 8590,
    "mesoChance": 0.6,
    "speedStat": -14,
    "speed": 86,
@@ -4181,11 +4181,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -4315,23 +4315,23 @@
    "elements": {
     "fire": 1.5
    },
-   "hp": 855,
+   "hp": 595,
    "mp": 44,
    "exp": 116,
    "atk": 50,
    "matk": 0,
    "def": 22,
    "mdef": 18,
-   "avoid": 11,
+   "avoid": 8,
    "acc": 36,
-   "meso": 68,
+   "meso": 122,
    "mesoChance": 0.6,
    "speedStat": -27,
    "speed": 73,
    "chaseOnSight": false,
    "width": 36,
    "height": 36,
-   "pushed": 86,
+   "pushed": 60,
    "noKnockback": false,
    "drops": [
     {
@@ -4340,11 +4340,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -4398,23 +4398,23 @@
     "holy": 1.5,
     "fire": 1.5
    },
-   "hp": 1040,
+   "hp": 722,
    "mp": 48,
    "exp": 141,
    "atk": 55,
    "matk": 0,
    "def": 25,
    "mdef": 20,
-   "avoid": 12,
+   "avoid": 9,
    "acc": 39,
-   "meso": 76,
+   "meso": 138,
    "mesoChance": 0.6,
    "speedStat": -39,
    "speed": 61,
    "chaseOnSight": false,
    "width": 36,
    "height": 36,
-   "pushed": 104,
+   "pushed": 72,
    "noKnockback": false,
    "drops": [
     {
@@ -4423,11 +4423,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -4482,23 +4482,23 @@
    "ranged": false,
    "magic": false,
    "elements": {},
-   "hp": 1410,
+   "hp": 966,
    "mp": 54,
    "exp": 188,
    "atk": 64,
    "matk": 0,
    "def": 30,
    "mdef": 24,
-   "avoid": 13,
+   "avoid": 10,
    "acc": 43,
-   "meso": 92,
+   "meso": 165,
    "mesoChance": 0.6,
    "speedStat": -22,
    "speed": 78,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 141,
+   "pushed": 97,
    "noKnockback": false,
    "drops": [
     {
@@ -4507,11 +4507,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -4565,23 +4565,23 @@
     "fire": 1.5,
     "ice": 0.5
    },
-   "hp": 2430,
+   "hp": 1700,
    "mp": 208,
    "exp": 310,
    "atk": 84,
    "matk": 93,
    "def": 40,
    "mdef": 52,
-   "avoid": 16,
+   "avoid": 12,
    "acc": 51,
-   "meso": 125,
+   "meso": 221,
    "mesoChance": 0.6,
    "speedStat": -22,
    "speed": 78,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 243,
+   "pushed": 170,
    "noKnockback": false,
    "drops": [
     {
@@ -4590,11 +4590,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -4662,23 +4662,23 @@
    "ranged": false,
    "magic": false,
    "elements": {},
-   "hp": 2860,
+   "hp": 2040,
    "mp": 70,
    "exp": 357,
    "atk": 91,
    "matk": 0,
    "def": 44,
    "mdef": 35,
-   "avoid": 17,
+   "avoid": 12,
    "acc": 54,
-   "meso": 136,
+   "meso": 238,
    "mesoChance": 0.6,
    "speedStat": -22,
    "speed": 78,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 286,
+   "pushed": 204,
    "noKnockback": false,
    "drops": [
     {
@@ -4687,11 +4687,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -4742,23 +4742,23 @@
    "ranged": false,
    "magic": false,
    "elements": {},
-   "hp": 4930,
+   "hp": 3820,
    "mp": 84,
    "exp": 570,
    "atk": 117,
    "matk": 0,
    "def": 59,
    "mdef": 47,
-   "avoid": 20,
+   "avoid": 15,
    "acc": 64,
-   "meso": 184,
+   "meso": 308,
    "mesoChance": 0.6,
    "speedStat": -19,
    "speed": 81,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 493,
+   "pushed": 382,
    "noKnockback": false,
    "drops": [
     {
@@ -4767,11 +4767,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -4830,23 +4830,23 @@
     "ice": 1.5,
     "fire": 0.5
    },
-   "hp": 7940,
+   "hp": 6880,
    "mp": 98,
    "exp": 874,
    "atk": 145,
    "matk": 0,
    "def": 77,
    "mdef": 62,
-   "avoid": 24,
+   "avoid": 18,
    "acc": 74,
-   "meso": 249,
+   "meso": 399,
    "mesoChance": 0.6,
    "speedStat": -19,
    "speed": 81,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 794,
+   "pushed": 688,
    "noKnockback": false,
    "drops": [
     {
@@ -4855,11 +4855,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -4931,23 +4931,23 @@
     "fire": 1.5,
     "ice": 0.5
    },
-   "hp": 9660,
+   "hp": 8830,
    "mp": 106,
    "exp": 1090,
    "atk": 164,
    "matk": 0,
    "def": 87,
    "mdef": 70,
-   "avoid": 26,
+   "avoid": 19,
    "acc": 79,
-   "meso": 285,
+   "meso": 446,
    "mesoChance": 0.6,
    "speedStat": -19,
    "speed": 81,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 966,
+   "pushed": 883,
    "noKnockback": false,
    "drops": [
     {
@@ -4956,11 +4956,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -5034,23 +5034,23 @@
    "ranged": false,
    "magic": false,
    "elements": {},
-   "hp": 9670,
+   "hp": 7860,
    "mp": 90,
    "exp": 1030,
    "atk": 141,
    "matk": 0,
    "def": 93,
    "mdef": 74,
-   "avoid": 22,
+   "avoid": 16,
    "acc": 68,
-   "meso": 210,
+   "meso": 345,
    "mesoChance": 0.6,
    "speedStat": -41,
    "speed": 59,
    "chaseOnSight": true,
    "width": 57,
    "height": 57,
-   "pushed": 967,
+   "pushed": 786,
    "noKnockback": false,
    "drops": [
     {
@@ -5059,11 +5059,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -5119,23 +5119,23 @@
    "ranged": false,
    "magic": false,
    "elements": {},
-   "hp": 13600,
+   "hp": 12000,
    "mp": 100,
    "exp": 1390,
    "atk": 165,
    "matk": 0,
    "def": 112,
    "mdef": 90,
-   "avoid": 25,
+   "avoid": 18,
    "acc": 75,
-   "meso": 260,
+   "meso": 414,
    "mesoChance": 0.6,
    "speedStat": -41,
    "speed": 59,
    "chaseOnSight": true,
    "width": 57,
    "height": 57,
-   "pushed": 1360,
+   "pushed": 1200,
    "noKnockback": false,
    "drops": [
     {
@@ -5144,11 +5144,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -5206,23 +5206,23 @@
    "elements": {
     "fire": 1.5
    },
-   "hp": 16800,
+   "hp": 15800,
    "mp": 110,
    "exp": 1820,
    "atk": 191,
    "matk": 0,
    "def": 129,
    "mdef": 103,
-   "avoid": 27,
+   "avoid": 20,
    "acc": 82,
-   "meso": 303,
+   "meso": 469,
    "mesoChance": 0.6,
    "speedStat": -41,
    "speed": 59,
    "chaseOnSight": true,
    "width": 57,
    "height": 57,
-   "pushed": 1680,
+   "pushed": 1580,
    "noKnockback": false,
    "drops": [
     {
@@ -5231,11 +5231,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -5291,23 +5291,23 @@
    "ranged": false,
    "magic": false,
    "elements": {},
-   "hp": 11900,
+   "hp": 11600,
    "mp": 116,
    "exp": 1420,
    "atk": 189,
    "matk": 0,
    "def": 100,
    "mdef": 80,
-   "avoid": 29,
+   "avoid": 21,
    "acc": 86,
-   "meso": 332,
+   "meso": 504,
    "mesoChance": 0.6,
    "speedStat": -19,
    "speed": 81,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 1190,
+   "pushed": 1160,
    "noKnockback": false,
    "drops": [
     {
@@ -5316,11 +5316,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -5395,9 +5395,9 @@
    "matk": 0,
    "def": 112,
    "mdef": 90,
-   "avoid": 31,
+   "avoid": 22,
    "acc": 92,
-   "meso": 376,
+   "meso": 557,
    "mesoChance": 0.6,
    "speedStat": -16,
    "speed": 84,
@@ -5413,11 +5413,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -5486,23 +5486,23 @@
    "elements": {
     "fire": 1.5
    },
-   "hp": 1330,
+   "hp": 904,
    "mp": 190,
    "exp": 189,
    "atk": 67,
    "matk": 74,
    "def": 21,
    "mdef": 27,
-   "avoid": 23,
+   "avoid": 14,
    "acc": 47,
-   "meso": 110,
+   "meso": 198,
    "mesoChance": 0.6,
    "speedStat": -22,
    "speed": 78,
    "chaseOnSight": false,
    "width": 31,
    "height": 27,
-   "pushed": 133,
+   "pushed": 90,
    "noKnockback": false,
    "drops": [
     {
@@ -5511,11 +5511,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -5593,9 +5593,9 @@
    "matk": 0,
    "def": 99,
    "mdef": 80,
-   "avoid": 22,
+   "avoid": 16,
    "acc": 68,
-   "meso": 6290,
+   "meso": 10300,
    "mesoChance": 0.6,
    "speedStat": -31,
    "speed": 69,
@@ -5611,11 +5611,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -5735,9 +5735,9 @@
    "matk": 452,
    "def": 183,
    "mdef": 237,
-   "avoid": 32,
+   "avoid": 23,
    "acc": 96,
-   "meso": 12400,
+   "meso": 18000,
    "mesoChance": 0.6,
    "speedStat": -1,
    "speed": 99,
@@ -5753,11 +5753,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -5908,23 +5908,23 @@
    "elements": {
     "dark": 1.5
    },
-   "hp": 1090,
+   "hp": 745,
    "mp": 178,
    "exp": 156,
    "atk": 61,
    "matk": 67,
    "def": 19,
    "mdef": 24,
-   "avoid": 21,
+   "avoid": 13,
    "acc": 44,
-   "meso": 97,
+   "meso": 175,
    "mesoChance": 0.6,
    "speedStat": -22,
    "speed": 78,
    "chaseOnSight": false,
    "width": 31,
    "height": 27,
-   "pushed": 109,
+   "pushed": 75,
    "noKnockback": false,
    "drops": [
     {
@@ -5933,11 +5933,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -6002,23 +6002,23 @@
    "elements": {
     "dark": 1.5
    },
-   "hp": 2000,
+   "hp": 1430,
    "mp": 220,
    "exp": 267,
    "atk": 82,
    "matk": 90,
    "def": 26,
    "mdef": 34,
-   "avoid": 26,
+   "avoid": 16,
    "acc": 54,
-   "meso": 136,
+   "meso": 238,
    "mesoChance": 0.6,
    "speedStat": -22,
    "speed": 78,
    "chaseOnSight": false,
    "width": 31,
    "height": 27,
-   "pushed": 200,
+   "pushed": 143,
    "noKnockback": false,
    "drops": [
     {
@@ -6027,11 +6027,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -6096,23 +6096,23 @@
    "elements": {
     "dark": 1.5
    },
-   "hp": 3450,
+   "hp": 2670,
    "mp": 262,
    "exp": 428,
    "atk": 105,
    "matk": 116,
    "def": 36,
    "mdef": 46,
-   "avoid": 31,
+   "avoid": 18,
    "acc": 64,
-   "meso": 184,
+   "meso": 308,
    "mesoChance": 0.6,
    "speedStat": -19,
    "speed": 81,
    "chaseOnSight": false,
    "width": 31,
    "height": 27,
-   "pushed": 345,
+   "pushed": 267,
    "noKnockback": false,
    "drops": [
     {
@@ -6121,11 +6121,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -6195,23 +6195,23 @@
    "elements": {
     "fire": 1.5
    },
-   "hp": 2860,
+   "hp": 2040,
    "mp": 70,
    "exp": 357,
    "atk": 91,
    "matk": 0,
    "def": 44,
    "mdef": 35,
-   "avoid": 17,
+   "avoid": 12,
    "acc": 54,
-   "meso": 136,
+   "meso": 238,
    "mesoChance": 0.6,
    "speedStat": 0,
    "speed": 0,
    "chaseOnSight": false,
    "width": 40,
    "height": 56,
-   "pushed": 286,
+   "pushed": 204,
    "noKnockback": false,
    "drops": [
     {
@@ -6220,11 +6220,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -6289,23 +6289,23 @@
    "elements": {
     "fire": 1.5
    },
-   "hp": 6050,
+   "hp": 4910,
    "mp": 90,
    "exp": 685,
    "atk": 128,
    "matk": 0,
    "def": 66,
    "mdef": 53,
-   "avoid": 22,
+   "avoid": 16,
    "acc": 68,
-   "meso": 210,
+   "meso": 345,
    "mesoChance": 0.6,
    "speedStat": 0,
    "speed": 0,
    "chaseOnSight": false,
    "width": 40,
    "height": 56,
-   "pushed": 605,
+   "pushed": 491,
    "noKnockback": false,
    "drops": [
     {
@@ -6314,11 +6314,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -6388,23 +6388,23 @@
    "elements": {
     "lightning": 1.5
    },
-   "hp": 5840,
+   "hp": 4300,
    "mp": 238,
    "exp": 659,
    "atk": 112,
    "matk": 123,
    "def": 70,
    "mdef": 91,
-   "avoid": 18,
+   "avoid": 13,
    "acc": 58,
-   "meso": 155,
+   "meso": 266,
    "mesoChance": 0.6,
    "speedStat": 0,
    "speed": 0,
    "chaseOnSight": false,
    "width": 52,
    "height": 73,
-   "pushed": 584,
+   "pushed": 430,
    "noKnockback": false,
    "drops": [
     {
@@ -6413,11 +6413,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -6483,23 +6483,23 @@
     "ice": 1.5,
     "fire": 0.5
    },
-   "hp": 11900,
+   "hp": 10100,
    "mp": 298,
    "exp": 1230,
    "atk": 155,
    "matk": 171,
    "def": 104,
    "mdef": 135,
-   "avoid": 24,
+   "avoid": 17,
    "acc": 72,
-   "meso": 239,
+   "meso": 385,
    "mesoChance": 0.6,
    "speedStat": 0,
    "speed": 0,
    "chaseOnSight": false,
    "width": 52,
    "height": 73,
-   "pushed": 1190,
+   "pushed": 1010,
    "noKnockback": false,
    "drops": [
     {
@@ -6508,11 +6508,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -6583,23 +6583,23 @@
     "fire": 1.5,
     "ice": 0.5
    },
-   "hp": 11900,
+   "hp": 10100,
    "mp": 298,
    "exp": 1230,
    "atk": 155,
    "matk": 171,
    "def": 104,
    "mdef": 135,
-   "avoid": 24,
+   "avoid": 17,
    "acc": 72,
-   "meso": 239,
+   "meso": 385,
    "mesoChance": 0.6,
    "speedStat": 0,
    "speed": 0,
    "chaseOnSight": false,
    "width": 52,
    "height": 73,
-   "pushed": 1190,
+   "pushed": 1010,
    "noKnockback": false,
    "drops": [
     {
@@ -6608,11 +6608,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -6685,23 +6685,23 @@
    "ranged": false,
    "magic": false,
    "elements": {},
-   "hp": 9250,
+   "hp": 8350,
    "mp": 104,
    "exp": 1030,
    "atk": 159,
    "matk": 0,
    "def": 85,
    "mdef": 68,
-   "avoid": 26,
+   "avoid": 19,
    "acc": 78,
-   "meso": 276,
+   "meso": 435,
    "mesoChance": 0.6,
    "speedStat": -9,
    "speed": 91,
    "chaseOnSight": false,
    "width": 34,
    "height": 30,
-   "pushed": 925,
+   "pushed": 835,
    "noKnockback": false,
    "drops": [
     {
@@ -6710,11 +6710,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -6772,23 +6772,23 @@
    "elements": {
     "lightning": 1.5
    },
-   "hp": 7360,
+   "hp": 6900,
    "mp": 340,
    "exp": 910,
    "atk": 156,
    "matk": 171,
    "def": 55,
    "mdef": 72,
-   "avoid": 41,
+   "avoid": 24,
    "acc": 82,
-   "meso": 303,
+   "meso": 469,
    "mesoChance": 0.6,
    "speedStat": -19,
    "speed": 81,
    "chaseOnSight": false,
    "width": 31,
    "height": 27,
-   "pushed": 736,
+   "pushed": 690,
    "noKnockback": false,
    "drops": [
     {
@@ -6797,11 +6797,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -6876,9 +6876,9 @@
    "matk": 0,
    "def": 148,
    "mdef": 119,
-   "avoid": 30,
+   "avoid": 21,
    "acc": 89,
-   "meso": 353,
+   "meso": 530,
    "mesoChance": 0.6,
    "speedStat": -38,
    "speed": 62,
@@ -6894,11 +6894,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -6963,9 +6963,9 @@
    "matk": 515,
    "def": 210,
    "mdef": 273,
-   "avoid": 35,
+   "avoid": 25,
    "acc": 103,
-   "meso": 14400,
+   "meso": 20400,
    "mesoChance": 0.6,
    "speedStat": -16,
    "speed": 84,
@@ -6981,11 +6981,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.gold",
@@ -7134,23 +7134,23 @@
     "fire": 1.5,
     "ice": 0.5
    },
-   "hp": 4930,
+   "hp": 3820,
    "mp": 84,
    "exp": 570,
    "atk": 117,
    "matk": 0,
    "def": 59,
    "mdef": 47,
-   "avoid": 20,
+   "avoid": 15,
    "acc": 64,
-   "meso": 184,
+   "meso": 308,
    "mesoChance": 0.6,
    "speedStat": 1,
    "speed": 101,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 493,
+   "pushed": 382,
    "noKnockback": false,
    "drops": [
     {
@@ -7159,11 +7159,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -7222,23 +7222,23 @@
     "fire": 1.5,
     "ice": 0.5
    },
-   "hp": 7420,
+   "hp": 6320,
    "mp": 96,
    "exp": 823,
    "atk": 141,
    "matk": 0,
    "def": 74,
    "mdef": 59,
-   "avoid": 24,
+   "avoid": 17,
    "acc": 72,
-   "meso": 239,
+   "meso": 385,
    "mesoChance": 0.6,
    "speedStat": 1,
    "speed": 101,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 742,
+   "pushed": 632,
    "noKnockback": false,
    "drops": [
     {
@@ -7247,11 +7247,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -7310,23 +7310,23 @@
     "fire": 1.5,
     "ice": 0.5
    },
-   "hp": 13600,
+   "hp": 12000,
    "mp": 100,
    "exp": 1390,
    "atk": 165,
    "matk": 0,
    "def": 112,
    "mdef": 90,
-   "avoid": 25,
+   "avoid": 18,
    "acc": 75,
-   "meso": 260,
+   "meso": 414,
    "mesoChance": 0.6,
    "speedStat": -9,
    "speed": 91,
    "chaseOnSight": true,
    "width": 57,
    "height": 57,
-   "pushed": 1360,
+   "pushed": 1200,
    "noKnockback": false,
    "drops": [
     {
@@ -7335,11 +7335,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -7398,23 +7398,23 @@
     "fire": 1.5,
     "ice": 0.5
    },
-   "hp": 9250,
+   "hp": 8350,
    "mp": 104,
    "exp": 1030,
    "atk": 159,
    "matk": 0,
    "def": 85,
    "mdef": 68,
-   "avoid": 26,
+   "avoid": 19,
    "acc": 78,
-   "meso": 276,
+   "meso": 435,
    "mesoChance": 0.6,
    "speedStat": -19,
    "speed": 81,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 925,
+   "pushed": 835,
    "noKnockback": false,
    "drops": [
     {
@@ -7423,11 +7423,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -7486,23 +7486,23 @@
     "fire": 1.5,
     "ice": 0.5
    },
-   "hp": 17500,
+   "hp": 16700,
    "mp": 112,
    "exp": 1920,
    "atk": 196,
    "matk": 0,
    "def": 132,
    "mdef": 106,
-   "avoid": 28,
+   "avoid": 20,
    "acc": 83,
-   "meso": 313,
+   "meso": 480,
    "mesoChance": 0.6,
    "speedStat": -29,
    "speed": 71,
    "chaseOnSight": true,
    "width": 57,
    "height": 57,
-   "pushed": 1750,
+   "pushed": 1670,
    "noKnockback": false,
    "drops": [
     {
@@ -7511,11 +7511,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -7574,23 +7574,23 @@
     "fire": 1.5,
     "ice": 0.5
    },
-   "hp": 6050,
+   "hp": 4910,
    "mp": 90,
    "exp": 685,
    "atk": 128,
    "matk": 0,
    "def": 66,
    "mdef": 53,
-   "avoid": 22,
+   "avoid": 16,
    "acc": 68,
-   "meso": 210,
+   "meso": 345,
    "mesoChance": 0.6,
    "speedStat": -24,
    "speed": 76,
    "chaseOnSight": false,
    "width": 36,
    "height": 36,
-   "pushed": 605,
+   "pushed": 491,
    "noKnockback": false,
    "drops": [
     {
@@ -7599,11 +7599,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -7680,9 +7680,9 @@
    "matk": 0,
    "def": 140,
    "mdef": 112,
-   "avoid": 35,
+   "avoid": 25,
    "acc": 103,
-   "meso": 480,
+   "meso": 681,
    "mesoChance": 0.6,
    "speedStat": 4,
    "speed": 104,
@@ -7698,11 +7698,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.gold",
@@ -7767,9 +7767,9 @@
    "matk": 0,
    "def": 231,
    "mdef": 185,
-   "avoid": 38,
+   "avoid": 28,
    "acc": 114,
-   "meso": 568,
+   "meso": 770,
    "mesoChance": 0.6,
    "speedStat": -6,
    "speed": 94,
@@ -7785,11 +7785,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.gold",
@@ -7848,23 +7848,23 @@
     "holy": 1.5,
     "fire": 1.5
    },
-   "hp": 11400,
+   "hp": 11000,
    "mp": 114,
    "exp": 1350,
    "atk": 183,
    "matk": 0,
    "def": 97,
    "mdef": 78,
-   "avoid": 28,
+   "avoid": 20,
    "acc": 85,
-   "meso": 322,
+   "meso": 492,
    "mesoChance": 0.6,
    "speedStat": -31,
    "speed": 69,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 1140,
+   "pushed": 1100,
    "noKnockback": false,
    "drops": [
     {
@@ -7873,11 +7873,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -7943,9 +7943,9 @@
    "matk": 0,
    "def": 115,
    "mdef": 92,
-   "avoid": 31,
+   "avoid": 22,
    "acc": 93,
-   "meso": 387,
+   "meso": 571,
    "mesoChance": 0.6,
    "speedStat": -28,
    "speed": 72,
@@ -7961,11 +7961,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -8030,9 +8030,9 @@
    "matk": 0,
    "def": 132,
    "mdef": 106,
-   "avoid": 34,
+   "avoid": 24,
    "acc": 100,
-   "meso": 451,
+   "meso": 648,
    "mesoChance": 0.6,
    "speedStat": -16,
    "speed": 84,
@@ -8048,11 +8048,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -8117,9 +8117,9 @@
    "matk": 0,
    "def": 149,
    "mdef": 119,
-   "avoid": 36,
+   "avoid": 26,
    "acc": 107,
-   "meso": 511,
+   "meso": 713,
    "mesoChance": 0.6,
    "speedStat": -16,
    "speed": 84,
@@ -8135,11 +8135,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.gold",
@@ -8216,9 +8216,9 @@
    "matk": 0,
    "def": 241,
    "mdef": 193,
-   "avoid": 39,
+   "avoid": 28,
    "acc": 117,
-   "meso": 592,
+   "meso": 794,
    "mesoChance": 0.6,
    "speedStat": -23,
    "speed": 77,
@@ -8234,11 +8234,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.gold",
@@ -8304,9 +8304,9 @@
    "matk": 728,
    "def": 286,
    "mdef": 372,
-   "avoid": 42,
+   "avoid": 30,
    "acc": 124,
-   "meso": 19700,
+   "meso": 25700,
    "mesoChance": 0.6,
    "speedStat": 12,
    "speed": 112,
@@ -8322,11 +8322,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.gold",
@@ -8440,23 +8440,23 @@
    "elements": {
     "fire": 1.5
    },
-   "hp": 1150,
+   "hp": 796,
    "mp": 50,
    "exp": 155,
    "atk": 58,
    "matk": 0,
    "def": 26,
    "mdef": 21,
-   "avoid": 12,
+   "avoid": 9,
    "acc": 40,
-   "meso": 81,
+   "meso": 146,
    "mesoChance": 0.6,
    "speedStat": -34,
    "speed": 66,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 115,
+   "pushed": 80,
    "noKnockback": false,
    "drops": [
     {
@@ -8465,11 +8465,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -8522,23 +8522,23 @@
    "elements": {
     "fire": 1.5
    },
-   "hp": 1560,
+   "hp": 1060,
    "mp": 56,
    "exp": 207,
    "atk": 68,
    "matk": 0,
    "def": 31,
    "mdef": 25,
-   "avoid": 14,
+   "avoid": 10,
    "acc": 44,
-   "meso": 97,
+   "meso": 175,
    "mesoChance": 0.6,
    "speedStat": -34,
    "speed": 66,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 156,
+   "pushed": 106,
    "noKnockback": false,
    "drops": [
     {
@@ -8547,11 +8547,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -8602,23 +8602,23 @@
    "ranged": false,
    "magic": false,
    "elements": {},
-   "hp": 2060,
+   "hp": 1420,
    "mp": 62,
    "exp": 270,
    "atk": 78,
    "matk": 0,
    "def": 37,
    "mdef": 29,
-   "avoid": 15,
+   "avoid": 11,
    "acc": 48,
-   "meso": 115,
+   "meso": 205,
    "mesoChance": 0.6,
    "speedStat": -27,
    "speed": 73,
    "chaseOnSight": false,
    "width": 36,
    "height": 36,
-   "pushed": 206,
+   "pushed": 142,
    "noKnockback": false,
    "drops": [
     {
@@ -8627,11 +8627,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -8684,23 +8684,23 @@
    "elements": {
     "lightning": 1.5
    },
-   "hp": 2630,
+   "hp": 1860,
    "mp": 68,
    "exp": 333,
    "atk": 87,
    "matk": 0,
    "def": 42,
    "mdef": 34,
-   "avoid": 17,
+   "avoid": 12,
    "acc": 53,
-   "meso": 131,
+   "meso": 230,
    "mesoChance": 0.6,
    "speedStat": -22,
    "speed": 78,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 263,
+   "pushed": 186,
    "noKnockback": false,
    "drops": [
     {
@@ -8709,11 +8709,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -8766,23 +8766,23 @@
    "elements": {
     "lightning": 1.5
    },
-   "hp": 3370,
+   "hp": 2450,
    "mp": 74,
    "exp": 410,
    "atk": 98,
    "matk": 0,
    "def": 48,
    "mdef": 38,
-   "avoid": 18,
+   "avoid": 13,
    "acc": 57,
-   "meso": 149,
+   "meso": 256,
    "mesoChance": 0.6,
    "speedStat": -2,
    "speed": 98,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 337,
+   "pushed": 245,
    "noKnockback": false,
    "drops": [
     {
@@ -8791,11 +8791,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -8848,23 +8848,23 @@
    "elements": {
     "lightning": 1.5
    },
-   "hp": 4300,
+   "hp": 3230,
    "mp": 80,
    "exp": 504,
    "atk": 110,
    "matk": 0,
    "def": 55,
    "mdef": 44,
-   "avoid": 19,
+   "avoid": 14,
    "acc": 61,
-   "meso": 169,
+   "meso": 286,
    "mesoChance": 0.6,
    "speedStat": 1,
    "speed": 101,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 430,
+   "pushed": 323,
    "noKnockback": false,
    "drops": [
     {
@@ -8873,11 +8873,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -8935,23 +8935,23 @@
    "elements": {
     "fire": 1.5
    },
-   "hp": 4600,
+   "hp": 3510,
    "mp": 82,
    "exp": 536,
    "atk": 113,
    "matk": 0,
    "def": 57,
    "mdef": 46,
-   "avoid": 20,
+   "avoid": 14,
    "acc": 62,
-   "meso": 177,
+   "meso": 297,
    "mesoChance": 0.6,
    "speedStat": -19,
    "speed": 81,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 460,
+   "pushed": 351,
    "noKnockback": false,
    "drops": [
     {
@@ -8960,11 +8960,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -9020,23 +9020,23 @@
    "ranged": false,
    "magic": false,
    "elements": {},
-   "hp": 8440,
+   "hp": 6640,
    "mp": 86,
    "exp": 909,
    "atk": 133,
    "matk": 0,
    "def": 86,
    "mdef": 69,
-   "avoid": 21,
+   "avoid": 15,
    "acc": 65,
-   "meso": 192,
+   "meso": 320,
    "mesoChance": 0.6,
    "speedStat": -41,
    "speed": 59,
    "chaseOnSight": true,
    "width": 57,
    "height": 57,
-   "pushed": 844,
+   "pushed": 664,
    "noKnockback": false,
    "drops": [
     {
@@ -9045,11 +9045,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -9107,23 +9107,23 @@
    "elements": {
     "lightning": 1.5
    },
-   "hp": 6470,
+   "hp": 5340,
    "mp": 92,
    "exp": 728,
    "atk": 132,
    "matk": 0,
    "def": 69,
    "mdef": 55,
-   "avoid": 23,
+   "avoid": 16,
    "acc": 69,
-   "meso": 219,
+   "meso": 358,
    "mesoChance": 0.6,
    "speedStat": -19,
    "speed": 81,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 647,
+   "pushed": 534,
    "noKnockback": false,
    "drops": [
     {
@@ -9132,11 +9132,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -9194,23 +9194,23 @@
    "elements": {
     "lightning": 1.5
    },
-   "hp": 7940,
+   "hp": 6880,
    "mp": 98,
    "exp": 874,
    "atk": 145,
    "matk": 0,
    "def": 77,
    "mdef": 62,
-   "avoid": 24,
+   "avoid": 18,
    "acc": 74,
-   "meso": 249,
+   "meso": 399,
    "mesoChance": 0.6,
    "speedStat": -29,
    "speed": 71,
    "chaseOnSight": false,
    "width": 34,
    "height": 30,
-   "pushed": 794,
+   "pushed": 688,
    "noKnockback": false,
    "drops": [
     {
@@ -9219,11 +9219,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -9281,23 +9281,23 @@
    "elements": {
     "lightning": 1.5
    },
-   "hp": 15400,
+   "hp": 14100,
    "mp": 106,
    "exp": 1640,
    "atk": 180,
    "matk": 0,
    "def": 122,
    "mdef": 97,
-   "avoid": 26,
+   "avoid": 19,
    "acc": 79,
-   "meso": 285,
+   "meso": 446,
    "mesoChance": 0.6,
    "speedStat": -29,
    "speed": 71,
    "chaseOnSight": true,
    "width": 57,
    "height": 57,
-   "pushed": 1540,
+   "pushed": 1410,
    "noKnockback": false,
    "drops": [
     {
@@ -9306,11 +9306,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -9380,23 +9380,23 @@
    "elements": {
     "lightning": 1.5
    },
-   "hp": 11400,
+   "hp": 11000,
    "mp": 114,
    "exp": 1350,
    "atk": 183,
    "matk": 0,
    "def": 97,
    "mdef": 78,
-   "avoid": 28,
+   "avoid": 20,
    "acc": 85,
-   "meso": 322,
+   "meso": 492,
    "mesoChance": 0.6,
    "speedStat": -29,
    "speed": 71,
    "chaseOnSight": false,
    "width": 34,
    "height": 30,
-   "pushed": 1140,
+   "pushed": 1100,
    "noKnockback": false,
    "drops": [
     {
@@ -9405,11 +9405,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -9474,9 +9474,9 @@
    "matk": 0,
    "def": 112,
    "mdef": 90,
-   "avoid": 31,
+   "avoid": 22,
    "acc": 92,
-   "meso": 376,
+   "meso": 557,
    "mesoChance": 0.6,
    "speedStat": -28,
    "speed": 72,
@@ -9492,11 +9492,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -9561,9 +9561,9 @@
    "matk": 226,
    "def": 73,
    "mdef": 95,
-   "avoid": 48,
+   "avoid": 29,
    "acc": 96,
-   "meso": 412,
+   "meso": 601,
    "mesoChance": 0.6,
    "speedStat": -16,
    "speed": 84,
@@ -9579,11 +9579,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -9665,9 +9665,9 @@
    "matk": 271,
    "def": 132,
    "mdef": 172,
-   "avoid": 34,
+   "avoid": 24,
    "acc": 100,
-   "meso": 451,
+   "meso": 648,
    "mesoChance": 0.6,
    "speedStat": -26,
    "speed": 74,
@@ -9683,11 +9683,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -9769,9 +9769,9 @@
    "matk": 0,
    "def": 146,
    "mdef": 117,
-   "avoid": 36,
+   "avoid": 26,
    "acc": 106,
-   "meso": 501,
+   "meso": 702,
    "mesoChance": 0.6,
    "speedStat": -28,
    "speed": 72,
@@ -9787,11 +9787,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.gold",
@@ -9856,9 +9856,9 @@
    "matk": 0,
    "def": 241,
    "mdef": 193,
-   "avoid": 39,
+   "avoid": 28,
    "acc": 117,
-   "meso": 592,
+   "meso": 794,
    "mesoChance": 0.6,
    "speedStat": -23,
    "speed": 77,
@@ -9874,11 +9874,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.gold",
@@ -9943,9 +9943,9 @@
    "matk": 405,
    "def": 191,
    "mdef": 248,
-   "avoid": 42,
+   "avoid": 30,
    "acc": 124,
-   "meso": 657,
+   "meso": 858,
    "mesoChance": 0.6,
    "speedStat": -18,
    "speed": 82,
@@ -9961,11 +9961,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.gold",
@@ -10042,9 +10042,9 @@
    "matk": 0,
    "def": 296,
    "mdef": 237,
-   "avoid": 44,
+   "avoid": 32,
    "acc": 131,
-   "meso": 730,
+   "meso": 926,
    "mesoChance": 0.6,
    "speedStat": -23,
    "speed": 77,
@@ -10060,11 +10060,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.adaman",
@@ -10129,9 +10129,9 @@
    "matk": 0,
    "def": 159,
    "mdef": 127,
-   "avoid": 30,
+   "avoid": 21,
    "acc": 89,
-   "meso": 10600,
+   "meso": 15900,
    "mesoChance": 0.6,
    "speedStat": -23,
    "speed": 77,
@@ -10147,11 +10147,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -10251,9 +10251,9 @@
    "matk": 1300,
    "def": 498,
    "mdef": 647,
-   "avoid": 56,
+   "avoid": 41,
    "acc": 166,
-   "meso": 33200,
+   "meso": 37800,
    "mesoChance": 0.6,
    "speedStat": -10,
    "speed": 90,
@@ -10269,11 +10269,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.adaman",
@@ -10411,23 +10411,23 @@
    "elements": {
     "lightning": 1.5
    },
-   "hp": 3010,
+   "hp": 2260,
    "mp": 80,
    "exp": 378,
    "atk": 99,
    "matk": 0,
    "def": 33,
    "mdef": 26,
-   "avoid": 29,
+   "avoid": 18,
    "acc": 61,
-   "meso": 169,
+   "meso": 286,
    "mesoChance": 0.6,
    "speedStat": -19,
    "speed": 81,
    "chaseOnSight": false,
    "width": 31,
    "height": 27,
-   "pushed": 301,
+   "pushed": 226,
    "noKnockback": false,
    "drops": [
     {
@@ -10436,11 +10436,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -10498,23 +10498,23 @@
    "elements": {
     "lightning": 1.5
    },
-   "hp": 5280,
+   "hp": 4150,
    "mp": 86,
    "exp": 606,
    "atk": 121,
    "matk": 0,
    "def": 62,
    "mdef": 49,
-   "avoid": 21,
+   "avoid": 15,
    "acc": 65,
-   "meso": 192,
+   "meso": 320,
    "mesoChance": 0.6,
    "speedStat": -29,
    "speed": 71,
    "chaseOnSight": false,
    "width": 34,
    "height": 30,
-   "pushed": 528,
+   "pushed": 415,
    "noKnockback": false,
    "drops": [
     {
@@ -10523,11 +10523,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -10589,23 +10589,23 @@
    "elements": {
     "lightning": 1.5
    },
-   "hp": 6470,
+   "hp": 5340,
    "mp": 92,
    "exp": 728,
    "atk": 132,
    "matk": 0,
    "def": 69,
    "mdef": 55,
-   "avoid": 23,
+   "avoid": 16,
    "acc": 69,
-   "meso": 219,
+   "meso": 358,
    "mesoChance": 0.6,
    "speedStat": -29,
    "speed": 71,
    "chaseOnSight": false,
    "width": 34,
    "height": 30,
-   "pushed": 647,
+   "pushed": 534,
    "noKnockback": false,
    "drops": [
     {
@@ -10614,11 +10614,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.silver",
@@ -10680,23 +10680,23 @@
    "elements": {
     "lightning": 1.5
    },
-   "hp": 13600,
+   "hp": 12000,
    "mp": 100,
    "exp": 1390,
    "atk": 165,
    "matk": 0,
    "def": 112,
    "mdef": 90,
-   "avoid": 25,
+   "avoid": 18,
    "acc": 75,
-   "meso": 260,
+   "meso": 414,
    "mesoChance": 0.6,
    "speedStat": -41,
    "speed": 59,
    "chaseOnSight": true,
    "width": 57,
    "height": 57,
-   "pushed": 1360,
+   "pushed": 1200,
    "noKnockback": false,
    "drops": [
     {
@@ -10705,11 +10705,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -10767,23 +10767,23 @@
    "elements": {
     "lightning": 1.5
    },
-   "hp": 10100,
+   "hp": 9330,
    "mp": 108,
    "exp": 1150,
    "atk": 168,
    "matk": 0,
    "def": 89,
    "mdef": 72,
-   "avoid": 27,
+   "avoid": 19,
    "acc": 81,
-   "meso": 294,
+   "meso": 457,
    "mesoChance": 0.6,
    "speedStat": -29,
    "speed": 71,
    "chaseOnSight": false,
    "width": 34,
    "height": 30,
-   "pushed": 1010,
+   "pushed": 933,
    "noKnockback": false,
    "drops": [
     {
@@ -10792,11 +10792,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -10869,23 +10869,23 @@
    "elements": {
     "lightning": 1.5
    },
-   "hp": 11900,
+   "hp": 11600,
    "mp": 116,
    "exp": 1420,
    "atk": 189,
    "matk": 0,
    "def": 100,
    "mdef": 80,
-   "avoid": 29,
+   "avoid": 21,
    "acc": 86,
-   "meso": 332,
+   "meso": 504,
    "mesoChance": 0.6,
    "speedStat": -29,
    "speed": 71,
    "chaseOnSight": false,
    "width": 34,
    "height": 30,
-   "pushed": 1190,
+   "pushed": 1160,
    "noKnockback": false,
    "drops": [
     {
@@ -10894,11 +10894,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -10963,9 +10963,9 @@
    "matk": 0,
    "def": 112,
    "mdef": 90,
-   "avoid": 31,
+   "avoid": 22,
    "acc": 92,
-   "meso": 376,
+   "meso": 557,
    "mesoChance": 0.6,
    "speedStat": -6,
    "speed": 94,
@@ -10981,11 +10981,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -11050,9 +11050,9 @@
    "matk": 0,
    "def": 140,
    "mdef": 112,
-   "avoid": 35,
+   "avoid": 25,
    "acc": 103,
-   "meso": 480,
+   "meso": 681,
    "mesoChance": 0.6,
    "speedStat": -26,
    "speed": 74,
@@ -11068,11 +11068,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.gold",
@@ -11137,9 +11137,9 @@
    "matk": 346,
    "def": 165,
    "mdef": 215,
-   "avoid": 38,
+   "avoid": 28,
    "acc": 114,
-   "meso": 568,
+   "meso": 770,
    "mesoChance": 0.6,
    "speedStat": -26,
    "speed": 74,
@@ -11155,11 +11155,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.gold",
@@ -11242,9 +11242,9 @@
    "matk": 0,
    "def": 179,
    "mdef": 143,
-   "avoid": 40,
+   "avoid": 29,
    "acc": 120,
-   "meso": 617,
+   "meso": 819,
    "mesoChance": 0.6,
    "speedStat": -3,
    "speed": 97,
@@ -11260,11 +11260,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.gold",
@@ -11329,9 +11329,9 @@
    "matk": 475,
    "def": 284,
    "mdef": 369,
-   "avoid": 43,
+   "avoid": 31,
    "acc": 128,
-   "meso": 700,
+   "meso": 898,
    "mesoChance": 0.6,
    "speedStat": -33,
    "speed": 67,
@@ -11347,11 +11347,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.gold",
@@ -11428,9 +11428,9 @@
    "matk": 0,
    "def": 328,
    "mdef": 263,
-   "avoid": 47,
+   "avoid": 34,
    "acc": 138,
-   "meso": 810,
+   "meso": 1000,
    "mesoChance": 0.6,
    "speedStat": -33,
    "speed": 67,
@@ -11446,11 +11446,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.adaman",
@@ -11515,9 +11515,9 @@
    "matk": 1300,
    "def": 498,
    "mdef": 647,
-   "avoid": 56,
+   "avoid": 41,
    "acc": 166,
-   "meso": 33200,
+   "meso": 37800,
    "mesoChance": 0.6,
    "speedStat": -15,
    "speed": 85,
@@ -11533,11 +11533,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.adaman",
@@ -11681,9 +11681,9 @@
    "matk": 0,
    "def": 273,
    "mdef": 218,
-   "avoid": 42,
+   "avoid": 30,
    "acc": 125,
-   "meso": 671,
+   "meso": 871,
    "mesoChance": 0.6,
    "speedStat": -35,
    "speed": 65,
@@ -11699,11 +11699,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.gold",
@@ -11766,9 +11766,9 @@
    "matk": 0,
    "def": 309,
    "mdef": 247,
-   "avoid": 45,
+   "avoid": 33,
    "acc": 134,
-   "meso": 761,
+   "meso": 955,
    "mesoChance": 0.6,
    "speedStat": -35,
    "speed": 65,
@@ -11784,11 +11784,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.adaman",
@@ -11853,9 +11853,9 @@
    "matk": 0,
    "def": 239,
    "mdef": 192,
-   "avoid": 48,
+   "avoid": 34,
    "acc": 139,
-   "meso": 828,
+   "meso": 1020,
    "mesoChance": 0.6,
    "speedStat": -13,
    "speed": 87,
@@ -11871,11 +11871,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.adaman",
@@ -11940,9 +11940,9 @@
    "matk": 550,
    "def": 260,
    "mdef": 338,
-   "avoid": 50,
+   "avoid": 36,
    "acc": 145,
-   "meso": 900,
+   "meso": 1080,
    "mesoChance": 0.6,
    "speedStat": -20,
    "speed": 80,
@@ -11958,11 +11958,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.adaman",
@@ -12044,9 +12044,9 @@
    "matk": 0,
    "def": 401,
    "mdef": 321,
-   "avoid": 52,
+   "avoid": 38,
    "acc": 153,
-   "meso": 978,
+   "meso": 1150,
    "mesoChance": 0.6,
    "speedStat": -32,
    "speed": 68,
@@ -12062,11 +12062,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.adaman",
@@ -12131,9 +12131,9 @@
    "matk": 660,
    "def": 306,
    "mdef": 398,
-   "avoid": 54,
+   "avoid": 39,
    "acc": 159,
-   "meso": 1030,
+   "meso": 1200,
    "mesoChance": 0.6,
    "speedStat": -15,
    "speed": 85,
@@ -12149,11 +12149,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.adaman",
@@ -12248,9 +12248,9 @@
    "matk": 627,
    "def": 193,
    "mdef": 251,
-   "avoid": 83,
+   "avoid": 50,
    "acc": 163,
-   "meso": 1080,
+   "meso": 1230,
    "mesoChance": 0.6,
    "speedStat": -5,
    "speed": 95,
@@ -12266,11 +12266,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.adaman",
@@ -12345,9 +12345,9 @@
    "matk": 1510,
    "def": 574,
    "mdef": 746,
-   "avoid": 61,
+   "avoid": 44,
    "acc": 180,
-   "meso": 38200,
+   "meso": 41800,
    "mesoChance": 0.6,
    "speedStat": -2,
    "speed": 98,
@@ -12363,11 +12363,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.starsteel",
@@ -12517,9 +12517,9 @@
    "matk": 0,
    "def": 159,
    "mdef": 127,
-   "avoid": 76,
+   "avoid": 45,
    "acc": 146,
-   "meso": 913,
+   "meso": 1090,
    "mesoChance": 0.6,
    "speedStat": -10,
    "speed": 90,
@@ -12535,11 +12535,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.adaman",
@@ -12604,9 +12604,9 @@
    "matk": 0,
    "def": 282,
    "mdef": 226,
-   "avoid": 52,
+   "avoid": 37,
    "acc": 152,
-   "meso": 965,
+   "meso": 1140,
    "mesoChance": 0.6,
    "speedStat": 0,
    "speed": 100,
@@ -12622,11 +12622,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.adaman",
@@ -12692,9 +12692,9 @@
    "matk": 0,
    "def": 306,
    "mdef": 245,
-   "avoid": 54,
+   "avoid": 39,
    "acc": 159,
-   "meso": 1030,
+   "meso": 1200,
    "mesoChance": 0.6,
    "speedStat": 0,
    "speed": 100,
@@ -12710,11 +12710,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.adaman",
@@ -12791,9 +12791,9 @@
    "matk": 0,
    "def": 337,
    "mdef": 270,
-   "avoid": 57,
+   "avoid": 41,
    "acc": 167,
-   "meso": 1120,
+   "meso": 1270,
    "mesoChance": 0.6,
    "speedStat": 0,
    "speed": 100,
@@ -12809,11 +12809,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.adaman",
@@ -12890,9 +12890,9 @@
    "matk": 0,
    "def": 510,
    "mdef": 408,
-   "avoid": 59,
+   "avoid": 43,
    "acc": 174,
-   "meso": 1200,
+   "meso": 1340,
    "mesoChance": 0.6,
    "speedStat": -17,
    "speed": 83,
@@ -12908,11 +12908,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.starsteel",
@@ -12987,9 +12987,9 @@
    "matk": 0,
    "def": 542,
    "mdef": 434,
-   "avoid": 62,
+   "avoid": 44,
    "acc": 181,
-   "meso": 1290,
+   "meso": 1410,
    "mesoChance": 0.6,
    "speedStat": -17,
    "speed": 83,
@@ -13005,11 +13005,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.starsteel",
@@ -13072,9 +13072,9 @@
    "matk": 895,
    "def": 412,
    "mdef": 536,
-   "avoid": 64,
+   "avoid": 46,
    "acc": 188,
-   "meso": 1380,
+   "meso": 1480,
    "mesoChance": 0.6,
    "speedStat": 13,
    "speed": 113,
@@ -13090,11 +13090,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.starsteel",
@@ -13172,9 +13172,9 @@
    "matk": 0,
    "def": 613,
    "mdef": 491,
-   "avoid": 67,
+   "avoid": 48,
    "acc": 195,
-   "meso": 1480,
+   "meso": 1560,
    "mesoChance": 0.6,
    "speedStat": -27,
    "speed": 73,
@@ -13190,11 +13190,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.starsteel",
@@ -13272,9 +13272,9 @@
    "matk": 0,
    "def": 613,
    "mdef": 491,
-   "avoid": 67,
+   "avoid": 48,
    "acc": 195,
-   "meso": 1480,
+   "meso": 1560,
    "mesoChance": 0.6,
    "speedStat": -27,
    "speed": 73,
@@ -13290,11 +13290,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.starsteel",
@@ -13369,9 +13369,9 @@
    "matk": 0,
    "def": 652,
    "mdef": 522,
-   "avoid": 70,
+   "avoid": 50,
    "acc": 202,
-   "meso": 1590,
+   "meso": 1640,
    "mesoChance": 0.6,
    "speedStat": -24,
    "speed": 76,
@@ -13387,11 +13387,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.starsteel",
@@ -13468,9 +13468,9 @@
    "matk": 1170,
    "def": 702,
    "mdef": 912,
-   "avoid": 73,
+   "avoid": 53,
    "acc": 211,
-   "meso": 1730,
+   "meso": 1750,
    "mesoChance": 0.6,
    "speedStat": -14,
    "speed": 86,
@@ -13486,11 +13486,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.starsteel",
@@ -13565,7 +13565,7 @@
    "matk": 2660,
    "def": 1020,
    "mdef": 1330,
-   "avoid": 79,
+   "avoid": 57,
    "acc": 229,
    "meso": 199000,
    "mesoChance": 0.6,
@@ -13583,11 +13583,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.starsteel",
@@ -13757,9 +13757,9 @@
    "matk": 0,
    "def": 311,
    "mdef": 249,
-   "avoid": 55,
+   "avoid": 39,
    "acc": 160,
-   "meso": 1050,
+   "meso": 1210,
    "mesoChance": 0.6,
    "speedStat": -15,
    "speed": 85,
@@ -13775,11 +13775,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.adaman",
@@ -13845,9 +13845,9 @@
    "matk": 663,
    "def": 202,
    "mdef": 263,
-   "avoid": 85,
+   "avoid": 51,
    "acc": 167,
-   "meso": 1120,
+   "meso": 1270,
    "mesoChance": 0.6,
    "speedStat": -10,
    "speed": 90,
@@ -13863,11 +13863,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.adaman",
@@ -13945,9 +13945,9 @@
    "matk": 0,
    "def": 510,
    "mdef": 408,
-   "avoid": 59,
+   "avoid": 43,
    "acc": 174,
-   "meso": 1200,
+   "meso": 1340,
    "mesoChance": 0.6,
    "speedStat": -29,
    "speed": 71,
@@ -13963,11 +13963,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.starsteel",
@@ -14032,9 +14032,9 @@
    "matk": 0,
    "def": 387,
    "mdef": 310,
-   "avoid": 62,
+   "avoid": 44,
    "acc": 181,
-   "meso": 1290,
+   "meso": 1410,
    "mesoChance": 0.6,
    "speedStat": -7,
    "speed": 93,
@@ -14050,11 +14050,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.starsteel",
@@ -14120,9 +14120,9 @@
    "matk": 0,
    "def": 412,
    "mdef": 330,
-   "avoid": 64,
+   "avoid": 46,
    "acc": 188,
-   "meso": 1380,
+   "meso": 1480,
    "mesoChance": 0.6,
    "speedStat": -7,
    "speed": 93,
@@ -14138,11 +14138,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.starsteel",
@@ -14220,9 +14220,9 @@
    "matk": 2180,
    "def": 828,
    "mdef": 1080,
-   "avoid": 69,
+   "avoid": 50,
    "acc": 201,
-   "meso": 157000,
+   "meso": 163000,
    "mesoChance": 0.6,
    "speedStat": 0,
    "speed": 0,
@@ -14238,11 +14238,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.starsteel",
@@ -14480,7 +14480,7 @@
    "matk": 995,
    "def": 315,
    "mdef": 409,
-   "avoid": 113,
+   "avoid": 68,
    "acc": 216,
    "meso": 1820,
    "mesoChance": 0.6,
@@ -14498,11 +14498,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.starsteel",
@@ -14579,7 +14579,7 @@
    "matk": 0,
    "def": 557,
    "mdef": 446,
-   "avoid": 79,
+   "avoid": 57,
    "acc": 226,
    "meso": 1950,
    "mesoChance": 0.6,
@@ -14597,11 +14597,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.starsteel",
@@ -14666,7 +14666,7 @@
    "matk": 1270,
    "def": 592,
    "mdef": 769,
-   "avoid": 82,
+   "avoid": 59,
    "acc": 236,
    "meso": 2100,
    "mesoChance": 0.6,
@@ -14684,11 +14684,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.starsteel",
@@ -14768,7 +14768,7 @@
    "matk": 0,
    "def": 880,
    "mdef": 704,
-   "avoid": 85,
+   "avoid": 61,
    "acc": 246,
    "meso": 2250,
    "mesoChance": 0.6,
@@ -14786,11 +14786,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.starsteel",
@@ -14855,7 +14855,7 @@
    "matk": 1630,
    "def": 943,
    "mdef": 1230,
-   "avoid": 89,
+   "avoid": 64,
    "acc": 257,
    "meso": 2450,
    "mesoChance": 0.6,
@@ -14873,11 +14873,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.starsteel",
@@ -14954,7 +14954,7 @@
    "matk": 1620,
    "def": 734,
    "mdef": 954,
-   "avoid": 94,
+   "avoid": 68,
    "acc": 271,
    "meso": 2710,
    "mesoChance": 0.6,
@@ -14972,11 +14972,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.starsteel",
@@ -15051,7 +15051,7 @@
    "matk": 1900,
    "def": 1100,
    "mdef": 1430,
-   "avoid": 99,
+   "avoid": 71,
    "acc": 282,
    "meso": 2940,
    "mesoChance": 0.6,
@@ -15069,11 +15069,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.starsteel",
@@ -15148,7 +15148,7 @@
    "matk": 3870,
    "def": 1440,
    "mdef": 1870,
-   "avoid": 100,
+   "avoid": 72,
    "acc": 285,
    "meso": 300000,
    "mesoChance": 0.6,
@@ -15166,11 +15166,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.starsteel",
@@ -15358,9 +15358,9 @@
    "matk": 0,
    "def": 45,
    "mdef": 36,
-   "avoid": 15,
+   "avoid": 11,
    "acc": 47,
-   "meso": 660,
+   "meso": 1190,
    "mesoChance": 0.6,
    "speedStat": 3,
    "speed": 103,
@@ -15376,11 +15376,11 @@
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -15464,9 +15464,9 @@
    "matk": 0,
    "def": 104,
    "mdef": 83,
-   "avoid": 25,
+   "avoid": 18,
    "acc": 75,
-   "meso": 1560,
+   "meso": 2490,
    "mesoChance": 0.6,
    "speedStat": -26,
    "speed": 74,
@@ -15482,11 +15482,11 @@
     },
     {
      "item": "use.white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -15573,9 +15573,9 @@
    "matk": 0,
    "def": 138,
    "mdef": 110,
-   "avoid": 30,
+   "avoid": 21,
    "acc": 89,
-   "meso": 2120,
+   "meso": 3180,
    "mesoChance": 0.6,
    "speedStat": 15,
    "speed": 115,
@@ -15591,11 +15591,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.mithril",
@@ -15686,9 +15686,9 @@
    "matk": 400,
    "def": 182,
    "mdef": 237,
-   "avoid": 35,
+   "avoid": 25,
    "acc": 103,
-   "meso": 2880,
+   "meso": 4090,
    "mesoChance": 0.6,
    "speedStat": -21,
    "speed": 79,
@@ -15704,11 +15704,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.gold",
@@ -15810,9 +15810,9 @@
    "matk": 631,
    "def": 275,
    "mdef": 357,
-   "avoid": 44,
+   "avoid": 32,
    "acc": 131,
-   "meso": 4380,
+   "meso": 5560,
    "mesoChance": 0.6,
    "speedStat": -13,
    "speed": 87,
@@ -15828,11 +15828,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.adaman",
@@ -15920,9 +15920,9 @@
    "matk": 0,
    "def": 468,
    "mdef": 374,
-   "avoid": 59,
+   "avoid": 42,
    "acc": 173,
-   "meso": 7130,
+   "meso": 7950,
    "mesoChance": 0.6,
    "speedStat": -12,
    "speed": 88,
@@ -15938,11 +15938,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.starsteel",
@@ -16024,23 +16024,23 @@
     "ice": 1.5,
     "fire": 0.5
    },
-   "hp": 806000,
+   "hp": 403000,
    "mp": 236,
    "exp": 123000,
-   "atk": 972,
+   "atk": 680,
    "matk": 0,
    "def": 453,
    "mdef": 362,
-   "avoid": 58,
+   "avoid": 42,
    "acc": 170,
-   "meso": 6930,
+   "meso": 7790,
    "mesoChance": 0.6,
    "speedStat": -15,
    "speed": 85,
    "chaseOnSight": false,
    "width": 68,
    "height": 60,
-   "pushed": 80600,
+   "pushed": 40300,
    "noKnockback": false,
    "drops": [
     {
@@ -16049,11 +16049,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.adaman",
@@ -16093,7 +16093,7 @@
    "cursedScrollChance": 0.02,
    "etc": "etc.M211",
    "special": null,
-   "note": "黒い翼の谷に 2 時間ごとに出る大きな翼竜。4 次転職の試験の品「紅の印」を落とす（試験中は 100%）。",
+   "note": "黒い翼の谷に 30 分ごとに出る大きな翼竜。4 次転職の試験の品「紅の印」を落とす（試験中は 100%）。",
    "attacks": [
     {
      "id": "shot",
@@ -16124,23 +16124,23 @@
     "fire": 1.5,
     "ice": 0.5
    },
-   "hp": 806000,
+   "hp": 403000,
    "mp": 236,
    "exp": 123000,
-   "atk": 972,
+   "atk": 680,
    "matk": 0,
    "def": 453,
    "mdef": 362,
-   "avoid": 58,
+   "avoid": 42,
    "acc": 170,
-   "meso": 6930,
+   "meso": 7790,
    "mesoChance": 0.6,
    "speedStat": -15,
    "speed": 85,
    "chaseOnSight": false,
    "width": 68,
    "height": 60,
-   "pushed": 80600,
+   "pushed": 40300,
    "noKnockback": false,
    "drops": [
     {
@@ -16149,11 +16149,11 @@
     },
     {
      "item": "use.xl_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_secret",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.adaman",
@@ -16193,7 +16193,7 @@
    "cursedScrollChance": 0.02,
    "etc": "etc.M212",
    "special": null,
-   "note": "骨の谷に 2 時間ごとに出る大きな翼竜。4 次転職の試験の品「蒼の印」を落とす（試験中は 100%）。",
+   "note": "骨の谷に 30 分ごとに出る大きな翼竜。4 次転職の試験の品「蒼の印」を落とす（試験中は 100%）。",
    "attacks": [
     {
      "id": "shot",
@@ -16228,9 +16228,9 @@
    "matk": 400,
    "def": 182,
    "mdef": 237,
-   "avoid": 35,
+   "avoid": 25,
    "acc": 103,
-   "meso": 2880,
+   "meso": 4090,
    "mesoChance": 0.6,
    "speedStat": -11,
    "speed": 89,
@@ -16246,11 +16246,11 @@
     },
     {
      "item": "use.big_white_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.mana_elixir",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.gold",
@@ -16336,36 +16336,36 @@
    "ranged": false,
    "magic": false,
    "elements": {},
-   "hp": 1150,
+   "hp": 398,
    "mp": 50,
    "exp": 155,
-   "atk": 58,
+   "atk": 46,
    "matk": 0,
    "def": 26,
    "mdef": 21,
-   "avoid": 12,
+   "avoid": 9,
    "acc": 40,
-   "meso": 81,
+   "meso": 146,
    "mesoChance": 0.6,
    "speedStat": -22,
    "speed": 78,
    "chaseOnSight": true,
    "width": 44,
    "height": 44,
-   "pushed": 115,
+   "pushed": 40,
    "noKnockback": false,
    "drops": [
     {
      "item": "etc.M301",
-     "chance": 0.55
+     "chance": 0.8
     },
     {
      "item": "use.orange_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "use.blue_potion",
-     "chance": 0.04
+     "chance": 0.07
     },
     {
      "item": "etc.ore.iron",
@@ -16400,7 +16400,7 @@
    "cursedScrollChance": 0,
    "etc": "etc.M301",
    "special": null,
-   "note": "2 次転職の試験場だけに出る。倒すと「試しの珠」を落とす（試験中は 50%）。",
+   "note": "2 次転職の試験場だけに出る。倒すと「試しの珠」を落とす（80%）。",
    "attacks": [],
    "touchStatus": null,
    "boss": null

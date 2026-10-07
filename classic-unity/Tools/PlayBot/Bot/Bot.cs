@@ -61,6 +61,7 @@ namespace Lumina.PlayBot
         public int StopLevel = 200;
         public TextWriter Log = TextWriter.Null;
         public bool Verbose;
+        public bool TraceHurt; // 被弾を全部ログに（--tracehurt）
 
         public readonly Dictionary<string, Issue> Issues = new Dictionary<string, Issue>();
         public readonly List<LevelRow> Levels = new List<LevelRow>();
@@ -76,6 +77,8 @@ namespace Lumina.PlayBot
             try { return f(); } finally { timeBucket = old; }
         }
         public long DamageTaken; public int HitsTaken;
+        /// <summary>受けたダメージを何をしていた時に受けたか（fight・travel・…）。</summary>
+        public readonly Dictionary<string, long> DamageByBucket = new Dictionary<string, long>();
         private readonly Queue<string> recentHurts = new Queue<string>();
         public int Swings, Whiffs, MobHits, Misses; public long DamageDealt;
         public long MesoDropped, MesoQuest, MesoSold, PotionMesoUsed; public int PotionsUsed;
@@ -223,7 +226,7 @@ namespace Lumina.PlayBot
                         QuestExp = QuestExp, MobExp = MobExp, Map = S.Map.Data.Id, Job = S.Character.JobName,
                     });
                     Say("Lv" + S.Character.Level + "（" + Fmt(S.PlaySec) + "・" + S.Map.Data.Id + "・倒れた " + Deaths + "・お金 " + S.Inventory.Meso + "）");
-                    if (Verbose) Say("  能力: " + StatLine());
+                    if (Verbose || S.Character.Level % 5 == 0) Say("  能力: " + StatLine());
                     if (S.Character.Level >= StopLevel) stopRequested = "Lv" + StopLevel;
                     break;
                 case GameEventType.Hurt:
@@ -231,8 +234,10 @@ namespace Lumina.PlayBot
                     if (e.Value > 0)
                     {
                         DamageTaken += e.Value; HitsTaken++;
+                        DamageByBucket[timeBucket] = (DamageByBucket.TryGetValue(timeBucket, out var dv) ? dv : 0) + e.Value;
                         var nm = S.Map.Mobs.Where(m => m.Alive).OrderBy(m => Math.Abs(m.X - S.Body.X) + Math.Abs(m.Y - S.Body.Y)).FirstOrDefault();
                         recentHurts.Enqueue(Fmt(S.PlaySec) + ":" + ((int)(S.PlaySec % 60)).ToString("00") + " " + S.Map.Data.Id + " x" + S.Body.X.ToString("0") + " -" + e.Value + " HP" + S.Character.Hp + " " + timeBucket + " " + (nm?.Def.Id ?? "-") + (nm != null ? "@" + (nm.X - S.Body.X).ToString("0") : ""));
+                        if (TraceHurt) Say("  被弾 " + recentHurts.Last() + "・敵の状態 " + (nm?.State.ToString() ?? "-") + "・攻撃中 " + (S.Attack != null));
                         while (recentHurts.Count > 12) recentHurts.Dequeue();
                     }
                     break;

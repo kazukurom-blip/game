@@ -72,14 +72,14 @@ namespace Lumina.PlayBot
                     var t = n.Travel;
                     if (S.Character.Level < t.MinLevel) continue;
                     if (t.RequiresQuest != null && S.Quests.Status(t.RequiresQuest) == QuestStatus.None) continue;
-                    if (t.Fee > S.Inventory.Meso) continue;
+                    if (t.Fee > S.Inventory.Meso && !t.Homeward) continue; // 帰りの便は有り金で乗れる
                     if (t.OneWay && !AllowOneWayTravel) continue;
                     if (D.GetMap(t.To) == null || BadHop(mapId + "/" + n.Id)) continue;
                     // ほかの地域（雲の上・おもちゃの町など）へは、帰りの運賃と薬代を残して行く（お金が無いと戻れない地域がある。PLAYTEST.md）
                     var tmap = D.GetMap(t.To);
                     if (tmap.Region != md.Region && tmap.Region != "V" && t.Fee * 2 + PotionReserve() > S.Inventory.Meso) continue;
-                    double extra = t.Fee > 0 && t.Fee * 3 > S.Inventory.Meso ? 30 : 0;
-                    yield return new Hop { Kind = "travel", From = mapId, To = t.To, Npc = n, Fee = t.Fee, Cost = 3 + extra };
+                    double extra = t.Fee > 0 && t.Fee * 3 > S.Inventory.Meso && !t.Homeward ? 30 : 0;
+                    yield return new Hop { Kind = "travel", From = mapId, To = t.To, Npc = n, Fee = Math.Min(t.Fee, S.Inventory.Meso), Cost = 3 + extra };
                 }
                 if (n.Taxi != null)
                 {

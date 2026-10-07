@@ -6,6 +6,7 @@
 // 同じ人が別のマップにもいる時（転職官が修練場にいる など）は ID に _<マップ> を付けた別の NPC にする（名前は同じ）。
 import { taxiOf } from '../systems.mjs';
 
+// homeward: 帰りの便（大陸の方へ戻る）。お金が足りない時は有り金だけで乗せてくれる（乗り物でしか出入りできない地域で詰まないように）
 const TRV = (to, o = {}) => ({ travel: { to, toPortal: 'sp', minLevel: 0, oneWay: false, fee: 0, ...o } });
 
 export const NPCS = [
@@ -127,7 +128,7 @@ export const NPCS = [
   ['hikari', '薬屋ヒカリ', 'C100', { role: 'potion', shop: 'shop.C100.potion' }],
   ['tsumu', '倉庫番ツム', 'C100', { role: 'storage' }],
   ['ceres_taxi', 'タクシーの運転手フワ', 'C100', TRV('F100', { fee: 2000, minLevel: 40 })],
-  ['luna', '駅員ルナ', 'C101', TRV('V310', { fee: 1000 })],
+  ['luna', '駅員ルナ', 'C101', TRV('V310', { fee: 1000, homeward: true })],
   ['sora', 'ティンクル行きの係ソラ', 'C101', TRV('T101', { fee: 1000 })],
   ['hashi', '天の階段の船頭', 'C101', TRV('P100', { fee: 2000, minLevel: 80 })],
   ['tsubasa', '大きな鳥の係ツバサ', 'C101', TRV('D101', { fee: 3000, minLevel: 90 })],
@@ -169,7 +170,7 @@ export const NPCS = [
   ['wata', '防具屋ワタ', 'T100', { role: 'armor' }],
   ['ame', '薬屋アメ', 'T100', { role: 'potion', shop: 'shop.T100.potion' }],
   ['hakobe', '倉庫番ハコベ', 'T100', { role: 'storage' }],
-  ['kippu', 'ティンクルの駅員キップ', 'T101', TRV('C101', { fee: 1000 })],
+  ['kippu', 'ティンクルの駅員キップ', 'T101', TRV('C101', { fee: 1000, homeward: true })],
   ['gear', '受付ギア', 'T118'],
   ['paz', '受付パズ', 'T119'],
 
@@ -182,14 +183,14 @@ export const NPCS = [
   ['kai_m', '防具屋カイガラ', 'M100', { role: 'armor' }],
   ['shizuku', '薬屋シズク', 'M100', { role: 'potion', shop: 'shop.M100.potion' }],
   ['tsubo', '倉庫番ツボ', 'M100', { role: 'storage' }],
-  ['norma', '潜水船の船長ノーマ', 'M113', TRV('V100', { fee: 1500 })],
+  ['norma', '潜水船の船長ノーマ', 'M113', TRV('V100', { fee: 1500, homeward: true })],
   ['shell', '受付シェル', 'M114'],
 
   // ===== 古の神殿 =====
   ['alma', '神殿の巫女アルマ', 'P100'],
   ['inori', '薬屋イノリ', 'P100', { role: 'potion', shop: 'shop.P100.potion' }],
   ['ishi', '倉庫番イシ', 'P100', { role: 'storage' }],
-  ['p_boat', '雲の船の船頭ミチ', 'P100', TRV('C101', { fee: 2000 })],
+  ['p_boat', '雲の船の船頭ミチ', 'P100', TRV('C101', { fee: 2000, homeward: true })],
 
   // ===== 竜の谷 =====
   ['haruka', '村長ハルカ', 'D100'],
@@ -199,7 +200,7 @@ export const NPCS = [
   ['tsume', '薬屋ツメ', 'D100', { role: 'potion', shop: 'shop.D100.potion' }],
   ['su', '倉庫番ス', 'D100', { role: 'storage' }],
   ['hawk', '鳥使いホーク', 'D101', TRV('E100', { fee: 5000, minLevel: 150, requiresQuest: 'L-12' })],
-  ['hane', '鳥の世話係ハネ', 'D101', TRV('C101', { fee: 3000 })],
+  ['hane', '鳥の世話係ハネ', 'D101', TRV('C101', { fee: 3000, homeward: true })],
   ['vald', '竜の大老ヴァルド', 'D115', { role: 'job' }],
   ['nest', '受付ネスト', 'D116'],
 

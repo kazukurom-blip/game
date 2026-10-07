@@ -97,6 +97,7 @@ namespace Lumina.Core.Items
         public double HpPct, MpPct;     // 最大の割合（0〜1）で回復
         public StatBlock Buff;          // 一時的な強化（力の薬など）
         public double BuffSec;
+        public double ExpPct, DropPct;  // 経験値 2 倍の券・ドロップ 2 倍の券（+100%。BuffSec の間）
         public string ReturnTo;         // 帰還の書: 戻る町のマップ ID（"nearest" = 一番近い町）
         public string ReturnRegion;     // 使える地域（null なら どこでも）
         public List<string> Cure = new List<string>(); // 治す状態異常
@@ -189,6 +190,7 @@ namespace Lumina.Core.Items
                 {
                     Hp = J.Int(u, "hp"), Mp = J.Int(u, "mp"), HpPct = J.Num(u, "hpPct"), MpPct = J.Num(u, "mpPct"),
                     Buff = J.Has(u, "buff") ? StatBlock.FromDict(J.Obj(u, "buff")) : null, BuffSec = J.Num(u, "buffSec"),
+                    ExpPct = J.Num(u, "expPct"), DropPct = J.Num(u, "dropPct"),
                     ReturnTo = J.Str(u, "returnTo"), ReturnRegion = J.Str(u, "returnRegion"), Cure = J.StrList(u, "cure"),
                 };
             }

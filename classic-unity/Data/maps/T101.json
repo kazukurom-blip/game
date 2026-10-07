@@ -71,7 +71,8 @@
     "toPortal": "sp",
     "minLevel": 0,
     "oneWay": false,
-    "fee": 1000
+    "fee": 1000,
+    "homeward": true
    }
   }
  ],

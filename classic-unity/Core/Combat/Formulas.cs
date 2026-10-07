@@ -91,6 +91,12 @@ namespace Lumina.Core.Combat
             return Math.Max(0.5, 1 - 0.02 * d);
         }
 
+        /// <summary>基礎の命中（Lv で上がる分）: 5 + Lv × 1.0（combat.mjs の baseAcc。ユーザーの決定「命中の底上げ」）。</summary>
+        public static double BaseAcc(int level) => 5 + level * 1.0;
+
+        /// <summary>自分の命中 = 基礎の命中 + DEX × 0.8 + LUK × 0.5 + 装備・バフ・パッシブ（combat.mjs の playerAcc）。</summary>
+        public static double PlayerAcc(int level, double dex, double luk, double extra) => BaseAcc(level) + dex * 0.8 + luk * 0.5 + extra;
+
         /// <summary>命中率（物理）。acc: 自分の命中、avoid: 敵の回避。</summary>
         public static double HitChance(double acc, double avoid, int playerLv, int mobLv)
         {

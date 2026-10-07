@@ -11,8 +11,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { mobBase, KIND_MUL, nice, expToNext } from '../../../classic/tools/lib/curves.mjs';
-import { MONSTERS_RAW } from '../../../classic/tools/data/monsters.mjs';
+import { earlyHpMul, FRAIL_AVOID, POT_DROP, mobBase, KIND_MUL, nice, expToNext } from '../../../classic/tools/lib/curves.mjs';
+import { MONSTERS_RAW, MOB_TUNE } from '../../../classic/tools/data/monsters.mjs';
 import { MOB_SKILLS } from '../../../classic/tools/data/mob_skills.mjs';
 import { MAPS_RAW } from '../../../classic/tools/data/maps.mjs';
 import { armorList, extraList, weaponList, STARTER, WEAPON_TYPES } from '../../../classic/tools/data/equips.mjs';
@@ -105,6 +105,10 @@ const USE = [
   ['marksman_elixir', '名手の秘薬', { buff: { acc: 20 }, buffSec: 600 }, 0],
 ];
 for (const [id, name, use, price] of USE) addItem({ id: `use.${id}`, name, tab: 'use', maxStack: 100, price, use });
+// 繰り返しのクエスト（R 系）の報酬の券（QUESTS.md 5 章: 「経験値 2 倍の券（30 分）または 5,000 ルド」）。
+// 「または お金」は、店で売るとその額になる形にした（受け取ってから選べる。使えば券、売ればお金）
+addItem({ id: 'use.exp_coupon', name: '経験値 2 倍の券（30 分）', tab: 'use', maxStack: 100, price: 0, sellPrice: 5000, use: { expPct: 100, buffSec: 1800 }, desc: '30 分、敵の経験値が 2 倍。店で売ると 5,000 ルド' });
+addItem({ id: 'use.drop_coupon', name: 'ドロップ 2 倍の券（30 分）', tab: 'use', maxStack: 100, price: 0, sellPrice: 50000, use: { dropPct: 100, buffSec: 1800 }, desc: '30 分、敵の落とす物が 2 倍の率。店で売ると 5 万ルド' });
 addItem({ id: 'use.safety_charm', name: '守りのお守り', tab: 'use', maxStack: 100, price: 5000, desc: '死んだ時に経験値を失わない（1 個使う）' });
 addItem({ id: 'use.ap_reset', name: 'AP 振り直しの書', tab: 'use', maxStack: 100, price: 0 });
 addItem({ id: 'use.sp_reset', name: 'SP 振り直しの書', tab: 'use', maxStack: 100, price: 0 });
@@ -247,8 +251,10 @@ const idOf = (name) => { const id = byName.get(name); if (!id) problems.push(`�
 const monsters = MONSTERS_RAW.map(([id, name, lv, kind, move, atkType, el, etc, special, note, speedStat]) => {
   const b = mobBase(lv);
   const k = KIND_MUL[kind];
+  const t = MOB_TUNE[id] || {}; // 試験の敵だけの調整（monsters.mjs）
   const magic = atkType.includes('魔');
-  const hp = nice(b.hp * k.hp);
+  const hp = nice(b.hp * k.hp * earlyHpMul(lv, kind) * (t.hp ?? 1));
+  const atk = b.atk * k.atk * (t.atk ?? 1);
   const mv = MOVE[move] || 'walk';
   const big = ['boss', 'raid'].includes(kind);
   const elements = {};
@@ -258,9 +264,9 @@ const monsters = MONSTERS_RAW.map(([id, name, lv, kind, move, atkType, el, etc, 
   }
   const [hpPot, mpPot] = POT(lv);
   const drops = [
-    { item: `etc.${id}`, chance: 0.55 },
-    { item: idOf(hpPot), chance: 0.04 },
-    { item: idOf(mpPot), chance: 0.04 },
+    { item: `etc.${id}`, chance: t.etc ?? 0.55 },
+    { item: idOf(hpPot), chance: POT_DROP },
+    { item: idOf(mpPot), chance: POT_DROP },
     { item: `etc.ore.${ORE(lv)}`, chance: 0.02 },
   ];
   if (lv >= 15) drops.push({ item: `etc.gem.${GEM(lv)}`, chance: 0.01 });
@@ -298,9 +304,9 @@ const monsters = MONSTERS_RAW.map(([id, name, lv, kind, move, atkType, el, etc, 
   return {
     id, name, lv, kind, move: mv, attack: atkType, touch: atkType.includes('体'), ranged: atkType.includes('遠'), magic,
     elements, hp, mp: magic ? nice(lv * 6 + 10) : nice(lv * 2), exp: nice(b.exp * k.exp),
-    atk: nice(b.atk * k.atk), matk: magic ? nice(b.atk * k.atk * 1.1) : 0, def: nice(b.def * k.def), mdef: nice(b.def * k.def * (magic ? 1.3 : 0.8)),
-    avoid: Math.round(b.avoid * (kind === 'frail' ? 1.5 : 1)), acc: Math.round(lv * 1.4 + 5),
-    meso: nice(b.meso * (kind === 'boss' ? 30 : kind === 'raid' ? 100 : kind === 'elite' ? 6 : 1)), mesoChance: 0.6,
+    atk: nice(atk), matk: magic ? nice(atk * 1.1) : 0, def: nice(b.def * k.def), mdef: nice(b.def * k.def * (magic ? 1.3 : 0.8)),
+    avoid: Math.round(b.avoid * (kind === 'frail' ? FRAIL_AVOID : 1)), acc: Math.round(lv * 1.4 + 5),
+    meso: nice(b.dropMeso * (kind === 'boss' ? 30 : kind === 'raid' ? 100 : kind === 'elite' ? 6 : 1)), mesoChance: 0.6,
     speedStat, speed: moveSpeed(mv, speedStat), chaseOnSight: mv === 'walk' && lv >= 20, width: sz[0], height: sz[1],
     pushed: big ? 0 : Math.max(1, Math.round(hp * 0.1)), noKnockback: big,
     drops: drops.filter((d) => d.item),
@@ -434,11 +440,23 @@ function parseRewards(text) {
   return { rewards, meso, rest };
 }
 
+// 繰り返しのクエスト（QUESTS.md 5 章）: R-01〜R-20 は掲示板の日替わり（毎日 3 本・1 日 1 回）、R-21 は週 1 回、R-22 は 1 日 1 回
+const REPEAT = (id) => {
+  const m = /^R-(\d+)$/.exec(id);
+  if (!m) return null;
+  const n = parseInt(m[1], 10);
+  if (n === 21) return { repeat: 'weekly' };
+  if (n === 22) return { repeat: 'daily' };
+  return { repeat: 'daily', board: true, coupon: n <= 12 ? 'use.exp_coupon' : 'use.drop_coupon' };
+};
+
 const quests = QUESTS_RAW.map(([id, name, giver, map, lv, pre, goal, size, itemsText, story]) => {
   const [ef, mf] = QSIZE[size] || [0, 0];
   const exp = Math.max(QMIN[size] || 0, nice(expToNext(Math.min(lv, 199)) * ef));
   const meso = nice(mobBase(lv).meso * mf);
   const r = parseRewards(itemsText);
+  const rp = REPEAT(id);
+  if (rp?.coupon) { r.rewards.push({ item: rp.coupon, count: 1 }); r.rest = []; }
   const tut = TUTORIAL[id] || QUEST_GOALS[id] || {};
   const giverId = npcIdOf(giver, map) || NPC_BY_NAME.get(giver) || giver;
   if (!NPCS.some((n) => n[0] === giverId && n[2] === map)) problems.push(`クエスト ${id} の依頼者 ${giver} が ${map} にいない`);
@@ -449,6 +467,7 @@ const quests = QUESTS_RAW.map(([id, name, giver, map, lv, pre, goal, size, items
     id, name, giver: giverId, giverName: giver, map, minLevel: lv, prereqs: pre === '-' ? [] : pre.split(/[・,]/).map((s) => s.trim()),
     size, goalText: goal.replace(/\[\[(k|i|m):([A-Z0-9]+)(?::(\d+))?\]\]/g, (_, t, a, n) => `${a}${n ? '×' + n : ''}`), objectives,
     end: tut.end || giverId, ...(tut.minStats ? { minStats: tut.minStats } : {}),
+    ...(rp ? { repeat: rp.repeat, ...(rp.board ? { board: true } : {}) } : {}),
     ...(tut.line ? { line: tut.line } : {}), ...(tut.advance ? { advance: tut.advance } : {}), ...(tut.unlock ? { unlock: tut.unlock } : {}), exp, meso: meso + r.meso, rewards: r.rewards, rewardText: itemsText, rewardUnparsed: r.rest, story,
     tutorial: id.startsWith('S-'),
   };

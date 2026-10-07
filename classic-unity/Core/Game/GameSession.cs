@@ -77,6 +77,8 @@ namespace Lumina.Core.Game
             Equipment = new Equipment(data.Item);
             Skills = new SkillBook(data);
             Quests = new QuestLog(data);
+            Quests.RepeatReady = q => Daily.Used(RepeatKey(q), Clock(), q.Weekly) == 0;
+            Quests.Offered = q => BoardToday().Contains(q.Id);
             Rng = new Rng(seed);
         }
 

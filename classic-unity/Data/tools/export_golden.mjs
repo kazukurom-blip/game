@@ -12,7 +12,7 @@ import { createPlayer, stepPlayer, hurtPlayer } from '../../../classic/src/engin
 import { loadMap } from '../../../classic/src/world/mapFormat.js';
 import testField from '../../../classic/src/data/maps/test_field.js';
 import { expTable, mobBase, soloMul, logInterp, nice, EXP_ANCHORS } from '../../../classic/tools/lib/curves.mjs';
-import { physRange, magicRange, afterDef, levelPenalty, hitChance, damageTaken, WEAPON } from '../../../classic/tools/lib/combat.mjs';
+import { physRange, magicRange, afterDef, levelPenalty, hitChance, damageTaken, playerAcc, WEAPON } from '../../../classic/tools/lib/combat.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.resolve(HERE, '..', '..', 'Tests', 'Golden');
@@ -135,7 +135,9 @@ const hits = [];
 for (const [acc, avoid, p, m] of [[20, 1, 1, 1], [10, 15, 10, 30], [30, 25, 30, 32], [5, 5, 5, 5], [12, 20, 10, 12], [40, 50, 30, 50]]) hits.push({ acc, avoid, p, m, out: hitChance(acc, avoid, p, m) });
 const taken = [];
 for (const [atk, wdef, ml, pl] of [[6, 5, 1, 1], [31, 20, 10, 8], [200, 150, 60, 55], [500, 50, 100, 120]]) taken.push({ atk, wdef, ml, pl, out: damageTaken(atk, wdef, ml, pl) });
-fs.writeFileSync(path.join(OUT, 'combat.json'), JSON.stringify({ phys, magic, defs, lvpen, hits, taken }));
+const accs = [];
+for (const [lv, dex, luk, extra] of [[1, 4, 4, 0], [8, 4, 4, 0], [30, 25, 4, 6], [120, 44, 4, 22], [200, 300, 40, 50]]) accs.push({ lv, dex, luk, extra, out: playerAcc({ lv, dex, luk, extra }) });
+fs.writeFileSync(path.join(OUT, 'combat.json'), JSON.stringify({ phys, magic, defs, lvpen, hits, taken, accs }));
 
 console.log('Golden を書き出した:', OUT);
 for (const sc of physics.scenarios) console.log(`  ${sc.name}: ${sc.trace.length} フレーム`);

@@ -1,5 +1,6 @@
 // クエストの進み具合（QUESTS.md 1 章）。受ける条件（前提・Lv）・目的の数え方・完了できるか・NPC の電球（黄/緑）。
 // 報酬を渡すのは GameSession（持ち物・経験値・お金を持っているので）。
+using System;
 using System.Collections.Generic;
 using Lumina.Core.Character;
 using Lumina.Core.Data;
@@ -23,7 +24,7 @@ namespace Lumina.Core.Quests
         public string QuestId; public int ObjectiveIndex; public int Count, Need;
     }
 
-    public enum StartResult { Ok, Unknown, AlreadyStarted, AlreadyCompleted, LevelTooLow, PrereqMissing, GiverNotHere, StatTooLow, WrongJob }
+    public enum StartResult { Ok, Unknown, AlreadyStarted, AlreadyCompleted, LevelTooLow, PrereqMissing, GiverNotHere, StatTooLow, WrongJob, NotToday }
 
     public sealed class QuestLog
     {
@@ -31,6 +32,11 @@ namespace Lumina.Core.Quests
         public readonly Dictionary<string, QuestProgress> Entries = new Dictionary<string, QuestProgress>();
 
         public QuestLog(GameData data) { this.data = data; }
+
+        /// <summary>繰り返しのクエストをもう一度受けられるか（今日・今週まだ完了していない）。GameSession が日付で決める。null なら受けられない</summary>
+        public Func<QuestDef, bool> RepeatReady;
+        /// <summary>掲示板のクエストが今日の 3 本に入っているか。GameSession が日付と Lv で決める。null なら全部</summary>
+        public Func<QuestDef, bool> Offered;
 
         public QuestStatus Status(string id) => Entries.TryGetValue(id, out var p) ? p.Status : QuestStatus.None;
         public bool IsCompleted(string id) => Status(id) == QuestStatus.Completed;
@@ -42,11 +48,12 @@ namespace Lumina.Core.Quests
             if (q == null) return StartResult.Unknown;
             var st = Status(id);
             if (st == QuestStatus.InProgress) return StartResult.AlreadyStarted;
-            if (st == QuestStatus.Completed) return StartResult.AlreadyCompleted;
+            if (st == QuestStatus.Completed && (q.Repeat == null || RepeatReady == null || !RepeatReady(q))) return StartResult.AlreadyCompleted;
             if (c.Level < q.MinLevel) return StartResult.LevelTooLow;
             foreach (var pre in q.Prereqs) if (!IsCompleted(pre)) return StartResult.PrereqMissing;
             foreach (var kv in q.MinStats) if (c.GetStat(ParseStat(kv.Key)) < kv.Value) return StartResult.StatTooLow;
             if (q.Line != null && q.Line != c.Line) return StartResult.WrongJob; // 転職のクエストは自分の系統だけ
+            if (q.Board && Offered != null && !Offered(q)) return StartResult.NotToday; // 掲示板は今日の 3 本だけ
             // 1 次転職のクエスト（J?-1）は初心者だけ。転職した後に別の系統の J?-1 を受けると、終わらないクエストが残る（PLAYTEST.md）
             if (c.Tier >= 1 && q.Objectives.Exists(o => o.Type == ObjectiveType.Event && o.Target == "job_advance.1")) return StartResult.WrongJob;
             return StartResult.Ok;

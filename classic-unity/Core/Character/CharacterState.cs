@@ -20,7 +20,7 @@ namespace Lumina.Core.Character
         public int NewLevel, HpGain, MpGain, ApGain, SpGain, SpTier;
     }
 
-    public enum AdvanceResult { Ok, AlreadyAdvanced, LevelTooLow, StatTooLow, UnknownJob }
+    public enum AdvanceResult { Ok, AlreadyAdvanced, LevelTooLow, StatTooLow, UnknownJob, WrongNpc }
 
     public sealed class CharacterState
     {
