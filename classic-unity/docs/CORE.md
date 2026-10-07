@@ -88,7 +88,7 @@ session.Character / Stats / Inventory / Equipment / Skills / Buffs / Status / Qu
   NPC のセリフ: `Data/tools/world/npc_lines.mjs` → `npcs.json` の `lines` → `NpcDef.Lines`・`NpcData.Lines`（`Game/NpcLines.cs`。先頭の `[条件]`（lv・tier・line・done・doing）が合う一言を先に、話しかけた回数で順に変える。`{name}`・`{job}`・`{lv}` を置き換える）。
   町の仕組み（4-11）: `StorageDeposit`／`StorageWithdraw`／`StorageDepositMeso`／`StorageWithdrawMeso`／`StorageExpand`／`ShopItems`（今日の品）／`Recharge`（詰め直し）／`TaxiTo`・`TaxiFee`／`Craft`・`CraftsAt`／`SitOnChair`・`StandUp`（または椅子を `UseItem`）／`FeedPet`・`TalkToPet`・`SetPetOut`・`RenamePet`（ペットの品・餌・技の本は `UseItem`）／`StartQuiz`・`AnswerQuiz`（賢者の石を `Interact` すると始まる）／`UseMasterBook`／`CanEnterRoom`・`RoomEntriesLeft`。
   読む物: `session.Storage`・`Pets`（X/Y/Motion）・`Quiz`（Current: 問題と混ぜた選択肢）・`CurrentRoom`・`RoomTimeLeft`/`RoomTimerRunning`/`RoomCleared`・`Sitting`（Pose.Motion = "sit"）・`Daily`。
-- **セーブ**: 自動（マップ移動・Lv アップ・クエスト完了・転職・起き上がり・3 分ごと）。アプリを閉じる時・裏に回った時は Unity 側で `SaveNow`。
+- **セーブ**: 自動（マップ移動・Lv アップ・クエスト完了・転職・起き上がり・1 分ごと）。アプリを閉じる時・裏に回った時は Unity 側で `SaveNow`。
 
 ## 4. 仕組みの説明
 
