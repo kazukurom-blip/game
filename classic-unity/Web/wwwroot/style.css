@@ -171,3 +171,52 @@ table.eq tr { border-bottom: 1px solid #2a2e48; }
 .cmp .up { color: var(--good); } .cmp .down { color: var(--bad); }
 #w_shop .col .list { max-height: 210px; }
 #w_shop .info { min-height: 96px; }
+
+/* ================================================================ クラシック風の見た目（絵の見本）
+   窓・ボタン・スロット・下の帯は art/ui/*.png（tools/make_art.mjs が作るオリジナルの 9 分割の枠）を border-image で。
+   字はゲームらしい太字＋濃い色の縁取り（text-shadow 4 方向）。#ui は整数倍に拡大するので、絵は pixelated で拡大する。 */
+:root { --ol: 1px 0 0 #0c1028, -1px 0 0 #0c1028, 0 1px 0 #0c1028, 0 -1px 0 #0c1028, 1px 1px 0 #0c1028; }
+#ui, #ui * { image-rendering: pixelated; }
+#ui { font-weight: bold; }
+#ui table { font-size: inherit; } /* index.html は doctype なし（互換モード）なので、表は字の大きさを受け継がない */
+button { border: 3px solid transparent; border-image: url(art/ui/btn.png) 4 fill stretch; background: none; border-radius: 0; color: #fff; text-shadow: var(--ol); font-weight: bold; padding: 1px 6px; }
+button:hover { background: none; border-image-source: url(art/ui/btn_hover.png); }
+button:active { transform: translateY(1px); }
+button.warn { background: none; filter: hue-rotate(150deg) saturate(1.3); }
+.tabs button { background: none; filter: saturate(0.4) brightness(0.8); }
+.tabs button.on { background: none; filter: none; border-image-source: url(art/ui/btn_gold.png); }
+.plus { background: none; border-image-source: url(art/ui/btn_gold.png); }
+
+/* 窓: 明るい枠・タイトルの帯・赤い閉じるボタン */
+.win { background: none; border: 8px solid transparent; border-image: url(art/ui/win.png) 8 fill stretch; border-radius: 0; box-shadow: 0 4px 0 rgba(0, 0, 0, 0.45); }
+.win .title { margin: -3px -3px 3px; padding: 3px 26px 3px 8px; font-size: 12px; color: #fff; text-shadow: var(--ol);
+  background: linear-gradient(#a8d0ff 0 1px, #5a94ec 1px 8px, #3a6cd0 8px 100%); border: 1px solid #10183a; border-radius: 3px 3px 0 0; box-shadow: inset 0 -2px 0 #2a4ca0; }
+.win .title::before { content: '◆ '; color: #ffe060; }
+.win .title .x { right: 2px; top: 1px; width: 18px; height: 16px; padding: 0; line-height: 9px; border-image-source: url(art/ui/btn.png); filter: hue-rotate(150deg) saturate(1.6) brightness(1.05); }
+.win .body { color: #f4f6ff; }
+.info { background: rgba(8, 10, 30, 0.55); border: 1px solid #6a78b8; border-radius: 3px; }
+#w_dialog button.sel { background: none; border-image-source: url(art/ui/btn_gold.png); color: #fff; }
+
+/* 持ち物のます・クイックスロット: へこんだ枠（中の色は持ち物の色） */
+.cell, .qs { border: 2px solid transparent; border-image: url(art/ui/slot.png) 3 stretch; background-color: #30386a; border-radius: 0; }
+.cell.empty { background-color: #262c54; border-color: transparent; }
+
+/* 下の状態の帯 */
+#hud { background: url(art/ui/bar.png) repeat-x; background-size: 4px 64px; border-top: 0; padding: 6px 6px 4px; }
+#hud .who { width: 138px; gap: 5px; }
+#hud .lv { color: #ffe060; font-size: 10px; text-shadow: var(--ol); font-style: italic; }
+#hud .lv b { font-size: 26px; line-height: 24px; letter-spacing: -1px; color: #ffe868; text-shadow: 2px 0 0 #3a1c00, -2px 0 0 #3a1c00, 0 2px 0 #3a1c00, 0 -2px 0 #3a1c00, 2px 2px 0 #3a1c00, -1px -1px 0 #3a1c00, 3px 3px 0 rgba(0, 0, 0, 0.5); }
+#hud .job { color: #c8e0ff; text-shadow: var(--ol); font-size: 10px; }
+#hud .name { display: inline-block; margin-top: 2px; padding: 1px 6px; color: #fff; background: rgba(8, 10, 30, 0.7); border: 1px solid #8a9ad0; border-radius: 3px; text-shadow: var(--ol); }
+.bar { height: 14px; background: #1c1e30; border: 1px solid #0c1028; border-radius: 3px; box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.5), 0 1px 0 rgba(255, 255, 255, 0.25); overflow: hidden; }
+.bar i { border-radius: 2px; }
+.bar.hp i { background: linear-gradient(#ffd0c8 0 2px, #ff6a50 2px 7px, #e0302a 7px 10px, #a81a20 10px); }
+.bar.mp i { background: linear-gradient(#d0e8ff 0 2px, #58a0ff 2px 7px, #2a6ae8 7px 10px, #1a48b0 10px); }
+.bar.ex i { background: linear-gradient(#fff8c8 0 2px, #ffe040 2px 7px, #e8b010 7px 10px, #b08008 10px); }
+.bar span { line-height: 12px; font-size: 10px; text-shadow: var(--ol); }
+.bar label { left: 1px; top: 1px; line-height: 10px; padding: 0 3px; border-radius: 2px; font-size: 8px; text-shadow: none; color: #fff; }
+.bar.hp label { background: #b8201c; } .bar.mp label { background: #1c48b0; } .bar.ex label { background: #a87808; }
+.qs em { color: #ffe868; text-shadow: var(--ol); }
+#hud .menu button { height: 24px; font-size: 11px; padding: 0; }
+#msgs { font-weight: bold; text-shadow: var(--ol); }
+.buff { border: 2px solid transparent; border-image: url(art/ui/slot.png) 3 stretch; }

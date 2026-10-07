@@ -89,15 +89,15 @@ const prone = [
 const backBase = () => ({ view: 'back', head: P(0, -27), neck: P(0, -28), hip: P(0, -17) });
 const ropeA = {
   ...backBase(),
-  armB: { s: P(-4, -25), e: P(-10, -36), h: P(-2, -54) },   // 背中から見て左の腕（高い）
-  armF: { s: P(4, -25), e: P(10, -32), h: P(2, -49) },      // 右の腕（低い）
+  armB: { s: P(-4, -25), e: P(-14, -38), h: P(-3, -58) },   // 背中から見て左の腕（高い）
+  armF: { s: P(4, -25), e: P(14, -34), h: P(3, -53) },      // 右の腕（低い）
   legB: { h: P(-2, -15), f: P(-2, -9), lift: true },
   legF: { h: P(2, -15), f: P(2, -4) },
 };
 const rope = [
   ropeA,
   with_(ropeA, {
-    armB: { e: P(-10, -32), h: P(-2, -49) }, armF: { e: P(10, -36), h: P(2, -54) },
+    armB: { e: P(-14, -34), h: P(-3, -53) }, armF: { e: P(14, -38), h: P(3, -58) },
     legB: { f: P(-2, -4), lift: false }, legF: { f: P(2, -9), lift: true },
   }),
 ];
@@ -105,21 +105,21 @@ const rope = [
 // --- はしご（背中・2 コマ・0.25 秒）: 手は左右の柱の近く、足は段に
 const ladderA = {
   ...backBase(),
-  armB: { s: P(-4, -25), e: P(-11, -35), h: P(-6, -53) },
-  armF: { s: P(4, -25), e: P(11, -31), h: P(6, -47) },
+  armB: { s: P(-4, -25), e: P(-15, -37), h: P(-8, -57) },
+  armF: { s: P(4, -25), e: P(15, -33), h: P(8, -52) },
   legB: { h: P(-2, -15), f: P(-3, -10), lift: true },
   legF: { h: P(2, -15), f: P(3, -4) },
 };
 const ladder = [
   ladderA,
   with_(ladderA, {
-    armB: { e: P(-11, -31), h: P(-6, -47) }, armF: { e: P(11, -35), h: P(6, -53) },
+    armB: { e: P(-15, -33), h: P(-8, -52) }, armF: { e: P(15, -37), h: P(8, -57) },
     legB: { f: P(-3, -4), lift: false }, legF: { f: P(3, -10), lift: true },
   }),
 ];
 
 // 脚の長さの調整: 足首より上をまとめて LEG_EXTRA だけ上げる（全体の高さ 約 51 px・頭身 約 2.3）
-const LEG_EXTRA = 2;
+const LEG_EXTRA = 1;
 function stretch(frames) {
   for (const f of frames) {
     if (f.prone) continue;
