@@ -3,7 +3,7 @@
 //   node classic-unity/Web/tools/make_dist.mjs --no-publish … publish し直さず、前の publish の結果から作る
 // dist/ の中身:
 //   index.html・main.js・style.css・js/ … 画面（wwwroot/ のまま）
-//   _framework/ … .NET の WebAssembly（dotnet publish の出力。Core のコードは Lumina.Web.wasm）
+//   framework/（publish の _framework） … .NET の WebAssembly（dotnet publish の出力。Core のコードは Lumina.Web.wasm）
 //   data.json   … classic-unity/Data/*.json と maps/*.json を 1 つにまとめた物（{ "items.json": "…", "maps/S001.json": "…" }）
 //   sfx.json    … 効果音（Audio/SFX/*.ogg）を base64 で 1 つにまとめた物（ファイルの数を減らす）
 //   audio/      … audio_manifest.json と BGM/*.ogg（イントロとループ・ジングル）
@@ -39,7 +39,7 @@ function copyDir(src, dst) {
     if (e.isDirectory()) copyDir(s, d); else fs.copyFileSync(s, d);
   }
 }
-copyDir(path.join(wwwroot, '_framework'), path.join(DIST, '_framework'));
+copyDir(path.join(wwwroot, '_framework'), path.join(DIST, 'framework')); // 公開先は「_」で始まる名前を使えないので framework に
 copyDir(path.join(WEB, 'wwwroot'), DIST); // 画面の JS・CSS は手元の wwwroot/ から（--no-publish でも新しい物）
 
 // 2) データを 1 つに

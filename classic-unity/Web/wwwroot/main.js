@@ -1,6 +1,6 @@
 // ルミナリア・クラシック 試遊版（ブラウザ）。C# の Core を WebAssembly で動かし、JS は入力・描画・音・窓だけ。
 // 流れは classic-unity/Unity/GameRunner.cs と同じ: 入力を集める → Frame(dt, 入力) → 出てきた物を描く・鳴らす。
-import { dotnet } from './_framework/dotnet.js';
+import { dotnet } from './framework/dotnet.js';
 import { Renderer, VIEW_W, VIEW_H } from './js/render.js';
 import { Ui, QUICK_KEYS } from './js/ui.js';
 import { Audio } from './js/audio.js';
