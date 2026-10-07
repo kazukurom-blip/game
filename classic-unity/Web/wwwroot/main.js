@@ -118,6 +118,12 @@ class Game {
     addEventListener('blur', () => this.input.clear());
   }
 
+  /** 進めているクエストの ID（隠し物を見せるか決める）。状態が変わった時だけ作り直す */
+  activeQuestSet(st) {
+    if (st && st !== this._aqFor) { this._aqFor = st; this._aq = new Set((st.quests || []).map((q) => q.id)); }
+    return this._aq || new Set();
+  }
+
   /** 会話の窓が開いている（この間は主人公を動かさない） */
   talking() { return this.ui.open.has('dialog') && !!this.ui.dialog; }
 
@@ -197,7 +203,7 @@ class Game {
     this.audio.onFrame(f, dt);
     this.ui.hud(f);
     const t2 = performance.now();
-    this.renderer.draw(f, dt, { weaponType: st?.stats?.weapon, hideMinimap: this.hideMinimap, talking: this.talking(), name: st?.name, medal: st?.medal });
+    this.renderer.draw(f, dt, { activeQuests: this.activeQuestSet(st), weaponType: st?.stats?.weapon, hideMinimap: this.hideMinimap, talking: this.talking(), name: st?.name, medal: st?.medal });
     this.fun.frame(f, dt);
     const t3 = performance.now();
     this.frameNo++;
@@ -237,6 +243,7 @@ class Game {
         case 'QuestCompleted': U.msg(`クエスト「${text}」完了！ 経験値 +${value}`, 'quest'); dirty = true; break;
         case 'QuestProgress': { const q = this.db.quests?.[id]; U.msg(`クエストの進み ${text}`, 'quest'); dirty = true; break; }
         case 'Message': case 'SkillFailed': case 'InventoryFull': case 'Revived': case 'RoomTimeUp': case 'RoomFailed':
+          if (type === 'Message' && text && this.map?.objects?.some((o) => o.id === id)) this.renderer.addFx('text', f.p[0], f.p[1], text);
           if (text) U.msg(text, type === 'Message' ? '' : 'bad'); break;
         case 'Died': U.msg('倒れてしまった…', 'bad'); break;
         case 'Saved': if (id === 'manual') U.msg('セーブした'); break;

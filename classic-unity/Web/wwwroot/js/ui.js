@@ -246,7 +246,7 @@ export class Ui {
     const it = tab[this.invSel];
     if (it) {
       const def = this.db.items[it.id];
-      body += `<div class="info">${this.itemInfo(it, def)}<div class="btns">`;
+      body += `<div class="info">${this.itemInfo(it, def)}${this.invTab === 0 ? this.compareEquip(def, s, it) : ''}<div class="btns">`;
       if (this.invTab === 0) body += `<button data-act="equip" data-n="${this.invSel}">装備する</button>`;
       if (this.invTab === 1 && def?.scroll) {
         body += `書を使う: ` + Object.keys(s.eq).map((k) => `<button data-act="scrollEquipped" data-a="${it.id}" data-b="${k}">${SLOT_NAMES[k] || k}</button>`).join('');
@@ -584,7 +584,7 @@ export class Ui {
     for (const e of sh.items) {
       const def = this.db.items[e.item];
       const stack = def && def.maxStack > 1 && !def.ammo;
-      body += `<div class="row" title="${esc(def?.desc || '')}"><div class="ic" style="background:${itemColor(def)}">${esc(this.short(def?.name))}</div><div class="tx">${esc(def?.name || e.item)}${e.bundle > 1 ? '×' + e.bundle : ''}<br><small>${num(e.price)} ルド${def?.reqLevel ? '・Lv' + def.reqLevel : ''}</small></div>
+      body += `<div class="row${this.shopSel === e.item ? ' sel' : ''}" data-shopsel="${e.item}" title="${esc(def?.desc || '')}"><div class="ic" style="background:${itemColor(def)}">${esc(this.short(def?.name))}</div><div class="tx">${esc(def?.name || e.item)}${e.bundle > 1 ? '×' + e.bundle : ''}<br><small>${num(e.price)} ルド${def?.reqLevel ? '・Lv' + def.reqLevel : ''}</small></div>
         <div class="bt">${stack ? `<input type="number" min="1" max="100" value="1" id="cnt_${esc(e.item)}">` : ''}<button data-buy="${e.item}">買う</button></div></div>`;
     }
     body += `</div></div><div class="col"><b>持ち物（売る）</b><div class="tabs">${TABS.map((t, i) => `<button class="${i === this.shopTab ? 'on' : ''}" data-shoptab="${i}">${t}</button>`).join('')}</div><div class="list">`;
@@ -593,8 +593,47 @@ export class Ui {
       const def = this.db.items[it.id];
       body += `<div class="row"><div class="ic" style="background:${itemColor(def)}">${esc(this.short(def?.name))}</div><div class="tx">${esc(def?.name || it.id)}${it.n > 1 ? '×' + it.n : ''}</div><div class="bt"><button data-act="sell" data-a="${this.shopTab}" data-n="${i}">売る</button>${sh.recharge && def?.ammo ? `<button data-act="recharge" data-a="${sh.id}" data-n="${i}">詰め直し</button>` : ''}</div></div>`;
     });
-    body += `</div></div></div><div class="meso">${num(s.meso)} ルド</div>`;
+    body += `</div></div></div>`;
+    // 選んだ品の説明・能力と、今の装備との差（品をクリック）
+    const pick = sh.items.find((e) => e.item === this.shopSel);
+    const pdef = pick && this.db.items[pick.item];
+    body += pdef ? `<div class="info">${this.itemInfo(null, pdef)}${this.compareEquip(pdef, s)}</div>` : '<div class="info dim">品をクリックすると、説明・能力・今の装備との差が出ます。</div>';
+    body += `<div class="meso">${num(s.meso)} ルド</div>`;
     return this.frame('shop', '店', body, 'wide');
+  }
+
+  /** 装備の品を、今その欄に着けている物と比べる（能力の差・着けられるか）。装備でなければ空 */
+  compareEquip(def, s, it = null) {
+    if (!def || def.tab !== 'equip' || !def.slot) return '';
+    const eq = s.eq || {};
+    const slot = def.slot === 'ring' ? 'ring1' : def.slot;
+    // 全身は上着＋下衣と、上着・下衣は全身と比べる
+    let curItems = [];
+    if (slot === 'overall') curItems = [eq.overall, eq.top, eq.bottom].filter(Boolean);
+    else if ((slot === 'top' || slot === 'bottom') && eq.overall) curItems = [eq.overall];
+    else if (eq[slot]) curItems = [eq[slot]];
+    const sum = (list) => { const o = {}; for (const x of list) for (const [k, v] of Object.entries(x.st || this.db.items[x.id]?.stats || {})) o[k] = (o[k] || 0) + (v || 0); return o; };
+    const mine = it?.st || def.stats || {};
+    const cur = sum(curItems);
+    const keys = [...new Set([...Object.keys(mine), ...Object.keys(cur)])].filter((k) => (mine[k] || 0) !== 0 || (cur[k] || 0) !== 0);
+    let h = '<div class="cmp"><b>今の装備と比べると</b>　';
+    h += curItems.length ? `<span class="dim">（${curItems.map((x) => esc(this.itemName(x.id))).join('＋')}）</span><br>` : '<span class="dim">（この欄は何も着けていない）</span><br>';
+    const parts = keys.map((k) => {
+      const d = (mine[k] || 0) - (cur[k] || 0);
+      const cls = d > 0 ? 'up' : d < 0 ? 'down' : 'dim';
+      return `<span class="${cls}">${STAT_NAMES[k] || k} ${d > 0 ? '+' : ''}${d}</span>`;
+    });
+    h += parts.length ? parts.join('　') : '<span class="dim">能力の差なし</span>';
+    // 着けられるか（Lv・職・必要な能力値）
+    const why = [];
+    if ((def.reqLevel || 0) > (s.lv || 0)) why.push(`Lv${def.reqLevel} から`);
+    if (def.job && def.job !== 'common' && def.job !== s.line) why.push(`${LINE_NAMES[def.job] || def.job}だけ`);
+    const rs = (def.reqStat || '').toLowerCase();
+    if (rs && def.reqValue && (s.stats?.[rs] ?? 0) < def.reqValue) why.push(`${STAT_NAMES[rs] || def.reqStat} ${def.reqValue} 以上が要る`);
+    h += why.length ? `<br><span class="down">今は着けられない: ${why.join('・')}</span>` : '<br><span class="up">今すぐ着けられる</span>';
+    const wt = def.weaponType, cw = curItems[0] && this.db.items[curItems[0].id]?.weaponType;
+    if (slot === 'weapon' && wt && cw && wt !== cw) h += `<br><span class="dim">武器の種類が変わる（${esc(cw)} → ${esc(wt)}）</span>`;
+    return h + '</div>';
   }
 
   winStorage(s) {
@@ -643,7 +682,8 @@ export class Ui {
 
   // ---------------- クリック
   onClick(e) {
-    const t = e.target.closest('button, [data-inv], [data-skillsel], [data-bookm], [data-wm], .qs');
+    if (e.target.tagName === 'INPUT') return; // 個数の入力欄（窓を描き直すと入力が消える）
+    const t = e.target.closest('button, [data-inv], [data-skillsel], [data-bookm], [data-wm], [data-shopsel], .qs');
     if (!t) return;
     if (t.blur) t.blur(); // Space・Enter でボタンがもう一度押されないように
     this.game.audio.unlock();
@@ -659,6 +699,7 @@ export class Ui {
     if (ds.inv != null) { this.invSel = +ds.inv; this.game.audio.sfx('ui_click'); this.renderWins(); return; }
     if (ds.skilltier != null) { this.skillTier = +ds.skilltier; this.renderWins(); return; }
     if (ds.skillsel != null && t.tagName !== 'BUTTON') { this.skillSel = ds.skillsel; this.renderWins(); return; }
+    if (ds.shopsel != null && t.tagName !== 'BUTTON') { this.shopSel = ds.shopsel; this.game.audio.sfx('ui_click'); this.renderWins(); return; }
     if (ds.shoptab != null) { this.shopTab = +ds.shoptab; this.renderWins(); return; }
     if (ds.pick) { this.picker = { kind: ds.pick, id: ds.id }; this.renderWins(); return; }
     if (ds.put != null) { this.put(+ds.put); return; }

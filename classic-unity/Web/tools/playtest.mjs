@@ -337,6 +337,17 @@ try {
   const buy = await page.$('#w_shop button[data-buy]');
   if (buy) { await buy.click(); await sleep(200); }
   check('店で買う', (await U()).meso < meso0, `お金 ${meso0}→${(await U()).meso}`);
+  // 装備の店で品を選ぶと、説明と今の装備との差が出る（雑貨屋タタ）
+  await page.evaluate(() => { const g = window.game; g.ui.close('shop'); g.ui.close('dialog'); const r = g.act('talk', 'tata'); g.ui.openDialog(r.dialog); });
+  await sleep(300);
+  const sb2 = await page.$('#w_dialog button[data-shop]');
+  if (sb2) { await sb2.click(); await sleep(200); }
+  const row = await page.$('#w_shop [data-shopsel] .tx');
+  if (row) { await row.click(); await sleep(200); }
+  const cmp = await page.$eval('#w_shop .info', (el) => el.textContent).catch(() => '');
+  check('店の品を選ぶと説明と今の装備との差が出る', /今の装備と比べると/.test(cmp), cmp.slice(0, 60));
+  await shot('shop_compare');
+  await page.evaluate(() => { const g = window.game; g.ui.close('shop'); g.ui.close('dialog'); });
   await shot('shop');
   await page.keyboard.press('Escape'); await page.keyboard.press('Escape');
   await shot('town');
