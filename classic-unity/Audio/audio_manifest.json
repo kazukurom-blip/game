@@ -1,5 +1,5 @@
 {
-  "about": "ルミナリア・クラシックの音の一覧（自動で作る: node classic/tools/render_bgm.mjs / render_sfx.mjs）。パスはこのファイルからの相対。BGM の file はループ部分だけ（AudioSource.loop=true でそのままくり返せる）。intro があれば先に鳴らし、終わる時刻に file を PlayScheduled でつなぐ。",
+  "about": "ルミナリア・クラシックの音の一覧（自動で作る: node classic/tools/render_bgm.mjs / render_sfx.mjs）。パスはこのファイルからの相対。BGM の file はループ部分だけ（AudioSource.loop=true でそのままくり返せる）。intro があれば先に鳴らし、終わる時刻に file を PlayScheduled でつなぐ。jingle はくり返さない短い曲（loop=false。BGM の上に鳴らし、その間 BGM を小さく）。events は Core の GameEventType → 鳴らす音の対応表。",
   "bgm": {
     "field_island": {
       "title": "はじまりの草原",
@@ -380,6 +380,974 @@
         "T117",
         "V618"
       ]
+    },
+    "pq": {
+      "title": "試しの回廊",
+      "file": "BGM/pq.ogg",
+      "intro": "BGM/pq_intro.ogg",
+      "bpm": 126,
+      "meter": "4/4",
+      "key": "B minor",
+      "introSeconds": 3.81,
+      "loopSeconds": 76.19,
+      "introSamples": 168000,
+      "loopSamples": 3360000,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.01694,
+          "ref": 0.07718,
+          "lo": -13
+        },
+        "intro": {
+          "err": 0.01694,
+          "ref": 0.07718,
+          "lo": -14.7
+        }
+      },
+      "bytes": 1065152,
+      "maps": [
+        "C117",
+        "C119",
+        "D116",
+        "D117",
+        "F118",
+        "M114",
+        "M115",
+        "T118",
+        "T119",
+        "T121",
+        "T122",
+        "V108",
+        "V211",
+        "V311",
+        "V413",
+        "V513",
+        "V515",
+        "V516"
+      ]
+    },
+    "field_toy": {
+      "title": "ぜんまい仕掛けの塔",
+      "file": "BGM/field_toy.ogg",
+      "intro": "BGM/field_toy_intro.ogg",
+      "bpm": 112,
+      "meter": "4/4",
+      "key": "Bb minor",
+      "introSeconds": 4.286,
+      "loopSeconds": 85.714,
+      "introSamples": 189000,
+      "loopSamples": 3780000,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.00374,
+          "ref": 0.04812,
+          "lo": -5
+        },
+        "intro": {
+          "err": 0.00364,
+          "ref": 0.04812,
+          "lo": -7.7
+        }
+      },
+      "bytes": 1107863,
+      "maps": [
+        "T102",
+        "T103",
+        "T104",
+        "T105",
+        "T106",
+        "T107",
+        "T109",
+        "T110",
+        "T111",
+        "T112",
+        "T113",
+        "T114",
+        "T115",
+        "T116",
+        "T120"
+      ]
+    },
+    "field_sky": {
+      "title": "風の階段",
+      "file": "BGM/field_sky.ogg",
+      "intro": "BGM/field_sky_intro.ogg",
+      "bpm": 120,
+      "meter": "4/4",
+      "key": "Bb major",
+      "introSeconds": 4,
+      "loopSeconds": 96,
+      "introSamples": 176400,
+      "loopSamples": 4233600,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.00324,
+          "ref": 0.08942,
+          "lo": -11.4
+        },
+        "intro": {
+          "err": 0.00324,
+          "ref": 0.08942,
+          "lo": -9.9
+        }
+      },
+      "bytes": 1449837,
+      "maps": [
+        "C102",
+        "C103",
+        "C104",
+        "C105",
+        "C106",
+        "C107",
+        "C108",
+        "C109",
+        "C110",
+        "C111",
+        "C112",
+        "C113",
+        "C114",
+        "C115"
+      ]
+    },
+    "ship": {
+      "title": "波間の航路",
+      "file": "BGM/ship.ogg",
+      "intro": "BGM/ship_intro.ogg",
+      "bpm": "66 (付点4分)",
+      "meter": "6/8",
+      "key": "G major",
+      "introSeconds": 3.636,
+      "loopSeconds": 72.727,
+      "introSamples": 160364,
+      "loopSamples": 3207273,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.00555,
+          "ref": 0.0631,
+          "lo": -3.6
+        },
+        "intro": {
+          "err": 0.00555,
+          "ref": 0.0631,
+          "lo": -3.4
+        }
+      },
+      "bytes": 1061460,
+      "maps": [
+        "C118"
+      ]
+    },
+    "town_pom": {
+      "title": "風車の丘のワルツ",
+      "file": "BGM/town_pom.ogg",
+      "intro": "BGM/town_pom_intro.ogg",
+      "bpm": 104,
+      "meter": "3/4",
+      "key": "F major",
+      "introSeconds": 3.462,
+      "loopSeconds": 83.077,
+      "introSamples": 152654,
+      "loopSamples": 3663692,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.00966,
+          "ref": 0.02945,
+          "lo": -0.6
+        },
+        "intro": {
+          "err": 0.00966,
+          "ref": 0.02952,
+          "lo": -0.9
+        }
+      },
+      "bytes": 1125438,
+      "maps": [
+        "V200"
+      ]
+    },
+    "town_silva": {
+      "title": "ランタンの森都",
+      "file": "BGM/town_silva.ogg",
+      "intro": "BGM/town_silva_intro.ogg",
+      "bpm": 84,
+      "meter": "3/4",
+      "key": "E dorian",
+      "introSeconds": 4.286,
+      "loopSeconds": 85.714,
+      "introSamples": 189000,
+      "loopSamples": 3780000,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.00322,
+          "ref": 0.11813,
+          "lo": -7
+        },
+        "intro": {
+          "err": 0.00322,
+          "ref": 0.11813,
+          "lo": -6.2
+        }
+      },
+      "bytes": 1258233,
+      "maps": [
+        "V300",
+        "V310"
+      ]
+    },
+    "town_gard": {
+      "title": "岩台の太鼓",
+      "file": "BGM/town_gard.ogg",
+      "intro": "BGM/town_gard_intro.ogg",
+      "bpm": 92,
+      "meter": "4/4",
+      "key": "D dorian",
+      "introSeconds": 5.217,
+      "loopSeconds": 83.478,
+      "introSamples": 230087,
+      "loopSamples": 3681391,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.00031,
+          "ref": 0.0226,
+          "lo": -8.3
+        },
+        "intro": {
+          "err": 0.00031,
+          "ref": 0.0226,
+          "lo": -9.2
+        }
+      },
+      "bytes": 1161278,
+      "maps": [
+        "V400"
+      ]
+    },
+    "town_crow": {
+      "title": "霧の路地のジャズ",
+      "file": "BGM/town_crow.ogg",
+      "intro": "BGM/town_crow_intro.ogg",
+      "bpm": 96,
+      "meter": "4/4",
+      "key": "C minor",
+      "introSeconds": 5,
+      "loopSeconds": 80,
+      "introSamples": 220500,
+      "loopSamples": 3528000,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.00781,
+          "ref": 0.0576,
+          "lo": -8.9
+        },
+        "intro": {
+          "err": 0.00781,
+          "ref": 0.0576,
+          "lo": -9.5
+        }
+      },
+      "bytes": 1111917,
+      "maps": [
+        "V500"
+      ]
+    },
+    "town_nemuri": {
+      "title": "湯けむりの谷",
+      "file": "BGM/town_nemuri.ogg",
+      "intro": "BGM/town_nemuri_intro.ogg",
+      "bpm": 76,
+      "meter": "4/4",
+      "key": "F# minor",
+      "introSeconds": 6.316,
+      "loopSeconds": 75.789,
+      "introSamples": 278526,
+      "loopSamples": 3342316,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.00025,
+          "ref": 0.07456,
+          "lo": -8.4
+        },
+        "intro": {
+          "err": 0.00025,
+          "ref": 0.07456,
+          "lo": -9.7
+        }
+      },
+      "bytes": 1057565,
+      "maps": [
+        "V600",
+        "V619"
+      ]
+    },
+    "market": {
+      "title": "にぎわい広場のポルカ",
+      "file": "BGM/market.ogg",
+      "intro": "BGM/market_intro.ogg",
+      "bpm": 132,
+      "meter": "4/4",
+      "key": "Bb major",
+      "introSeconds": 3.636,
+      "loopSeconds": 87.273,
+      "introSamples": 160364,
+      "loopSamples": 3848727,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.02293,
+          "ref": 0.03954,
+          "lo": -4.6
+        },
+        "intro": {
+          "err": 0.02293,
+          "ref": 0.03597,
+          "lo": -5.1
+        }
+      },
+      "bytes": 1256939,
+      "maps": [
+        "V090"
+      ]
+    },
+    "town_hyoga": {
+      "title": "暖炉の灯る雪村",
+      "file": "BGM/town_hyoga.ogg",
+      "intro": "BGM/town_hyoga_intro.ogg",
+      "bpm": 84,
+      "meter": "3/4",
+      "key": "A major",
+      "introSeconds": 4.286,
+      "loopSeconds": 85.714,
+      "introSamples": 189000,
+      "loopSamples": 3780000,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.0043,
+          "ref": 0.05878,
+          "lo": -4.1
+        },
+        "intro": {
+          "err": 0.0043,
+          "ref": 0.05878,
+          "lo": -5.1
+        }
+      },
+      "bytes": 1058670,
+      "maps": [
+        "F100",
+        "F117"
+      ]
+    },
+    "town_tinkle": {
+      "title": "ブリキのマーチ",
+      "file": "BGM/town_tinkle.ogg",
+      "intro": "BGM/town_tinkle_intro.ogg",
+      "bpm": 132,
+      "meter": "4/4",
+      "key": "C major",
+      "introSeconds": 3.636,
+      "loopSeconds": 72.727,
+      "introSamples": 160364,
+      "loopSamples": 3207273,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.00517,
+          "ref": 0.39661,
+          "lo": -2.4
+        },
+        "intro": {
+          "err": 0.00517,
+          "ref": 0.39661,
+          "lo": -3.9
+        }
+      },
+      "bytes": 1035890,
+      "maps": [
+        "T100",
+        "T101"
+      ]
+    },
+    "town_marina": {
+      "title": "泡の灯の都",
+      "file": "BGM/town_marina.ogg",
+      "intro": "BGM/town_marina_intro.ogg",
+      "bpm": "60 (付点4分)",
+      "meter": "6/8",
+      "key": "Ab major",
+      "introSeconds": 4,
+      "loopSeconds": 80,
+      "introSamples": 176400,
+      "loopSamples": 3528000,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.00069,
+          "ref": 0.11586,
+          "lo": -12
+        },
+        "intro": {
+          "err": 0.00069,
+          "ref": 0.11586,
+          "lo": -11.7
+        }
+      },
+      "bytes": 1188314,
+      "maps": [
+        "M100",
+        "M113"
+      ]
+    },
+    "town_dragon": {
+      "title": "竜の背の村",
+      "file": "BGM/town_dragon.ogg",
+      "intro": "BGM/town_dragon_intro.ogg",
+      "bpm": 86,
+      "meter": "4/4",
+      "key": "F minor",
+      "introSeconds": 5.581,
+      "loopSeconds": 89.302,
+      "introSamples": 246140,
+      "loopSamples": 3938233,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.00322,
+          "ref": 0.01569,
+          "lo": -2.9
+        },
+        "intro": {
+          "err": 0.00324,
+          "ref": 0.01569,
+          "lo": -4.2
+        }
+      },
+      "bytes": 1230263,
+      "maps": [
+        "D100",
+        "D101",
+        "D115"
+      ]
+    },
+    "camp": {
+      "title": "焚き火のそばで",
+      "file": "BGM/camp.ogg",
+      "intro": "BGM/camp_intro.ogg",
+      "bpm": 70,
+      "meter": "4/4",
+      "key": "E major",
+      "introSeconds": 6.857,
+      "loopSeconds": 68.571,
+      "introSamples": 302400,
+      "loopSamples": 3024000,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.00052,
+          "ref": 0.24374,
+          "lo": -9.7
+        },
+        "intro": {
+          "err": 0.00052,
+          "ref": 0.24374,
+          "lo": -9.7
+        }
+      },
+      "bytes": 1008202,
+      "maps": [
+        "E100",
+        "H100",
+        "P100"
+      ]
+    },
+    "field_port": {
+      "title": "海辺を駆けて",
+      "file": "BGM/field_port.ogg",
+      "intro": "BGM/field_port_intro.ogg",
+      "bpm": 126,
+      "meter": "4/4",
+      "key": "E major",
+      "introSeconds": 3.81,
+      "loopSeconds": 76.19,
+      "introSamples": 168000,
+      "loopSamples": 3360000,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.00627,
+          "ref": 0.10929,
+          "lo": -6.8
+        },
+        "intro": {
+          "err": 0.00629,
+          "ref": 0.10929,
+          "lo": -8.4
+        }
+      },
+      "bytes": 1202332,
+      "maps": [
+        "V101",
+        "V102",
+        "V103",
+        "V104",
+        "V105",
+        "V106",
+        "V109",
+        "V700",
+        "V707"
+      ]
+    },
+    "field_pom": {
+      "title": "花畑のピクニック",
+      "file": "BGM/field_pom.ogg",
+      "intro": "BGM/field_pom_intro.ogg",
+      "bpm": 116,
+      "meter": "4/4",
+      "key": "G major",
+      "introSeconds": 4.138,
+      "loopSeconds": 82.759,
+      "introSamples": 182483,
+      "loopSamples": 3649655,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.00254,
+          "ref": 0.05892,
+          "lo": -15.7
+        },
+        "intro": {
+          "err": 0.00257,
+          "ref": 0.05892,
+          "lo": -10.9
+        }
+      },
+      "bytes": 1211103,
+      "maps": [
+        "V201",
+        "V202",
+        "V203",
+        "V204",
+        "V205",
+        "V206",
+        "V207",
+        "V209",
+        "V210",
+        "V212",
+        "V701"
+      ]
+    },
+    "field_gard": {
+      "title": "岩山を登る",
+      "file": "BGM/field_gard.ogg",
+      "intro": "BGM/field_gard_intro.ogg",
+      "bpm": 132,
+      "meter": "4/4",
+      "key": "A minor",
+      "introSeconds": 3.636,
+      "loopSeconds": 72.727,
+      "introSamples": 160364,
+      "loopSamples": 3207273,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.00537,
+          "ref": 0.0959,
+          "lo": -8.6
+        },
+        "intro": {
+          "err": 0.00537,
+          "ref": 0.0959,
+          "lo": -10.2
+        }
+      },
+      "bytes": 1081820,
+      "maps": [
+        "V401",
+        "V402",
+        "V403",
+        "V404",
+        "V405",
+        "V406",
+        "V407",
+        "V414",
+        "V704",
+        "V705"
+      ]
+    },
+    "field_crow": {
+      "title": "終電のない地下鉄",
+      "file": "BGM/field_crow.ogg",
+      "intro": "BGM/field_crow_intro.ogg",
+      "bpm": 112,
+      "meter": "4/4",
+      "key": "Eb minor",
+      "introSeconds": 4.286,
+      "loopSeconds": 85.714,
+      "introSamples": 189000,
+      "loopSamples": 3780000,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.00517,
+          "ref": 0.0996,
+          "lo": -13.9
+        },
+        "intro": {
+          "err": 0.00517,
+          "ref": 0.0996,
+          "lo": -14.8
+        }
+      },
+      "bytes": 1279718,
+      "maps": [
+        "V501",
+        "V502",
+        "V503",
+        "V504",
+        "V505",
+        "V506",
+        "V507",
+        "V514"
+      ]
+    },
+    "field_snow": {
+      "title": "白い風の雪原",
+      "file": "BGM/field_snow.ogg",
+      "intro": "BGM/field_snow_intro.ogg",
+      "bpm": 104,
+      "meter": "4/4",
+      "key": "E minor",
+      "introSeconds": 4.615,
+      "loopSeconds": 73.846,
+      "introSamples": 203538,
+      "loopSamples": 3256615,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.00449,
+          "ref": 0.11071,
+          "lo": -6.2
+        },
+        "intro": {
+          "err": 0.00447,
+          "ref": 0.11071,
+          "lo": -7.3
+        }
+      },
+      "bytes": 1173542,
+      "maps": [
+        "F101",
+        "F102",
+        "F103",
+        "F104",
+        "F105",
+        "F106",
+        "F107",
+        "F108",
+        "F109"
+      ]
+    },
+    "field_sea": {
+      "title": "ゆらめく海の道",
+      "file": "BGM/field_sea.ogg",
+      "intro": "BGM/field_sea_intro.ogg",
+      "bpm": 88,
+      "meter": "4/4",
+      "key": "F major",
+      "introSeconds": 5.455,
+      "loopSeconds": 87.273,
+      "introSamples": 240545,
+      "loopSamples": 3848727,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.00073,
+          "ref": 0.11488,
+          "lo": -4.9
+        },
+        "intro": {
+          "err": 0.00075,
+          "ref": 0.11488,
+          "lo": -4.6
+        }
+      },
+      "bytes": 1413836,
+      "maps": [
+        "M101",
+        "M102",
+        "M103",
+        "M104",
+        "M105",
+        "M106",
+        "M107",
+        "M108",
+        "M109",
+        "M110",
+        "M111"
+      ]
+    },
+    "field_dragon": {
+      "title": "竜の谷を往く",
+      "file": "BGM/field_dragon.ogg",
+      "intro": "BGM/field_dragon_intro.ogg",
+      "bpm": 120,
+      "meter": "4/4",
+      "key": "C minor",
+      "introSeconds": 4,
+      "loopSeconds": 80,
+      "introSamples": 176400,
+      "loopSamples": 3528000,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.0076,
+          "ref": 0.02423,
+          "lo": -8.4
+        },
+        "intro": {
+          "err": 0.0076,
+          "ref": 0.02159,
+          "lo": -9.3
+        }
+      },
+      "bytes": 1218517,
+      "maps": [
+        "D102",
+        "D103",
+        "D104",
+        "D105",
+        "D106",
+        "D107",
+        "D108",
+        "D109",
+        "D110",
+        "D111",
+        "D112"
+      ]
+    },
+    "field_volcano": {
+      "title": "焔の坑道",
+      "file": "BGM/field_volcano.ogg",
+      "intro": "BGM/field_volcano_intro.ogg",
+      "bpm": 140,
+      "meter": "4/4",
+      "key": "E phrygian",
+      "introSeconds": 3.429,
+      "loopSeconds": 82.286,
+      "introSamples": 151200,
+      "loopSamples": 3628800,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.00036,
+          "ref": 0.0535,
+          "lo": -7.3
+        },
+        "intro": {
+          "err": 0.00036,
+          "ref": 0.0535,
+          "lo": -9.2
+        }
+      },
+      "bytes": 1180815,
+      "maps": [
+        "H101",
+        "H102",
+        "H103",
+        "H104",
+        "H105",
+        "H106"
+      ]
+    },
+    "field_star": {
+      "title": "星の果ての旅路",
+      "file": "BGM/field_star.ogg",
+      "intro": "BGM/field_star_intro.ogg",
+      "bpm": 80,
+      "meter": "4/4",
+      "key": "Db major",
+      "introSeconds": 6,
+      "loopSeconds": 96,
+      "introSamples": 264600,
+      "loopSamples": 4233600,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.01329,
+          "ref": 0.08419,
+          "lo": -4.8
+        },
+        "intro": {
+          "err": 0.01333,
+          "ref": 0.08419,
+          "lo": -6.5
+        }
+      },
+      "bytes": 1540877,
+      "maps": [
+        "E101",
+        "E102",
+        "E103",
+        "E104",
+        "E105",
+        "E106",
+        "E107"
+      ]
+    },
+    "dungeon_temple": {
+      "title": "止まった時の神殿",
+      "file": "BGM/dungeon_temple.ogg",
+      "intro": "BGM/dungeon_temple_intro.ogg",
+      "bpm": 64,
+      "meter": "4/4",
+      "key": "G# minor",
+      "introSeconds": 7.5,
+      "loopSeconds": 75,
+      "introSamples": 330750,
+      "loopSamples": 3307500,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.00261,
+          "ref": 0.008,
+          "lo": -1.9
+        },
+        "intro": {
+          "err": 0.00262,
+          "ref": 0.00759,
+          "lo": -3.3
+        }
+      },
+      "bytes": 1062770,
+      "maps": [
+        "P101",
+        "P102",
+        "P103",
+        "P104",
+        "P105",
+        "P106",
+        "P107",
+        "P108"
+      ]
+    },
+    "boss_final": {
+      "title": "三つ首の黒竜",
+      "file": "BGM/boss_final.ogg",
+      "intro": "BGM/boss_final_intro.ogg",
+      "bpm": 144,
+      "meter": "4/4",
+      "key": "F minor",
+      "introSeconds": 3.333,
+      "loopSeconds": 80,
+      "introSamples": 147000,
+      "loopSamples": 3528000,
+      "sampleRate": 44100,
+      "seamPcm": {
+        "loop": {
+          "err": 0.02581,
+          "ref": 0.18542,
+          "lo": -14.9
+        },
+        "intro": {
+          "err": 0.02569,
+          "ref": 0.18542,
+          "lo": -8.5
+        }
+      },
+      "bytes": 1219577,
+      "maps": [
+        "D114",
+        "E108"
+      ]
+    }
+  },
+  "jingle": {
+    "jingle_levelup": {
+      "title": "レベルアップ",
+      "file": "BGM/jingle_levelup.ogg",
+      "loop": false,
+      "bpm": 120,
+      "meter": "4/4",
+      "key": "D major",
+      "seconds": 3.8,
+      "samples": 167580,
+      "musicSeconds": 2,
+      "sampleRate": 44100,
+      "bytes": 54831
+    },
+    "jingle_jobup": {
+      "title": "転職",
+      "file": "BGM/jingle_jobup.ogg",
+      "loop": false,
+      "bpm": 132,
+      "meter": "4/4",
+      "key": "Eb major",
+      "seconds": 7.255,
+      "samples": 319925,
+      "musicSeconds": 5.455,
+      "sampleRate": 44100,
+      "bytes": 109514
+    },
+    "jingle_quest": {
+      "title": "クエスト完了",
+      "file": "BGM/jingle_quest.ogg",
+      "loop": false,
+      "bpm": 132,
+      "meter": "4/4",
+      "key": "F major",
+      "seconds": 3.618,
+      "samples": 159562,
+      "musicSeconds": 1.818,
+      "sampleRate": 44100,
+      "bytes": 44347
+    },
+    "jingle_boss_clear": {
+      "title": "ボス撃破",
+      "file": "BGM/jingle_boss_clear.ogg",
+      "loop": false,
+      "bpm": 120,
+      "meter": "4/4",
+      "key": "C major",
+      "seconds": 4.836,
+      "samples": 213249,
+      "musicSeconds": 4,
+      "sampleRate": 44100,
+      "bytes": 73195
+    },
+    "jingle_death": {
+      "title": "倒れた",
+      "file": "BGM/jingle_death.ogg",
+      "loop": false,
+      "bpm": 72,
+      "meter": "4/4",
+      "key": "A minor",
+      "seconds": 4.292,
+      "samples": 189265,
+      "musicSeconds": 3.333,
+      "sampleRate": 44100,
+      "bytes": 51003
+    },
+    "jingle_ship": {
+      "title": "出航",
+      "file": "BGM/jingle_ship.ogg",
+      "loop": false,
+      "bpm": 90,
+      "meter": "4/4",
+      "key": "C major",
+      "seconds": 4.467,
+      "samples": 196980,
+      "musicSeconds": 2.667,
+      "sampleRate": 44100,
+      "bytes": 45572
     }
   },
   "sfx": {
@@ -550,34 +1518,819 @@
       "seconds": 2.4,
       "peakDb": -4,
       "bytes": 22238
+    },
+    "ui_equip": {
+      "file": "SFX/ui_equip.ogg",
+      "desc": "装備する・外す",
+      "seconds": 0.391,
+      "peakDb": -11,
+      "bytes": 7411
+    },
+    "shop_buy": {
+      "file": "SFX/shop_buy.ogg",
+      "desc": "店で買う",
+      "seconds": 1,
+      "peakDb": -8,
+      "bytes": 11207
+    },
+    "shop_sell": {
+      "file": "SFX/shop_sell.ogg",
+      "desc": "店で売る",
+      "seconds": 0.9,
+      "peakDb": -8,
+      "bytes": 10412
+    },
+    "storage": {
+      "file": "SFX/storage.ogg",
+      "desc": "倉庫に預ける・出す",
+      "seconds": 0.461,
+      "peakDb": -9,
+      "bytes": 7831
+    },
+    "craft": {
+      "file": "SFX/craft.ogg",
+      "desc": "製作・精錬",
+      "seconds": 1.4,
+      "peakDb": -7,
+      "bytes": 16199
+    },
+    "chest_open": {
+      "file": "SFX/chest_open.ogg",
+      "desc": "宝箱を開ける",
+      "seconds": 1.4,
+      "peakDb": -7,
+      "bytes": 16922
+    },
+    "scroll_ok": {
+      "file": "SFX/scroll_ok.ogg",
+      "desc": "書（強化）の成功",
+      "seconds": 1.6,
+      "peakDb": -5,
+      "bytes": 18784
+    },
+    "scroll_fail": {
+      "file": "SFX/scroll_fail.ogg",
+      "desc": "書の失敗",
+      "seconds": 1,
+      "peakDb": -7,
+      "bytes": 9673
+    },
+    "scroll_break": {
+      "file": "SFX/scroll_break.ogg",
+      "desc": "書の失敗で装備が壊れる",
+      "seconds": 0.907,
+      "peakDb": -4,
+      "bytes": 12719
+    },
+    "jobup": {
+      "file": "SFX/jobup.ogg",
+      "desc": "転職（ジングルと一緒）",
+      "seconds": 2.4,
+      "peakDb": -4,
+      "bytes": 27660
+    },
+    "death": {
+      "file": "SFX/death.ogg",
+      "desc": "自分が倒れた",
+      "seconds": 1.914,
+      "peakDb": -5,
+      "bytes": 19509
+    },
+    "revive": {
+      "file": "SFX/revive.ogg",
+      "desc": "生き返る",
+      "seconds": 1.8,
+      "peakDb": -6,
+      "bytes": 22381
+    },
+    "quest_fail": {
+      "file": "SFX/quest_fail.ogg",
+      "desc": "クエスト失敗",
+      "seconds": 1.228,
+      "peakDb": -8,
+      "bytes": 11139
+    },
+    "sit": {
+      "file": "SFX/sit.ogg",
+      "desc": "椅子に座る",
+      "seconds": 0.378,
+      "peakDb": -11,
+      "bytes": 6921
+    },
+    "quiz_ok": {
+      "file": "SFX/quiz_ok.ogg",
+      "desc": "クイズ正解",
+      "seconds": 1,
+      "peakDb": -8,
+      "bytes": 11407
+    },
+    "quiz_ng": {
+      "file": "SFX/quiz_ng.ogg",
+      "desc": "クイズ不正解",
+      "seconds": 0.6,
+      "peakDb": -10,
+      "bytes": 10253
+    },
+    "room_enter": {
+      "file": "SFX/room_enter.ogg",
+      "desc": "ボスの間・ダンジョン・試験の部屋に入る",
+      "seconds": 2.322,
+      "peakDb": -5,
+      "bytes": 22755
+    },
+    "room_timeup": {
+      "file": "SFX/room_timeup.ogg",
+      "desc": "制限時間が切れた",
+      "seconds": 1.4,
+      "peakDb": -6,
+      "bytes": 14105
+    },
+    "mech_glass": {
+      "file": "SFX/mech_glass.ogg",
+      "desc": "仕掛け: 時の裂け目・かけら",
+      "seconds": 1,
+      "peakDb": -7,
+      "bytes": 12621
+    },
+    "mech_rock": {
+      "file": "SFX/mech_rock.ogg",
+      "desc": "仕掛け: 岩が砕ける",
+      "seconds": 0.516,
+      "peakDb": -4,
+      "bytes": 9002
+    },
+    "mech_door": {
+      "file": "SFX/mech_door.ogg",
+      "desc": "仕掛け: 扉が開く",
+      "seconds": 1.39,
+      "peakDb": -5,
+      "bytes": 15526
+    },
+    "mech_splash": {
+      "file": "SFX/mech_splash.ogg",
+      "desc": "仕掛け: 水にもぐる・出る",
+      "seconds": 0.699,
+      "peakDb": -6,
+      "bytes": 10460
+    },
+    "ship_horn": {
+      "file": "SFX/ship_horn.ogg",
+      "desc": "船の汽笛",
+      "seconds": 1.65,
+      "peakDb": -4,
+      "bytes": 16428
+    },
+    "buff_end": {
+      "file": "SFX/buff_end.ogg",
+      "desc": "強化が切れる",
+      "seconds": 0.6,
+      "peakDb": -11,
+      "bytes": 8550
+    },
+    "rope": {
+      "file": "SFX/rope.ogg",
+      "desc": "縄の 1 段（上り下りで一定間隔に鳴らす）",
+      "seconds": 0.419,
+      "peakDb": -13,
+      "bytes": 7472
+    },
+    "grab": {
+      "file": "SFX/grab.ogg",
+      "desc": "はしご・縄につかまる",
+      "seconds": 0.318,
+      "peakDb": -11,
+      "bytes": 6547
+    },
+    "jump_down": {
+      "file": "SFX/jump_down.ogg",
+      "desc": "下へ飛び降りる",
+      "seconds": 0.45,
+      "peakDb": -12,
+      "bytes": 8088
+    },
+    "drop": {
+      "file": "SFX/drop.ogg",
+      "desc": "アイテムが落ちる",
+      "seconds": 0.398,
+      "peakDb": -11,
+      "bytes": 7377
+    },
+    "drop_meso": {
+      "file": "SFX/drop_meso.ogg",
+      "desc": "お金が落ちる",
+      "seconds": 0.354,
+      "peakDb": -12,
+      "bytes": 7244
+    },
+    "atk_dagger": {
+      "file": "SFX/atk_dagger.ogg",
+      "desc": "短剣の振り",
+      "seconds": 0.434,
+      "peakDb": -7,
+      "bytes": 7855
+    },
+    "atk_axe": {
+      "file": "SFX/atk_axe.ogg",
+      "desc": "斧の振り",
+      "seconds": 0.63,
+      "peakDb": -5,
+      "bytes": 9652
+    },
+    "atk_blunt": {
+      "file": "SFX/atk_blunt.ogg",
+      "desc": "鈍器の振り",
+      "seconds": 0.645,
+      "peakDb": -5,
+      "bytes": 9734
+    },
+    "atk_spear": {
+      "file": "SFX/atk_spear.ogg",
+      "desc": "槍・矛の突き",
+      "seconds": 0.473,
+      "peakDb": -6,
+      "bytes": 8441
+    },
+    "atk_claw": {
+      "file": "SFX/atk_claw.ogg",
+      "desc": "手裏剣を投げる",
+      "seconds": 0.467,
+      "peakDb": -7,
+      "bytes": 8229
+    },
+    "atk_bow": {
+      "file": "SFX/atk_bow.ogg",
+      "desc": "弓を射る",
+      "seconds": 0.591,
+      "peakDb": -6,
+      "bytes": 9631
+    },
+    "atk_xbow": {
+      "file": "SFX/atk_xbow.ogg",
+      "desc": "弩を射る",
+      "seconds": 0.446,
+      "peakDb": -6,
+      "bytes": 8273
+    },
+    "atk_wand": {
+      "file": "SFX/atk_wand.ogg",
+      "desc": "杖・ワンドの通常攻撃",
+      "seconds": 0.7,
+      "peakDb": -8,
+      "bytes": 8365
+    },
+    "atk_knuckle": {
+      "file": "SFX/atk_knuckle.ogg",
+      "desc": "ナックル（殴る）",
+      "seconds": 0.398,
+      "peakDb": -5,
+      "bytes": 7266
+    },
+    "atk_gun": {
+      "file": "SFX/atk_gun.ogg",
+      "desc": "銃（撃つ）",
+      "seconds": 0.339,
+      "peakDb": -5,
+      "bytes": 7638
+    },
+    "skill_swing": {
+      "file": "SFX/skill_swing.ogg",
+      "desc": "スキル: 斬る",
+      "seconds": 0.661,
+      "peakDb": -4,
+      "bytes": 10099
+    },
+    "skill_stab": {
+      "file": "SFX/skill_stab.ogg",
+      "desc": "スキル: 突く",
+      "seconds": 0.592,
+      "peakDb": -4,
+      "bytes": 9253
+    },
+    "skill_shoot": {
+      "file": "SFX/skill_shoot.ogg",
+      "desc": "スキル: 撃つ・射る",
+      "seconds": 0.607,
+      "peakDb": -4,
+      "bytes": 10077
+    },
+    "skill_throw": {
+      "file": "SFX/skill_throw.ogg",
+      "desc": "スキル: 投げる",
+      "seconds": 0.553,
+      "peakDb": -5,
+      "bytes": 9389
+    },
+    "skill_punch": {
+      "file": "SFX/skill_punch.ogg",
+      "desc": "スキル: 殴る",
+      "seconds": 0.9,
+      "peakDb": -4,
+      "bytes": 11256
+    },
+    "mag_fire": {
+      "file": "SFX/mag_fire.ogg",
+      "desc": "魔法: 火",
+      "seconds": 1.1,
+      "peakDb": -4,
+      "bytes": 15810
+    },
+    "mag_ice": {
+      "file": "SFX/mag_ice.ogg",
+      "desc": "魔法: 氷",
+      "seconds": 1.4,
+      "peakDb": -5,
+      "bytes": 16348
+    },
+    "mag_thunder": {
+      "file": "SFX/mag_thunder.ogg",
+      "desc": "魔法: 雷",
+      "seconds": 0.96,
+      "peakDb": -3,
+      "bytes": 11860
+    },
+    "mag_poison": {
+      "file": "SFX/mag_poison.ogg",
+      "desc": "魔法: 毒",
+      "seconds": 0.88,
+      "peakDb": -6,
+      "bytes": 11236
+    },
+    "mag_holy": {
+      "file": "SFX/mag_holy.ogg",
+      "desc": "魔法: 聖",
+      "seconds": 1.6,
+      "peakDb": -5,
+      "bytes": 19965
+    },
+    "mag_dark": {
+      "file": "SFX/mag_dark.ogg",
+      "desc": "魔法: 闇",
+      "seconds": 1.5,
+      "peakDb": -5,
+      "bytes": 19097
+    },
+    "heal": {
+      "file": "SFX/heal.ogg",
+      "desc": "回復",
+      "seconds": 1.4,
+      "peakDb": -6,
+      "bytes": 15278
+    },
+    "buff": {
+      "file": "SFX/buff.ogg",
+      "desc": "強化がかかる",
+      "seconds": 1.2,
+      "peakDb": -6,
+      "bytes": 14320
+    },
+    "summon": {
+      "file": "SFX/summon.ogg",
+      "desc": "召喚",
+      "seconds": 1.2,
+      "peakDb": -6,
+      "bytes": 14802
+    },
+    "dash": {
+      "file": "SFX/dash.ogg",
+      "desc": "移動スキル（突進・瞬間移動）",
+      "seconds": 0.499,
+      "peakDb": -7,
+      "bytes": 8606
+    },
+    "mob_attack": {
+      "file": "SFX/mob_attack.ogg",
+      "desc": "敵の攻撃",
+      "seconds": 0.474,
+      "peakDb": -7,
+      "bytes": 8276
+    },
+    "mob_cast": {
+      "file": "SFX/mob_cast.ogg",
+      "desc": "敵の技の構え・予兆",
+      "seconds": 1.4,
+      "peakDb": -5,
+      "bytes": 20957
+    },
+    "mob_skill_hit": {
+      "file": "SFX/mob_skill_hit.ogg",
+      "desc": "敵の技が当たる",
+      "seconds": 0.492,
+      "peakDb": -4,
+      "bytes": 8357
+    },
+    "mob_summon": {
+      "file": "SFX/mob_summon.ogg",
+      "desc": "敵が手下を呼ぶ",
+      "seconds": 0.9,
+      "peakDb": -7,
+      "bytes": 11551
+    },
+    "mob_buff": {
+      "file": "SFX/mob_buff.ogg",
+      "desc": "敵の強化",
+      "seconds": 1.117,
+      "peakDb": -6,
+      "bytes": 15323
+    },
+    "dispel": {
+      "file": "SFX/dispel.ogg",
+      "desc": "強化を崩す・消す",
+      "seconds": 0.632,
+      "peakDb": -7,
+      "bytes": 10455
+    },
+    "mob_spawn": {
+      "file": "SFX/mob_spawn.ogg",
+      "desc": "敵が出てくる",
+      "seconds": 0.434,
+      "peakDb": -14,
+      "bytes": 7332
+    },
+    "mob_die_m": {
+      "file": "SFX/mob_die_m.ogg",
+      "desc": "中くらいの敵が倒れる",
+      "seconds": 0.662,
+      "peakDb": -6,
+      "bytes": 8918
+    },
+    "mob_die_l": {
+      "file": "SFX/mob_die_l.ogg",
+      "desc": "大きな敵が倒れる",
+      "seconds": 1.272,
+      "peakDb": -3,
+      "bytes": 18494
+    },
+    "boss_phase": {
+      "file": "SFX/boss_phase.ogg",
+      "desc": "ボスの段階が変わる",
+      "seconds": 2.303,
+      "peakDb": -2,
+      "bytes": 27098
+    },
+    "st_poison": {
+      "file": "SFX/st_poison.ogg",
+      "desc": "状態異常: 毒",
+      "seconds": 0.819,
+      "peakDb": -8,
+      "bytes": 10864
+    },
+    "st_stun": {
+      "file": "SFX/st_stun.ogg",
+      "desc": "状態異常: 気絶",
+      "seconds": 0.9,
+      "peakDb": -7,
+      "bytes": 9129
+    },
+    "st_freeze": {
+      "file": "SFX/st_freeze.ogg",
+      "desc": "状態異常: 凍結",
+      "seconds": 0.541,
+      "peakDb": -7,
+      "bytes": 9385
+    },
+    "st_sleep": {
+      "file": "SFX/st_sleep.ogg",
+      "desc": "状態異常: 睡眠",
+      "seconds": 1.2,
+      "peakDb": -8,
+      "bytes": 12827
+    },
+    "st_curse": {
+      "file": "SFX/st_curse.ogg",
+      "desc": "状態異常: 暗闇・封印・呪い・弱体・鈍足・混乱・変身",
+      "seconds": 1.2,
+      "peakDb": -7,
+      "bytes": 15440
+    },
+    "status_end": {
+      "file": "SFX/status_end.ogg",
+      "desc": "状態異常が時間で切れる",
+      "seconds": 0.6,
+      "peakDb": -12,
+      "bytes": 7705
+    },
+    "status_cure": {
+      "file": "SFX/status_cure.ogg",
+      "desc": "状態異常が治る",
+      "seconds": 0.9,
+      "peakDb": -8,
+      "bytes": 11545
+    },
+    "status_resist": {
+      "file": "SFX/status_resist.ogg",
+      "desc": "状態異常を防いだ",
+      "seconds": 0.516,
+      "peakDb": -9,
+      "bytes": 8035
+    },
+    "pet_adopt": {
+      "file": "SFX/pet_adopt.ogg",
+      "desc": "ペットを迎える",
+      "seconds": 1.4,
+      "peakDb": -7,
+      "bytes": 13041
+    },
+    "pet_feed": {
+      "file": "SFX/pet_feed.ogg",
+      "desc": "ペットにえさ",
+      "seconds": 0.547,
+      "peakDb": -10,
+      "bytes": 9096
+    },
+    "pet_happy": {
+      "file": "SFX/pet_happy.ogg",
+      "desc": "ペットが喜ぶ（親密度アップ・芸の成功）",
+      "seconds": 0.7,
+      "peakDb": -9,
+      "bytes": 7499
+    },
+    "pet_sulk": {
+      "file": "SFX/pet_sulk.ogg",
+      "desc": "ペットがすねる（空腹・芸の失敗）",
+      "seconds": 0.8,
+      "peakDb": -10,
+      "bytes": 11336
     }
   },
-  "bgmFallback": {
-    "boss_final": "boss_big",
-    "camp": "login",
-    "dungeon_temple": "dungeon_deep",
-    "field_crow": "field_swamp",
-    "field_dragon": "field_silva",
-    "field_gard": "field_silva",
-    "field_pom": "field_island",
-    "field_port": "field_island",
-    "field_sea": "field_silva",
-    "field_sky": "town_ceres",
-    "field_snow": "field_silva",
-    "field_star": "town_ceres",
-    "field_toy": "field_swamp",
-    "field_volcano": "boss_mid",
-    "market": "town_beginner",
-    "pq": "field_swamp",
-    "ship": "town_port",
-    "town_crow": "field_swamp",
-    "town_dragon": "town_port",
-    "town_gard": "town_port",
-    "town_hyoga": "town_beginner",
-    "town_marina": "town_ceres",
-    "town_nemuri": "dungeon_deep",
-    "town_pom": "town_beginner",
-    "town_silva": "field_silva",
-    "town_tinkle": "town_beginner"
+  "bgmFallback": {},
+  "events": {
+    "about": "Core の GameEventType → 鳴らす音。sfx の値は SFX の ID（null は鳴らさない）。{byId|byValue|byText: {...}, default} は GameEvent の Id/Value/Text で選ぶ（byId・byText は前方一致。値はさらに入れ子の決め方でもよい）。{rule: \"weapon\"} は weaponSfx、{rule: \"skill\"} は skillSfx（order の順に element → kind → motion → projectile → weapon）、{rule: \"mobSize\"} は mobSize、{rule: \"status\"} は statusSfx（fixed があればその音、onlyPlayer なら主人公 = Value 0 のときだけ）。jingle はジングル（BGM の ID。jingle の欄）を BGM の上に鳴らす。はしご・縄の上り下りは climb の音を intervalSec ごとに。敵の動き（Motion）が attack1 / skill1 になったら mobMotion の音。同じ音が同じフレームに何度も来たら 1 回にまとめる（MobSpawned・MobHit・DropSpawned は特に）。",
+    "sfx": {
+      "Jump": "jump",
+      "Land": "land",
+      "Grab": "grab",
+      "DownJump": "jump_down",
+      "RopeJump": "jump",
+      "Hurt": "hurt",
+      "AttackStart": {
+        "rule": "weapon",
+        "default": "atk_sword1"
+      },
+      "AttackHit": null,
+      "SkillUsed": {
+        "rule": "skill"
+      },
+      "SkillFailed": "ui_error",
+      "MobHit": {
+        "byText": {
+          "status:": null,
+          "pull": "grab",
+          "steal": "coin",
+          "dispel": "dispel",
+          "debuff": "st_curse"
+        },
+        "default": "hit",
+        "note": "Text が status:〜 のときは状態異常の音に任せる。同じフレームのダメージの数字が会心なら hit の代わりに crit"
+      },
+      "MobDied": {
+        "rule": "mobSize"
+      },
+      "MobSpawned": "mob_spawn",
+      "DropSpawned": "drop",
+      "ItemPicked": "pickup",
+      "MesoPicked": "coin",
+      "InventoryFull": "ui_error",
+      "ExpGained": null,
+      "LevelUp": "levelup",
+      "ApChanged": "ui_click",
+      "SpChanged": "ui_click",
+      "JobAdvanced": "jobup",
+      "BuffStarted": "buff",
+      "BuffEnded": "buff_end",
+      "Healed": "heal",
+      "QuestStarted": "quest_accept",
+      "QuestProgress": null,
+      "QuestCompleted": "quest_done",
+      "QuestFailed": "quest_fail",
+      "MapChanged": null,
+      "PortalUsed": "portal",
+      "Travel": {
+        "byValue": {
+          "0": "ship_horn"
+        },
+        "default": "portal",
+        "note": "船（Value なし）は汽笛、タクシー（Value = 料金）はポータルの音"
+      },
+      "ItemUsed": {
+        "byId": {
+          "use.return.": "portal",
+          "use.master_book.": {
+            "byValue": {
+              "0": "scroll_fail",
+              "1": "scroll_ok"
+            },
+            "default": "scroll_fail"
+          }
+        },
+        "default": "potion"
+      },
+      "ItemBought": "shop_buy",
+      "ItemSold": "shop_sell",
+      "EquipChanged": "ui_equip",
+      "ScrollResult": {
+        "byValue": {
+          "0": "scroll_ok",
+          "1": "scroll_fail",
+          "2": "scroll_break"
+        },
+        "default": "ui_error"
+      },
+      "Died": "death",
+      "Revived": "revive",
+      "Saved": null,
+      "SaveFailed": "ui_error",
+      "Message": null,
+      "StatusApplied": {
+        "rule": "status",
+        "default": "st_curse"
+      },
+      "StatusEnded": {
+        "rule": "status",
+        "fixed": "status_end",
+        "onlyPlayer": true
+      },
+      "StatusCured": "status_cure",
+      "StatusResisted": "status_resist",
+      "MobCast": "mob_cast",
+      "MobSkillHit": "mob_skill_hit",
+      "MobSummoned": "mob_summon",
+      "BossPhase": "boss_phase",
+      "StorageChanged": "storage",
+      "Crafted": "craft",
+      "ChestOpened": "chest_open",
+      "SatDown": "sit",
+      "StoodUp": null,
+      "PetAdopted": "pet_adopt",
+      "PetFed": "pet_feed",
+      "PetCloseness": "pet_happy",
+      "PetTrick": {
+        "byValue": {
+          "0": "pet_sulk",
+          "1": "pet_happy"
+        },
+        "default": "pet_happy"
+      },
+      "PetHungry": "pet_sulk",
+      "PetUsedPotion": "potion",
+      "RoomEntered": "room_enter",
+      "RoomTimeUp": "room_timeup",
+      "RoomFailed": "quest_fail",
+      "DungeonCleared": null,
+      "BossKilled": null,
+      "QuizQuestion": "ui_open",
+      "QuizAnswered": {
+        "byValue": {
+          "0": "quiz_ng",
+          "1": "quiz_ok"
+        },
+        "default": "quiz_ng"
+      },
+      "QuizCleared": "quest_done",
+      "MobBuffed": "mob_buff",
+      "MobBuffEnded": "buff_end",
+      "MobDispelled": "dispel",
+      "Mechanic": {
+        "byId": {
+          "rift_open": "mech_glass",
+          "rift_filled": "mech_glass",
+          "rift_reset": "mob_cast",
+          "rift_exposed": "mech_glass",
+          "rift_guarded": "status_resist",
+          "shard_got": "pickup",
+          "submerge": "mech_splash",
+          "surface": "mech_splash",
+          "rock_broken": "mech_rock",
+          "clones": "summon",
+          "shuffle": "dash",
+          "pulled": "grab",
+          "decoy_hit": "hit",
+          "decoy_broken": "mech_rock",
+          "ship_broken": "mech_rock",
+          "door_open": "mech_door",
+          "door_used": "portal",
+          "zone_start": "mag_poison"
+        },
+        "default": "mob_cast"
+      }
+    },
+    "jingle": {
+      "LevelUp": "jingle_levelup",
+      "JobAdvanced": "jingle_jobup",
+      "QuestCompleted": "jingle_quest",
+      "BossKilled": "jingle_boss_clear",
+      "DungeonCleared": "jingle_boss_clear",
+      "Died": "jingle_death",
+      "Travel": {
+        "byValue": {
+          "0": "jingle_ship"
+        },
+        "default": null
+      }
+    },
+    "weaponSfx": {
+      "片手剣": "atk_sword1",
+      "両手剣": "atk_sword2",
+      "片手斧": "atk_axe",
+      "両手斧": "atk_axe",
+      "片手鈍器": "atk_blunt",
+      "両手鈍器": "atk_blunt",
+      "槍": "atk_spear",
+      "矛": "atk_spear",
+      "短剣": "atk_dagger",
+      "クロー": "atk_claw",
+      "弓": "atk_bow",
+      "クロスボウ": "atk_xbow",
+      "ナックル": "atk_knuckle",
+      "銃": "atk_gun",
+      "ワンド": "atk_wand",
+      "スタッフ": "atk_wand",
+      "素手": "atk_knuckle"
+    },
+    "skillSfx": {
+      "order": [
+        "element",
+        "kind",
+        "motion",
+        "projectile",
+        "weapon"
+      ],
+      "element": {
+        "fire": "mag_fire",
+        "ice": "mag_ice",
+        "lightning": "mag_thunder",
+        "poison": "mag_poison",
+        "holy": "mag_holy",
+        "dark": "mag_dark"
+      },
+      "kind": {
+        "buff": "buff",
+        "heal": "heal",
+        "summon": "summon",
+        "movement": "dash"
+      },
+      "motion": {
+        "swing": "skill_swing",
+        "stab": "skill_stab",
+        "shoot": "skill_shoot",
+        "throw": "skill_throw",
+        "punch": "skill_punch",
+        "cast": "mag_cast"
+      },
+      "projectile": {
+        "arrow": "skill_shoot",
+        "bullet": "skill_shoot",
+        "star": "skill_throw",
+        "magic": "mag_cast",
+        "pebble": "atk_claw"
+      },
+      "weapon": {
+        "片手剣": "skill_swing",
+        "両手剣": "skill_swing",
+        "片手斧": "skill_swing",
+        "両手斧": "skill_swing",
+        "片手鈍器": "skill_swing",
+        "両手鈍器": "skill_swing",
+        "槍": "skill_stab",
+        "矛": "skill_stab",
+        "短剣": "skill_stab",
+        "クロー": "skill_throw",
+        "弓": "skill_shoot",
+        "クロスボウ": "skill_shoot",
+        "ナックル": "skill_punch",
+        "銃": "skill_shoot",
+        "ワンド": "mag_cast",
+        "スタッフ": "mag_cast",
+        "素手": "skill_punch"
+      },
+      "default": "skill_swing"
+    },
+    "statusSfx": {
+      "poison": "st_poison",
+      "stun": "st_stun",
+      "freeze": "st_freeze",
+      "sleep": "st_sleep",
+      "darkness": "st_curse",
+      "seal": "st_curse",
+      "curse": "st_curse",
+      "weak": "st_curse",
+      "slow": "st_curse",
+      "polymorph": "st_curse",
+      "confuse": "st_curse"
+    },
+    "mobSize": {
+      "large": "mob_die_l",
+      "medium": "mob_die_m",
+      "small": "mob_die_s",
+      "mediumHeight": 70
+    },
+    "climb": {
+      "ladder": "ladder",
+      "rope": "rope",
+      "intervalSec": 0.3
+    },
+    "mobMotion": {
+      "attack1": "mob_attack",
+      "skill1": "mob_attack"
+    }
   }
 }

@@ -3,6 +3,7 @@
 //   playBgm('town_beginner');   // 同じ曲なら何もしない。違う曲なら前の曲を消してから鳴らす
 //   stopBgm();                  // ゆっくり消す
 //   playSfx('ui_click');
+//   playJingle('jingle_levelup'); // くり返さない短い曲。鳴っている間は BGM を小さくする
 //   setVolume({ bgm: 0.8, sfx: 0.6 });   // 0〜1。端末に覚えておく
 // ブラウザの自動再生の制限: 最初のキー・クリック・タッチまで音は出せない。それより前に
 // playBgm を呼んだときは「鳴らしたい曲」として覚えておき、最初の操作のときに鳴らし始める。
@@ -70,6 +71,27 @@ export function playSfx(id) {
   return playSfxOn(state.ctx, state.sfxG, id);
 }
 
+export function playJingle(id) {
+  if (!state.unlocked || !state.ctx) return false;
+  const song = SONGS[id];
+  if (!song?.jingle) return false;
+  const ctx = state.ctx;
+  if (!state.jinglePlayer) state.jinglePlayer = new BgmPlayer(ctx, state.bgmG);
+  state.jinglePlayer.stop(0.05);
+  state.jinglePlayer.play(song, { fadeIn: 0.01 });
+  // 鳴っている間は今の曲を小さく（終わったらゆっくり戻す）
+  const len = (song._compiled || {}).loop?.len || 3;
+  const g = state.player?.cur?.B.bus.gain;
+  if (g) {
+    const t = ctx.currentTime;
+    g.cancelScheduledValues(t); g.setValueAtTime(g.value, t);
+    g.linearRampToValueAtTime(0.25, t + 0.15);
+    g.setValueAtTime(0.25, t + len + 0.3);
+    g.linearRampToValueAtTime(1, t + len + 1.5);
+  }
+  return true;
+}
+
 export function setVolume({ bgm, sfx } = {}) {
   if (bgm != null) state.vol.bgm = Math.max(0, Math.min(1, +bgm));
   if (sfx != null) state.vol.sfx = Math.max(0, Math.min(1, +sfx));
@@ -83,7 +105,8 @@ export function setVolume({ bgm, sfx } = {}) {
 }
 export const getVolume = () => ({ ...state.vol });
 export const currentBgm = () => state.curBgm || state.wantBgm;
-export const BGM_IDS = Object.keys(SONGS);
+export const BGM_IDS = Object.keys(SONGS).filter((k) => !SONGS[k].jingle);
+export const JINGLE_IDS = Object.keys(SONGS).filter((k) => SONGS[k].jingle);
 export const SFX_IDS = Object.keys(SFX);
 
 // 最初の操作で音を出せるようにする

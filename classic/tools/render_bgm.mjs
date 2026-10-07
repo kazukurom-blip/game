@@ -13,6 +13,7 @@
 //   classic/assets/audio/preview/<id>.mp3     試聴用 30 秒（イントロから、最後 2 秒で消える）
 //   classic/assets/audio/preview/<id>.wav     イントロ＋ループ 1 周（ループ位置の smpl つき。git には入れない）
 //   classic-unity/Audio/audio_manifest.json  の bgm の欄（render_sfx.mjs と同じファイルを更新する）
+// ジングル（song.jingle）はくり返さないので、BGM/<id>.ogg に「1 回＋残響」をそのまま書き、manifest の jingle の欄へ。
 
 import fs from 'node:fs';
 import os from 'node:os';
@@ -40,15 +41,62 @@ function encodeOgg(chs, sr, out, tags) {
   return 1;
 }
 
+// ジングル（くり返さない短い曲）: 1 回＋残響を書き出し、後ろの無音を切って最後をなめらかに消す。
+//   大きさは最大 -3dBFS、RMS は -15dBFS まで。Unity 用 ogg と試聴 mp3（全部）を作る
+async function renderJingle(page, takeUpload, id, song) {
+  const t0 = Date.now();
+  const info = await page.evaluate(async (sid) => {
+    const { renderSong } = await import('/classic/src/audio/bgm.js');
+    const { SONGS: all } = await import('/classic/src/audio/songs/index.js');
+    const r = await renderSong(all[sid], { tail: 3 });
+    const f = new Float32Array(r.length * 2);
+    for (let i = 0; i < r.length; i++) { f[i * 2] = r.left[i]; f[i * 2 + 1] = r.right[i]; }
+    await fetch('/__upload', { method: 'POST', body: f.buffer });
+    return { sr: r.sampleRate, loopLen: r.loopLen };
+  }, id);
+  const chs = splitStereo(takeUpload());
+  const sr = info.sr;
+  const pk0 = peakOf(chs);
+  if (pk0 < 1e-4) throw new Error(`${id}: 音が出ていない`);
+  // 後ろの残響は -40dB まで下がったところ、長くても曲の終わり＋1.8 秒で切る
+  const th = pk0 * undb(-40);
+  let end = chs[0].length - 1;
+  while (end > 0 && Math.abs(chs[0][end]) < th && Math.abs(chs[1][end]) < th) end--;
+  end = Math.min(chs[0].length, end + Math.round(sr * 0.05), Math.round(sr * (info.loopLen + 1.8)));
+  const fo = Math.round(sr * 0.4);
+  const out = chs.map((c) => {
+    const d = c.slice(0, end);
+    for (let j = 0; j < fo && j < d.length; j++) { const x = 1 - (j + 1) / fo; d[d.length - fo + j] *= x * x; }
+    d[0] = 0;
+    return d;
+  });
+  const g = Math.min(undb(-3) / peakOf(out), undb(-15) / rmsOf(out));
+  for (const c of out) for (let i = 0; i < c.length; i++) c[i] *= g;
+  const tags = ['-metadata', `title=${song.title}`];
+  const ogg = path.join(UNITY_DIR, `${id}.ogg`);
+  encodeOgg(out, sr, ogg, tags);
+  const wav = path.join(PREVIEW_DIR, `${id}.wav`);
+  fs.writeFileSync(wav, wavFile(out, sr));
+  const mp3 = path.join(PREVIEW_DIR, `${id}.mp3`);
+  ffmpeg(['-i', wav, '-c:a', 'libmp3lame', '-b:a', '128k', ...tags, mp3]);
+  const n = out[0].length;
+  console.log(`${id}「${song.title}」 ${((Date.now() - t0) / 1000).toFixed(1)} 秒で書き出し / ジングル ${(n / sr).toFixed(2)} 秒（曲 ${info.loopLen.toFixed(2)} 秒＋残響） 最大 ${db(peakOf(out)).toFixed(2)} dBFS → ${rel(ogg)} (${(fs.statSync(ogg).size / 1e3).toFixed(1)} KB)`);
+  return {
+    title: song.title, file: `BGM/${id}.ogg`, loop: false, bpm: song.bpm, meter: song.meter || `${song.beatsPerBar}/4`, key: song.key,
+    seconds: +(n / sr).toFixed(3), samples: n, musicSeconds: +info.loopLen.toFixed(3), sampleRate: sr, bytes: fs.statSync(ogg).size,
+  };
+}
+
 async function main() {
   fs.mkdirSync(UNITY_DIR, { recursive: true });
   fs.mkdirSync(PREVIEW_DIR, { recursive: true });
-  const results = {};
+  const results = {}, jingles = {};
   await withBrowser(async (page, takeUpload) => {
     for (const id of IDS) {
       const song = SONGS[id];
       if (!song) throw new Error(`曲が無い: ${id}`);
       const t0 = Date.now();
+      if (song.jingle) { jingles[id] = await renderJingle(page, takeUpload, id, song); continue; }
       const info = await page.evaluate(async (sid) => {
         const { renderSong } = await import('/classic/src/audio/bgm.js');
         const { SONGS: all } = await import('/classic/src/audio/songs/index.js');
@@ -118,7 +166,7 @@ async function main() {
       console.log(`  → ${rel(loopOgg)} (${mb(loopOgg)} MB)${intro ? `, ${rel(introOgg)} (${mb(introOgg)} MB)` : ''}, ${rel(mp3)} (${mb(mp3)} MB)`);
     }
   });
-  updateManifest({ bgm: results });
+  updateManifest({ bgm: results, jingle: jingles });
   fs.rmSync(TMP, { recursive: true, force: true });
 }
 

@@ -58,6 +58,7 @@ export class BgmPlayer {
       for (let guard = 0; guard < 4; guard++) {
         st.i = scheduleRange(B, st.seg.events, st.base, st.i, to);
         if (st.i < st.seg.events.length) break;
+        if (song.jingle && st.seg === comp.loop) { clearInterval(st.timer); st.timer = null; break; } // ジングルはくり返さない
         if (st.base + st.seg.len > to) break;
         st.base += st.seg.len; st.seg = comp.loop; st.i = 0; // 次はループ部分
       }
@@ -86,20 +87,22 @@ export class BgmPlayer {
 // 返り値: { sampleRate, introLen, loopLen, length, left, right }
 // 書き出す側（tools/render_bgm.mjs）で 2 周目のループ [introLen+loopLen, introLen+2*loopLen) を
 // ループ部分に使う。2 周目の頭には 1 周目の最後の残響が入っているので、そこをくり返してもつなぎ目が出ない。
-export async function renderSong(song, { sampleRate = 44100, level = 0.9 } = {}) {
+// song.jingle のときは「ループ 1 回＋残響 tail 秒」だけを書き出す（loopLen はジングルの長さ）。
+export async function renderSong(song, { sampleRate = 44100, level = 0.9, tail = 2.5 } = {}) {
   const comp = compileSong(song);
+  const once = !!song.jingle;
   // イントロとループの長さをサンプルの整数倍にそろえる（1 サンプル未満のずれ。書き出しで切る位置をはっきりさせる）。
   // なお Chrome では 1 周目と 2 周目で音の始まりが数サンプルずれることがあるので、書き出す側でつなぎ目をなめらかにする
   const I = Math.round(comp.intro.len * sampleRate) / sampleRate, L = Math.round(comp.loop.len * sampleRate) / sampleRate;
   const OAC = globalThis.OfflineAudioContext || globalThis.webkitOfflineAudioContext;
-  const ctx = new OAC(2, Math.ceil((I + 2 * L) * sampleRate) + 16, sampleRate);
+  const ctx = new OAC(2, Math.ceil((once ? I + L + tail : I + 2 * L) * sampleRate) + 16, sampleRate);
   const master = ctx.createGain(); master.gain.value = level;
   const lim = ctx.createDynamicsCompressor();
   lim.threshold.value = -8; lim.knee.value = 6; lim.ratio.value = 4; lim.attack.value = 0.005; lim.release.value = 0.2;
   master.connect(lim); lim.connect(ctx.destination);
   const B = makeSongBus(ctx, song, master);
   const all = [...comp.intro.events.map((ev) => [ev.t, ev])];
-  for (const k of [0, 1]) for (const ev of comp.loop.events) all.push([I + k * L + ev.t, ev]);
+  for (const k of once ? [0] : [0, 1]) for (const ev of comp.loop.events) all.push([I + k * L + ev.t, ev]);
   all.sort((a, b) => a[0] - b[0]);
   // 全部を先に予約すると音の部品が多すぎて遅くなるので、CHUNK 秒ごとに止めて次の分を予約する
   const CHUNK = 2;
