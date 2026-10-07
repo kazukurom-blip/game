@@ -968,6 +968,8 @@ const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.
 export function previewPlan(files, root, cat) {
   const man = JSON.parse(fs.readFileSync(path.join(root, 'assets', 'sprites', 'manifest.json'), 'utf8'));
   const rig = man.rig && typeof man.rig === 'object' ? JSON.parse(JSON.stringify(man.rig)) : { enabled: true, fit: false, layout: 2, defaultWear: false };
+  // 素体だけの納品（服が無い）は、服の代わり（defaultWear）を着せずに素体そのものを見せる
+  if (files.some((f) => /^rig\/body_[fm]\.png$/.test(f.rel)) && !files.some((f) => /^rig\/(top|bottom|shoes)\//.test(f.rel))) rig.defaultWear = false;
   const parts = rig.parts && typeof rig.parts === 'object' && !Array.isArray(rig.parts) ? rig.parts : {};
   const items = { f: { top: [], bottom: [], shoes: [], hat: [], accessory: [] }, m: { top: [], bottom: [], shoes: [], hat: [], accessory: [] } };
   const weapons = [];
