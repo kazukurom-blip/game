@@ -15,13 +15,13 @@ classic-unity/
     Combat/    Formulas（STATS.md の式）・DamageCalc（乱数入りの 1 回のダメージ）・Attack（振りの時間・当たる瞬間・範囲・数字）
     Character/ Curves（経験値の表・敵の基礎値）・Jobs・CharacterState（Lv/AP/SP/HP/MP/転職/死）・StatCalc（最終の能力）
     Skills/    SkillDef（データの形）・SkillBook（SP・前提・待ち時間）・Buffs（強化・召喚）
-    Mobs/      MobDef・Mob/MobAI（動き）・MobSkill（技・ボスの段階の形）・MobCombat（技を選ぶ・予兆・段階・呼び出し）・DropRoller（ドロップ）
+    Mobs/      MobDef・Mob/MobAI（動き）・MobSkill（技・ボスの段階の形）・MobCombat（技を選ぶ・予兆・段階・呼び出し）・MobBuffs（敵の強化）・BossMechanics（ボスの仕掛け）・DropRoller（ドロップ）
     Status/    StatusSet（かかっている状態異常）・StatusSystem（かける・治す・時間を進める公開の入口）
     Items/     ItemDef・StatBlock・Inventory（5 タブ）・Equipment・ScrollSystem
     Quests/    QuestDef・QuestLog
     World/     MapData（マップの JSON の形）・MapInstance（敵・落ちている物・湧き直し）
     Save/      SaveData・SaveSerializer・SaveMigrations・SaveStore（壊れない書き方）・FileSystem
-    Game/      GameSession（全部をまとめる。Unity が持つのはこれ 1 つ）・PlayerInput・GameEvents・AvatarPose
+    Game/      GameSession（全部をまとめる。Unity が持つのはこれ 1 つ。.Combat/.Skills/.Status/.Items/.Quests/.Mechanics に分けてある）・PlayerInput・GameEvents・AvatarPose
     Data/      GameData（JSON を読む）・IDataSource
     Util/      Json（小さな読み書き）・Rng（決まった乱数）・Expr（スキルの式）
   Data/                     ← ゲームのデータ（JSON）。Unity では Assets/Resources/Lumina/ へコピー
@@ -67,8 +67,9 @@ session.Update(Time.deltaTime, input);     // 中で 1/60 秒の固定の更新�
 session.Body          // 足元の位置 X, Y（px・y は下が正）、State、Facing、InvT（無敵）
 session.PrevX/PrevY + session.Stepper.Alpha   // 描く時の補間
 session.Pose          // Motion（stand1/walk1/jump/ladder/rope/alert/swingO1/prone/dead）・Frame・FacingRight・Visible（点滅）
-session.Map           // Data（マップの JSON）・Mobs（敵: X, Y, HopY, Facing, Motion, Hp, FadeOut, Uid, Hidden, StatusIcons）・Drops（落ちている物）
-                      // Projectiles（敵の飛び道具）・Hazards（敵の技の予兆と当たる所）・BossBar（ボスの HP バーの値。いなければ null）
+session.Map           // Data（マップの JSON）・Mobs（敵: X, Y, HopY, Facing, Motion, Hp, MaxHp, FadeOut, Uid, Hidden, StatusIcons, BuffIcons, FormId, CloneOf/HasShadow, Charmed, Mechanic/MechanicKind）・Drops（落ちている物）
+                      // Projectiles（敵の飛び道具）・Hazards（敵の技の予兆と当たる所・SuckW・SafeZones）・BossBar（ボスの HP バーの値。いなければ null）・Rifts（時の裂け目）
+session.Decoy / Door / Zones / ShipHp   // 身代わり人形・秘術の扉・毒の霧・乗船の船の HP（4-4）
 session.Status        // 主人公の状態異常（Active で一覧、Pose.StatusIcons にビット）
 session.Out.Events    // 起きたこと（音・エフェクト・メッセージ）。次の Update の始めに空になる
 session.Out.Damage    // ダメージの数字（Kind・Value・X/Y・Stack・Delay）
@@ -120,14 +121,22 @@ session.Character / Stats / Inventory / Equipment / Skills / Buffs / Status / Qu
 | 強化 | buff | 加速（+2 段階）・神速（重なる）・闘気・付与（属性・同時に 1 つ）・全能力の加護・体力強化・魂の矢・影分身・お金の盾・煙玉・復活・変身・乗船 |
 | 回復 | heal | ひと休み・ヒール（不死の敵に聖）・気の回復（LUK・DEX）・気合いの回復（MP） |
 | パッシブ | passive | 熟練（最小ダメージ・命中）・追撃・闘気の極み・不屈・属性の増幅（MP も増える）・急所狙い・必殺の一撃・気合い・影の衣・暗黒の力 |
-| 召喚 | summon | 闇の獣（回復）・火の精／銀の鷹など（interval 秒ごとに近くの敵へ）・タコの砲台（その場に置く）・身代わり人形（形だけ） |
+| 召喚 | summon | 闇の獣（回復）・火の精／銀の鷹など（interval 秒ごとに近くの敵へ）・タコの砲台（その場に置く）・身代わり人形（敵を引きつける） |
 
 - 決まり: SP はそのスキルの段階の財布から・前提（`prereqs`、「または」は `prereqAny`）・MP/HP（`hpPct` は最大 HP の %）・お金（`meso`）・待ち時間（`cooldown`。4 次の一部と気合いの回復だけ）・効果の時間（`buff.sec`）・使える武器（`weapons`。2 次以降の攻撃は職の武器だけ）・弾を使う（`ammo`、1 回ごとに 1 つ）・射程のパッシブがのる（`rangeBonus`）。縄・はしごの上では使えない。
 - 動きの種類（`motion`: swing/stab/shoot/throw/cast/punch）→ `Pose.AttackKind`。無ければ武器（剣=振り・槍と短剣=突き・弓と銃=撃ち・クロー=投げ・ナックル=殴り）、魔法は詠唱。
 - 1 回の時間 = 攻撃速度の時間 × `delay` ＋ 詠唱 `cast`（流星群・吹雪・天の裁き 1.5 秒）・溜め `charge`（溜めの大魔法 2 秒、溜めきった扱いで ×2）。当たる瞬間は詠唱の後の振りの 300/800。突進（`dash`・`dashTime`）は攻撃中も前へ進む。
 - 攻撃スキルのキーを押しっぱなし（`PlayerInput.SkillHeld`）で、終わるたびにくり返す。
 - 弓・クロスボウで矢が無い時のふつうの攻撃は**弱い殴り**（振り・武器係数 1.4・矢は減らない）。クロー・銃はお知らせだけ。
-- 状態異常: スキルのデータの `status`（種類・確率・秒・強さ）を `StatusSystem` へ渡す（poison/burn → 毒、stun/bind → 気絶、darkness・seal・freeze）。slow・polymorph・charm は `StatusKind` に無いので `MobStatusHook` とお知らせだけ。意志の力・解除は `CureStatus`、聖なる盾の間は受けない。
+- 状態異常: スキルのデータの `status`（種類・確率・秒・強さ）を `StatusSystem` へ渡す（poison/burn → 毒、stun/bind → 気絶、darkness・seal・freeze、slow → 遅延、polymorph → 変化（コロ貝 `M001` の姿）、charm → 錯乱（錯乱弾。敵は主人公の味方になる））。意志の力・解除は `CureStatus`、聖なる盾の間は受けない。
+- **敵の強化を消す**: 鎧崩し（`dispel.what` = def: 防御・物理の反射）・魔法崩し（magic: 魔法攻撃・魔防・魔法の反射）・力崩し（atk）・解除（all・まわりの敵全部）。確率で `mob.Buffs` から消して `MobDispelled`。
+- **錯乱弾で操った敵**（`mob.Charmed`）: 主人公に当たらない・技を使わない・主人公の攻撃の的にならない。近くの敵（400 px）を追って 1 秒ごとに体当たり（攻撃力 × 0.85〜1 − 防御 × 0.5）。倒した分の経験値は主人公に入る。
+- **身代わり人形**: 主人公の前 30 px に置く（そのマップだけ）。HP は最大 HP の 50+5x%。450 px の中の敵は人形を追い（技も人形をねらう）、体当たり（0.5 秒ごと）・飛び道具・予兆の技で HP が減り、0 で消える。`session.Decoy`。
+- **秘術の扉**: 町へ行き、町の着いた所に扉。扉の前で ↑ → 使った場所へ、使った場所の扉で ↑ → 町へ（効果の 30+5x 秒の間、何度でも）。`session.Door`。
+- **乗船**: 船の HP（`shipHp` = 2000+200x）。受けたダメージで減り、0 で降りる（`ship_broken`）。`session.ShipHp / ShipMaxHp`。
+- **隠れ足**: 空中でジャンプキーを押している間、落ちる速さを 120 px/秒まで（`PlayerBody.SlowFall`）。
+- **毒の霧**: 当たった範囲を 6 秒（`zone`）置いておき、1 秒ごとに中の敵（最大 6 体）に毒をかけ直す（後から入った敵にも）。`session.Zones`。
+- **クローの熟練**: 投げ星の 1 枠に重なる数 +10x（`Inventory.StackOf`）。**調合上手**: 薬の回復量 +(10+x)%・強化の薬の時間 +x%。**MP 吸収**: 敵の MP（`mob.CurMp`）を減らし、無くなったら吸えない。**星の連投**: データで `chainable` の付いたスキル（二つ星投げ）だけ。
 - 効き目の合計は `Stats.Mods`（`SkillMods`）。闘気の玉は `session.ComboOrbs`、気合いは `session.Energy`（100 で満タン → 60 秒の強化）。
 
 ### 4-5. 敵（MONSTERS.md・FEEL.md 9 章）
@@ -154,16 +163,32 @@ session.Character / Stats / Inventory / Equipment / Skills / Buffs / Status / Qu
 | summon | 手下を呼ぶ（mobs を順に count 体、生きている手下は max まで。呼んだ手下は湧き直しの数に入らない・すぐ向かってくる） | — |
 | heal | 自分の HP を pct% 治す | — |
 | dive | 消えて（`Hidden`・当たらない）、主人公の所に予兆 → 出てきて当たる | `Hazards` |
+| buff | 自分（`allies` なら w 幅の中の仲間も）を強化（`buff`: atk・matk・def・mdef・speed は +%、reflect・magicReflect は受けたダメージの % を返す、sec） | `mob.BuffIcons` |
 
 - 技の無い敵は「攻撃」の列から自動（遠 = 3 秒ごとの飛び道具、魔 = 足元に予兆の魔法）。体当たりは今までどおり。`touchStatus` で触れた時の状態異常（フグトゲの毒・クラゲンの気絶など）。
 - 技を使うのは: ボス、攻撃されて追っている間、Lv20 以上の歩く敵、動かない敵。待ち時間は技ごと（ボスは入った直後 30%）、技と技の間 1 秒。気絶・凍結・眠りで構えは消える（予兆も消える）。封印の間は技を使わない。闇隠れ中は狙わない・当たらない。
-- 当たると `HitPlayer`（ダメージは攻撃力 × pct%。魔法は避けられない。pct 0 は状態異常だけで、無敵の間もかかる）。お知らせ: `MobCast`（構え・予兆の始まり）・`MobSkillHit`・`MobSummoned`。
+- 当たると `HitPlayer`（ダメージは攻撃力 × pct%。魔法は避けられない。pct 0 は状態異常だけで、無敵の間もかかる）。お知らせ: `MobCast`（構え・予兆の始まり）・`MobSkillHit`・`MobSummoned`・`MobBuffed`/`MobBuffEnded`。
+- 技の追加の項目: `pull`（当たったら敵の方へ px 引き寄せる。ツタ）・`suck: { w, speed }`（予兆の間、w 幅の中の主人公を中心へ吸い込む。当たるのは中心の w×h。渦潮）・`shelter: { at, w }`（マップの横幅の割合の所の w 幅にいれば当たらない。全滅の炎の盾の陰。`Hazard.SafeZones`）。主人公を動かすのは `PlayerPhysics.Shove`（地面では足場にそって・壁は越えない）。
+- **敵の強化**（`Mobs/MobBuffs.cs`）: 攻撃・魔法攻撃・防御・魔防・速さ（+%）と反射（物理・魔法）。同じ種類は強い方・長い方。反射は主人公が与えたダメージの % を返す（1 回で最大 HP の 20% まで・HP 1 で止まる。似）。データ: ガイコツ大将（骨の守り: 防御）・黒角の魔獣（怒りの咆哮: 攻撃・速さ、怒りの段階）・雲の魔女（雲の衣: 魔防・魔法の反射）・神殿の守護神（光の鏡: 反射・防御、金と光の段階）・封印の司祭（守りの祈り: まわりの仲間の防御・魔防）。
 
 #### ボス（`MobDef.Boss`）
 
 - `boss.phases`: HP がその割合以下で次の段階（戻らない）。段階ごとに `atkMul`・`defMul`・`speedMul`・`rate`（技の速さ）・`elements`（弱点の上書き）・`healPct`（始まった時に治す）・`summon`（始まった時に呼ぶ）。技は `phases` で使う段階を決める。お知らせ `BossPhase`（Value = 段階、Text = 名前）。
 - 地域のボス 12 体・大ボス 3 体・ダンジョンの主 7 体にデータあり（MONSTERS.md 5 章をもとに。大ボスの部位は段階にまとめた簡略版）。データの無いボスも 1 段階で HP バーは出る。
-- **ボスの HP バー**: `session.Map.BossBar`（`BossBarInfo`: Name・Lv・Hp/MaxHp・Ratio・Phase/PhaseCount/PhaseName・段階の中の残り PhaseRatio・状態異常・大技の詠唱 Casting/CastName/CastProgress）。色は Phase で変える。
+- **ボスの HP バー**: `session.Map.BossBar`（`BossBarInfo`: Name・Lv・Hp/MaxHp・Ratio・Phase/PhaseCount/PhaseName・段階の中の残り PhaseRatio・状態異常・強化 BuffIcons・大技の詠唱 Casting/CastName/CastProgress・Guarded（時の裂け目）・Submerged/SubmergeProgress/RocksLeft・Clones）。色は Phase で変える。分身はバーに出ない。
+
+#### ボスの仕掛け（`Mobs/BossMechanics.cs`・データは mob_skills.mjs の `boss`）
+
+| 仕掛け | データ | 動き | Unity へ出す値 |
+|---|---|---|---|
+| 分身（雲の魔女・HP 50%） | 段階の `clones: { count: 2, hpPct: 2, shuffle: 8 }` | 本物と同じ姿の分身（HP は最大 HP の 2%・攻撃力半分・呼び出し/回復/強化はしない）。8 秒ごとに本物と分身の場所が入れ替わる。本物が倒れると消える | `mob.CloneOf`・`HasShadow`（本物だけ影）・`BossBar.Clones`・`Mechanic "clones"/"shuffle"` |
+| 時の裂け目（時計塔の魔物・1 段目） | `boss.rifts: { phase: 0, count: 3, mob: M149, limit: 60, guard: 0.1, expose: 20 }` | 床に裂け目 3 つ。本体の受けるダメージ × 0.1。部屋の時計虫（M149）を倒すと時のかけら。裂け目の上で調べるキーではめる。60 秒で全部はめないと元に戻る（時計虫がまた出る）。全部はめると 20 秒無防備。2 段目で終わり | `session.Map.Rifts`（Spots の X/Y/W/Filled・Progress・Shards・Exposed）・`BossBar.Guarded`・`Mechanic "rift_*"/"shard_got"` |
+| 深く潜って回復・光る岩（深淵の大魚・HP 75/50/25%） | 段階の `submerge: { sec: 30, healPct: 5, rocks: 3, rockHpPct: 0.5 }` | 30 秒潜る（当たらない・技なし）。岩が残っている間、30 秒で最大 HP の 5% の速さで治る。岩（HP は最大 HP の 0.5%）を全部壊すと止まって出てくる | `BossBar.Submerged/SubmergeProgress/RocksLeft`・岩は `mob.MechanicKind == "rock"`（ID は `M189.rock`）・`Mechanic "submerge"/"surface"/"rock_broken"` |
+| 盾の陰（焔の巨像・全滅の炎） | 技の `shelter: { at: [0.06, 0.94], w: 90 }` | 予兆 5 秒の間に隅の盾の陰へ入れば当たらない | `Hazard.SafeZones` |
+| ツタの引き寄せ（大樹の怪） | 技の `pull: 200` | 当たると敵の方へ最大 200 px（敵の手前 40 px まで） | `Mechanic "pulled"` |
+| 渦潮の吸い込み（深淵の大魚） | 技の `suck: { w: 600, speed: 110 }`・当たるのは中心 140 px | 予兆 1.6 秒の間、中心へ 110 px/秒（歩けば逃げられる） | `Hazard.SuckW`・`Progress` |
+
+- 仕掛けの物（分身・光る岩・時計虫）は倒しても経験値・ドロップ・クエストの数にならない（`mob.Mechanic`）。湧き直しの数にも入らない。
 
 ### 4-6. アイテム（ITEMS.md）
 
@@ -216,9 +241,13 @@ session.Character / Stats / Inventory / Equipment / Skills / Buffs / Status / Qu
 | 弱り | Weak / weak | ジャンプできない（跳ねる敵は跳ねない） | 時間 |
 | 凍結 | Freeze / freeze | 動けない・攻撃できない。**攻撃を受けると解ける** | 時間 |
 | 眠り | Sleep / sleep | 同上 | 時間 |
+| 遅延 | Slow / slow | 速さ −power（既定 20。主人公は 30 より下げない、敵は元の 2 割より下げない） | 意志の力・解除・時間 |
+| 変化 | Polymorph / polymorph | 攻撃・スキルが使えない（歩ける・薬は使える）。敵はコロ貝（M001）の姿・攻撃力・防御になり技を使わない（`mob.FormId`、`Pose.Polymorphed`） | 意志の力・解除・時間 |
+| 錯乱 | Confuse / confuse | 主人公は左右が逆（`Pose.Confused`）。敵は錯乱弾で主人公の味方になる（`mob.Charmed`） | 意志の力・解除・時間 |
 
 - **重ねがけ**: 同じ種類は重ならない（かけ直すと残り時間は長い方・強さは強い方）。違う種類は同時にかかる。死ぬと全部消える。セーブしない（バフと同じ）。
-- **効きにくさ**: ボス（kind = boss）は気絶・凍結・眠りが 1/3 の時間、毒は 1/10 の強さ。大ボス（raid）は何も効かない（`StatusResisted`）。
+- **効きにくさ**: ボス（kind = boss）は気絶・凍結・眠りが 1/3 の時間、毒は 1/10 の強さ、変化・錯乱は効かない。大ボス（raid）は何も効かない（`StatusResisted`）。
+- **敵の技から**: 時計塔の魔物（時の遅れ: 遅延 6 秒・−40）・雲の魔女（変化の光: 変化 4 秒・50%）・ダラダラオバケ（惑わしの息: 錯乱 4 秒・30%）・星を呑む者（惑いの星: 画面全体の錯乱 4 秒）。
 - **公開の入口**（スキル担当が「スキルが状態異常を付ける」時に使う）:
 
 ```csharp
@@ -238,10 +267,10 @@ session.CureStatus(GameSession.CurableAll);       // 治すスキル（意志の
 ## 5. クラシックに比べてまだ違う所・次にやること
 
 - **敵の速さ**: 這う敵は前の 40 px/秒から 50〜62 px/秒（FEEL.md の「-50〜+50 で 50〜150」に合わせた。MONSTERS.md の「30〜50」の書き方も直した）。
-- **ボス**: 簡略にした所がある — 大ボスの部位（焔の巨像の腕 8 本・黒竜の 6 部位・星を呑む者の背中の核）は段階にまとめた。雲の魔女の分身・時計塔の「時の裂け目」・深淵の大魚の「光る岩」・巨像の「盾の陰」・大樹の怪の「ツタで引き寄せる」・渦潮の吸い込みは無い（技の数値だけ）。ボスの間の回数制限・制限時間も未実装。
-- **状態異常**: ボスの毒を 1/10 にしたのは独自（クラシックは技ごとの上限）。石化（雲の魔女）は気絶で代わりにした。誘惑・混乱などクラシックの他の異常は無い。
+- **ボス**: 簡略にした所がある — 大ボスの部位（焔の巨像の腕 8 本・黒竜の 6 部位・星を呑む者の背中の核）は段階にまとめた。ボスの間の回数制限・制限時間も未実装。仕掛け（分身・時の裂け目・光る岩・盾の陰・ツタ・渦潮）は 4-5 のとおり入れたが、盾の陰は全滅の炎の予兆の間だけ（いつも置いてある盾の絵はマップの方で）。時のかけらは持ち物ではなく、そのボスの間の中だけの数（`Rifts.Shards`）。
+- **状態異常**: ボスの毒を 1/10 にしたのは独自（クラシックは技ごとの上限）。石化（雲の魔女）は気絶で代わりにした。誘惑などクラシックの他の異常は無い。錯乱は「主人公 = 左右逆」「敵 = 味方になる（錯乱弾）」の 2 つの意味で 1 つの種類にした。
 - **敵の技の絵**: Core は `Motion`（attack1 / skill1）・`Hazards`（予兆）・`Projectiles`（SkillId）を出すだけ。絵・音は Unity 側。
-- **2〜4 次のスキル**: 全部入れたが「形と最低限の動き」の物がある — 敵の強化を消す（鎧崩し・魔法崩し・力崩し・解除）はお知らせだけ（敵のバフが無い）。遅延・変化の呪い・錯乱弾は状態異常の種類が無いのでお知らせだけ。秘術の扉は町へ行くだけ（戻る扉なし）。身代わり人形・乗船の HP・隠れ足（ゆっくり落ちる）・毒の霧の「置いておく」・クローの熟練の「1 束 +」・調合上手は数値だけで効いていない。MP 吸収は敵の MP を減らさない。溜めの大魔法は溜める長さを選べない（いつも 2 秒で ×2）。盗賊団・爆弾カモメは即時の攻撃。当たる範囲・ディレイ・状態異常の秒（JOBS.md に無い物）は「似」で決めた値。
+- **2〜4 次のスキル**: 全部入れて効かせた（敵の強化を消す・遅延・変化の呪い・錯乱弾・秘術の扉の戻りの扉・身代わり人形・乗船の HP・隠れ足・毒の霧の設置・クローの熟練の 1 束・調合上手・MP 吸収で敵の MP を減らす）。残り: 溜めの大魔法は溜める長さを選べない（いつも 2 秒で ×2）。盗賊団・爆弾カモメは即時の攻撃。当たる範囲・ディレイ・状態異常の秒（JOBS.md に無い物）・身代わり人形の引きつける距離（450 px）・船の HP（2000+200x）・隠れ足の落ちる速さ（120 px/秒）・敵の反射の上限（最大 HP の 20%）は「似」で決めた値。
 - **攻撃の絵**: Core は攻撃の種類（振り・突き・撃ち・投げ・詠唱・殴り）を `Pose.AttackKind` で出しているが、絵の名前は ART_SPEC の `swingO1` だけ。
 - **闇隠れの「速さ −20+x」**: ブラウザ版の速さの計算（100 より下にしない）に合わせているので、遅くはならない。
 - **ペット・倉庫・椅子・製作・2 次以降の転職の試験・1 人用ダンジョン・ボスの間（入る回数・制限時間）**は未実装（ボスそのものの技・段階は 4-5）。

@@ -32,7 +32,7 @@ namespace Lumina.Core.Skills
 
     /// <summary>
     /// スキルが付ける状態異常（毒・気絶・凍結 …）の種類・確率・秒数。かける仕組みそのものは Core/Status/（別担当）。
-    /// type: poison / stun / darkness / seal / freeze / slow / bind（動けない）/ burn / polymorph（コロ貝に変える）/ charm（味方にする）
+    /// type: poison / stun / darkness / seal / freeze / slow（遅延）/ bind（動けない）/ burn / polymorph（コロ貝に変える）/ charm（錯乱弾: 味方にする = 錯乱）
     /// </summary>
     public sealed class StatusSpec
     {
@@ -88,7 +88,7 @@ namespace Lumina.Core.Skills
         public List<StatusSpec> OnHitStatus = new List<StatusSpec>(); // 毒の星・毒の刃
         public Expr MesoOnHit;                              // お金拾い（%）
         public Expr ExecuteChance, ExecuteHpPct;            // 必殺の一撃
-        public Expr StarBundle;                             // クローの熟練: 投げ星の 1 束 +（形だけ）
+        public Expr StarBundle;                             // クローの熟練: 投げ星の 1 枠に重なる数 +
         public Expr PotionPct, PotionTimePct;               // 調合上手
         public Expr StunCrit;                               // 気絶の極み（TODO(status): 気絶している敵が分かったら）
         public Expr EnergyWatk, EnergyWdef, EnergyHpRegen;  // 気合い（満タンの時）
@@ -121,15 +121,16 @@ namespace Lumina.Core.Skills
         public Expr MpCostPct;         // 集中の極意: MP 消費 -%
         public Expr Reflect, MagicReflect; // 守りの構え（物理を返す）・魔力の反射
         public bool Invincible;        // 煙玉
-        public bool StatusImmune;      // 聖なる盾（TODO(status)）
+        public bool StatusImmune;      // 聖なる盾
         public bool Revive;            // 復活
         public Expr MesoGuardPct, MesoGuardCost; // お金の盾
         public Expr ShadowPartner;     // 影分身（まねる攻撃の威力 %）
-        public bool SlowFall;          // 隠れ足（TODO: ゆっくり落ちるのは物理の担当）
+        public bool SlowFall;          // 隠れ足（空中でジャンプキーを押している間ゆっくり落ちる）
         public Expr HpDrain; public double HpDrainInterval = 4; // 竜の血
         public int ComboMax; public Expr ComboDamage; // 闘気
         public Expr DamageReduce;      // 聖なる守り（受けるダメージ -%）
         public bool Transform, Ship;   // 変身・乗船
+        public Expr ShipHp;            // 乗船: 船の HP（受けたダメージで減り、0 で降りる）
     }
 
     public sealed class DebuffEffect
@@ -195,7 +196,7 @@ namespace Lumina.Core.Skills
         public bool NeedsCharge, ConsumeCharge, NeedsEnergy;
         public Expr Pull;              // 怪物の引き寄せ（%）
         public Expr Steal;             // 盗む（%）
-        public Expr DispelChance; public string DispelWhat; // 鎧崩し・魔法崩し・力崩し・解除（敵の強化は未実装なのでお知らせだけ）
+        public Expr DispelChance; public string DispelWhat; // 鎧崩し（def）・魔法崩し（magic）・力崩し（atk）・解除（all）: 敵の強化（MobBuffs）を消す
         public Expr MarkDamage, MarkExp, MarkSec; // 狙い撃ち・挑発
         public bool MesoExplosion;     // お金の爆発
         public int TickCount; public double TickInterval; // 忍び寄る影（1 秒ごと 5 回）
@@ -209,7 +210,8 @@ namespace Lumina.Core.Skills
         public Expr HealMpPct;         // 気合いの回復
         public double HealLuk, HealDex; public Expr HealMul; // 気の回復
         public Expr UndeadSpell, UndeadTargets; public double UndeadRange = 200; // ヒール: まわりの不死の敵
-        public double Zone;            // 毒の霧（置いておく秒。今は形だけ）
+        public double Zone;            // 毒の霧: 当たった所に置いておく秒（中の敵に 1 秒ごとに状態異常をかけ続ける）
+        public bool Chainable;         // 星の連投がのる（二つ星投げ）
 
         // 移動
         public double DashSpeed;       // 前へ押す速さ（px/秒）
@@ -299,7 +301,7 @@ namespace Lumina.Core.Skills
                 NeedsBuff = StrListOrNull(d, "needsBuff"), NeedsCharge = J.Bool(d, "needsCharge"), ConsumeCharge = J.Bool(d, "consumeCharge"),
                 NeedsEnergy = J.Bool(d, "needsEnergy"), MesoExplosion = J.Bool(d, "mesoExplosion"), StealthMul = J.Num(d, "stealthMul", 1),
                 Teleport = E(d, "teleport"), Door = J.Bool(d, "door"), CdReset = J.Bool(d, "cdReset"), HealMpPct = E(d, "healMpPct"),
-                SummonFixed = J.Bool(d, "summonFixed"), Zone = J.Num(d, "zone"),
+                SummonFixed = J.Bool(d, "summonFixed"), Zone = J.Num(d, "zone"), Chainable = J.Bool(d, "chainable"),
             };
             if (J.Has(d, "weaponMul")) s.WeaponMul = J.Num(d, "weaponMul");
             foreach (var o in J.Arr(d, "prereqs"))
@@ -358,7 +360,7 @@ namespace Lumina.Core.Skills
                     Infinity = J.Num(b, "infinity"), MpCostPct = E(b, "mpCostPct"), Reflect = E(b, "reflect"), MagicReflect = E(b, "magicReflect"),
                     Invincible = J.Bool(b, "invincible"), StatusImmune = J.Bool(b, "statusImmune"), Revive = J.Bool(b, "revive"),
                     ShadowPartner = E(b, "shadowPartner"), SlowFall = J.Bool(b, "slowFall"), DamageReduce = E(b, "damageReduce"),
-                    Transform = J.Bool(b, "transform"), Ship = J.Bool(b, "ship"),
+                    Transform = J.Bool(b, "transform"), Ship = J.Bool(b, "ship"), ShipHp = E(b, "shipHp"),
                 };
                 s.Buff.OnHitStatus.AddRange(StatusSpec.List(b, "onHitStatus"));
                 var mg = J.Obj(b, "mesoGuard"); if (mg != null) { s.Buff.MesoGuardPct = E(mg, "pct"); s.Buff.MesoGuardCost = E(mg, "cost"); }

@@ -288,14 +288,13 @@ namespace Lumina.Core.Tests
             Run(s, new PlayerInput(), 1);
             Assert.Equal(2, g.Phase);
 
-            // 深淵の大魚: 段階が変わる時に 5% 治す
+            // 深淵の大魚: 段階が変わると深く潜る（治り方は BossMechanicTests）
             var f = s.Map.Spawn("M189", s.Body.X + 2500, s.Body.Y - 100);
             Run(s, new PlayerInput(), 1);
             f.Hp = (int)(f.MaxHp * 0.70);
-            int before = f.Hp;
             Run(s, new PlayerInput(), 1);
             Assert.Equal(1, f.Phase);
-            Assert.Equal(before + (int)Math.Floor(f.MaxHp * 0.05), f.Hp);
+            Assert.True(f.Submerged && f.Hidden);
 
             // 大ボスは段階ごとに守りが変わる（星を呑む者の鎧）
             var r = s.Map.Spawn("M239", s.Body.X + 1500, s.Body.Y);

@@ -5,6 +5,8 @@
 //   魔法 magic  主人公の足元に予兆 → windup 秒後に当たる（count 個を spread px おき、linger 秒残る）
 //   全体 area   敵のまわり、または画面全体（global）。地面にいる時だけ（groundOnly）・高い所は安全（safeHeight）
 //   呼び出し summon / 回復 heal / 潜る・急降下 dive（消えて、主人公の所に予兆 → 出てきて当たる）
+//   強化 buff   自分（allies なら w 幅の中の仲間も）に攻撃・防御・魔防・速さ・反射の強化（Mobs/MobBuffs.cs）
+// ボスの仕掛け（分身・潜って回復・時の裂け目）は BossMechanics.cs。
 //
 // 当たる判定（主人公のダメージ・状態異常）は GameSession（GameSession.Status.cs）が MapInstance.Hazards と Projectiles を見て行う。
 // 乱数は使える技がある時だけ引く（技の無い敵では乱数の並びが変わらない）。
@@ -36,7 +38,17 @@ namespace Lumina.Core.Mobs
             double rate = m.PhaseDef?.Rate ?? 1;
             for (int i = 0; i < m.SkillCd.Length; i++) if (m.SkillCd[i] > 0) m.SkillCd[i] -= dt * rate;
             if (m.SkillGap > 0) m.SkillGap -= dt;
-            UpdatePhase(m, map, events);
+            if (m.Buffs.Any)
+            {
+                var ended = new List<MobBuffKind>(0);
+                m.Buffs.Tick(dt, ended);
+                foreach (var k in ended) events?.Add(GameEventType.MobBuffEnded, MobBuffs.Keys[(int)k], m.Uid, m.X, m.HeadY, MobBuffs.Names[(int)k]);
+            }
+            if (m.CloneOf == 0)
+            {
+                UpdatePhase(m, map, events);
+                if (m.Def.Boss != null) BossMechanics.Step(m, map, dt, rng, events);
+            }
 
             if (m.Casting != null)
             {
@@ -50,7 +62,7 @@ namespace Lumina.Core.Mobs
                 if (m.CastT <= 0) Fire(m, map, events);
                 return;
             }
-            if (skills.Count == 0 || !m.Status.CanUseSkill || player.Hidden || m.State == MobState.Hit || m.SkillGap > 0) return;
+            if (skills.Count == 0 || !m.Status.CanUseSkill || player.Hidden || m.State == MobState.Hit || m.SkillGap > 0 || m.Submerged) return;
 
             bool boss = m.Def.Boss != null;
             bool engaged = boss || m.AggroT > 0 || m.Def.ChaseOnSight || m.Def.Move == MobMove.Stand;
@@ -86,10 +98,18 @@ namespace Lumina.Core.Mobs
                 case MobSkillType.Shot: return adx <= s.Range && ady <= ShotRangeY;
                 case MobSkillType.Magic: return adx <= s.Range && ady <= MagicRangeY;
                 case MobSkillType.Dive: return adx <= s.Range && ady <= DiveRangeY;
-                case MobSkillType.Area: return s.Global ? adx <= BossSight : adx <= s.W / 2 + 40 && ady <= 200;
+                case MobSkillType.Area: return s.Global ? adx <= BossSight : adx <= Math.Max(s.W / 2 + 40, s.SuckW / 2) && ady <= 200; // 渦潮は吸い込む広さで
                 case MobSkillType.Summon:
+                    if (m.CloneOf != 0) return false;
                     return adx <= BossSight && s.Mobs.Count > 0 && map.SummonCount(m.Uid) < s.Max;
-                case MobSkillType.Heal: return m.Hp < m.MaxHp;
+                case MobSkillType.Heal: return m.CloneOf == 0 && m.Hp < m.MaxHp;
+                case MobSkillType.Buff:
+                {
+                    // まだかかっていない強化がある時だけ（分身は使わない）
+                    if (m.CloneOf != 0 || s.Buff == null || adx > s.Range) return false;
+                    for (int i = 0; i < MobBuffs.KindCount; i++) if (s.Buff.Pct[i] > 0 && !m.Buffs.Has((MobBuffKind)i)) return true;
+                    return false;
+                }
                 default: return false;
             }
         }
@@ -129,6 +149,16 @@ namespace Lumina.Core.Mobs
                     var h = AddHazard(m, map, s, HazardKind.Area, box, dmg);
                     h.Global = s.Global; h.GroundOnly = s.GroundOnly;
                     if (s.SafeHeight > 0) h.SafeAboveY = m.Y - s.SafeHeight;
+                    if (s.ShelterAt != null)
+                    {
+                        // 盾の陰: マップの横幅の割合の位置に w 幅（上下は全部）
+                        h.SafeZones = new List<Rect>();
+                        foreach (var at in s.ShelterAt)
+                        {
+                            double cx = map.Data.Width * at;
+                            h.SafeZones.Add(new Rect(cx - s.ShelterW / 2, -1e5, cx + s.ShelterW / 2, 1e5));
+                        }
+                    }
                     break;
                 }
                 case MobSkillType.Dive:
@@ -146,6 +176,7 @@ namespace Lumina.Core.Mobs
                 Uid = map.NewUid(), MobUid = m.Uid, MobId = m.Def.Id, SkillId = s.Id, Name = s.Name, Kind = kind, Box = box,
                 Warn = m.CastTotal, WarnTotal = m.CastTotal, Linger = s.Linger,
                 Atk = dmg, MobLv = m.Def.Lv, MobAcc = m.Acc, Magic = s.Magic, FromX = m.X, Status = s.Status,
+                Pull = s.Pull, SuckW = s.SuckW, SuckSpeed = s.SuckSpeed,
             };
             map.Hazards.Add(h);
             return h;
@@ -155,7 +186,7 @@ namespace Lumina.Core.Mobs
         {
             foreach (var h in map.Hazards) if (h.MobUid == m.Uid && !h.Fired) h.Done = true;
             m.Casting = null;
-            m.Hidden = false;
+            m.Hidden = m.Submerged;
         }
 
         /// <summary>構えが終わった: 撃つ・呼ぶ・治す・出てくる（近接・魔法・全体は予兆が同じ時に当たる）。</summary>
@@ -200,7 +231,22 @@ namespace Lumina.Core.Mobs
                     Teleport(m, map, m.CastX, m.CastY);
                     break;
                 }
+                case MobSkillType.Buff:
+                {
+                    ApplyBuff(m, s, events);
+                    if (s.Allies)
+                        foreach (var o in map.Mobs)
+                            if (o != m && o.Alive && !o.Mechanic && !o.Charmed && Math.Abs(o.X - m.X) <= s.W / 2 && Math.Abs(o.Y - m.Y) <= 200) ApplyBuff(o, s, events);
+                    break;
+                }
             }
+        }
+
+        private static void ApplyBuff(Mob m, MobSkillDef s, EventQueue events)
+        {
+            var kinds = new List<MobBuffKind>(2);
+            m.Buffs.Apply(s.Buff, kinds);
+            foreach (var k in kinds) events?.Add(GameEventType.MobBuffed, MobBuffs.Keys[(int)k], m.Uid, m.X, m.HeadY, s.Name);
         }
 
         /// <summary>手下を count 体呼ぶ（mobs を順に、ボスの左右に並べる）。呼んだ数。</summary>

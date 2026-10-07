@@ -4,6 +4,7 @@
 //   - 壁（PhysicsMap.Walls）: 左右に通れない
 //   - 攻撃中（AttackLock）: 地上では歩けず止まる・ジャンプしない。空中は勢いそのまま
 //   - ジャンプできない（NoJump。状態異常「弱り」）
+//   - ゆっくり落ちる（SlowFall。隠れ足）・外から横に動かす（Shove。ツタの引き寄せ・渦潮の吸い込み）
 using System;
 using System.Collections.Generic;
 
@@ -43,6 +44,9 @@ namespace Lumina.Core.Physics
         // 追加の状態（ブラウザ版に無い）
         public bool AttackLock;
         public bool NoJump;
+        /// <summary>隠れ足: 空中でジャンプキーを押している間、落ちる速さを SlowFallSpeed までにする</summary>
+        public bool SlowFall;
+        public const double SlowFallSpeed = 120; // px/秒（似。ふつうの最大の落ちる速さより十分遅い）
 
         public PlayerBody(double x, double y, double speed = 100, double jump = 100)
         {
@@ -274,6 +278,7 @@ namespace Lumina.Core.Physics
             // 重力（速さの平均で進める → ジャンプの高さが計算どおり v²/2g になる）
             double prevX = p.X, prevY = p.Y;
             double nvy = Math.Min(Feel.MaxFall, p.Vy + Feel.Gravity * dt);
+            if (p.SlowFall && inp.Jump && nvy > PlayerBody.SlowFallSpeed) nvy = PlayerBody.SlowFallSpeed; // 隠れ足（使わなければブラウザ版と同じ）
             p.Y += (p.Vy + nvy) / 2 * dt;
             p.Vy = nvy;
             p.X += p.Vx * dt;
@@ -348,6 +353,27 @@ namespace Lumina.Core.Physics
             p.SetState(BodyState.Air);
             p.Events.Add(BodyEvent.Hurt);
             return true;
+        }
+
+        /// <summary>
+        /// 外から横に押す・引く（ツタの引き寄せ・渦潮の吸い込み）。地面では足場にそって進み（端からは落ちる）、空中ではそのまま横へ。
+        /// 縄・はしごの上では動かない。壁は越えない。
+        /// </summary>
+        public static void Shove(PlayerBody p, PhysicsMap map, double dx)
+        {
+            if (dx == 0 || p.OnRope) return;
+            if (p.OnGround && p.Seg != null)
+            {
+                double vx = p.Vx;
+                p.Vx = dx;
+                MoveOnGround(p, map, 1);
+                p.Vx = p.OnGround ? vx : 0;
+                return;
+            }
+            double prevX = p.X;
+            p.X += dx;
+            ApplyWalls(p, map, prevX);
+            ClampX(p, map);
         }
 
         /// <summary>出現の位置に置いて、足元の足場に立たせる（マップに入った時）。</summary>

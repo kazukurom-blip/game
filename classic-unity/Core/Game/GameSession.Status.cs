@@ -2,7 +2,8 @@
 //
 // 主人公の状態異常: session.Status（StatusSet）。頭の上のアイコンは session.Pose.StatusIcons（ビット）か Status.Active。
 //   気絶・凍結・眠り = 動けない・攻撃もスキルも使えない（薬は使える）、封印 = スキル不可（治すスキルは使える）、
-//   弱り = ジャンプできない、暗闇 = 命中 −50%、呪い = 攻撃力・防御 −20%・経験値 −50%、毒 = 1 秒ごとに最大 HP の 2%（HP 1 で止まる）。
+//   弱り = ジャンプできない、暗闇 = 命中 −50%、呪い = 攻撃力・防御 −20%・経験値 −50%、毒 = 1 秒ごとに最大 HP の 2%（HP 1 で止まる）、
+//   遅延 = 速さ −power、変化 = 攻撃・スキル不可（動ける・薬は使える）、錯乱 = 左右が逆。
 // 敵の状態異常: mob.Status（同じ形）。毒の数字は DamageKind.Poison。凍結・眠りは攻撃を受けると解ける。
 using System;
 using System.Collections.Generic;
@@ -48,7 +49,7 @@ namespace Lumina.Core.Game
         public int CureStatus(IEnumerable<StatusKind> kinds) => StatusSystem.Cure(this, kinds, Out);
 
         /// <summary>治すスキル（意志の力など）・万能薬で治る物（STATS.md 4-3）。</summary>
-        public static readonly StatusKind[] CurableAll = { StatusKind.Poison, StatusKind.Stun, StatusKind.Darkness, StatusKind.Seal, StatusKind.Curse };
+        public static readonly StatusKind[] CurableAll = { StatusKind.Poison, StatusKind.Stun, StatusKind.Darkness, StatusKind.Seal, StatusKind.Curse, StatusKind.Slow, StatusKind.Polymorph, StatusKind.Confuse };
 
         // ---------------- 毎フレーム
 
@@ -99,6 +100,7 @@ namespace Lumina.Core.Game
         {
             if (Map.Hazards.Count == 0) return;
             var pbox = PlayerBox;
+            var decoy = ActiveDecoy;
             foreach (var h in Map.Hazards)
             {
                 if (h.Done) continue;
@@ -107,11 +109,15 @@ namespace Lumina.Core.Game
                     var owner = Map.FindMob(h.MobUid);
                     if (owner == null || !owner.Alive) { h.Done = true; continue; } // 撃つ前に倒れた
                     h.Warn -= dt;
+                    if (h.SuckSpeed > 0) SuckPlayer(h, dt); // 渦潮: 予兆の間、中心へ吸い込む
                     if (h.Warn > 1e-9) continue;
                     h.Fired = true;
                     h.LingerT = h.Linger;
-                    if (HazardTouches(h, pbox))
-                        HitPlayer(h.Atk, h.MobLv, h.MobAcc, h.Magic, h.FromX, h.Status, h.SkillId, h.MobUid);
+                    if (decoy != null && h.Atk > 0 && (h.Global || h.Box.Overlaps(DecoyBox(decoy)))) HitDecoy(decoy, h.Atk);
+                    if (HazardTouches(h, PlayerBox)
+                        && HitPlayer(h.Atk, h.MobLv, h.MobAcc, h.Magic, h.FromX, h.Status, h.SkillId, h.MobUid)
+                        && h.Pull > 0 && !Dead)
+                        PullPlayer(owner, h.Pull); // ツタ: 敵の方へ引き寄せる
                     if (h.LingerT <= 0) h.Done = true;
                     continue;
                 }
@@ -133,6 +139,7 @@ namespace Lumina.Core.Game
             if (Dead || Stats.Stealth) return false;
             if (h.GroundOnly && !Body.OnGround) return false;
             if (!double.IsNaN(h.SafeAboveY) && Body.Y < h.SafeAboveY) return false;
+            if (h.SafeZones != null) foreach (var z in h.SafeZones) if (z.Contains(Body.X, Body.Y - 1)) return false; // 盾の陰
             return h.Global || h.Box.Overlaps(pbox);
         }
     }

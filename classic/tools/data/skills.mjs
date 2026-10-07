@@ -377,7 +377,7 @@ export const SKILL_MECH = {
     かく乱: { id: 'disorder', kind: 'attack', targets: '1', hits: '1', debuff: { atk: 'x', def: 'x', sec: '3*x' }, range: { front: 110, back: 10, up: 60, down: 10 } },
     闇隠れ: { id: 'dark_sight', buff: { sec: '5*x', stealth: true, stats: { speed: '-20+x' } } },
     二段突き: { id: 'double_stab', kind: 'attack', damage: '70+5*x', targets: '1', hits: '2', weapons: ['短剣'], range: { front: 75, back: 10, up: 60, down: 10 } },
-    二つ星投げ: { id: 'lucky_seven', kind: 'ranged', damage: '80+3*x', targets: '1', hits: '2', weaponMul: 5.0, weapons: ['クロー'], ammo: true, rangeBonus: true, range: { front: 250, back: 0, up: 40, down: 20 } },
+    二つ星投げ: { id: 'lucky_seven', kind: 'ranged', damage: '80+3*x', targets: '1', hits: '2', weaponMul: 5.0, weapons: ['クロー'], ammo: true, rangeBonus: true, chainable: true, range: { front: 250, back: 0, up: 40, down: 20 } },
   },
   アサシン: {
     クローの熟練: mastery('claw_mastery', W.claw, { starBundle: '10*x' }),
@@ -491,7 +491,7 @@ export const SKILL_MECH = {
   キャプテン: {
     全能力の加護: allStats,
     意志の力: will,
-    乗船: { id: 'ship', buff: { sec: '600', stats: { hp: 'x*100', wdef: '10*x' }, ship: true } },
+    乗船: { id: 'ship', buff: { sec: '600', stats: { hp: 'x*100', wdef: '10*x' }, ship: true, shipHp: '2000+200*x' } },
     大砲: { id: 'cannon', kind: 'area', damage: '400+15*x', targets: '6', range: R.line(450), needsBuff: ['captain.ship'], motion: 'shoot', delay: 1.2 },
     弾幕: { id: 'rapid_fire', damage: '100+3*x', targets: '1', range: R.shot(380), rapid: 8 },
     艦砲射撃: { id: 'air_strike', kind: 'area', damage: '300+10*x', targets: '15', range: R.screen, motion: 'cast', delay: 1.4, ammo: false },

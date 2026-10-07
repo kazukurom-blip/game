@@ -6,7 +6,7 @@
 //   session.ApplyStatus(mob, StatusKind.Freeze, 3)                       // GameSession から（お知らせ付き）
 //
 // target は IStatusTarget（敵 = Mob、主人公 = GameSession）。
-// 効きにくさ（MONSTERS.md 5 章）: ボスは気絶・凍結・眠りが 1/3 の時間、毒は 1/10 の強さ。大ボスは何も効かない。
+// 効きにくさ（MONSTERS.md 5 章）: ボスは気絶・凍結・眠りが 1/3 の時間、毒は 1/10 の強さ、変化・錯乱は効かない。大ボスは何も効かない。
 using System;
 using System.Collections.Generic;
 using Lumina.Core.Game;
@@ -29,8 +29,8 @@ namespace Lumina.Core.Status
 
     public static class StatusSystem
     {
-        public static readonly string[] Keys = { "poison", "stun", "darkness", "seal", "curse", "weak", "freeze", "sleep" };
-        public static readonly string[] Names = { "毒", "気絶", "暗闇", "封印", "呪い", "弱り", "凍結", "眠り" };
+        public static readonly string[] Keys = { "poison", "stun", "darkness", "seal", "curse", "weak", "freeze", "sleep", "slow", "polymorph", "confuse" };
+        public static readonly string[] Names = { "毒", "気絶", "暗闇", "封印", "呪い", "弱り", "凍結", "眠り", "遅延", "変化", "錯乱" };
 
         public static string Key(StatusKind k) => Keys[(int)k];
         public static string Name(StatusKind k) => Names[(int)k];
@@ -59,6 +59,12 @@ namespace Lumina.Core.Status
             }
             if (resist == StatusResist.Boss)
             {
+                // 変化・錯乱はボスに効かない（JOBS.md「ボス以外」）
+                if (kind == StatusKind.Polymorph || kind == StatusKind.Confuse)
+                {
+                    events?.Add(GameEventType.StatusResisted, Key(kind), target.StatusUid, target.StatusX, target.StatusY, Name(kind));
+                    return StatusApplyResult.Immune;
+                }
                 if (kind == StatusKind.Stun || kind == StatusKind.Freeze || kind == StatusKind.Sleep) seconds /= 3;
                 if (kind == StatusKind.Poison) power = (power > 0 ? power : StatusSet.DefaultPower(kind)) / 10;
             }

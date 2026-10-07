@@ -36,9 +36,9 @@ namespace Lumina.Core.Tests
             return d;
         }
 
-        internal static GameSession Hero(string line, string weapon = null, string ammo = null, int level = 30)
+        internal static GameSession Hero(string line, string weapon = null, string ammo = null, int level = 30, GameData data = null)
         {
-            var data = Arena();
+            data ??= Arena();
             var s = GameSession.NewGame(data, "試し", 7);
             s.ChangeMap("T_ARENA");
             var c = s.Character;

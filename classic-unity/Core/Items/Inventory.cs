@@ -58,6 +58,10 @@ namespace Lumina.Core.Items
 
         private readonly ItemInstance[][] tabs = new ItemInstance[5][];
         private readonly Func<string, ItemDef> lookup;
+        /// <summary>1 枠に重なる数の追加（クローの熟練の「投げ星の 1 束 +」）。GameSession がつなぐ。</summary>
+        public Func<ItemDef, int> ExtraStack;
+        /// <summary>1 枠に重なる数（データの maxStack ＋ 追加）</summary>
+        public int StackOf(ItemDef def) => def.Stackable ? def.MaxStack + Math.Max(0, ExtraStack?.Invoke(def) ?? 0) : def.MaxStack;
         public long Meso;
         public const long MaxMeso = 2147483647; // クラシックの上限（21 億）
 
@@ -125,8 +129,8 @@ namespace Lumina.Core.Items
             int room = 0;
             foreach (var it in tab)
             {
-                if (it == null) room += def.MaxStack;
-                else if (it.ItemId == itemId && def.Stackable) room += Math.Max(0, def.MaxStack - it.Count);
+                if (it == null) room += StackOf(def);
+                else if (it.ItemId == itemId && def.Stackable) room += Math.Max(0, StackOf(def) - it.Count);
                 if (room >= count) return true;
             }
             return room >= count;
@@ -150,15 +154,15 @@ namespace Lumina.Core.Items
                 for (int i = 0; i < tab.Length && rest > 0; i++)
                 {
                     var it = tab[i];
-                    if (it == null || it.ItemId != itemId || it.Count >= def.MaxStack) continue;
-                    int put = Math.Min(rest, def.MaxStack - it.Count);
+                    if (it == null || it.ItemId != itemId || it.Count >= StackOf(def)) continue;
+                    int put = Math.Min(rest, StackOf(def) - it.Count);
                     it.Count += put; rest -= put;
                 }
             }
             for (int i = 0; i < tab.Length && rest > 0; i++)
             {
                 if (tab[i] != null) continue;
-                int put = Math.Min(rest, def.MaxStack);
+                int put = Math.Min(rest, StackOf(def));
                 tab[i] = new ItemInstance { ItemId = itemId, Count = put };
                 rest -= put;
             }

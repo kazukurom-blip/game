@@ -64,6 +64,9 @@ namespace Lumina.Core.World
         public bool Fired, Done;
         public int Atk, MobLv, MobAcc; public bool Magic; public double FromX;
         public StatusInflict Status;
+        public double Pull;             // 当たったら主人公を敵の方へ引き寄せる（px。ツタ）
+        public double SuckW, SuckSpeed; // 予兆の間、中心から SuckW/2 の中の主人公を中心へ吸い込む（px/秒。渦潮）。Unity 側は渦の大きさに使う
+        public List<Rect> SafeZones;    // この中（盾の陰）にいれば当たらない（全滅の炎）。Unity 側は盾の絵を出す
         /// <summary>予兆を描くか（近接は構えの絵だけで、地面の印は出さない）</summary>
         public bool ShowWarning => Kind != HazardKind.Melee;
         public double Progress => WarnTotal > 0 ? Math.Min(1, Math.Max(0, 1 - Warn / WarnTotal)) : 1;
@@ -83,9 +86,13 @@ namespace Lumina.Core.World
         public double PhaseRatio;       // 段階の中での残り（1→0）。段階ごとのバーに使う
         public int StatusIcons;         // かかっている状態異常のビット
         public bool Casting; public string CastName; public double CastProgress; // 大技の詠唱のバー
+        public int BuffIcons;           // かかっている強化のビット（1 << (int)MobBuffKind）
+        public bool Guarded;            // ダメージがほとんど通らない（時の裂け目が閉じていない）
+        public bool Submerged; public double SubmergeProgress; public int RocksLeft; // 深く潜っている（0→1）・残りの光る岩
+        public int Clones;              // 生きている分身の数
     }
 
-    public sealed class MapInstance
+    public sealed partial class MapInstance
     {
         public readonly MapData Data;
         public readonly PhysicsMap Physics;
@@ -126,7 +133,7 @@ namespace Lumina.Core.World
             foreach (var m in Mobs)
             {
                 m.AggroT = 0; m.StunT = 0; m.KnockT = 0; if (m.State == MobState.Hit) m.State = MobState.Stand;
-                m.Casting = null; m.Hidden = false;
+                m.Casting = null; m.Hidden = m.Submerged;
             }
             FillSpawns(rng);
             respawnT = 0;
@@ -153,7 +160,7 @@ namespace Lumina.Core.World
 
         public int AliveCount
         {
-            get { int n = 0; foreach (var m in Mobs) if (m.Alive && !m.Timed && !m.Summoned) n++; return n; }
+            get { int n = 0; foreach (var m in Mobs) if (m.Alive && !m.Timed && !m.Summoned && !m.Mechanic) n++; return n; }
         }
 
         private void FillSpawns(IRandom rng)
@@ -274,7 +281,7 @@ namespace Lumina.Core.World
                 Mob b = null;
                 foreach (var m in Mobs)
                 {
-                    if (!m.Alive || m.Def.Boss == null) continue;
+                    if (!m.Alive || m.Def.Boss == null || m.CloneOf != 0) continue; // 分身は出さない
                     if (b == null || (m.Def.IsBoss && !b.Def.IsBoss)) b = m;
                 }
                 if (b == null) return null;
@@ -289,6 +296,9 @@ namespace Lumina.Core.World
                     PhaseRatio = top - bottom > 1e-9 ? Math.Max(0, Math.Min(1, (ratio - bottom) / (top - bottom))) : 0,
                     StatusIcons = b.StatusIcons,
                     Casting = b.Casting != null, CastName = b.Casting?.Name, CastProgress = b.Casting != null && b.CastTotal > 0 ? 1 - b.CastT / b.CastTotal : 0,
+                    BuffIcons = b.BuffIcons, Guarded = b.GuardMul < 1,
+                    Submerged = b.Submerged, SubmergeProgress = b.Submerged && b.SubmergeTotal > 0 ? Math.Min(1, 1 - b.SubmergeT / b.SubmergeTotal) : 0,
+                    RocksLeft = CountMechanics(b.Uid, "rock"), Clones = CountMechanics(b.Uid, "clone"),
                 };
             }
         }

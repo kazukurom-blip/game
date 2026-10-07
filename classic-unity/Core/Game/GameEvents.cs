@@ -20,7 +20,7 @@ namespace Lumina.Core.Game
         Died, Revived,
         Saved, SaveFailed,
         Message,                                          // システムメッセージ（Text）
-        // 状態異常（Id = poison/stun/darkness/seal/curse/weak/freeze/sleep、Value = 敵の Uid（主人公は 0）、Text = 名前）
+        // 状態異常（Id = poison/stun/darkness/seal/curse/weak/freeze/sleep/slow/polymorph/confuse、Value = 敵の Uid（主人公は 0）、Text = 名前）
         StatusApplied, StatusEnded, StatusCured, StatusResisted,
         // 敵の技（Id = 技の ID、Value = 敵の Uid、Text = 技の名前、X/Y = 予兆の位置）
         MobCast,        // 構え・予兆が始まった（音・予兆のエフェクト）
@@ -41,6 +41,15 @@ namespace Lumina.Core.Game
         QuizQuestion,   // クイズの問題（Id = 問題の ID、Value = 何問目（1〜）、Text = 問題）
         QuizAnswered,   // 答えた（Value = 1 正解 / 0 不正解）
         QuizCleared,    // 全問正解
+        // 敵の強化（Id = atk/matk/def/mdef/speed/reflect/magicReflect、Value = 敵の Uid）
+        MobBuffed,      // 強化がかかった（技の後。Text = 技の名前）
+        MobBuffEnded,   // 時間で切れた
+        MobDispelled,   // 主人公の崩し・解除で消えた（Text = 消した物の名前）
+        // ボスの仕掛け・スキルの仕掛け（Id = 何が起きたか、Value = 敵の Uid など、X/Y = 位置）
+        //   rift_open / rift_filled / rift_reset / rift_exposed / rift_guarded / shard_got（時の裂け目）
+        //   submerge / surface / rock_broken（深淵の大魚）・clones / shuffle（分身）・pulled（ツタ）
+        //   decoy_hit / decoy_broken（身代わり人形）・ship_broken（乗船）・door_open / door_used（秘術の扉）・zone_start（毒の霧）
+        Mechanic,
     }
 
     public struct GameEvent

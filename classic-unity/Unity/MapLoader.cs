@@ -115,14 +115,17 @@ namespace Lumina.View
                     mobs[m.Uid] = go;
                 }
                 // 足元が (X, Y)。跳ねている分（HopY）だけ上。絵は m.Motion（stand/move/fly/hit1/die1/attack1/skill1）と m.Facing で選ぶ
-                // 潜っている間（m.Hidden）は描かない。頭の上の状態異常のアイコンは m.StatusIcons（ビット）
+                // 潜っている間（m.Hidden）は描かない。頭の上の状態異常のアイコンは m.StatusIcons、強化は m.BuffIcons（ビット）
+                // 変化の呪いの間は m.FormId（コロ貝）の絵で描く。分身（m.CloneOf != 0）は同じ絵で影を出さない（m.HasShadow）
+                // 光る岩・時計虫など仕掛けの物は m.Mechanic / m.MechanicKind。錯乱弾で操った敵（m.Charmed）は色を変えるなど
                 go.SetActive(!m.Hidden);
                 go.transform.position = GameRunner.ToUnity(m.X, m.Y - m.HopY);
                 go.transform.localScale = new Vector3(m.Facing > 0 ? -1 : 1, 1, 1); // 敵の絵も左向きが基本なら右で反転
                 // 倒れる時は 0.6 秒で消える（m.FadeOut 0→1）
                 foreach (var r in go.GetComponentsInChildren<SpriteRenderer>()) { var c = r.color; c.a = 1f - (float)m.FadeOut; r.color = c; }
-                // TODO: m.HpBarT > 0 の間だけ頭の上に HP バー（m.Hp / m.Def.Hp）
-                // TODO: 敵の技の予兆は session.Map.Hazards（ShowWarning の物の Box に Progress 0→1 で印）、ボスの HP バーは session.Map.BossBar
+                // TODO: m.HpBarT > 0 の間だけ頭の上に HP バー（m.Hp / m.MaxHp）
+                // TODO: 敵の技の予兆は session.Map.Hazards（ShowWarning の物の Box に Progress 0→1 で印。SuckW は渦、SafeZones は盾の陰）、ボスの HP バーは session.Map.BossBar
+                // TODO: 時の裂け目は session.Map.Rifts（Spots の X/Y/Filled・Progress）、身代わり人形は session.Decoy、秘術の扉は session.Door、毒の霧は session.Zones
             }
             RemoveMissing(mobs, alive);
 

@@ -1,8 +1,9 @@
 // スキル固有の動き（GameSession の続き）: 闘気・気合い・召喚の攻撃・テレポート・回復・遅れて当たる攻撃・状態異常の受け渡し。
 //
 // 状態異常（毒・気絶・凍結 …）は Core/Status/（StatusSystem）。スキルのデータの種類（type）を StatusKind に直してかける:
-//   poison・burn → 毒、stun・bind → 気絶（動けない）、darkness → 暗闇、seal → 封印、freeze → 凍結。
-//   slow（遅延）・polymorph（変化の呪い）・charm（錯乱弾）は StatusKind に無いので、お知らせ（MobHit "status:種類"）と MobStatusHook だけ。
+//   poison・burn → 毒、stun・bind → 気絶（動けない）、darkness → 暗闇、seal → 封印、freeze → 凍結、
+//   slow → 遅延（速さ −）、polymorph → 変化（コロ貝の姿・技なし）、charm（錯乱弾）→ 錯乱（主人公の味方になる）。
+// 身代わり人形・秘術の扉・乗船の船の HP・毒の霧・ボスの仕掛けは GameSession.Mechanics.cs。
 using System;
 using System.Collections.Generic;
 using Lumina.Core.Character;
@@ -30,7 +31,7 @@ namespace Lumina.Core.Game
         public const int EnergyMax = 100, EnergyPerHit = 10;
         public const double EnergyFullSec = 60; // 満タンが続く時間（似）
 
-        /// <summary>StatusKind に無い状態異常（遅延・変化・錯乱）を受け取る所（今は誰もつないでいない）。</summary>
+        /// <summary>StatusKind に無い状態異常の名前（データの書き間違いなど）を受け取る所（今は誰もつないでいない）。</summary>
         public Action<Mob, StatusRequest> MobStatusHook;
         /// <summary>聖なる盾がかかっている間は状態異常を受けない。</summary>
         public bool StatusImmune => Stats?.Mods.StatusImmune ?? false;
@@ -42,6 +43,7 @@ namespace Lumina.Core.Game
             {
                 case "burn": kind = StatusKind.Poison; return true;   // 燃焼 = 火の毒
                 case "bind": kind = StatusKind.Stun; return true;     // 動けない
+                case "charm": kind = StatusKind.Confuse; return true; // 錯乱弾（敵は主人公の味方になる）
                 default: return StatusSystem.TryParse(type, out kind);
             }
         }
@@ -58,11 +60,16 @@ namespace Lumina.Core.Game
             if (mob == null || !mob.Alive) return;
             if (r.NoBoss && mob.Def.IsBoss) return;
             if (!Rng.Chance(r.Chance / 100)) return;
-            if (SkillStatusKind(r.Type, out var kind)) ApplyStatus(mob, kind, r.Sec, r.Power);
+            if (SkillStatusKind(r.Type, out var kind))
+            {
+                if (kind == StatusKind.Polymorph && mob.PolyDef == null) mob.PolyDef = Data.Mob(PolymorphMobId);
+                var res = ApplyStatus(mob, kind, r.Sec, r.Power);
+                if (kind == StatusKind.Confuse && (res == StatusApplyResult.Applied || res == StatusApplyResult.Refreshed)) OnCharmed(mob);
+            }
             else
             {
                 Out.Add(GameEventType.MobHit, mob.Def.Id, 0, mob.X, mob.HeadY, "status:" + r.Type);
-                MobStatusHook?.Invoke(mob, r); // 遅延・変化の呪い・錯乱弾（敵の速さ・姿・味方化はまだ無い）
+                MobStatusHook?.Invoke(mob, r);
             }
         }
 
@@ -158,9 +165,11 @@ namespace Lumina.Core.Game
             {
                 Id = def.Id, Name = def.Name, SkillLevel = x, Summon = true, Total = def.SummonSec?.Eval(x, lv) ?? 60,
                 SummonHeal = def.SummonHeal?.EvalInt(x, lv) ?? 0, SummonInterval = def.SummonHealInterval,
-                SummonAttack = def.SummonAttack, SummonFixed = def.SummonFixed, SummonX = Body.X + Body.Facing * 30, SummonY = Body.Y,
-                DecoyHp = def.DecoyHpPct != null ? (int)Math.Floor(Stats.MaxHp * def.DecoyHpPct.Eval(x, lv) / 100) : 0,
+                SummonAttack = def.SummonAttack, SummonFixed = def.SummonFixed || def.DecoyHpPct != null, SummonX = Body.X + Body.Facing * 30, SummonY = Body.Y,
+                DecoyHp = def.DecoyHpPct != null ? Math.Max(1, (int)Math.Floor(Stats.MaxHp * def.DecoyHpPct.Eval(x, lv) / 100)) : 0,
+                SummonMap = Map.Data.Id,
             };
+            sb.DecoyMaxHp = sb.DecoyHp;
             sb.Remaining = sb.Total;
             Buffs.Apply(sb);
             Out.Add(GameEventType.BuffStarted, def.Id, (long)sb.Total);
@@ -248,13 +257,20 @@ namespace Lumina.Core.Game
             Out.Add(GameEventType.PortalUsed, "teleport", x: Body.X, y: Body.Y);
         }
 
-        /// <summary>秘術の扉: 今いる地域の町へ。TODO: 町の側の戻る扉（今は町へ行くだけ）。</summary>
+        /// <summary>
+        /// 秘術の扉: 今いる地域の町へ行き、町の側に戻る扉を開く（扉は効果の時間だけ。GameSession.Mechanics.cs の Door）。
+        /// 使った場所にも扉が残り、そこからまた町へ行ける。
+        /// </summary>
         private void OpenDoor(SkillDef def)
         {
             string town = Map.Data.ReturnMap ?? StartMap;
-            if (Map.Data.IsTown || town == Map.Data.Id) { Out.Add(GameEventType.Message, def.Id, text: "町では使えない"); return; }
+            if (Map.Data.IsTown || town == Map.Data.Id) { Out.Add(GameEventType.Message, def.Id, text: "町では使えない"); Buffs.Remove(def.Id); return; }
             var md = Data.GetMap(town);
+            var door = new MysticDoor { SkillId = def.Id, FieldMap = Map.Data.Id, FieldX = Body.X, FieldY = Body.Y, TownMap = town };
             ChangeMap(town, md?.FindPortalByName("town") != null ? "town" : null);
+            door.TownX = Body.X; door.TownY = Body.Y;
+            Door = door;
+            Out.Add(GameEventType.Mechanic, "door_open", 0, Body.X, Body.Y, "秘術の扉");
         }
 
         /// <summary>お金の爆発: 範囲の中の落ちているお金を使って、まわりの敵に（お金の量で決まる）固定ダメージ。</summary>

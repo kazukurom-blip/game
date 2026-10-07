@@ -230,8 +230,9 @@ const BAND = (lv) => [10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 80, 90, 100, 110, 
 const MOVE = { 這: 'crawl', 歩: 'walk', 跳: 'jump', 飛: 'fly', 止: 'stand', 瞬: 'teleport' };
 // 速さ（-50〜+50、monsters.mjs の最後の列）→ px/秒 = 100 + 速さ（FEEL.md 9 章）。止は 0。
 const moveSpeed = (mv, sp) => (mv === 'stand' ? 0 : 100 + Math.max(-50, Math.min(50, sp ?? 0)));
-const STATUS_KINDS = ['poison', 'stun', 'darkness', 'seal', 'curse', 'weak', 'freeze', 'sleep'];
-const ATTACK_TYPES = ['melee', 'shot', 'magic', 'area', 'summon', 'heal', 'dive'];
+const STATUS_KINDS = ['poison', 'stun', 'darkness', 'seal', 'curse', 'weak', 'freeze', 'sleep', 'slow', 'polymorph', 'confuse'];
+const ATTACK_TYPES = ['melee', 'shot', 'magic', 'area', 'summon', 'heal', 'dive', 'buff'];
+const MOB_BUFF_KEYS = ['atk', 'matk', 'def', 'mdef', 'speed', 'reflect', 'magicReflect', 'sec'];
 // mob_skills.mjs に無い敵の技: 遠 = 真っすぐの飛び道具（3 秒ごと）、魔 = 足元に予兆 → 当たる魔法
 const defaultAttacks = (atkType) => {
   if (atkType.includes('遠')) return [{ id: 'shot', name: '飛び道具', type: 'shot', range: 300, cd: 3, windup: 0.3, pct: 100, speed: 300, life: 1.2 }];
@@ -280,11 +281,19 @@ const monsters = MONSTERS_RAW.map(([id, name, lv, kind, move, atkType, el, etc, 
     if (ids.has(a.id)) problems.push(`${id} の技の ID ${a.id} が重なっている`);
     ids.add(a.id);
     checkStatus(a.status, a.id);
+    if (a.type === 'buff') {
+      if (!a.buff || !(a.buff.sec > 0)) problems.push(`${id} の技 ${a.id} の強化に sec が無い`);
+      for (const k of Object.keys(a.buff || {})) if (!MOB_BUFF_KEYS.includes(k)) problems.push(`${id} の技 ${a.id} の強化 ${k} が無い`);
+    }
     for (const m of a.mobs || []) if (!MONSTERS_RAW.some((r) => r[0] === m)) problems.push(`${id} の技 ${a.id} が呼ぶ ${m} が無い`);
   }
   checkStatus(sk.touchStatus, '触れた時');
   const boss = sk.boss || (big ? { phases: [{ hp: 1, name: name }] } : null);
   if (boss) for (const ph of boss.phases) for (const m of ph.summon?.mobs || []) if (!MONSTERS_RAW.some((r) => r[0] === m)) problems.push(`${id} の段階 ${ph.name} が呼ぶ ${m} が無い`);
+  if (boss?.rifts) {
+    if (!MONSTERS_RAW.some((r) => r[0] === boss.rifts.mob)) problems.push(`${id} の時の裂け目の ${boss.rifts.mob} が無い`);
+    if (!(boss.rifts.phase >= 0 && boss.rifts.phase < boss.phases.length)) problems.push(`${id} の時の裂け目の段階 ${boss.rifts.phase} が無い`);
+  }
   if (!Number.isInteger(speedStat) || speedStat < -50 || speedStat > 50) problems.push(`${id} の速さ ${speedStat} が -50〜+50 でない`);
   return {
     id, name, lv, kind, move: mv, attack: atkType, touch: atkType.includes('体'), ranged: atkType.includes('遠'), magic,

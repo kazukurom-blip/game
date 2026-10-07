@@ -35,7 +35,9 @@ namespace Lumina.Core.Skills
         public bool Summon; public int SummonHeal; public double SummonInterval, SummonTimer;
         public SummonAttackDef SummonAttack; public double SummonAttackTimer;
         public bool SummonFixed; public double SummonX, SummonY;
-        public int DecoyHp;          // 身代わり人形の HP（形だけ）
+        public int DecoyHp, DecoyMaxHp; // 身代わり人形の HP（0 になると消える）
+        public string SummonMap;     // 置いたマップ（置く物はそのマップの中だけ）
+        public int ShipHp, ShipMaxHp; // 乗船: 船の HP
 
         public bool Blinking => Remaining <= 5;
     }
@@ -136,6 +138,9 @@ namespace Lumina.Core.Skills
         public ActiveBuff ComboBuff => List.Find(b => b.Combo);
         public ActiveBuff MesoGuard => List.Find(b => b.MesoGuardPct > 0);
         public ActiveBuff ReviveBuff => List.Find(b => b.Revive);
+        public ActiveBuff ShipBuff => List.Find(b => b.Ship);
+        public ActiveBuff DecoyBuff => List.Find(b => b.Summon && b.DecoyMaxHp > 0);
+        public bool SlowFall => List.Exists(b => b.SlowFall);
         /// <summary>無限の魔力: かけてから Infinity 秒ごとに魔法のダメージ +4%。</summary>
         public double InfinityPct => Max(b => b.Infinity > 0 ? 4 * Math.Floor(b.InfinityT / b.Infinity) : 0);
 
