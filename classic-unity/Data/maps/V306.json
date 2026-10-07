@@ -233,7 +233,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V306.q_hat",
+   "name": "オルフェの帽子",
+   "x": 324,
+   "y": 200,
+   "quest": "W-28"
+  }
+ ],
  "note": "大木の幹の中。",
  "seed": "V306#0"
 }

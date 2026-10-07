@@ -413,7 +413,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V209.q_tin",
+   "name": "木の根元の缶",
+   "x": 2856,
+   "y": 712,
+   "quest": "B-30"
+  }
+ ],
  "note": "町のすぐ上の 3 段の狩り場。",
  "seed": "V209#0"
 }

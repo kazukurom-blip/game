@@ -18,6 +18,8 @@ import { MAPS_RAW } from '../../../classic/tools/data/maps.mjs';
 import { armorList, extraList, weaponList, STARTER, WEAPON_TYPES } from '../../../classic/tools/data/equips.mjs';
 import { SCROLLS, scrollsFor } from '../../../classic/tools/data/scrolls.mjs';
 import { QUESTS_RAW } from '../../../classic/tools/data/quests.mjs';
+import { QUEST_ITEMS } from '../../../classic/tools/data/quest_items.mjs';
+import { SIDE_EXP, SIDE_MESO } from '../../../classic/tools/data/quests_more.mjs';
 import { NPCS, npcIdOf } from './world/npcs.mjs';
 import { buildNpcLines, checkNpcLines } from './world/npc_lines.mjs';
 import { buildWorld } from './world/world.mjs';
@@ -210,6 +212,18 @@ for (const [id, name, tab, extra = {}] of SYS.SYSTEM_ITEMS) {
   for (const a of alias || []) byName.set(a, id);
 }
 for (const e of SYS.craftedEquips(items)) equipItem(e);
+// クエストでしか手に入らない品（quest_items.mjs。ITEMS.md 8 章）。questOnly: 店に並ばない・敵が落とさない（テストで確かめる）
+const QSLOT = { 帽子: 'cap', 耳飾り: 'earring', マント: 'cape', 顔飾り: 'face', 指輪: 'ring', ペンダント: 'pendant', メダル: 'medal' };
+for (const [id, name, kind, lv, stats, quest, desc, alias] of QUEST_ITEMS) {
+  const d = `${desc}（入手: クエストのみ・${quest}）`;
+  let it;
+  if (QSLOT[kind]) it = equipItem({ id, name, slot: QSLOT[kind], job: 'common', reqLevel: lv, stats: parseStats(stats), upgrades: kind === 'メダル' ? 0 : lv === 0 ? 0 : 5, price: 0, sellPrice: 1, desc: d, questOnly: true, ...(lv === 0 && kind !== 'メダル' ? { cosmetic: true } : {}) });
+  else if (kind === '椅子') it = addItem({ id, name, tab: 'setup', maxStack: 1, price: 0, sellPrice: 1, chair: { regenMul: 1.5 }, desc: d, questOnly: true });
+  else if (kind === 'ペット') it = addItem({ id, name, tab: 'use', maxStack: 1, price: 0, sellPrice: 0, pet: id.split('.').pop(), desc: d, questOnly: true });
+  else problems.push(`クエストの品 ${id} の種類 ${kind} が分からない`);
+  for (const a of alias || []) byName.set(a, id);
+  void it;
+}
 // 敵の固有品（2-5。島では「旅立ちの髪飾り」）
 for (const [id, , lv, kind, , , , , special] of MONSTERS_RAW) {
   if (!special || byName.has(special) || SYS.MEDAL_OF_MOB[id]) continue; // 1 人用ダンジョンの主のメダルはダンジョンごと（systems.mjs）
@@ -405,17 +419,28 @@ const TUTORIAL = {
   'S-20': T({ end: 'riri' }),
 };
 
+// 目的の印（quests.mjs の先頭）: [[k:敵:N]] [[i:敵:N]] [[m:マップ]] と、ラベル付きの [[t:NPC|表示]] [[x:調べる物:N|表示]] [[g:品:N|表示]] [[e:操作:N|表示]]
+const GOAL_RE = /\[\[(k|i|m):([A-Z0-9]+)(?::(\d+))?\]\]|\[\[(t|x|g|e):([^\]|:]+)(?::(\d+))?\|([^\]]+)\]\]/g;
 function parseGoal(goal) {
   const out = [];
-  const re = /\[\[(k|i|m):([A-Z0-9]+)(?::(\d+))?\]\]/g;
   let m;
-  while ((m = re.exec(goal))) {
+  GOAL_RE.lastIndex = 0;
+  while ((m = GOAL_RE.exec(goal))) {
     if (m[1] === 'k') out.push({ type: 'kill', mob: m[2], count: parseInt(m[3], 10) });
     else if (m[1] === 'i') out.push({ type: 'collect', item: `etc.${m[2]}`, count: parseInt(m[3], 10) });
-    else out.push({ type: 'visit', map: m[2] });
+    else if (m[1] === 'm') out.push({ type: 'visit', map: m[2] });
+    else {
+      const n = m[6] ? parseInt(m[6], 10) : 1;
+      const label = m[7];
+      if (m[4] === 't') out.push({ type: 'talk', npc: m[5], label });
+      else if (m[4] === 'x') out.push({ type: 'interact', target: m[5], label, ...(n > 1 ? { count: n } : {}) });
+      else if (m[4] === 'g') out.push({ type: 'collect', item: m[5], count: n, label });
+      else out.push({ type: 'event', event: m[5], label, ...(n > 1 ? { count: n } : {}) });
+    }
   }
   return out;
 }
+const goalText = (goal) => goal.replace(GOAL_RE, (_, t, a, n, t2, a2, n2, label) => (t ? `${a}${n ? '×' + n : ''}` : label));
 
 // 「赤ポーション ×5」「守りのお守り ×1」「1 万ルド」「靴速さの書 100%」→ 品
 function parseRewards(text) {
@@ -452,14 +477,15 @@ const REPEAT = (id) => {
   return { repeat: 'daily', board: true, coupon: n <= 12 ? 'use.exp_coupon' : 'use.drop_coupon' };
 };
 
-const quests = QUESTS_RAW.map(([id, name, giver, map, lv, pre, goal, size, itemsText, story]) => {
+const quests = QUESTS_RAW.map(([id, name, giver, map, lv, pre, goal, size, itemsText, story, ext = {}]) => {
   const [ef, mf] = QSIZE[size] || [0, 0];
-  const exp = Math.max(QMIN[size] || 0, nice(expToNext(Math.min(lv, 199)) * ef));
-  const meso = nice(mobBase(lv).meso * mf);
+  // 寄り道（quests_more.mjs の side）は経験値・お金を少なめ（gen_docs.mjs と同じ式）
+  const exp = Math.max((QMIN[size] || 0) * (ext.side ? 0.5 : 1), nice(expToNext(Math.min(lv, 199)) * ef * (ext.side ? SIDE_EXP : 1)));
+  const meso = nice(mobBase(lv).meso * mf * (ext.side ? SIDE_MESO : 1));
   const r = parseRewards(itemsText);
-  const rp = REPEAT(id);
+  const rp = REPEAT(id) || (ext.repeat ? { repeat: ext.repeat } : null);
   if (rp?.coupon) { r.rewards.push({ item: rp.coupon, count: 1 }); r.rest = []; }
-  const tut = TUTORIAL[id] || QUEST_GOALS[id] || {};
+  const tut = TUTORIAL[id] || QUEST_GOALS[id] || ext;
   const giverId = npcIdOf(giver, map) || NPC_BY_NAME.get(giver) || giver;
   if (!NPCS.some((n) => n[0] === giverId && n[2] === map)) problems.push(`クエスト ${id} の依頼者 ${giver} が ${map} にいない`);
   const objectives = tut.parsed ? [...parseGoal(goal), ...tut.objectives] : tut.objectives || parseGoal(goal);
@@ -467,9 +493,10 @@ const quests = QUESTS_RAW.map(([id, name, giver, map, lv, pre, goal, size, items
   if (!objectives.length && id.startsWith('S-')) problems.push(`クエスト ${id} の目的が読めない`);
   return {
     id, name, giver: giverId, giverName: giver, map, minLevel: lv, prereqs: pre === '-' ? [] : pre.split(/[・,]/).map((s) => s.trim()),
-    size, goalText: goal.replace(/\[\[(k|i|m):([A-Z0-9]+)(?::(\d+))?\]\]/g, (_, t, a, n) => `${a}${n ? '×' + n : ''}`), objectives,
+    size, goalText: goalText(goal), objectives,
     end: tut.end || giverId, ...(tut.minStats ? { minStats: tut.minStats } : {}),
     ...(rp ? { repeat: rp.repeat, ...(rp.board ? { board: true } : {}) } : {}),
+    ...(ext.ordered ? { ordered: true } : {}), ...(ext.hours ? { hours: ext.hours } : {}), ...(ext.needItem ? { needItem: ext.needItem } : {}),
     ...(tut.line ? { line: tut.line } : {}), ...(tut.advance ? { advance: tut.advance } : {}), ...(tut.unlock ? { unlock: tut.unlock } : {}), exp, meso: meso + r.meso, rewards: r.rewards, rewardText: itemsText, rewardUnparsed: r.rest, story,
     tutorial: id.startsWith('S-'),
   };

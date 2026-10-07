@@ -12,6 +12,8 @@ import { armorList, extraList, weaponList, STARTER } from './data/equips.mjs';
 import { SCROLLS, scrollsFor } from './data/scrolls.mjs';
 import { huntTable, killsPerMin } from './hunt_speed.mjs';
 import { QUESTS_RAW } from './data/quests.mjs';
+import { QUEST_SPAWNS, SIDE_EXP, SIDE_MESO } from './data/quests_more.mjs';
+import { QUEST_ITEMS } from './data/quest_items.mjs';
 import { expToNext } from './lib/curves.mjs';
 import { check } from './balance_check.mjs';
 import { playerAcc, hitChance } from './lib/combat.mjs';
@@ -60,6 +62,14 @@ for (const m of MAPS) {
     }
   }
 }
+// クエスト専用の敵（quests_more.mjs の QUEST_SPAWNS。そのクエストの間だけ湧く）
+for (const [mid, map, quest] of QUEST_SPAWNS) {
+  const mob = MOB[mid];
+  if (!mob) { problems.push(`クエスト専用の敵 ${mid} が無い`); continue; }
+  if (!MAP[map]) { problems.push(`クエスト専用の敵 ${mid} のマップ ${map} が無い`); continue; }
+  mob.maps.push(map);
+  mob.questOnly = quest;
+}
 for (const mob of MONSTERS) if (!mob.maps.length) problems.push(`敵 ${mob.id} ${mob.name} がどのマップにも出ない`);
 for (const mob of MONSTERS) if (!Number.isInteger(mob.speed) || mob.speed < -50 || mob.speed > 50) problems.push(`敵 ${mob.id} ${mob.name} の速さ ${mob.speed} が -50〜+50 の整数でない`);
 // どのマップからも町へ歩いて戻れるか（乗り物を含めず、ポータルだけで町に着くか）
@@ -94,7 +104,7 @@ function genMonsters() {
     out.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
     for (const m of list) {
       const kindJ = { normal: '通常', tough: '硬い', frail: '柔い', elite: '強敵', boss: 'ボス', raid: '大ボス' }[m.kind];
-      out.push(`| ${m.id} | ${m.name} | ${m.lv} | ${kindJ} | ${fmt(m.hp)} | ${fmt(m.mp)} | ${fmt(m.exp)} | ${fmt(m.atk)}/${m.matk ? fmt(m.matk) : '-'} | ${fmt(m.def)}/${fmt(m.mdef)} | ${m.avoid}/${m.acc} | ${fmt(m.meso)} | ${m.move}・${m.atkType} | ${m.move === '止' ? '-' : (m.speed > 0 ? '+' : '') + m.speed} | ${m.el} | ${m.maps.join(' ')} |`);
+      out.push(`| ${m.id} | ${m.name} | ${m.lv} | ${kindJ} | ${fmt(m.hp)} | ${fmt(m.mp)} | ${fmt(m.exp)} | ${fmt(m.atk)}/${m.matk ? fmt(m.matk) : '-'} | ${fmt(m.def)}/${fmt(m.mdef)} | ${m.avoid}/${m.acc} | ${fmt(m.meso)} | ${m.move}・${m.atkType} | ${m.move === '止' ? '-' : (m.speed > 0 ? '+' : '') + m.speed} | ${m.el} | ${m.maps.join(' ')}${m.questOnly ? `（${m.questOnly} の間だけ）` : ''} |`);
     }
     out.push('');
     out.push('<details><summary>ドロップと説明</summary>\n');
@@ -120,14 +130,19 @@ function genBossTime() {
 
 // ---------------- クエスト
 const SIZE = { 小: [0.06, 10], 中: [0.12, 25], 大: [0.25, 60], 特: [0.5, 150] };
-export const QUESTS = QUESTS_RAW.map(([id, name, giver, map, lv, pre, goal, size, items, story]) => {
+export const QUESTS = QUESTS_RAW.map(([id, name, giver, map, lv, pre, goal, size, items, story, ext = {}]) => {
   const [ef, mf] = SIZE[size] || [0, 0];
   if (!SIZE[size]) problems.push(`クエスト ${id} の大きさ ${size} が変`);
-  return { id, name, giver, map, lv, pre, goal, size, items, story, exp: Math.max({ 小: 8, 中: 15, 大: 30, 特: 60 }[size] || 0, nice(expToNext(Math.min(lv, 199)) * ef)), meso: nice(mobBase(lv).meso * mf) };
+  return { id, name, giver, map, lv, pre, goal, size, items, story, ext, exp: Math.max(({ 小: 8, 中: 15, 大: 30, 特: 60 }[size] || 0) * (ext.side ? 0.5 : 1), nice(expToNext(Math.min(lv, 199)) * ef * (ext.side ? SIDE_EXP : 1))), meso: nice(mobBase(lv).meso * mf * (ext.side ? SIDE_MESO : 1)) };
 });
 const QMAP = Object.fromEntries(QUESTS.map((q) => [q.id, q]));
+const QIDS = new Set(QUESTS.map((q) => q.id));
+for (const q of QUESTS) if (QUESTS.filter((x) => x.id === q.id).length > 1) problems.push(`クエストの ID ${q.id} が重なっている`);
+void QIDS;
 function renderGoal(q) {
-  return q.goal.replace(/\[\[(k|i|m):([A-Z0-9]+)(?::(\d+))?\]\]/g, (_, t, ref, n) => {
+  // ラベル付きの印（quests_more.mjs の先頭: [[t:..|表示]] [[x:..|表示]] [[g:..|表示]] [[e:..|表示]]）は表示の文だけ
+  const g = q.goal.replace(/\[\[(t|x|g|e):([^\]|:]+)(?::(\d+))?\|([^\]]+)\]\]/g, (_, t, ref, n, label) => label);
+  return g.replace(/\[\[(k|i|m):([A-Z0-9]+)(?::(\d+))?\]\]/g, (_, t, ref, n) => {
     if (t === 'm') { if (!MAP[ref]) problems.push(`クエスト ${q.id} のマップ ${ref} が無い`); return `${MAP[ref]?.name}（${ref}）`; }
     const m = MOB[ref];
     if (!m) { problems.push(`クエスト ${q.id} の敵 ${ref} が無い`); return ref; }
@@ -143,6 +158,7 @@ const QGROUPS = [
   ['S', '芽吹きの島（チュートリアル）'], ['V', 'ブリーズ港'], ['B', 'ポム丘'], ['W', 'シルワ森都'], ['G', 'ガルド岩台'], ['K', 'クロウ街'], ['N', 'ねむり谷'],
   ['C', 'セレス'], ['F', 'ヒョウガ村'], ['T', 'ティンクル'], ['M', 'マリナ'], ['A', '古の神殿'], ['D', '竜の谷'], ['H', '焔の坑道'], ['E', '星の果て'],
   ['L', '本筋「星の封印」'], ['J', '転職'], ['PET', 'ペット'], ['R', '繰り返し（募集の掲示板）'], ['PQ', '1 人用ダンジョンの受付'],
+  ['IS', '芽吹きの島の寄り道'], ['MK', 'にぎわい市場'], ['Y', '町をまたぐ寄り道の連作'], ['X', '冒険の記録（長い目標）'],
 ];
 const groupOf = (id) => id.split('-')[0].replace(/^J\d$/, 'J');
 function genQuests() {
@@ -160,13 +176,60 @@ function genQStats() {
   const bands = [[1, 10], [10, 30], [30, 70], [70, 120], [120, 200]];
   const out = ['| Lv 帯 | クエスト数 | 報酬の経験値の合計 | その帯で要る経験値 | 割合 |', '|---|---|---|---|---|'];
   for (const [a, b] of bands) {
-    const qs = QUESTS.filter((q) => q.lv >= a && q.lv < b && !q.id.startsWith('R-') && !q.id.startsWith('PQ'));
+    const qs = QUESTS.filter((q) => q.lv >= a && q.lv < b && !q.id.startsWith('R-') && !q.id.startsWith('PQ') && !q.ext.repeat);
     const sum = qs.reduce((x, q) => x + q.exp, 0);
     const need = t.filter((r) => r.lv >= a && r.lv < b).reduce((x, r) => x + r.need, 0);
     out.push(`| ${a}〜${b - 1} | ${qs.length} | ${fmt(sum)} | ${fmt(need)} | ${(sum / need * 100).toFixed(1)}% |`);
   }
-  out.push('', `- 合計 **${QUESTS.length} 本**（繰り返し・ダンジョンの受付を除くと ${QUESTS.filter((q) => !q.id.startsWith('R-') && !q.id.startsWith('PQ')).length} 本）。`);
+  out.push('', `- 合計 **${QUESTS.length} 本**（繰り返し・ダンジョンの受付を除くと ${QUESTS.filter((q) => !q.id.startsWith('R-') && !q.id.startsWith('PQ') && !q.ext.repeat).length} 本）。`);
   out.push('- 割合は「1 回だけのクエスト」の経験値だけ。低い Lv ほどクエストで育つ割合が高く（クラシックの「最初はクエストで町を覚える」流れ）、高 Lv は狩り・ボス・1 人用ダンジョンが中心。繰り返し（毎日 3 本）と 1 人用ダンジョンの報酬で高 Lv も 1〜2 割を足す。');
+  return out.join('\n');
+}
+
+// 町ごと・Lv 帯ごとの本数（QUESTS.md 8 章）。町は依頼者のいるマップの地域（大陸は町の番号の帯）で分ける
+const TOWN_OF = (map) => {
+  const r = map[0], n = parseInt(map.slice(1), 10);
+  if (r === 'S') return '芽吹きの島';
+  if (r === 'V') {
+    if (n === 90) return 'にぎわい市場';
+    if (n >= 100 && n < 200) return 'ブリーズ港（潮風号を含む）';
+    if (n >= 200 && n < 300) return 'ポム丘';
+    if (n >= 300 && n < 400) return 'シルワ森都';
+    if (n >= 400 && n < 500) return 'ガルド岩台';
+    if (n >= 500 && n < 600 || n === 707) return 'クロウ街';
+    if (n >= 600 && n < 700) return 'ねむり谷';
+    return 'ヴェルデ大陸の道';
+  }
+  return { C: 'セレス', F: 'ヒョウガ村', T: 'ティンクル', M: 'マリナ', P: '古の神殿', D: '竜の谷', H: '焔の坑道', E: '星の果て' }[r] || r;
+};
+const BANDS = [[1, 10], [10, 30], [30, 70], [70, 120], [120, 201]];
+function genQTowns() {
+  const towns = [...new Set(QUESTS.map((q) => TOWN_OF(q.map)))];
+  const out = ['| 町 | ' + BANDS.map(([a, b]) => `Lv${a}〜${b - 1}`).join(' | ') + ' | 合計 | うち連作の最後の限定品・隠し・毎日 |', '|---|' + BANDS.map(() => '---|').join('') + '---|---|'];
+  for (const t of towns) {
+    const qs = QUESTS.filter((q) => TOWN_OF(q.map) === t);
+    const cells = BANDS.map(([a, b]) => qs.filter((q) => q.lv >= a && q.lv < b).length || '-');
+    const special = QUEST_ITEMS.filter((it) => qs.some((q) => q.id === it[5])).length;
+    const hidden = qs.filter((q) => q.ext.hours || q.ext.needItem).length;
+    const daily = qs.filter((q) => q.ext.repeat || q.id.startsWith('R-')).length;
+    out.push(`| ${t} | ${cells.join(' | ')} | ${qs.length} | ${special}・${hidden}・${daily} |`);
+  }
+  const tot = BANDS.map(([a, b]) => QUESTS.filter((q) => q.lv >= a && q.lv < b).length);
+  out.push(`| **合計** | ${tot.join(' | ')} | **${QUESTS.length}** | ${QUEST_ITEMS.length}・${QUESTS.filter((q) => q.ext.hours || q.ext.needItem).length}・${QUESTS.filter((q) => q.ext.repeat || q.id.startsWith('R-')).length} |`);
+  // Lv ごとに「その Lv で受けられる（前提を除く）クエスト」の数の目安
+  out.push('', '| Lv | ' + [5, 10, 15, 20, 30, 40, 50, 60, 70, 85, 100, 120, 140, 160, 180, 200].join(' | ') + ' |', '|---|' + Array(16).fill('---|').join(''));
+  const near = [5, 10, 15, 20, 30, 40, 50, 60, 70, 85, 100, 120, 140, 160, 180, 200].map((lv) => QUESTS.filter((q) => q.lv <= lv && q.lv > lv - 10).length);
+  out.push(`| その Lv の 10 下までに始まる本数 | ${near.join(' | ')} |`);
+  return out.join('\n');
+}
+// クエストでしか手に入らない品（ITEMS.md 8 章）
+function genQuestItems() {
+  const out = ['| 名前 | 種類 | 必要Lv | 能力 | 入手 | 説明 |', '|---|---|---|---|---|---|'];
+  for (const [, name, kind, lv, stats, quest, desc] of QUEST_ITEMS) {
+    if (!QMAP[quest]) problems.push(`クエストの品 ${name} の入手のクエスト ${quest} が無い`);
+    else if (!QMAP[quest].items.includes(name) && !(QUEST_ITEMS.find((x) => x[1] === name)?.[7] || []).some((a) => QMAP[quest].items.includes(a))) problems.push(`クエストの品 ${name} が ${quest} の報酬に無い`);
+    out.push(`| ${name} | ${kind} | ${lv || '-'} | ${stats || '-'} | **クエストのみ**（${quest} ${QMAP[quest]?.name || ''}） | ${desc} |`);
+  }
   return out.join('\n');
 }
 
@@ -275,9 +338,9 @@ const BLOCKS = {
   'MONSTERS.md': { monsters: genMonsters, bosstime: genBossTime },
   'WORLD.md': { maps: genMaps, travel: genTravel },
   'STATS.md': { exp: genExp, hit: genHit, hunt: genHunt, balance: genBalance },
-  'ITEMS.md': { equips: genEquips, scrolls: genScrolls },
+  'ITEMS.md': { equips: genEquips, scrolls: genScrolls, questitems: genQuestItems },
   'DESIGN.md': { counts: genCounts },
-  'QUESTS.md': { quests: genQuests, qstats: genQStats },
+  'QUESTS.md': { quests: genQuests, qstats: genQStats, qtowns: genQTowns },
 };
 
 let drift = 0;

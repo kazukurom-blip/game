@@ -290,6 +290,14 @@
     "name": "子竜",
     "grownName": "竜",
     "growAt": 30
+   },
+   {
+    "id": "owlet",
+    "name": "子ふくろう"
+   },
+   {
+    "id": "cloudlamb",
+    "name": "雲の子ひつじ"
    }
   ],
   "fullnessMax": 100,

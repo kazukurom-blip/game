@@ -298,7 +298,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V514.q_safe",
+   "name": "古い金庫",
+   "x": 1024,
+   "y": 200,
+   "quest": "K-30"
+  }
+ ],
  "note": "ビルの屋上を渡る。",
  "seed": "V514#0"
 }

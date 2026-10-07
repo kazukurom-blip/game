@@ -395,7 +395,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "C103.q_star",
+   "name": "落ちた星",
+   "x": 860,
+   "y": 200,
+   "quest": "C-30"
+  }
+ ],
  "note": "星の形の足場。",
  "seed": "C103#0"
 }

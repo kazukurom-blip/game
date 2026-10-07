@@ -402,9 +402,25 @@
  ],
  "mobMax": 22,
  "respawnSec": 7,
- "timedSpawns": [],
+ "timedSpawns": [
+  {
+   "mob": "M412",
+   "x": 1692,
+   "y": 584,
+   "intervalSec": 10,
+   "quest": "D-16"
+  }
+ ],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "D107.q_flag",
+   "name": "折れた旗",
+   "x": 2822,
+   "y": 584,
+   "quest": "D-13"
+  }
+ ],
  "note": "",
  "seed": "D107#0"
 }

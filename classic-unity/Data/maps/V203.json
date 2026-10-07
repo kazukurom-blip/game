@@ -360,7 +360,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V203.q_parcel",
+   "name": "置き忘れの荷物",
+   "x": 1500,
+   "y": 592,
+   "quest": "B-24"
+  }
+ ],
  "note": "一面の花畑。",
  "seed": "V203#0"
 }

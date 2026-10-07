@@ -314,9 +314,25 @@
  ],
  "mobMax": 18,
  "respawnSec": 7,
- "timedSpawns": [],
+ "timedSpawns": [
+  {
+   "mob": "M402",
+   "x": 1380,
+   "y": 600,
+   "intervalSec": 10,
+   "quest": "B-18"
+  }
+ ],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V207.q_sign",
+   "name": "倒れた立て札",
+   "x": 414,
+   "y": 576,
+   "quest": "B-16"
+  }
+ ],
  "note": "荒れた畑。",
  "seed": "V207#0"
 }

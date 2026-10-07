@@ -251,7 +251,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V408.q_track",
+   "name": "大きな足あと",
+   "x": 336,
+   "y": 620,
+   "quest": "G-17"
+  }
+ ],
  "note": "発掘の足場とはしご。",
  "seed": "V408#0"
 }

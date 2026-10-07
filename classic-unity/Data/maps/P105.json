@@ -273,7 +273,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "P105.q_dust",
+   "name": "床の銀の粉",
+   "x": 2108,
+   "y": 648,
+   "quest": "A-10"
+  }
+ ],
  "note": "",
  "seed": "P105#0"
 }

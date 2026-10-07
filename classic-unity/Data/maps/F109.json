@@ -313,7 +313,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "F109.q_grave",
+   "name": "小さな石の墓",
+   "x": 2482,
+   "y": 600,
+   "quest": "F-33"
+  }
+ ],
  "note": "",
  "seed": "F109#0"
 }

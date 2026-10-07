@@ -353,7 +353,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "D111.q_nest",
+   "name": "古い巣",
+   "x": 1156,
+   "y": 200,
+   "quest": "D-25"
+  }
+ ],
  "note": "",
  "seed": "D111#0"
 }

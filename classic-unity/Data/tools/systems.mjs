@@ -169,6 +169,8 @@ export const PETS = {
   kinds: [
     { id: 'puppy', name: '子犬' }, { id: 'kitten', name: '子猫' }, { id: 'bunny', name: '子うさぎ' },
     { id: 'panda', name: '子パンダ' }, { id: 'penguin', name: '子ペンギン' }, { id: 'dragon', name: '子竜', grownName: '竜', growAt: 30 },
+    // クエストでしか迎えられないペット（quest_items.mjs。W-21・C-18）
+    { id: 'owlet', name: '子ふくろう' }, { id: 'cloudlamb', name: '雲の子ひつじ' },
   ],
   fullnessMax: 100, hungerSec: 36,          // 満腹度は 36 秒で 1 減る（100 → 0 で 1 時間）
   foodItem: 'use.pet_food', foodFullness: 30, // ペットの餌 +30（ITEMS.md 3-5）

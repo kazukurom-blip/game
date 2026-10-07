@@ -329,7 +329,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V106.q_bottle",
+   "name": "流れ着いた瓶",
+   "x": 2074,
+   "y": 392,
+   "quest": "V-42"
+  }
+ ],
  "note": "クロウ街への街道へ続く。",
  "seed": "V106#0"
 }

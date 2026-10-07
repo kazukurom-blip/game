@@ -575,6 +575,7 @@ namespace Lumina.Core.Game
             stolenFrom.Remove(mob);
             GainExp((long)Math.Max(1, Math.Round(def.Exp * mul)));
             foreach (var note in Quests.Progress(ObjectiveType.Kill, def.Id)) OnQuestNote(note);
+            RecordKill(def); // 冒険の記録: 倒した敵の種類（GameSession.Records.cs）
             var drops = DropRoller.Roll(def, Data, Rng, 1 + Stats.Mods.DropPct / 100, 1 + Stats.Mods.MesoPct / 100);
             AddQuestDrops(def, drops);   // 転職の試験の印（GameSession.Rooms.cs）
             OnMobKilledTown(mob);        // boss_kill・ダンジョンのクリア

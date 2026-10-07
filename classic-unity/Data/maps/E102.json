@@ -316,7 +316,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "E102.q_crater",
+   "name": "くぼみ",
+   "x": 2142,
+   "y": 516,
+   "quest": "E-12"
+  }
+ ],
  "note": "",
  "seed": "E102#0"
 }

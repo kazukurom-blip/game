@@ -47,7 +47,14 @@
  "mobMax": 0,
  "respawnSec": 7,
  "timedSpawns": [],
- "npcs": [],
+ "npcs": [
+  {
+   "id": "sennin",
+   "name": "湯けむりの仙人",
+   "x": 328,
+   "y": 200
+  }
+ ],
  "objects": [],
  "note": "座ると HP/MP の回復が 3 倍。",
  "seed": "V619#0"

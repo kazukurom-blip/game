@@ -381,7 +381,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "C115.q_altar",
+   "name": "星の台座",
+   "x": 792,
+   "y": 200,
+   "quest": "Y-15"
+  }
+ ],
  "note": "",
  "seed": "C115#0"
 }

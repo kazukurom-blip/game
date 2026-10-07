@@ -24,7 +24,7 @@ namespace Lumina.Core.Quests
         public string QuestId; public int ObjectiveIndex; public int Count, Need;
     }
 
-    public enum StartResult { Ok, Unknown, AlreadyStarted, AlreadyCompleted, LevelTooLow, PrereqMissing, GiverNotHere, StatTooLow, WrongJob, NotToday }
+    public enum StartResult { Ok, Unknown, AlreadyStarted, AlreadyCompleted, LevelTooLow, PrereqMissing, GiverNotHere, StatTooLow, WrongJob, NotToday, WrongTime, MissingItem }
 
     public sealed class QuestLog
     {
@@ -37,6 +37,14 @@ namespace Lumina.Core.Quests
         public Func<QuestDef, bool> RepeatReady;
         /// <summary>掲示板のクエストが今日の 3 本に入っているか。GameSession が日付と Lv で決める。null なら全部</summary>
         public Func<QuestDef, bool> Offered;
+
+        /// <summary>今の時（0〜23）。隠しクエストの時間に使う。null なら時間の条件は見ない</summary>
+        public Func<int> HourNow;
+        /// <summary>品を持っているか。隠しクエストの「持って話す」に使う。null なら見ない</summary>
+        public Func<string, bool> HasItem;
+
+        /// <summary>時 h が [from, to) に入るか（from &gt; to なら夜をまたぐ: 22〜4 時 など）</summary>
+        public static bool InHours(int h, int from, int to) => from <= to ? h >= from && h < to : h >= from || h < to;
 
         public QuestStatus Status(string id) => Entries.TryGetValue(id, out var p) ? p.Status : QuestStatus.None;
         public bool IsCompleted(string id) => Status(id) == QuestStatus.Completed;
@@ -54,6 +62,8 @@ namespace Lumina.Core.Quests
             foreach (var kv in q.MinStats) if (c.GetStat(ParseStat(kv.Key)) < kv.Value) return StartResult.StatTooLow;
             if (q.Line != null && q.Line != c.Line) return StartResult.WrongJob; // 転職のクエストは自分の系統だけ
             if (q.Board && Offered != null && !Offered(q)) return StartResult.NotToday; // 掲示板は今日の 3 本だけ
+            if (q.HourFrom >= 0 && HourNow != null && !InHours(HourNow(), q.HourFrom, q.HourTo)) return StartResult.WrongTime; // 隠し: その時間だけ
+            if (q.NeedItem != null && HasItem != null && !HasItem(q.NeedItem)) return StartResult.MissingItem;               // 隠し: その品を持って話す
             // 1 次転職のクエスト（J?-1）は初心者だけ。転職した後に別の系統の J?-1 を受けると、終わらないクエストが残る（PLAYTEST.md）
             if (c.Tier >= 1 && q.Objectives.Exists(o => o.Type == ObjectiveType.Event && o.Target == "job_advance.1")) return StartResult.WrongJob;
             return StartResult.Ok;
@@ -133,11 +143,50 @@ namespace Lumina.Core.Quests
                 {
                     var o = q.Objectives[i];
                     if (o.Type != type || o.Target != target) continue;
+                    if (q.Ordered && !EarlierDone(q, p, i)) break; // 順番のある目的: 前が済んでいないと進まない
                     p.Counts.TryGetValue(o.Key, out var n);
                     if (n >= o.Count) continue;
                     n = System.Math.Min(o.Count, n + amount);
                     p.Counts[o.Key] = n;
                     notes.Add(new QuestProgressNote { QuestId = q.Id, ObjectiveIndex = i, Count = n, Need = o.Count });
+                }
+            }
+            return notes;
+        }
+
+        private static bool EarlierDone(QuestDef q, QuestProgress p, int i)
+        {
+            for (int j = 0; j < i; j++)
+            {
+                var o = q.Objectives[j];
+                if (o.Type == ObjectiveType.Collect) continue; // 集める物は持ち物で数える（順番には入れない）
+                if (!p.Counts.TryGetValue(o.Key, out var n) || n < o.Count) return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 長い目標（敵を N 種類倒す・町を N か所訪ねる など）: 目的の数を「今までの合計」にそろえる（減らさない）。
+        /// GameSession が倒した敵の種類などを数えて呼ぶ。進んだ物を返す。
+        /// </summary>
+        public List<QuestProgressNote> SetAtLeast(ObjectiveType type, string target, int value)
+        {
+            var notes = new List<QuestProgressNote>();
+            foreach (var kv in Entries)
+            {
+                var p = kv.Value;
+                if (p.Status != QuestStatus.InProgress) continue;
+                var q = data.Quest(kv.Key);
+                if (q == null) continue;
+                for (int i = 0; i < q.Objectives.Count; i++)
+                {
+                    var o = q.Objectives[i];
+                    if (o.Type != type || o.Target != target) continue;
+                    p.Counts.TryGetValue(o.Key, out var n);
+                    int v = System.Math.Min(o.Count, value);
+                    if (v <= n) continue;
+                    p.Counts[o.Key] = v;
+                    notes.Add(new QuestProgressNote { QuestId = q.Id, ObjectiveIndex = i, Count = v, Need = o.Count });
                 }
             }
             return notes;

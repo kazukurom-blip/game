@@ -281,7 +281,15 @@
  ],
  "mobMax": 19,
  "respawnSec": 7,
- "timedSpawns": [],
+ "timedSpawns": [
+  {
+   "mob": "M409",
+   "x": 1440,
+   "y": 640,
+   "intervalSec": 10,
+   "quest": "T-19"
+  }
+ ],
  "npcs": [],
  "objects": [],
  "note": "",

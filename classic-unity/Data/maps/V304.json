@@ -426,7 +426,22 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V304.q_owl_tree",
+   "name": "うろのある木",
+   "x": 2142,
+   "y": 656,
+   "quest": "W-17"
+  },
+  {
+   "id": "V304.q_fairy_ring",
+   "name": "花の輪",
+   "x": 378,
+   "y": 656,
+   "quest": "W-32"
+  }
+ ],
  "note": "高い枝の足場。妖精が光る。",
  "seed": "V304#1"
 }

@@ -106,6 +106,15 @@ namespace Lumina.Core.World
         private readonly double[] timedT;
         private readonly int[] timedUid;
 
+        /// <summary>クエスト専用の敵（SpawnData.Quest）を湧かせてよいか。GameSession が「そのクエストを進めている」で答える。null なら湧かない</summary>
+        public Func<string, bool> QuestActive;
+
+        private bool TimedAllowed(int i)
+        {
+            var q = Data.TimedSpawns[i].Quest;
+            return q == null || QuestActive != null && QuestActive(q);
+        }
+
         public MapInstance(MapData md, GameData data)
         {
             Data = md;
@@ -121,7 +130,7 @@ namespace Lumina.Core.World
         public void InitialSpawn(IRandom rng)
         {
             FillSpawns(rng);
-            for (int i = 0; i < Data.TimedSpawns.Count; i++) SpawnTimed(i);
+            for (int i = 0; i < Data.TimedSpawns.Count; i++) if (TimedAllowed(i)) SpawnTimed(i);
         }
 
         /// <summary>しばらく離れていたマップに戻った: 倒された分を補充する（敵の HP・落ちている物はそのまま）。</summary>
@@ -190,6 +199,13 @@ namespace Lumina.Core.World
             for (int i = 0; i < timedT.Length; i++)
             {
                 bool alive = Mobs.Exists(m => m.Uid == timedUid[i] && !m.Removed);
+                if (!TimedAllowed(i))
+                {
+                    // クエスト専用の敵: クエストを進めていない時は出ない（終えた・やめた時は消える）
+                    if (alive) foreach (var m in Mobs) if (m.Uid == timedUid[i]) m.Removed = true;
+                    timedT[i] = 0;
+                    continue;
+                }
                 if (alive) continue;
                 timedT[i] += dt;
                 if (timedT[i] >= Data.TimedSpawns[i].IntervalSec - 1e-9) SpawnTimed(i);

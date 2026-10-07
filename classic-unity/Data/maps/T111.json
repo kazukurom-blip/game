@@ -330,7 +330,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "T111.q_map",
+   "name": "歯車の間",
+   "x": 1412,
+   "y": 200,
+   "quest": "Y-12"
+  }
+ ],
  "note": "",
  "seed": "T111#0"
 }

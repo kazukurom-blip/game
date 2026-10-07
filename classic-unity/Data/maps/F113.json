@@ -270,7 +270,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "F113.q_helmet",
+   "name": "古いヘルメット",
+   "x": 2380,
+   "y": 620,
+   "quest": "F-27"
+  }
+ ],
  "note": "",
  "seed": "F113#0"
 }

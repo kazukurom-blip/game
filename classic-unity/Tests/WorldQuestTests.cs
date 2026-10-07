@@ -169,7 +169,7 @@ namespace Lumina.Core.Tests
         public void QuestDataAndRewardsFromQuestsMd()
         {
             var d = TestData.Get();
-            Assert.Equal(286, d.Quests.Count);
+            Assert.True(d.Quests.Count >= 600, "クエストが " + d.Quests.Count + " 本"); // QUESTS.md 8 章で 286 → 600 本以上
             var q = d.Quest("S-17");
             Assert.Equal(278, q.Exp);
             Assert.Equal(1220, q.Meso);

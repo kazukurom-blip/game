@@ -303,7 +303,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V104.q_rock_arrow",
+   "name": "岩に彫った矢印",
+   "x": 524,
+   "y": 200,
+   "quest": "V-17"
+  }
+ ],
  "note": "岩の段差と潮だまり。",
  "seed": "V104#0"
 }

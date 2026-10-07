@@ -355,7 +355,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "P101.q_dawn",
+   "name": "階段の一番上の段",
+   "x": 2024,
+   "y": 200,
+   "quest": "A-19"
+  }
+ ],
  "note": "",
  "seed": "P101#0"
 }

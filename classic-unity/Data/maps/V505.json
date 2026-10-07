@@ -247,7 +247,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V505.q_cap",
+   "name": "落とし物の棚",
+   "x": 1734,
+   "y": 504,
+   "quest": "K-17"
+  }
+ ],
  "note": "切符売り場。",
  "seed": "V505#0"
 }

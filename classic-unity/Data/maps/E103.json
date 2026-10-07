@@ -361,9 +361,25 @@
  ],
  "mobMax": 18,
  "respawnSec": 7,
- "timedSpawns": [],
+ "timedSpawns": [
+  {
+   "mob": "M414",
+   "x": 1380,
+   "y": 684,
+   "intervalSec": 10,
+   "quest": "E-14"
+  }
+ ],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "E103.q_crater",
+   "name": "焦げた石畳",
+   "x": 414,
+   "y": 684,
+   "quest": "E-12"
+  }
+ ],
  "note": "",
  "seed": "E103#0"
 }

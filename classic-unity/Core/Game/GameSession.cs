@@ -63,6 +63,8 @@ namespace Lumina.Core.Game
         public SaveStore Store { get; private set; }
         public string Slot { get; private set; }
         public Func<DateTime> Clock = () => DateTime.UtcNow;
+        /// <summary>隠しクエストの「時間」を決める時差（時間）。既定は日本の時間（UTC+9）</summary>
+        public double HourOffset = 9;
 
         private PlayerInput input;
         private bool prevJump;
@@ -79,6 +81,8 @@ namespace Lumina.Core.Game
             Quests = new QuestLog(data);
             Quests.RepeatReady = q => Daily.Used(RepeatKey(q), Clock(), q.Weekly) == 0;
             Quests.Offered = q => BoardToday().Contains(q.Id);
+            Quests.HourNow = () => Clock().AddHours(HourOffset).Hour;   // 隠しクエストの時間（QUESTS.md 8 章）
+            Quests.HasItem = HasOrWears;                               // 隠しクエストの「持って話す」品（着けていてもよい）
             Rng = new Rng(seed);
         }
 
@@ -318,6 +322,7 @@ namespace Lumina.Core.Game
             else
             {
                 m = new MapInstance(md, Data);
+                m.QuestActive = q => Quests.Status(q) == QuestStatus.InProgress; // クエスト専用の敵（QUESTS.md 8 章）
                 m.InitialSpawn(Rng);
             }
             mapCache.Insert(0, m);
