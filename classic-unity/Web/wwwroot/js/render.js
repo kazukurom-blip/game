@@ -192,7 +192,7 @@ export class Renderer {
     g.save(); g.translate(-cx, -cy);
     this.drawTerrain(g, cx, cy);
     this.drawPortals(g, cx);
-    this.drawObjects(g, f);
+    this.drawObjects(g, f, ui);
     this.drawNpcs(g, f, ui);
     this.drawHazards(g, f, cx, cy, false);
     this.drawDrops(g, f);
@@ -290,11 +290,19 @@ export class Renderer {
     }
   }
 
-  drawObjects(g, f) {
+  drawObjects(g, f, ui) {
+    // クエストの隠し物は、そのクエストを進めている間だけ見える（Core と同じ: ほかの時は調べても何も無い）。
+    // 調べられる距離は Core の ObjectAt と同じ（横 32 px・縦 48 px）
     for (const o of this.map.objects || []) {
-      const near = Math.abs(o.x - f.p[0]) < 40 && Math.abs(o.y - f.p[1]) < 60;
+      if (o.quest && !ui?.activeQuests?.has(o.quest)) continue;
+      const near = Math.abs(o.x - f.p[0]) <= 32 && Math.abs(o.y - f.p[1]) <= 48;
       g.fillStyle = '#8a5a2a'; g.fillRect(o.x - 10, o.y - 20, 20, 20);
       g.fillStyle = '#c08a4a'; g.fillRect(o.x - 8, o.y - 18, 16, 6); g.fillRect(o.x - 8, o.y - 10, 16, 8);
+      if (o.quest) { // 探している物: きらきら光らせて誘導する
+        const k = Math.floor(this.time * 4) % 4;
+        g.fillStyle = '#fff8a0';
+        g.fillRect(o.x - 12 + k * 6, o.y - 28 + (k % 2) * 4, 3, 3); g.fillRect(o.x + 8 - k * 4, o.y - 24, 2, 2);
+      }
       if (near) this.tag(g, o.name + '（V で調べる）', o.x, o.y - 34, '#fff8c0');
     }
   }

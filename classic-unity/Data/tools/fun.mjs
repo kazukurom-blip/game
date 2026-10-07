@@ -182,7 +182,7 @@ const BOUTIQUE = [
   ['setup.fun.bubble.cloud', 8000], ['setup.fun.bubble.heart', 8000], ['setup.fun.bubble.scroll', 12000],
   ['setup.fun.hat.cat', 10000], ['setup.fun.hat.chef', 10000], ['setup.fun.hat.crown', 20000],
   ['setup.fun.outfit.sailor', 15000], ['setup.fun.outfit.festival', 15000], ['setup.fun.outfit.formal', 25000],
-  ['use.gacha_ticket', 1500],
+  ['use.gacha_ticket', 30000], // ふつうの狩りで Lv30 なら約 45 分・Lv50 なら約 20 分ぶん（安すぎたので 1,500 から上げた）
 ];
 
 // ---------------------------------------------------------------- 8. 珍しい色違いの敵
@@ -305,7 +305,7 @@ export function buildFun({ world, items, MONSTERS_RAW, problems }) {
     note: 'Data/tools/fun.mjs から書き出した（景品の機械・フィールドボス・船の旅・感情表現・遊び場・季節・美容院・珍しい敵・ダンジョンの課題・見た目の品・天気）。手で直さない。',
     spots,
     looks: Object.fromEntries(FUN_ITEMS.filter(([, , , e]) => e?.fun).map(([id, , , e]) => [id, e.fun])),
-    gacha: { ticket: 'use.gacha_ticket', ticketPrice: 1500, mobTicketChance: 0.002, machines: GACHA.map((g) => ({ id: `gacha.${g.town}`, town: g.town, name: g.name, prizes: g.prizes })) },
+    gacha: { ticket: 'use.gacha_ticket', ticketPrice: 30000, mobTicketChance: 0.002, machines: GACHA.map((g) => ({ id: `gacha.${g.town}`, town: g.town, name: g.name, prizes: g.prizes })) },
     fieldBosses,
     voyages: VOYAGES,
     emotes: EMOTES, emoteSec: 4,

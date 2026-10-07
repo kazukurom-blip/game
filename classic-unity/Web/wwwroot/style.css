@@ -166,6 +166,11 @@ table.eq tr { border-bottom: 1px solid #2a2e48; }
 .wmap .out { fill: #a8b0d0; font-size: 8px; }
 .wmap .bulb2 circle { fill: #b0ff90; stroke: #000; } .wmap .bulb2 rect { fill: #888; }
 #wmInfo .obj { color: #ff9a30; }
+/* 店・持ち物: 今の装備との差 */
+.cmp { margin-top: 5px; padding-top: 4px; border-top: 1px dashed #3a3f60; line-height: 1.6; }
+.cmp .up { color: var(--good); } .cmp .down { color: var(--bad); }
+#w_shop .col .list { max-height: 210px; }
+#w_shop .info { min-height: 96px; }
 
 /* ================================================================ クラシック風の見た目（絵の見本）
    窓・ボタン・スロット・下の帯は art/ui/*.png（tools/make_art.mjs が作るオリジナルの 9 分割の枠）を border-image で。
