@@ -352,7 +352,7 @@ namespace Lumina.Core.Tests
             Assert.True(s.Stats.Stealth);
             int hp = s.Character.Hp;
             s.Step(new PlayerInput(), 120);
-            Assert.Equal(hp, s.Character.Hp);
+            Assert.True(s.Character.Hp >= hp, "闇隠れ中は触れても減らない"); // 自然回復で増えることはある
             s.Step(new PlayerInput { Attack = true }, 1);
             s.RefreshStats();
             Assert.False(s.Stats.Stealth);

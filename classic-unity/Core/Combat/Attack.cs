@@ -28,7 +28,7 @@ namespace Lumina.Core.Combat
         }
     }
 
-    public enum DamageKind { Dealt, Critical, Taken, Heal, MpHeal, Miss }
+    public enum DamageKind { Dealt, Critical, Taken, Heal, MpHeal, Miss, Poison } // Poison = 毒で減った分（紫の数字）
 
     /// <summary>画面に出すダメージの数字（FEEL.md 6 章・UI.md 1-3）。Unity 側の DamageNumberView が描く。</summary>
     public struct DamageNumber

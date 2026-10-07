@@ -20,6 +20,7 @@ using Lumina.Core.Physics;
 using Lumina.Core.Quests;
 using Lumina.Core.Save;
 using Lumina.Core.Skills;
+using Lumina.Core.Status;
 using Lumina.Core.Util;
 using Lumina.Core.World;
 
@@ -150,7 +151,7 @@ namespace Lumina.Core.Game
             {
                 Map.StepWorld(dt, Rng);
                 StepMobs(dt);
-                Pose = poseTracker.Update(Body, null, true, dt);
+                Pose = poseTracker.Update(Body, null, true, dt, 0);
                 TickAutoSave(dt);
                 return;
             }
@@ -163,19 +164,21 @@ namespace Lumina.Core.Game
             if (inp.UpPressed && !Body.OnRope)
             {
                 var p = Map.Data.FindPortalAt(Body.X, Body.Y);
-                if (p != null && UsePortal(p)) { Pose = poseTracker.Update(Body, Attack, Dead, dt); return; }
+                if (p != null && Status.CanMove && UsePortal(p)) { Pose = poseTracker.Update(Body, Attack, Dead, dt, Status.Mask); return; }
             }
 
             // ふつうの攻撃（押している間くり返す）
             if (inp.Attack && Attack == null) StartBasicAttack();
 
-            // 物理
+            // 物理（気絶・凍結・眠りの間は入力が効かない。弱りはジャンプだけできない）
             Body.AttackLock = Attack != null && Attack.OnGround && !Attack.Finished;
+            Body.NoJump = !Status.CanJump;
             var pin = new PhysicsInput
             {
                 Left = inp.Left, Right = inp.Right, Up = inp.Up, Down = inp.Down, Jump = inp.Jump,
                 JumpPressed = inp.JumpPressed || (inp.Jump && !prevJump),
             };
+            if (!Status.CanMove) pin = PhysicsInput.None;
             prevJump = inp.Jump;
             PlayerPhysics.Step(Body, pin, Map.Physics, dt);
             foreach (var e in Body.Events) Out.Add(ToEventType(e), x: Body.X, y: Body.Y);
@@ -199,10 +202,11 @@ namespace Lumina.Core.Game
             if (inp.Pickup && pickupT <= 0) { if (TryPickup()) pickupT = 0.1; }
 
             TickBuffs(dt);
+            TickPlayerStatus(dt);
             Skills.Tick(dt);
             Regen(dt);
 
-            Pose = poseTracker.Update(Body, Attack, Dead, dt);
+            Pose = poseTracker.Update(Body, Attack, Dead, dt, Status.Mask);
             TickAutoSave(dt);
         }
 
@@ -223,6 +227,19 @@ namespace Lumina.Core.Game
         public void RefreshStats()
         {
             Stats = StatCalc.Compute(Character, Equipment, Skills, Buffs, Inventory, Data);
+            if (Status.Any)
+            {
+                // 暗闇: 命中 −50%。呪い: 攻撃力・魔力・防御 −20%（STATS.md 4-3）
+                Stats.Acc *= Status.AccMul;
+                double cm = Status.AtkMul;
+                if (cm < 1)
+                {
+                    Stats.Watk = (int)Math.Floor(Stats.Watk * cm);
+                    Stats.MagicPower = (int)Math.Floor(Stats.MagicPower * cm);
+                    Stats.Wdef = (int)Math.Floor(Stats.Wdef * cm);
+                    Stats.Mdef = (int)Math.Floor(Stats.Mdef * cm);
+                }
+            }
             if (Body != null) Body.SetMoveStats(Stats.Speed, Stats.Jump);
             if (Character.Hp > Stats.MaxHp) Character.Hp = Stats.MaxHp;
             if (Character.Mp > Stats.MaxMp) Character.Mp = Stats.MaxMp;
@@ -376,6 +393,7 @@ namespace Lumina.Core.Game
             Attack = null;
             Body.Vx = 0;
             Buffs.Clear();
+            Status.Clear();
             Out.Add(GameEventType.Died, Map.Data.Id, x: Body.X, y: Body.Y);
         }
 

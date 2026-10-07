@@ -1,11 +1,13 @@
 // アイテム・装備・書・店・宿屋・クイックスロット・AP/SP（GameSession の続き）。
 using System;
+using System.Collections.Generic;
 using Lumina.Core.Character;
 using Lumina.Core.Combat;
 using Lumina.Core.Data;
 using Lumina.Core.Items;
 using Lumina.Core.Quests;
 using Lumina.Core.Skills;
+using Lumina.Core.Status;
 using Lumina.Core.World;
 
 namespace Lumina.Core.Game
@@ -90,9 +92,13 @@ namespace Lumina.Core.Game
                 Out.Add(GameEventType.BuffStarted, itemId, (long)u.BuffSec);
                 did = true;
             }
+            // 解毒薬・目薬・聖水・万能薬（治す物が無くても使える。クラシックどおり）
+            var cure = new List<StatusKind>();
+            foreach (var key in u.Cure) if (StatusSystem.TryParse(key, out var k)) cure.Add(k);
             if (u.Cure.Count > 0) did = true;
             if (!did) return false;
             Inventory.Remove(itemId);
+            if (cure.Count > 0) CureStatus(cure);
             Out.Add(GameEventType.ItemUsed, itemId);
             if (potion) QuestEvent("use_potion");
             RefreshStats();

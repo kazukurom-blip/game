@@ -8,11 +8,12 @@ using Lumina.Core.Mobs;
 using Lumina.Core.Physics;
 using Lumina.Core.Quests;
 using Lumina.Core.Skills;
+using Lumina.Core.Status;
 using Lumina.Core.World;
 
 namespace Lumina.Core.Game
 {
-    public enum SkillUseResult { Ok, Unknown, NotLearned, Passive, Dead, OnRope, Busy, Cooldown, WrongWeapon, NoMp, NoHp, NoAmmo }
+    public enum SkillUseResult { Ok, Unknown, NotLearned, Passive, Dead, OnRope, Busy, Cooldown, WrongWeapon, NoMp, NoHp, NoAmmo, Stunned, Sealed }
 
     public sealed partial class GameSession
     {
@@ -61,7 +62,7 @@ namespace Lumina.Core.Game
             }
         }
 
-        public bool CanAttackNow => !Dead && !Body.OnRope && Attack == null;
+        public bool CanAttackNow => !Dead && !Body.OnRope && Attack == null && Status.CanAct;
 
         /// <summary>ふつうの攻撃を始める（攻撃キーを押している間くり返す）。</summary>
         public bool StartBasicAttack()
@@ -94,6 +95,9 @@ namespace Lumina.Core.Game
             if (x <= 0) return Fail(SkillUseResult.NotLearned, id, "まだ覚えていない");
             if (def.Kind == SkillKind.Passive) return Fail(SkillUseResult.Passive, id, "常に効くスキル");
             if (Dead) return Fail(SkillUseResult.Dead, id, null);
+            // 状態異常: 気絶・凍結・眠りは動けない、封印はスキル不可（治すスキルだけは使える）
+            if (!def.Cure && !Status.CanAct) return Fail(SkillUseResult.Stunned, id, "動けない");
+            if (!def.Cure && Status.Has(StatusKind.Seal)) return Fail(SkillUseResult.Sealed, id, "封印されていてスキルが使えない");
             if (Body.OnRope) return Fail(SkillUseResult.OnRope, id, "縄・はしごでは使えない");
             bool isAttack = def.Kind == SkillKind.Attack || def.Kind == SkillKind.Area || def.Kind == SkillKind.Ranged;
             if (isAttack && Attack != null) return Fail(SkillUseResult.Busy, id, null);
@@ -144,7 +148,7 @@ namespace Lumina.Core.Game
                     break;
                 default: // Buff
                     if (def.Buff != null) ApplySkillBuff(def, x);
-                    if (def.Cure) Out.Add(GameEventType.Message, id, text: "状態異常が治った");
+                    if (def.Cure && CureStatus(CurableAll) > 0) Out.Add(GameEventType.Message, id, text: "状態異常が治った");
                     break;
             }
             RefreshStats();
@@ -200,7 +204,7 @@ namespace Lumina.Core.Game
                 maxTargets = 1; hits = 1;
             }
             var alive = new List<Mob>();
-            foreach (var m in Map.Mobs) if (m.Alive) alive.Add(m);
+            foreach (var m in Map.Mobs) if (m.Alive && !m.Hidden) alive.Add(m);
             var targets = Targeting.Pick(alive, m => m.Box, range, Body.X, a.Facing, maxTargets);
             int landed = 0;
             foreach (var mob in targets)
@@ -241,6 +245,7 @@ namespace Lumina.Core.Game
             if (res.Miss) { mob.AggroT = Mob.AggroTime; return; }
             mob.Hp -= res.Damage;
             MobAI.OnHit(mob, res.Damage, Body.X);
+            if (res.Damage > 0) StatusSystem.BreakOnHit(mob, Out); // 凍結・眠りは攻撃で解ける
             Out.Add(GameEventType.MobHit, mob.Def.Id, res.Damage, mob.X, mob.HeadY);
             if (mob.Hp <= 0) KillMob(mob);
         }
@@ -254,6 +259,7 @@ namespace Lumina.Core.Game
             double mul = 1;
             int gap = Character.Level - def.Lv;
             if (gap > 20) mul = Math.Max(0.1, 1 - 0.05 * (gap - 20));
+            mul *= Status.ExpMul; // 呪い: 経験値 −50%
             GainExp((long)Math.Max(1, Math.Round(def.Exp * mul)));
             foreach (var note in Quests.Progress(ObjectiveType.Kill, def.Id)) OnQuestNote(note);
             var drops = DropRoller.Roll(def, Data, Rng);
@@ -285,49 +291,43 @@ namespace Lumina.Core.Game
         {
             var sense = new PlayerSense { X = Body.X, Y = Body.Y, Chain = Body.Seg?.Chain, Hidden = Dead || Stats.Stealth };
             var pbox = PlayerBox;
-            foreach (var m in Map.Mobs)
+            // 呼び出しで Mobs が増えるので、今いる分だけ回す
+            int count = Map.Mobs.Count;
+            for (int i = 0; i < count && i < Map.Mobs.Count; i++)
             {
+                var m = Map.Mobs[i];
+                if (m.Alive) TickMobStatus(m, dt);
                 MobAI.Step(m, Map.Physics, sense, dt, Rng);
-                if (!m.Alive || Dead) continue;
-                // 遠くから撃つ敵（遠・魔）: 前にいて近ければ 3 秒ごとに撃つ
-                if ((m.Def.Ranged || (m.Def.Magic && !m.Def.Touch)) && !sense.Hidden && m.AttackCooldown <= 0 && m.State != MobState.Hit)
-                {
-                    double dx = Body.X - m.X;
-                    bool inFront = (m.AggroT > 0 || m.Def.ChaseOnSight || m.Def.Move == MobMove.Stand) && Math.Abs(dx) < 300 && Math.Abs(Body.Y - m.Y) < 60;
-                    if (inFront)
-                    {
-                        m.Facing = dx >= 0 ? 1 : -1;
-                        m.AttackCooldown = 3;
-                        Map.Projectiles.Add(new MobProjectile
-                        {
-                            X = m.X + m.Facing * m.Def.Width / 2, Y = m.Y - m.Def.Height / 2, Vx = m.Facing * 300, Life = 1.2,
-                            Atk = m.Def.Magic ? Math.Max(1, m.Def.Matk) : m.Atk, MobLv = m.Def.Lv, MobAcc = m.Def.Acc, Magic = m.Def.Magic, FromX = m.X,
-                        });
-                    }
-                }
+                // 技（飛び道具・魔法の予兆・ボスの技・段階）
+                MobCombat.Step(m, Map, sense, Body.OnGround, dt, Rng, Out);
+                if (!m.Alive || Dead || m.Hidden) continue;
+                // 触れるとダメージ（状態異常つきの敵もいる）
                 if (m.Def.Touch && !sense.Hidden && Body.InvT <= 0 && m.Box.Overlaps(pbox))
-                    TakeHit(m.Atk, m.Def.Lv, m.Def.Acc, false, m.X);
+                    HitPlayer(m.Atk, m.Def.Lv, m.Acc, false, m.X, m.Def.TouchStatus);
             }
-            if (Dead) return;
-            foreach (var p in Map.Projectiles)
+            if (!Dead)
             {
-                if (p.Dead || !p.Box.Overlaps(pbox) || Stats.Stealth) continue;
-                p.Dead = true;
-                if (Body.InvT <= 0) TakeHit(p.Atk, p.MobLv, p.MobAcc, p.Magic, p.FromX);
+                foreach (var p in Map.Projectiles)
+                {
+                    if (p.Dead || !p.Box.Overlaps(pbox) || Stats.Stealth) continue;
+                    p.Dead = true;
+                    if (Body.InvT <= 0) HitPlayer(p.Atk, p.MobLv, p.MobAcc, p.Magic, p.FromX, p.Status, p.SkillId, p.MobUid);
+                }
             }
+            StepHazards(dt);
         }
 
         /// <summary>敵の攻撃を受ける（避けた時は MISS）。魔力の盾があれば一部を MP で受ける。</summary>
-        public void TakeHit(int atk, int mobLv, int mobAcc, bool magic, double fromX)
+        public bool TakeHit(int atk, int mobLv, int mobAcc, bool magic, double fromX)
         {
-            if (Dead || Body.InvT > 0) return;
+            if (Dead || Body.InvT > 0) return false;
             var res = DamageCalc.Taken(atk, mobLv, mobAcc, magic, Stats, Character.Level, Character.Line == JobLine.Warrior, Rng);
             double headY = Body.Y - PlayerBody.Height;
             if (res.Miss)
             {
                 Out.Damage.Add(new DamageNumber { Kind = DamageKind.Miss, X = Body.X, Y = headY });
                 Body.InvT = 0.6; // 避けた後すぐまた当たらないように（ふっとびは無し）
-                return;
+                return false;
             }
             var (hpDmg, mpDmg) = DamageCalc.SplitMagicGuard(res.Damage, Stats.MagicGuard, Character.Mp);
             Character.Mp -= mpDmg;
@@ -337,7 +337,9 @@ namespace Lumina.Core.Game
             Attack = null;
             poseTracker.AlertLeft = PoseTracker.AlertTime;
             Out.Add(GameEventType.Hurt, value: res.Damage, x: Body.X, y: Body.Y);
+            StatusSystem.BreakOnHit(this, Out); // 凍結・眠りは攻撃を受けると解ける
             if (Character.Hp <= 0) Die();
+            return true;
         }
     }
 }
