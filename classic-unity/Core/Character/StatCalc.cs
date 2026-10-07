@@ -57,6 +57,8 @@ namespace Lumina.Core.Character
     {
         /// <summary>素手の攻撃力（初心者が武器を持たない時）。STATS.md「攻撃力は Lv で決まる」→ 8 + Lv（最大 20）。似。</summary>
         public static int BareHandWatk(int level) => Math.Min(20, 8 + level);
+        /// <summary>基礎の命中（レベルで自然に上がる分）。DEX に振らない初心者でも同じくらいの Lv の敵に当たるように: 5 + Lv × 0.5（STATS.md 2 章）</summary>
+        public static double BaseAcc(int level) => 5 + level * 0.5;
 
         public static FinalStats Compute(CharacterState c, Equipment eq, SkillBook book, BuffSet buffs, Inventory inv, GameData data)
         {
@@ -120,7 +122,7 @@ namespace Lumina.Core.Character
             f.Wdef = es.Wdef + bs.Wdef + ps.Wdef + f.Str / 10;
             f.Mdef = es.Mdef + bs.Mdef + ps.Mdef + f.Int / 2;
             // 命中・回避
-            f.Acc = f.Dex * 0.8 + f.Luk * 0.5 + es.Acc + bs.Acc + ps.Acc;
+            f.Acc = BaseAcc(c.Level) + f.Dex * 0.8 + f.Luk * 0.5 + es.Acc + bs.Acc + ps.Acc;
             f.Avoid = f.Dex * 0.25 + f.Luk * 0.5 + es.Avoid + bs.Avoid + ps.Avoid;
             f.AvoidCap = Jobs.Get(c.Line).AvoidCap;
             // 速さ・ジャンプ（100 が基準、最大 140 / 123）

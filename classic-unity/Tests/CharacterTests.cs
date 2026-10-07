@@ -217,7 +217,7 @@ namespace Lumina.Core.Tests
             var expect = Formulas.PhysRange("片手剣", 12, 5, 17, 0.1);
             Assert.Equal(expect.Min, f.Range.Min);
             Assert.Equal(expect.Max, f.Range.Max);
-            Assert.Equal(5 * 0.8 + 4 * 0.5, f.Acc, 9);
+            Assert.Equal(StatCalc.BaseAcc(c.Level) + 5 * 0.8 + 4 * 0.5, f.Acc, 9);
             Assert.Equal(5 * 0.25 + 4 * 0.5, f.Avoid, 9);
             Assert.Equal(5, f.AttackStage);
             Assert.Equal(0.66, f.AttackDelay, 9);
@@ -250,7 +250,7 @@ namespace Lumina.Core.Tests
             var f = StatCalc.Compute(c, eq, book, buffs, inv, data);
             var bow = data.Item("eq.bowman.bow.10");
             Assert.Equal(bow.Stats.Watk + 2, f.Watk); // ⌈8/4⌉ = 2、矢 +0
-            Assert.Equal(40 * 0.8 + 4 * 0.5 + 8, f.Acc, 9);
+            Assert.Equal(StatCalc.BaseAcc(c.Level) + 40 * 0.8 + 4 * 0.5 + 8, f.Acc, 9);
             Assert.Equal(0.07, f.CritRate, 9); // 2+5 %
             Assert.Equal(2.0, f.CritDamage, 9);
             Assert.Equal("use.arrow_bow", f.AmmoItem);
@@ -259,7 +259,7 @@ namespace Lumina.Core.Tests
             var g = StatCalc.Compute(c, eq, book, buffs, inv, data);
             Assert.Equal(StatCalc.BareHandWatk(10), g.Watk);
             Assert.Equal(0, g.CritRate);
-            Assert.Equal(40 * 0.8 + 4 * 0.5 + 8, g.Acc, 9);
+            Assert.Equal(StatCalc.BaseAcc(c.Level) + 40 * 0.8 + 4 * 0.5 + 8, g.Acc, 9);
         }
 
         [Fact]
