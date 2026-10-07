@@ -162,6 +162,7 @@ namespace Lumina.Core.Game
 
             if (Dead)
             {
+                TickFun(dt);
                 Map.StepWorld(dt, Rng);
                 StepMobs(dt);
                 Pose = poseTracker.Update(Body, null, true, dt, 0);
@@ -175,7 +176,7 @@ namespace Lumina.Core.Game
             if (inp.SkillPressed != null) UseSkill(inp.SkillPressed);
             // 攻撃スキルのキーを押しっぱなし: 終わるたびにくり返す（嵐の連射・弾幕も）
             else if (inp.SkillHeld != null && Attack == null && Data.Skill(inp.SkillHeld)?.IsAttack == true) UseSkill(inp.SkillHeld, true);
-            if (inp.InteractPressed && !TryFillRift()) InteractNearby();
+            if (inp.InteractPressed && !TryFillRift() && !TryInteractFun()) InteractNearby(); // 町の機械・ダンジョンの仕掛け（GameSession.Fun.cs）
 
             // ポータル: ↑を押した瞬間、足元にポータルがあれば入る（縄より先）
             if (inp.UpPressed && !Body.OnRope)
@@ -228,6 +229,7 @@ namespace Lumina.Core.Game
             Skills.Tick(dt);
             Regen(dt);
             TickTown(dt); // ペット・部屋の制限時間（GameSession.Town.cs）
+            TickFun(dt);  // フィールドボス・船の旅・感情表現・ダンジョンの課題（GameSession.Fun.cs）
 
             Pose = poseTracker.Update(Body, Attack, Dead, dt, Status.Mask);
             if (Sitting != null) Pose.Motion = "sit";
@@ -303,6 +305,7 @@ namespace Lumina.Core.Game
                 AutoSave.Request("map");
             }
             AfterEnterMap(md, sameMap && !first);
+            AfterEnterMapFun(md); // フィールドボス・船の旅・ダンジョンの課題（GameSession.Fun.cs）
             foreach (var pet in Pets) { pet.X = Body.X; pet.Y = Body.Y; }
             OnVisitMap(md.Id);
         }
@@ -323,6 +326,7 @@ namespace Lumina.Core.Game
             {
                 m = new MapInstance(md, Data);
                 m.QuestActive = q => Quests.Status(q) == QuestStatus.InProgress; // クエスト専用の敵（QUESTS.md 8 章）
+                var inst = m; m.OnSpawned = mob => OnMobSpawnedFun(inst, mob); // 珍しい色違いの個体・季節の敵（GameSession.Fun.cs）
                 m.InitialSpawn(Rng);
             }
             mapCache.Insert(0, m);
@@ -348,6 +352,7 @@ namespace Lumina.Core.Game
                 return false;
             }
             if (p.To != null && !CheckRoomEntry(p.To)) return false; // ボスの間・ダンジョン・試験の部屋（GameSession.Rooms.cs）
+            if (!FunPortalOpen(p)) return false; // ダンジョンの部屋の課題が終わっていない（GameSession.Fun.cs）
             Out.Add(GameEventType.PortalUsed, p.Name, x: p.X, y: p.Y);
             if (p.To == null)
             {
@@ -526,6 +531,7 @@ namespace Lumina.Core.Game
             // 死んでいる時は、起き上がる町に置いておく（読み込んだら町から）
             if (Dead) { s.Map = CurrentRoom?.Exit ?? Map.Data.ReturnMap ?? StartMap; var md = Data.GetMap(s.Map); var p = md?.FindPortalByName("town"); s.X = p?.X ?? 0; s.Y = p?.Y ?? 0; }
             WriteTownSave(s); // 倉庫以外の町の仕組み（毎日の回数・ペット）
+            WriteFunSave(s);  // 楽しさの要素（遊び場の点数・見た目・フィールドボスの時計。船の旅の途中なら着く所へ）
             return s;
         }
 
@@ -599,6 +605,7 @@ namespace Lumina.Core.Game
                 if (g.Map.Physics.SegBelow(pos.Item1, pos.Item2) == null) PlayerPhysics.PlaceOnGround(g.Body, g.Map.Physics, sp.x, sp.y);
             }
             g.ReadTownSave(s);
+            g.ReadFunSave(s);
             g.RefreshStats();
             if (c.Hp <= 0) c.Hp = Math.Max(1, g.Stats.MaxHp / 2);
             g.Out.Clear();

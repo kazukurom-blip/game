@@ -74,6 +74,7 @@ namespace Lumina.Core.Game
             if (def == null || !Inventory.Has(itemId) || Dead) return false;
             var pet = TryUsePetItem(def); // ペット・餌・技の本（GameSession.Pets.cs）
             if (pet.HasValue) return pet.Value;
+            if (TryUseFunItem(def)) return true; // 見た目の品（帽子・服・名札・吹き出し。GameSession.Fun.cs）
             if (def.IsChair) { if (Sitting == itemId) { StandUp(); return true; } return SitOnChair(itemId); } // 椅子（GameSession.Town.cs）
             if (def.Use == null) return false;
             var u = def.Use;

@@ -104,7 +104,7 @@ namespace Lumina.Web
                 case "dbgPos": s.Teleport(n, double.Parse(a, CultureInfo.InvariantCulture)); return R(true, "Ok");
                 case "dbgMeso": s.Inventory.AddMeso(n); return R(true, "Ok");
                 case "dbgItem": { int rest = s.Inventory.Add(a, Math.Max(1, n)); return R(rest == 0, "Ok"); }
-                default: return R(false, "Unknown", "知らない操作: " + cmd);
+                default: return Fun.Run(s, cmd, a, b, n) ?? R(false, "Unknown", "知らない操作: " + cmd); // 楽しさの要素（src/Fun.cs）
             }
         }
 

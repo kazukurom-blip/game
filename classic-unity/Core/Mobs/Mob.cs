@@ -78,6 +78,8 @@ namespace Lumina.Core.Mobs
         public int CloneOf;            // 分身なら本物の Uid（0 = 分身でない）
         public int OwnerUid;           // 仕掛けの物を出したボスの Uid
         public double AtkScale = 1;    // 攻撃力の倍率（分身は 0.5）
+        public bool FieldBoss;         // フィールドボス（Core/Fun。決まったマップに時間で 1 体だけ湧く）
+        public bool Rare;              // 珍しい色違いの個体（Core/Fun。HP・攻撃力が高く、経験値と落とす物が多い。Unity 側は色を変えて光らせる）
         public bool Mechanic;          // 仕掛けの物（分身・光る岩・時計虫）: 倒しても経験値・ドロップ・クエストの数にならない
         public string MechanicKind;    // "clone" / "rock" / "shard"（Unity 側の絵の選び方）
         public double GuardMul = 1;    // 受けるダメージの倍率（時の裂け目が閉じていない間 0.1 など）

@@ -2256,6 +2256,86 @@
    "sellPrice": 76
   },
   {
+   "id": "etc.M420",
+   "name": "ねじれ根のこぶ",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 40
+  },
+  {
+   "id": "etc.M421",
+   "name": "ガンタの折れ牙",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 60
+  },
+  {
+   "id": "etc.M422",
+   "name": "ヌルヌマのぬめり玉",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 76
+  },
+  {
+   "id": "etc.M423",
+   "name": "メェロンの金の毛",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 96
+  },
+  {
+   "id": "etc.M424",
+   "name": "ユキゴロウの毛皮",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 120
+  },
+  {
+   "id": "etc.M425",
+   "name": "ギザの古傷の歯",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 132
+  },
+  {
+   "id": "etc.M426",
+   "name": "ゴウヨクの風切り羽",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 228
+  },
+  {
+   "id": "etc.M427",
+   "name": "迷い星のかけら",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 336
+  },
+  {
+   "id": "etc.M430",
+   "name": "実りのカボチャの種",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 30
+  },
+  {
+   "id": "etc.M431",
+   "name": "雪の祭りの結晶",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 30
+  },
+  {
    "id": "etc.ore.bronze",
    "name": "青銅の原石",
    "tab": "etc",
@@ -19213,6 +19293,950 @@
    "price": 0,
    "sellPrice": 6000,
    "desc": "製作（鍛冶屋カジ）"
+  },
+  {
+   "id": "use.gacha_ticket",
+   "name": "景品の機械の券",
+   "tab": "use",
+   "maxStack": 100,
+   "price": 0,
+   "desc": "町の景品の機械に入れると、景品が 1 つ出てくる",
+   "sellPrice": 300
+  },
+  {
+   "id": "use.fun.hair_coupon",
+   "name": "髪型の券",
+   "tab": "use",
+   "maxStack": 100,
+   "price": 0,
+   "desc": "美容院で髪型か髪の色を 1 回変えられる",
+   "sellPrice": 500
+  },
+  {
+   "id": "use.fun.face_coupon",
+   "name": "顔の券",
+   "tab": "use",
+   "maxStack": 100,
+   "price": 0,
+   "desc": "美容院で顔（目）か肌の色を 1 回変えられる",
+   "sellPrice": 500
+  },
+  {
+   "id": "etc.fun.dungeon_mark",
+   "name": "踏破の印",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "desc": "1 人用ダンジョンを踏破した証。市場の印の交換所で品と替えられる",
+   "sellPrice": 1
+  },
+  {
+   "id": "setup.fun.hat.acorn",
+   "name": "どんぐり帽子",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "hat",
+    "look": "hat_acorn"
+   },
+   "desc": "どんぐりのかさの形の帽子（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.hat.cat",
+   "name": "ねこ耳の帽子",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "hat",
+    "look": "hat_cat"
+   },
+   "desc": "三角の耳がついた帽子（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.hat.crown",
+   "name": "紙の王冠",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "hat",
+    "look": "hat_crown"
+   },
+   "desc": "色紙で作った王冠（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.hat.chef",
+   "name": "コック帽",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "hat",
+    "look": "hat_chef"
+   },
+   "desc": "背の高い白い帽子（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.hat.witch",
+   "name": "とんがり帽子",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "hat",
+    "look": "hat_witch"
+   },
+   "desc": "先の折れたとんがり帽子（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.hat.leaf",
+   "name": "葉っぱの帽子",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "hat",
+    "look": "hat_leaf"
+   },
+   "desc": "大きな葉っぱを 1 枚のせただけ（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.hat.pirate",
+   "name": "小さな船長帽",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "hat",
+    "look": "hat_pirate"
+   },
+   "desc": "港の子どもに人気の帽子（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.hat.star",
+   "name": "星の髪飾り",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "hat",
+    "look": "hat_star"
+   },
+   "desc": "小さな星が光る髪飾り（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.hat.pumpkin",
+   "name": "カボチャの帽子",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "hat",
+    "look": "hat_pumpkin"
+   },
+   "desc": "実りの祭りの記念の帽子（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.hat.snow",
+   "name": "雪の結晶の帽子",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "hat",
+    "look": "hat_snow"
+   },
+   "desc": "雪の祭りの記念の帽子（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.hat.stump",
+   "name": "切り株の帽子",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "hat",
+    "look": "hat_stump"
+   },
+   "desc": "ねじれ根のモクモクのこぶを削った帽子（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.hat.sheep",
+   "name": "金の羊毛の帽子",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "hat",
+    "look": "hat_sheep"
+   },
+   "desc": "日だまりの大羊の毛で編んだ帽子（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.outfit.sailor",
+   "name": "水兵の服",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "outfit",
+    "look": "sailor"
+   },
+   "desc": "白と紺の水兵の服（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.outfit.festival",
+   "name": "祭りの法被",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "outfit",
+    "look": "festival"
+   },
+   "desc": "赤い祭りの上着（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.outfit.formal",
+   "name": "黒い礼服",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "outfit",
+    "look": "formal"
+   },
+   "desc": "よそ行きの黒い服（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.outfit.farmer",
+   "name": "畑仕事の服",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "outfit",
+    "look": "farmer"
+   },
+   "desc": "緑の上着と茶色のズボン（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.outfit.snow",
+   "name": "雪の外套",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "outfit",
+    "look": "snow"
+   },
+   "desc": "白いふかふかの外套（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.outfit.star",
+   "name": "星空の服",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "outfit",
+    "look": "star"
+   },
+   "desc": "夜空の色の服（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.tag.wood",
+   "name": "木の名札",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "tag",
+    "look": "wood"
+   },
+   "desc": "名前の下に木の札（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.tag.gold",
+   "name": "金の名札",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "tag",
+    "look": "gold"
+   },
+   "desc": "名前の下に金の札（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.tag.sakura",
+   "name": "花の名札",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "tag",
+    "look": "sakura"
+   },
+   "desc": "名前の下に花色の札（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.tag.star",
+   "name": "星の名札",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "tag",
+    "look": "star"
+   },
+   "desc": "名前の下に星の札（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.tag.ice",
+   "name": "氷の名札",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "tag",
+    "look": "ice"
+   },
+   "desc": "名前の下に氷の札（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.bubble.cloud",
+   "name": "雲の吹き出し",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "bubble",
+    "look": "cloud"
+   },
+   "desc": "会話と感情表現の吹き出しが雲の形に（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.bubble.heart",
+   "name": "ハートの吹き出し",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "bubble",
+    "look": "heart"
+   },
+   "desc": "会話と感情表現の吹き出しが桃色に（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.bubble.scroll",
+   "name": "巻物の吹き出し",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "bubble",
+    "look": "scroll"
+   },
+   "desc": "会話と感情表現の吹き出しが巻物に（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.bubble.neon",
+   "name": "光る吹き出し",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "bubble",
+    "look": "neon"
+   },
+   "desc": "会話と感情表現の吹き出しが光る（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.bubble.leaf",
+   "name": "葉っぱの吹き出し",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "fun": {
+    "kind": "bubble",
+    "look": "leaf"
+   },
+   "desc": "会話と感情表現の吹き出しが緑に（見た目だけ。使うと着ける・もう一度で外す）"
+  },
+  {
+   "id": "setup.fun.chair.capsule",
+   "name": "カプセルの椅子",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "chair": {
+    "regenMul": 1.5
+   },
+   "desc": "景品の機械のカプセルの形（座ると回復が 1.5 倍）"
+  },
+  {
+   "id": "setup.fun.chair.swing",
+   "name": "木のブランコ",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "chair": {
+    "regenMul": 1.5
+   },
+   "desc": "ゆらゆら揺れるブランコ（座ると回復が 1.5 倍）"
+  },
+  {
+   "id": "setup.fun.chair.mushroom",
+   "name": "キノコの腰かけ",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "chair": {
+    "regenMul": 1.5
+   },
+   "desc": "赤いかさのキノコ（座ると回復が 1.5 倍）"
+  },
+  {
+   "id": "setup.fun.chair.puff",
+   "name": "わたぐもの椅子",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "chair": {
+    "regenMul": 1.5
+   },
+   "desc": "ふわふわの雲（座ると回復が 1.5 倍）"
+  },
+  {
+   "id": "setup.fun.chair.shell",
+   "name": "大貝の椅子",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "chair": {
+    "regenMul": 1.5
+   },
+   "desc": "海の底の大きな貝（座ると回復が 1.5 倍）"
+  },
+  {
+   "id": "setup.fun.chair.ice",
+   "name": "氷の玉座",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "chair": {
+    "regenMul": 1.5
+   },
+   "desc": "ひんやりした氷の椅子（座ると回復が 1.5 倍）"
+  },
+  {
+   "id": "setup.fun.chair.drum",
+   "name": "太鼓の椅子",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "chair": {
+    "regenMul": 1.5
+   },
+   "desc": "座るとぽこんと鳴る（座ると回復が 1.5 倍）"
+  },
+  {
+   "id": "setup.fun.chair.lantern",
+   "name": "灯籠の縁台",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "chair": {
+    "regenMul": 1.5
+   },
+   "desc": "実りの祭りの縁台（座ると回復が 1.5 倍）"
+  },
+  {
+   "id": "setup.fun.chair.snowglobe",
+   "name": "雪の玉の椅子",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "chair": {
+    "regenMul": 1.5
+   },
+   "desc": "雪の祭りのガラスの玉（座ると回復が 1.5 倍）"
+  },
+  {
+   "id": "setup.fun.chair.nest",
+   "name": "翼竜の巣の椅子",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "chair": {
+    "regenMul": 1.5
+   },
+   "desc": "古巣の翼竜ゴウヨクの巣のかけら（座ると回復が 1.5 倍）"
+  },
+  {
+   "id": "eq.fun.jackpot.V100",
+   "name": "港風のマント",
+   "tab": "equip",
+   "maxStack": 1,
+   "slot": "cape",
+   "job": "common",
+   "reqLevel": 10,
+   "stats": {
+    "str": 2,
+    "dex": 2,
+    "int": 2,
+    "luk": 2,
+    "wdef": 8,
+    "avoid": 4
+   },
+   "upgrades": 7,
+   "price": 0,
+   "sellPrice": 200,
+   "desc": "港の景品の機械の大当たり"
+  },
+  {
+   "id": "eq.fun.jackpot.C100",
+   "name": "雲織りの首飾り",
+   "tab": "equip",
+   "maxStack": 1,
+   "slot": "pendant",
+   "job": "common",
+   "reqLevel": 30,
+   "stats": {
+    "str": 3,
+    "dex": 3,
+    "int": 3,
+    "luk": 3,
+    "hp": 60,
+    "mp": 60
+   },
+   "upgrades": 7,
+   "price": 0,
+   "sellPrice": 600,
+   "desc": "セレスの景品の機械の大当たり"
+  },
+  {
+   "id": "eq.fun.jackpot.T100",
+   "name": "ぜんまいの耳飾り",
+   "tab": "equip",
+   "maxStack": 1,
+   "slot": "earring",
+   "job": "common",
+   "reqLevel": 30,
+   "stats": {
+    "str": 3,
+    "dex": 3,
+    "int": 3,
+    "luk": 3,
+    "mdef": 20,
+    "acc": 5
+   },
+   "upgrades": 7,
+   "price": 0,
+   "sellPrice": 600,
+   "desc": "ティンクルの景品の機械の大当たり"
+  },
+  {
+   "id": "eq.fun.jackpot.F100",
+   "name": "霜の花のマント",
+   "tab": "equip",
+   "maxStack": 1,
+   "slot": "cape",
+   "job": "common",
+   "reqLevel": 50,
+   "stats": {
+    "str": 4,
+    "dex": 4,
+    "int": 4,
+    "luk": 4,
+    "wdef": 25,
+    "mdef": 25
+   },
+   "upgrades": 7,
+   "price": 0,
+   "sellPrice": 1000,
+   "desc": "ヒョウガ村の景品の機械の大当たり"
+  },
+  {
+   "id": "eq.fun.jackpot.M100",
+   "name": "真珠の首飾り",
+   "tab": "equip",
+   "maxStack": 1,
+   "slot": "pendant",
+   "job": "common",
+   "reqLevel": 60,
+   "stats": {
+    "str": 5,
+    "dex": 5,
+    "int": 5,
+    "luk": 5,
+    "hp": 150,
+    "mp": 150
+   },
+   "upgrades": 7,
+   "price": 0,
+   "sellPrice": 1200,
+   "desc": "マリナの景品の機械の大当たり"
+  },
+  {
+   "id": "eq.fun.jackpot.D100",
+   "name": "竜鱗の耳飾り",
+   "tab": "equip",
+   "maxStack": 1,
+   "slot": "earring",
+   "job": "common",
+   "reqLevel": 100,
+   "stats": {
+    "str": 6,
+    "dex": 6,
+    "int": 6,
+    "luk": 6,
+    "watk": 3,
+    "matk": 3
+   },
+   "upgrades": 7,
+   "price": 0,
+   "sellPrice": 2000,
+   "desc": "竜の背の村の景品の機械の大当たり"
+  },
+  {
+   "id": "eq.fun.boss.M420",
+   "name": "ねじれ根の腕輪",
+   "tab": "equip",
+   "maxStack": 1,
+   "slot": "gloves",
+   "job": "common",
+   "reqLevel": 18,
+   "stats": {
+    "str": 2,
+    "dex": 2,
+    "wdef": 10,
+    "watk": 1
+   },
+   "upgrades": 7,
+   "price": 0,
+   "sellPrice": 360,
+   "desc": "フィールドボス「ねじれ根のモクモク」だけが落とす"
+  },
+  {
+   "id": "eq.fun.boss.M421",
+   "name": "ガンタの牙の首飾り",
+   "tab": "equip",
+   "maxStack": 1,
+   "slot": "pendant",
+   "job": "common",
+   "reqLevel": 28,
+   "stats": {
+    "str": 4,
+    "hp": 80,
+    "watk": 1
+   },
+   "upgrades": 7,
+   "price": 0,
+   "sellPrice": 560,
+   "desc": "フィールドボス「牙折れの大猪ガンタ」だけが落とす"
+  },
+  {
+   "id": "eq.fun.boss.M422",
+   "name": "ぬめり玉の耳飾り",
+   "tab": "equip",
+   "maxStack": 1,
+   "slot": "earring",
+   "job": "common",
+   "reqLevel": 35,
+   "stats": {
+    "int": 4,
+    "luk": 2,
+    "mdef": 15,
+    "mp": 80
+   },
+   "upgrades": 7,
+   "price": 0,
+   "sellPrice": 700,
+   "desc": "フィールドボス「沼の主ヌルヌマ」だけが落とす"
+  },
+  {
+   "id": "eq.fun.boss.M423",
+   "name": "金の羊毛のマント",
+   "tab": "equip",
+   "maxStack": 1,
+   "slot": "cape",
+   "job": "common",
+   "reqLevel": 45,
+   "stats": {
+    "str": 3,
+    "dex": 3,
+    "int": 3,
+    "luk": 3,
+    "wdef": 20
+   },
+   "upgrades": 7,
+   "price": 0,
+   "sellPrice": 900,
+   "desc": "フィールドボス「日だまりの大羊メェロン」だけが落とす"
+  },
+  {
+   "id": "eq.fun.boss.M424",
+   "name": "大熊の毛皮の手袋",
+   "tab": "equip",
+   "maxStack": 1,
+   "slot": "gloves",
+   "job": "common",
+   "reqLevel": 55,
+   "stats": {
+    "str": 3,
+    "dex": 3,
+    "wdef": 30,
+    "watk": 2
+   },
+   "upgrades": 7,
+   "price": 0,
+   "sellPrice": 1100,
+   "desc": "フィールドボス「雪かぶりの大熊ユキゴロウ」だけが落とす"
+  },
+  {
+   "id": "eq.fun.boss.M425",
+   "name": "古傷の歯の首飾り",
+   "tab": "equip",
+   "maxStack": 1,
+   "slot": "pendant",
+   "job": "common",
+   "reqLevel": 62,
+   "stats": {
+    "dex": 5,
+    "luk": 5,
+    "hp": 120,
+    "avoid": 6
+   },
+   "upgrades": 7,
+   "price": 0,
+   "sellPrice": 1240,
+   "desc": "フィールドボス「傷だらけの大鮫ギザ」だけが落とす"
+  },
+  {
+   "id": "eq.fun.boss.M426",
+   "name": "風切り羽のマント",
+   "tab": "equip",
+   "maxStack": 1,
+   "slot": "cape",
+   "job": "common",
+   "reqLevel": 110,
+   "stats": {
+    "str": 6,
+    "dex": 6,
+    "int": 6,
+    "luk": 6,
+    "wdef": 50,
+    "speed": 5
+   },
+   "upgrades": 7,
+   "price": 0,
+   "sellPrice": 2200,
+   "desc": "フィールドボス「古巣の翼竜ゴウヨク」だけが落とす"
+  },
+  {
+   "id": "eq.fun.boss.M427",
+   "name": "迷い星の指輪",
+   "tab": "equip",
+   "maxStack": 1,
+   "slot": "ring",
+   "job": "common",
+   "reqLevel": 160,
+   "stats": {
+    "str": 8,
+    "dex": 8,
+    "int": 8,
+    "luk": 8,
+    "watk": 4,
+    "matk": 4
+   },
+   "upgrades": 7,
+   "price": 0,
+   "sellPrice": 3200,
+   "desc": "フィールドボス「迷い星の巨人」だけが落とす"
+  },
+  {
+   "id": "etc.fun.card.M001",
+   "name": "コロ貝のカード",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 10,
+   "card": "M001",
+   "desc": "景品の機械で出る、コロ貝の絵のカード。集めて飾る"
+  },
+  {
+   "id": "etc.fun.card.M005",
+   "name": "ポヨスライムのカード",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 10,
+   "card": "M005",
+   "desc": "景品の機械で出る、ポヨスライムの絵のカード。集めて飾る"
+  },
+  {
+   "id": "etc.fun.card.M030",
+   "name": "ヒトツメのカード",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 10,
+   "card": "M030",
+   "desc": "景品の機械で出る、ヒトツメの絵のカード。集めて飾る"
+  },
+  {
+   "id": "etc.fun.card.M100",
+   "name": "ホシの子のカード",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 10,
+   "card": "M100",
+   "desc": "景品の機械で出る、ホシの子の絵のカード。集めて飾る"
+  },
+  {
+   "id": "etc.fun.card.M101",
+   "name": "ツキの子のカード",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 10,
+   "card": "M101",
+   "desc": "景品の機械で出る、ツキの子の絵のカード。集めて飾る"
+  },
+  {
+   "id": "etc.fun.card.M102",
+   "name": "ヒの子のカード",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 10,
+   "card": "M102",
+   "desc": "景品の機械で出る、ヒの子の絵のカード。集めて飾る"
+  },
+  {
+   "id": "etc.fun.card.M140",
+   "name": "チャイロクマ人形のカード",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 10,
+   "card": "M140",
+   "desc": "景品の機械で出る、チャイロクマ人形の絵のカード。集めて飾る"
+  },
+  {
+   "id": "etc.fun.card.M141",
+   "name": "モモクマ人形のカード",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 10,
+   "card": "M141",
+   "desc": "景品の機械で出る、モモクマ人形の絵のカード。集めて飾る"
+  },
+  {
+   "id": "etc.fun.card.M145",
+   "name": "クロネジネズミのカード",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 10,
+   "card": "M145",
+   "desc": "景品の機械で出る、クロネジネズミの絵のカード。集めて飾る"
+  },
+  {
+   "id": "etc.fun.card.M120",
+   "name": "コオリオオカミのカード",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 10,
+   "card": "M120",
+   "desc": "景品の機械で出る、コオリオオカミの絵のカード。集めて飾る"
+  },
+  {
+   "id": "etc.fun.card.M123",
+   "name": "ペンギン兵のカード",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 10,
+   "card": "M123",
+   "desc": "景品の機械で出る、ペンギン兵の絵のカード。集めて飾る"
+  },
+  {
+   "id": "etc.fun.card.M124",
+   "name": "ダークイエティのカード",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 10,
+   "card": "M124",
+   "desc": "景品の機械で出る、ダークイエティの絵のカード。集めて飾る"
+  },
+  {
+   "id": "etc.fun.card.M170",
+   "name": "アワぷくのカード",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 10,
+   "card": "M170",
+   "desc": "景品の機械で出る、アワぷくの絵のカード。集めて飾る"
+  },
+  {
+   "id": "etc.fun.card.M175",
+   "name": "イカ戦士のカード",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 10,
+   "card": "M175",
+   "desc": "景品の機械で出る、イカ戦士の絵のカード。集めて飾る"
+  },
+  {
+   "id": "etc.fun.card.M176",
+   "name": "サメのカード",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 10,
+   "card": "M176",
+   "desc": "景品の機械で出る、サメの絵のカード。集めて飾る"
+  },
+  {
+   "id": "etc.fun.card.M200",
+   "name": "ハネトカゲのカード",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 10,
+   "card": "M200",
+   "desc": "景品の機械で出る、ハネトカゲの絵のカード。集めて飾る"
+  },
+  {
+   "id": "etc.fun.card.M201",
+   "name": "アオワイバーンのカード",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 10,
+   "card": "M201",
+   "desc": "景品の機械で出る、アオワイバーンの絵のカード。集めて飾る"
+  },
+  {
+   "id": "etc.fun.card.M202",
+   "name": "アカワイバーンのカード",
+   "tab": "etc",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 10,
+   "card": "M202",
+   "desc": "景品の機械で出る、アカワイバーンの絵のカード。集めて飾る"
   },
   {
    "tab": "equip",

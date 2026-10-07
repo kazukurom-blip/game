@@ -4,6 +4,8 @@ import { dotnet } from './framework/dotnet.js';
 import { Renderer, VIEW_W, VIEW_H } from './js/render.js';
 import { Ui, QUICK_KEYS } from './js/ui.js';
 import { Audio } from './js/audio.js';
+import { Fun } from './js/fun.js'; // 楽しさの要素（景品の機械・船の旅・感情表現・遊び場・美容院…）
+import './js/avatar/parts_fun.js';
 
 const SLOT = 'char1';
 const params = new URLSearchParams(location.search);
@@ -76,6 +78,7 @@ class Game {
     this.paused = false;
     this.fitScreen();
     addEventListener('resize', () => this.fitScreen());
+    this.fun = new Fun(this);
     this.bindKeys();
     this.canvas.addEventListener('click', (e) => this.onCanvasClick(e));
     addEventListener('beforeunload', () => { try { this.act('save', 'quit'); } catch { /* */ } });
@@ -94,6 +97,7 @@ class Game {
       const c = e.code;
       if (c === 'F5' || c === 'F12' || (e.ctrlKey && (c === 'KeyR' || c === 'KeyW'))) return;
       e.preventDefault();
+      if (c !== 'Escape' && this.fun?.key(e)) return; // R ＋ 1〜7 の感情表現・機械の窓
       if (!e.repeat) {
         if (c === 'Escape') { this.ui.closeTop(); return; }
         if (WIN_KEYS[c]) { this.ui.toggle(WIN_KEYS[c]); return; }
@@ -192,6 +196,7 @@ class Game {
     this.ui.hud(f);
     const t2 = performance.now();
     this.renderer.draw(f, dt, { weaponType: st?.stats?.weapon, hideMinimap: this.hideMinimap, talking: this.talking() });
+    this.fun.frame(f, dt);
     const t3 = performance.now();
     this.frameNo++;
     if (this.frameNo % 20 === 0) this.ui.refresh(false);

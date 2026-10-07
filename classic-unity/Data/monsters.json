@@ -18391,6 +18391,1233 @@
      }
     ]
    }
+  },
+  {
+   "id": "M420",
+   "name": "ねじれ根のモクモク",
+   "lv": 20,
+   "kind": "elite",
+   "move": "walk",
+   "attack": "体",
+   "touch": true,
+   "ranged": false,
+   "magic": false,
+   "elements": {
+    "fire": 1.5
+   },
+   "hp": 7000,
+   "mp": 40,
+   "exp": 763,
+   "atk": 63,
+   "matk": 0,
+   "def": 26,
+   "mdef": 21,
+   "avoid": 7,
+   "acc": 33,
+   "meso": 648,
+   "mesoChance": 0.6,
+   "speedStat": -28,
+   "speed": 72,
+   "chaseOnSight": true,
+   "width": 88,
+   "height": 88,
+   "pushed": 700,
+   "noKnockback": false,
+   "drops": [
+    {
+     "item": "etc.M420",
+     "chance": 0.55
+    },
+    {
+     "item": "use.orange_potion",
+     "chance": 0.07
+    },
+    {
+     "item": "use.blue_potion",
+     "chance": 0.07
+    },
+    {
+     "item": "etc.ore.iron",
+     "chance": 0.02
+    },
+    {
+     "item": "etc.gem.1",
+     "chance": 0.01
+    },
+    {
+     "item": "scroll.W13.60",
+     "chance": 0.003
+    },
+    {
+     "item": "scroll.W13.10",
+     "chance": 0.001
+    },
+    {
+     "item": "scroll.A26.60",
+     "chance": 0.003
+    },
+    {
+     "item": "scroll.A26.10",
+     "chance": 0.001
+    }
+   ],
+   "equipDrop": {
+    "band": 20,
+    "chance": 0.3,
+    "count": 1
+   },
+   "cursedScrollChance": 0.02,
+   "etc": "etc.M420",
+   "special": null,
+   "note": "ヒトツメの森の奥の古い切り株が起き上がった物。根を地面に走らせる。",
+   "attacks": [
+    {
+     "id": "root",
+     "name": "走る根",
+     "type": "magic",
+     "range": 400,
+     "cd": 5,
+     "windup": 1,
+     "pct": 110,
+     "w": 90,
+     "h": 70,
+     "count": 3,
+     "spread": 120
+    },
+    {
+     "id": "sprout",
+     "name": "芽吹き",
+     "type": "summon",
+     "mobs": [
+      "M033"
+     ],
+     "count": 2,
+     "max": 4,
+     "cd": 20,
+     "windup": 0.8,
+     "phases": [
+      1
+     ]
+    }
+   ],
+   "touchStatus": null,
+   "boss": {
+    "phases": [
+     {
+      "hp": 1,
+      "name": "切り株"
+     },
+     {
+      "hp": 0.5,
+      "name": "根の怒り",
+      "atkMul": 1.2,
+      "rate": 1.3
+     }
+    ]
+   }
+  },
+  {
+   "id": "M421",
+   "name": "牙折れの大猪ガンタ",
+   "lv": 30,
+   "kind": "elite",
+   "move": "walk",
+   "attack": "体",
+   "touch": true,
+   "ranged": false,
+   "magic": false,
+   "elements": {},
+   "hp": 19000,
+   "mp": 60,
+   "exp": 2020,
+   "atk": 105,
+   "matk": 0,
+   "def": 45,
+   "mdef": 36,
+   "avoid": 11,
+   "acc": 47,
+   "meso": 1190,
+   "mesoChance": 0.6,
+   "speedStat": 10,
+   "speed": 110,
+   "chaseOnSight": true,
+   "width": 88,
+   "height": 88,
+   "pushed": 1900,
+   "noKnockback": false,
+   "drops": [
+    {
+     "item": "etc.M421",
+     "chance": 0.55
+    },
+    {
+     "item": "use.orange_potion",
+     "chance": 0.07
+    },
+    {
+     "item": "use.blue_potion",
+     "chance": 0.07
+    },
+    {
+     "item": "etc.ore.iron",
+     "chance": 0.02
+    },
+    {
+     "item": "etc.gem.2",
+     "chance": 0.01
+    },
+    {
+     "item": "scroll.A04.60",
+     "chance": 0.003
+    },
+    {
+     "item": "scroll.A04.10",
+     "chance": 0.001
+    },
+    {
+     "item": "scroll.W07.60",
+     "chance": 0.003
+    },
+    {
+     "item": "scroll.W07.10",
+     "chance": 0.001
+    }
+   ],
+   "equipDrop": {
+    "band": 30,
+    "chance": 0.3,
+    "count": 1
+   },
+   "cursedScrollChance": 0.02,
+   "etc": "etc.M421",
+   "special": null,
+   "note": "イノシシの谷の群れの長。片方の牙が折れている。突進がこわい。",
+   "attacks": [
+    {
+     "id": "tusk",
+     "name": "牙の突き上げ",
+     "type": "melee",
+     "range": 120,
+     "cd": 3,
+     "windup": 0.5,
+     "pct": 140,
+     "w": 120,
+     "h": 80,
+     "status": {
+      "kind": "stun",
+      "sec": 1,
+      "chance": 0.3
+     }
+    },
+    {
+     "id": "charge",
+     "name": "大突進",
+     "type": "area",
+     "global": true,
+     "groundOnly": true,
+     "cd": 12,
+     "windup": 1.4,
+     "pct": 110
+    }
+   ],
+   "touchStatus": null,
+   "boss": {
+    "phases": [
+     {
+      "hp": 1,
+      "name": "群れの長"
+     },
+     {
+      "hp": 0.4,
+      "name": "怒りの長",
+      "speedMul": 1.4,
+      "atkMul": 1.2,
+      "summon": {
+       "mobs": [
+        "M044"
+       ],
+       "count": 2
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "M422",
+   "name": "沼の主ヌルヌマ",
+   "lv": 38,
+   "kind": "elite",
+   "move": "crawl",
+   "attack": "体魔",
+   "touch": true,
+   "ranged": false,
+   "magic": true,
+   "elements": {
+    "lightning": 1.5
+   },
+   "hp": 36500,
+   "mp": 238,
+   "exp": 3510,
+   "atk": 143,
+   "matk": 157,
+   "def": 65,
+   "mdef": 85,
+   "avoid": 13,
+   "acc": 58,
+   "meso": 1600,
+   "mesoChance": 0.6,
+   "speedStat": -38,
+   "speed": 62,
+   "chaseOnSight": false,
+   "width": 60,
+   "height": 48,
+   "pushed": 3650,
+   "noKnockback": false,
+   "drops": [
+    {
+     "item": "etc.M422",
+     "chance": 0.55
+    },
+    {
+     "item": "use.white_potion",
+     "chance": 0.07
+    },
+    {
+     "item": "use.mana_elixir",
+     "chance": 0.07
+    },
+    {
+     "item": "etc.ore.silver",
+     "chance": 0.02
+    },
+    {
+     "item": "etc.gem.2",
+     "chance": 0.01
+    },
+    {
+     "item": "scroll.A11.60",
+     "chance": 0.003
+    },
+    {
+     "item": "scroll.A11.10",
+     "chance": 0.001
+    },
+    {
+     "item": "scroll.A04.60",
+     "chance": 0.003
+    },
+    {
+     "item": "scroll.A04.10",
+     "chance": 0.001
+    }
+   ],
+   "equipDrop": {
+    "band": 35,
+    "chance": 0.3,
+    "count": 1
+   },
+   "cursedScrollChance": 0.02,
+   "etc": "etc.M422",
+   "special": null,
+   "note": "深い沼の底から上がってくる大きなナマズ。泥の玉を吐く。",
+   "attacks": [
+    {
+     "id": "mud",
+     "name": "泥の玉",
+     "type": "shot",
+     "range": 420,
+     "cd": 3,
+     "windup": 0.5,
+     "pct": 100,
+     "speed": 260,
+     "count": 3,
+     "spread": 40,
+     "status": {
+      "kind": "slow",
+      "sec": 4,
+      "chance": 0.4,
+      "power": 30
+     }
+    },
+    {
+     "id": "swamp",
+     "name": "底なしの沼",
+     "type": "magic",
+     "range": 400,
+     "cd": 9,
+     "windup": 1.2,
+     "pct": 60,
+     "w": 160,
+     "h": 60,
+     "linger": 4,
+     "status": {
+      "kind": "poison",
+      "sec": 4,
+      "chance": 1
+     }
+    }
+   ],
+   "touchStatus": null,
+   "boss": {
+    "phases": [
+     {
+      "hp": 1,
+      "name": "ぬめり"
+     },
+     {
+      "hp": 0.5,
+      "name": "濁り",
+      "atkMul": 1.2,
+      "healPct": 5
+     }
+    ]
+   }
+  },
+  {
+   "id": "M423",
+   "name": "日だまりの大羊メェロン",
+   "lv": 48,
+   "kind": "elite",
+   "move": "jump",
+   "attack": "体",
+   "touch": true,
+   "ranged": false,
+   "magic": false,
+   "elements": {
+    "dark": 1.5
+   },
+   "hp": 74200,
+   "mp": 96,
+   "exp": 6580,
+   "atk": 197,
+   "matk": 0,
+   "def": 96,
+   "mdef": 77,
+   "avoid": 17,
+   "acc": 72,
+   "meso": 2310,
+   "mesoChance": 0.6,
+   "speedStat": -24,
+   "speed": 76,
+   "chaseOnSight": false,
+   "width": 72,
+   "height": 72,
+   "pushed": 7420,
+   "noKnockback": false,
+   "drops": [
+    {
+     "item": "etc.M423",
+     "chance": 0.55
+    },
+    {
+     "item": "use.white_potion",
+     "chance": 0.07
+    },
+    {
+     "item": "use.mana_elixir",
+     "chance": 0.07
+    },
+    {
+     "item": "etc.ore.silver",
+     "chance": 0.02
+    },
+    {
+     "item": "etc.gem.3",
+     "chance": 0.01
+    },
+    {
+     "item": "scroll.A18.60",
+     "chance": 0.003
+    },
+    {
+     "item": "scroll.A18.10",
+     "chance": 0.001
+    },
+    {
+     "item": "scroll.A17.60",
+     "chance": 0.003
+    },
+    {
+     "item": "scroll.A17.10",
+     "chance": 0.001
+    },
+    {
+     "item": "use.elixir",
+     "chance": 0.005,
+     "count": 1
+    }
+   ],
+   "equipDrop": {
+    "band": 40,
+    "chance": 0.3,
+    "count": 1
+   },
+   "cursedScrollChance": 0.02,
+   "etc": "etc.M423",
+   "special": null,
+   "note": "日の庭で昼寝をしている大きな羊の精。起こすと怒る。",
+   "attacks": [
+    {
+     "id": "bump",
+     "name": "もこもこ体当たり",
+     "type": "melee",
+     "range": 110,
+     "cd": 3,
+     "windup": 0.5,
+     "pct": 130,
+     "w": 110,
+     "h": 80
+    },
+    {
+     "id": "yawn",
+     "name": "大あくび",
+     "type": "area",
+     "w": 520,
+     "cd": 14,
+     "windup": 1.2,
+     "pct": 0,
+     "status": {
+      "kind": "sleep",
+      "sec": 3,
+      "chance": 0.6
+     }
+    },
+    {
+     "id": "sun",
+     "name": "日の光",
+     "type": "magic",
+     "range": 450,
+     "cd": 6,
+     "windup": 1,
+     "pct": 110,
+     "w": 120,
+     "h": 120,
+     "phases": [
+      1
+     ]
+    }
+   ],
+   "touchStatus": null,
+   "boss": {
+    "phases": [
+     {
+      "hp": 1,
+      "name": "昼寝"
+     },
+     {
+      "hp": 0.5,
+      "name": "お目覚め",
+      "rate": 1.4,
+      "speedMul": 1.2
+     }
+    ]
+   }
+  },
+  {
+   "id": "M424",
+   "name": "雪かぶりの大熊ユキゴロウ",
+   "lv": 60,
+   "kind": "elite",
+   "move": "walk",
+   "attack": "体",
+   "touch": true,
+   "ranged": false,
+   "magic": false,
+   "elements": {
+    "fire": 1.5,
+    "ice": 0.5
+   },
+   "hp": 130000,
+   "mp": 120,
+   "exp": 12700,
+   "atk": 280,
+   "matk": 0,
+   "def": 138,
+   "mdef": 110,
+   "avoid": 21,
+   "acc": 89,
+   "meso": 3180,
+   "mesoChance": 0.6,
+   "speedStat": -14,
+   "speed": 86,
+   "chaseOnSight": true,
+   "width": 88,
+   "height": 88,
+   "pushed": 13000,
+   "noKnockback": false,
+   "drops": [
+    {
+     "item": "etc.M424",
+     "chance": 0.55
+    },
+    {
+     "item": "use.big_white_potion",
+     "chance": 0.07
+    },
+    {
+     "item": "use.mana_elixir",
+     "chance": 0.07
+    },
+    {
+     "item": "etc.ore.mithril",
+     "chance": 0.02
+    },
+    {
+     "item": "etc.gem.4",
+     "chance": 0.01
+    },
+    {
+     "item": "scroll.A25.60",
+     "chance": 0.003
+    },
+    {
+     "item": "scroll.A25.10",
+     "chance": 0.001
+    },
+    {
+     "item": "scroll.A30.60",
+     "chance": 0.003
+    },
+    {
+     "item": "scroll.A30.10",
+     "chance": 0.001
+    },
+    {
+     "item": "use.elixir",
+     "chance": 0.005,
+     "count": 1
+    }
+   ],
+   "equipDrop": {
+    "band": 60,
+    "chance": 0.3,
+    "count": 1
+   },
+   "cursedScrollChance": 0.02,
+   "etc": "etc.M424",
+   "special": null,
+   "note": "黒い雪の谷の大きな熊。雪玉を投げ、吠えると雪崩が起きる。",
+   "attacks": [
+    {
+     "id": "snowball",
+     "name": "大雪玉",
+     "type": "shot",
+     "range": 450,
+     "cd": 3,
+     "windup": 0.6,
+     "pct": 120,
+     "speed": 280,
+     "status": {
+      "kind": "freeze",
+      "sec": 1.5,
+      "chance": 0.25
+     }
+    },
+    {
+     "id": "avalanche",
+     "name": "雪崩の咆哮",
+     "type": "area",
+     "global": true,
+     "safeHeight": 60,
+     "cd": 15,
+     "windup": 1.6,
+     "pct": 120
+    }
+   ],
+   "touchStatus": null,
+   "boss": {
+    "phases": [
+     {
+      "hp": 1,
+      "name": "大熊"
+     },
+     {
+      "hp": 0.5,
+      "name": "吹雪の熊",
+      "atkMul": 1.25,
+      "summon": {
+       "mobs": [
+        "M123"
+       ],
+       "count": 2
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "M425",
+   "name": "傷だらけの大鮫ギザ",
+   "lv": 66,
+   "kind": "elite",
+   "move": "fly",
+   "attack": "体",
+   "touch": true,
+   "ranged": false,
+   "magic": false,
+   "elements": {
+    "lightning": 1.5
+   },
+   "hp": 163000,
+   "mp": 132,
+   "exp": 17200,
+   "atk": 328,
+   "matk": 0,
+   "def": 163,
+   "mdef": 130,
+   "avoid": 23,
+   "acc": 97,
+   "meso": 3700,
+   "mesoChance": 0.6,
+   "speedStat": -10,
+   "speed": 90,
+   "chaseOnSight": false,
+   "width": 68,
+   "height": 60,
+   "pushed": 16300,
+   "noKnockback": false,
+   "drops": [
+    {
+     "item": "etc.M425",
+     "chance": 0.55
+    },
+    {
+     "item": "use.big_white_potion",
+     "chance": 0.07
+    },
+    {
+     "item": "use.mana_elixir",
+     "chance": 0.07
+    },
+    {
+     "item": "etc.ore.mithril",
+     "chance": 0.02
+    },
+    {
+     "item": "etc.gem.4",
+     "chance": 0.01
+    },
+    {
+     "item": "scroll.A32.60",
+     "chance": 0.003
+    },
+    {
+     "item": "scroll.A32.10",
+     "chance": 0.001
+    },
+    {
+     "item": "scroll.W11.60",
+     "chance": 0.003
+    },
+    {
+     "item": "scroll.W11.10",
+     "chance": 0.001
+    },
+    {
+     "item": "use.elixir",
+     "chance": 0.005,
+     "count": 1
+    }
+   ],
+   "equipDrop": {
+    "band": 60,
+    "chance": 0.3,
+    "count": 1
+   },
+   "cursedScrollChance": 0.02,
+   "etc": "etc.M425",
+   "special": null,
+   "note": "サメの通り道を回る古い大鮫。体じゅうに古い傷がある。",
+   "attacks": [
+    {
+     "id": "bite",
+     "name": "古傷の牙",
+     "type": "melee",
+     "range": 120,
+     "cd": 2.5,
+     "windup": 0.4,
+     "pct": 150,
+     "w": 120,
+     "h": 80
+    },
+    {
+     "id": "dive",
+     "name": "深みからの一撃",
+     "type": "dive",
+     "range": 500,
+     "cd": 12,
+     "windup": 1.2,
+     "pct": 130,
+     "w": 120,
+     "h": 100
+    }
+   ],
+   "touchStatus": null,
+   "boss": {
+    "phases": [
+     {
+      "hp": 1,
+      "name": "回遊"
+     },
+     {
+      "hp": 0.4,
+      "name": "血の匂い",
+      "speedMul": 1.3,
+      "rate": 1.4
+     }
+    ]
+   }
+  },
+  {
+   "id": "M426",
+   "name": "古巣の翼竜ゴウヨク",
+   "lv": 114,
+   "kind": "elite",
+   "move": "fly",
+   "attack": "体遠",
+   "touch": true,
+   "ranged": true,
+   "magic": false,
+   "elements": {
+    "ice": 1.5,
+    "fire": 0.5
+   },
+   "hp": 725000,
+   "mp": 228,
+   "exp": 108000,
+   "atk": 904,
+   "matk": 0,
+   "def": 424,
+   "mdef": 340,
+   "avoid": 40,
+   "acc": 165,
+   "meso": 7480,
+   "mesoChance": 0.6,
+   "speedStat": -12,
+   "speed": 88,
+   "chaseOnSight": false,
+   "width": 68,
+   "height": 60,
+   "pushed": 72500,
+   "noKnockback": false,
+   "drops": [
+    {
+     "item": "etc.M426",
+     "chance": 0.55
+    },
+    {
+     "item": "use.xl_potion",
+     "chance": 0.07
+    },
+    {
+     "item": "use.blue_secret",
+     "chance": 0.07
+    },
+    {
+     "item": "etc.ore.adaman",
+     "chance": 0.02
+    },
+    {
+     "item": "etc.gem.7",
+     "chance": 0.01
+    },
+    {
+     "item": "scroll.W07.60",
+     "chance": 0.003
+    },
+    {
+     "item": "scroll.W07.10",
+     "chance": 0.001
+    },
+    {
+     "item": "scroll.A08.60",
+     "chance": 0.003
+    },
+    {
+     "item": "scroll.A08.10",
+     "chance": 0.001
+    },
+    {
+     "item": "use.power_elixir",
+     "chance": 0.005,
+     "count": 1
+    }
+   ],
+   "equipDrop": {
+    "band": 110,
+    "chance": 0.3,
+    "count": 1
+   },
+   "cursedScrollChance": 0.02,
+   "etc": "etc.M426",
+   "special": null,
+   "note": "ワイバーンの森の古い巣を守る翼竜。火の玉と風。",
+   "attacks": [
+    {
+     "id": "fire",
+     "name": "火の玉",
+     "type": "shot",
+     "range": 500,
+     "cd": 3,
+     "windup": 0.5,
+     "pct": 120,
+     "speed": 320,
+     "count": 2,
+     "spread": 50,
+     "status": {
+      "kind": "poison",
+      "sec": 4,
+      "chance": 0.3
+     }
+    },
+    {
+     "id": "gust",
+     "name": "翼の突風",
+     "type": "area",
+     "w": 600,
+     "cd": 13,
+     "windup": 1.2,
+     "pct": 90,
+     "status": {
+      "kind": "stun",
+      "sec": 1.5,
+      "chance": 0.4
+     }
+    }
+   ],
+   "touchStatus": null,
+   "boss": {
+    "phases": [
+     {
+      "hp": 1,
+      "name": "巣の守り"
+     },
+     {
+      "hp": 0.5,
+      "name": "怒りの空",
+      "atkMul": 1.2,
+      "summon": {
+       "mobs": [
+        "M202"
+       ],
+       "count": 2
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "M427",
+   "name": "迷い星の巨人",
+   "lv": 168,
+   "kind": "elite",
+   "move": "walk",
+   "attack": "体魔",
+   "touch": true,
+   "ranged": false,
+   "magic": true,
+   "elements": {
+    "holy": 1.5
+   },
+   "hp": 1890000,
+   "mp": 1020,
+   "exp": 526000,
+   "atk": 1670,
+   "matk": 1840,
+   "def": 789,
+   "mdef": 1030,
+   "avoid": 60,
+   "acc": 240,
+   "meso": 13000,
+   "mesoChance": 0.6,
+   "speedStat": -18,
+   "speed": 82,
+   "chaseOnSight": true,
+   "width": 88,
+   "height": 88,
+   "pushed": 189000,
+   "noKnockback": false,
+   "drops": [
+    {
+     "item": "etc.M427",
+     "chance": 0.55
+    },
+    {
+     "item": "use.xl_potion",
+     "chance": 0.07
+    },
+    {
+     "item": "use.blue_secret",
+     "chance": 0.07
+    },
+    {
+     "item": "etc.ore.starsteel",
+     "chance": 0.02
+    },
+    {
+     "item": "etc.gem.8",
+     "chance": 0.01
+    },
+    {
+     "item": "scroll.W14.60",
+     "chance": 0.003
+    },
+    {
+     "item": "scroll.W14.10",
+     "chance": 0.001
+    },
+    {
+     "item": "scroll.A21.60",
+     "chance": 0.003
+    },
+    {
+     "item": "scroll.A21.10",
+     "chance": 0.001
+    },
+    {
+     "item": "use.power_elixir",
+     "chance": 0.005,
+     "count": 1
+    }
+   ],
+   "equipDrop": {
+    "band": 150,
+    "chance": 0.3,
+    "count": 1
+   },
+   "cursedScrollChance": 0.02,
+   "etc": "etc.M427",
+   "special": null,
+   "note": "廃都の大通りを歩き回る、落ちた星の光をまとう巨人。",
+   "attacks": [
+    {
+     "id": "fist",
+     "name": "星の拳",
+     "type": "melee",
+     "range": 130,
+     "cd": 3,
+     "windup": 0.6,
+     "pct": 150,
+     "w": 130,
+     "h": 90
+    },
+    {
+     "id": "fall",
+     "name": "降る星",
+     "type": "magic",
+     "range": 500,
+     "cd": 7,
+     "windup": 1.2,
+     "pct": 120,
+     "w": 100,
+     "h": 120,
+     "count": 3,
+     "spread": 150
+    },
+    {
+     "id": "flash",
+     "name": "星の閃き",
+     "type": "area",
+     "global": true,
+     "cd": 18,
+     "windup": 2,
+     "pct": 0,
+     "status": {
+      "kind": "darkness",
+      "sec": 5,
+      "chance": 0.7
+     },
+     "phases": [
+      1,
+      2
+     ]
+    }
+   ],
+   "touchStatus": null,
+   "boss": {
+    "phases": [
+     {
+      "hp": 1,
+      "name": "迷い星"
+     },
+     {
+      "hp": 0.6,
+      "name": "輝き",
+      "atkMul": 1.15
+     },
+     {
+      "hp": 0.3,
+      "name": "燃え尽きる星",
+      "atkMul": 1.3,
+      "speedMul": 1.3
+     }
+    ]
+   }
+  },
+  {
+   "id": "M430",
+   "name": "おばけカボチャ",
+   "lv": 15,
+   "kind": "normal",
+   "move": "jump",
+   "attack": "体",
+   "touch": true,
+   "ranged": false,
+   "magic": false,
+   "elements": {
+    "fire": 1.5
+   },
+   "hp": 264,
+   "mp": 30,
+   "exp": 54,
+   "atk": 31,
+   "matk": 0,
+   "def": 13,
+   "mdef": 10,
+   "avoid": 5,
+   "acc": 26,
+   "meso": 70,
+   "mesoChance": 0.6,
+   "speedStat": -28,
+   "speed": 72,
+   "chaseOnSight": false,
+   "width": 36,
+   "height": 36,
+   "pushed": 26,
+   "noKnockback": false,
+   "drops": [
+    {
+     "item": "etc.M430",
+     "chance": 0.55
+    },
+    {
+     "item": "use.orange_potion",
+     "chance": 0.07
+    },
+    {
+     "item": "use.blue_potion",
+     "chance": 0.07
+    },
+    {
+     "item": "etc.ore.bronze",
+     "chance": 0.02
+    },
+    {
+     "item": "etc.gem.1",
+     "chance": 0.01
+    },
+    {
+     "item": "scroll.A19.60",
+     "chance": 0.003
+    },
+    {
+     "item": "scroll.A19.10",
+     "chance": 0.001
+    },
+    {
+     "item": "scroll.A12.60",
+     "chance": 0.003
+    },
+    {
+     "item": "scroll.A12.10",
+     "chance": 0.001
+    }
+   ],
+   "equipDrop": {
+    "band": 15,
+    "chance": 0.008,
+    "count": 1
+   },
+   "cursedScrollChance": 0,
+   "etc": "etc.M430",
+   "special": null,
+   "note": "秋の実りの祭りの間だけ現れる、ランタンの顔のカボチャ。",
+   "attacks": [],
+   "touchStatus": null,
+   "boss": null
+  },
+  {
+   "id": "M431",
+   "name": "雪だるまのコロン",
+   "lv": 15,
+   "kind": "normal",
+   "move": "walk",
+   "attack": "体",
+   "touch": true,
+   "ranged": false,
+   "magic": false,
+   "elements": {
+    "fire": 1.5,
+    "ice": 0.5
+   },
+   "hp": 264,
+   "mp": 30,
+   "exp": 54,
+   "atk": 31,
+   "matk": 0,
+   "def": 13,
+   "mdef": 10,
+   "avoid": 5,
+   "acc": 26,
+   "meso": 70,
+   "mesoChance": 0.6,
+   "speedStat": -26,
+   "speed": 74,
+   "chaseOnSight": false,
+   "width": 44,
+   "height": 44,
+   "pushed": 26,
+   "noKnockback": false,
+   "drops": [
+    {
+     "item": "etc.M431",
+     "chance": 0.55
+    },
+    {
+     "item": "use.orange_potion",
+     "chance": 0.07
+    },
+    {
+     "item": "use.blue_potion",
+     "chance": 0.07
+    },
+    {
+     "item": "etc.ore.bronze",
+     "chance": 0.02
+    },
+    {
+     "item": "etc.gem.1",
+     "chance": 0.01
+    },
+    {
+     "item": "scroll.A26.60",
+     "chance": 0.003
+    },
+    {
+     "item": "scroll.A26.10",
+     "chance": 0.001
+    },
+    {
+     "item": "scroll.A25.60",
+     "chance": 0.003
+    },
+    {
+     "item": "scroll.A25.10",
+     "chance": 0.001
+    }
+   ],
+   "equipDrop": {
+    "band": 15,
+    "chance": 0.008,
+    "count": 1
+   },
+   "cursedScrollChance": 0,
+   "etc": "etc.M431",
+   "special": null,
+   "note": "冬の雪の祭りの間だけ現れる、転がって歩く雪だるま。",
+   "attacks": [],
+   "touchStatus": null,
+   "boss": null
   }
  ]
 }

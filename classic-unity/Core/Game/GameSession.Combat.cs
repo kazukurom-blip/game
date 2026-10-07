@@ -579,6 +579,7 @@ namespace Lumina.Core.Game
             var drops = DropRoller.Roll(def, Data, Rng, 1 + Stats.Mods.DropPct / 100, 1 + Stats.Mods.MesoPct / 100);
             AddQuestDrops(def, drops);   // 転職の試験の印（GameSession.Rooms.cs）
             OnMobKilledTown(mob);        // boss_kill・ダンジョンのクリア
+            OnMobKilledFun(mob, drops);  // 珍しい個体・フィールドボス・船の襲撃・券・ダンジョンの課題（GameSession.Fun.cs）
             if (drops.Count > 0)
             {
                 Map.SpawnDrops(mob.X, mob.Y, drops);

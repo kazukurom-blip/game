@@ -1,0 +1,1576 @@
+{
+ "note": "Data/tools/fun.mjs から書き出した（景品の機械・フィールドボス・船の旅・感情表現・遊び場・季節・美容院・珍しい敵・ダンジョンの課題・見た目の品・天気）。手で直さない。",
+ "spots": [
+  {
+   "id": "gacha.V100",
+   "kind": "gacha",
+   "map": "V100",
+   "name": "港のガラガラ",
+   "x": 1728,
+   "y": 368
+  },
+  {
+   "id": "gacha.C100",
+   "kind": "gacha",
+   "map": "C100",
+   "name": "雲の上のくじ箱",
+   "x": 1320,
+   "y": 644
+  },
+  {
+   "id": "gacha.T100",
+   "kind": "gacha",
+   "map": "T100",
+   "name": "ぜんまい仕掛けの景品箱",
+   "x": 1368,
+   "y": 520
+  },
+  {
+   "id": "gacha.F100",
+   "kind": "gacha",
+   "map": "F100",
+   "name": "雪の村の福引き",
+   "x": 1256,
+   "y": 352
+  },
+  {
+   "id": "gacha.M100",
+   "kind": "gacha",
+   "map": "M100",
+   "name": "海の底の貝くじ",
+   "x": 1380,
+   "y": 532
+  },
+  {
+   "id": "gacha.D100",
+   "kind": "gacha",
+   "map": "D100",
+   "name": "竜の背の宝くじ",
+   "x": 1420,
+   "y": 516
+  },
+  {
+   "id": "arcade.V200",
+   "kind": "arcade",
+   "map": "V200",
+   "name": "遊び場の係コマ爺",
+   "x": 1796,
+   "y": 432
+  },
+  {
+   "id": "salon.V500",
+   "kind": "salon",
+   "map": "V500",
+   "name": "美容院のカミラ",
+   "x": 1580,
+   "y": 504
+  },
+  {
+   "id": "boutique.V090",
+   "kind": "boutique",
+   "map": "V090",
+   "name": "見た目の品のキラ",
+   "x": 1512,
+   "y": 360
+  },
+  {
+   "id": "marks.V090",
+   "kind": "marks",
+   "map": "V090",
+   "name": "印の交換所のトオル",
+   "x": 1176,
+   "y": 360
+  },
+  {
+   "id": "season.V100",
+   "kind": "season",
+   "map": "V100",
+   "name": "祭りの係ミノリ",
+   "x": 1312,
+   "y": 344
+  }
+ ],
+ "looks": {
+  "setup.fun.hat.acorn": {
+   "kind": "hat",
+   "look": "hat_acorn"
+  },
+  "setup.fun.hat.cat": {
+   "kind": "hat",
+   "look": "hat_cat"
+  },
+  "setup.fun.hat.crown": {
+   "kind": "hat",
+   "look": "hat_crown"
+  },
+  "setup.fun.hat.chef": {
+   "kind": "hat",
+   "look": "hat_chef"
+  },
+  "setup.fun.hat.witch": {
+   "kind": "hat",
+   "look": "hat_witch"
+  },
+  "setup.fun.hat.leaf": {
+   "kind": "hat",
+   "look": "hat_leaf"
+  },
+  "setup.fun.hat.pirate": {
+   "kind": "hat",
+   "look": "hat_pirate"
+  },
+  "setup.fun.hat.star": {
+   "kind": "hat",
+   "look": "hat_star"
+  },
+  "setup.fun.hat.pumpkin": {
+   "kind": "hat",
+   "look": "hat_pumpkin"
+  },
+  "setup.fun.hat.snow": {
+   "kind": "hat",
+   "look": "hat_snow"
+  },
+  "setup.fun.hat.stump": {
+   "kind": "hat",
+   "look": "hat_stump"
+  },
+  "setup.fun.hat.sheep": {
+   "kind": "hat",
+   "look": "hat_sheep"
+  },
+  "setup.fun.outfit.sailor": {
+   "kind": "outfit",
+   "look": "sailor"
+  },
+  "setup.fun.outfit.festival": {
+   "kind": "outfit",
+   "look": "festival"
+  },
+  "setup.fun.outfit.formal": {
+   "kind": "outfit",
+   "look": "formal"
+  },
+  "setup.fun.outfit.farmer": {
+   "kind": "outfit",
+   "look": "farmer"
+  },
+  "setup.fun.outfit.snow": {
+   "kind": "outfit",
+   "look": "snow"
+  },
+  "setup.fun.outfit.star": {
+   "kind": "outfit",
+   "look": "star"
+  },
+  "setup.fun.tag.wood": {
+   "kind": "tag",
+   "look": "wood"
+  },
+  "setup.fun.tag.gold": {
+   "kind": "tag",
+   "look": "gold"
+  },
+  "setup.fun.tag.sakura": {
+   "kind": "tag",
+   "look": "sakura"
+  },
+  "setup.fun.tag.star": {
+   "kind": "tag",
+   "look": "star"
+  },
+  "setup.fun.tag.ice": {
+   "kind": "tag",
+   "look": "ice"
+  },
+  "setup.fun.bubble.cloud": {
+   "kind": "bubble",
+   "look": "cloud"
+  },
+  "setup.fun.bubble.heart": {
+   "kind": "bubble",
+   "look": "heart"
+  },
+  "setup.fun.bubble.scroll": {
+   "kind": "bubble",
+   "look": "scroll"
+  },
+  "setup.fun.bubble.neon": {
+   "kind": "bubble",
+   "look": "neon"
+  },
+  "setup.fun.bubble.leaf": {
+   "kind": "bubble",
+   "look": "leaf"
+  }
+ },
+ "gacha": {
+  "ticket": "use.gacha_ticket",
+  "ticketPrice": 1500,
+  "mobTicketChance": 0.002,
+  "machines": [
+   {
+    "id": "gacha.V100",
+    "town": "V100",
+    "name": "港のガラガラ",
+    "prizes": [
+     {
+      "item": "etc.fun.card.M001",
+      "n": 1,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "etc.fun.card.M005",
+      "n": 1,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "etc.fun.card.M030",
+      "n": 1,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "use.orange_potion",
+      "n": 10,
+      "tier": 0,
+      "w": 14
+     },
+     {
+      "item": "use.blue_potion",
+      "n": 10,
+      "tier": 0,
+      "w": 12
+     },
+     {
+      "item": "use.speed_tonic",
+      "n": 3,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "setup.fun.hat.acorn",
+      "n": 1,
+      "tier": 1,
+      "w": 5
+     },
+     {
+      "item": "setup.fun.hat.pirate",
+      "n": 1,
+      "tier": 1,
+      "w": 5
+     },
+     {
+      "item": "setup.fun.chair.mushroom",
+      "n": 1,
+      "tier": 1,
+      "w": 4
+     },
+     {
+      "item": "setup.fun.tag.wood",
+      "n": 1,
+      "tier": 1,
+      "w": 4
+     },
+     {
+      "item": "scroll.A17.60",
+      "n": 1,
+      "tier": 1,
+      "w": 3
+     },
+     {
+      "item": "eq.fun.jackpot.V100",
+      "n": 1,
+      "tier": 2,
+      "w": 2
+     },
+     {
+      "item": "setup.fun.chair.capsule",
+      "n": 1,
+      "tier": 2,
+      "w": 1
+     }
+    ]
+   },
+   {
+    "id": "gacha.C100",
+    "town": "C100",
+    "name": "雲の上のくじ箱",
+    "prizes": [
+     {
+      "item": "etc.fun.card.M100",
+      "n": 1,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "etc.fun.card.M101",
+      "n": 1,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "etc.fun.card.M102",
+      "n": 1,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "use.white_potion",
+      "n": 10,
+      "tier": 0,
+      "w": 14
+     },
+     {
+      "item": "use.mana_elixir",
+      "n": 5,
+      "tier": 0,
+      "w": 12
+     },
+     {
+      "item": "use.magic_tonic",
+      "n": 3,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "setup.fun.hat.star",
+      "n": 1,
+      "tier": 1,
+      "w": 5
+     },
+     {
+      "item": "setup.fun.chair.puff",
+      "n": 1,
+      "tier": 1,
+      "w": 5
+     },
+     {
+      "item": "setup.fun.bubble.cloud",
+      "n": 1,
+      "tier": 1,
+      "w": 4
+     },
+     {
+      "item": "setup.fun.outfit.sailor",
+      "n": 1,
+      "tier": 1,
+      "w": 4
+     },
+     {
+      "item": "scroll.A26.60",
+      "n": 1,
+      "tier": 1,
+      "w": 3
+     },
+     {
+      "item": "eq.fun.jackpot.C100",
+      "n": 1,
+      "tier": 2,
+      "w": 2
+     },
+     {
+      "item": "setup.fun.chair.capsule",
+      "n": 1,
+      "tier": 2,
+      "w": 1
+     }
+    ]
+   },
+   {
+    "id": "gacha.T100",
+    "town": "T100",
+    "name": "ぜんまい仕掛けの景品箱",
+    "prizes": [
+     {
+      "item": "etc.fun.card.M140",
+      "n": 1,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "etc.fun.card.M141",
+      "n": 1,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "etc.fun.card.M145",
+      "n": 1,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "use.white_potion",
+      "n": 10,
+      "tier": 0,
+      "w": 14
+     },
+     {
+      "item": "use.mana_elixir",
+      "n": 5,
+      "tier": 0,
+      "w": 12
+     },
+     {
+      "item": "use.power_tonic",
+      "n": 3,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "setup.fun.hat.crown",
+      "n": 1,
+      "tier": 1,
+      "w": 5
+     },
+     {
+      "item": "setup.fun.chair.drum",
+      "n": 1,
+      "tier": 1,
+      "w": 5
+     },
+     {
+      "item": "setup.fun.bubble.neon",
+      "n": 1,
+      "tier": 1,
+      "w": 4
+     },
+     {
+      "item": "setup.fun.tag.star",
+      "n": 1,
+      "tier": 1,
+      "w": 4
+     },
+     {
+      "item": "scroll.A18.60",
+      "n": 1,
+      "tier": 1,
+      "w": 3
+     },
+     {
+      "item": "eq.fun.jackpot.T100",
+      "n": 1,
+      "tier": 2,
+      "w": 2
+     },
+     {
+      "item": "setup.fun.chair.capsule",
+      "n": 1,
+      "tier": 2,
+      "w": 1
+     }
+    ]
+   },
+   {
+    "id": "gacha.F100",
+    "town": "F100",
+    "name": "雪の村の福引き",
+    "prizes": [
+     {
+      "item": "etc.fun.card.M120",
+      "n": 1,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "etc.fun.card.M123",
+      "n": 1,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "etc.fun.card.M124",
+      "n": 1,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "use.big_white_potion",
+      "n": 5,
+      "tier": 0,
+      "w": 14
+     },
+     {
+      "item": "use.mana_elixir",
+      "n": 8,
+      "tier": 0,
+      "w": 12
+     },
+     {
+      "item": "use.aim_tonic",
+      "n": 3,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "setup.fun.hat.cat",
+      "n": 1,
+      "tier": 1,
+      "w": 5
+     },
+     {
+      "item": "setup.fun.chair.ice",
+      "n": 1,
+      "tier": 1,
+      "w": 5
+     },
+     {
+      "item": "setup.fun.tag.ice",
+      "n": 1,
+      "tier": 1,
+      "w": 4
+     },
+     {
+      "item": "setup.fun.outfit.snow",
+      "n": 1,
+      "tier": 1,
+      "w": 4
+     },
+     {
+      "item": "scroll.A28.60",
+      "n": 1,
+      "tier": 1,
+      "w": 3
+     },
+     {
+      "item": "eq.fun.jackpot.F100",
+      "n": 1,
+      "tier": 2,
+      "w": 2
+     },
+     {
+      "item": "setup.fun.chair.capsule",
+      "n": 1,
+      "tier": 2,
+      "w": 1
+     }
+    ]
+   },
+   {
+    "id": "gacha.M100",
+    "town": "M100",
+    "name": "海の底の貝くじ",
+    "prizes": [
+     {
+      "item": "etc.fun.card.M170",
+      "n": 1,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "etc.fun.card.M175",
+      "n": 1,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "etc.fun.card.M176",
+      "n": 1,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "use.big_white_potion",
+      "n": 8,
+      "tier": 0,
+      "w": 14
+     },
+     {
+      "item": "use.blue_secret",
+      "n": 3,
+      "tier": 0,
+      "w": 12
+     },
+     {
+      "item": "use.dodge_tonic",
+      "n": 3,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "setup.fun.hat.chef",
+      "n": 1,
+      "tier": 1,
+      "w": 5
+     },
+     {
+      "item": "setup.fun.chair.shell",
+      "n": 1,
+      "tier": 1,
+      "w": 5
+     },
+     {
+      "item": "setup.fun.bubble.scroll",
+      "n": 1,
+      "tier": 1,
+      "w": 4
+     },
+     {
+      "item": "setup.fun.outfit.formal",
+      "n": 1,
+      "tier": 1,
+      "w": 4
+     },
+     {
+      "item": "scroll.A29.60",
+      "n": 1,
+      "tier": 1,
+      "w": 3
+     },
+     {
+      "item": "eq.fun.jackpot.M100",
+      "n": 1,
+      "tier": 2,
+      "w": 2
+     },
+     {
+      "item": "setup.fun.chair.capsule",
+      "n": 1,
+      "tier": 2,
+      "w": 1
+     }
+    ]
+   },
+   {
+    "id": "gacha.D100",
+    "town": "D100",
+    "name": "竜の背の宝くじ",
+    "prizes": [
+     {
+      "item": "etc.fun.card.M200",
+      "n": 1,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "etc.fun.card.M201",
+      "n": 1,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "etc.fun.card.M202",
+      "n": 1,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "use.xl_potion",
+      "n": 5,
+      "tier": 0,
+      "w": 14
+     },
+     {
+      "item": "use.blue_secret",
+      "n": 5,
+      "tier": 0,
+      "w": 12
+     },
+     {
+      "item": "use.warrior_elixir",
+      "n": 2,
+      "tier": 0,
+      "w": 8
+     },
+     {
+      "item": "setup.fun.hat.witch",
+      "n": 1,
+      "tier": 1,
+      "w": 5
+     },
+     {
+      "item": "setup.fun.chair.swing",
+      "n": 1,
+      "tier": 1,
+      "w": 5
+     },
+     {
+      "item": "setup.fun.bubble.heart",
+      "n": 1,
+      "tier": 1,
+      "w": 4
+     },
+     {
+      "item": "setup.fun.outfit.star",
+      "n": 1,
+      "tier": 1,
+      "w": 4
+     },
+     {
+      "item": "scroll.A24.60",
+      "n": 1,
+      "tier": 1,
+      "w": 3
+     },
+     {
+      "item": "eq.fun.jackpot.D100",
+      "n": 1,
+      "tier": 2,
+      "w": 2
+     },
+     {
+      "item": "setup.fun.chair.capsule",
+      "n": 1,
+      "tier": 2,
+      "w": 1
+     }
+    ]
+   }
+  ]
+ },
+ "fieldBosses": [
+  {
+   "mob": "M420",
+   "map": "V303",
+   "minSec": 1800,
+   "maxSec": 3600,
+   "warnSec": 60,
+   "drops": [
+    {
+     "item": "eq.fun.boss.M420",
+     "chance": 0.3
+    },
+    {
+     "item": "use.gacha_ticket",
+     "chance": 0.6,
+     "count": 2
+    },
+    {
+     "item": "setup.fun.hat.stump",
+     "chance": 0.15
+    }
+   ]
+  },
+  {
+   "mob": "M421",
+   "map": "V405",
+   "minSec": 1800,
+   "maxSec": 3600,
+   "warnSec": 60,
+   "drops": [
+    {
+     "item": "eq.fun.boss.M421",
+     "chance": 0.3
+    },
+    {
+     "item": "use.gacha_ticket",
+     "chance": 0.6,
+     "count": 2
+    },
+    {
+     "item": "setup.fun.chair.mushroom",
+     "chance": 0.15
+    }
+   ]
+  },
+  {
+   "mob": "M422",
+   "map": "V510",
+   "minSec": 2400,
+   "maxSec": 4200,
+   "warnSec": 60,
+   "drops": [
+    {
+     "item": "eq.fun.boss.M422",
+     "chance": 0.3
+    },
+    {
+     "item": "use.gacha_ticket",
+     "chance": 0.6,
+     "count": 2
+    },
+    {
+     "item": "setup.fun.bubble.leaf",
+     "chance": 0.15
+    }
+   ]
+  },
+  {
+   "mob": "M423",
+   "map": "C105",
+   "minSec": 2400,
+   "maxSec": 4200,
+   "warnSec": 60,
+   "drops": [
+    {
+     "item": "eq.fun.boss.M423",
+     "chance": 0.3
+    },
+    {
+     "item": "use.gacha_ticket",
+     "chance": 0.6,
+     "count": 2
+    },
+    {
+     "item": "setup.fun.hat.sheep",
+     "chance": 0.15
+    }
+   ]
+  },
+  {
+   "mob": "M424",
+   "map": "F106",
+   "minSec": 2700,
+   "maxSec": 4800,
+   "warnSec": 60,
+   "drops": [
+    {
+     "item": "eq.fun.boss.M424",
+     "chance": 0.3
+    },
+    {
+     "item": "use.gacha_ticket",
+     "chance": 0.6,
+     "count": 2
+    },
+    {
+     "item": "setup.fun.chair.ice",
+     "chance": 0.15
+    }
+   ]
+  },
+  {
+   "mob": "M425",
+   "map": "M106",
+   "minSec": 2700,
+   "maxSec": 4800,
+   "warnSec": 60,
+   "drops": [
+    {
+     "item": "eq.fun.boss.M425",
+     "chance": 0.3
+    },
+    {
+     "item": "use.gacha_ticket",
+     "chance": 0.6,
+     "count": 2
+    },
+    {
+     "item": "setup.fun.chair.shell",
+     "chance": 0.15
+    }
+   ]
+  },
+  {
+   "mob": "M426",
+   "map": "D104",
+   "minSec": 3600,
+   "maxSec": 5400,
+   "warnSec": 60,
+   "drops": [
+    {
+     "item": "eq.fun.boss.M426",
+     "chance": 0.3
+    },
+    {
+     "item": "use.gacha_ticket",
+     "chance": 0.6,
+     "count": 2
+    },
+    {
+     "item": "setup.fun.chair.nest",
+     "chance": 0.15
+    }
+   ]
+  },
+  {
+   "mob": "M427",
+   "map": "E103",
+   "minSec": 3600,
+   "maxSec": 5400,
+   "warnSec": 60,
+   "drops": [
+    {
+     "item": "eq.fun.boss.M427",
+     "chance": 0.3
+    },
+    {
+     "item": "use.gacha_ticket",
+     "chance": 0.6,
+     "count": 2
+    },
+    {
+     "item": "setup.fun.hat.star",
+     "chance": 0.15
+    }
+   ]
+  }
+ ],
+ "voyages": [
+  {
+   "npc": "noa",
+   "deck": "C118",
+   "sec": 75,
+   "raids": [
+    {
+     "at": 0.35,
+     "mobs": [
+      "M100"
+     ],
+     "count": 3
+    },
+    {
+     "at": 0.7,
+     "mobs": [
+      "M100"
+     ],
+     "count": 3
+    }
+   ],
+   "bonusMeso": 800,
+   "ticketChance": 0.2
+  },
+  {
+   "npc": "luna",
+   "deck": "C118",
+   "sec": 75,
+   "raids": [
+    {
+     "at": 0.35,
+     "mobs": [
+      "M100"
+     ],
+     "count": 3
+    },
+    {
+     "at": 0.7,
+     "mobs": [
+      "M100"
+     ],
+     "count": 3
+    }
+   ],
+   "bonusMeso": 800,
+   "ticketChance": 0.2
+  },
+  {
+   "npc": "sora",
+   "deck": "C118",
+   "sec": 90,
+   "raids": [
+    {
+     "at": 0.3,
+     "mobs": [
+      "M100",
+      "M101"
+     ],
+     "count": 3
+    },
+    {
+     "at": 0.65,
+     "mobs": [
+      "M101"
+     ],
+     "count": 4
+    }
+   ],
+   "bonusMeso": 1200,
+   "ticketChance": 0.2
+  },
+  {
+   "npc": "kippu",
+   "deck": "C118",
+   "sec": 90,
+   "raids": [
+    {
+     "at": 0.3,
+     "mobs": [
+      "M100",
+      "M101"
+     ],
+     "count": 3
+    },
+    {
+     "at": 0.65,
+     "mobs": [
+      "M101"
+     ],
+     "count": 4
+    }
+   ],
+   "bonusMeso": 1200,
+   "ticketChance": 0.2
+  },
+  {
+   "npc": "hashi",
+   "deck": "C118",
+   "sec": 110,
+   "raids": [
+    {
+     "at": 0.3,
+     "mobs": [
+      "M101",
+      "M102"
+     ],
+     "count": 4
+    },
+    {
+     "at": 0.65,
+     "mobs": [
+      "M102"
+     ],
+     "count": 5
+    }
+   ],
+   "bonusMeso": 3000,
+   "ticketChance": 0.3
+  },
+  {
+   "npc": "p_boat",
+   "deck": "C118",
+   "sec": 110,
+   "raids": [
+    {
+     "at": 0.3,
+     "mobs": [
+      "M101",
+      "M102"
+     ],
+     "count": 4
+    },
+    {
+     "at": 0.65,
+     "mobs": [
+      "M102"
+     ],
+     "count": 5
+    }
+   ],
+   "bonusMeso": 3000,
+   "ticketChance": 0.3
+  }
+ ],
+ "emotes": [
+  {
+   "id": "smile",
+   "name": "にっこり",
+   "face": "face_e_smile"
+  },
+  {
+   "id": "cry",
+   "name": "泣く",
+   "face": "face_e_cry"
+  },
+  {
+   "id": "angry",
+   "name": "怒る",
+   "face": "face_e_angry"
+  },
+  {
+   "id": "surprise",
+   "name": "驚く",
+   "face": "face_e_surprise"
+  },
+  {
+   "id": "shy",
+   "name": "照れる",
+   "face": "face_e_shy"
+  },
+  {
+   "id": "sleepy",
+   "name": "眠い",
+   "face": "face_e_sleepy"
+  },
+  {
+   "id": "wink",
+   "name": "ウインク",
+   "face": "face_e_wink"
+  }
+ ],
+ "emoteSec": 4,
+ "arcade": {
+  "gomoku": {
+   "size": 15,
+   "points": {
+    "easy": [
+     20,
+     8,
+     3
+    ],
+    "normal": [
+     50,
+     15,
+     5
+    ]
+   }
+  },
+  "memory": {
+   "pairs": 8,
+   "recall": {
+    "easy": 0.35,
+    "normal": 0.7
+   },
+   "points": {
+    "easy": [
+     20,
+     8,
+     3
+    ],
+    "normal": [
+     45,
+     15,
+     5
+    ]
+   }
+  },
+  "prizes": [
+   {
+    "item": "use.gacha_ticket",
+    "cost": 40
+   },
+   {
+    "item": "use.exp_coupon",
+    "cost": 120
+   },
+   {
+    "item": "use.fun.hair_coupon",
+    "cost": 100
+   },
+   {
+    "item": "use.fun.face_coupon",
+    "cost": 100
+   },
+   {
+    "item": "setup.fun.tag.sakura",
+    "cost": 150
+   },
+   {
+    "item": "setup.fun.bubble.leaf",
+    "cost": 150
+   },
+   {
+    "item": "setup.fun.outfit.farmer",
+    "cost": 200
+   },
+   {
+    "item": "setup.fun.hat.leaf",
+    "cost": 200
+   },
+   {
+    "item": "setup.fun.chair.swing",
+    "cost": 300
+   },
+   {
+    "item": "setup.fun.chair.drum",
+    "cost": 300
+   }
+  ]
+ },
+ "seasons": [
+  {
+   "id": "autumn",
+   "name": "実りの祭り",
+   "months": [
+    9,
+    10,
+    11
+   ],
+   "deco": "autumn",
+   "mob": "M430",
+   "mobChance": 0.08,
+   "task": {
+    "item": "etc.M430",
+    "count": 20,
+    "first": [
+     {
+      "item": "setup.fun.hat.pumpkin",
+      "n": 1
+     },
+     {
+      "item": "setup.fun.chair.lantern",
+      "n": 1
+     }
+    ],
+    "again": [
+     {
+      "item": "use.gacha_ticket",
+      "n": 2
+     }
+    ]
+   },
+   "prizes": [
+    "setup.fun.hat.pumpkin",
+    "setup.fun.chair.lantern"
+   ],
+   "say": "実りの祭りだよ！ 畑に出るおばけカボチャの種を 20 個集めてくれたら、記念の品をあげよう。",
+   "maps": [
+    "V201",
+    "V202",
+    "V203",
+    "V301",
+    "V302",
+    "V401",
+    "V402",
+    "V700",
+    "V701"
+   ]
+  },
+  {
+   "id": "winter",
+   "name": "雪の祭り",
+   "months": [
+    12,
+    1,
+    2
+   ],
+   "deco": "winter",
+   "mob": "M431",
+   "mobChance": 0.08,
+   "task": {
+    "item": "etc.M431",
+    "count": 20,
+    "first": [
+     {
+      "item": "setup.fun.hat.snow",
+      "n": 1
+     },
+     {
+      "item": "setup.fun.chair.snowglobe",
+      "n": 1
+     }
+    ],
+    "again": [
+     {
+      "item": "use.gacha_ticket",
+      "n": 2
+     }
+    ]
+   },
+   "prizes": [
+    "setup.fun.hat.snow",
+    "setup.fun.chair.snowglobe"
+   ],
+   "say": "雪の祭りだよ！ 転がる雪だるまの結晶を 20 個集めてくれたら、記念の品をあげよう。",
+   "maps": [
+    "V201",
+    "V202",
+    "V203",
+    "V301",
+    "V302",
+    "V401",
+    "V402",
+    "V700",
+    "V701"
+   ]
+  }
+ ],
+ "salon": {
+  "hair": [
+   [
+    "hair_spiky",
+    "とがった短い髪"
+   ],
+   [
+    "hair_bob",
+    "まるいボブ"
+   ],
+   [
+    "hair_long",
+    "長い髪"
+   ],
+   [
+    "hair_pony",
+    "ポニーテール"
+   ],
+   [
+    "hair_bun",
+    "おだんご"
+   ],
+   [
+    "hair_curly",
+    "くせっ毛"
+   ],
+   [
+    "hair_mohawk",
+    "とさか頭"
+   ]
+  ],
+  "hairColor": [
+   [
+    "brown",
+    "茶"
+   ],
+   [
+    "black",
+    "黒"
+   ],
+   [
+    "blond",
+    "金"
+   ],
+   [
+    "red",
+    "赤"
+   ],
+   [
+    "silver",
+    "銀"
+   ],
+   [
+    "blue",
+    "青"
+   ],
+   [
+    "pink",
+    "桃"
+   ],
+   [
+    "green",
+    "緑"
+   ]
+  ],
+  "face": [
+   [
+    "face_basic",
+    "ふつうの目"
+   ],
+   [
+    "face_round",
+    "まるい目"
+   ],
+   [
+    "face_sharp",
+    "きりっとした目"
+   ],
+   [
+    "face_calm",
+    "おだやかな目"
+   ],
+   [
+    "face_sparkle",
+    "きらきらの目"
+   ]
+  ],
+  "skin": [
+   [
+    "light",
+    "明るい肌"
+   ],
+   [
+    "tan",
+    "小麦色"
+   ],
+   [
+    "pale",
+    "白い肌"
+   ],
+   [
+    "dark",
+    "褐色"
+   ]
+  ],
+  "price": {
+   "hair": 5000,
+   "hairColor": 3000,
+   "face": 8000,
+   "skin": 3000
+  },
+  "coupon": {
+   "hair": "use.fun.hair_coupon",
+   "hairColor": "use.fun.hair_coupon",
+   "face": "use.fun.face_coupon",
+   "skin": "use.fun.face_coupon"
+  }
+ },
+ "boutique": [
+  {
+   "item": "setup.fun.tag.wood",
+   "price": 3000
+  },
+  {
+   "item": "setup.fun.tag.gold",
+   "price": 30000
+  },
+  {
+   "item": "setup.fun.tag.star",
+   "price": 15000
+  },
+  {
+   "item": "setup.fun.bubble.cloud",
+   "price": 8000
+  },
+  {
+   "item": "setup.fun.bubble.heart",
+   "price": 8000
+  },
+  {
+   "item": "setup.fun.bubble.scroll",
+   "price": 12000
+  },
+  {
+   "item": "setup.fun.hat.cat",
+   "price": 10000
+  },
+  {
+   "item": "setup.fun.hat.chef",
+   "price": 10000
+  },
+  {
+   "item": "setup.fun.hat.crown",
+   "price": 20000
+  },
+  {
+   "item": "setup.fun.outfit.sailor",
+   "price": 15000
+  },
+  {
+   "item": "setup.fun.outfit.festival",
+   "price": 15000
+  },
+  {
+   "item": "setup.fun.outfit.formal",
+   "price": 25000
+  },
+  {
+   "item": "use.gacha_ticket",
+   "price": 1500
+  }
+ ],
+ "rare": {
+  "chance": 0.0033333333333333335,
+  "hpMul": 3,
+  "atkMul": 1.3,
+  "expMul": 5,
+  "dropRolls": 3,
+  "mesoMul": 3,
+  "bonus": [
+   {
+    "item": "use.gacha_ticket",
+    "chance": 0.5
+   }
+  ]
+ },
+ "dungeons": {
+  "rooms": {
+   "V516": [
+    "kill",
+    "switch",
+    "carry",
+    "climb"
+   ],
+   "T121": [
+    "switch",
+    "kill",
+    "climb",
+    "carry"
+   ],
+   "T122": [
+    "carry",
+    "switch",
+    "kill",
+    "climb"
+   ],
+   "C119": [
+    "climb",
+    "kill",
+    "switch",
+    "carry"
+   ],
+   "M115": [
+    "kill",
+    "carry",
+    "switch",
+    "climb"
+   ],
+   "D117": [
+    "switch",
+    "climb",
+    "carry",
+    "kill"
+   ]
+  },
+  "carrySec": 25,
+  "chests": 3,
+  "mark": "etc.fun.dungeon_mark",
+  "chestItems": [
+   "use.gacha_ticket",
+   "use.elixir",
+   "use.exp_coupon",
+   "use.fun.hair_coupon",
+   "scroll.A18.60",
+   "scroll.A17.60"
+  ],
+  "prizes": [
+   {
+    "item": "use.gacha_ticket",
+    "cost": 1
+   },
+   {
+    "item": "use.power_elixir",
+    "cost": 2
+   },
+   {
+    "item": "use.drop_coupon",
+    "cost": 4
+   },
+   {
+    "item": "scroll.A18.60",
+    "cost": 3
+   },
+   {
+    "item": "scroll.A24.60",
+    "cost": 3
+   },
+   {
+    "item": "setup.fun.tag.gold",
+    "cost": 8
+   },
+   {
+    "item": "setup.fun.outfit.star",
+    "cost": 10
+   }
+  ]
+ },
+ "weather": {
+  "indoorThemes": [
+   "cave",
+   "tower",
+   "room",
+   "rooms",
+   "boss",
+   "ship",
+   "dungeon"
+  ],
+  "rules": [
+   {
+    "match": "^F",
+    "kind": "snow",
+    "chance": 1
+   },
+   {
+    "match": "^(V50[89]|V510|V620|V306|V307)$",
+    "kind": "fog",
+    "chance": 0.7
+   },
+   {
+    "match": "^V3",
+    "kind": "petals",
+    "chance": 0.4
+   },
+   {
+    "match": "^V2",
+    "kind": "petals",
+    "chance": 0.2
+   },
+   {
+    "match": "^(V|S)",
+    "kind": "rain",
+    "chance": 0.2
+   },
+   {
+    "match": "^D",
+    "kind": "rain",
+    "chance": 0.3
+   }
+  ],
+  "bgmVolume": {
+   "rain": 0.75,
+   "snow": 0.9,
+   "fog": 0.85,
+   "petals": 1
+  }
+ }
+}

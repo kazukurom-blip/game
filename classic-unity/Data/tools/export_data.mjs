@@ -26,6 +26,7 @@ import { buildWorld } from './world/world.mjs';
 import { QUEST_GOALS } from './quest_goals.mjs';
 import { buildSkills } from './skills_export.mjs';
 import * as SYS from './systems.mjs';
+import { funItems, buildFun } from './fun.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.resolve(HERE, '..');
@@ -212,6 +213,7 @@ for (const [id, name, tab, extra = {}] of SYS.SYSTEM_ITEMS) {
   for (const a of alias || []) byName.set(a, id);
 }
 for (const e of SYS.craftedEquips(items)) equipItem(e);
+for (const it of funItems(MONSTERS_RAW)) addItem(it); // 楽しさの要素の品（fun.mjs）
 // クエストでしか手に入らない品（quest_items.mjs。ITEMS.md 8 章）。questOnly: 店に並ばない・敵が落とさない（テストで確かめる）
 const QSLOT = { 帽子: 'cap', 耳飾り: 'earring', マント: 'cape', 顔飾り: 'face', 指輪: 'ring', ペンダント: 'pendant', メダル: 'medal' };
 for (const [id, name, kind, lv, stats, quest, desc, alias] of QUEST_ITEMS) {
@@ -562,6 +564,9 @@ write('npcs.json', { note: 'world/npcs.mjs（位置はマップを作った時�
     storage: SYS.STORAGE, rooms: SYS.ROOMS, pets: SYS.PETS, crafts: SYS.CRAFTS, quiz: SYS.QUIZ, jobs: SYS.JOB_TESTS, chests,
   });
 }
+
+// ---------------- 楽しさの要素（fun.mjs → fun.json）
+write('fun.json', buildFun({ world, items, MONSTERS_RAW, problems }));
 
 // ---------------- スキル（JOBS.md の表 ＋ skills.mjs の動き）
 const skills = buildSkills(problems);

@@ -50,6 +50,10 @@ namespace Lumina.Core.Game
         //   submerge / surface / rock_broken（深淵の大魚）・clones / shuffle（分身）・pulled（ツタ）
         //   decoy_hit / decoy_broken（身代わり人形）・ship_broken（乗船）・door_open / door_used（秘術の扉）・zone_start（毒の霧）
         Mechanic,
+        // 楽しさの要素（Core/Fun・GameSession.Fun.cs。Id = 何が起きたか、Text = 人が読む文、Value = 数）
+        //   gacha / jackpot（景品の機械。Id のあとに ":" で品）・boss_warn / boss_spawn / boss_down（フィールドボス）・voyage_start / voyage_raid / voyage_clear / voyage_arrive（船の旅）
+        //   emote（感情表現）・rare（珍しい個体が出た）・arcade（遊び場の点数）・season（季節）・salon（美容院）・look（見た目の品）・dungeon_task / dungeon_chest（ダンジョン）
+        Fun,
     }
 
     public struct GameEvent

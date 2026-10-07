@@ -219,8 +219,20 @@ namespace Lumina.Core.Game
         /// <summary>乗り物（船など）に乗る。島の船は Lv7 以上・片道。useTicket = true なら雲の船の切符を 1 枚使う（料金なし）。帰りの便（Homeward）はお金が足りなければ有り金で乗れる。</summary>
         public bool Travel(string npcId, bool useTicket = false)
         {
+            if (TravelFromDeck(npcId)) return true; // 船の旅の途中に水夫と話した: そのまま着く（GameSession.Fun.cs）
+            if (!PayTravel(npcId, useTicket, out var t)) return false;
+            string from = Map.Data.Region;
+            Out.Add(GameEventType.Travel, t.To);
+            ChangeMap(t.To, t.ToPortal);
+            if (t.OneWay && from == "S") Flags["leftIsland"] = true;
+            return true;
+        }
+
+        /// <summary>乗り物の料金を払う（Lv・クエスト・お金を確かめる）。払えたら true。船の旅（Board）も使う。</summary>
+        private bool PayTravel(string npcId, bool useTicket, out TravelData t)
+        {
             var n = Map.Npc(npcId);
-            var t = n?.Travel;
+            t = n?.Travel;
             if (t == null) return false;
             if (Character.Level < t.MinLevel) { Out.Add(GameEventType.Message, npcId, text: "Lv" + t.MinLevel + " から乗れる"); return false; }
             if (t.RequiresQuest != null && Quests.Status(t.RequiresQuest) == QuestStatus.None) { Out.Add(GameEventType.Message, npcId, text: "まだ乗れない"); return false; }
@@ -234,10 +246,6 @@ namespace Lumina.Core.Game
                 Out.Add(GameEventType.Message, npcId, text: "足りない分はまけてもらった");
             }
             Inventory.AddMeso(-fee);
-            string from = Map.Data.Region;
-            Out.Add(GameEventType.Travel, t.To);
-            ChangeMap(t.To, t.ToPortal);
-            if (t.OneWay && from == "S") Flags["leftIsland"] = true;
             return true;
         }
 

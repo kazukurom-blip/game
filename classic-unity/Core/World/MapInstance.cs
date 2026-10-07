@@ -108,6 +108,8 @@ namespace Lumina.Core.World
 
         /// <summary>クエスト専用の敵（SpawnData.Quest）を湧かせてよいか。GameSession が「そのクエストを進めている」で答える。null なら湧かない</summary>
         public Func<string, bool> QuestActive;
+        /// <summary>敵が湧いた時（珍しい色違いの個体を決める。GameSession.Fun.cs）。null なら何もしない</summary>
+        public Action<Mob> OnSpawned;
 
         private bool TimedAllowed(int i)
         {
@@ -156,6 +158,7 @@ namespace Lumina.Core.World
             MobAI.Place(m, Physics, x, y);
             m.StateDur = 1 + (m.Uid % 3) * 0.5;
             Mobs.Add(m);
+            OnSpawned?.Invoke(m);
             return m;
         }
 

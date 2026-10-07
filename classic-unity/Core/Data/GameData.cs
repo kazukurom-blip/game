@@ -71,6 +71,8 @@ namespace Lumina.Core.Data
         public readonly List<string> MapIds = new List<string>();
         /// <summary>町と成長の仕組み（systems.json: 倉庫・部屋の決まり・ペット・製作・クイズ・転職の試験）。無ければ空</summary>
         public SystemsData Systems = new SystemsData();
+        /// <summary>楽しさの要素（fun.json: 景品の機械・フィールドボス・船の旅・遊び場など。Core/Fun）。無ければ空</summary>
+        public Lumina.Core.Fun.FunData Fun = new Lumina.Core.Fun.FunData();
         private readonly Dictionary<string, MapData> maps = new Dictionary<string, MapData>();
         private IDataSource source;
 
@@ -130,6 +132,8 @@ namespace Lumina.Core.Data
             }
             var sys = src.ReadText("systems.json");
             if (sys != null) g.Systems = SystemsData.FromDict(Json.ParseObject(sys));
+            var fun = src.ReadText("fun.json");
+            if (fun != null) g.Fun = Lumina.Core.Fun.FunData.FromDict(Json.ParseObject(fun));
             var idx = src.ReadText("maps/index.json");
             if (idx != null) foreach (var o in J.Arr(Json.ParseObject(idx), "maps")) g.MapIds.Add(J.Str((Dictionary<string, object>)o, "id"));
             return g;

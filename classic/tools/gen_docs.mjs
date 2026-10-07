@@ -14,6 +14,7 @@ import { huntTable, killsPerMin } from './hunt_speed.mjs';
 import { QUESTS_RAW } from './data/quests.mjs';
 import { QUEST_SPAWNS, SIDE_EXP, SIDE_MESO } from './data/quests_more.mjs';
 import { QUEST_ITEMS } from './data/quest_items.mjs';
+import { FIELD_BOSSES, SEASON_MOBS } from './data/fun_mobs.mjs';
 import { expToNext } from './lib/curves.mjs';
 import { check } from './balance_check.mjs';
 import { playerAcc, hitChance } from './lib/combat.mjs';
@@ -70,6 +71,9 @@ for (const [mid, map, quest] of QUEST_SPAWNS) {
   mob.maps.push(map);
   mob.questOnly = quest;
 }
+// フィールドボス・季節の敵（data/fun_mobs.mjs。classic-unity の fun.json）
+for (const [mid, map] of FIELD_BOSSES) { const mob = MOB[mid]; if (!mob) { problems.push(`フィールドボス ${mid} が無い`); continue; } if (!MAP[map]) problems.push(`フィールドボス ${mid} のマップ ${map} が無い`); else mob.maps.push(map); }
+for (const [mid, , maps] of SEASON_MOBS) { const mob = MOB[mid]; if (!mob) { problems.push(`季節の敵 ${mid} が無い`); continue; } for (const map of maps) if (!MAP[map]) problems.push(`季節の敵 ${mid} のマップ ${map} が無い`); else mob.maps.push(map); }
 for (const mob of MONSTERS) if (!mob.maps.length) problems.push(`敵 ${mob.id} ${mob.name} がどのマップにも出ない`);
 for (const mob of MONSTERS) if (!Number.isInteger(mob.speed) || mob.speed < -50 || mob.speed > 50) problems.push(`敵 ${mob.id} ${mob.name} の速さ ${mob.speed} が -50〜+50 の整数でない`);
 // どのマップからも町へ歩いて戻れるか（乗り物を含めず、ポータルだけで町に着くか）

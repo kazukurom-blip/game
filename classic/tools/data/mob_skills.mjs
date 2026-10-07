@@ -352,4 +352,63 @@ export const MOB_SKILLS = {
     ],
     boss: { phases: [{ hp: 1, name: '大泥棒' }, { hp: 0.5, name: '化け分身', clones: { count: 2, hpPct: 2, shuffle: 8 } }] },
   },
+  // ===== フィールドボス（fun.mjs） =====
+  M420: { // ねじれ根のモクモク
+    attacks: [
+      { id: 'root', name: '走る根', type: 'magic', range: 400, cd: 5, windup: 1.0, pct: 110, w: 90, h: 70, count: 3, spread: 120 },
+      { id: 'sprout', name: '芽吹き', type: 'summon', mobs: ['M033'], count: 2, max: 4, cd: 20, windup: 0.8, phases: [1] },
+    ],
+    boss: { phases: [{ hp: 1, name: '切り株' }, { hp: 0.5, name: '根の怒り', atkMul: 1.2, rate: 1.3 }] },
+  },
+  M421: { // 牙折れの大猪ガンタ
+    attacks: [
+      { id: 'tusk', name: '牙の突き上げ', type: 'melee', range: 120, cd: 3, windup: 0.5, pct: 140, w: 120, h: 80, status: S('stun', 1, 0.3) },
+      { id: 'charge', name: '大突進', type: 'area', global: true, groundOnly: true, cd: 12, windup: 1.4, pct: 110 },
+    ],
+    boss: { phases: [{ hp: 1, name: '群れの長' }, { hp: 0.4, name: '怒りの長', speedMul: 1.4, atkMul: 1.2, summon: { mobs: ['M044'], count: 2 } }] },
+  },
+  M422: { // 沼の主ヌルヌマ
+    attacks: [
+      { id: 'mud', name: '泥の玉', type: 'shot', range: 420, cd: 3, windup: 0.5, pct: 100, speed: 260, count: 3, spread: 40, status: S('slow', 4, 0.4, 30) },
+      { id: 'swamp', name: '底なしの沼', type: 'magic', range: 400, cd: 9, windup: 1.2, pct: 60, w: 160, h: 60, linger: 4, status: S('poison', 4, 1) },
+    ],
+    boss: { phases: [{ hp: 1, name: 'ぬめり' }, { hp: 0.5, name: '濁り', atkMul: 1.2, healPct: 5 }] },
+  },
+  M423: { // 日だまりの大羊メェロン
+    attacks: [
+      { id: 'bump', name: 'もこもこ体当たり', type: 'melee', range: 110, cd: 3, windup: 0.5, pct: 130, w: 110, h: 80 },
+      { id: 'yawn', name: '大あくび', type: 'area', w: 520, cd: 14, windup: 1.2, pct: 0, status: S('sleep', 3, 0.6) },
+      { id: 'sun', name: '日の光', type: 'magic', range: 450, cd: 6, windup: 1.0, pct: 110, w: 120, h: 120, phases: [1] },
+    ],
+    boss: { phases: [{ hp: 1, name: '昼寝' }, { hp: 0.5, name: 'お目覚め', rate: 1.4, speedMul: 1.2 }] },
+  },
+  M424: { // 雪かぶりの大熊ユキゴロウ
+    attacks: [
+      { id: 'snowball', name: '大雪玉', type: 'shot', range: 450, cd: 3, windup: 0.6, pct: 120, speed: 280, status: S('freeze', 1.5, 0.25) },
+      { id: 'avalanche', name: '雪崩の咆哮', type: 'area', global: true, safeHeight: 60, cd: 15, windup: 1.6, pct: 120 },
+    ],
+    boss: { phases: [{ hp: 1, name: '大熊' }, { hp: 0.5, name: '吹雪の熊', atkMul: 1.25, summon: { mobs: ['M123'], count: 2 } }] },
+  },
+  M425: { // 傷だらけの大鮫ギザ
+    attacks: [
+      { id: 'bite', name: '古傷の牙', type: 'melee', range: 120, cd: 2.5, windup: 0.4, pct: 150, w: 120, h: 80 },
+      { id: 'dive', name: '深みからの一撃', type: 'dive', range: 500, cd: 12, windup: 1.2, pct: 130, w: 120, h: 100 },
+    ],
+    boss: { phases: [{ hp: 1, name: '回遊' }, { hp: 0.4, name: '血の匂い', speedMul: 1.3, rate: 1.4 }] },
+  },
+  M426: { // 古巣の翼竜ゴウヨク
+    attacks: [
+      { id: 'fire', name: '火の玉', type: 'shot', range: 500, cd: 3, windup: 0.5, pct: 120, speed: 320, count: 2, spread: 50, status: S('poison', 4, 0.3) },
+      { id: 'gust', name: '翼の突風', type: 'area', w: 600, cd: 13, windup: 1.2, pct: 90, status: S('stun', 1.5, 0.4) },
+    ],
+    boss: { phases: [{ hp: 1, name: '巣の守り' }, { hp: 0.5, name: '怒りの空', atkMul: 1.2, summon: { mobs: ['M202'], count: 2 } }] },
+  },
+  M427: { // 迷い星の巨人
+    attacks: [
+      { id: 'fist', name: '星の拳', type: 'melee', range: 130, cd: 3, windup: 0.6, pct: 150, w: 130, h: 90 },
+      { id: 'fall', name: '降る星', type: 'magic', range: 500, cd: 7, windup: 1.2, pct: 120, w: 100, h: 120, count: 3, spread: 150 },
+      { id: 'flash', name: '星の閃き', type: 'area', global: true, cd: 18, windup: 2.0, pct: 0, status: S('darkness', 5, 0.7), phases: [1, 2] },
+    ],
+    boss: { phases: [{ hp: 1, name: '迷い星' }, { hp: 0.6, name: '輝き', atkMul: 1.15 }, { hp: 0.3, name: '燃え尽きる星', atkMul: 1.3, speedMul: 1.3 }] },
+  },
 };

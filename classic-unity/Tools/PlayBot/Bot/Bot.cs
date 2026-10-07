@@ -96,6 +96,7 @@ namespace Lumina.PlayBot
             Branch = branch;
             Name = name ?? "bot-" + line;
             S = GameSession.NewGame(data, Name, seed);
+            S.FunEvents = false; // フィールドボス・珍しい個体・季節の敵・ダンジョンの課題は通しの検証の外（Core/Fun）
             HookSession();
         }
 

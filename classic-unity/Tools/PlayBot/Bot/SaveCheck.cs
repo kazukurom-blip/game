@@ -58,6 +58,7 @@ namespace Lumina.PlayBot
             }
             // 読み込んだ方で続ける
             S = g;
+            S.FunEvents = false;
             HookSession();
             Reloads++;
             return diffs.Count == 0;

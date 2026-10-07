@@ -79,7 +79,7 @@ namespace Lumina.Web
             {
                 if (m.Removed) continue;
                 if (!first) C(); first = false;
-                int flags = (m.Hidden ? 1 : 0) | (m.HpBarT > 0 ? 2 : 0) | (m.CloneOf != 0 ? 4 : 0) | (m.Charmed ? 8 : 0) | (m.Def.Boss != null ? 16 : 0) | (m.Mechanic ? 32 : 0) | (m.Def.IsElite || m.Timed ? 64 : 0);
+                int flags = (m.Hidden ? 1 : 0) | (m.HpBarT > 0 ? 2 : 0) | (m.CloneOf != 0 ? 4 : 0) | (m.Charmed ? 8 : 0) | (m.Def.Boss != null ? 16 : 0) | (m.Mechanic ? 32 : 0) | (m.Def.IsElite || m.Timed ? 64 : 0) | (m.Rare ? 128 : 0) | (m.FieldBoss ? 256 : 0);
                 sb.Append('['); I(m.Uid); C(); S(m.FormId ?? m.Def.Id); C(); N(m.X); C(); N(m.Y - m.HopY); C(); I(m.Facing); C();
                 S(m.Motion); C(); I(m.Hp); C(); I(m.MaxHp); C(); N(m.FadeOut); C(); I(flags); C(); I(m.StatusIcons); C(); S(m.MechanicKind); sb.Append(']');
             }
