@@ -110,6 +110,7 @@ namespace Lumina.PlayBot
             else if (s.Kind == SkillKind.Passive && s.Passives.Any(pe => pe.Mastery != null && (pe.Weapons == null || pe.Weapons.Contains(wt) || WeaponTypes.Any(w => pe.Weapons.Contains(w))))) p = 95;
             else if (s.Kind == SkillKind.Buff && s.Buff != null && s.Buff.BoosterStages > 0) p = 85;
             else if (s.Kind == SkillKind.Buff && s.Buff != null && s.Buff.MagicGuard != null) p = 92; // 魔力の盾（打たれ弱い魔法使いの命綱）
+            else if (Line == "magician" && s.Kind == SkillKind.Passive && s.Passives.Any(pe => pe.MpRegen != null)) p = 97; // MP 回復力アップ（魔法使いは MP の薬代が重い。クラシックでも 1 次で先に取る）
             else if (s.Kind == SkillKind.Passive) p = 50;
             else if (s.Kind == SkillKind.Buff && UsefulBuff(s)) p = 45;
             else if (s.Kind == SkillKind.Heal) p = 30;
