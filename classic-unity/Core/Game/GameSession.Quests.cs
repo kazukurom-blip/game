@@ -1,0 +1,185 @@
+// NPC と話す・クエストを受ける/報告する・調べる・乗り物（GameSession の続き）。
+using System;
+using System.Collections.Generic;
+using Lumina.Core.Quests;
+using Lumina.Core.World;
+
+namespace Lumina.Core.Game
+{
+    /// <summary>NPC に話した時に Unity の会話の窓へ出す中身。</summary>
+    public sealed class NpcDialog
+    {
+        public NpcData Npc;
+        public List<QuestDef> Available = new List<QuestDef>();   // 受けられる（黄色の電球）
+        public List<QuestDef> Completable = new List<QuestDef>(); // 報告できる（緑の電球）
+        public List<QuestDef> InProgress = new List<QuestDef>();  // 進めている途中（この NPC が報告先）
+        public string Shop;
+        public int InnFee = -1;
+        public TravelData Travel;
+    }
+
+    public enum CompleteResult { Ok, NotInProgress, NotDone, WrongNpc, InventoryFull }
+
+    public sealed partial class GameSession
+    {
+        /// <summary>今のマップの NPC に話す。「話す」目的が進み、受けられる・報告できるクエストを返す。</summary>
+        public NpcDialog Talk(string npcId)
+        {
+            var n = Map.Npc(npcId);
+            if (n == null || Dead) return null;
+            foreach (var note in Quests.Progress(ObjectiveType.Talk, npcId)) OnQuestNote(note);
+            var d = new NpcDialog { Npc = n, Shop = n.Shop, InnFee = n.InnFee, Travel = n.Travel };
+            d.Completable = Quests.CompletableAt(npcId, Inventory);
+            d.Available = Quests.AvailableFrom(npcId, Character);
+            foreach (var q in Quests.InProgress()) if (q.End == npcId && !d.Completable.Contains(q)) d.InProgress.Add(q);
+            return d;
+        }
+
+        /// <summary>頭の上の電球: 2 = 報告できる（緑）、1 = 受けられる（黄）、0 = 無し。</summary>
+        public int NpcBulb(string npcId)
+        {
+            if (Quests.CompletableAt(npcId, Inventory).Count > 0) return 2;
+            if (Quests.AvailableFrom(npcId, Character).Count > 0) return 1;
+            return 0;
+        }
+
+        /// <summary>クエストを受ける（依頼者が今のマップにいる時）。</summary>
+        public StartResult AcceptQuest(string questId)
+        {
+            var q = Data.Quest(questId);
+            if (q == null) return StartResult.Unknown;
+            if (q.Giver != null && Map.Npc(q.Giver) == null && Data.Npcs.ContainsKey(q.Giver)) return StartResult.GiverNotHere;
+            var r = Quests.Start(questId, Character);
+            if (r != StartResult.Ok) return r;
+            Out.Add(GameEventType.QuestStarted, questId, text: q.Name);
+            // 今いるマップが「行く」目的なら、もう着いている
+            foreach (var note in Quests.Progress(ObjectiveType.Visit, Map.Data.Id)) OnQuestNote(note);
+            CheckAutoComplete();
+            return r;
+        }
+
+        /// <summary>クエストを報告して報酬をもらう。</summary>
+        public CompleteResult CompleteQuest(string questId)
+        {
+            var q = Data.Quest(questId);
+            if (q == null || Quests.Status(questId) != QuestStatus.InProgress) return CompleteResult.NotInProgress;
+            if (!Quests.ObjectivesDone(q, Inventory)) return CompleteResult.NotDone;
+            if (!q.AutoComplete && Map.Npc(q.End) == null) return CompleteResult.WrongNpc;
+            return FinishQuest(q);
+        }
+
+        private CompleteResult FinishQuest(QuestDef q)
+        {
+            // 報酬が入るか（集めた物を渡した後で数える）
+            foreach (var rw in q.Rewards)
+            {
+                var def = Data.Item(rw.Item);
+                if (def == null) continue;
+                if (!Inventory.CanAdd(rw.Item, rw.Count) && !CollectFreesRoom(q, def))
+                {
+                    Out.Add(GameEventType.InventoryFull, q.Id, text: "持ち物がいっぱいで報酬を受け取れない");
+                    return CompleteResult.InventoryFull;
+                }
+            }
+            foreach (var o in q.Objectives) if (o.Type == ObjectiveType.Collect) Inventory.Remove(o.Target, o.Count);
+            Quests.MarkCompleted(q.Id, (long)PlaySec);
+            Out.Add(GameEventType.QuestCompleted, q.Id, q.Exp, text: q.Name);
+            if (q.Meso > 0) { Inventory.AddMeso(q.Meso); Out.Add(GameEventType.MesoPicked, q.Id, q.Meso); }
+            foreach (var rw in q.Rewards)
+            {
+                if (Data.Item(rw.Item) == null) continue;
+                Inventory.Add(rw.Item, rw.Count);
+                Out.Add(GameEventType.ItemPicked, rw.Item, rw.Count, text: Data.Item(rw.Item).Name);
+            }
+            GainExp(q.Exp);
+            RefreshStats();
+            AutoSave.Request("quest");
+            return CompleteResult.Ok;
+        }
+
+        private bool CollectFreesRoom(QuestDef q, Items.ItemDef reward)
+        {
+            foreach (var o in q.Objectives)
+                if (o.Type == ObjectiveType.Collect && Data.Item(o.Target)?.Tab == reward.Tab) return true;
+            return false;
+        }
+
+        private void CheckAutoComplete()
+        {
+            var done = new List<QuestDef>();
+            foreach (var q in Quests.InProgress()) if (q.AutoComplete && Quests.ObjectivesDone(q, Inventory)) done.Add(q);
+            foreach (var q in done) FinishQuest(q);
+        }
+
+        private void OnQuestNote(QuestProgressNote n)
+        {
+            Out.Add(GameEventType.QuestProgress, n.QuestId, n.Count, text: n.Count + "/" + n.Need);
+        }
+
+        /// <summary>「操作をする」目的（クイックスロットに置く・AP を振る など）を進める。</summary>
+        public void QuestEvent(string name, int amount = 1)
+        {
+            foreach (var note in Quests.Progress(ObjectiveType.Event, name, amount)) OnQuestNote(note);
+            CheckAutoComplete();
+        }
+
+        private void OnVisitMap(string mapId)
+        {
+            foreach (var note in Quests.Progress(ObjectiveType.Visit, mapId)) OnQuestNote(note);
+            CheckAutoComplete();
+        }
+
+        /// <summary>話す/調べるキー: 近くの調べられる物を調べる。無ければ一番近い NPC（120 px 以内）に話す。</summary>
+        public object InteractNearby()
+        {
+            var o = Map.ObjectAt(Body.X, Body.Y);
+            if (o != null) { Interact(o.Id); return o; }
+            NpcData best = null; double bd = 120;
+            foreach (var n in Map.Data.Npcs)
+            {
+                double d = Math.Abs(n.X - Body.X);
+                if (d <= bd && Math.Abs(n.Y - Body.Y) < 80) { bd = d; best = n; }
+            }
+            if (best != null) { LastDialog = Talk(best.Id); return LastDialog; }
+            return null;
+        }
+
+        /// <summary>InteractNearby で話した時の会話の中身（Unity の会話の窓が読む）。</summary>
+        public NpcDialog LastDialog;
+
+        /// <summary>調べる（木箱・宝箱・見晴らし台）。近くにある時だけ。</summary>
+        public bool Interact(string objectId)
+        {
+            MapObjectData found = null;
+            foreach (var o in Map.Data.Objects) if (o.Id == objectId) found = o;
+            if (found == null || Math.Abs(found.X - Body.X) > 32 || Math.Abs(found.Y - Body.Y) > 48) return false;
+            Out.Add(GameEventType.Message, objectId, text: found.Name + "を調べた");
+            foreach (var note in Quests.Progress(ObjectiveType.Interact, objectId)) OnQuestNote(note);
+            CheckAutoComplete();
+            return true;
+        }
+
+        /// <summary>乗り物（船など）に乗る。島の船は Lv7 以上・片道。</summary>
+        public bool Travel(string npcId)
+        {
+            var n = Map.Npc(npcId);
+            var t = n?.Travel;
+            if (t == null) return false;
+            if (Character.Level < t.MinLevel) { Out.Add(GameEventType.Message, npcId, text: "Lv" + t.MinLevel + " から乗れる"); return false; }
+            if (t.RequiresQuest != null && Quests.Status(t.RequiresQuest) == QuestStatus.None) { Out.Add(GameEventType.Message, npcId, text: "まだ乗れない"); return false; }
+            if (Inventory.Meso < t.Fee) { Out.Add(GameEventType.Message, npcId, text: "お金が足りない"); return false; }
+            Inventory.AddMeso(-t.Fee);
+            string from = Map.Data.Region;
+            Out.Add(GameEventType.Travel, t.To);
+            ChangeMap(t.To, t.ToPortal);
+            if (t.OneWay && from == "S") Flags["leftIsland"] = true;
+            return true;
+        }
+
+        /// <summary>テスト・道具用: 足元の位置を動かす（足場に立たせる）。</summary>
+        public void Teleport(double x, double y)
+        {
+            Physics.PlayerPhysics.PlaceOnGround(Body, Map.Physics, x, y);
+        }
+    }
+}
