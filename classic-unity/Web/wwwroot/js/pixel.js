@@ -104,3 +104,80 @@ export function blob(buf, cx, cy, rx, ry, pal) {
     buf.px(x, y, s > 0.9 && pal.light ? pal.light : s < -0.8 && pal.dark ? pal.dark : pal.mid);
   }
 }
+
+// ---------------------------------------------------------------- 形（マスク）を塗る道具（クラシック風の 3 段の塗り＋1px の線）
+// 形を「ある/ない」の集まりで作り（楕円・多角形・太い線の足し引き）、paintMask で塗る:
+//   外側 1 ドット = 線（その部分の一番暗い色）、左上の縁 = 明るい色、右下の縁 = 暗い色、ほか = ふつうの色。
+// 部品を順に塗ると、後の部品の線が前の部品の上に乗るので、部品の間にも 1px の線が入る。
+export class Mask {
+  constructor() { this.s = new Set(); }
+  static k(x, y) { return ((x + 4096) << 13) | (y + 4096); }
+  has(x, y) { return this.s.has(Mask.k(x, y)); }
+  put(x, y, on = true) { const k = Mask.k(Math.round(x), Math.round(y)); if (on) this.s.add(k); else this.s.delete(k); return this; }
+  *each() { for (const k of this.s) yield [(k >> 13) - 4096, (k & 8191) - 4096]; }
+  get size() { return this.s.size; }
+  ellipse(cx, cy, rx, ry, on = true) {
+    for (let y = Math.floor(cy - ry - 1); y <= Math.ceil(cy + ry + 1); y++)
+      for (let x = Math.floor(cx - rx - 1); x <= Math.ceil(cx + rx + 1); x++)
+        if (((x - cx) / (rx + 0.01)) ** 2 + ((y - cy) / (ry + 0.01)) ** 2 <= 1) this.put(x, y, on);
+    return this;
+  }
+  rect(x, y, w, h, on = true) { for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) this.put(x + i, y + j, on); return this; }
+  // 太い線（カプセル）
+  line(a, b, r, on = true) {
+    const dx = b.x - a.x, dy = b.y - a.y, L2 = dx * dx + dy * dy || 1;
+    for (let y = Math.floor(Math.min(a.y, b.y) - r - 1); y <= Math.ceil(Math.max(a.y, b.y) + r + 1); y++)
+      for (let x = Math.floor(Math.min(a.x, b.x) - r - 1); x <= Math.ceil(Math.max(a.x, b.x) + r + 1); x++) {
+        const t = Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / L2));
+        if (Math.hypot(x - a.x - dx * t, y - a.y - dy * t) <= r) this.put(x, y, on);
+      }
+    return this;
+  }
+  // 多角形（点の配列 [[x,y],…]）。ドットの中心で判定
+  poly(pts, on = true) {
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    for (const [x, y] of pts) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+    for (let y = Math.floor(y0); y <= Math.ceil(y1); y++) for (let x = Math.floor(x0); x <= Math.ceil(x1); x++) {
+      let inside = false;
+      for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+        const [xi, yi] = pts[i], [xj, yj] = pts[j];
+        if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+      }
+      if (inside) this.put(x, y, on);
+    }
+    return this;
+  }
+  add(m) { for (const k of m.s) this.s.add(k); return this; }
+  sub(m) { for (const k of m.s) this.s.delete(k); return this; }
+  and(m) { for (const k of [...this.s]) if (!m.s.has(k)) this.s.delete(k); return this; }
+  clone() { const m = new Mask(); for (const k of this.s) m.s.add(k); return m; }
+  shift(dx, dy) { const m = new Mask(); for (const [x, y] of this.each()) m.put(x + dx, y + dy); return m; }
+}
+
+// 左上（sx,sy = -1,-1）か右下（1,1）へ何ドットで形の外に出るか（横・縦・斜めの小さい方）
+function rimDist(m, x, y, sx, sy, max) {
+  for (let k = 1; k <= max; k++) if (!m.has(x + sx * k, y) || !m.has(x, y + sy * k) || !m.has(x + sx * k, y + sy * k)) return k;
+  return max + 1;
+}
+/** マスクを塗る。pal = { line, light, mid, dark }。opt: rimL（明るい縁の幅）・rimD（暗い縁の幅）・outline（false で線なし） */
+export function paintMask(buf, m, pal, opt = {}) {
+  const { rimL = 1, rimD = 2, outline = true } = opt;
+  if (outline) {
+    for (const [x, y] of m.each()) for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      if (!m.has(x + dx, y + dy)) buf.px(x + dx, y + dy, pal.line);
+    }
+  }
+  for (const [x, y] of m.each()) {
+    let c = pal.mid;
+    if (pal.dark && rimD > 0 && rimDist(m, x, y, 1, 1, rimD) <= rimD) c = pal.dark;
+    if (pal.light && rimL > 0 && rimDist(m, x, y, -1, -1, rimL) <= rimL) c = pal.light;
+    buf.px(x, y, c);
+  }
+}
+/** 1 ドットの線（ぼけない。ブレゼンハム） */
+export function pxLine(buf, x0, y0, x1, y1, color) {
+  x0 = Math.round(x0); y0 = Math.round(y0); x1 = Math.round(x1); y1 = Math.round(y1);
+  const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+  let e = dx + dy;
+  for (;;) { buf.px(x0, y0, color); if (x0 === x1 && y0 === y1) break; const e2 = 2 * e; if (e2 >= dy) { e += dy; x0 += sx; } if (e2 <= dx) { e += dx; y0 += sy; } }
+}

@@ -24,7 +24,7 @@ async function loadPlaywright() {
   throw new Error('playwright が見つからない');
 }
 
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.json': 'application/json', '.wasm': 'application/wasm', '.css': 'text/css', '.ogg': 'audio/ogg', '.dat': 'application/octet-stream', '.blat': 'application/octet-stream' };
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.json': 'application/json', '.wasm': 'application/wasm', '.css': 'text/css', '.ogg': 'audio/ogg', '.png': 'image/png', '.dat': 'application/octet-stream', '.blat': 'application/octet-stream' };
 function serve() {
   return new Promise((res) => {
     const srv = http.createServer((req, rsp) => {
