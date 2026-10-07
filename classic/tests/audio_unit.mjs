@@ -16,7 +16,7 @@ ok(barBeats('F#5:q. A5:e D6:q C#6:e B5:e') === 4, '1 小節の拍');
 ok(parseChord('D/A').bass === 9 && parseChord('Gm6').pcs.join() === '7,10,2,4', '和音の読み方');
 
 for (const [id, song] of Object.entries(SONGS)) {
-  console.log(`曲 ${id}「${song.title}」 ${song.bpm} BPM ${song.beatsPerBar}/4`);
+  console.log(`曲 ${id}「${song.title}」 ${song.bpm} BPM ${song.meter || `${song.beatsPerBar}/4`}`);
   const bpb = song.beatsPerBar;
   for (const [sn, sec] of Object.entries(song.sections)) {
     const nb = sec.chords.length;
@@ -65,7 +65,7 @@ for (const [id, song] of Object.entries(SONGS)) {
     for (let i = 1; i < seg.events.length; i++) ok(seg.events[i].t >= seg.events[i - 1].t, '音が時間順でない');
   }
   // メロディの歌いやすさ（1 オクターブを超える跳び・同じ高さが 6 回以上続く、が無いこと）
-  const mel = Object.entries(song.tracks).find(([, t]) => t.melody || t.inst === 'flute');
+  const mel = Object.entries(song.tracks).find(([, t]) => t.melody) || Object.entries(song.tracks).find(([, t]) => t.inst === 'flute');
   if (mel) {
     const notes = c.loop.events.filter((e) => e.track === mel[0]);
     let maxLeap = 0, run = 1, maxRun = 1;

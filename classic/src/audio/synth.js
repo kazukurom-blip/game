@@ -1,6 +1,7 @@
 // サンプルを使わない小さなゲーム音源。AudioContext でも OfflineAudioContext でも動く。
-// 楽器: piano / strings / brass / flute / bell / accordion / guitar / bass / pad / harp / marimba
-// 太鼓: kick / snare / block / rim / hat / shaker / tamb / tri / crash / tom
+// 楽器: piano / strings / brass / flute / bell / musicbox / accordion / guitar / bass / pad / harp / marimba /
+//       clarinet / spicc（短いストリングス）/ pizz（ピチカート）/ choir（合唱風）
+// 太鼓: kick / snare / block / rim / hat / shaker / tamb / tri / crash / tom / tomlo / timp / taiko / drip / tick / clap
 // どの楽器も note(S, dest, t, midi, dur, vel) の形。S = makeEngine() が返す、その ctx 用の入れ物。
 
 import { midiToFreq } from './score.js';
@@ -287,6 +288,66 @@ export const INSTRUMENTS = {
     cleanup(all[0], all);
   },
 
+  // クラリネット風（奇数の倍音が強い、少しおどけた木管）
+  clarinet(S, dest, t, m, dur, v) {
+    const f = midiToFreq(m);
+    const end = t + dur + 0.3;
+    const o = osc(S, wave(S, 'clarinet', [1, 0.04, 0.42, 0.03, 0.22, 0.02, 0.1, 0.01, 0.05]), f, t, end);
+    const vib = vibrato(S, o, f, t, end, 0.004, 4.6, Math.min(0.3, dur * 0.6));
+    const lp = filt(S, 'lowpass', Math.min(5000, f * 5), 0.6);
+    const g = gain(S);
+    adsr(g.gain, t, dur, 0.3 * v, 0.03, 0.15, 0.85, 0.08);
+    o.connect(lp); lp.connect(g); g.connect(dest);
+    cleanup(o, [o, lp, g, vib.l, vib.g]);
+  },
+
+  // 短く弾くストリングス（スピッカート。ボス戦の刻み用）
+  spicc(S, dest, t, m, dur, v) {
+    const f = midiToFreq(m);
+    const len = Math.min(dur, 0.22);
+    const end = t + len + 0.25;
+    const os = [-7, 7].map((dt) => osc(S, 'sawtooth', f, t, end, dt));
+    const lp = filt(S, 'lowpass', Math.min(5000, 900 + f * 3), 0.7);
+    const g = gain(S);
+    adsr(g.gain, t, len, 0.13 * v, 0.008, 0.08, 0.55, 0.1);
+    os.forEach((o) => o.connect(lp)); lp.connect(g); g.connect(dest);
+    cleanup(os[0], [...os, lp, g]);
+  },
+
+  // ピチカート（はじくストリングス）
+  pizz(S, dest, t, m, dur, v) {
+    const b = ksBuffer(S, m, 0.35, 0.99, 1.2);
+    const src = S.ctx.createBufferSource(); src.buffer = b; src.playbackRate.value = b.rate;
+    const lp = filt(S, 'lowpass', 2600, 0.5);
+    const g = gain(S);
+    g.gain.setValueAtTime(0.42 * v, t);
+    g.gain.setTargetAtTime(0, t + 0.02, 0.14);
+    src.connect(lp); lp.connect(g); g.connect(dest);
+    src.start(t); src.stop(t + 0.8);
+    cleanup(src, [src, lp, g]);
+  },
+
+  // 合唱風（「あー」の母音のパッド）
+  choir(S, dest, t, m, dur, v) {
+    const f = midiToFreq(m);
+    const end = t + dur + 1.0;
+    const os = [-8, 0, 7].map((dt) => osc(S, 'sawtooth', f, t, end, dt));
+    const vib = vibrato(S, os, f, t, end, 0.005, 5.0, 0.4);
+    const mix = gain(S, 1);
+    os.forEach((o) => o.connect(mix));
+    const g = gain(S);
+    adsr(g.gain, t, dur, 0.1 * v, 0.35, 0.4, 0.9, 0.7);
+    const all = [...os, mix, g, vib.l, vib.g];
+    for (const [ff, q, a] of [[750, 6, 1], [1150, 7, 0.55], [2600, 9, 0.25]]) {
+      const bp = filt(S, 'bandpass', ff, q);
+      const ga = gain(S, a * 2.2);
+      mix.connect(bp); bp.connect(ga); ga.connect(g);
+      all.push(bp, ga);
+    }
+    g.connect(dest);
+    cleanup(os[0], all);
+  },
+
   // 指弾きのベース
   bass(S, dest, t, m, dur, v) {
     const f = midiToFreq(m);
@@ -335,7 +396,27 @@ export const DRUMS = {
   tri(S, d, t, v) { for (const [f, a] of [[3150, 1], [5120, 0.5], [7300, 0.25]]) toneHit(S, d, t, { f, dur: 1.4, vol: 0.05 * v * a }); },
   crash(S, d, t, v) { noiseHit(S, d, t, { dur: 1.6, vol: 0.13 * v, type: 'highpass', f: 4500, q: 0.4, off: 0.9 }); },
   tom(S, d, t, v) { toneHit(S, d, t, { f: 190, f1: 110, dur: 0.28, vol: 0.45 * v }); },
+  tomlo(S, d, t, v) { toneHit(S, d, t, { f: 120, f1: 75, dur: 0.4, vol: 0.5 * v }); },
+  // ティンパニ風（低く長い、少し皮の音）
+  timp(S, d, t, v) {
+    toneHit(S, d, t, { f: 98, f1: 86, dur: 1.1, vol: 0.55 * v });
+    toneHit(S, d, t, { f: 98 * 1.5, f1: 86 * 1.5, dur: 0.5, vol: 0.18 * v });
+    noiseHit(S, d, t, { dur: 0.05, vol: 0.08 * v, type: 'lowpass', f: 900, off: 0.2 });
+  },
+  // 大太鼓（重い、遠くで響く）
+  taiko(S, d, t, v) {
+    toneHit(S, d, t, { f: 80, f1: 48, dur: 0.6, vol: 0.9 * v });
+    noiseHit(S, d, t, { dur: 0.08, vol: 0.14 * v, type: 'lowpass', f: 600, off: 0.5 });
+  },
+  // 水の滴る音（上がる短いサイン）
+  drip(S, d, t, v) { toneHit(S, d, t, { f: 900, f1: 2100, dur: 0.07, vol: 0.12 * v }); toneHit(S, d, t + 0.09, { f: 1500, f1: 2600, dur: 0.04, vol: 0.03 * v }); },
+  // 時計のカチ
+  tick(S, d, t, v) { toneHit(S, d, t, { f: 3800, dur: 0.012, vol: 0.08 * v, type: 'square' }); },
+  clap(S, d, t, v) { for (let i = 0; i < 3; i++) noiseHit(S, d, t + i * 0.011, { dur: i === 2 ? 0.12 : 0.02, vol: 0.18 * v, type: 'bandpass', f: 1400, q: 1.2, off: 0.2 + i * 0.13 }); },
 };
+
+// 効果音を作るときに使う部品（sfx.js から使う）
+export const PARTS = { noiseHit, toneHit, noiseBuf };
 
 // 1 つの音を鳴らす（楽器か太鼓か）
 export function playNote(S, dest, ev, t) {
