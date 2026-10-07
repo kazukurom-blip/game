@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+  <!-- ブラウザの試遊版: Core（classic-unity/Core）のソースをそのまま WebAssembly で動かす。
+       Core の .cs を Compile Include で取り込む（Core/ には何も足さない）。画面は wwwroot/ の JS + canvas。
+       作り方は README.md（dotnet publish → tools/make_dist.mjs → dist/）。 -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RootNamespace>Lumina.Web</RootNamespace>
+    <AssemblyName>Lumina.Web</AssemblyName>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <InvariantTimezone>true</InvariantTimezone>
+    <!-- 小さくする -->
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>full</TrimMode>
+    <WasmEnableWebcil>true</WasmEnableWebcil>
+    <BlazorEnableTimeZoneSupport>false</BlazorEnableTimeZoneSupport>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+    <EventSourceSupport>false</EventSourceSupport>
+    <DebuggerSupport>false</DebuggerSupport>
+    <CompressionEnabled>false</CompressionEnabled>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../Core/**/*.cs" Link="Core/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="src/**/*.cs" />
+  </ItemGroup>
+</Project>
