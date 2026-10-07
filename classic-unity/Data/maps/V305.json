@@ -434,7 +434,15 @@
  ],
  "mobMax": 20,
  "respawnSec": 7,
- "timedSpawns": [],
+ "timedSpawns": [
+  {
+   "mob": "M403",
+   "x": 1500,
+   "y": 660,
+   "intervalSec": 10,
+   "quest": "W-20"
+  }
+ ],
  "npcs": [],
  "objects": [
   {
@@ -442,6 +450,13 @@
    "name": "一番奥の切り株",
    "x": 2752,
    "y": 660
+  },
+  {
+   "id": "V305.q_fairy_ring",
+   "name": "花の輪",
+   "x": 450,
+   "y": 660,
+   "quest": "W-32"
   }
  ],
  "note": "つるの縄が多い迷路のような道。",

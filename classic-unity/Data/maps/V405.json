@@ -329,7 +329,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V405.q_leaf",
+   "name": "葉っぱをかぶった金槌",
+   "x": 2856,
+   "y": 404,
+   "quest": "Y-04"
+  }
+ ],
  "note": "谷底の平らな道。",
  "seed": "V405#4"
 }

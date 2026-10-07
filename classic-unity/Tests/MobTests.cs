@@ -49,7 +49,7 @@ namespace Lumina.Core.Tests
                 var m = d.Mob(e.id);
                 Assert.True(m.Hp == e.hp && m.Exp == e.exp && m.Atk == e.atk && m.Def == e.def && m.Avoid == e.avoid && m.Meso == e.meso, e.id);
             }
-            Assert.Equal(170, d.Mobs.Count);
+            Assert.Equal(186, d.Mobs.Count); // 170 ＋ クエスト専用のボス 16（M400〜M415。QUESTS.md 8 章）
             Assert.Equal(1.5, d.Mob("M003").ElementMul("fire"));
             Assert.Equal(MobMove.Crawl, d.Mob("M001").Move);
             Assert.Equal(MobMove.Jump, d.Mob("M005").Move);

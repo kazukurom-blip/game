@@ -250,9 +250,25 @@
  ],
  "mobMax": 18,
  "respawnSec": 7,
- "timedSpawns": [],
+ "timedSpawns": [
+  {
+   "mob": "M405",
+   "x": 1340,
+   "y": 504,
+   "intervalSec": 10,
+   "quest": "K-20"
+  }
+ ],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V507.q_ticket",
+   "name": "古い切符",
+   "x": 402,
+   "y": 504,
+   "quest": "K-15"
+  }
+ ],
  "note": "暗いホーム。",
  "seed": "V507#0"
 }

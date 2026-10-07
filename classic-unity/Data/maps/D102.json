@@ -381,7 +381,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "D102.q_feather",
+   "name": "青い羽",
+   "x": 2686,
+   "y": 532,
+   "quest": "Y-18"
+  }
+ ],
  "note": "",
  "seed": "D102#0"
 }

@@ -356,7 +356,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "T105.q_score",
+   "name": "楽譜の切れ端",
+   "x": 1764,
+   "y": 200,
+   "quest": "T-16"
+  }
+ ],
  "note": "",
  "seed": "T105#3"
 }

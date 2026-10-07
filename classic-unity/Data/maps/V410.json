@@ -283,7 +283,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V410.q_track",
+   "name": "壁の爪あと",
+   "x": 236,
+   "y": 200,
+   "quest": "G-17"
+  }
+ ],
  "note": "地下 2 層。",
  "seed": "V410#0"
 }

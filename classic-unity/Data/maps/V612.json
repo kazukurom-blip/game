@@ -257,7 +257,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V612.q_rubbing",
+   "name": "寺跡の碑文",
+   "x": 668,
+   "y": 200,
+   "quest": "N-31"
+  }
+ ],
  "note": "崩れた寺。",
  "seed": "V612#0"
 }

@@ -2128,6 +2128,134 @@
    "sellPrice": 50
   },
   {
+   "id": "etc.M400",
+   "name": "大岩ガニの甲羅",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 18
+  },
+  {
+   "id": "etc.M401",
+   "name": "親分の大きな貝",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 34
+  },
+  {
+   "id": "etc.M402",
+   "name": "大王のわらの冠",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 48
+  },
+  {
+   "id": "etc.M403",
+   "name": "古ツタの芽",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 56
+  },
+  {
+   "id": "etc.M404",
+   "name": "化石竜の頭骨",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 74
+  },
+  {
+   "id": "etc.M405",
+   "name": "車掌の切符ばさみ",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 64
+  },
+  {
+   "id": "etc.M406",
+   "name": "女王蛾の鱗粉",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 84
+  },
+  {
+   "id": "etc.M407",
+   "name": "雷雲のかけら",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 100
+  },
+  {
+   "id": "etc.M408",
+   "name": "牙王の氷柱",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 120
+  },
+  {
+   "id": "etc.M409",
+   "name": "楽隊長の指揮棒",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 108
+  },
+  {
+   "id": "etc.M410",
+   "name": "亡霊の鐘の舌",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 148
+  },
+  {
+   "id": "etc.M411",
+   "name": "大紙魚の銀の粉",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 208
+  },
+  {
+   "id": "etc.M412",
+   "name": "古兵の骨の盾",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 252
+  },
+  {
+   "id": "etc.M413",
+   "name": "鍛冶霊の金槌",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 264
+  },
+  {
+   "id": "etc.M414",
+   "name": "亡霊騎士の星の盾",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 332
+  },
+  {
+   "id": "etc.M415",
+   "name": "大泥棒の葉っぱ",
+   "tab": "etc",
+   "maxStack": 200,
+   "price": 0,
+   "sellPrice": 76
+  },
+  {
    "id": "etc.ore.bronze",
    "name": "青銅の原石",
    "tab": "etc",
@@ -19085,6 +19213,874 @@
    "price": 0,
    "sellPrice": 6000,
    "desc": "製作（鍛冶屋カジ）"
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.quest.island_leaf",
+   "name": "若葉の髪飾り",
+   "slot": "cap",
+   "job": "common",
+   "reqLevel": 5,
+   "stats": {
+    "wdef": 7,
+    "mdef": 2,
+    "str": 1,
+    "dex": 1,
+    "int": 1,
+    "luk": 1
+   },
+   "upgrades": 5,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "ゲン爺と昔の仲間が埋めた宝。芽吹きの島の若葉の形。（入手: クエストのみ・IS-12）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.quest.anchor_earring",
+   "name": "錨の耳飾り",
+   "slot": "earring",
+   "job": "common",
+   "reqLevel": 15,
+   "stats": {
+    "mdef": 9,
+    "str": 1,
+    "dex": 1,
+    "int": 1,
+    "luk": 1,
+    "hp": 30
+   },
+   "upgrades": 5,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "60 年前に港の子どもが隠した小さな錨。（入手: クエストのみ・V-20）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.quest.windmill_cap",
+   "name": "風車守の羽根帽子",
+   "slot": "cap",
+   "job": "common",
+   "reqLevel": 20,
+   "stats": {
+    "wdef": 16,
+    "mdef": 3,
+    "dex": 4,
+    "str": 1,
+    "int": 1,
+    "luk": 1
+   },
+   "upgrades": 5,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "最初のカカシがかぶっていた羽根の帽子を、ボブが直した物。（入手: クエストのみ・B-19）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.quest.lantern_earring",
+   "name": "森灯りの耳飾り",
+   "slot": "earring",
+   "job": "common",
+   "reqLevel": 25,
+   "stats": {
+    "mdef": 14,
+    "int": 4,
+    "str": 1,
+    "dex": 1,
+    "luk": 1,
+    "mp": 40
+   },
+   "upgrades": 5,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "森の夜を照らす小さなランタンの耳飾り。（入手: クエストのみ・W-21）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.quest.fossil_helm",
+   "name": "化石竜の兜",
+   "slot": "cap",
+   "job": "common",
+   "reqLevel": 35,
+   "stats": {
+    "wdef": 26,
+    "mdef": 5,
+    "str": 4,
+    "dex": 1,
+    "int": 1,
+    "luk": 1,
+    "hp": 60
+   },
+   "upgrades": 5,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "よみがえった化石竜の頭の骨から、鍛冶屋カジが打った兜。（入手: クエストのみ・G-21）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.quest.night_cape",
+   "name": "霧夜のマント",
+   "slot": "cape",
+   "job": "common",
+   "reqLevel": 30,
+   "stats": {
+    "wdef": 8,
+    "mdef": 8,
+    "str": 2,
+    "dex": 2,
+    "int": 2,
+    "luk": 2,
+    "avoid": 4
+   },
+   "upgrades": 5,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "終電の車掌が最後に置いていった、霧の色のマント。（入手: クエストのみ・K-21）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.quest.moth_earring",
+   "name": "眠り蛾の耳飾り",
+   "slot": "earring",
+   "job": "common",
+   "reqLevel": 40,
+   "stats": {
+    "mdef": 22,
+    "str": 2,
+    "dex": 2,
+    "int": 2,
+    "luk": 2,
+    "mp": 60
+   },
+   "upgrades": 5,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "女王蛾の鱗粉を閉じこめた、ほのかに光る耳飾り。（入手: クエストのみ・N-21）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.quest.thunder_ring",
+   "name": "雷雲の指輪",
+   "slot": "ring",
+   "job": "common",
+   "reqLevel": 50,
+   "stats": {
+    "str": 2,
+    "dex": 2,
+    "int": 2,
+    "luk": 2,
+    "watk": 1,
+    "matk": 2
+   },
+   "upgrades": 5,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "迷子の雷雲が礼に置いていった、ぱちぱちする指輪。（入手: クエストのみ・C-18）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.quest.icefang_cape",
+   "name": "氷牙のマント",
+   "slot": "cape",
+   "job": "common",
+   "reqLevel": 60,
+   "stats": {
+    "wdef": 14,
+    "mdef": 14,
+    "str": 3,
+    "dex": 3,
+    "int": 3,
+    "luk": 3,
+    "hp": 100
+   },
+   "upgrades": 5,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "氷柱の牙王の毛皮で、猟師ボルグが縫ったマント。（入手: クエストのみ・F-19）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.quest.bandleader_cap",
+   "name": "楽隊長の帽子",
+   "slot": "cap",
+   "job": "common",
+   "reqLevel": 55,
+   "stats": {
+    "wdef": 33,
+    "mdef": 7,
+    "str": 2,
+    "dex": 2,
+    "int": 2,
+    "luk": 2,
+    "speed": 3
+   },
+   "upgrades": 5,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "ぜんまいの楽隊の隊長の帽子。かぶると足が軽い。（入手: クエストのみ・T-20）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.quest.bell_pendant",
+   "name": "沈み鐘のペンダント",
+   "slot": "pendant",
+   "job": "common",
+   "reqLevel": 70,
+   "stats": {
+    "hp": 150,
+    "mp": 150,
+    "str": 2,
+    "dex": 2,
+    "int": 2,
+    "luk": 2,
+    "mdef": 10
+   },
+   "upgrades": 5,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "海の底で鳴り続けた鐘の舌で作ったペンダント。（入手: クエストのみ・M-19）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.quest.scribe_earring",
+   "name": "書守りの耳飾り",
+   "slot": "earring",
+   "job": "common",
+   "reqLevel": 100,
+   "stats": {
+    "mdef": 52,
+    "str": 5,
+    "dex": 5,
+    "int": 5,
+    "luk": 5,
+    "mp": 120
+   },
+   "upgrades": 5,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "石板を守った神殿の書記の耳飾り。（入手: クエストのみ・A-14）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.quest.oldbone_cape",
+   "name": "古兵の骨マント",
+   "slot": "cape",
+   "job": "common",
+   "reqLevel": 120,
+   "stats": {
+    "wdef": 26,
+    "mdef": 26,
+    "str": 5,
+    "dex": 5,
+    "int": 5,
+    "luk": 5,
+    "hp": 200
+   },
+   "upgrades": 5,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "竜と共に戦った古い兵の形見のマント。（入手: クエストのみ・D-17）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.quest.ember_ring",
+   "name": "熾火の指輪",
+   "slot": "ring",
+   "job": "common",
+   "reqLevel": 130,
+   "stats": {
+    "str": 3,
+    "dex": 3,
+    "int": 3,
+    "luk": 3,
+    "watk": 3,
+    "matk": 3
+   },
+   "upgrades": 5,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "灰の鍛冶霊が最後に打った、消えない火の指輪。（入手: クエストのみ・H-11）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.quest.falling_star_cap",
+   "name": "流れ星の冠",
+   "slot": "cap",
+   "job": "common",
+   "reqLevel": 160,
+   "stats": {
+    "wdef": 92,
+    "mdef": 20,
+    "str": 6,
+    "dex": 6,
+    "int": 6,
+    "luk": 6
+   },
+   "upgrades": 5,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "流れ星の亡霊騎士が守っていた冠。（入手: クエストのみ・E-15）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.quest.leaf_cape",
+   "name": "化け葉のマント",
+   "slot": "cape",
+   "job": "common",
+   "reqLevel": 35,
+   "stats": {
+    "wdef": 7,
+    "mdef": 7,
+    "str": 2,
+    "dex": 2,
+    "int": 2,
+    "luk": 2,
+    "avoid": 6,
+    "speed": 2
+   },
+   "upgrades": 5,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "化けダヌキの大泥棒がいつも頭にのせていた葉っぱで作ったマント。（入手: クエストのみ・Y-08）",
+   "questOnly": true
+  },
+  {
+   "id": "setup.chair.tanuki",
+   "name": "大泥棒の宝箱の椅子",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "sellPrice": 1,
+   "chair": {
+    "regenMul": 1.5
+   },
+   "desc": "中身は空っぽ。座り心地はいい。（入手: クエストのみ・Y-08）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.quest.starmap_earring",
+   "name": "星図の耳飾り",
+   "slot": "earring",
+   "job": "common",
+   "reqLevel": 60,
+   "stats": {
+    "mdef": 30,
+    "str": 3,
+    "dex": 3,
+    "int": 3,
+    "luk": 3,
+    "acc": 5
+   },
+   "upgrades": 5,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "4 つの町に散らばった星図の切れ端が、最後に耳飾りになった。（入手: クエストのみ・Y-16）",
+   "questOnly": true
+  },
+  {
+   "id": "setup.chair.telescope",
+   "name": "望遠鏡の椅子",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "sellPrice": 1,
+   "chair": {
+    "regenMul": 1.5
+   },
+   "desc": "のぞくと、見たことのない星座が見える。（入手: クエストのみ・Y-16）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.quest.wanderer_pendant",
+   "name": "渡り鳥のペンダント",
+   "slot": "pendant",
+   "job": "common",
+   "reqLevel": 110,
+   "stats": {
+    "hp": 300,
+    "mp": 300,
+    "str": 4,
+    "dex": 4,
+    "int": 4,
+    "luk": 4,
+    "speed": 2
+   },
+   "upgrades": 5,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "空と海と火山と星の果てを渡った鳥の羽のペンダント。（入手: クエストのみ・Y-23）",
+   "questOnly": true
+  },
+  {
+   "id": "use.pet.owlet",
+   "name": "子ふくろう",
+   "tab": "use",
+   "maxStack": 1,
+   "price": 0,
+   "sellPrice": 0,
+   "pet": "owlet",
+   "desc": "シルワの夜の森で拾われた子ふくろう。（入手: クエストのみ・W-21）",
+   "questOnly": true
+  },
+  {
+   "id": "use.pet.cloudlamb",
+   "name": "雲の子ひつじ",
+   "tab": "use",
+   "maxStack": 1,
+   "price": 0,
+   "sellPrice": 0,
+   "pet": "cloudlamb",
+   "desc": "セレスの雲の綿から生まれた、ふわふわの子ひつじ。（入手: クエストのみ・C-18）",
+   "questOnly": true
+  },
+  {
+   "id": "setup.chair.market_crate",
+   "name": "市場の木箱の椅子",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "sellPrice": 1,
+   "chair": {
+    "regenMul": 1.5
+   },
+   "desc": "素材屋マテの店の古い木箱。（入手: クエストのみ・MK-08）",
+   "questOnly": true
+  },
+  {
+   "id": "setup.chair.teddy",
+   "name": "くまのぬいぐるみ",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "sellPrice": 1,
+   "chair": {
+    "regenMul": 1.5
+   },
+   "desc": "人形師ルルのぬいぐるみ。大きいので座れる。（入手: クエストのみ・T-03）",
+   "questOnly": true
+  },
+  {
+   "id": "setup.chair.hot_spring",
+   "name": "湯けむりの手おけ",
+   "tab": "setup",
+   "maxStack": 1,
+   "price": 0,
+   "sellPrice": 1,
+   "chair": {
+    "regenMul": 1.5
+   },
+   "desc": "谷の温泉の手おけ。座るとなぜか温かい。（入手: クエストのみ・N-24）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.quest.flower_hairpin",
+   "name": "花の髪飾り",
+   "slot": "cap",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "wdef": 1
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "花売りのスイが作る髪飾り。見た目だけ。（入手: クエストのみ・B-02）",
+   "questOnly": true,
+   "cosmetic": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.quest.hard_hat",
+   "name": "工事の帽子",
+   "slot": "cap",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "wdef": 3
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "工事の親方ボルトの予備の帽子。（入手: クエストのみ・K-03）",
+   "questOnly": true,
+   "cosmetic": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.quest.snowman_hat",
+   "name": "雪だるまの帽子",
+   "slot": "cap",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "wdef": 2
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "雪ん子ユキの手作り。（入手: クエストのみ・F-03）",
+   "questOnly": true,
+   "cosmetic": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.first_step",
+   "name": "はじめの一歩のメダル",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "hp": 10
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "芽吹きの島の 7 種類の敵を全部倒した。（入手: クエストのみ・IS-26）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.mushroom",
+   "name": "キノコ博士のメダル",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "int": 1,
+    "luk": 1
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "丘のキノコを全部調べた。（入手: クエストのみ・B-13）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.continent_hero",
+   "name": "大陸の英雄のメダル",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "str": 2,
+    "dex": 2,
+    "int": 2,
+    "luk": 2
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "黒角の魔獣を倒した。（入手: クエストのみ・N-13）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.dragon_slayer",
+   "name": "竜を討つ者のメダル",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "str": 3,
+    "dex": 3,
+    "int": 3,
+    "luk": 3,
+    "watk": 1,
+    "matk": 1
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "三つ首の黒竜を倒した。（入手: クエストのみ・D-09）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.flame_calmer",
+   "name": "焔を鎮めた者のメダル",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "str": 3,
+    "dex": 3,
+    "int": 3,
+    "luk": 3,
+    "hp": 100
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "焔の巨像を倒した。（入手: クエストのみ・H-04）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.star_seer",
+   "name": "星を見た者のメダル",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "str": 5,
+    "dex": 5,
+    "int": 5,
+    "luk": 5
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "星を呑む者を倒した。（入手: クエストのみ・E-10）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.hunter1",
+   "name": "駆け出しの狩人のメダル",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "dex": 1,
+    "acc": 2
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "30 種類の敵を倒した。（入手: クエストのみ・X-01）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.hunter2",
+   "name": "一人前の狩人のメダル",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "dex": 1,
+    "str": 1,
+    "acc": 4
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "70 種類の敵を倒した。（入手: クエストのみ・X-02）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.hunter3",
+   "name": "名うての狩人のメダル",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "str": 2,
+    "dex": 2,
+    "int": 2,
+    "luk": 2,
+    "acc": 6
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "120 種類の敵を倒した。（入手: クエストのみ・X-03）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.boss_hunter",
+   "name": "ボス狩りのメダル",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "str": 2,
+    "dex": 2,
+    "int": 2,
+    "luk": 2,
+    "watk": 1
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "ボス・強敵を 12 種類倒した。（入手: クエストのみ・X-04）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.traveler",
+   "name": "旅人のメダル",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "speed": 2,
+    "jump": 1
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "大陸の 6 つの町と市場を訪ねた。（入手: クエストのみ・X-05）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.globetrotter",
+   "name": "世界を巡る者のメダル",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "str": 2,
+    "dex": 2,
+    "int": 2,
+    "luk": 2,
+    "speed": 3
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "15 の町を全部訪ねた。（入手: クエストのみ・X-06）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.cartographer",
+   "name": "地図職人のメダル",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "str": 1,
+    "dex": 1,
+    "int": 1,
+    "luk": 1,
+    "avoid": 3
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "100 のマップを歩いた。（入手: クエストのみ・X-07）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.helper",
+   "name": "世話好きのメダル",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "str": 1,
+    "dex": 1,
+    "int": 1,
+    "luk": 1,
+    "hp": 50
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "クエストを 100 本終えた。（入手: クエストのみ・X-08）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.trusted",
+   "name": "頼れる人のメダル",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "str": 3,
+    "dex": 3,
+    "int": 3,
+    "luk": 3,
+    "hp": 150,
+    "mp": 150
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "クエストを 300 本終えた。（入手: クエストのみ・X-09）",
+   "questOnly": true
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.legend",
+   "name": "語り継がれる人のメダル",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "str": 5,
+    "dex": 5,
+    "int": 5,
+    "luk": 5,
+    "hp": 300,
+    "mp": 300
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 1,
+   "desc": "クエストを 500 本終えた。（入手: クエストのみ・X-10）",
+   "questOnly": true
   },
   {
    "tab": "equip",

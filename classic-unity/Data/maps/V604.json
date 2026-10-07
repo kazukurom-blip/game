@@ -265,7 +265,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V604.q_cocoon",
+   "name": "大きな繭の殻",
+   "x": 1972,
+   "y": 624,
+   "quest": "N-17"
+  }
+ ],
  "note": "分かれ道。",
  "seed": "V604#0"
 }

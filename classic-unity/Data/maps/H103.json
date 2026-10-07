@@ -290,7 +290,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "H103.q_forge",
+   "name": "古い炉",
+   "x": 402,
+   "y": 640,
+   "quest": "H-08"
+  }
+ ],
  "note": "",
  "seed": "H103#0"
 }

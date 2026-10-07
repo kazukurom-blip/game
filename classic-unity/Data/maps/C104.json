@@ -350,7 +350,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "C104.q_map",
+   "name": "白い石の下",
+   "x": 2176,
+   "y": 552,
+   "quest": "Y-10"
+  }
+ ],
  "note": "月の形の足場。",
  "seed": "C104#1"
 }

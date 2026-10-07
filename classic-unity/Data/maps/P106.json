@@ -270,7 +270,15 @@
  ],
  "mobMax": 18,
  "respawnSec": 7,
- "timedSpawns": [],
+ "timedSpawns": [
+  {
+   "mob": "M411",
+   "x": 1320,
+   "y": 764,
+   "intervalSec": 10,
+   "quest": "A-13"
+  }
+ ],
  "npcs": [],
  "objects": [],
  "note": "",

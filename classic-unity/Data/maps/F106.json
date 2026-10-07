@@ -273,7 +273,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "F106.q_map",
+   "name": "氷の中の紙",
+   "x": 2068,
+   "y": 200,
+   "quest": "Y-11"
+  }
+ ],
  "note": "",
  "seed": "F106#0"
 }

@@ -508,6 +508,10 @@ namespace Lumina.PlayBot
                     return D.Systems.Jobs.QuizNeedItems.All(i => S.Inventory.Has(i)) || D.Systems.Jobs.QuizNeedItems.All(i => i == "etc.M300" || CollectSource(null, i, out _) != null || S.Inventory.Has(i));
             }
             if (ev.StartsWith("dungeon_clear.")) return DungeonTarget(ev.Substring("dungeon_clear.".Length)) != null;
+            // 長い目標（冒険の記録。QUESTS.md 8 章）: 狙っては進めない。今までの記録でもう足りている時だけ受けて報告する
+            int rec = ev == GameSession.RecKinds ? S.KindsKilled : ev == GameSession.RecBosses ? S.BossKindsKilled : ev == GameSession.RecTowns ? S.TownsVisited
+                    : ev == GameSession.RecMaps ? S.MapsVisited : ev == GameSession.RecQuests ? S.QuestsDone : -1;
+            if (rec >= 0) { why = "記録が足りない"; return rec >= count; }
             why = "知らない操作 " + ev;
             return NoteNever(q, why);
         }
@@ -524,6 +528,8 @@ namespace Lumina.PlayBot
                     if (S.Quests.Count(q, i, S.Inventory) >= o.Count) continue;
                     var p = ObjectivePlan(q, i, o);
                     if (p != null) plans.Add(p);
+                    // 順番のある目的（ヒント → 見つける）: 済んでいない物の先はまだ進められない（集める物は順番に入れない）
+                    if (q.Ordered && o.Type != ObjectiveType.Collect) break;
                 }
             }
         }

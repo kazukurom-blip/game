@@ -305,9 +305,25 @@
  ],
  "mobMax": 17,
  "respawnSec": 7,
- "timedSpawns": [],
+ "timedSpawns": [
+  {
+   "mob": "M406",
+   "x": 1300,
+   "y": 420,
+   "intervalSec": 10,
+   "quest": "N-20"
+  }
+ ],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V620.q_mist",
+   "name": "霧の吹き出し口",
+   "x": 390,
+   "y": 420,
+   "quest": "N-17"
+  }
+ ],
  "note": "霧の沼。",
  "seed": "V620#0"
 }

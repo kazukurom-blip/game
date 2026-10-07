@@ -38,6 +38,12 @@ namespace Lumina.Core.Quests
         public bool Weekly => Repeat == "weekly";
         /// <summary>完了すると開く物（storage+4 = 倉庫の枠 +4、pet.second = ペットを 2 匹）</summary>
         public string Unlock;
+        /// <summary>目的を上から順にしか進められない（ヒント → 次のヒント → 見つける。QUESTS.md 8 章）</summary>
+        public bool Ordered;
+        /// <summary>隠しクエスト: 受けられる時間（時。HourFrom &lt;= 時 &lt; HourTo、From &gt; To なら夜をまたぐ）。-1 ならいつでも</summary>
+        public int HourFrom = -1, HourTo = -1;
+        /// <summary>隠しクエスト: この品を持って話すと受けられる（渡さない）。null なら要らない</summary>
+        public string NeedItem;
         public readonly List<string> Prereqs = new List<string>();
         public readonly List<QuestObjective> Objectives = new List<QuestObjective>();
         public readonly List<QuestReward> Rewards = new List<QuestReward>();
@@ -70,7 +76,10 @@ namespace Lumina.Core.Quests
                 Exp = J.Long(d, "exp"), Meso = J.Long(d, "meso"), Tutorial = J.Bool(d, "tutorial"),
                 Line = J.Str(d, "line"), Advance = J.Int(d, "advance"), Unlock = J.Str(d, "unlock"),
                 Repeat = J.Str(d, "repeat"), Board = J.Bool(d, "board"),
+                Ordered = J.Bool(d, "ordered"), NeedItem = J.Str(d, "needItem"),
             };
+            var hours = J.Arr(d, "hours");
+            if (hours.Count == 2) { q.HourFrom = (int)J.ToDouble(hours[0]); q.HourTo = (int)J.ToDouble(hours[1]); }
             if (q.End == null) q.End = q.Giver;
             q.Prereqs.AddRange(J.StrList(d, "prereqs"));
             foreach (var o in J.Arr(d, "objectives"))

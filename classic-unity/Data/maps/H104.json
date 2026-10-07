@@ -303,9 +303,25 @@
  ],
  "mobMax": 17,
  "respawnSec": 7,
- "timedSpawns": [],
+ "timedSpawns": [
+  {
+   "mob": "M413",
+   "x": 1240,
+   "y": 776,
+   "intervalSec": 10,
+   "quest": "H-10"
+  }
+ ],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "H104.q_anvil",
+   "name": "熱い金床",
+   "x": 2108,
+   "y": 776,
+   "quest": "H-08"
+  }
+ ],
  "note": "",
  "seed": "H104#0"
 }

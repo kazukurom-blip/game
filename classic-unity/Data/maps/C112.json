@@ -376,9 +376,25 @@
  ],
  "mobMax": 22,
  "respawnSec": 7,
- "timedSpawns": [],
+ "timedSpawns": [
+  {
+   "mob": "M407",
+   "x": 1680,
+   "y": 572,
+   "intervalSec": 10,
+   "quest": "C-17"
+  }
+ ],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "C112.q_scorch",
+   "name": "焦げあとと水たまり",
+   "x": 2856,
+   "y": 572,
+   "quest": "C-14"
+  }
+ ],
  "note": "雲の上を歩く。",
  "seed": "C112#0"
 }

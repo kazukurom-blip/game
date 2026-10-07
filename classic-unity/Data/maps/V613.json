@@ -225,7 +225,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V613.q_rubbing",
+   "name": "寺跡の碑文",
+   "x": 1460,
+   "y": 200,
+   "quest": "N-31"
+  }
+ ],
  "note": "黒い石の寺。",
  "seed": "V613#0"
 }

@@ -375,7 +375,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "F103.q_sled",
+   "name": "埋もれたそり",
+   "x": 2448,
+   "y": 572,
+   "quest": "F-23"
+  }
+ ],
  "note": "針葉樹の森。",
  "seed": "F103#2"
 }

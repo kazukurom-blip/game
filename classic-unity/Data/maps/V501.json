@@ -360,7 +360,15 @@
  "respawnSec": 7,
  "timedSpawns": [],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "V501.q_shadow",
+   "name": "霧の中の影",
+   "x": 1460,
+   "y": 544,
+   "quest": "K-33"
+  }
+ ],
  "note": "水路と路地。",
  "seed": "V501#2"
 }

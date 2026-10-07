@@ -345,9 +345,25 @@
  ],
  "mobMax": 22,
  "respawnSec": 7,
- "timedSpawns": [],
+ "timedSpawns": [
+  {
+   "mob": "M408",
+   "x": 1620,
+   "y": 516,
+   "intervalSec": 10,
+   "quest": "F-18"
+  }
+ ],
  "npcs": [],
- "objects": [],
+ "objects": [
+  {
+   "id": "F105.q_track",
+   "name": "大きな足あと",
+   "x": 2754,
+   "y": 492,
+   "quest": "F-14"
+  }
+ ],
  "note": "",
  "seed": "F105#5"
 }
