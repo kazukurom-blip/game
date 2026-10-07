@@ -180,6 +180,7 @@ namespace Lumina.Core.Game
         public void Teleport(double x, double y)
         {
             Physics.PlayerPhysics.PlaceOnGround(Body, Map.Physics, x, y);
+            PrevX = Body.X; PrevY = Body.Y;
         }
     }
 }

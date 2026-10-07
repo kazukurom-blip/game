@@ -53,6 +53,8 @@ namespace Lumina.Core.Game
         public AvatarPose Pose;
         public bool Dead;
         public double PlaySec;
+        /// <summary>1 つ前の固定の更新の時の足元の位置（描く時の補間: Lerp(Prev, 今, Stepper.Alpha)）</summary>
+        public double PrevX, PrevY;
 
         public SaveStore Store { get; private set; }
         public string Slot { get; private set; }
@@ -138,6 +140,7 @@ namespace Lumina.Core.Game
 
         private void StepFixed(double dt)
         {
+            PrevX = Body.X; PrevY = Body.Y;
             PlaySec += dt;
             RefreshStats();
             var inp = input;
@@ -242,6 +245,7 @@ namespace Lumina.Core.Game
             var (x, y) = portalName != null && md.FindPortalByName(portalName) != null ? PortalPos(md, portalName) : md.SpawnPoint();
             if (Body == null) Body = new PlayerBody(x, y);
             PlayerPhysics.PlaceOnGround(Body, Map.Physics, x, y);
+            PrevX = Body.X; PrevY = Body.Y; // マップをまたいで補間しない
             Body.InvT = 0; Body.Events.Clear();
             Attack = null;
             RefreshStats();
@@ -299,6 +303,7 @@ namespace Lumina.Core.Game
                 var dst = Map.Data.FindPortalByName(p.ToPortal);
                 if (dst == null) return false;
                 PlayerPhysics.PlaceOnGround(Body, Map.Physics, dst.X, dst.Y);
+                PrevX = Body.X; PrevY = Body.Y;
                 return true;
             }
             ChangeMap(p.To, p.ToPortal);

@@ -184,7 +184,7 @@ namespace Lumina.Core.Tests
             var s = Field();
             var normal = s.Map.Mobs.Where(m => !m.Timed).ToList();
             Assert.Equal(4, normal.Count); // 最大 4
-            Assert.Single(s.Map.Mobs.Where(m => m.Timed));
+            Assert.Single(s.Map.Mobs, m => m.Timed);
             foreach (var m in normal) MobAI.Kill(m);
             s.Step(new PlayerInput(), 60);
             Assert.Equal(0, s.Map.AliveCount);
