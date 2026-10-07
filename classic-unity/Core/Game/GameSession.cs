@@ -440,6 +440,7 @@ namespace Lumina.Core.Game
             foreach (var kv in Equipment.All) s.Equipment[ItemEnums.SlotKey(kv.Key)] = ToSaved(kv.Value, 0, 0);
             foreach (var kv in Skills.Levels) s.Skills[kv.Key] = kv.Value;
             foreach (var kv in Skills.Cooldowns) s.Cooldowns[kv.Key] = kv.Value;
+            foreach (var kv in Skills.Masters) s.SkillMasters[kv.Key] = kv.Value;
             for (int i = 0; i < QuickSlots.Length; i++) if (QuickSlots[i] != null) s.QuickSlots.Add(new SavedQuickSlot { Key = i, Kind = QuickSlots[i].Kind, Id = QuickSlots[i].Id });
             foreach (var kv in Quests.Entries)
             {
@@ -499,6 +500,7 @@ namespace Lumina.Core.Game
             }
             foreach (var kv in s.Skills) if (data.Skill(kv.Key) != null) g.Skills.Levels[kv.Key] = kv.Value;
             foreach (var kv in s.Cooldowns) g.Skills.Cooldowns[kv.Key] = kv.Value;
+            foreach (var kv in s.SkillMasters) if (data.Skill(kv.Key) != null) g.Skills.Masters[kv.Key] = kv.Value;
             foreach (var q in s.QuickSlots) if (q.Key >= 0 && q.Key < QuickSlotCount) g.QuickSlots[q.Key] = new QuickSlot { Kind = q.Kind, Id = q.Id };
             foreach (var q in s.Quests)
             {

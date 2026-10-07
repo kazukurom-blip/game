@@ -66,6 +66,7 @@ namespace Lumina.Core.Save
 
         public Dictionary<string, int> Skills = new Dictionary<string, int>();
         public Dictionary<string, double> Cooldowns = new Dictionary<string, double>();
+        public Dictionary<string, int> SkillMasters = new Dictionary<string, int>(); // 極意の書で上がった最大 Lv（無ければ空）
         public List<SavedQuickSlot> QuickSlots = new List<SavedQuickSlot>();
         public List<SavedQuest> Quests = new List<SavedQuest>();
 

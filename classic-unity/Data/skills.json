@@ -1,122 +1,7312 @@
 {
-  "note": "JOBS.md 4-0〜4-35 の初心者と 1 次職 5 系統の全スキル。式の x はスキルの Lv、lv はキャラの Lv。range は当たる範囲（px、主人公の足元から。front=向いている方）は FEEL.md の『似』の値。sample=true は 1 次以外の見本（回復・速さ・加速・召喚・待ち時間の仕組みを確かめる用）。手で書くデータ（元は JOBS.md）。",
-  "skills": [
-    { "id": "beginner.pebble", "name": "石つぶて", "job": "beginner", "tier": 0, "kind": "ranged", "maxLevel": 3,
-      "desc": "前の敵 1 体に石を投げる。固定ダメージ 15x", "mp": "3*x", "fixed": "15*x", "targets": "1", "hits": "1",
-      "range": { "front": 200, "back": 0, "up": 40, "down": 20 } },
-    { "id": "beginner.rest", "name": "ひと休み", "job": "beginner", "tier": 0, "kind": "heal", "maxLevel": 3,
-      "desc": "30 秒間、10 秒ごとに HP を 8x 回復", "mp": "5*x", "buff": { "sec": "30", "hotHp": "8*x", "hotInterval": 10 } },
-    { "id": "beginner.nimble_feet", "name": "身軽な足", "job": "beginner", "tier": 0, "kind": "buff", "maxLevel": 3,
-      "desc": "4x 秒間、速さ +15", "mp": "4*x", "buff": { "sec": "4*x", "stats": { "speed": "15" } } },
-
-    { "id": "warrior.hp_recovery", "name": "HP回復力アップ", "job": "warrior", "tier": 1, "kind": "passive", "maxLevel": 16,
-      "desc": "10 秒ごとの HP 自然回復 +3x（立ち止まっている時）", "passive": [ { "hpRegen": "3*x" } ] },
-    { "id": "warrior.max_hp", "name": "最大HPアップ", "job": "warrior", "tier": 1, "kind": "passive", "maxLevel": 10,
-      "desc": "Lv が上がった時の HP の増え方 +2x、AP を HP に振った時 +x", "prereqs": [ { "skill": "warrior.hp_recovery", "level": 5 } ],
-      "passive": [ { "levelHp": "2*x", "apHp": "x" } ] },
-    { "id": "warrior.endure", "name": "我慢", "job": "warrior", "tier": 1, "kind": "passive", "maxLevel": 8,
-      "desc": "縄・はしごにつかまっている間も HP が回復する（間隔 30-2x 秒）", "passive": [ { "ropeRegenInterval": "30-2*x" } ] },
-    { "id": "warrior.iron_body", "name": "鉄の体", "job": "warrior", "tier": 1, "kind": "buff", "maxLevel": 20,
-      "desc": "物理防御 +3x、持続 10x 秒", "mp": "4+floor(x/4)", "buff": { "sec": "10*x", "stats": { "wdef": "3*x" } } },
-    { "id": "warrior.power_strike", "name": "強打", "job": "warrior", "tier": 1, "kind": "attack", "maxLevel": 20,
-      "desc": "前の敵 1 体に 160+5x%", "mp": "3+floor(x/4)", "damage": "160+5*x", "targets": "1", "hits": "1",
-      "range": { "front": 75, "back": 10, "up": 60, "down": 10 } },
-    { "id": "warrior.slash_blast", "name": "なぎ払い", "job": "warrior", "tier": 1, "kind": "area", "maxLevel": 20,
-      "desc": "前の敵 最大 6 体に 60+3x%。HP を 5 消費", "mp": "6+floor(x/2)", "hp": "5", "damage": "60+3*x", "targets": "6", "hits": "1",
-      "prereqs": [ { "skill": "warrior.power_strike", "level": 1 } ],
-      "range": { "front": 110, "back": 25, "up": 70, "down": 15 } },
-
-    { "id": "magician.mp_recovery", "name": "MP回復力アップ", "job": "magician", "tier": 1, "kind": "passive", "maxLevel": 16,
-      "desc": "10 秒ごとの MP 自然回復 +x×Lv÷10", "passive": [ { "mpRegen": "x*lv/10" } ] },
-    { "id": "magician.max_mp", "name": "最大MPアップ", "job": "magician", "tier": 1, "kind": "passive", "maxLevel": 10,
-      "desc": "Lv が上がった時の MP の増え方 +x", "prereqs": [ { "skill": "magician.mp_recovery", "level": 5 } ],
-      "passive": [ { "levelMp": "x" } ] },
-    { "id": "magician.magic_guard", "name": "魔力の盾", "job": "magician", "tier": 1, "kind": "buff", "maxLevel": 20,
-      "desc": "受けるダメージの 15+3x%（最大 75%）を MP で受ける、持続 30+10x 秒", "mp": "4+floor(x/2)",
-      "buff": { "sec": "30+10*x", "magicGuard": "min(75, 15+3*x)" } },
-    { "id": "magician.magic_armor", "name": "魔力の鎧", "job": "magician", "tier": 1, "kind": "buff", "maxLevel": 20,
-      "desc": "物理防御 +2x、持続 10x 秒", "mp": "4+floor(x/4)", "prereqs": [ { "skill": "magician.magic_guard", "level": 3 } ],
-      "buff": { "sec": "10*x", "stats": { "wdef": "2*x" } } },
-    { "id": "magician.energy_bolt", "name": "魔力の矢", "job": "magician", "tier": 1, "kind": "ranged", "maxLevel": 20,
-      "desc": "前の 1 体に魔法攻撃力 20+2x（最大 60）", "mp": "4+floor(x/4)", "magic": true, "spell": "min(60, 20+2*x)", "targets": "1", "hits": "1",
-      "range": { "front": 300, "back": 0, "up": 40, "down": 20 } },
-    { "id": "magician.magic_claw", "name": "魔力の爪", "job": "magician", "tier": 1, "kind": "ranged", "maxLevel": 20,
-      "desc": "前の 1 体に 2 回、各 魔法攻撃力 10+2x（最大 50）", "mp": "8+floor(x/3)", "magic": true, "spell": "min(50, 10+2*x)", "targets": "1", "hits": "2",
-      "prereqs": [ { "skill": "magician.energy_bolt", "level": 1 } ],
-      "range": { "front": 220, "back": 0, "up": 50, "down": 20 } },
-
-    { "id": "bowman.archery_basics", "name": "弓の心得", "job": "bowman", "tier": 1, "kind": "passive", "maxLevel": 16,
-      "desc": "命中 +x、弓・クロスボウの攻撃 +⌈x/4⌉",
-      "passive": [ { "stats": { "acc": "x" } }, { "weapons": ["弓", "クロスボウ"], "stats": { "watk": "ceil(x/4)" } } ] },
-    { "id": "bowman.eagle_eye", "name": "遠目", "job": "bowman", "tier": 1, "kind": "passive", "maxLevel": 8,
-      "desc": "弓・クロスボウの射程 +10x", "prereqs": [ { "skill": "bowman.archery_basics", "level": 3 } ],
-      "passive": [ { "weapons": ["弓", "クロスボウ"], "range": "10*x" } ] },
-    { "id": "bowman.critical_shot", "name": "必中の矢", "job": "bowman", "tier": 1, "kind": "passive", "maxLevel": 20,
-      "desc": "クリティカル率 +(2+x)%、クリティカルの威力 200%", "prereqs": [ { "skill": "bowman.archery_basics", "level": 3 } ],
-      "passive": [ { "weapons": ["弓", "クロスボウ"], "critRate": "2+x", "critDamage": "200" } ] },
-    { "id": "bowman.focus", "name": "集中", "job": "bowman", "tier": 1, "kind": "buff", "maxLevel": 20,
-      "desc": "命中 +x、回避 +x、持続 10x 秒", "mp": "5+floor(x/4)", "buff": { "sec": "10*x", "stats": { "acc": "x", "avoid": "x" } } },
-    { "id": "bowman.power_arrow", "name": "強弓", "job": "bowman", "tier": 1, "kind": "ranged", "maxLevel": 20,
-      "desc": "前の 1 体に 160+5x%", "mp": "3+floor(x/4)", "damage": "160+5*x", "targets": "1", "hits": "1",
-      "weapons": ["弓", "クロスボウ"], "ammo": true, "rangeBonus": true,
-      "range": { "front": 350, "back": 0, "up": 40, "down": 20 } },
-    { "id": "bowman.double_shot", "name": "ダブルショット", "job": "bowman", "tier": 1, "kind": "ranged", "maxLevel": 20,
-      "desc": "前の 1 体に 2 本、各 50+3x%", "mp": "5+floor(x/4)", "damage": "50+3*x", "targets": "1", "hits": "2",
-      "weapons": ["弓", "クロスボウ"], "ammo": true, "rangeBonus": true, "prereqs": [ { "skill": "bowman.power_arrow", "level": 1 } ],
-      "range": { "front": 350, "back": 0, "up": 40, "down": 20 } },
-
-    { "id": "thief.nimble_body", "name": "身のこなし", "job": "thief", "tier": 1, "kind": "passive", "maxLevel": 20,
-      "desc": "命中 +x、回避 +x", "passive": [ { "stats": { "acc": "x", "avoid": "x" } } ] },
-    { "id": "thief.keen_eyes", "name": "鋭い目", "job": "thief", "tier": 1, "kind": "passive", "maxLevel": 8,
-      "desc": "クローの射程 +10x", "prereqs": [ { "skill": "thief.nimble_body", "level": 3 } ],
-      "passive": [ { "weapons": ["クロー"], "range": "10*x" } ] },
-    { "id": "thief.disorder", "name": "かく乱", "job": "thief", "tier": 1, "kind": "attack", "maxLevel": 20,
-      "desc": "前の 1 体の攻撃 -x、防御 -x、持続 3x 秒", "mp": "8", "targets": "1", "hits": "1",
-      "debuff": { "atk": "x", "def": "x", "sec": "3*x" },
-      "range": { "front": 110, "back": 10, "up": 60, "down": 10 } },
-    { "id": "thief.dark_sight", "name": "闇隠れ", "job": "thief", "tier": 1, "kind": "buff", "maxLevel": 20,
-      "desc": "姿を消す（敵に狙われない。攻撃すると解ける）、持続 5x 秒、速さ -20+x", "mp": "10+floor(x/2)",
-      "prereqs": [ { "skill": "thief.disorder", "level": 3 } ],
-      "buff": { "sec": "5*x", "stealth": true, "stats": { "speed": "-20+x" } } },
-    { "id": "thief.double_stab", "name": "二段突き", "job": "thief", "tier": 1, "kind": "attack", "maxLevel": 20,
-      "desc": "短剣で前の 1 体に 2 回、各 70+5x%", "mp": "6+floor(x/4)", "damage": "70+5*x", "targets": "1", "hits": "2",
-      "weapons": ["短剣"], "range": { "front": 75, "back": 10, "up": 60, "down": 10 } },
-    { "id": "thief.lucky_seven", "name": "二つ星投げ", "job": "thief", "tier": 1, "kind": "ranged", "maxLevel": 20,
-      "desc": "クローで前の 1 体に投げ星 2 つ、各 LUK×5.0 で計算した 80+3x%（投げ星の攻撃力が乗る）", "mp": "6+floor(x/4)",
-      "damage": "80+3*x", "targets": "1", "hits": "2", "weaponMul": 5.0, "weapons": ["クロー"], "ammo": true, "rangeBonus": true,
-      "prereqs": [ { "skill": "thief.keen_eyes", "level": 1 } ],
-      "range": { "front": 250, "back": 0, "up": 40, "down": 20 } },
-
-    { "id": "pirate.dash", "name": "早足", "job": "pirate", "tier": 1, "kind": "movement", "maxLevel": 10,
-      "desc": "前へダッシュ（速さ +10+x、ジャンプ +x、持続 2+x 秒）", "mp": "10", "dash": 220,
-      "buff": { "sec": "2+x", "stats": { "speed": "10+x", "jump": "x" } } },
-    { "id": "pirate.nimble_stance", "name": "身軽な構え", "job": "pirate", "tier": 1, "kind": "passive", "maxLevel": 20,
-      "desc": "命中 +x、回避 +x", "passive": [ { "stats": { "acc": "x", "avoid": "x" } } ] },
-    { "id": "pirate.somersault_kick", "name": "宙返り蹴り", "job": "pirate", "tier": 1, "kind": "area", "maxLevel": 20,
-      "desc": "まわり 最大 6 体に 80+4x%", "mp": "8+floor(x/4)", "damage": "80+4*x", "targets": "6", "hits": "1",
-      "range": { "front": 85, "back": 85, "up": 60, "down": 15, "around": true } },
-    { "id": "pirate.flash_fist", "name": "拳の連打", "job": "pirate", "tier": 1, "kind": "attack", "maxLevel": 20,
-      "desc": "ナックルで前の 1 体に 2 回、各 80+5x%", "mp": "6+floor(x/4)", "damage": "80+5*x", "targets": "1", "hits": "2",
-      "weapons": ["ナックル"], "range": { "front": 70, "back": 10, "up": 60, "down": 10 } },
-    { "id": "pirate.double_shot", "name": "ダブルショット", "job": "pirate", "tier": 1, "kind": "ranged", "maxLevel": 20,
-      "desc": "銃で前の 1 体に 2 発、各 70+5x%", "mp": "6+floor(x/4)", "damage": "70+5*x", "targets": "1", "hits": "2",
-      "weapons": ["銃"], "ammo": true, "rangeBonus": true, "range": { "front": 280, "back": 0, "up": 40, "down": 20 } },
-    { "id": "pirate.gun_mastery", "name": "銃の心得", "job": "pirate", "tier": 1, "kind": "passive", "maxLevel": 8,
-      "desc": "銃の射程 +10x", "prereqs": [ { "skill": "pirate.double_shot", "level": 1 } ],
-      "passive": [ { "weapons": ["銃"], "range": "10*x" } ] },
-
-    { "id": "cleric.heal", "name": "ヒール", "job": "magician", "tier": 2, "kind": "heal", "maxLevel": 30, "sample": true,
-      "desc": "（2 次・見本）自分の HP を最大の 10+2x% 回復", "mp": "20+floor(x/2)", "healPct": "10+2*x" },
-    { "id": "assassin.haste", "name": "ヘイスト", "job": "thief", "tier": 2, "kind": "buff", "maxLevel": 20, "sample": true,
-      "desc": "（2 次・見本）速さ +x、ジャンプ +⌈x/2⌉、持続 10x 秒", "mp": "10+floor(x/2)",
-      "buff": { "sec": "10*x", "stats": { "speed": "x", "jump": "ceil(x/2)" } } },
-    { "id": "fighter.sword_booster", "name": "剣の加速", "job": "warrior", "tier": 2, "kind": "buff", "maxLevel": 20, "sample": true,
-      "desc": "（2 次・見本）剣の攻撃速度 +2 段階、持続 10x 秒", "mp": "13-floor(x/4)",
-      "buff": { "sec": "10*x", "booster": 2, "weapons": ["片手剣", "両手剣"] } },
-    { "id": "darkknight.beholder", "name": "闇の獣を呼ぶ", "job": "warrior", "tier": 4, "kind": "summon", "maxLevel": 30, "sample": true,
-      "desc": "（4 次・見本）闇の獣が 30x 秒そばにいて、20 秒ごとに HP を 100+20x 回復する", "mp": "30+x",
-      "summonSec": "30*x", "summonHeal": "100+20*x", "summonHealInterval": 20 },
-    { "id": "common4.will", "name": "意志の力", "job": "warrior", "tier": 4, "kind": "buff", "maxLevel": 5, "sample": true,
-      "desc": "（4 次・見本）状態異常を全部治す。待ち時間 600-60x 秒", "mp": "30", "cooldown": "600-60*x", "cure": true }
-  ]
+ "note": "export_data.mjs が JOBS.md 4 章の表（名前・最大Lv・効果・MP・前提）と classic/tools/data/skills.mjs（範囲・式・動き・状態異常）から書き出した。手で直さない。式の x はスキルの Lv、lv はキャラの Lv。range は当たる範囲（px、主人公の足元から。front = 向いている方）。",
+ "skills": [
+  {
+   "id": "beginner.pebble",
+   "name": "石つぶて",
+   "job": "beginner",
+   "tier": 0,
+   "jobName": "初心者",
+   "kind": "ranged",
+   "maxLevel": 3,
+   "desc": "前の敵 1 体に石を投げる。固定ダメージ 15x",
+   "mp": "3*x",
+   "fixed": "15*x",
+   "targets": "1",
+   "hits": "1",
+   "range": {
+    "front": 200,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   },
+   "motion": "throw"
+  },
+  {
+   "id": "beginner.rest",
+   "name": "ひと休み",
+   "job": "beginner",
+   "tier": 0,
+   "jobName": "初心者",
+   "kind": "heal",
+   "maxLevel": 3,
+   "desc": "30 秒間、10 秒ごとに HP を 8x 回復",
+   "mp": "5*x",
+   "buff": {
+    "sec": "30",
+    "hotHp": "8*x",
+    "hotInterval": 10
+   }
+  },
+  {
+   "id": "beginner.nimble_feet",
+   "name": "身軽な足",
+   "job": "beginner",
+   "tier": 0,
+   "jobName": "初心者",
+   "kind": "buff",
+   "maxLevel": 3,
+   "desc": "4x 秒間、速さ +15",
+   "mp": "4*x",
+   "buff": {
+    "sec": "4*x",
+    "stats": {
+     "speed": "15"
+    }
+   }
+  },
+  {
+   "id": "warrior.hp_recovery",
+   "name": "HP回復力アップ",
+   "job": "warrior",
+   "tier": 1,
+   "jobName": "戦士",
+   "kind": "passive",
+   "maxLevel": 16,
+   "desc": "10 秒ごとの HP 自然回復 +3x（立ち止まっている時）",
+   "passive": [
+    {
+     "hpRegen": "3*x"
+    }
+   ]
+  },
+  {
+   "id": "warrior.max_hp",
+   "name": "最大HPアップ",
+   "job": "warrior",
+   "tier": 1,
+   "jobName": "戦士",
+   "kind": "passive",
+   "maxLevel": 10,
+   "desc": "Lv が上がった時の HP の増え方 +2x、AP を HP に振った時 +x",
+   "prereqs": [
+    {
+     "skill": "warrior.hp_recovery",
+     "level": 5
+    }
+   ],
+   "passive": [
+    {
+     "levelHp": "2*x",
+     "apHp": "x"
+    }
+   ]
+  },
+  {
+   "id": "warrior.endure",
+   "name": "我慢",
+   "job": "warrior",
+   "tier": 1,
+   "jobName": "戦士",
+   "kind": "passive",
+   "maxLevel": 8,
+   "desc": "縄・はしごにつかまっている間も HP が回復する（間隔 30-2x 秒）",
+   "passive": [
+    {
+     "ropeRegenInterval": "30-2*x"
+    }
+   ]
+  },
+  {
+   "id": "warrior.iron_body",
+   "name": "鉄の体",
+   "job": "warrior",
+   "tier": 1,
+   "jobName": "戦士",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "物理防御 +3x、持続 10x 秒",
+   "mp": "4+floor(x/4)",
+   "buff": {
+    "sec": "10*x",
+    "stats": {
+     "wdef": "3*x"
+    }
+   }
+  },
+  {
+   "id": "warrior.power_strike",
+   "name": "強打",
+   "job": "warrior",
+   "tier": 1,
+   "jobName": "戦士",
+   "kind": "attack",
+   "maxLevel": 20,
+   "desc": "前の敵 1 体に 160+5x%",
+   "mp": "3+floor(x/4)",
+   "damage": "160+5*x",
+   "targets": "1",
+   "hits": "1",
+   "range": {
+    "front": 75,
+    "back": 10,
+    "up": 60,
+    "down": 10
+   }
+  },
+  {
+   "id": "warrior.slash_blast",
+   "name": "なぎ払い",
+   "job": "warrior",
+   "tier": 1,
+   "jobName": "戦士",
+   "kind": "area",
+   "maxLevel": 20,
+   "desc": "前の敵 最大 6 体に 60+3x%。HP を 5 消費",
+   "mp": "6+floor(x/2)",
+   "prereqs": [
+    {
+     "skill": "warrior.power_strike",
+     "level": 1
+    }
+   ],
+   "hp": "5",
+   "damage": "60+3*x",
+   "targets": "6",
+   "hits": "1",
+   "range": {
+    "front": 110,
+    "back": 25,
+    "up": 70,
+    "down": 15
+   }
+  },
+  {
+   "id": "fighter.sword_mastery",
+   "name": "剣の熟練",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ファイター",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "剣の熟練度 10+5⌈x/2⌉%（最大 60%）、命中 +x",
+   "passive": [
+    {
+     "weapons": [
+      "片手剣",
+      "両手剣"
+     ],
+     "mastery": "10+5*ceil(x/2)",
+     "stats": {
+      "acc": "x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "fighter.axe_mastery",
+   "name": "斧の熟練",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ファイター",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "斧の熟練度 10+5⌈x/2⌉%、命中 +x",
+   "passive": [
+    {
+     "weapons": [
+      "片手斧",
+      "両手斧"
+     ],
+     "mastery": "10+5*ceil(x/2)",
+     "stats": {
+      "acc": "x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "fighter.sword_booster",
+   "name": "剣の加速",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ファイター",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "剣の攻撃速度 +2 段階、持続 10x 秒",
+   "mp": "13-floor(x/4)",
+   "prereqs": [
+    {
+     "skill": "fighter.sword_mastery",
+     "level": 5
+    }
+   ],
+   "buff": {
+    "sec": "10*x",
+    "booster": 2,
+    "weapons": [
+     "片手剣",
+     "両手剣"
+    ]
+   }
+  },
+  {
+   "id": "fighter.axe_booster",
+   "name": "斧の加速",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ファイター",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "斧の攻撃速度 +2 段階、持続 10x 秒",
+   "mp": "13-floor(x/4)",
+   "prereqs": [
+    {
+     "skill": "fighter.axe_mastery",
+     "level": 5
+    }
+   ],
+   "buff": {
+    "sec": "10*x",
+    "booster": 2,
+    "weapons": [
+     "片手斧",
+     "両手斧"
+    ]
+   }
+  },
+  {
+   "id": "fighter.sword_final",
+   "name": "剣の追撃",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ファイター",
+   "kind": "passive",
+   "maxLevel": 30,
+   "desc": "剣で攻撃した後 2x% で追撃（威力 100+3x%）",
+   "prereqs": [
+    {
+     "skill": "fighter.sword_booster",
+     "level": 3
+    }
+   ],
+   "passive": [
+    {
+     "weapons": [
+      "片手剣",
+      "両手剣"
+     ],
+     "finalAttack": {
+      "chance": "2*x",
+      "damage": "100+3*x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "fighter.axe_final",
+   "name": "斧の追撃",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ファイター",
+   "kind": "passive",
+   "maxLevel": 30,
+   "desc": "斧で攻撃した後 2x% で追撃（威力 100+3x%）",
+   "prereqs": [
+    {
+     "skill": "fighter.axe_booster",
+     "level": 3
+    }
+   ],
+   "passive": [
+    {
+     "weapons": [
+      "片手斧",
+      "両手斧"
+     ],
+     "finalAttack": {
+      "chance": "2*x",
+      "damage": "100+3*x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "fighter.rage",
+   "name": "闘志",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ファイター",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "攻撃力 +⌈2x/3⌉、物理防御 -⌈x/2⌉、持続 4x 秒",
+   "mp": "10+floor(x/3)",
+   "prereqs": [
+    {
+     "skill": "fighter.sword_booster",
+     "level": 1
+    },
+    {
+     "skill": "fighter.axe_booster",
+     "level": 1
+    }
+   ],
+   "prereqAny": true,
+   "buff": {
+    "sec": "4*x",
+    "stats": {
+     "watk": "ceil(2*x/3)",
+     "wdef": "-ceil(x/2)"
+    }
+   }
+  },
+  {
+   "id": "fighter.power_guard",
+   "name": "守りの構え",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ファイター",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "受けた物理ダメージの 10+x% を相手に返し、自分はその分減る、持続 4x 秒",
+   "mp": "15",
+   "buff": {
+    "sec": "4*x",
+    "reflect": "10+x"
+   }
+  },
+  {
+   "id": "crusader.mp_recovery",
+   "name": "MP回復力アップ",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "クルセイダー",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "10 秒ごとの MP 自然回復 +x+Lv÷10",
+   "passive": [
+    {
+     "mpRegen": "x+lv/10"
+    }
+   ]
+  },
+  {
+   "id": "crusader.shield_mastery",
+   "name": "盾の熟練",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "クルセイダー",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "盾の防御 +5x%",
+   "passive": [
+    {
+     "shieldDefPct": "5*x"
+    }
+   ]
+  },
+  {
+   "id": "crusader.combo",
+   "name": "闘気",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "クルセイダー",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "攻撃が当たるたびに闘気の玉が 1 つたまる（最大 5）。玉 1 つにつき攻撃 +x/2+5% 、持続 4x 秒",
+   "mp": "15",
+   "buff": {
+    "sec": "4*x",
+    "combo": {
+     "max": 5,
+     "damage": "x/2+5"
+    }
+   }
+  },
+  {
+   "id": "crusader.panic_sword",
+   "name": "闘気爆発・剣",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "クルセイダー",
+   "kind": "attack",
+   "maxLevel": 30,
+   "desc": "闘気を全部使い、剣で前の 1 体に 300+10x% ＋ 暗闇（命中 -x%）",
+   "mp": "12+floor(x/3)",
+   "prereqs": [
+    {
+     "skill": "crusader.combo",
+     "level": 1
+    }
+   ],
+   "damage": "300+10*x",
+   "targets": "1",
+   "range": {
+    "front": 80,
+    "back": 10,
+    "up": 60,
+    "down": 10
+   },
+   "weapons": [
+    "片手剣",
+    "両手剣"
+   ],
+   "combo": {
+    "use": "all"
+   },
+   "status": [
+    {
+     "type": "darkness",
+     "chance": "100",
+     "sec": "10",
+     "power": "x"
+    }
+   ],
+   "delay": 1.2,
+   "hits": "1"
+  },
+  {
+   "id": "crusader.panic_axe",
+   "name": "闘気爆発・斧",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "クルセイダー",
+   "kind": "attack",
+   "maxLevel": 30,
+   "desc": "闘気を全部使い、斧で前の 1 体に 300+10x% ＋ 暗闇（命中 -x%）",
+   "mp": "12+floor(x/3)",
+   "prereqs": [
+    {
+     "skill": "crusader.combo",
+     "level": 1
+    }
+   ],
+   "damage": "300+10*x",
+   "targets": "1",
+   "range": {
+    "front": 80,
+    "back": 10,
+    "up": 60,
+    "down": 10
+   },
+   "weapons": [
+    "片手斧",
+    "両手斧"
+   ],
+   "combo": {
+    "use": "all"
+   },
+   "status": [
+    {
+     "type": "darkness",
+     "chance": "100",
+     "sec": "10",
+     "power": "x"
+    }
+   ],
+   "delay": 1.2,
+   "hits": "1"
+  },
+  {
+   "id": "crusader.coma_sword",
+   "name": "闘気衝撃・剣",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "クルセイダー",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "闘気を 1 つ使い、剣で前の敵 最大 6 体に 140+4x% ＋ 気絶（x÷2+5 秒、確率 2x%）",
+   "mp": "18+floor(x/3)",
+   "prereqs": [
+    {
+     "skill": "crusader.combo",
+     "level": 1
+    }
+   ],
+   "damage": "140+4*x",
+   "targets": "6",
+   "range": {
+    "front": 130,
+    "back": 25,
+    "up": 75,
+    "down": 15
+   },
+   "weapons": [
+    "片手剣",
+    "両手剣"
+   ],
+   "combo": {
+    "use": 1
+   },
+   "status": [
+    {
+     "type": "stun",
+     "chance": "2*x",
+     "sec": "x/2+5"
+    }
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "crusader.coma_axe",
+   "name": "闘気衝撃・斧",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "クルセイダー",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "闘気を 1 つ使い、斧で前の敵 最大 6 体に 140+4x% ＋ 気絶（x÷2+5 秒、確率 2x%）",
+   "mp": "18+floor(x/3)",
+   "prereqs": [
+    {
+     "skill": "crusader.combo",
+     "level": 1
+    }
+   ],
+   "damage": "140+4*x",
+   "targets": "6",
+   "range": {
+    "front": 130,
+    "back": 25,
+    "up": 75,
+    "down": 15
+   },
+   "weapons": [
+    "片手斧",
+    "両手斧"
+   ],
+   "combo": {
+    "use": 1
+   },
+   "status": [
+    {
+     "type": "stun",
+     "chance": "2*x",
+     "sec": "x/2+5"
+    }
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "crusader.armor_crash",
+   "name": "鎧崩し",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "クルセイダー",
+   "kind": "attack",
+   "maxLevel": 30,
+   "desc": "前の 1 体の防御強化（バフ）を確率 40+2x% で消す",
+   "mp": "20",
+   "prereqs": [
+    {
+     "skill": "crusader.combo",
+     "level": 5
+    }
+   ],
+   "targets": "1",
+   "range": {
+    "front": 80,
+    "back": 10,
+    "up": 60,
+    "down": 10
+   },
+   "dispel": {
+    "chance": "40+2*x",
+    "what": "def"
+   },
+   "weapons": [
+    "片手剣",
+    "両手剣",
+    "片手斧",
+    "両手斧"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "crusader.shout",
+   "name": "雄叫び",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "クルセイダー",
+   "kind": "area",
+   "maxLevel": 20,
+   "desc": "自分のまわり 最大 15 体に 120+5x% ＋ 気絶（確率 3x%）",
+   "mp": "10+x",
+   "prereqs": [
+    {
+     "skill": "crusader.combo",
+     "level": 3
+    }
+   ],
+   "damage": "120+5*x",
+   "targets": "15",
+   "range": {
+    "front": 200,
+    "back": 200,
+    "up": 100,
+    "down": 20,
+    "around": true
+   },
+   "motion": "cast",
+   "status": [
+    {
+     "type": "stun",
+     "chance": "3*x",
+     "sec": "3"
+    }
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "champion.blessing",
+   "name": "全能力の加護",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "チャンピオン",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "全ての能力値 +⌈x/2⌉%、持続 30x 秒（4 次は全職が持つ）",
+   "mp": "10+floor(x/3)",
+   "buff": {
+    "sec": "30*x",
+    "statPct": "ceil(x/2)"
+   }
+  },
+  {
+   "id": "champion.will",
+   "name": "意志の力",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "チャンピオン",
+   "kind": "buff",
+   "maxLevel": 5,
+   "desc": "状態異常（気絶・暗闇・毒・封印・呪い・誘惑）を全部治す。待ち時間 600-60x 秒",
+   "mp": "30",
+   "cooldown": "600-60*x",
+   "cure": true
+  },
+  {
+   "id": "champion.stoic",
+   "name": "不屈",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "チャンピオン",
+   "kind": "passive",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "受けるダメージ -⌈x/2⌉%",
+   "passive": [
+    {
+     "damageTaken": "ceil(x/2)"
+    }
+   ]
+  },
+  {
+   "id": "champion.advanced_combo",
+   "name": "闘気の極み",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "チャンピオン",
+   "kind": "passive",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "闘気の玉の最大 +5（合計 10）。玉 1 つの攻撃 +1%、玉がたまる確率 +x%",
+   "passive": [
+    {
+     "combo": {
+      "max": 5,
+      "damage": "1",
+      "rate": "x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "champion.brandish",
+   "name": "乱れ斬り",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "チャンピオン",
+   "kind": "area",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "前の敵 最大 3 体に 2 回、各 260+5x%",
+   "mp": "20+floor(x/2)",
+   "damage": "260+5*x",
+   "targets": "3",
+   "hits": "2",
+   "range": {
+    "front": 130,
+    "back": 25,
+    "up": 75,
+    "down": 15
+   },
+   "delay": 1.2,
+   "weapons": [
+    "片手剣",
+    "両手剣",
+    "片手斧",
+    "両手斧"
+   ]
+  },
+  {
+   "id": "champion.rush",
+   "name": "突撃",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "チャンピオン",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "前へ突進し、敵を押しながら 最大 10 体に 80+4x%",
+   "mp": "15+floor(x/3)",
+   "damage": "80+4*x",
+   "targets": "10",
+   "range": {
+    "front": 130,
+    "back": 25,
+    "up": 75,
+    "down": 15
+   },
+   "dash": 420,
+   "dashTime": 0.35,
+   "delay": 1.3,
+   "push": 60,
+   "weapons": [
+    "片手剣",
+    "両手剣",
+    "片手斧",
+    "両手斧"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "champion.enrage",
+   "name": "怒りの解放",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "チャンピオン",
+   "kind": "buff",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "闘気を 10 個使い、攻撃力 +x、ダメージ +x%、持続 3x 秒",
+   "mp": "30",
+   "prereqs": [
+    {
+     "skill": "champion.advanced_combo",
+     "level": 10
+    }
+   ],
+   "combo": {
+    "use": 10
+   },
+   "buff": {
+    "sec": "3*x",
+    "stats": {
+     "watk": "x"
+    },
+    "damagePct": "x"
+   }
+  },
+  {
+   "id": "champion.guard",
+   "name": "守りの盾",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "チャンピオン",
+   "kind": "passive",
+   "maxLevel": 30,
+   "desc": "盾を持っている時、正面の攻撃を 10+x% で完全に防ぎ、その敵を気絶させる",
+   "passive": [
+    {
+     "guard": "10+x"
+    }
+   ]
+  },
+  {
+   "id": "champion.monster_magnet",
+   "name": "怪物の引き寄せ",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "チャンピオン",
+   "kind": "ranged",
+   "maxLevel": 30,
+   "desc": "前の 1 体（ボス以外）を自分の前に引き寄せる。確率 40+2x%",
+   "mp": "15",
+   "targets": "1",
+   "pull": {
+    "chance": "40+2*x"
+   },
+   "range": {
+    "front": 320,
+    "back": 0,
+    "up": 70,
+    "down": 30
+   },
+   "motion": "cast",
+   "weapons": [
+    "片手剣",
+    "両手剣",
+    "片手斧",
+    "両手斧"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "page.sword_mastery",
+   "name": "剣の熟練",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "ページ",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "剣の熟練度 10+5⌈x/2⌉%（最大 60%）、命中 +x",
+   "passive": [
+    {
+     "weapons": [
+      "片手剣",
+      "両手剣"
+     ],
+     "mastery": "10+5*ceil(x/2)",
+     "stats": {
+      "acc": "x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "page.blunt_mastery",
+   "name": "鈍器の熟練",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "ページ",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "鈍器の熟練度 10+5⌈x/2⌉%、命中 +x",
+   "passive": [
+    {
+     "weapons": [
+      "片手鈍器",
+      "両手鈍器"
+     ],
+     "mastery": "10+5*ceil(x/2)",
+     "stats": {
+      "acc": "x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "page.sword_booster",
+   "name": "剣の加速",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "ページ",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "剣の攻撃速度 +2 段階、持続 10x 秒",
+   "mp": "13-floor(x/4)",
+   "prereqs": [
+    {
+     "skill": "page.sword_mastery",
+     "level": 5
+    }
+   ],
+   "buff": {
+    "sec": "10*x",
+    "booster": 2,
+    "weapons": [
+     "片手剣",
+     "両手剣"
+    ]
+   }
+  },
+  {
+   "id": "page.blunt_booster",
+   "name": "鈍器の加速",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "ページ",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "鈍器の攻撃速度 +2 段階、持続 10x 秒",
+   "mp": "13-floor(x/4)",
+   "prereqs": [
+    {
+     "skill": "page.blunt_mastery",
+     "level": 5
+    }
+   ],
+   "buff": {
+    "sec": "10*x",
+    "booster": 2,
+    "weapons": [
+     "片手鈍器",
+     "両手鈍器"
+    ]
+   }
+  },
+  {
+   "id": "page.sword_final",
+   "name": "剣の追撃",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "ページ",
+   "kind": "passive",
+   "maxLevel": 30,
+   "desc": "剣で攻撃した後 2x% で追撃（威力 100+3x%）",
+   "prereqs": [
+    {
+     "skill": "page.sword_booster",
+     "level": 3
+    }
+   ],
+   "passive": [
+    {
+     "weapons": [
+      "片手剣",
+      "両手剣"
+     ],
+     "finalAttack": {
+      "chance": "2*x",
+      "damage": "100+3*x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "page.blunt_final",
+   "name": "鈍器の追撃",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "ページ",
+   "kind": "passive",
+   "maxLevel": 30,
+   "desc": "鈍器で 2x% 追撃（100+3x%）",
+   "prereqs": [
+    {
+     "skill": "page.blunt_booster",
+     "level": 3
+    }
+   ],
+   "passive": [
+    {
+     "weapons": [
+      "片手鈍器",
+      "両手鈍器"
+     ],
+     "finalAttack": {
+      "chance": "2*x",
+      "damage": "100+3*x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "page.threaten",
+   "name": "威圧",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "ページ",
+   "kind": "area",
+   "maxLevel": 20,
+   "desc": "前の敵 最大 6 体の攻撃力 -x、防御 -⌈x/2⌉%、持続 3x 秒、確率 50+2x%",
+   "mp": "10+floor(x/2)",
+   "targets": "6",
+   "range": {
+    "front": 130,
+    "back": 25,
+    "up": 75,
+    "down": 15
+   },
+   "motion": "cast",
+   "debuff": {
+    "atk": "x",
+    "defPct": "ceil(x/2)",
+    "sec": "3*x",
+    "chance": "50+2*x"
+   },
+   "hits": "1"
+  },
+  {
+   "id": "page.power_guard",
+   "name": "守りの構え",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "ページ",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "受けた物理ダメージの 10+x% を相手に返し、自分はその分減る、持続 4x 秒",
+   "mp": "15",
+   "buff": {
+    "sec": "4*x",
+    "reflect": "10+x"
+   }
+  },
+  {
+   "id": "knight.mp_recovery",
+   "name": "MP回復力アップ",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "ナイト",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "10 秒ごとの MP 自然回復 +x+Lv÷10",
+   "passive": [
+    {
+     "mpRegen": "x+lv/10"
+    }
+   ]
+  },
+  {
+   "id": "knight.shield_mastery",
+   "name": "盾の熟練",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "ナイト",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "盾の防御 +5x%",
+   "passive": [
+    {
+     "shieldDefPct": "5*x"
+    }
+   ]
+  },
+  {
+   "id": "knight.fire_charge",
+   "name": "炎の付与",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "ナイト",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "武器に火をのせる。攻撃 +(5+x)%、火に弱い敵に 1.5 倍、持続 4x 秒",
+   "mp": "15",
+   "buff": {
+    "sec": "4*x",
+    "element": "fire",
+    "damagePct": "5+x",
+    "charge": true
+   }
+  },
+  {
+   "id": "knight.ice_charge",
+   "name": "氷の付与",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "ナイト",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "武器に氷をのせる。攻撃 +(5+x)%、当たった敵を 2+x÷10 秒凍らせる",
+   "mp": "15",
+   "buff": {
+    "sec": "4*x",
+    "element": "ice",
+    "damagePct": "5+x",
+    "charge": true,
+    "onHitStatus": [
+     {
+      "type": "freeze",
+      "chance": "100",
+      "sec": "2+x/10"
+     }
+    ]
+   }
+  },
+  {
+   "id": "knight.lightning_charge",
+   "name": "雷の付与",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "ナイト",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "武器に雷をのせる。攻撃 +(10+x)%",
+   "mp": "15",
+   "buff": {
+    "sec": "4*x",
+    "element": "lightning",
+    "damagePct": "10+x",
+    "charge": true
+   }
+  },
+  {
+   "id": "knight.charge_blow",
+   "name": "付与の一撃",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "ナイト",
+   "kind": "attack",
+   "maxLevel": 30,
+   "desc": "付与をのせている時、前の 1 体に 300+10x% ＋ 気絶（確率 2x%）。付与は消える",
+   "mp": "15",
+   "prereqs": [
+    {
+     "skill": "knight.fire_charge",
+     "level": 1
+    },
+    {
+     "skill": "knight.ice_charge",
+     "level": 1
+    },
+    {
+     "skill": "knight.lightning_charge",
+     "level": 1
+    }
+   ],
+   "prereqAny": true,
+   "damage": "300+10*x",
+   "targets": "1",
+   "range": {
+    "front": 80,
+    "back": 10,
+    "up": 60,
+    "down": 10
+   },
+   "needsCharge": true,
+   "consumeCharge": true,
+   "status": [
+    {
+     "type": "stun",
+     "chance": "2*x",
+     "sec": "3"
+    }
+   ],
+   "weapons": [
+    "片手剣",
+    "両手剣",
+    "片手鈍器",
+    "両手鈍器"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "knight.magic_crash",
+   "name": "魔法崩し",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "ナイト",
+   "kind": "attack",
+   "maxLevel": 20,
+   "desc": "前の 1 体の魔法の強化を確率 40+3x% で消す",
+   "mp": "20",
+   "targets": "1",
+   "range": {
+    "front": 80,
+    "back": 10,
+    "up": 60,
+    "down": 10
+   },
+   "dispel": {
+    "chance": "40+3*x",
+    "what": "magic"
+   },
+   "weapons": [
+    "片手剣",
+    "両手剣",
+    "片手鈍器",
+    "両手鈍器"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "knight.iron_will",
+   "name": "鉄壁の誓い",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "ナイト",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "物理防御 +5x、魔法防御 +5x、持続 10x 秒",
+   "mp": "20",
+   "prereqs": [
+    {
+     "skill": "knight.shield_mastery",
+     "level": 5
+    }
+   ],
+   "buff": {
+    "sec": "10*x",
+    "stats": {
+     "wdef": "5*x",
+     "mdef": "5*x"
+    }
+   }
+  },
+  {
+   "id": "paladin.blessing",
+   "name": "全能力の加護",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "パラディン",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "全ての能力値 +⌈x/2⌉%、持続 30x 秒（4 次は全職が持つ）",
+   "mp": "10+floor(x/3)",
+   "buff": {
+    "sec": "30*x",
+    "statPct": "ceil(x/2)"
+   }
+  },
+  {
+   "id": "paladin.will",
+   "name": "意志の力",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "パラディン",
+   "kind": "buff",
+   "maxLevel": 5,
+   "desc": "状態異常（気絶・暗闇・毒・封印・呪い・誘惑）を全部治す。待ち時間 600-60x 秒",
+   "mp": "30",
+   "cooldown": "600-60*x",
+   "cure": true
+  },
+  {
+   "id": "paladin.stoic",
+   "name": "不屈",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "パラディン",
+   "kind": "passive",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "受けるダメージ -⌈x/2⌉%",
+   "passive": [
+    {
+     "damageTaken": "ceil(x/2)"
+    }
+   ]
+  },
+  {
+   "id": "paladin.holy_charge",
+   "name": "聖なる付与",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "パラディン",
+   "kind": "buff",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "武器に聖をのせる。攻撃 +(10+x)%、不死の敵に 1.5 倍、持続 4x 秒",
+   "mp": "20",
+   "buff": {
+    "sec": "4*x",
+    "element": "holy",
+    "damagePct": "10+x",
+    "charge": true
+   }
+  },
+  {
+   "id": "paladin.blast",
+   "name": "天の一撃",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "パラディン",
+   "kind": "attack",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "前の 1 体に 4 回、各 120+6x%（付与の属性がのる）",
+   "mp": "20+floor(x/2)",
+   "damage": "120+6*x",
+   "targets": "1",
+   "hits": "4",
+   "range": {
+    "front": 80,
+    "back": 10,
+    "up": 60,
+    "down": 10
+   },
+   "delay": 1.3,
+   "weapons": [
+    "片手剣",
+    "両手剣",
+    "片手鈍器",
+    "両手鈍器"
+   ]
+  },
+  {
+   "id": "paladin.heavens_hammer",
+   "name": "天からの鉄槌",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "パラディン",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "前の広い範囲 最大 15 体に 1 回。ボス以外の敵は確率 x% で一撃で倒す、残りは 600+20x%",
+   "mp": "30+x",
+   "prereqs": [
+    {
+     "skill": "paladin.blast",
+     "level": 5
+    }
+   ],
+   "damage": "600+20*x",
+   "targets": "15",
+   "range": {
+    "front": 300,
+    "back": 30,
+    "up": 130,
+    "down": 40
+   },
+   "instantKill": "x",
+   "delay": 1.4,
+   "weapons": [
+    "片手剣",
+    "両手剣",
+    "片手鈍器",
+    "両手鈍器"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "paladin.rush",
+   "name": "突撃",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "パラディン",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "前へ突進し、敵を押しながら 最大 10 体に 80+4x%",
+   "mp": "15+floor(x/3)",
+   "damage": "80+4*x",
+   "targets": "10",
+   "range": {
+    "front": 130,
+    "back": 25,
+    "up": 75,
+    "down": 15
+   },
+   "dash": 420,
+   "dashTime": 0.35,
+   "delay": 1.3,
+   "push": 60,
+   "weapons": [
+    "片手剣",
+    "両手剣",
+    "片手鈍器",
+    "両手鈍器"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "paladin.guard",
+   "name": "守りの盾",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "パラディン",
+   "kind": "passive",
+   "maxLevel": 30,
+   "desc": "盾を持っている時、正面の攻撃を 10+x% で完全に防ぎ、その敵を気絶させる",
+   "passive": [
+    {
+     "guard": "10+x"
+    }
+   ]
+  },
+  {
+   "id": "paladin.monster_magnet",
+   "name": "怪物の引き寄せ",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "パラディン",
+   "kind": "ranged",
+   "maxLevel": 30,
+   "desc": "前の 1 体（ボス以外）を自分の前に引き寄せる。確率 40+2x%",
+   "mp": "15",
+   "targets": "1",
+   "pull": {
+    "chance": "40+2*x"
+   },
+   "range": {
+    "front": 320,
+    "back": 0,
+    "up": 70,
+    "down": 30
+   },
+   "motion": "cast",
+   "weapons": [
+    "片手剣",
+    "両手剣",
+    "片手鈍器",
+    "両手鈍器"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "spearman.spear_mastery",
+   "name": "槍の熟練",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 2,
+   "jobName": "スピアマン",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "槍の熟練度 10+5⌈x/2⌉%、命中 +x",
+   "passive": [
+    {
+     "weapons": [
+      "槍"
+     ],
+     "mastery": "10+5*ceil(x/2)",
+     "stats": {
+      "acc": "x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "spearman.polearm_mastery",
+   "name": "矛の熟練",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 2,
+   "jobName": "スピアマン",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "矛の熟練度 10+5⌈x/2⌉%、命中 +x",
+   "passive": [
+    {
+     "weapons": [
+      "矛"
+     ],
+     "mastery": "10+5*ceil(x/2)",
+     "stats": {
+      "acc": "x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "spearman.spear_booster",
+   "name": "槍の加速",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 2,
+   "jobName": "スピアマン",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "槍の攻撃速度 +2 段階、持続 10x 秒",
+   "mp": "13-floor(x/4)",
+   "prereqs": [
+    {
+     "skill": "spearman.spear_mastery",
+     "level": 5
+    }
+   ],
+   "buff": {
+    "sec": "10*x",
+    "booster": 2,
+    "weapons": [
+     "槍"
+    ]
+   }
+  },
+  {
+   "id": "spearman.polearm_booster",
+   "name": "矛の加速",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 2,
+   "jobName": "スピアマン",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "矛の攻撃速度 +2 段階、持続 10x 秒",
+   "mp": "13-floor(x/4)",
+   "prereqs": [
+    {
+     "skill": "spearman.polearm_mastery",
+     "level": 5
+    }
+   ],
+   "buff": {
+    "sec": "10*x",
+    "booster": 2,
+    "weapons": [
+     "矛"
+    ]
+   }
+  },
+  {
+   "id": "spearman.spear_final",
+   "name": "槍の追撃",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 2,
+   "jobName": "スピアマン",
+   "kind": "passive",
+   "maxLevel": 30,
+   "desc": "槍で 2x% 追撃（100+3x%）",
+   "prereqs": [
+    {
+     "skill": "spearman.spear_booster",
+     "level": 3
+    }
+   ],
+   "passive": [
+    {
+     "weapons": [
+      "槍"
+     ],
+     "finalAttack": {
+      "chance": "2*x",
+      "damage": "100+3*x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "spearman.polearm_final",
+   "name": "矛の追撃",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 2,
+   "jobName": "スピアマン",
+   "kind": "passive",
+   "maxLevel": 30,
+   "desc": "矛で 2x% 追撃（100+3x%）",
+   "prereqs": [
+    {
+     "skill": "spearman.polearm_booster",
+     "level": 3
+    }
+   ],
+   "passive": [
+    {
+     "weapons": [
+      "矛"
+     ],
+     "finalAttack": {
+      "chance": "2*x",
+      "damage": "100+3*x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "spearman.iron_will",
+   "name": "鉄の意志",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 2,
+   "jobName": "スピアマン",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "物理防御 +2x、魔法防御 +2x、持続 10x 秒",
+   "mp": "15",
+   "buff": {
+    "sec": "10*x",
+    "stats": {
+     "wdef": "2*x",
+     "mdef": "2*x"
+    }
+   }
+  },
+  {
+   "id": "spearman.hyper_body",
+   "name": "体力強化",
+   "job": "warrior",
+   "tier": 2,
+   "branch": 2,
+   "jobName": "スピアマン",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "最大 HP・最大 MP +2x%、持続 10x 秒",
+   "mp": "10+floor(x/2)",
+   "prereqs": [
+    {
+     "skill": "spearman.iron_will",
+     "level": 10
+    }
+   ],
+   "buff": {
+    "sec": "10*x",
+    "hpPct": "2*x",
+    "mpPct": "2*x"
+   }
+  },
+  {
+   "id": "dragoon.element_resist",
+   "name": "属性への耐性",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 2,
+   "jobName": "ドラグーン",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "火・氷・雷・毒の魔法のダメージ -x%",
+   "passive": [
+    {
+     "elementResist": "x"
+    }
+   ]
+  },
+  {
+   "id": "dragoon.crusher_spear",
+   "name": "連突き・槍",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 2,
+   "jobName": "ドラグーン",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "槍で前の敵 最大 3 体に 3 回、各 80+4x%",
+   "mp": "14+floor(x/3)",
+   "damage": "80+4*x",
+   "targets": "3",
+   "hits": "3",
+   "range": {
+    "front": 160,
+    "back": 25,
+    "up": 80,
+    "down": 15
+   },
+   "weapons": [
+    "槍"
+   ],
+   "motion": "stab",
+   "delay": 1.3
+  },
+  {
+   "id": "dragoon.crusher_polearm",
+   "name": "連突き・矛",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 2,
+   "jobName": "ドラグーン",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "矛で前の敵 最大 3 体に 3 回、各 80+4x%",
+   "mp": "14+floor(x/3)",
+   "damage": "80+4*x",
+   "targets": "3",
+   "hits": "3",
+   "range": {
+    "front": 160,
+    "back": 25,
+    "up": 80,
+    "down": 15
+   },
+   "weapons": [
+    "矛"
+   ],
+   "motion": "stab",
+   "delay": 1.3
+  },
+  {
+   "id": "dragoon.fury_spear",
+   "name": "竜巻き・槍",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 2,
+   "jobName": "ドラグーン",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "槍を回し、前の敵 最大 6 体に 150+4x%",
+   "mp": "16+floor(x/3)",
+   "damage": "150+4*x",
+   "targets": "6",
+   "range": {
+    "front": 160,
+    "back": 25,
+    "up": 80,
+    "down": 15
+   },
+   "weapons": [
+    "槍"
+   ],
+   "motion": "swing",
+   "delay": 1.1,
+   "hits": "1"
+  },
+  {
+   "id": "dragoon.fury_polearm",
+   "name": "竜巻き・矛",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 2,
+   "jobName": "ドラグーン",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "矛を回し、前の敵 最大 6 体に 150+4x%",
+   "mp": "16+floor(x/3)",
+   "damage": "150+4*x",
+   "targets": "6",
+   "range": {
+    "front": 160,
+    "back": 25,
+    "up": 80,
+    "down": 15
+   },
+   "weapons": [
+    "矛"
+   ],
+   "motion": "swing",
+   "delay": 1.1,
+   "hits": "1"
+  },
+  {
+   "id": "dragoon.sacrifice",
+   "name": "捨て身",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 2,
+   "jobName": "ドラグーン",
+   "kind": "attack",
+   "maxLevel": 30,
+   "desc": "HP を 与えたダメージの 10% 失い、前の 1 体に防御無視で 350+10x%",
+   "mp": "20",
+   "prereqs": [
+    {
+     "skill": "dragoon.crusher_spear",
+     "level": 1
+    },
+    {
+     "skill": "dragoon.crusher_polearm",
+     "level": 1
+    }
+   ],
+   "prereqAny": true,
+   "damage": "350+10*x",
+   "targets": "1",
+   "range": {
+    "front": 110,
+    "back": 10,
+    "up": 60,
+    "down": 10
+   },
+   "ignoreDef": true,
+   "selfDamagePct": 10,
+   "motion": "stab",
+   "weapons": [
+    "槍",
+    "矛"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "dragoon.dragon_roar",
+   "name": "竜の咆哮",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 2,
+   "jobName": "ドラグーン",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "HP を最大の 20% 払い、画面の敵 最大 15 体に 240+8x% ＋ 自分は 2 秒動けない",
+   "mp": "20+x",
+   "prereqs": [
+    {
+     "skill": "dragoon.fury_spear",
+     "level": 1
+    },
+    {
+     "skill": "dragoon.fury_polearm",
+     "level": 1
+    }
+   ],
+   "prereqAny": true,
+   "damage": "240+8*x",
+   "targets": "15",
+   "range": {
+    "front": 420,
+    "back": 420,
+    "up": 320,
+    "down": 280,
+    "around": true
+   },
+   "hpPct": "20",
+   "motion": "cast",
+   "selfStatus": [
+    {
+     "type": "bind",
+     "chance": "100",
+     "sec": "2"
+    }
+   ],
+   "delay": 1.3,
+   "weapons": [
+    "槍",
+    "矛"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "dragoon.power_crash",
+   "name": "力崩し",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 2,
+   "jobName": "ドラグーン",
+   "kind": "attack",
+   "maxLevel": 20,
+   "desc": "前の 1 体の攻撃の強化を確率 40+3x% で消す",
+   "mp": "20",
+   "targets": "1",
+   "range": {
+    "front": 110,
+    "back": 10,
+    "up": 60,
+    "down": 10
+   },
+   "dispel": {
+    "chance": "40+3*x",
+    "what": "atk"
+   },
+   "weapons": [
+    "槍",
+    "矛"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "dragoon.dragon_blood",
+   "name": "竜の血",
+   "job": "warrior",
+   "tier": 3,
+   "branch": 2,
+   "jobName": "ドラグーン",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "攻撃力 +x+5、その間 4 秒ごとに HP が 4+x 減る、持続 8x 秒",
+   "mp": "10",
+   "prereqs": [
+    {
+     "skill": "dragoon.power_crash",
+     "level": 1
+    }
+   ],
+   "buff": {
+    "sec": "8*x",
+    "stats": {
+     "watk": "x+5"
+    },
+    "hpDrain": {
+     "amount": "4+x",
+     "interval": 4
+    }
+   }
+  },
+  {
+   "id": "darkknight.blessing",
+   "name": "全能力の加護",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 2,
+   "jobName": "ダークナイト",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "全ての能力値 +⌈x/2⌉%、持続 30x 秒（4 次は全職が持つ）",
+   "mp": "10+floor(x/3)",
+   "buff": {
+    "sec": "30*x",
+    "statPct": "ceil(x/2)"
+   }
+  },
+  {
+   "id": "darkknight.will",
+   "name": "意志の力",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 2,
+   "jobName": "ダークナイト",
+   "kind": "buff",
+   "maxLevel": 5,
+   "desc": "状態異常（気絶・暗闇・毒・封印・呪い・誘惑）を全部治す。待ち時間 600-60x 秒",
+   "mp": "30",
+   "cooldown": "600-60*x",
+   "cure": true
+  },
+  {
+   "id": "darkknight.stoic",
+   "name": "不屈",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 2,
+   "jobName": "ダークナイト",
+   "kind": "passive",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "受けるダメージ -⌈x/2⌉%",
+   "passive": [
+    {
+     "damageTaken": "ceil(x/2)"
+    }
+   ]
+  },
+  {
+   "id": "darkknight.berserk",
+   "name": "暗黒の力",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 2,
+   "jobName": "ダークナイト",
+   "kind": "passive",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "HP が最大の x% 以下の時、ダメージ 2 倍",
+   "passive": [
+    {
+     "berserk": "x"
+    }
+   ]
+  },
+  {
+   "id": "darkknight.beholder",
+   "name": "闇の獣を呼ぶ",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 2,
+   "jobName": "ダークナイト",
+   "kind": "summon",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "闇の獣が 30x 秒そばにいて、20 秒ごとに HP を 100+20x 回復する",
+   "mp": "30+x",
+   "summonSec": "30*x",
+   "summonHeal": "100+20*x",
+   "summonHealInterval": 20
+  },
+  {
+   "id": "darkknight.beholder_aura",
+   "name": "獣の加護",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 2,
+   "jobName": "ダークナイト",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "闇の獣がいる時、物理防御 +10x、命中・回避 +2x",
+   "mp": "20",
+   "prereqs": [
+    {
+     "skill": "darkknight.beholder",
+     "level": 1
+    }
+   ],
+   "needsBuff": [
+    "darkknight.beholder"
+   ],
+   "buff": {
+    "sec": "30*x",
+    "stats": {
+     "wdef": "10*x",
+     "acc": "2*x",
+     "avoid": "2*x"
+    }
+   }
+  },
+  {
+   "id": "darkknight.beholder_strike",
+   "name": "獣の一撃",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 2,
+   "jobName": "ダークナイト",
+   "kind": "ranged",
+   "maxLevel": 20,
+   "desc": "闇の獣が前の 1 体に 150+20x%",
+   "mp": "20",
+   "prereqs": [
+    {
+     "skill": "darkknight.beholder",
+     "level": 3
+    }
+   ],
+   "damage": "150+20*x",
+   "targets": "1",
+   "range": {
+    "front": 300,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   },
+   "needsBuff": [
+    "darkknight.beholder"
+   ],
+   "motion": "cast",
+   "hits": "1"
+  },
+  {
+   "id": "darkknight.rush",
+   "name": "突撃",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 2,
+   "jobName": "ダークナイト",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "前へ突進し、敵を押しながら 最大 10 体に 80+4x%",
+   "mp": "15+floor(x/3)",
+   "damage": "80+4*x",
+   "targets": "10",
+   "range": {
+    "front": 130,
+    "back": 25,
+    "up": 75,
+    "down": 15
+   },
+   "dash": 420,
+   "dashTime": 0.35,
+   "delay": 1.3,
+   "push": 60,
+   "weapons": [
+    "槍",
+    "矛"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "darkknight.monster_magnet",
+   "name": "怪物の引き寄せ",
+   "job": "warrior",
+   "tier": 4,
+   "branch": 2,
+   "jobName": "ダークナイト",
+   "kind": "ranged",
+   "maxLevel": 30,
+   "desc": "前の 1 体（ボス以外）を自分の前に引き寄せる。確率 40+2x%",
+   "mp": "15",
+   "targets": "1",
+   "pull": {
+    "chance": "40+2*x"
+   },
+   "range": {
+    "front": 320,
+    "back": 0,
+    "up": 70,
+    "down": 30
+   },
+   "motion": "cast",
+   "weapons": [
+    "槍",
+    "矛"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "magician.mp_recovery",
+   "name": "MP回復力アップ",
+   "job": "magician",
+   "tier": 1,
+   "jobName": "魔法使い",
+   "kind": "passive",
+   "maxLevel": 16,
+   "desc": "10 秒ごとの MP 自然回復 +x×Lv÷10",
+   "passive": [
+    {
+     "mpRegen": "x*lv/10"
+    }
+   ]
+  },
+  {
+   "id": "magician.max_mp",
+   "name": "最大MPアップ",
+   "job": "magician",
+   "tier": 1,
+   "jobName": "魔法使い",
+   "kind": "passive",
+   "maxLevel": 10,
+   "desc": "Lv が上がった時の MP の増え方 +x",
+   "prereqs": [
+    {
+     "skill": "magician.mp_recovery",
+     "level": 5
+    }
+   ],
+   "passive": [
+    {
+     "levelMp": "x"
+    }
+   ]
+  },
+  {
+   "id": "magician.magic_guard",
+   "name": "魔力の盾",
+   "job": "magician",
+   "tier": 1,
+   "jobName": "魔法使い",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "受けるダメージの 15+3x%（最大 75%）を MP で受ける、持続 30+10x 秒",
+   "mp": "4+floor(x/2)",
+   "buff": {
+    "sec": "30+10*x",
+    "magicGuard": "min(75, 15+3*x)"
+   }
+  },
+  {
+   "id": "magician.magic_armor",
+   "name": "魔力の鎧",
+   "job": "magician",
+   "tier": 1,
+   "jobName": "魔法使い",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "物理防御 +2x、持続 10x 秒",
+   "mp": "4+floor(x/4)",
+   "prereqs": [
+    {
+     "skill": "magician.magic_guard",
+     "level": 3
+    }
+   ],
+   "buff": {
+    "sec": "10*x",
+    "stats": {
+     "wdef": "2*x"
+    }
+   }
+  },
+  {
+   "id": "magician.energy_bolt",
+   "name": "魔力の矢",
+   "job": "magician",
+   "tier": 1,
+   "jobName": "魔法使い",
+   "kind": "ranged",
+   "maxLevel": 20,
+   "desc": "前の 1 体に魔法攻撃力 20+2x（最大 60）",
+   "mp": "4+floor(x/4)",
+   "magic": true,
+   "spell": "min(60, 20+2*x)",
+   "targets": "1",
+   "hits": "1",
+   "range": {
+    "front": 300,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   }
+  },
+  {
+   "id": "magician.magic_claw",
+   "name": "魔力の爪",
+   "job": "magician",
+   "tier": 1,
+   "jobName": "魔法使い",
+   "kind": "ranged",
+   "maxLevel": 20,
+   "desc": "前の 1 体に 2 回、各 魔法攻撃力 10+2x（最大 50）",
+   "mp": "8+floor(x/3)",
+   "prereqs": [
+    {
+     "skill": "magician.energy_bolt",
+     "level": 1
+    }
+   ],
+   "magic": true,
+   "spell": "min(50, 10+2*x)",
+   "targets": "1",
+   "hits": "2",
+   "range": {
+    "front": 220,
+    "back": 0,
+    "up": 50,
+    "down": 20
+   }
+  },
+  {
+   "id": "firewizard.mp_eater",
+   "name": "MP吸収",
+   "job": "magician",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ファイアウィザード",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "魔法を当てた時 10+x% で敵の MP を 2+x÷2% 吸う",
+   "passive": [
+    {
+     "mpEater": {
+      "chance": "10+x",
+      "pct": "2+x/2"
+     }
+    }
+   ]
+  },
+  {
+   "id": "firewizard.meditation",
+   "name": "瞑想",
+   "job": "magician",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ファイアウィザード",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "魔力 +x、持続 10x 秒",
+   "mp": "14",
+   "buff": {
+    "sec": "10*x",
+    "stats": {
+     "matk": "x"
+    }
+   }
+  },
+  {
+   "id": "firewizard.teleport",
+   "name": "テレポート",
+   "job": "magician",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ファイアウィザード",
+   "kind": "movement",
+   "maxLevel": 20,
+   "desc": "向いている方向（上下左右）へ 150+5x の距離を一瞬で移動",
+   "mp": "40-x",
+   "teleport": "150+5*x"
+  },
+  {
+   "id": "firewizard.slow",
+   "name": "遅延",
+   "job": "magician",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ファイアウィザード",
+   "kind": "area",
+   "maxLevel": 20,
+   "desc": "まわりの敵 最大 6 体の速さ -2x、持続 3x 秒",
+   "mp": "10+floor(x/2)",
+   "prereqs": [
+    {
+     "skill": "firewizard.teleport",
+     "level": 5
+    }
+   ],
+   "targets": "6",
+   "range": {
+    "front": 200,
+    "back": 200,
+    "up": 80,
+    "down": 20,
+    "around": true
+   },
+   "magic": true,
+   "motion": "cast",
+   "status": [
+    {
+     "type": "slow",
+     "chance": "100",
+     "sec": "3*x",
+     "power": "2*x"
+    }
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "firewizard.fire_arrow",
+   "name": "火の矢",
+   "job": "magician",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ファイアウィザード",
+   "kind": "ranged",
+   "maxLevel": 30,
+   "desc": "前の 1 体に火の魔法攻撃力 60+4x（最大 180）",
+   "mp": "12+floor(x/3)",
+   "magic": true,
+   "spell": "min(180, 60+4*x)",
+   "element": "fire",
+   "targets": "1",
+   "range": {
+    "front": 330,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   },
+   "hits": "1"
+  },
+  {
+   "id": "firewizard.poison_breath",
+   "name": "毒の息",
+   "job": "magician",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ファイアウィザード",
+   "kind": "ranged",
+   "maxLevel": 30,
+   "desc": "前の 1 体に毒の魔法攻撃力 40+3x ＋ 毒（1 秒ごとに最大 HP の 0.5% × 3+x÷5 秒、ボスは 1/10）",
+   "mp": "14+floor(x/3)",
+   "prereqs": [
+    {
+     "skill": "firewizard.fire_arrow",
+     "level": 1
+    }
+   ],
+   "magic": true,
+   "spell": "40+3*x",
+   "element": "poison",
+   "targets": "1",
+   "range": {
+    "front": 300,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   },
+   "status": [
+    {
+     "type": "poison",
+     "chance": "100",
+     "sec": "3+x/5",
+     "power": "0.5"
+    }
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "firewizard.fire_ring",
+   "name": "炎の輪",
+   "job": "magician",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ファイアウィザード",
+   "kind": "area",
+   "maxLevel": 20,
+   "desc": "自分のまわり 最大 4 体に火の魔法攻撃力 40+3x",
+   "mp": "18+floor(x/2)",
+   "prereqs": [
+    {
+     "skill": "firewizard.fire_arrow",
+     "level": 5
+    }
+   ],
+   "magic": true,
+   "spell": "40+3*x",
+   "element": "fire",
+   "targets": "4",
+   "range": {
+    "front": 130,
+    "back": 130,
+    "up": 80,
+    "down": 20,
+    "around": true
+   },
+   "hits": "1"
+  },
+  {
+   "id": "firemage.element_resist",
+   "name": "属性への耐性",
+   "job": "magician",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "ファイアメイジ",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "火・毒への強い敵に対しても、ダメージの低下を -x% 和らげる",
+   "passive": [
+    {
+     "resistPierce": "x"
+    }
+   ]
+  },
+  {
+   "id": "firemage.amplify",
+   "name": "属性の増幅",
+   "job": "magician",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "ファイアメイジ",
+   "kind": "passive",
+   "maxLevel": 30,
+   "desc": "魔法のダメージ ×(1+x/60)、MP 消費 ×(1+x/60)",
+   "prereqs": [
+    {
+     "skill": "firemage.element_resist",
+     "level": 5
+    }
+   ],
+   "passive": [
+    {
+     "amp": {
+      "damage": "x",
+      "mp": "x"
+     },
+     "mastery": "60"
+    }
+   ]
+  },
+  {
+   "id": "firemage.explosion",
+   "name": "爆炎",
+   "job": "magician",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "ファイアメイジ",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "自分のまわり 最大 6 体に火の魔法攻撃力 90+4x",
+   "mp": "20+x",
+   "magic": true,
+   "spell": "90+4*x",
+   "element": "fire",
+   "targets": "6",
+   "range": {
+    "front": 170,
+    "back": 170,
+    "up": 100,
+    "down": 20,
+    "around": true
+   },
+   "delay": 1.1,
+   "hits": "1"
+  },
+  {
+   "id": "firemage.poison_mist",
+   "name": "毒の霧",
+   "job": "magician",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "ファイアメイジ",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "目の前に毒の霧（6 秒）。中の敵 最大 6 体に毒の魔法攻撃力 70+2x ＋ 毒",
+   "mp": "25+x",
+   "magic": true,
+   "spell": "70+2*x",
+   "element": "poison",
+   "targets": "6",
+   "range": {
+    "front": 220,
+    "back": 30,
+    "up": 130,
+    "down": 40
+   },
+   "zone": 6,
+   "status": [
+    {
+     "type": "poison",
+     "chance": "100",
+     "sec": "6",
+     "power": "0.5"
+    }
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "firemage.seal",
+   "name": "封印",
+   "job": "magician",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "ファイアメイジ",
+   "kind": "area",
+   "maxLevel": 20,
+   "desc": "まわりの敵 最大 6 体の魔法を封じる（確率 30+3x%、持続 2x 秒）",
+   "mp": "15+x",
+   "targets": "6",
+   "range": {
+    "front": 200,
+    "back": 200,
+    "up": 80,
+    "down": 20,
+    "around": true
+   },
+   "magic": true,
+   "motion": "cast",
+   "status": [
+    {
+     "type": "seal",
+     "chance": "30+3*x",
+     "sec": "2*x"
+    }
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "firemage.magic_booster",
+   "name": "魔法の加速",
+   "job": "magician",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "ファイアメイジ",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "魔法の速さ +2 段階、持続 10x 秒",
+   "mp": "15",
+   "prereqs": [
+    {
+     "skill": "firemage.seal",
+     "level": 1
+    }
+   ],
+   "buff": {
+    "sec": "10*x",
+    "booster": 2,
+    "weapons": [
+     "ワンド",
+     "スタッフ"
+    ]
+   }
+  },
+  {
+   "id": "firemage.fire_poison",
+   "name": "炎と毒の混合",
+   "job": "magician",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "ファイアメイジ",
+   "kind": "ranged",
+   "maxLevel": 30,
+   "desc": "前の 1 体に火と毒の魔法攻撃力 200+6x ＋ 毒",
+   "mp": "30+floor(x/2)",
+   "prereqs": [
+    {
+     "skill": "firemage.explosion",
+     "level": 5
+    },
+    {
+     "skill": "firemage.poison_mist",
+     "level": 5
+    }
+   ],
+   "magic": true,
+   "spell": "200+6*x",
+   "element": "fire",
+   "targets": "1",
+   "range": {
+    "front": 330,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   },
+   "status": [
+    {
+     "type": "poison",
+     "chance": "100",
+     "sec": "6",
+     "power": "0.5"
+    }
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "firearchmage.blessing",
+   "name": "全能力の加護",
+   "job": "magician",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ファイアアークメイジ",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "全ての能力値 +⌈x/2⌉%、持続 30x 秒（4 次は全職が持つ）",
+   "mp": "10+floor(x/3)",
+   "buff": {
+    "sec": "30*x",
+    "statPct": "ceil(x/2)"
+   }
+  },
+  {
+   "id": "firearchmage.will",
+   "name": "意志の力",
+   "job": "magician",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ファイアアークメイジ",
+   "kind": "buff",
+   "maxLevel": 5,
+   "desc": "状態異常（気絶・暗闇・毒・封印・呪い・誘惑）を全部治す。待ち時間 600-60x 秒",
+   "mp": "30",
+   "cooldown": "600-60*x",
+   "cure": true
+  },
+  {
+   "id": "firearchmage.magic_reflect",
+   "name": "魔力の反射",
+   "job": "magician",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ファイアアークメイジ",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "受けた魔法ダメージの 10+2x% を返す、持続 4x 秒",
+   "mp": "30",
+   "buff": {
+    "sec": "4*x",
+    "magicReflect": "10+2*x"
+   }
+  },
+  {
+   "id": "firearchmage.infinity",
+   "name": "無限の魔力",
+   "job": "magician",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ファイアアークメイジ",
+   "kind": "buff",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "10+x 秒間 MP を使わない。その間、魔法のダメージが 4 秒ごとに +4% 増える。待ち時間 600 秒",
+   "mp": "100",
+   "cooldown": "600",
+   "buff": {
+    "sec": "10+x",
+    "noMp": true,
+    "infinity": 4
+   }
+  },
+  {
+   "id": "firearchmage.meteor",
+   "name": "流星群",
+   "job": "magician",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ファイアアークメイジ",
+   "kind": "area",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "画面の敵 最大 15 体に火の魔法攻撃力 300+12x、3 回まで降る。詠唱 1.5 秒",
+   "mp": "150+x",
+   "magic": true,
+   "spell": "300+12*x",
+   "element": "fire",
+   "targets": "15",
+   "range": {
+    "front": 420,
+    "back": 420,
+    "up": 320,
+    "down": 280,
+    "around": true
+   },
+   "cast": 1.5,
+   "hits": "1"
+  },
+  {
+   "id": "firearchmage.poison_cloud",
+   "name": "毒の雲",
+   "job": "magician",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ファイアアークメイジ",
+   "kind": "area",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "広い範囲 最大 15 体に毒の魔法攻撃力 200+8x ＋ 毒",
+   "mp": "80+x",
+   "magic": true,
+   "spell": "200+8*x",
+   "element": "poison",
+   "targets": "15",
+   "range": {
+    "front": 360,
+    "back": 30,
+    "up": 130,
+    "down": 40
+   },
+   "status": [
+    {
+     "type": "poison",
+     "chance": "100",
+     "sec": "8",
+     "power": "0.5"
+    }
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "firearchmage.paralyze",
+   "name": "麻痺の毒",
+   "job": "magician",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ファイアアークメイジ",
+   "kind": "ranged",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "前の 1 体に魔法攻撃力 300+15x ＋ 動きを止める（3 秒、ボス以外）",
+   "mp": "40+x",
+   "magic": true,
+   "spell": "300+15*x",
+   "element": "poison",
+   "targets": "1",
+   "range": {
+    "front": 350,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   },
+   "status": [
+    {
+     "type": "bind",
+     "chance": "100",
+     "sec": "3",
+     "noBoss": true
+    }
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "firearchmage.fire_spirit",
+   "name": "火の精を呼ぶ",
+   "job": "magician",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ファイアアークメイジ",
+   "kind": "summon",
+   "maxLevel": 30,
+   "desc": "火の精 1 体が 20+3x 秒、近くの敵に火の魔法攻撃力 150+5x を撃つ",
+   "mp": "50+x",
+   "summonSec": "20+3*x",
+   "summonAttack": {
+    "spell": "150+5*x",
+    "element": "fire",
+    "targets": "1",
+    "interval": 3,
+    "range": 300
+   }
+  },
+  {
+   "id": "firearchmage.big_bang",
+   "name": "溜めの大魔法",
+   "job": "magician",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ファイアアークメイジ",
+   "kind": "area",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "最大 2 秒溜めて、まわり 最大 15 体に魔法攻撃力 200+12x（溜めた長さで最大 2 倍）",
+   "mp": "40+x",
+   "magic": true,
+   "spell": "200+12*x",
+   "element": "fire",
+   "targets": "15",
+   "range": {
+    "front": 220,
+    "back": 220,
+    "up": 120,
+    "down": 20,
+    "around": true
+   },
+   "charge": 2,
+   "hits": "1"
+  },
+  {
+   "id": "icewizard.mp_eater",
+   "name": "MP吸収",
+   "job": "magician",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "アイスウィザード",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "魔法を当てた時 10+x% で敵の MP を 2+x÷2% 吸う",
+   "passive": [
+    {
+     "mpEater": {
+      "chance": "10+x",
+      "pct": "2+x/2"
+     }
+    }
+   ]
+  },
+  {
+   "id": "icewizard.meditation",
+   "name": "瞑想",
+   "job": "magician",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "アイスウィザード",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "魔力 +x、持続 10x 秒",
+   "mp": "14",
+   "buff": {
+    "sec": "10*x",
+    "stats": {
+     "matk": "x"
+    }
+   }
+  },
+  {
+   "id": "icewizard.teleport",
+   "name": "テレポート",
+   "job": "magician",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "アイスウィザード",
+   "kind": "movement",
+   "maxLevel": 20,
+   "desc": "向いている方向（上下左右）へ 150+5x の距離を一瞬で移動",
+   "mp": "40-x",
+   "teleport": "150+5*x"
+  },
+  {
+   "id": "icewizard.slow",
+   "name": "遅延",
+   "job": "magician",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "アイスウィザード",
+   "kind": "area",
+   "maxLevel": 20,
+   "desc": "まわりの敵 最大 6 体の速さ -2x、持続 3x 秒",
+   "mp": "10+floor(x/2)",
+   "prereqs": [
+    {
+     "skill": "icewizard.teleport",
+     "level": 5
+    }
+   ],
+   "targets": "6",
+   "range": {
+    "front": 200,
+    "back": 200,
+    "up": 80,
+    "down": 20,
+    "around": true
+   },
+   "magic": true,
+   "motion": "cast",
+   "status": [
+    {
+     "type": "slow",
+     "chance": "100",
+     "sec": "3*x",
+     "power": "2*x"
+    }
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "icewizard.cold_beam",
+   "name": "冷気の矢",
+   "job": "magician",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "アイスウィザード",
+   "kind": "ranged",
+   "maxLevel": 30,
+   "desc": "前の 1 体に氷の魔法攻撃力 50+4x ＋ 凍結（2+x÷10 秒）",
+   "mp": "12+floor(x/3)",
+   "magic": true,
+   "spell": "50+4*x",
+   "element": "ice",
+   "targets": "1",
+   "range": {
+    "front": 320,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   },
+   "status": [
+    {
+     "type": "freeze",
+     "chance": "100",
+     "sec": "2+x/10"
+    }
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "icewizard.thunder_bolt",
+   "name": "雷撃",
+   "job": "magician",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "アイスウィザード",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "自分のまわり 最大 6 体に雷の魔法攻撃力 40+3x",
+   "mp": "18+floor(x/2)",
+   "prereqs": [
+    {
+     "skill": "icewizard.cold_beam",
+     "level": 1
+    }
+   ],
+   "magic": true,
+   "spell": "40+3*x",
+   "element": "lightning",
+   "targets": "6",
+   "range": {
+    "front": 150,
+    "back": 150,
+    "up": 100,
+    "down": 20,
+    "around": true
+   },
+   "hits": "1"
+  },
+  {
+   "id": "icemage.element_resist",
+   "name": "属性への耐性",
+   "job": "magician",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "アイスメイジ",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "火・氷・雷・毒の魔法のダメージ -x%（氷・雷）",
+   "passive": [
+    {
+     "resistPierce": "x"
+    }
+   ]
+  },
+  {
+   "id": "icemage.amplify",
+   "name": "属性の増幅",
+   "job": "magician",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "アイスメイジ",
+   "kind": "passive",
+   "maxLevel": 30,
+   "desc": "魔法のダメージ ×(1+x/60)、MP 消費 ×(1+x/60)",
+   "prereqs": [
+    {
+     "skill": "icemage.element_resist",
+     "level": 5
+    }
+   ],
+   "passive": [
+    {
+     "amp": {
+      "damage": "x",
+      "mp": "x"
+     },
+     "mastery": "60"
+    }
+   ]
+  },
+  {
+   "id": "icemage.ice_strike",
+   "name": "氷の槍",
+   "job": "magician",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "アイスメイジ",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "前の広い範囲 最大 6 体に氷の魔法攻撃力 90+4x ＋ 凍結",
+   "mp": "20+x",
+   "magic": true,
+   "spell": "90+4*x",
+   "element": "ice",
+   "targets": "6",
+   "range": {
+    "front": 300,
+    "back": 30,
+    "up": 130,
+    "down": 40
+   },
+   "status": [
+    {
+     "type": "freeze",
+     "chance": "100",
+     "sec": "2+x/10"
+    }
+   ],
+   "delay": 1.1,
+   "hits": "1"
+  },
+  {
+   "id": "icemage.thunder_spear",
+   "name": "雷の柱",
+   "job": "magician",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "アイスメイジ",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "前の 最大 6 体に雷の魔法攻撃力 100+4x",
+   "mp": "20+x",
+   "magic": true,
+   "spell": "100+4*x",
+   "element": "lightning",
+   "targets": "6",
+   "range": {
+    "front": 260,
+    "back": 30,
+    "up": 130,
+    "down": 40
+   },
+   "hits": "1"
+  },
+  {
+   "id": "icemage.seal",
+   "name": "封印",
+   "job": "magician",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "アイスメイジ",
+   "kind": "area",
+   "maxLevel": 20,
+   "desc": "まわりの敵 最大 6 体の魔法を封じる（確率 30+3x%、持続 2x 秒）",
+   "mp": "15+x",
+   "targets": "6",
+   "range": {
+    "front": 200,
+    "back": 200,
+    "up": 80,
+    "down": 20,
+    "around": true
+   },
+   "magic": true,
+   "motion": "cast",
+   "status": [
+    {
+     "type": "seal",
+     "chance": "30+3*x",
+     "sec": "2*x"
+    }
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "icemage.magic_booster",
+   "name": "魔法の加速",
+   "job": "magician",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "アイスメイジ",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "魔法の速さ +2 段階、持続 10x 秒",
+   "mp": "15",
+   "prereqs": [
+    {
+     "skill": "icemage.seal",
+     "level": 1
+    }
+   ],
+   "buff": {
+    "sec": "10*x",
+    "booster": 2,
+    "weapons": [
+     "ワンド",
+     "スタッフ"
+    ]
+   }
+  },
+  {
+   "id": "icemage.ice_lightning",
+   "name": "氷と雷の混合",
+   "job": "magician",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "アイスメイジ",
+   "kind": "ranged",
+   "maxLevel": 30,
+   "desc": "前の 1 体に氷と雷の魔法攻撃力 200+6x ＋ 凍結",
+   "mp": "30+floor(x/2)",
+   "prereqs": [
+    {
+     "skill": "icemage.ice_strike",
+     "level": 5
+    },
+    {
+     "skill": "icemage.thunder_spear",
+     "level": 5
+    }
+   ],
+   "magic": true,
+   "spell": "200+6*x",
+   "element": "ice",
+   "targets": "1",
+   "range": {
+    "front": 330,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   },
+   "status": [
+    {
+     "type": "freeze",
+     "chance": "100",
+     "sec": "2+x/10"
+    }
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "icearchmage.blessing",
+   "name": "全能力の加護",
+   "job": "magician",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "アイスアークメイジ",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "全ての能力値 +⌈x/2⌉%、持続 30x 秒（4 次は全職が持つ）",
+   "mp": "10+floor(x/3)",
+   "buff": {
+    "sec": "30*x",
+    "statPct": "ceil(x/2)"
+   }
+  },
+  {
+   "id": "icearchmage.will",
+   "name": "意志の力",
+   "job": "magician",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "アイスアークメイジ",
+   "kind": "buff",
+   "maxLevel": 5,
+   "desc": "状態異常（気絶・暗闇・毒・封印・呪い・誘惑）を全部治す。待ち時間 600-60x 秒",
+   "mp": "30",
+   "cooldown": "600-60*x",
+   "cure": true
+  },
+  {
+   "id": "icearchmage.magic_reflect",
+   "name": "魔力の反射",
+   "job": "magician",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "アイスアークメイジ",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "受けた魔法ダメージの 10+2x% を返す、持続 4x 秒",
+   "mp": "30",
+   "buff": {
+    "sec": "4*x",
+    "magicReflect": "10+2*x"
+   }
+  },
+  {
+   "id": "icearchmage.infinity",
+   "name": "無限の魔力",
+   "job": "magician",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "アイスアークメイジ",
+   "kind": "buff",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "10+x 秒間 MP を使わない。その間、魔法のダメージが 4 秒ごとに +4% 増える。待ち時間 600 秒",
+   "mp": "100",
+   "cooldown": "600",
+   "buff": {
+    "sec": "10+x",
+    "noMp": true,
+    "infinity": 4
+   }
+  },
+  {
+   "id": "icearchmage.blizzard",
+   "name": "吹雪",
+   "job": "magician",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "アイスアークメイジ",
+   "kind": "area",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "画面の敵 最大 15 体に氷の魔法攻撃力 300+12x ＋ 凍結。詠唱 1.5 秒",
+   "mp": "150+x",
+   "magic": true,
+   "spell": "300+12*x",
+   "element": "ice",
+   "targets": "15",
+   "range": {
+    "front": 420,
+    "back": 420,
+    "up": 320,
+    "down": 280,
+    "around": true
+   },
+   "cast": 1.5,
+   "status": [
+    {
+     "type": "freeze",
+     "chance": "100",
+     "sec": "3"
+    }
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "icearchmage.chain_lightning",
+   "name": "連鎖の雷",
+   "job": "magician",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "アイスアークメイジ",
+   "kind": "area",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "前の 1 体に雷の魔法攻撃力 300+12x、まわりの 5 体へ連鎖（連鎖ごとに -10%）",
+   "mp": "40+x",
+   "magic": true,
+   "spell": "300+12*x",
+   "element": "lightning",
+   "targets": "6",
+   "range": {
+    "front": 350,
+    "back": 30,
+    "up": 130,
+    "down": 40
+   },
+   "pierce": -10,
+   "hits": "1"
+  },
+  {
+   "id": "icearchmage.ice_spirit",
+   "name": "氷の精を呼ぶ",
+   "job": "magician",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "アイスアークメイジ",
+   "kind": "summon",
+   "maxLevel": 30,
+   "desc": "氷の精 1 体が 20+3x 秒、氷の魔法攻撃力 150+5x を撃ち、当てた敵を凍らせる",
+   "mp": "50+x",
+   "summonSec": "20+3*x",
+   "summonAttack": {
+    "spell": "150+5*x",
+    "element": "ice",
+    "targets": "1",
+    "interval": 3,
+    "range": 300,
+    "status": [
+     {
+      "type": "freeze",
+      "chance": "100",
+      "sec": "2"
+     }
+    ]
+   }
+  },
+  {
+   "id": "icearchmage.big_bang",
+   "name": "溜めの大魔法",
+   "job": "magician",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "アイスアークメイジ",
+   "kind": "area",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "最大 2 秒溜めて、まわり 最大 15 体に魔法攻撃力 200+12x（溜めた長さで最大 2 倍）（氷）",
+   "mp": "40+x",
+   "magic": true,
+   "spell": "200+12*x",
+   "element": "ice",
+   "targets": "15",
+   "range": {
+    "front": 220,
+    "back": 220,
+    "up": 120,
+    "down": 20,
+    "around": true
+   },
+   "charge": 2,
+   "hits": "1"
+  },
+  {
+   "id": "icearchmage.ice_great_spirit",
+   "name": "氷の大精霊",
+   "job": "magician",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "アイスアークメイジ",
+   "kind": "summon",
+   "maxLevel": 30,
+   "desc": "大きな氷の精霊が 10+x 秒、画面の敵に 1 秒ごと魔法攻撃力 100+4x。待ち時間 300 秒",
+   "mp": "100",
+   "prereqs": [
+    {
+     "skill": "icearchmage.ice_spirit",
+     "level": 10
+    }
+   ],
+   "cooldown": "300",
+   "summonSec": "10+x",
+   "summonAttack": {
+    "spell": "100+4*x",
+    "element": "ice",
+    "targets": "15",
+    "interval": 1,
+    "range": 420
+   }
+  },
+  {
+   "id": "cleric.mp_eater",
+   "name": "MP吸収",
+   "job": "magician",
+   "tier": 2,
+   "branch": 2,
+   "jobName": "クレリック",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "魔法を当てた時 10+x% で敵の MP を 2+x÷2% 吸う",
+   "passive": [
+    {
+     "mpEater": {
+      "chance": "10+x",
+      "pct": "2+x/2"
+     }
+    }
+   ]
+  },
+  {
+   "id": "cleric.teleport",
+   "name": "テレポート",
+   "job": "magician",
+   "tier": 2,
+   "branch": 2,
+   "jobName": "クレリック",
+   "kind": "movement",
+   "maxLevel": 20,
+   "desc": "向いている方向（上下左右）へ 150+5x の距離を一瞬で移動",
+   "mp": "40-x",
+   "teleport": "150+5*x"
+  },
+  {
+   "id": "cleric.heal",
+   "name": "ヒール",
+   "job": "magician",
+   "tier": 2,
+   "branch": 2,
+   "jobName": "クレリック",
+   "kind": "heal",
+   "maxLevel": 30,
+   "desc": "自分の HP を最大の 10+2x% 回復し、まわりの不死の敵 最大 5 体に聖の魔法攻撃力 30+3x",
+   "mp": "20+floor(x/2)",
+   "healPct": "10+2*x",
+   "undeadSpell": {
+    "spell": "30+3*x",
+    "targets": "5",
+    "range": 200
+   }
+  },
+  {
+   "id": "cleric.bless",
+   "name": "祝福",
+   "job": "magician",
+   "tier": 2,
+   "branch": 2,
+   "jobName": "クレリック",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "命中・回避 +x、物理・魔法防御 +2x、持続 10x 秒",
+   "mp": "14+floor(x/2)",
+   "prereqs": [
+    {
+     "skill": "cleric.heal",
+     "level": 5
+    }
+   ],
+   "buff": {
+    "sec": "10*x",
+    "stats": {
+     "acc": "x",
+     "avoid": "x",
+     "wdef": "2*x",
+     "mdef": "2*x"
+    }
+   }
+  },
+  {
+   "id": "cleric.holy_guard",
+   "name": "聖なる守り",
+   "job": "magician",
+   "tier": 2,
+   "branch": 2,
+   "jobName": "クレリック",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "受けるダメージ -10-x%、持続 10x 秒",
+   "mp": "25",
+   "prereqs": [
+    {
+     "skill": "cleric.bless",
+     "level": 3
+    }
+   ],
+   "buff": {
+    "sec": "10*x",
+    "damageReduce": "10+x"
+   }
+  },
+  {
+   "id": "cleric.holy_arrow",
+   "name": "聖なる矢",
+   "job": "magician",
+   "tier": 2,
+   "branch": 2,
+   "jobName": "クレリック",
+   "kind": "ranged",
+   "maxLevel": 30,
+   "desc": "前の 1 体に聖の魔法攻撃力 60+4x",
+   "mp": "14+floor(x/3)",
+   "prereqs": [
+    {
+     "skill": "cleric.heal",
+     "level": 1
+    }
+   ],
+   "magic": true,
+   "spell": "60+4*x",
+   "element": "holy",
+   "targets": "1",
+   "range": {
+    "front": 320,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   },
+   "hits": "1"
+  },
+  {
+   "id": "priest.element_resist",
+   "name": "属性への耐性",
+   "job": "magician",
+   "tier": 3,
+   "branch": 2,
+   "jobName": "プリースト",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "全属性の魔法のダメージ -x%",
+   "passive": [
+    {
+     "elementResist": "x",
+     "allElements": true
+    }
+   ]
+  },
+  {
+   "id": "priest.dispel",
+   "name": "解除",
+   "job": "magician",
+   "tier": 3,
+   "branch": 2,
+   "jobName": "プリースト",
+   "kind": "area",
+   "maxLevel": 20,
+   "desc": "自分の状態異常を治し、まわりの敵の強化を確率 40+3x% で消す",
+   "mp": "30",
+   "targets": "6",
+   "range": {
+    "front": 220,
+    "back": 220,
+    "up": 120,
+    "down": 20,
+    "around": true
+   },
+   "magic": true,
+   "motion": "cast",
+   "cure": true,
+   "dispel": {
+    "chance": "40+3*x",
+    "what": "all"
+   },
+   "hits": "1"
+  },
+  {
+   "id": "priest.mystic_door",
+   "name": "秘術の扉",
+   "job": "magician",
+   "tier": 3,
+   "branch": 2,
+   "jobName": "プリースト",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "今いる地域の町へ行く扉を開く（30+5x 秒）。町の側にも扉ができ、戻ってこられる",
+   "mp": "30",
+   "door": true,
+   "buff": {
+    "sec": "30+5*x"
+   }
+  },
+  {
+   "id": "priest.holy_symbol",
+   "name": "聖なる御印",
+   "job": "magician",
+   "tier": 3,
+   "branch": 2,
+   "jobName": "プリースト",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "経験値 +(10+x)%、持続 4x 秒",
+   "mp": "30",
+   "buff": {
+    "sec": "4*x",
+    "expPct": "10+x"
+   }
+  },
+  {
+   "id": "priest.shining_ray",
+   "name": "聖なる光",
+   "job": "magician",
+   "tier": 3,
+   "branch": 2,
+   "jobName": "プリースト",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "前の広い範囲 最大 6 体に聖の魔法攻撃力 100+5x",
+   "mp": "20+x",
+   "magic": true,
+   "spell": "100+5*x",
+   "element": "holy",
+   "targets": "6",
+   "range": {
+    "front": 300,
+    "back": 30,
+    "up": 130,
+    "down": 40
+   },
+   "hits": "1"
+  },
+  {
+   "id": "priest.light_dragon",
+   "name": "光の竜を呼ぶ",
+   "job": "magician",
+   "tier": 3,
+   "branch": 2,
+   "jobName": "プリースト",
+   "kind": "summon",
+   "maxLevel": 30,
+   "desc": "光の竜が 60+3x 秒、近くの敵に聖の魔法攻撃力 80+5x",
+   "mp": "40+x",
+   "prereqs": [
+    {
+     "skill": "priest.shining_ray",
+     "level": 5
+    }
+   ],
+   "summonSec": "60+3*x",
+   "summonAttack": {
+    "spell": "80+5*x",
+    "element": "holy",
+    "targets": "1",
+    "interval": 3,
+    "range": 300
+   }
+  },
+  {
+   "id": "priest.doom",
+   "name": "変化の呪い",
+   "job": "magician",
+   "tier": 3,
+   "branch": 2,
+   "jobName": "プリースト",
+   "kind": "area",
+   "maxLevel": 20,
+   "desc": "前の敵 最大 6 体（ボス以外）を確率 20+3x% で「コロ貝」に変える（10+x 秒）",
+   "mp": "25",
+   "targets": "6",
+   "range": {
+    "front": 260,
+    "back": 30,
+    "up": 130,
+    "down": 40
+   },
+   "magic": true,
+   "motion": "cast",
+   "status": [
+    {
+     "type": "polymorph",
+     "chance": "20+3*x",
+     "sec": "10+x",
+     "noBoss": true
+    }
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "bishop.blessing",
+   "name": "全能力の加護",
+   "job": "magician",
+   "tier": 4,
+   "branch": 2,
+   "jobName": "ビショップ",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "全ての能力値 +⌈x/2⌉%、持続 30x 秒（4 次は全職が持つ）",
+   "mp": "10+floor(x/3)",
+   "buff": {
+    "sec": "30*x",
+    "statPct": "ceil(x/2)"
+   }
+  },
+  {
+   "id": "bishop.will",
+   "name": "意志の力",
+   "job": "magician",
+   "tier": 4,
+   "branch": 2,
+   "jobName": "ビショップ",
+   "kind": "buff",
+   "maxLevel": 5,
+   "desc": "状態異常（気絶・暗闇・毒・封印・呪い・誘惑）を全部治す。待ち時間 600-60x 秒",
+   "mp": "30",
+   "cooldown": "600-60*x",
+   "cure": true
+  },
+  {
+   "id": "bishop.magic_reflect",
+   "name": "魔力の反射",
+   "job": "magician",
+   "tier": 4,
+   "branch": 2,
+   "jobName": "ビショップ",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "受けた魔法ダメージの 10+2x% を返す、持続 4x 秒",
+   "mp": "30",
+   "buff": {
+    "sec": "4*x",
+    "magicReflect": "10+2*x"
+   }
+  },
+  {
+   "id": "bishop.infinity",
+   "name": "無限の魔力",
+   "job": "magician",
+   "tier": 4,
+   "branch": 2,
+   "jobName": "ビショップ",
+   "kind": "buff",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "10+x 秒間 MP を使わない。その間、魔法のダメージが 4 秒ごとに +4% 増える。待ち時間 600 秒",
+   "mp": "100",
+   "cooldown": "600",
+   "buff": {
+    "sec": "10+x",
+    "noMp": true,
+    "infinity": 4
+   }
+  },
+  {
+   "id": "bishop.genesis",
+   "name": "天の裁き",
+   "job": "magician",
+   "tier": 4,
+   "branch": 2,
+   "jobName": "ビショップ",
+   "kind": "area",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "画面の敵 最大 15 体に聖の魔法攻撃力 300+12x。詠唱 1.5 秒",
+   "mp": "150+x",
+   "magic": true,
+   "spell": "300+12*x",
+   "element": "holy",
+   "targets": "15",
+   "range": {
+    "front": 420,
+    "back": 420,
+    "up": 320,
+    "down": 280,
+    "around": true
+   },
+   "cast": 1.5,
+   "hits": "1"
+  },
+  {
+   "id": "bishop.angel_ray",
+   "name": "天使の光線",
+   "job": "magician",
+   "tier": 4,
+   "branch": 2,
+   "jobName": "ビショップ",
+   "kind": "ranged",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "前の 1 体に聖の魔法攻撃力 250+10x、当てるたびに自分の HP を 2% 回復",
+   "mp": "30+x",
+   "magic": true,
+   "spell": "250+10*x",
+   "element": "holy",
+   "targets": "1",
+   "range": {
+    "front": 350,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   },
+   "healPerHit": "2",
+   "hits": "1"
+  },
+  {
+   "id": "bishop.holy_dragon",
+   "name": "聖竜を呼ぶ",
+   "job": "magician",
+   "tier": 4,
+   "branch": 2,
+   "jobName": "ビショップ",
+   "kind": "summon",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "聖竜が 60+3x 秒、近くの敵に聖の魔法攻撃力 200+10x",
+   "mp": "60+x",
+   "summonSec": "60+3*x",
+   "summonAttack": {
+    "spell": "200+10*x",
+    "element": "holy",
+    "targets": "1",
+    "interval": 3,
+    "range": 320
+   }
+  },
+  {
+   "id": "bishop.resurrection",
+   "name": "復活",
+   "job": "magician",
+   "tier": 4,
+   "branch": 2,
+   "jobName": "ビショップ",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "かけておくと、倒れた時に一度だけその場で HP 50% で起き上がる（待ち時間 3600-60x 秒）",
+   "mp": "100",
+   "cooldown": "3600-60*x",
+   "buff": {
+    "sec": "3600-60*x",
+    "revive": true
+   }
+  },
+  {
+   "id": "bishop.holy_shield",
+   "name": "聖なる盾",
+   "job": "magician",
+   "tier": 4,
+   "branch": 2,
+   "jobName": "ビショップ",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "状態異常を受けない、持続 4x 秒",
+   "mp": "50",
+   "buff": {
+    "sec": "4*x",
+    "statusImmune": true
+   }
+  },
+  {
+   "id": "bowman.archery_basics",
+   "name": "弓の心得",
+   "job": "bowman",
+   "tier": 1,
+   "jobName": "弓使い",
+   "kind": "passive",
+   "maxLevel": 16,
+   "desc": "命中 +x、弓・クロスボウの攻撃 +⌈x/4⌉",
+   "passive": [
+    {
+     "stats": {
+      "acc": "x"
+     }
+    },
+    {
+     "weapons": [
+      "弓",
+      "クロスボウ"
+     ],
+     "stats": {
+      "watk": "ceil(x/4)"
+     }
+    }
+   ]
+  },
+  {
+   "id": "bowman.eagle_eye",
+   "name": "遠目",
+   "job": "bowman",
+   "tier": 1,
+   "jobName": "弓使い",
+   "kind": "passive",
+   "maxLevel": 8,
+   "desc": "弓・クロスボウの射程 +10x",
+   "prereqs": [
+    {
+     "skill": "bowman.archery_basics",
+     "level": 3
+    }
+   ],
+   "passive": [
+    {
+     "weapons": [
+      "弓",
+      "クロスボウ"
+     ],
+     "range": "10*x"
+    }
+   ]
+  },
+  {
+   "id": "bowman.critical_shot",
+   "name": "必中の矢",
+   "job": "bowman",
+   "tier": 1,
+   "jobName": "弓使い",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "クリティカル率 +(2+x)%、クリティカルの威力 200%",
+   "prereqs": [
+    {
+     "skill": "bowman.archery_basics",
+     "level": 3
+    }
+   ],
+   "passive": [
+    {
+     "weapons": [
+      "弓",
+      "クロスボウ"
+     ],
+     "critRate": "2+x",
+     "critDamage": "200"
+    }
+   ]
+  },
+  {
+   "id": "bowman.focus",
+   "name": "集中",
+   "job": "bowman",
+   "tier": 1,
+   "jobName": "弓使い",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "命中 +x、回避 +x、持続 10x 秒",
+   "mp": "5+floor(x/4)",
+   "buff": {
+    "sec": "10*x",
+    "stats": {
+     "acc": "x",
+     "avoid": "x"
+    }
+   }
+  },
+  {
+   "id": "bowman.power_arrow",
+   "name": "強弓",
+   "job": "bowman",
+   "tier": 1,
+   "jobName": "弓使い",
+   "kind": "ranged",
+   "maxLevel": 20,
+   "desc": "前の 1 体に 160+5x%",
+   "mp": "3+floor(x/4)",
+   "damage": "160+5*x",
+   "targets": "1",
+   "hits": "1",
+   "weapons": [
+    "弓",
+    "クロスボウ"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "range": {
+    "front": 350,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   }
+  },
+  {
+   "id": "bowman.double_shot",
+   "name": "ダブルショット",
+   "job": "bowman",
+   "tier": 1,
+   "jobName": "弓使い",
+   "kind": "ranged",
+   "maxLevel": 20,
+   "desc": "前の 1 体に 2 本、各 50+3x%",
+   "mp": "5+floor(x/4)",
+   "prereqs": [
+    {
+     "skill": "bowman.power_arrow",
+     "level": 1
+    }
+   ],
+   "damage": "50+3*x",
+   "targets": "1",
+   "hits": "2",
+   "weapons": [
+    "弓",
+    "クロスボウ"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "range": {
+    "front": 350,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   }
+  },
+  {
+   "id": "hunter.bow_mastery",
+   "name": "弓の熟練",
+   "job": "bowman",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ハンター",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "弓の熟練度 10+5⌈x/2⌉%、命中 +x",
+   "passive": [
+    {
+     "weapons": [
+      "弓"
+     ],
+     "mastery": "10+5*ceil(x/2)",
+     "stats": {
+      "acc": "x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "hunter.bow_booster",
+   "name": "弓の加速",
+   "job": "bowman",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ハンター",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "弓の攻撃速度 +2 段階、持続 10x 秒",
+   "mp": "13-floor(x/4)",
+   "prereqs": [
+    {
+     "skill": "hunter.bow_mastery",
+     "level": 5
+    }
+   ],
+   "buff": {
+    "sec": "10*x",
+    "booster": 2,
+    "weapons": [
+     "弓"
+    ]
+   }
+  },
+  {
+   "id": "hunter.bow_final",
+   "name": "弓の追撃",
+   "job": "bowman",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ハンター",
+   "kind": "passive",
+   "maxLevel": 30,
+   "desc": "弓で 2x% 追撃（100+3x%）",
+   "prereqs": [
+    {
+     "skill": "hunter.bow_booster",
+     "level": 3
+    }
+   ],
+   "passive": [
+    {
+     "weapons": [
+      "弓"
+     ],
+     "finalAttack": {
+      "chance": "2*x",
+      "damage": "100+3*x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "hunter.soul_arrow",
+   "name": "魂の矢・弓",
+   "job": "bowman",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ハンター",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "弓の矢を使わない、持続 10x 秒",
+   "mp": "20",
+   "prereqs": [
+    {
+     "skill": "hunter.bow_mastery",
+     "level": 5
+    }
+   ],
+   "buff": {
+    "sec": "10*x",
+    "noAmmo": true
+   }
+  },
+  {
+   "id": "hunter.power_knockback",
+   "name": "力の解放",
+   "job": "bowman",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ハンター",
+   "kind": "area",
+   "maxLevel": 20,
+   "desc": "近くの敵 最大 6 体を吹き飛ばす（100+5x%）",
+   "mp": "8",
+   "damage": "100+5*x",
+   "targets": "6",
+   "range": {
+    "front": 130,
+    "back": 25,
+    "up": 75,
+    "down": 15
+   },
+   "motion": "swing",
+   "knockback": true,
+   "weapons": [
+    "弓"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "hunter.arrow_bomb",
+   "name": "爆裂矢",
+   "job": "bowman",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ハンター",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "当たると爆発し、まわり 最大 6 体に 60+3x% ＋ 気絶（確率 2x%）",
+   "mp": "12+floor(x/3)",
+   "prereqs": [
+    {
+     "skill": "hunter.power_knockback",
+     "level": 1
+    }
+   ],
+   "damage": "60+3*x",
+   "targets": "6",
+   "range": {
+    "front": 350,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   },
+   "explode": 90,
+   "status": [
+    {
+     "type": "stun",
+     "chance": "2*x",
+     "sec": "3"
+    }
+   ],
+   "weapons": [
+    "弓"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "hits": "1"
+  },
+  {
+   "id": "ranger.mortal_blow",
+   "name": "必殺の一撃",
+   "job": "bowman",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "レンジャー",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "近くの敵（ボス以外）の HP が 10% 以下の時、確率 x% で一撃で倒す",
+   "passive": [
+    {
+     "execute": {
+      "chance": "x",
+      "hpPct": "10"
+     }
+    }
+   ]
+  },
+  {
+   "id": "ranger.puppet",
+   "name": "身代わり人形",
+   "job": "bowman",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "レンジャー",
+   "kind": "summon",
+   "maxLevel": 20,
+   "desc": "人形を置く（敵の攻撃を引きつける）。人形の HP は自分の最大 HP の 50+5x%",
+   "mp": "30",
+   "summonSec": "60",
+   "decoy": {
+    "hpPct": "50+5*x"
+   }
+  },
+  {
+   "id": "ranger.silver_hawk",
+   "name": "銀の鷹を呼ぶ",
+   "job": "bowman",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "レンジャー",
+   "kind": "summon",
+   "maxLevel": 30,
+   "desc": "銀の鷹が 60+3x 秒、近くの敵に 200+10x% のつつき ＋ 気絶",
+   "mp": "30+x",
+   "summonSec": "60+3*x",
+   "summonAttack": {
+    "damage": "200+10*x",
+    "targets": "1",
+    "interval": 3,
+    "range": 300,
+    "status": [
+     {
+      "type": "stun",
+      "chance": "20",
+      "sec": "2"
+     }
+    ]
+   }
+  },
+  {
+   "id": "ranger.inferno",
+   "name": "炎の矢",
+   "job": "bowman",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "レンジャー",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "前の敵 最大 6 体に火の 180+5x%",
+   "mp": "20+floor(x/3)",
+   "damage": "180+5*x",
+   "element": "fire",
+   "targets": "6",
+   "range": {
+    "front": 360,
+    "back": 0,
+    "up": 110,
+    "down": 50
+   },
+   "weapons": [
+    "弓"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "hits": "1"
+  },
+  {
+   "id": "ranger.arrow_rain",
+   "name": "矢の雨",
+   "job": "bowman",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "レンジャー",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "前の空から矢を降らせ、最大 6 体に 170+5x%",
+   "mp": "25+floor(x/3)",
+   "damage": "170+5*x",
+   "targets": "6",
+   "range": {
+    "front": 360,
+    "back": 30,
+    "up": 130,
+    "down": 40
+   },
+   "delay": 1.1,
+   "weapons": [
+    "弓"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "hits": "1"
+  },
+  {
+   "id": "ranger.quad_shot",
+   "name": "四連射",
+   "job": "bowman",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "レンジャー",
+   "kind": "ranged",
+   "maxLevel": 30,
+   "desc": "前の 1 体に 4 本、各 70+3x%",
+   "mp": "15+floor(x/3)",
+   "damage": "70+3*x",
+   "targets": "1",
+   "hits": "4",
+   "range": {
+    "front": 380,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   },
+   "delay": 1.3,
+   "weapons": [
+    "弓"
+   ],
+   "ammo": true,
+   "rangeBonus": true
+  },
+  {
+   "id": "ranger.wind_stance",
+   "name": "疾風の構え",
+   "job": "bowman",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "レンジャー",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "速さ +x、持続 10x 秒",
+   "mp": "15",
+   "buff": {
+    "sec": "10*x",
+    "stats": {
+     "speed": "x"
+    }
+   }
+  },
+  {
+   "id": "masterarcher.blessing",
+   "name": "全能力の加護",
+   "job": "bowman",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "マスターアーチャー",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "全ての能力値 +⌈x/2⌉%、持続 30x 秒（4 次は全職が持つ）",
+   "mp": "10+floor(x/3)",
+   "buff": {
+    "sec": "30*x",
+    "statPct": "ceil(x/2)"
+   }
+  },
+  {
+   "id": "masterarcher.will",
+   "name": "意志の力",
+   "job": "bowman",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "マスターアーチャー",
+   "kind": "buff",
+   "maxLevel": 5,
+   "desc": "状態異常（気絶・暗闇・毒・封印・呪い・誘惑）を全部治す。待ち時間 600-60x 秒",
+   "mp": "30",
+   "cooldown": "600-60*x",
+   "cure": true
+  },
+  {
+   "id": "masterarcher.bow_expert",
+   "name": "弓の極み",
+   "job": "bowman",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "マスターアーチャー",
+   "kind": "passive",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "弓の熟練度 60+x%、攻撃 +x",
+   "passive": [
+    {
+     "weapons": [
+      "弓"
+     ],
+     "mastery": "60+x",
+     "stats": {
+      "watk": "x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "masterarcher.hurricane",
+   "name": "嵐の連射",
+   "job": "bowman",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "マスターアーチャー",
+   "kind": "ranged",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "キーを押している間、前の 1 体に 1 秒 8 本、各 80+3x%",
+   "mp": "1",
+   "damage": "80+3*x",
+   "targets": "1",
+   "range": {
+    "front": 400,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   },
+   "rapid": 8,
+   "weapons": [
+    "弓"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "hits": "1"
+  },
+  {
+   "id": "masterarcher.sharp_eyes",
+   "name": "鷹の目",
+   "job": "bowman",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "マスターアーチャー",
+   "kind": "buff",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "クリティカル率 +x%、クリティカルの威力 +x%、持続 10x 秒",
+   "mp": "30",
+   "buff": {
+    "sec": "10*x",
+    "critRate": "x",
+    "critDamage": "x"
+   }
+  },
+  {
+   "id": "masterarcher.phoenix",
+   "name": "火の鳥を呼ぶ",
+   "job": "bowman",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "マスターアーチャー",
+   "kind": "summon",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "火の鳥が 60+3x 秒、近くの敵 最大 4 体に 300+12x%",
+   "mp": "60+x",
+   "summonSec": "60+3*x",
+   "summonAttack": {
+    "damage": "300+12*x",
+    "element": "fire",
+    "targets": "4",
+    "interval": 3,
+    "range": 320
+   }
+  },
+  {
+   "id": "masterarcher.concentrate",
+   "name": "集中の極意",
+   "job": "bowman",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "マスターアーチャー",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "攻撃 +x、MP 消費 -x÷2%、持続 4x 秒。待ち時間 120 秒",
+   "mp": "30",
+   "cooldown": "120",
+   "buff": {
+    "sec": "4*x",
+    "stats": {
+     "watk": "x"
+    },
+    "mpCostPct": "x/2"
+   }
+  },
+  {
+   "id": "masterarcher.arrow_storm",
+   "name": "矢の大雨",
+   "job": "bowman",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "マスターアーチャー",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "画面の広い範囲 最大 15 体に 200+6x%",
+   "mp": "40+x",
+   "damage": "200+6*x",
+   "targets": "15",
+   "range": {
+    "front": 420,
+    "back": 420,
+    "up": 320,
+    "down": 280,
+    "around": true
+   },
+   "delay": 1.3,
+   "weapons": [
+    "弓"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "hits": "1"
+  },
+  {
+   "id": "crossbowman.crossbow_mastery",
+   "name": "クロスボウの熟練",
+   "job": "bowman",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "クロスボウマン",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "クロスボウの熟練度 10+5⌈x/2⌉%、命中 +x",
+   "passive": [
+    {
+     "weapons": [
+      "クロスボウ"
+     ],
+     "mastery": "10+5*ceil(x/2)",
+     "stats": {
+      "acc": "x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "crossbowman.crossbow_booster",
+   "name": "クロスボウの加速",
+   "job": "bowman",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "クロスボウマン",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "攻撃速度 +2 段階、持続 10x 秒",
+   "mp": "13-floor(x/4)",
+   "prereqs": [
+    {
+     "skill": "crossbowman.crossbow_mastery",
+     "level": 5
+    }
+   ],
+   "buff": {
+    "sec": "10*x",
+    "booster": 2,
+    "weapons": [
+     "クロスボウ"
+    ]
+   }
+  },
+  {
+   "id": "crossbowman.crossbow_final",
+   "name": "クロスボウの追撃",
+   "job": "bowman",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "クロスボウマン",
+   "kind": "passive",
+   "maxLevel": 30,
+   "desc": "2x% 追撃（100+3x%）",
+   "prereqs": [
+    {
+     "skill": "crossbowman.crossbow_booster",
+     "level": 3
+    }
+   ],
+   "passive": [
+    {
+     "weapons": [
+      "クロスボウ"
+     ],
+     "finalAttack": {
+      "chance": "2*x",
+      "damage": "100+3*x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "crossbowman.soul_arrow",
+   "name": "魂の矢・クロスボウ",
+   "job": "bowman",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "クロスボウマン",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "矢を使わない、持続 10x 秒",
+   "mp": "20",
+   "prereqs": [
+    {
+     "skill": "crossbowman.crossbow_mastery",
+     "level": 5
+    }
+   ],
+   "buff": {
+    "sec": "10*x",
+    "noAmmo": true
+   }
+  },
+  {
+   "id": "crossbowman.power_knockback",
+   "name": "力の解放",
+   "job": "bowman",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "クロスボウマン",
+   "kind": "area",
+   "maxLevel": 20,
+   "desc": "近くの敵 最大 6 体を吹き飛ばす（100+5x%）",
+   "mp": "8",
+   "damage": "100+5*x",
+   "targets": "6",
+   "range": {
+    "front": 130,
+    "back": 25,
+    "up": 75,
+    "down": 15
+   },
+   "motion": "swing",
+   "knockback": true,
+   "weapons": [
+    "クロスボウ"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "crossbowman.iron_arrow",
+   "name": "鉄の矢",
+   "job": "bowman",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "クロスボウマン",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "貫く矢。一直線上の 最大 6 体に 100+4x%（1 体ごとに -10%）",
+   "mp": "12+floor(x/3)",
+   "prereqs": [
+    {
+     "skill": "crossbowman.power_knockback",
+     "level": 1
+    }
+   ],
+   "damage": "100+4*x",
+   "targets": "6",
+   "range": {
+    "front": 420,
+    "back": 0,
+    "up": 30,
+    "down": 15
+   },
+   "pierce": -10,
+   "hits": "1",
+   "weapons": [
+    "クロスボウ"
+   ],
+   "ammo": true,
+   "rangeBonus": true
+  },
+  {
+   "id": "sniper.mortal_blow",
+   "name": "必殺の一撃",
+   "job": "bowman",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "スナイパー",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "近くの敵（ボス以外）の HP が 10% 以下の時、確率 x% で一撃で倒す",
+   "passive": [
+    {
+     "execute": {
+      "chance": "x",
+      "hpPct": "10"
+     }
+    }
+   ]
+  },
+  {
+   "id": "sniper.puppet",
+   "name": "身代わり人形",
+   "job": "bowman",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "スナイパー",
+   "kind": "summon",
+   "maxLevel": 20,
+   "desc": "人形を置く（敵の攻撃を引きつける）。人形の HP は自分の最大 HP の 50+5x%",
+   "mp": "30",
+   "summonSec": "60",
+   "decoy": {
+    "hpPct": "50+5*x"
+   }
+  },
+  {
+   "id": "sniper.golden_eagle",
+   "name": "金の鷲を呼ぶ",
+   "job": "bowman",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "スナイパー",
+   "kind": "summon",
+   "maxLevel": 30,
+   "desc": "金の鷲が 60+3x 秒、200+10x% ＋ 気絶",
+   "mp": "30+x",
+   "summonSec": "60+3*x",
+   "summonAttack": {
+    "damage": "200+10*x",
+    "targets": "1",
+    "interval": 3,
+    "range": 300,
+    "status": [
+     {
+      "type": "stun",
+      "chance": "20",
+      "sec": "2"
+     }
+    ]
+   }
+  },
+  {
+   "id": "sniper.blizzard_arrow",
+   "name": "氷の矢",
+   "job": "bowman",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "スナイパー",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "前の敵 最大 6 体に氷の 180+5x% ＋ 凍結",
+   "mp": "20+floor(x/3)",
+   "damage": "180+5*x",
+   "element": "ice",
+   "targets": "6",
+   "range": {
+    "front": 360,
+    "back": 0,
+    "up": 110,
+    "down": 50
+   },
+   "status": [
+    {
+     "type": "freeze",
+     "chance": "100",
+     "sec": "3"
+    }
+   ],
+   "weapons": [
+    "クロスボウ"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "hits": "1"
+  },
+  {
+   "id": "sniper.arrow_eruption",
+   "name": "噴き出す矢",
+   "job": "bowman",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "スナイパー",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "前の地面から矢が噴き出し、最大 6 体に 170+5x%",
+   "mp": "25+floor(x/3)",
+   "damage": "170+5*x",
+   "targets": "6",
+   "range": {
+    "front": 360,
+    "back": 30,
+    "up": 130,
+    "down": 40
+   },
+   "delay": 1.1,
+   "weapons": [
+    "クロスボウ"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "hits": "1"
+  },
+  {
+   "id": "sniper.quad_shot",
+   "name": "四連射",
+   "job": "bowman",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "スナイパー",
+   "kind": "ranged",
+   "maxLevel": 30,
+   "desc": "前の 1 体に 4 本、各 70+3x%",
+   "mp": "15+floor(x/3)",
+   "damage": "70+3*x",
+   "targets": "1",
+   "hits": "4",
+   "range": {
+    "front": 380,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   },
+   "delay": 1.3,
+   "weapons": [
+    "クロスボウ"
+   ],
+   "ammo": true,
+   "rangeBonus": true
+  },
+  {
+   "id": "sniper.wind_stance",
+   "name": "疾風の構え",
+   "job": "bowman",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "スナイパー",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "速さ +x、持続 10x 秒",
+   "mp": "15",
+   "buff": {
+    "sec": "10*x",
+    "stats": {
+     "speed": "x"
+    }
+   }
+  },
+  {
+   "id": "marksman.blessing",
+   "name": "全能力の加護",
+   "job": "bowman",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "マークスマン",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "全ての能力値 +⌈x/2⌉%、持続 30x 秒（4 次は全職が持つ）",
+   "mp": "10+floor(x/3)",
+   "buff": {
+    "sec": "30*x",
+    "statPct": "ceil(x/2)"
+   }
+  },
+  {
+   "id": "marksman.will",
+   "name": "意志の力",
+   "job": "bowman",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "マークスマン",
+   "kind": "buff",
+   "maxLevel": 5,
+   "desc": "状態異常（気絶・暗闇・毒・封印・呪い・誘惑）を全部治す。待ち時間 600-60x 秒",
+   "mp": "30",
+   "cooldown": "600-60*x",
+   "cure": true
+  },
+  {
+   "id": "marksman.crossbow_expert",
+   "name": "クロスボウの極み",
+   "job": "bowman",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "マークスマン",
+   "kind": "passive",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "熟練度 60+x%、攻撃 +x",
+   "passive": [
+    {
+     "weapons": [
+      "クロスボウ"
+     ],
+     "mastery": "60+x",
+     "stats": {
+      "watk": "x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "marksman.piercing_arrow",
+   "name": "貫く矢",
+   "job": "bowman",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "マークスマン",
+   "kind": "area",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "一直線上の 最大 6 体を貫く。1 体ごとに威力が上がる（150+5x% から +30% ずつ）",
+   "mp": "30+x",
+   "damage": "150+5*x",
+   "targets": "6",
+   "range": {
+    "front": 450,
+    "back": 0,
+    "up": 30,
+    "down": 15
+   },
+   "pierce": 30,
+   "weapons": [
+    "クロスボウ"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "hits": "1"
+  },
+  {
+   "id": "marksman.snipe",
+   "name": "狙撃",
+   "job": "bowman",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "マークスマン",
+   "kind": "ranged",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "前の 1 体に 1500+60x% の 1 発。待ち時間 5 秒",
+   "mp": "50",
+   "damage": "1500+60*x",
+   "targets": "1",
+   "range": {
+    "front": 450,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   },
+   "cooldown": "5",
+   "delay": 1.5,
+   "weapons": [
+    "クロスボウ"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "hits": "1"
+  },
+  {
+   "id": "marksman.sharp_eyes",
+   "name": "鷹の目",
+   "job": "bowman",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "マークスマン",
+   "kind": "buff",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "クリティカル率 +x%、クリティカルの威力 +x%、持続 10x 秒",
+   "mp": "30",
+   "buff": {
+    "sec": "10*x",
+    "critRate": "x",
+    "critDamage": "x"
+   }
+  },
+  {
+   "id": "marksman.frostprey",
+   "name": "氷の鳥を呼ぶ",
+   "job": "bowman",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "マークスマン",
+   "kind": "summon",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "氷の鳥が 60+3x 秒、最大 4 体に 300+12x% ＋ 凍結",
+   "mp": "60+x",
+   "summonSec": "60+3*x",
+   "summonAttack": {
+    "damage": "300+12*x",
+    "element": "ice",
+    "targets": "4",
+    "interval": 3,
+    "range": 320,
+    "status": [
+     {
+      "type": "freeze",
+      "chance": "100",
+      "sec": "2"
+     }
+    ]
+   }
+  },
+  {
+   "id": "marksman.dragon_breath",
+   "name": "竜の息の矢",
+   "job": "bowman",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "マークスマン",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "前の扇形 最大 15 体に 200+6x%",
+   "mp": "40+x",
+   "damage": "200+6*x",
+   "targets": "15",
+   "range": {
+    "front": 400,
+    "back": 0,
+    "up": 110,
+    "down": 50
+   },
+   "delay": 1.2,
+   "weapons": [
+    "クロスボウ"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "hits": "1"
+  },
+  {
+   "id": "thief.nimble_body",
+   "name": "身のこなし",
+   "job": "thief",
+   "tier": 1,
+   "jobName": "盗賊",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "命中 +x、回避 +x",
+   "passive": [
+    {
+     "stats": {
+      "acc": "x",
+      "avoid": "x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "thief.keen_eyes",
+   "name": "鋭い目",
+   "job": "thief",
+   "tier": 1,
+   "jobName": "盗賊",
+   "kind": "passive",
+   "maxLevel": 8,
+   "desc": "クローの射程 +10x",
+   "prereqs": [
+    {
+     "skill": "thief.nimble_body",
+     "level": 3
+    }
+   ],
+   "passive": [
+    {
+     "weapons": [
+      "クロー"
+     ],
+     "range": "10*x"
+    }
+   ]
+  },
+  {
+   "id": "thief.disorder",
+   "name": "かく乱",
+   "job": "thief",
+   "tier": 1,
+   "jobName": "盗賊",
+   "kind": "attack",
+   "maxLevel": 20,
+   "desc": "前の 1 体の攻撃 -x、防御 -x、持続 3x 秒",
+   "mp": "8",
+   "targets": "1",
+   "hits": "1",
+   "debuff": {
+    "atk": "x",
+    "def": "x",
+    "sec": "3*x"
+   },
+   "range": {
+    "front": 110,
+    "back": 10,
+    "up": 60,
+    "down": 10
+   }
+  },
+  {
+   "id": "thief.dark_sight",
+   "name": "闇隠れ",
+   "job": "thief",
+   "tier": 1,
+   "jobName": "盗賊",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "姿を消す（敵に狙われない。攻撃すると解ける）、持続 5x 秒、速さ -20+x",
+   "mp": "10+floor(x/2)",
+   "prereqs": [
+    {
+     "skill": "thief.disorder",
+     "level": 3
+    }
+   ],
+   "buff": {
+    "sec": "5*x",
+    "stealth": true,
+    "stats": {
+     "speed": "-20+x"
+    }
+   }
+  },
+  {
+   "id": "thief.double_stab",
+   "name": "二段突き",
+   "job": "thief",
+   "tier": 1,
+   "jobName": "盗賊",
+   "kind": "attack",
+   "maxLevel": 20,
+   "desc": "短剣で前の 1 体に 2 回、各 70+5x%",
+   "mp": "6+floor(x/4)",
+   "damage": "70+5*x",
+   "targets": "1",
+   "hits": "2",
+   "weapons": [
+    "短剣"
+   ],
+   "range": {
+    "front": 75,
+    "back": 10,
+    "up": 60,
+    "down": 10
+   }
+  },
+  {
+   "id": "thief.lucky_seven",
+   "name": "二つ星投げ",
+   "job": "thief",
+   "tier": 1,
+   "jobName": "盗賊",
+   "kind": "ranged",
+   "maxLevel": 20,
+   "desc": "クローで前の 1 体に投げ星 2 つ、各 LUK×5.0 で計算した 80+3x%（投げ星の攻撃力が乗る）",
+   "mp": "6+floor(x/4)",
+   "prereqs": [
+    {
+     "skill": "thief.keen_eyes",
+     "level": 1
+    }
+   ],
+   "damage": "80+3*x",
+   "targets": "1",
+   "hits": "2",
+   "weaponMul": 5,
+   "weapons": [
+    "クロー"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "range": {
+    "front": 250,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   }
+  },
+  {
+   "id": "assassin.claw_mastery",
+   "name": "クローの熟練",
+   "job": "thief",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "アサシン",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "クローの熟練度 10+5⌈x/2⌉%、命中 +x。投げ星の 1 束の数 +10x",
+   "passive": [
+    {
+     "weapons": [
+      "クロー"
+     ],
+     "mastery": "10+5*ceil(x/2)",
+     "stats": {
+      "acc": "x"
+     },
+     "starBundle": "10*x"
+    }
+   ]
+  },
+  {
+   "id": "assassin.critical_throw",
+   "name": "急所狙い",
+   "job": "thief",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "アサシン",
+   "kind": "passive",
+   "maxLevel": 30,
+   "desc": "クリティカル率 +(10+x)%（最大 40%）、クリティカルの威力 +100+3x%",
+   "prereqs": [
+    {
+     "skill": "assassin.claw_mastery",
+     "level": 3
+    }
+   ],
+   "passive": [
+    {
+     "weapons": [
+      "クロー"
+     ],
+     "critRate": "min(40, 10+x)",
+     "critDamage": "200+3*x"
+    }
+   ]
+  },
+  {
+   "id": "assassin.claw_booster",
+   "name": "クローの加速",
+   "job": "thief",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "アサシン",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "クローの攻撃速度 +2 段階、持続 10x 秒",
+   "mp": "13-floor(x/4)",
+   "prereqs": [
+    {
+     "skill": "assassin.claw_mastery",
+     "level": 5
+    }
+   ],
+   "buff": {
+    "sec": "10*x",
+    "booster": 2,
+    "weapons": [
+     "クロー"
+    ]
+   }
+  },
+  {
+   "id": "assassin.endure",
+   "name": "我慢・盗賊",
+   "job": "thief",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "アサシン",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "縄・はしごでも HP が回復（間隔 30-x 秒）",
+   "passive": [
+    {
+     "ropeRegenInterval": "30-x"
+    }
+   ]
+  },
+  {
+   "id": "assassin.haste",
+   "name": "ヘイスト",
+   "job": "thief",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "アサシン",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "速さ +x、ジャンプ +⌈x/2⌉、持続 10x 秒",
+   "mp": "10+floor(x/2)",
+   "buff": {
+    "sec": "10*x",
+    "stats": {
+     "speed": "x",
+     "jump": "ceil(x/2)"
+    }
+   }
+  },
+  {
+   "id": "assassin.drain",
+   "name": "吸い取り",
+   "job": "thief",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "アサシン",
+   "kind": "attack",
+   "maxLevel": 30,
+   "desc": "前の 1 体に 100+4x%、与えたダメージの 10+x% を HP に（最大で自分の最大 HP の半分）",
+   "mp": "12+floor(x/3)",
+   "damage": "100+4*x",
+   "targets": "1",
+   "range": {
+    "front": 80,
+    "back": 10,
+    "up": 60,
+    "down": 10
+   },
+   "motion": "swing",
+   "drain": {
+    "pct": "10+x",
+    "cap": 50
+   },
+   "weapons": [
+    "クロー"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "assassin.star_chain",
+   "name": "星の連投",
+   "job": "thief",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "アサシン",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "「二つ星投げ」の時、確率 2x% で同じ攻撃をもう 1 体へ跳ね返す",
+   "prereqs": [
+    {
+     "skill": "assassin.claw_mastery",
+     "level": 5
+    }
+   ],
+   "passive": [
+    {
+     "weapons": [
+      "クロー"
+     ],
+     "chainStar": "2*x"
+    }
+   ]
+  },
+  {
+   "id": "hermit.alchemist",
+   "name": "調合上手",
+   "job": "thief",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "ハーミット",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "薬の回復量 +(10+x)%、薬の効き目の時間 +x%",
+   "passive": [
+    {
+     "potionPct": "10+x",
+     "potionTimePct": "x"
+    }
+   ]
+  },
+  {
+   "id": "hermit.meso_up",
+   "name": "お金の加護",
+   "job": "thief",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "ハーミット",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "敵の落とすお金 +x+10%、持続 10x 秒",
+   "mp": "20",
+   "buff": {
+    "sec": "10*x",
+    "mesoPct": "x+10"
+   }
+  },
+  {
+   "id": "hermit.shadow_partner",
+   "name": "影分身",
+   "job": "thief",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "ハーミット",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "影が自分の攻撃をまねる（影の攻撃は 50% の威力）、持続 4x 秒",
+   "mp": "30+floor(x/2)",
+   "buff": {
+    "sec": "4*x",
+    "shadowPartner": "50"
+   }
+  },
+  {
+   "id": "hermit.shadow_web",
+   "name": "影の網",
+   "job": "thief",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "ハーミット",
+   "kind": "area",
+   "maxLevel": 20,
+   "desc": "まわりの敵 最大 6 体を 2+x÷5 秒動けなくする",
+   "mp": "15",
+   "targets": "6",
+   "range": {
+    "front": 180,
+    "back": 180,
+    "up": 80,
+    "down": 20,
+    "around": true
+   },
+   "motion": "cast",
+   "status": [
+    {
+     "type": "bind",
+     "chance": "100",
+     "sec": "2+x/5"
+    }
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "hermit.avenger",
+   "name": "大星投げ",
+   "job": "thief",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "ハーミット",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "大きな星で一直線上の 最大 6 体を貫く、各 100+4x%",
+   "mp": "16+floor(x/3)",
+   "damage": "100+4*x",
+   "targets": "6",
+   "range": {
+    "front": 420,
+    "back": 0,
+    "up": 30,
+    "down": 15
+   },
+   "weaponMul": 5,
+   "weapons": [
+    "クロー"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "hits": "1"
+  },
+  {
+   "id": "hermit.flash_jump",
+   "name": "空中ジャンプ",
+   "job": "thief",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "ハーミット",
+   "kind": "movement",
+   "maxLevel": 20,
+   "desc": "空中でもう一度ジャンプ（前へ大きく）。距離 +x%",
+   "mp": "10+floor(x/4)",
+   "airJump": {
+    "vx": "330*(1+x/100)",
+    "vy": "300"
+   }
+  },
+  {
+   "id": "hermit.meso_toss",
+   "name": "お金の投げ打ち",
+   "job": "thief",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "ハーミット",
+   "kind": "ranged",
+   "maxLevel": 30,
+   "desc": "お金を投げる。前の 1 体に固定ダメージ（使ったお金 ×x÷2）",
+   "meso": "10*x",
+   "prereqs": [
+    {
+     "skill": "hermit.meso_up",
+     "level": 5
+    }
+   ],
+   "fixed": "5*x*x",
+   "targets": "1",
+   "range": {
+    "front": 300,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   },
+   "hits": "1"
+  },
+  {
+   "id": "nightstalker.blessing",
+   "name": "全能力の加護",
+   "job": "thief",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ナイトストーカー",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "全ての能力値 +⌈x/2⌉%、持続 30x 秒（4 次は全職が持つ）",
+   "mp": "10+floor(x/3)",
+   "buff": {
+    "sec": "30*x",
+    "statPct": "ceil(x/2)"
+   }
+  },
+  {
+   "id": "nightstalker.will",
+   "name": "意志の力",
+   "job": "thief",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ナイトストーカー",
+   "kind": "buff",
+   "maxLevel": 5,
+   "desc": "状態異常（気絶・暗闇・毒・封印・呪い・誘惑）を全部治す。待ち時間 600-60x 秒",
+   "mp": "30",
+   "cooldown": "600-60*x",
+   "cure": true
+  },
+  {
+   "id": "nightstalker.shadow_shifter",
+   "name": "影の身代わり",
+   "job": "thief",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ナイトストーカー",
+   "kind": "passive",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "確率 x% で攻撃を受けずに避ける",
+   "passive": [
+    {
+     "dodge": "x"
+    }
+   ]
+  },
+  {
+   "id": "nightstalker.triple_throw",
+   "name": "三つ星投げ",
+   "job": "thief",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ナイトストーカー",
+   "kind": "ranged",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "前の 1 体に投げ星 3 つ、各 100+5x%",
+   "mp": "20+floor(x/2)",
+   "damage": "100+5*x",
+   "targets": "1",
+   "hits": "3",
+   "range": {
+    "front": 300,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   },
+   "weaponMul": 5,
+   "weapons": [
+    "クロー"
+   ],
+   "ammo": true,
+   "rangeBonus": true
+  },
+  {
+   "id": "nightstalker.venom_star",
+   "name": "毒の星",
+   "job": "thief",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ナイトストーカー",
+   "kind": "passive",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "投げ星の攻撃に毒（確率 x+10%）",
+   "passive": [
+    {
+     "weapons": [
+      "クロー"
+     ],
+     "onHitStatus": [
+      {
+       "type": "poison",
+       "chance": "x+10",
+       "sec": "6",
+       "power": "0.5"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nightstalker.ninja_ambush",
+   "name": "忍び寄る影",
+   "job": "thief",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ナイトストーカー",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "地面から影が出て、まわり 最大 10 体に 5 秒の間 1 秒ごと 60+3x%",
+   "mp": "30+x",
+   "damage": "60+3*x",
+   "targets": "10",
+   "range": {
+    "front": 200,
+    "back": 200,
+    "up": 80,
+    "down": 20,
+    "around": true
+   },
+   "motion": "cast",
+   "ticks": {
+    "count": 5,
+    "interval": 1
+   },
+   "hits": "1"
+  },
+  {
+   "id": "nightstalker.taunt",
+   "name": "挑発",
+   "job": "thief",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ナイトストーカー",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "前の敵 最大 6 体の防御 -x%、経験値 +x÷2%、持続 4x 秒",
+   "mp": "20",
+   "targets": "6",
+   "range": {
+    "front": 130,
+    "back": 25,
+    "up": 75,
+    "down": 15
+   },
+   "motion": "cast",
+   "debuff": {
+    "defPct": "x",
+    "sec": "4*x"
+   },
+   "mark": {
+    "exp": "x/2",
+    "sec": "4*x"
+   },
+   "hits": "1"
+  },
+  {
+   "id": "nightstalker.star_storm",
+   "name": "星の嵐",
+   "job": "thief",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ナイトストーカー",
+   "kind": "area",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "画面の敵 最大 15 体に 300+10x%。HP を 30% 払う",
+   "mp": "50+x",
+   "damage": "300+10*x",
+   "targets": "15",
+   "range": {
+    "front": 420,
+    "back": 420,
+    "up": 320,
+    "down": 280,
+    "around": true
+   },
+   "hpPct": "30",
+   "delay": 1.3,
+   "weapons": [
+    "クロー"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "hits": "1"
+  },
+  {
+   "id": "nightstalker.shadow_stars",
+   "name": "尽きない星",
+   "job": "thief",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ナイトストーカー",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "投げ星が減らない、持続 4x 秒",
+   "mp": "30",
+   "buff": {
+    "sec": "4*x",
+    "noAmmo": true
+   }
+  },
+  {
+   "id": "bandit.dagger_mastery",
+   "name": "短剣の熟練",
+   "job": "thief",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "バンディット",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "短剣の熟練度 10+5⌈x/2⌉%、命中 +x",
+   "passive": [
+    {
+     "weapons": [
+      "短剣"
+     ],
+     "mastery": "10+5*ceil(x/2)",
+     "stats": {
+      "acc": "x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "bandit.endure",
+   "name": "我慢・盗賊",
+   "job": "thief",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "バンディット",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "縄・はしごでも HP が回復（間隔 30-x 秒）",
+   "passive": [
+    {
+     "ropeRegenInterval": "30-x"
+    }
+   ]
+  },
+  {
+   "id": "bandit.dagger_booster",
+   "name": "短剣の加速",
+   "job": "thief",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "バンディット",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "短剣の攻撃速度 +2 段階、持続 10x 秒",
+   "mp": "13-floor(x/4)",
+   "prereqs": [
+    {
+     "skill": "bandit.dagger_mastery",
+     "level": 5
+    }
+   ],
+   "buff": {
+    "sec": "10*x",
+    "booster": 2,
+    "weapons": [
+     "短剣"
+    ]
+   }
+  },
+  {
+   "id": "bandit.haste",
+   "name": "ヘイスト",
+   "job": "thief",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "バンディット",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "速さ +x、ジャンプ +⌈x/2⌉、持続 10x 秒",
+   "mp": "10+floor(x/2)",
+   "buff": {
+    "sec": "10*x",
+    "stats": {
+     "speed": "x",
+     "jump": "ceil(x/2)"
+    }
+   }
+  },
+  {
+   "id": "bandit.steal",
+   "name": "盗む",
+   "job": "thief",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "バンディット",
+   "kind": "attack",
+   "maxLevel": 30,
+   "desc": "前の 1 体（ボスも可）から確率 3x% で落とし物を 1 つ盗む。1 体に 1 回",
+   "mp": "20",
+   "targets": "1",
+   "range": {
+    "front": 80,
+    "back": 10,
+    "up": 60,
+    "down": 10
+   },
+   "steal": {
+    "chance": "3*x"
+   },
+   "weapons": [
+    "短剣"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "bandit.savage_blow",
+   "name": "連続斬り",
+   "job": "thief",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "バンディット",
+   "kind": "attack",
+   "maxLevel": 30,
+   "desc": "前の 1 体に 6 回、各 40+2x%",
+   "mp": "14+floor(x/3)",
+   "prereqs": [
+    {
+     "skill": "bandit.dagger_mastery",
+     "level": 3
+    }
+   ],
+   "damage": "40+2*x",
+   "targets": "1",
+   "hits": "6",
+   "range": {
+    "front": 80,
+    "back": 10,
+    "up": 60,
+    "down": 10
+   },
+   "delay": 1.4,
+   "weapons": [
+    "短剣"
+   ]
+  },
+  {
+   "id": "bandit.spin_slash",
+   "name": "回し斬り",
+   "job": "thief",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "バンディット",
+   "kind": "area",
+   "maxLevel": 20,
+   "desc": "まわり 最大 4 体に 80+4x%",
+   "mp": "12+floor(x/3)",
+   "prereqs": [
+    {
+     "skill": "bandit.savage_blow",
+     "level": 1
+    }
+   ],
+   "damage": "80+4*x",
+   "targets": "4",
+   "range": {
+    "front": 110,
+    "back": 110,
+    "up": 80,
+    "down": 20,
+    "around": true
+   },
+   "motion": "swing",
+   "weapons": [
+    "短剣"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "rogue.assaulter",
+   "name": "突進斬り",
+   "job": "thief",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "ローグ",
+   "kind": "attack",
+   "maxLevel": 30,
+   "desc": "前へ突進して最初の 1 体に 300+10x% ＋ 気絶（確率 2x%）",
+   "mp": "20+floor(x/2)",
+   "damage": "300+10*x",
+   "targets": "1",
+   "range": {
+    "front": 80,
+    "back": 10,
+    "up": 60,
+    "down": 10
+   },
+   "dash": 450,
+   "dashTime": 0.3,
+   "status": [
+    {
+     "type": "stun",
+     "chance": "2*x",
+     "sec": "3"
+    }
+   ],
+   "weapons": [
+    "短剣"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "rogue.band_of_thieves",
+   "name": "盗賊団",
+   "job": "thief",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "ローグ",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "仲間の盗賊を呼び、前の敵 最大 6 体に 150+5x%",
+   "mp": "25+floor(x/2)",
+   "damage": "150+5*x",
+   "targets": "6",
+   "range": {
+    "front": 300,
+    "back": 30,
+    "up": 130,
+    "down": 40
+   },
+   "motion": "cast",
+   "delay": 1.2,
+   "weapons": [
+    "短剣"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "rogue.chakra",
+   "name": "気の回復",
+   "job": "thief",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "ローグ",
+   "kind": "heal",
+   "maxLevel": 30,
+   "desc": "HP を (LUK×0.5+DEX×0.3)×(1+x/30) 回復",
+   "mp": "20",
+   "healStats": {
+    "luk": 0.5,
+    "dex": 0.3,
+    "mul": "1+x/30"
+   }
+  },
+  {
+   "id": "rogue.meso_guard",
+   "name": "お金の盾",
+   "job": "thief",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "ローグ",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "受けるダメージの 50% を減らし、その分お金を払う（1 ダメージ 1+x÷5 ルド）、持続 10x 秒",
+   "mp": "15",
+   "buff": {
+    "sec": "10*x",
+    "mesoGuard": {
+     "pct": "50",
+     "cost": "1+x/5"
+    }
+   }
+  },
+  {
+   "id": "rogue.meso_explosion",
+   "name": "お金の爆発",
+   "job": "thief",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "ローグ",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "足元に落ちているお金を爆発させ、まわり 最大 6 体に（お金の量で決まる）大ダメージ",
+   "mp": "30",
+   "prereqs": [
+    {
+     "skill": "rogue.pickpocket",
+     "level": 1
+    }
+   ],
+   "targets": "6",
+   "range": {
+    "front": 200,
+    "back": 200,
+    "up": 100,
+    "down": 20,
+    "around": true
+   },
+   "motion": "cast",
+   "mesoExplosion": true,
+   "hits": "1"
+  },
+  {
+   "id": "rogue.pickpocket",
+   "name": "お金拾い",
+   "job": "thief",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "ローグ",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "攻撃が当たるたびに確率 2x% で少しのお金が落ちる",
+   "passive": [
+    {
+     "mesoOnHit": "2*x"
+    }
+   ]
+  },
+  {
+   "id": "rogue.shadow_cloak",
+   "name": "影の衣",
+   "job": "thief",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "ローグ",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "闇隠れ中の速さの低下が無くなり、闇隠れから攻撃した最初の 1 回の威力 +5x%",
+   "passive": [
+    {
+     "stealthAttack": "5*x",
+     "stealthNoSlow": true
+    }
+   ]
+  },
+  {
+   "id": "shadowblade.blessing",
+   "name": "全能力の加護",
+   "job": "thief",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "シャドウブレード",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "全ての能力値 +⌈x/2⌉%、持続 30x 秒（4 次は全職が持つ）",
+   "mp": "10+floor(x/3)",
+   "buff": {
+    "sec": "30*x",
+    "statPct": "ceil(x/2)"
+   }
+  },
+  {
+   "id": "shadowblade.will",
+   "name": "意志の力",
+   "job": "thief",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "シャドウブレード",
+   "kind": "buff",
+   "maxLevel": 5,
+   "desc": "状態異常（気絶・暗闇・毒・封印・呪い・誘惑）を全部治す。待ち時間 600-60x 秒",
+   "mp": "30",
+   "cooldown": "600-60*x",
+   "cure": true
+  },
+  {
+   "id": "shadowblade.shadow_shifter",
+   "name": "影の身代わり",
+   "job": "thief",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "シャドウブレード",
+   "kind": "passive",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "確率 x% で攻撃を受けずに避ける",
+   "passive": [
+    {
+     "dodge": "x"
+    }
+   ]
+  },
+  {
+   "id": "shadowblade.venom_blade",
+   "name": "毒の刃",
+   "job": "thief",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "シャドウブレード",
+   "kind": "passive",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "短剣の攻撃に毒（確率 x+10%）",
+   "passive": [
+    {
+     "weapons": [
+      "短剣"
+     ],
+     "onHitStatus": [
+      {
+       "type": "poison",
+       "chance": "x+10",
+       "sec": "6",
+       "power": "0.5"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "shadowblade.assassinate",
+   "name": "暗殺",
+   "job": "thief",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "シャドウブレード",
+   "kind": "attack",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "前の 1 体に 4 回、各 300+10x%。闇隠れ中に使うと 2 倍",
+   "mp": "30+x",
+   "damage": "300+10*x",
+   "targets": "1",
+   "hits": "4",
+   "range": {
+    "front": 80,
+    "back": 10,
+    "up": 60,
+    "down": 10
+   },
+   "stealthMul": 2,
+   "delay": 1.4,
+   "weapons": [
+    "短剣"
+   ]
+  },
+  {
+   "id": "shadowblade.blade_storm",
+   "name": "刃の嵐",
+   "job": "thief",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "シャドウブレード",
+   "kind": "area",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "前の敵 最大 6 体に 2 回、各 200+6x%",
+   "mp": "25+x",
+   "damage": "200+6*x",
+   "targets": "6",
+   "hits": "2",
+   "range": {
+    "front": 130,
+    "back": 25,
+    "up": 75,
+    "down": 15
+   },
+   "delay": 1.2,
+   "weapons": [
+    "短剣"
+   ]
+  },
+  {
+   "id": "shadowblade.ninja_ambush",
+   "name": "忍び寄る影",
+   "job": "thief",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "シャドウブレード",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "地面から影が出て、まわり 最大 10 体に 5 秒の間 1 秒ごと 60+3x%",
+   "mp": "30+x",
+   "damage": "60+3*x",
+   "targets": "10",
+   "range": {
+    "front": 200,
+    "back": 200,
+    "up": 80,
+    "down": 20,
+    "around": true
+   },
+   "motion": "cast",
+   "ticks": {
+    "count": 5,
+    "interval": 1
+   },
+   "hits": "1"
+  },
+  {
+   "id": "shadowblade.taunt",
+   "name": "挑発",
+   "job": "thief",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "シャドウブレード",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "前の敵 最大 6 体の防御 -x%、経験値 +x÷2%、持続 4x 秒",
+   "mp": "20",
+   "targets": "6",
+   "range": {
+    "front": 130,
+    "back": 25,
+    "up": 75,
+    "down": 15
+   },
+   "motion": "cast",
+   "debuff": {
+    "defPct": "x",
+    "sec": "4*x"
+   },
+   "mark": {
+    "exp": "x/2",
+    "sec": "4*x"
+   },
+   "hits": "1"
+  },
+  {
+   "id": "shadowblade.smokescreen",
+   "name": "煙玉",
+   "job": "thief",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "シャドウブレード",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "煙を張る。中にいる間ダメージを受けない（10+x÷2 秒、待ち時間 600 秒）",
+   "mp": "50",
+   "cooldown": "600",
+   "buff": {
+    "sec": "10+x/2",
+    "invincible": true
+   }
+  },
+  {
+   "id": "pirate.dash",
+   "name": "早足",
+   "job": "pirate",
+   "tier": 1,
+   "jobName": "海賊",
+   "kind": "movement",
+   "maxLevel": 10,
+   "desc": "前へダッシュ（速さ +10+x、ジャンプ +x、持続 2+x 秒）",
+   "mp": "10",
+   "dash": 220,
+   "buff": {
+    "sec": "2+x",
+    "stats": {
+     "speed": "10+x",
+     "jump": "x"
+    }
+   }
+  },
+  {
+   "id": "pirate.nimble_stance",
+   "name": "身軽な構え",
+   "job": "pirate",
+   "tier": 1,
+   "jobName": "海賊",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "命中 +x、回避 +x",
+   "passive": [
+    {
+     "stats": {
+      "acc": "x",
+      "avoid": "x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "pirate.somersault_kick",
+   "name": "宙返り蹴り",
+   "job": "pirate",
+   "tier": 1,
+   "jobName": "海賊",
+   "kind": "area",
+   "maxLevel": 20,
+   "desc": "まわり 最大 6 体に 80+4x%",
+   "mp": "8+floor(x/4)",
+   "damage": "80+4*x",
+   "targets": "6",
+   "hits": "1",
+   "range": {
+    "front": 85,
+    "back": 85,
+    "up": 60,
+    "down": 15,
+    "around": true
+   },
+   "motion": "punch"
+  },
+  {
+   "id": "pirate.flash_fist",
+   "name": "拳の連打",
+   "job": "pirate",
+   "tier": 1,
+   "jobName": "海賊",
+   "kind": "attack",
+   "maxLevel": 20,
+   "desc": "ナックルで前の 1 体に 2 回、各 80+5x%",
+   "mp": "6+floor(x/4)",
+   "damage": "80+5*x",
+   "targets": "1",
+   "hits": "2",
+   "weapons": [
+    "ナックル"
+   ],
+   "range": {
+    "front": 70,
+    "back": 10,
+    "up": 60,
+    "down": 10
+   }
+  },
+  {
+   "id": "pirate.double_shot",
+   "name": "ダブルショット",
+   "job": "pirate",
+   "tier": 1,
+   "jobName": "海賊",
+   "kind": "ranged",
+   "maxLevel": 20,
+   "desc": "銃で前の 1 体に 2 発、各 70+5x%",
+   "mp": "6+floor(x/4)",
+   "damage": "70+5*x",
+   "targets": "1",
+   "hits": "2",
+   "weapons": [
+    "銃"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "range": {
+    "front": 280,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   }
+  },
+  {
+   "id": "pirate.gun_mastery",
+   "name": "銃の心得",
+   "job": "pirate",
+   "tier": 1,
+   "jobName": "海賊",
+   "kind": "passive",
+   "maxLevel": 8,
+   "desc": "銃の射程 +10x",
+   "prereqs": [
+    {
+     "skill": "pirate.double_shot",
+     "level": 1
+    }
+   ],
+   "passive": [
+    {
+     "weapons": [
+      "銃"
+     ],
+     "range": "10*x"
+    }
+   ]
+  },
+  {
+   "id": "brawler.knuckle_mastery",
+   "name": "ナックルの熟練",
+   "job": "pirate",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ブローラー",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "ナックルの熟練度 10+5⌈x/2⌉%、命中 +x",
+   "passive": [
+    {
+     "weapons": [
+      "ナックル"
+     ],
+     "mastery": "10+5*ceil(x/2)",
+     "stats": {
+      "acc": "x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "brawler.knuckle_booster",
+   "name": "ナックルの加速",
+   "job": "pirate",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ブローラー",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "攻撃速度 +2 段階、持続 10x 秒",
+   "mp": "13-floor(x/4)",
+   "prereqs": [
+    {
+     "skill": "brawler.knuckle_mastery",
+     "level": 5
+    }
+   ],
+   "buff": {
+    "sec": "10*x",
+    "booster": 2,
+    "weapons": [
+     "ナックル"
+    ]
+   }
+  },
+  {
+   "id": "brawler.corkscrew",
+   "name": "突進の拳",
+   "job": "pirate",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ブローラー",
+   "kind": "area",
+   "maxLevel": 20,
+   "desc": "前へ突進し、最大 4 体に 150+5x%",
+   "mp": "14+floor(x/3)",
+   "damage": "150+5*x",
+   "targets": "4",
+   "range": {
+    "front": 130,
+    "back": 25,
+    "up": 75,
+    "down": 15
+   },
+   "dash": 420,
+   "dashTime": 0.3,
+   "weapons": [
+    "ナックル"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "brawler.spin_kick",
+   "name": "回し蹴り",
+   "job": "pirate",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ブローラー",
+   "kind": "area",
+   "maxLevel": 20,
+   "desc": "まわり 最大 4 体に 120+5x% ＋ 気絶（確率 2x%）",
+   "mp": "12+floor(x/3)",
+   "prereqs": [
+    {
+     "skill": "brawler.corkscrew",
+     "level": 1
+    }
+   ],
+   "damage": "120+5*x",
+   "targets": "4",
+   "range": {
+    "front": 110,
+    "back": 110,
+    "up": 80,
+    "down": 20,
+    "around": true
+   },
+   "status": [
+    {
+     "type": "stun",
+     "chance": "2*x",
+     "sec": "3"
+    }
+   ],
+   "weapons": [
+    "ナックル"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "brawler.energy_charge",
+   "name": "気合い",
+   "job": "pirate",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ブローラー",
+   "kind": "passive",
+   "maxLevel": 40,
+   "desc": "攻撃が当たるたびに気が貯まる。満タンで攻撃力 +x÷2、防御 +x、10 秒ごとに HP 回復",
+   "passive": [
+    {
+     "energy": {
+      "watk": "x/2",
+      "wdef": "x",
+      "hpRegen": "x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "brawler.double_upper",
+   "name": "二段アッパー",
+   "job": "pirate",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ブローラー",
+   "kind": "attack",
+   "maxLevel": 20,
+   "desc": "前の 1 体に 2 回、各 180+5x%",
+   "mp": "15+floor(x/3)",
+   "prereqs": [
+    {
+     "skill": "brawler.energy_charge",
+     "level": 1
+    }
+   ],
+   "damage": "180+5*x",
+   "targets": "1",
+   "hits": "2",
+   "range": {
+    "front": 80,
+    "back": 10,
+    "up": 60,
+    "down": 10
+   },
+   "weapons": [
+    "ナックル"
+   ]
+  },
+  {
+   "id": "brawler.mp_recovery",
+   "name": "気合いの回復",
+   "job": "pirate",
+   "tier": 2,
+   "branch": 0,
+   "jobName": "ブローラー",
+   "kind": "heal",
+   "maxLevel": 10,
+   "desc": "MP を最大の 5x% 回復、待ち時間 60 秒",
+   "cooldown": "60",
+   "healMpPct": "5*x"
+  },
+  {
+   "id": "striker.transform",
+   "name": "変身",
+   "job": "pirate",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "ストライカー",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "拳闘の姿に変身。攻撃力 +x、物理防御 +5x、速さ +10、持続 10x 秒",
+   "mp": "30",
+   "buff": {
+    "sec": "10*x",
+    "stats": {
+     "watk": "x",
+     "wdef": "5*x",
+     "speed": "10"
+    },
+    "transform": true
+   }
+  },
+  {
+   "id": "striker.shockwave",
+   "name": "衝撃波",
+   "job": "pirate",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "ストライカー",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "地面を叩き、まわり 最大 6 体に 200+5x%",
+   "mp": "20+floor(x/2)",
+   "prereqs": [
+    {
+     "skill": "striker.transform",
+     "level": 1
+    }
+   ],
+   "damage": "200+5*x",
+   "targets": "6",
+   "range": {
+    "front": 160,
+    "back": 160,
+    "up": 80,
+    "down": 20,
+    "around": true
+   },
+   "needsBuff": [
+    "striker.transform",
+    "fightmaster.super_transform"
+   ],
+   "weapons": [
+    "ナックル"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "striker.energy_blast",
+   "name": "気の弾",
+   "job": "pirate",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "ストライカー",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "気を撃つ。前の敵 最大 6 体に 160+5x%（気合いが満タンの時だけ）",
+   "mp": "20",
+   "damage": "160+5*x",
+   "targets": "6",
+   "range": {
+    "front": 380,
+    "back": 0,
+    "up": 30,
+    "down": 15
+   },
+   "needsEnergy": true,
+   "weapons": [
+    "ナックル"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "striker.energy_drain",
+   "name": "気の吸収",
+   "job": "pirate",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "ストライカー",
+   "kind": "attack",
+   "maxLevel": 20,
+   "desc": "前の 1 体に 200+5x%、ダメージの x% を HP に",
+   "mp": "15",
+   "damage": "200+5*x",
+   "targets": "1",
+   "range": {
+    "front": 80,
+    "back": 10,
+    "up": 60,
+    "down": 10
+   },
+   "drain": {
+    "pct": "x",
+    "cap": 50
+   },
+   "weapons": [
+    "ナックル"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "striker.stun_mastery",
+   "name": "気絶の極み",
+   "job": "pirate",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "ストライカー",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "気絶している敵へのクリティカル率 +x%",
+   "passive": [
+    {
+     "stunCrit": "x"
+    }
+   ]
+  },
+  {
+   "id": "striker.tornado_upper",
+   "name": "竜巻アッパー",
+   "job": "pirate",
+   "tier": 3,
+   "branch": 0,
+   "jobName": "ストライカー",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "前の 最大 3 体を打ち上げ、各 250+6x%",
+   "mp": "20+floor(x/2)",
+   "prereqs": [
+    {
+     "skill": "striker.shockwave",
+     "level": 5
+    }
+   ],
+   "damage": "250+6*x",
+   "targets": "3",
+   "range": {
+    "front": 130,
+    "back": 25,
+    "up": 75,
+    "down": 15
+   },
+   "weapons": [
+    "ナックル"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "fightmaster.blessing",
+   "name": "全能力の加護",
+   "job": "pirate",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ファイトマスター",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "全ての能力値 +⌈x/2⌉%、持続 30x 秒（4 次は全職が持つ）",
+   "mp": "10+floor(x/3)",
+   "buff": {
+    "sec": "30*x",
+    "statPct": "ceil(x/2)"
+   }
+  },
+  {
+   "id": "fightmaster.will",
+   "name": "意志の力",
+   "job": "pirate",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ファイトマスター",
+   "kind": "buff",
+   "maxLevel": 5,
+   "desc": "状態異常（気絶・暗闇・毒・封印・呪い・誘惑）を全部治す。待ち時間 600-60x 秒",
+   "mp": "30",
+   "cooldown": "600-60*x",
+   "cure": true
+  },
+  {
+   "id": "fightmaster.super_transform",
+   "name": "竜の変身",
+   "job": "pirate",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ファイトマスター",
+   "kind": "buff",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "変身の上位。攻撃力 +2x、物理防御 +8x、速さ +20、持続 10x 秒",
+   "mp": "50",
+   "buff": {
+    "sec": "10*x",
+    "stats": {
+     "watk": "2*x",
+     "wdef": "8*x",
+     "speed": "20"
+    },
+    "transform": true
+   }
+  },
+  {
+   "id": "fightmaster.barrage",
+   "name": "百裂拳",
+   "job": "pirate",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ファイトマスター",
+   "kind": "attack",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "前の 1 体に 6 回、各 150+5x%",
+   "mp": "30+x",
+   "damage": "150+5*x",
+   "targets": "1",
+   "hits": "6",
+   "range": {
+    "front": 80,
+    "back": 10,
+    "up": 60,
+    "down": 10
+   },
+   "delay": 1.5,
+   "weapons": [
+    "ナックル"
+   ]
+  },
+  {
+   "id": "fightmaster.sky_fist",
+   "name": "空裂拳",
+   "job": "pirate",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ファイトマスター",
+   "kind": "attack",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "前の 1 体に 1 回、500+20x%。当たった敵の防御を 10 秒 -20%",
+   "mp": "40+x",
+   "damage": "500+20*x",
+   "targets": "1",
+   "range": {
+    "front": 80,
+    "back": 10,
+    "up": 60,
+    "down": 10
+   },
+   "debuff": {
+    "defPct": "20",
+    "sec": "10"
+   },
+   "delay": 1.2,
+   "weapons": [
+    "ナックル"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "fightmaster.energy_orb",
+   "name": "気の大玉",
+   "job": "pirate",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ファイトマスター",
+   "kind": "area",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "気を溜めた大きな玉。一直線上の 最大 10 体に 300+10x%",
+   "mp": "30+x",
+   "damage": "300+10*x",
+   "targets": "10",
+   "range": {
+    "front": 420,
+    "back": 0,
+    "up": 30,
+    "down": 15
+   },
+   "delay": 1.2,
+   "weapons": [
+    "ナックル"
+   ],
+   "hits": "1"
+  },
+  {
+   "id": "fightmaster.speed_infusion",
+   "name": "神速",
+   "job": "pirate",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ファイトマスター",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "攻撃速度 +1 段階（加速と重なる）、持続 10x 秒",
+   "mp": "30",
+   "buff": {
+    "sec": "10*x",
+    "boosterStack": 1
+   }
+  },
+  {
+   "id": "fightmaster.time_leap",
+   "name": "時の拳",
+   "job": "pirate",
+   "tier": 4,
+   "branch": 0,
+   "jobName": "ファイトマスター",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "他のスキルの待ち時間を全部なくす。待ち時間 1800-30x 秒",
+   "mp": "100",
+   "cooldown": "1800-30*x",
+   "cdReset": true
+  },
+  {
+   "id": "gunslinger.gun_mastery",
+   "name": "銃の熟練",
+   "job": "pirate",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "ガンスリンガー",
+   "kind": "passive",
+   "maxLevel": 20,
+   "desc": "銃の熟練度 10+5⌈x/2⌉%、命中 +x",
+   "passive": [
+    {
+     "weapons": [
+      "銃"
+     ],
+     "mastery": "10+5*ceil(x/2)",
+     "stats": {
+      "acc": "x"
+     }
+    }
+   ]
+  },
+  {
+   "id": "gunslinger.gun_booster",
+   "name": "銃の加速",
+   "job": "pirate",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "ガンスリンガー",
+   "kind": "buff",
+   "maxLevel": 20,
+   "desc": "攻撃速度 +2 段階、持続 10x 秒",
+   "mp": "13-floor(x/4)",
+   "prereqs": [
+    {
+     "skill": "gunslinger.gun_mastery",
+     "level": 5
+    }
+   ],
+   "buff": {
+    "sec": "10*x",
+    "booster": 2,
+    "weapons": [
+     "銃"
+    ]
+   }
+  },
+  {
+   "id": "gunslinger.grenade",
+   "name": "爆発弾",
+   "job": "pirate",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "ガンスリンガー",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "弾が爆発し、まわり 最大 6 体に 100+4x%",
+   "mp": "12+floor(x/3)",
+   "damage": "100+4*x",
+   "targets": "6",
+   "range": {
+    "front": 300,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   },
+   "explode": 90,
+   "weapons": [
+    "銃"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "hits": "1"
+  },
+  {
+   "id": "gunslinger.wings",
+   "name": "隠れ足",
+   "job": "pirate",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "ガンスリンガー",
+   "kind": "buff",
+   "maxLevel": 10,
+   "desc": "空中でゆっくり落ちる（ジャンプキーを押している間）、持続 10x 秒",
+   "mp": "10",
+   "buff": {
+    "sec": "10*x",
+    "slowFall": true
+   }
+  },
+  {
+   "id": "gunslinger.ricochet",
+   "name": "跳弾",
+   "job": "pirate",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "ガンスリンガー",
+   "kind": "area",
+   "maxLevel": 20,
+   "desc": "前の 最大 6 体に 60+3x% ＋ 封印（確率 2x%）",
+   "mp": "14+floor(x/3)",
+   "prereqs": [
+    {
+     "skill": "gunslinger.grenade",
+     "level": 1
+    }
+   ],
+   "damage": "60+3*x",
+   "targets": "6",
+   "range": {
+    "front": 300,
+    "back": 0,
+    "up": 110,
+    "down": 50
+   },
+   "status": [
+    {
+     "type": "seal",
+     "chance": "2*x",
+     "sec": "5"
+    }
+   ],
+   "weapons": [
+    "銃"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "hits": "1"
+  },
+  {
+   "id": "gunslinger.backspin_shot",
+   "name": "後ろ跳び撃ち",
+   "job": "pirate",
+   "tier": 2,
+   "branch": 1,
+   "jobName": "ガンスリンガー",
+   "kind": "ranged",
+   "maxLevel": 20,
+   "desc": "後ろへ跳びながら前の 1 体に 150+5x%",
+   "mp": "10",
+   "damage": "150+5*x",
+   "targets": "1",
+   "range": {
+    "front": 300,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   },
+   "backJump": {
+    "vx": 220,
+    "vy": 330
+   },
+   "weapons": [
+    "銃"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "hits": "1"
+  },
+  {
+   "id": "outlaw.flamethrower",
+   "name": "炎の弾",
+   "job": "pirate",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "アウトロー",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "前の扇形 最大 6 体に火の 160+5x% ＋ 燃焼",
+   "mp": "20+floor(x/2)",
+   "damage": "160+5*x",
+   "element": "fire",
+   "targets": "6",
+   "range": {
+    "front": 280,
+    "back": 0,
+    "up": 110,
+    "down": 50
+   },
+   "status": [
+    {
+     "type": "burn",
+     "chance": "100",
+     "sec": "4"
+    }
+   ],
+   "weapons": [
+    "銃"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "hits": "1"
+  },
+  {
+   "id": "outlaw.ice_splitter",
+   "name": "氷の弾",
+   "job": "pirate",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "アウトロー",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "前の扇形 最大 6 体に氷の 160+5x% ＋ 凍結",
+   "mp": "20+floor(x/2)",
+   "damage": "160+5*x",
+   "element": "ice",
+   "targets": "6",
+   "range": {
+    "front": 280,
+    "back": 0,
+    "up": 110,
+    "down": 50
+   },
+   "status": [
+    {
+     "type": "freeze",
+     "chance": "100",
+     "sec": "2"
+    }
+   ],
+   "weapons": [
+    "銃"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "hits": "1"
+  },
+  {
+   "id": "outlaw.gaviota",
+   "name": "爆弾カモメを呼ぶ",
+   "job": "pirate",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "アウトロー",
+   "kind": "summon",
+   "maxLevel": 30,
+   "desc": "カモメが前へ飛び、最大 6 体に 300+10x%",
+   "mp": "30+floor(x/2)",
+   "summonSec": "1.5",
+   "summonAttack": {
+    "damage": "300+10*x",
+    "targets": "6",
+    "interval": 0.6,
+    "range": 300,
+    "once": true,
+    "front": true
+   }
+  },
+  {
+   "id": "outlaw.homing",
+   "name": "八方撃ち",
+   "job": "pirate",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "アウトロー",
+   "kind": "area",
+   "maxLevel": 30,
+   "desc": "敵を自動で狙う弾を 4+x÷10 発、各 120+4x%",
+   "mp": "25+floor(x/2)",
+   "damage": "120+4*x",
+   "targets": "floor(4+x/10)",
+   "range": {
+    "front": 350,
+    "back": 350,
+    "up": 120,
+    "down": 20,
+    "around": true
+   },
+   "weapons": [
+    "銃"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "hits": "1"
+  },
+  {
+   "id": "outlaw.octopus",
+   "name": "タコの砲台",
+   "job": "pirate",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "アウトロー",
+   "kind": "summon",
+   "maxLevel": 30,
+   "desc": "その場に砲台を置く（30+x 秒）。近くの敵を撃つ 150+5x%",
+   "mp": "30+floor(x/2)",
+   "summonSec": "30+x",
+   "summonFixed": true,
+   "summonAttack": {
+    "damage": "150+5*x",
+    "targets": "1",
+    "interval": 2,
+    "range": 300
+   }
+  },
+  {
+   "id": "outlaw.burst_fire",
+   "name": "連射",
+   "job": "pirate",
+   "tier": 3,
+   "branch": 1,
+   "jobName": "アウトロー",
+   "kind": "ranged",
+   "maxLevel": 20,
+   "desc": "前の 1 体に 4 発、各 100+5x%",
+   "mp": "15+floor(x/3)",
+   "damage": "100+5*x",
+   "targets": "1",
+   "hits": "4",
+   "range": {
+    "front": 320,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   },
+   "delay": 1.2,
+   "weapons": [
+    "銃"
+   ],
+   "ammo": true,
+   "rangeBonus": true
+  },
+  {
+   "id": "captain.blessing",
+   "name": "全能力の加護",
+   "job": "pirate",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "キャプテン",
+   "kind": "buff",
+   "maxLevel": 30,
+   "desc": "全ての能力値 +⌈x/2⌉%、持続 30x 秒（4 次は全職が持つ）",
+   "mp": "10+floor(x/3)",
+   "buff": {
+    "sec": "30*x",
+    "statPct": "ceil(x/2)"
+   }
+  },
+  {
+   "id": "captain.will",
+   "name": "意志の力",
+   "job": "pirate",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "キャプテン",
+   "kind": "buff",
+   "maxLevel": 5,
+   "desc": "状態異常（気絶・暗闇・毒・封印・呪い・誘惑）を全部治す。待ち時間 600-60x 秒",
+   "mp": "30",
+   "cooldown": "600-60*x",
+   "cure": true
+  },
+  {
+   "id": "captain.ship",
+   "name": "乗船",
+   "job": "pirate",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "キャプテン",
+   "kind": "buff",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "小さな船に乗る。最大 HP +x×100、防御 +10x。船の HP が無くなると降りる",
+   "mp": "50",
+   "buff": {
+    "sec": "600",
+    "stats": {
+     "hp": "x*100",
+     "wdef": "10*x"
+    },
+    "ship": true
+   }
+  },
+  {
+   "id": "captain.cannon",
+   "name": "大砲",
+   "job": "pirate",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "キャプテン",
+   "kind": "area",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "乗船中だけ。一直線上の 最大 6 体に 400+15x%",
+   "mp": "30+x",
+   "prereqs": [
+    {
+     "skill": "captain.ship",
+     "level": 1
+    }
+   ],
+   "damage": "400+15*x",
+   "targets": "6",
+   "range": {
+    "front": 450,
+    "back": 0,
+    "up": 30,
+    "down": 15
+   },
+   "needsBuff": [
+    "captain.ship"
+   ],
+   "motion": "shoot",
+   "delay": 1.2,
+   "weapons": [
+    "銃"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "hits": "1"
+  },
+  {
+   "id": "captain.rapid_fire",
+   "name": "弾幕",
+   "job": "pirate",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "キャプテン",
+   "kind": "ranged",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "キーを押している間、前の 1 体に 1 秒 8 発、各 100+3x%",
+   "mp": "1",
+   "damage": "100+3*x",
+   "targets": "1",
+   "range": {
+    "front": 380,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   },
+   "rapid": 8,
+   "weapons": [
+    "銃"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "hits": "1"
+  },
+  {
+   "id": "captain.air_strike",
+   "name": "艦砲射撃",
+   "job": "pirate",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "キャプテン",
+   "kind": "area",
+   "maxLevel": 20,
+   "masterLevel": 30,
+   "desc": "空から砲弾。画面の敵 最大 15 体に 300+10x%",
+   "mp": "60+x",
+   "damage": "300+10*x",
+   "targets": "15",
+   "range": {
+    "front": 420,
+    "back": 420,
+    "up": 320,
+    "down": 280,
+    "around": true
+   },
+   "motion": "cast",
+   "delay": 1.4,
+   "weapons": [
+    "銃"
+   ],
+   "rangeBonus": true,
+   "hits": "1"
+  },
+  {
+   "id": "captain.hypnotize_mark",
+   "name": "狙い撃ち",
+   "job": "pirate",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "キャプテン",
+   "kind": "ranged",
+   "maxLevel": 30,
+   "desc": "前の 1 体に印を付け、30 秒 その敵へのダメージ +x%・経験値 +x÷2%",
+   "mp": "20",
+   "targets": "1",
+   "range": {
+    "front": 380,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   },
+   "mark": {
+    "damage": "x",
+    "exp": "x/2",
+    "sec": "30"
+   },
+   "weapons": [
+    "銃"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "hits": "1"
+  },
+  {
+   "id": "captain.hypnotize",
+   "name": "錯乱弾",
+   "job": "pirate",
+   "tier": 4,
+   "branch": 1,
+   "jobName": "キャプテン",
+   "kind": "ranged",
+   "maxLevel": 30,
+   "desc": "前の 1 体（ボス以外）を操り、10+x÷3 秒 味方として戦わせる",
+   "mp": "30",
+   "targets": "1",
+   "range": {
+    "front": 320,
+    "back": 0,
+    "up": 40,
+    "down": 20
+   },
+   "status": [
+    {
+     "type": "charm",
+     "chance": "100",
+     "sec": "10+x/3",
+     "noBoss": true
+    }
+   ],
+   "weapons": [
+    "銃"
+   ],
+   "ammo": true,
+   "rangeBonus": true,
+   "hits": "1"
+  }
+ ]
 }

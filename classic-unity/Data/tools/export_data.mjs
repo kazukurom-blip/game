@@ -1,9 +1,10 @@
 // ゲームのデータ（JSON）を、設計書の元データ classic/tools/data/*.mjs と式 classic/tools/lib/*.mjs から書き出す。
 // Unity 版の Core（classic-unity/Core）はこの JSON を読む。数値は gen_docs.mjs（設計書の表）と同じ式で作る。
 //
-// 実行: node classic-unity/Data/tools/export_data.mjs
-// 出力: classic-unity/Data/items.json, monsters.json, quests.json, shops.json, npcs.json, maps/<ID>.json, maps/index.json
-// 手で書くデータ: classic-unity/Data/skills.json（JOBS.md から）
+// 実行: node classic-unity/Data/tools/export_data.mjs          （書き出す）
+//       node classic-unity/Data/tools/export_data.mjs --check  （書き出さずに、今の JSON と同じか・つじつまを検査。違えば 1 で終わる）
+// 出力: classic-unity/Data/items.json, monsters.json, quests.json, shops.json, npcs.json, skills.json, maps/<ID>.json, maps/index.json
+// スキル: 名前・MP・前提などは classic/docs/JOBS.md の表、動き（範囲・式・状態異常）は classic/tools/data/skills.mjs（skills_export.mjs）
 // マップの足場の配置は仮（このファイルの ISLAND）。つながり（ポータル）は maps.mjs のとおり。
 import fs from 'node:fs';
 import path from 'node:path';
@@ -14,14 +15,22 @@ import { MAPS_RAW } from '../../../classic/tools/data/maps.mjs';
 import { armorList, extraList, weaponList, STARTER, WEAPON_TYPES } from '../../../classic/tools/data/equips.mjs';
 import { SCROLLS, scrollsFor } from '../../../classic/tools/data/scrolls.mjs';
 import { QUESTS_RAW } from '../../../classic/tools/data/quests.mjs';
+import { buildSkills } from './skills_export.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.resolve(HERE, '..');
 const problems = [];
+const CHECK_ONLY = process.argv.includes('--check');
 const write = (name, obj) => {
   const p = path.join(OUT, name);
+  const text = JSON.stringify(obj, null, 1) + '\n';
+  if (CHECK_ONLY) {
+    const now = fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : null;
+    if (now !== text) problems.push(`${name} が元のデータと違う（node classic-unity/Data/tools/export_data.mjs で書き出し直す）`);
+    return;
+  }
   fs.mkdirSync(path.dirname(p), { recursive: true });
-  fs.writeFileSync(p, JSON.stringify(obj, null, 1) + '\n');
+  fs.writeFileSync(p, text);
 };
 
 // ---------------- 共通の言葉 → コードの名前
@@ -452,5 +461,12 @@ for (const [mid, L] of Object.entries(ISLAND)) {
 for (const [mid, L] of Object.entries(ISLAND)) for (const to of Object.keys(L.portals)) if (!ISLAND[to]?.portals[mid]) problems.push(`${mid} → ${to} の戻りのポータルが無い`);
 write('maps/index.json', { maps: mapIndex });
 
+// ---------------- スキル（JOBS.md の表 ＋ skills.mjs の動き）
+const skills = buildSkills(problems);
+write('skills.json', {
+  note: 'export_data.mjs が JOBS.md 4 章の表（名前・最大Lv・効果・MP・前提）と classic/tools/data/skills.mjs（範囲・式・動き・状態異常）から書き出した。手で直さない。式の x はスキルの Lv、lv はキャラの Lv。range は当たる範囲（px、主人公の足元から。front = 向いている方）。',
+  skills,
+});
+
 if (problems.length) { console.error('問題:\n  ' + problems.join('\n  ')); process.exit(1); }
-console.log(`書き出した: アイテム ${items.length}、敵 ${monsters.length}、クエスト ${quests.length}、マップ ${mapIndex.length}、NPC ${NPCS.length}、店 ${shops.length}`);
+console.log(`${CHECK_ONLY ? '検査した（同じ）' : '書き出した'}: アイテム ${items.length}、敵 ${monsters.length}、クエスト ${quests.length}、マップ ${mapIndex.length}、NPC ${NPCS.length}、店 ${shops.length}、スキル ${skills.length}`);
