@@ -49,7 +49,7 @@ namespace Lumina.Core.Fun
         public readonly List<FunSpot> Spots = new List<FunSpot>();
         /// <summary>見た目の品（アイテムの ID → kind: hat/outfit/tag/bubble と絵の名前）</summary>
         public readonly Dictionary<string, (string kind, string look)> Looks = new Dictionary<string, (string, string)>();
-        public string Ticket = "use.gacha_ticket"; public long TicketPrice = 1500; public double MobTicketChance;
+        public string Ticket = "use.gacha_ticket"; public long TicketPrice = 30000; public double MobTicketChance;
         public readonly List<GachaMachine> Machines = new List<GachaMachine>();
         public readonly List<FieldBossDef> FieldBosses = new List<FieldBossDef>();
         public readonly List<VoyageDef> Voyages = new List<VoyageDef>();
@@ -126,7 +126,7 @@ namespace Lumina.Core.Fun
             var g = J.Obj(d, "gacha");
             if (g != null)
             {
-                f.Ticket = J.Str(g, "ticket", f.Ticket); f.TicketPrice = J.Long(g, "ticketPrice", 1500); f.MobTicketChance = J.Num(g, "mobTicketChance");
+                f.Ticket = J.Str(g, "ticket", f.Ticket); f.TicketPrice = J.Long(g, "ticketPrice", 30000); f.MobTicketChance = J.Num(g, "mobTicketChance");
                 foreach (var o in J.Arr(g, "machines"))
                 {
                     var x = (Dictionary<string, object>)o;

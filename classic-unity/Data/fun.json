@@ -206,7 +206,7 @@
  },
  "gacha": {
   "ticket": "use.gacha_ticket",
-  "ticketPrice": 1500,
+  "ticketPrice": 30000,
   "mobTicketChance": 0.002,
   "machines": [
    {
@@ -1426,7 +1426,7 @@
   },
   {
    "item": "use.gacha_ticket",
-   "price": 1500
+   "price": 30000
   }
  ],
  "rare": {
