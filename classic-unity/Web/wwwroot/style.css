@@ -93,6 +93,12 @@ table.eq tr { border-bottom: 1px solid #2a2e48; }
 .quest { padding: 4px; margin-bottom: 4px; border-bottom: 1px solid #2a2e48; line-height: 1.45; }
 .story { margin: 3px 0; color: #e8e0c8; }
 .say { margin-bottom: 6px; line-height: 1.5; color: #fff8e0; }
+.say.hint { color: #a8ffb0; }
+/* 会話の窓: V・Enter で押されるボタン（↑↓ で選ぶ） */
+#w_dialog button.sel { background: #c08a10; border-color: #fff2a0; color: #fff; box-shadow: 0 0 0 1px #ffe060, 0 0 8px 2px rgba(255, 220, 80, 0.85); animation: selglow 0.9s ease-in-out infinite alternate; }
+#w_dialog button.sel::before { content: '▶ '; font-size: 9px; }
+@keyframes selglow { from { box-shadow: 0 0 0 1px #ffe060, 0 0 4px 1px rgba(255, 220, 80, 0.6); } to { box-shadow: 0 0 0 1px #ffe060, 0 0 10px 3px rgba(255, 220, 80, 0.95); } }
+.keyhint { margin-top: 6px; font-size: 10px; }
 .opt-row { padding: 3px 0; border-bottom: 1px solid #2a2e48; }
 .bulb.y { color: #ffe040; } .bulb.g { color: #70ff70; }
 .cols { display: flex; gap: 8px; } .col { flex: 1; min-width: 0; }

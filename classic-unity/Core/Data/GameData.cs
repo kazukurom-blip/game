@@ -54,6 +54,8 @@ namespace Lumina.Core.Data
     {
         public string Id, Name, Map, Shop;
         public double X;
+        /// <summary>話しかけた時のセリフ（npc_lines.mjs → npcs.json の lines）。先頭の [条件] は NpcLines.cs</summary>
+        public readonly List<string> Lines = new List<string>();
     }
 
     public sealed class GameData
@@ -122,6 +124,7 @@ namespace Lumina.Core.Data
                 {
                     var d = (Dictionary<string, object>)o;
                     var n = new NpcDef { Id = J.Str(d, "id"), Name = J.Str(d, "name", ""), Map = J.Str(d, "map"), Shop = J.Str(d, "shop"), X = J.Num(d, "x") };
+                    foreach (var l in J.Arr(d, "lines")) if (l is string ls) n.Lines.Add(ls);
                     g.Npcs[n.Id] = n;
                 }
             }
@@ -147,6 +150,9 @@ namespace Lumina.Core.Data
             var t = source?.ReadText("maps/" + id + ".json");
             if (t == null) return null;
             m = MapData.FromJson(t);
+            // セリフは npcs.json が持つ（マップの JSON に無ければ写す）
+            foreach (var n in m.Npcs)
+                if (n.Lines.Count == 0 && Npcs.TryGetValue(n.Id, out var def)) n.Lines.AddRange(def.Lines);
             maps[id] = m;
             return m;
         }

@@ -18,7 +18,7 @@ export class Audio {
     this.mobMotion = new Map();
     this.weapon = '素手';
     this.wantBgm = null;
-    this.played = [];
+    this.played = []; this.seen = new Set(); // 確かめ用: 鳴った物（played は最後の 300 個・seen は全部の種類）
   }
 
   unlock() {
@@ -113,7 +113,7 @@ export class Audio {
   sfx(id) {
     if (!id || !this.ctx || this.frameSet.has(id)) return;
     this.frameSet.add(id);
-    this.played.push(id); if (this.played.length > 300) this.played.shift(); // 確かめ用（tools/playtest.mjs が読む）
+    this.played.push(id); this.seen.add(id); if (this.played.length > 300) this.played.shift(); // 確かめ用（tools/playtest.mjs が読む）
     const e = this.m.sfx[id];
     if (!e) return;
     this.load(e.file).then((buf) => {

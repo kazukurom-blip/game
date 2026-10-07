@@ -19,6 +19,7 @@ import { armorList, extraList, weaponList, STARTER, WEAPON_TYPES } from '../../.
 import { SCROLLS, scrollsFor } from '../../../classic/tools/data/scrolls.mjs';
 import { QUESTS_RAW } from '../../../classic/tools/data/quests.mjs';
 import { NPCS, npcIdOf } from './world/npcs.mjs';
+import { buildNpcLines, checkNpcLines } from './world/npc_lines.mjs';
 import { buildWorld } from './world/world.mjs';
 import { QUEST_GOALS } from './quest_goals.mjs';
 import { buildSkills } from './skills_export.mjs';
@@ -487,12 +488,14 @@ for (const raw of MAPS_RAW) {
 }
 write('maps/index.json', { maps: mapIndex });
 const npcOut = [];
+const npcLines = buildNpcLines(NPCS); // セリフ（world/npc_lines.mjs → lines。Core の NpcDef.Lines・NpcData.Lines）
+problems.push(...checkNpcLines(NPCS, npcLines));
 for (const [id, name, map, extra = {}] of NPCS) {
   const placed = world.maps[map]?.npcs.find((n) => n.id === id);
   const { tier: _t, x: _x, ...rest } = extra;
-  npcOut.push({ id, name, map, x: placed?.x ?? extra.x, y: placed?.y, ...rest });
+  npcOut.push({ id, name, map, x: placed?.x ?? extra.x, y: placed?.y, ...rest, lines: npcLines[id] });
 }
-write('npcs.json', { note: 'world/npcs.mjs（位置はマップを作った時に決まる）', npcs: npcOut });
+write('npcs.json', { note: 'world/npcs.mjs（位置はマップを作った時に決まる）・セリフは world/npc_lines.mjs', npcs: npcOut });
 
 // ---------------- 町と成長の仕組み（systems.mjs → systems.json）
 {

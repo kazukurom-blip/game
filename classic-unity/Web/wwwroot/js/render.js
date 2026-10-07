@@ -165,7 +165,7 @@ export class Renderer {
     this.drawTerrain(g, cx, cy);
     this.drawPortals(g, cx);
     this.drawObjects(g, f);
-    this.drawNpcs(g, f);
+    this.drawNpcs(g, f, ui);
     this.drawHazards(g, f, cx, cy, false);
     this.drawDrops(g, f);
     for (const m of f.mo) this.drawMob(g, m);
@@ -267,7 +267,7 @@ export class Renderer {
       const near = Math.abs(o.x - f.p[0]) < 40 && Math.abs(o.y - f.p[1]) < 60;
       g.fillStyle = '#8a5a2a'; g.fillRect(o.x - 10, o.y - 20, 20, 20);
       g.fillStyle = '#c08a4a'; g.fillRect(o.x - 8, o.y - 18, 16, 6); g.fillRect(o.x - 8, o.y - 10, 16, 8);
-      if (near) this.tag(g, o.name + '（Enter で調べる）', o.x, o.y - 34, '#fff8c0');
+      if (near) this.tag(g, o.name + '（V で調べる）', o.x, o.y - 34, '#fff8c0');
     }
   }
 
@@ -281,22 +281,54 @@ export class Renderer {
     return l;
   }
 
-  drawNpcs(g, f) {
+  drawNpcs(g, f, ui) {
     const t = this.time;
     if (f.bu) this.bulbs = f.bu;
+    // V で話せる人（Core の InteractNearby と同じ: 横 120 px・縦 80 px の中でいちばん近い人）
+    let near = null, nd = 120;
+    for (const n of this.map.npcs) {
+      const d = Math.abs(n.x - f.p[0]);
+      if (d <= nd && Math.abs(n.y - f.p[1]) < 80) { nd = d; near = n; }
+    }
     for (const n of this.map.npcs) {
       const facing = f.p[0] < n.x ? -1 : 1;
       drawAvatar(g, this.npcLook(n.id), 'stand1', Math.floor(t / 0.5 + (hash(n.id) % 3)) % 3, n.x, n.y, facing);
       this.tag(g, n.name, n.x, n.y + 4, '#ffe080');
+      if (n === near && !ui?.talking) this.tag(g, 'V で話す', n.x, n.y + 19, '#c8f0ff');
       const b = this.bulbs[n.id];
-      if (b) {
-        const y = n.y - 70 + Math.round(Math.sin(t * 4) * 2);
-        g.fillStyle = '#3a2a00'; g.fillRect(n.x - 6, y - 1, 12, 14);
-        g.fillStyle = b === 2 ? '#70ff70' : '#ffe040'; g.fillRect(n.x - 5, y, 10, 9);
-        g.fillStyle = '#806020'; g.fillRect(n.x - 3, y + 9, 6, 3);
-        g.fillStyle = '#ffffff'; g.fillRect(n.x - 3, y + 2, 2, 3);
-      }
+      if (b) this.drawMark(g, b, n.x, n.y - 100 + Math.round(Math.sin(t * 3 + (hash(n.id) % 7)) * 4), t);
     }
+  }
+
+  // 頭の上のマーク: 1 = 受けられるクエスト（黄色の「？」）、2 = 報告できるクエスト（光る電球）。上が y、中心が x
+  // 遠くからでも分かるよう 3 px のドットで描き、まわりをぼんやり光らせる（上下の動きは呼ぶ側）
+  drawMark(g, kind, x, y, t) {
+    x = Math.round(x); y = Math.round(y);
+    const px = 3;
+    const glow = 0.25 + 0.2 * Math.sin(t * 5);
+    const dots = (rows, ox, oy, color) => {
+      g.fillStyle = '#3a2400';
+      for (let r = 0; r < rows.length; r++) for (let c = 0; c < rows[r].length; c++) if (rows[r][c] === '#') g.fillRect(ox + c * px - 1, oy + r * px - 1, px + 2, px + 2);
+      for (let r = 0; r < rows.length; r++) for (let c = 0; c < rows[r].length; c++) if (rows[r][c] === '#') { g.fillStyle = color(r, c); g.fillRect(ox + c * px, oy + r * px, px, px); }
+    };
+    const halo = (cx, cy, rad, rgb) => {
+      const gr = g.createRadialGradient(cx, cy, 2, cx, cy, rad);
+      gr.addColorStop(0, `rgba(${rgb},${glow + 0.3})`); gr.addColorStop(1, `rgba(${rgb},0)`);
+      g.fillStyle = gr; g.beginPath(); g.arc(cx, cy, rad, 0, Math.PI * 2); g.fill();
+    };
+    if (kind === 1) {
+      const Q = ['.#####.', '##...##', '##...##', '.....##', '....##.', '...##..', '...##..', '.......', '...##..', '...##..'];
+      halo(x, y + 15, 22, '255,220,60');
+      dots(Q, x - 10, y, (r) => (r < 2 ? '#fff6a0' : '#ffd820'));
+      return;
+    }
+    const B = ['..####..', '.######.', '########', '########', '########', '.######.', '..####..', '...##...'];
+    halo(x, y + 11, 26, '255,250,170');
+    g.fillStyle = '#fffbd0';
+    for (const [dx, dy, w, h] of [[-21, 9, 5, 2], [16, 9, 5, 2], [-1, -9, 2, 5], [-16, -4, 4, 2], [12, -4, 4, 2]]) g.fillRect(x + dx, y + dy, w, h);
+    dots(B, x - 12, y, (r, c) => ((r < 3 && c < 4) ? '#ffffff' : '#ffec60'));
+    g.fillStyle = '#4a3a00'; g.fillRect(x - 7, y + 23, 14, 10);
+    g.fillStyle = '#a0a0a8'; g.fillRect(x - 6, y + 24, 12, 3); g.fillRect(x - 6, y + 29, 12, 3);
   }
 
   // 名前の札（下が暗い四角・字は明るい）
@@ -618,8 +650,14 @@ export class Renderer {
     }
     g.fillStyle = '#80c0ff';
     for (const p of m.portals) if (p.type === 'visible') g.fillRect(ox + p.x * sx - 1, oy + p.y * sy - 3, 3, 3);
-    g.fillStyle = '#70ff70';
-    for (const n of m.npcs) g.fillRect(ox + n.x * sx - 1, oy + n.y * sy - 3, 3, 3);
+    // NPC の点: ふつうは緑、受けられるクエストは黄色（大きめ）、報告できるクエストは白く光る
+    for (const n of m.npcs) {
+      const b = this.bulbs[n.id];
+      const x = ox + n.x * sx, y = oy + n.y * sy;
+      if (b === 2) { g.fillStyle = '#4a3a00'; g.fillRect(x - 3, y - 6, 7, 7); g.fillStyle = '#fffbd0'; g.fillRect(x - 2, y - 5, 5, 5); }
+      else if (b === 1) { g.fillStyle = '#3a2400'; g.fillRect(x - 3, y - 6, 7, 7); g.fillStyle = '#ffd820'; g.fillRect(x - 2, y - 5, 5, 5); }
+      else { g.fillStyle = '#70ff70'; g.fillRect(x - 1, y - 3, 3, 3); }
+    }
     g.fillStyle = '#ffe040';
     g.fillRect(ox + f.p[0] * sx - 2, oy + f.p[1] * sy - 4, 4, 4);
   }

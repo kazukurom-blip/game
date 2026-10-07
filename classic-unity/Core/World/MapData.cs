@@ -83,6 +83,8 @@ namespace Lumina.Core.World
         public int InnFee = -1;          // 宿屋（休むと HP/MP 全回復）の料金。-1 = 宿屋でない
         public TravelData Travel;
         public TaxiData Taxi;
+        /// <summary>話しかけた時のセリフ（npcs.json の lines を GameData.GetMap が写す）。先頭の [条件] は Game/NpcLines.cs</summary>
+        public readonly List<string> Lines = new List<string>();
     }
     public sealed class MapObjectData { public string Id, Name; public double X, Y; }
 
@@ -164,6 +166,7 @@ namespace Lumina.Core.World
             {
                 var r = (Dictionary<string, object>)o;
                 var npc = new NpcData { Id = J.Str(r, "id"), Name = J.Str(r, "name", ""), Shop = J.Str(r, "shop"), Role = J.Str(r, "role"), X = J.Num(r, "x"), Y = J.Num(r, "y"), InnFee = J.Int(r, "inn", -1) };
+                foreach (var l in J.Arr(r, "lines")) if (l is string ls) npc.Lines.Add(ls);
                 var tr = J.Obj(r, "travel");
                 if (tr != null)
                 {

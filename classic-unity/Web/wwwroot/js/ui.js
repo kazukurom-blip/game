@@ -11,7 +11,8 @@ const STAT_NAMES = { str: 'STR', dex: 'DEX', int: 'INT', luk: 'LUK', hp: 'HP', m
 const LINE_NAMES = { warrior: '戦士', magician: '魔法使い', bowman: '弓使い', thief: '盗賊', pirate: '海賊' };
 const OBJ_TYPES = { Kill: '倒す', Collect: '集める', Talk: '話す', Visit: '行く', Interact: '調べる', Event: 'する' };
 
-export const QUICK_KEYS = ['Shift', 'A', 'D', 'F', 'G', 'V', 'B', 'Y', '1', '2', '3', '4', '5', '6', '7', '8'];
+// V は「話す・会話を進める」に使うので、クイックスロットは T
+export const QUICK_KEYS = ['Shift', 'A', 'D', 'F', 'G', 'T', 'B', 'Y', '1', '2', '3', '4', '5', '6', '7', '8'];
 
 export class Ui {
   constructor(root, game) {
@@ -55,8 +56,9 @@ export class Ui {
     this.el('keys').innerHTML = `<b>キー</b> <small>(H で隠す)</small><br>
       ←→ 歩く / ↑ はしご・縄・ポータル / ↓ 伏せ・下りる<br>
       Alt・Space・C ジャンプ（↓+ジャンプで下へ）<br>
-      Ctrl・X 攻撃 / Z 拾う / Enter 話す・調べる<br>
-      クイック: Shift A D F G V B Y ・ 1〜8<br>
+      Ctrl・X 攻撃 / Z 拾う / V・Enter 話す・調べる<br>
+      会話中: V・Enter 決める / ↑↓ 選ぶ / Esc 閉じる<br>
+      クイック: Shift A D F G T B Y ・ 1〜8<br>
       I 持ち物 E 装備 S 能力値 K スキル Q クエスト<br>
       O 設定・セーブ / M ミニマップ / Esc 閉じる<br>
       NPC はクリックでも話せる`;
@@ -149,7 +151,7 @@ export class Ui {
   }
   close(name) {
     if (!this.open.delete(name)) return false;
-    if (name === 'dialog') { this.dialog = null; this.dialogQuest = null; }
+    if (name === 'dialog') { this.dialog = null; this.dialogQuest = null; this.dlgSel = null; }
     if (name === 'shop') this.shop = null;
     if (name === 'storage') this.storageNpc = null;
     this.game.audio.sfx('ui_close');
@@ -187,6 +189,7 @@ export class Ui {
     w.querySelectorAll('.win .body').forEach((b) => { scrolls[b.parentElement.id] = b.scrollTop; });
     w.innerHTML = parts.join('');
     w.querySelectorAll('.win .body').forEach((b) => { if (scrolls[b.parentElement.id]) b.scrollTop = scrolls[b.parentElement.id]; });
+    if (this.open.has('dialog')) this.markDialogSel();
   }
 
   frame(id, title, body, cls = '') {
@@ -326,7 +329,7 @@ export class Ui {
   // ---------------- 会話
   openDialog(d) {
     if (!d) return;
-    this.dialog = d; this.dialogQuest = null; this.dialogMsg = '';
+    this.dialog = d; this.dialogQuest = null; this.dialogMsg = ''; this.dlgSel = null;
     this.open.add('dialog');
     this.game.audio.sfx('ui_open');
     this.refresh(true);
@@ -334,6 +337,7 @@ export class Ui {
 
   winDialog(s) {
     const d = this.dialog;
+    const keyHint = `<div class="dim keyhint">V・Enter 決める ／ ↑↓ 選ぶ ／ Esc 閉じる</div>`;
     let body = '';
     if (this.dialogMsg) body += `<div class="say">${esc(this.dialogMsg)}</div>`;
     if (this.dialogQuest) {
@@ -341,11 +345,11 @@ export class Ui {
       body += this.questBlock(q, true);
       const isAvail = d.available.some((x) => x.id === q.id);
       body += `<div class="btns">${isAvail ? `<button data-act="accept" data-a="${q.id}" data-b="${d.npc}">受ける</button>` : ''}<button data-dq="">もどる</button></div>`;
-      return this.frame('dialog', d.name, body, 'dlg');
+      return this.frame('dialog', d.name, body + keyHint, 'dlg');
     }
-    const lines = [];
-    if (!d.available.length && !d.completable.length && !d.inProgress.length && !d.shop && !d.job) lines.push(greet(d.role));
-    body += lines.map((l) => `<div class="say">${esc(l)}</div>`).join('');
+    // 一言（話しかけるたびに変わる）と、進めているクエストの残り（C# の NpcLines.cs）
+    if (!this.dialogMsg) body += `<div class="say">${esc(d.say || greet(d.role))}</div>`;
+    if (d.hint) body += `<div class="say hint">${esc(d.hint)}</div>`;
     for (const q of d.completable) body += `<div class="opt-row"><span class="bulb g">●</span> ${esc(q.name)} <button data-act="complete" data-a="${q.id}" data-b="${d.npc}">報告する</button></div>`;
     for (const q of d.available) body += `<div class="opt-row"><span class="bulb y">●</span> ${esc(q.name)} <span class="dim">Lv${q.lv}〜</span> <button data-dq="${q.id}">話を聞く</button></div>`;
     for (const q of d.inProgress) body += this.questBlock(q, false);
@@ -361,7 +365,45 @@ export class Ui {
       if (j.second) body += `<div class="opt-row">2 次転職（Lv${j.second.lv}・試験の証${j.second.proof ? 'あり' : 'なし'}）: ${j.second.names.map((n, i) => `<button data-act="advance2" data-n="${i}" data-b="${d.npc}" ${j.second.proof ? '' : 'disabled'}>${esc(n)}</button>`).join('')}</div>`;
     }
     body += `<div class="btns"><button data-close="dialog">さようなら</button></div>`;
-    return this.frame('dialog', d.name, body, 'dlg');
+    return this.frame('dialog', d.name, body + keyHint, 'dlg');
+  }
+
+  // ---------------- 会話の窓をキーで進める（V・Enter で選ばれているボタンを押す、↑↓ で選ぶ）
+  dialogButtons() { return [...this.root.querySelectorAll('#w_dialog .body button:not([disabled])')]; }
+
+  /** 決まりの順: 報告する → 受ける → 話を聞く → さようなら（無ければ最後のボタン） */
+  dialogDefault(btns) {
+    for (const p of ['[data-act="complete"]', '[data-act="accept"]', '[data-dq]:not([data-dq=""])', '[data-close="dialog"]']) {
+      const i = btns.findIndex((b) => b.matches(p));
+      if (i >= 0) return i;
+    }
+    return btns.length - 1;
+  }
+
+  markDialogSel() {
+    const btns = this.dialogButtons();
+    if (!btns.length) return null;
+    if (this.dlgSel == null || this.dlgSel >= btns.length) this.dlgSel = this.dialogDefault(btns);
+    btns.forEach((b, i) => b.classList.toggle('sel', i === this.dlgSel));
+    return btns[this.dlgSel];
+  }
+
+  dialogMove(dir) {
+    const btns = this.dialogButtons();
+    if (!btns.length) return;
+    if (this.dlgSel == null || this.dlgSel >= btns.length) this.dlgSel = this.dialogDefault(btns);
+    else this.dlgSel = (this.dlgSel + dir + btns.length) % btns.length;
+    const b = this.markDialogSel();
+    b?.scrollIntoView?.({ block: 'nearest' });
+    this.game.audio.sfx('ui_click');
+  }
+
+  dialogPress() {
+    if (!this.open.has('dialog') || !this.dialog) return false;
+    const b = this.markDialogSel();
+    if (!b) { this.close('dialog'); return true; }
+    b.click();
+    return true;
   }
 
   winShop(s) {
@@ -448,7 +490,7 @@ export class Ui {
     if (ds.shoptab != null) { this.shopTab = +ds.shoptab; this.renderWins(); return; }
     if (ds.pick) { this.picker = { kind: ds.pick, id: ds.id }; this.renderWins(); return; }
     if (ds.put != null) { this.put(+ds.put); return; }
-    if (ds.dq != null) { this.dialogQuest = ds.dq ? [...this.dialog.available, ...this.dialog.completable].find((q) => q.id === ds.dq) : null; this.dialogMsg = ''; this.renderWins(); return; }
+    if (ds.dq != null) { this.dialogQuest = ds.dq ? [...this.dialog.available, ...this.dialog.completable].find((q) => q.id === ds.dq) : null; this.dialogMsg = ''; this.dlgSel = null; this.renderWins(); return; }
     if (ds.shop) { const items = this.dialog?.shopItems || []; this.shop = { id: ds.shop, items, recharge: this.dialog?.recharge }; this.open.add('shop'); this.renderWins(); return; }
     if (ds.storage) { this.storageNpc = ds.storage; this.open.add('storage'); this.renderWins(); return; }
     if (ds.buy) {
@@ -470,7 +512,7 @@ export class Ui {
     const r = this.game.act(cmd, a, b, n);
     if (r.msg) { this.msg(r.msg, r.ok ? '' : 'bad'); if (this.open.has('dialog')) this.dialogMsg = r.msg; }
     if (!r.ok) this.game.audio.sfx('ui_error'); else if (cmd === 'quick' || cmd === 'ap' || cmd === 'learn') this.game.audio.sfx('ui_ok');
-    if (r.dialog) { this.dialog = r.dialog; this.dialogQuest = null; }
+    if (r.dialog) { this.dialog = r.dialog; this.dialogQuest = null; this.dlgSel = null; }
     if (cmd === 'equip' && r.ok) this.invSel = -1;
     if ((cmd === 'travel' || cmd === 'taxi') && r.ok) { this.close('dialog'); }
     if (cmd === 'revive') { this.deadShown = false; this.el('modal').innerHTML = ''; }

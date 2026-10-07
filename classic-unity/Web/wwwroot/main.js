@@ -18,7 +18,8 @@ const HOLD = {
   ControlLeft: 'Attack', ControlRight: 'Attack', KeyX: 'Attack',
   KeyZ: 'Pickup',
 };
-const QUICK_CODES = ['ShiftLeft|ShiftRight', 'KeyA', 'KeyD', 'KeyF', 'KeyG', 'KeyV', 'KeyB', 'KeyY', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8'];
+// V は話す・会話を進めるキー（クイックスロットの 6 番目は T）
+const QUICK_CODES = ['ShiftLeft|ShiftRight', 'KeyA', 'KeyD', 'KeyF', 'KeyG', 'KeyT', 'KeyB', 'KeyY', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8'];
 const quickOf = (code) => QUICK_CODES.findIndex((c) => c.split('|').includes(code));
 const WIN_KEYS = { KeyI: 'inv', KeyE: 'equip', KeyS: 'stat', KeyK: 'skill', KeyQ: 'quest', KeyO: 'opt' };
 
@@ -32,7 +33,7 @@ class Input {
     if (!repeat) {
       if (HOLD[code] === 'Jump') this.edges.jump = true;
       if (code === 'ArrowUp') this.edges.up = true;
-      if (code === 'Enter' || code === 'NumpadEnter') this.edges.interact = true;
+      if (code === 'Enter' || code === 'NumpadEnter' || code === 'KeyV') this.edges.interact = true;
       const q = quickOf(code);
       if (q >= 0) this.edges.quick.push(q);
     }
@@ -99,11 +100,20 @@ class Game {
         if (c === 'KeyH') { this.ui.toggleKeys(); return; }
         if (c === 'KeyM') { this.hideMinimap = !this.hideMinimap; return; }
       }
+      // 会話の窓が開いている間: V・Enter で選ばれているボタンを押す、↑↓ で選ぶ（主人公は動かない・攻撃しない）
+      if (this.talking()) {
+        if (!e.repeat && (c === 'KeyV' || c === 'Enter' || c === 'NumpadEnter')) this.ui.dialogPress();
+        else if (c === 'ArrowUp' || c === 'ArrowDown') this.ui.dialogMove(c === 'ArrowUp' ? -1 : 1);
+        return;
+      }
       this.input.down(c, e.repeat);
     });
     addEventListener('keyup', (e) => { this.input.up(e.code); if (e.key === 'Alt') e.preventDefault(); });
     addEventListener('blur', () => this.input.clear());
   }
+
+  /** 会話の窓が開いている（この間は主人公を動かさない） */
+  talking() { return this.ui.open.has('dialog') && !!this.ui.dialog; }
 
   mapData(id) {
     let m = this.maps.get(id);
@@ -167,7 +177,9 @@ class Game {
     }
     const hq = this.input.heldQuick();
     if (hq >= 0 && st?.quick[hq]?.kind === 'skill') held = st.quick[hq].id;
-    const json = this.api.Frame(dt, this.input.bits(), skill, item, held);
+    let bits = this.input.bits();
+    if (this.talking()) { bits = 0; skill = ''; item = ''; held = ''; } // 会話の間は動かない・攻撃しない
+    const json = this.api.Frame(dt, bits, skill, item, held);
     this.input.reset();
     const t1 = performance.now();
     const f = JSON.parse(json);
@@ -179,7 +191,7 @@ class Game {
     this.audio.onFrame(f, dt);
     this.ui.hud(f);
     const t2 = performance.now();
-    this.renderer.draw(f, dt, { weaponType: st?.stats?.weapon, hideMinimap: this.hideMinimap });
+    this.renderer.draw(f, dt, { weaponType: st?.stats?.weapon, hideMinimap: this.hideMinimap, talking: this.talking() });
     const t3 = performance.now();
     this.frameNo++;
     if (this.frameNo % 20 === 0) this.ui.refresh(false);
@@ -284,7 +296,7 @@ async function main() {
     game.audio.unlock();
     game.ui.refresh(false);
     game.ui.msg(r.msg);
-    game.ui.msg('← → で歩き、Alt / Space でジャンプ。案内人に Enter で話しかけよう。');
+    game.ui.msg('← → で歩き、Alt / Space でジャンプ。案内人に V で話しかけよう（V を押すと会話も進む）。');
     const loop = (t) => {
       try { game.tick(t); } catch (err) { game.errors.push(String(err && err.stack || err)); console.error(err); }
       requestAnimationFrame(loop);

@@ -17,7 +17,7 @@ namespace Lumina.Web
             return s;
         }
 
-        private static string Redialog(GameSession s, string npc) => npc != null ? Ui.Dialog(s, s.Talk(npc)) : null;
+        private static string Redialog(GameSession s, string npc) => !string.IsNullOrEmpty(npc) ? Ui.Dialog(s, s.Talk(npc, true)) : null;
 
         public static string Run(GameSession s, string cmd, string a, string b, int n)
         {

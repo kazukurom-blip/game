@@ -138,7 +138,8 @@ namespace Lumina.Web
             var n = d.Npc;
             var c = s.Character;
             var o = D(("npc", n.Id), ("name", n.Name), ("role", d.Role),
-                ("available", Quests(s, d.Available)), ("completable", Quests(s, d.Completable)), ("inProgress", Quests(s, d.InProgress)));
+                ("available", Quests(s, d.Available)), ("completable", Quests(s, d.Completable)), ("inProgress", Quests(s, d.InProgress)),
+                ("say", d.Say), ("hint", d.Hint));
             if (d.Shop != null)
             {
                 var items = new List<object>();

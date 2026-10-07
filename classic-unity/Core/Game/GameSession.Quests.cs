@@ -24,14 +24,20 @@ namespace Lumina.Core.Game
         public bool Storage;                                          // 倉庫番
         public bool ShopRecharge;                                     // 店で詰め直しができる
         public List<Town.CraftRecipe> Crafts = new List<Town.CraftRecipe>(); // 作れる物
+        // セリフ（Game/NpcLines.cs）
+        public string Say;                                            // 話しかけるたびに変わる一言（無ければ null）
+        public string Hint;                                           // 進めているクエストの残り（この NPC が依頼者か報告先の時）
     }
 
     public enum CompleteResult { Ok, NotInProgress, NotDone, WrongNpc, InventoryFull }
 
     public sealed partial class GameSession
     {
-        /// <summary>今のマップの NPC に話す。「話す」目的が進み、受けられる・報告できるクエストを返す。</summary>
-        public NpcDialog Talk(string npcId)
+        /// <summary>今のマップの NPC に話す。「話す」目的が進み、受けられる・報告できるクエストを返す。
+        /// refresh = true は同じ会話の窓を作り直す時（受けた・報告した後）で、一言（Say）を進めない。</summary>
+        public NpcDialog Talk(string npcId) => Talk(npcId, false);
+
+        public NpcDialog Talk(string npcId, bool refresh)
         {
             var n = Map.Npc(npcId);
             if (n == null || Dead) return null;
@@ -41,6 +47,8 @@ namespace Lumina.Core.Game
             d.Available = Quests.AvailableFrom(npcId, Character);
             foreach (var q in Quests.InProgress()) if (q.End == npcId && !d.Completable.Contains(q)) d.InProgress.Add(q);
             FillTownDialog(d);
+            d.Say = NpcLine(n, !refresh);
+            d.Hint = QuestHint(npcId);
             return d;
         }
 
