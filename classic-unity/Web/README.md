@@ -3,7 +3,7 @@
 Unity 版が遊べるようになるまでの確認用。**中身は Unity 版と同じ C# の Core（`classic-unity/Core`）をそのまま WebAssembly で動かしている**（.NET 8 の素の WASM。Blazor は使っていない）。
 JS が持つのは入力・描画（canvas）・音・窓だけで、物理・戦闘・スキル・敵・成長・クエスト・店・セーブはすべて Core。呼び方は `docs/CORE.md` 3 章（Unity の `GameRunner` と同じ流れ）。
 
-絵は**仮**（四角や丸で描いた敵、ブラウザの試作の仮のアバター）。実在のゲームの絵は使っていない。
+絵は**仮**（四角や丸で描いた敵）だが、**主人公・芽吹きの島の敵 5 体（＋色違い 2）・UI はクラシック風の見本**に描き直した（下の「絵の見本」）。実在のゲームの絵は使っていない・写していない。
 
 ## 作り方
 
@@ -44,7 +44,22 @@ node classic-unity/Web/tools/playtest.mjs               # Chromium で自動で�
 | `wwwroot/js/ui.js` | HUD と窓（持ち物・装備・能力値・スキル・クエスト・会話・店・倉庫・設定） |
 | `src/Fun.cs`・`wwwroot/js/fun.js`・`js/avatar/parts_fun.js` | 楽しさの要素（`FunFrame`・`FunUi`・Act の続き → Core の `GameSession.Fun.cs`）: 町の機械・係の絵と窓、船の旅の残り時間、感情表現、髪型・顔・帽子・服の仮の部品、名札・吹き出し、珍しい個体の光、天気と季節の飾り、ダンジョンの仕掛け。ほかの画面のファイル（main.js・ui.js・render.js）には呼び出しとつなぎだけ |
 | `wwwroot/js/audio.js` | BGM（イントロ → ループ）・ジングル・効果音（`audio_manifest.json` の events の表どおり） |
-| `wwwroot/js/avatar/`・`pixel.js` | `classic/src/render/` の仮のアバターのコピー（攻撃・構え・座るの動きを足した） |
+| `wwwroot/js/avatar/`・`pixel.js` | 主人公（クラシック風のちびキャラ。元は `classic/src/render/` の仮のアバターで、型紙に攻撃・構え・座るを足し、部品の絵を描き直した） |
+| `wwwroot/js/art.js`・`wwwroot/art/` | 敵のドット絵（PNG）の読み込みと描画・UI の枠の絵（`tools/make_art.mjs` が作る） |
+
+## 絵の見本（クラシック風。`tools/make_art.mjs`）
+
+ジャンルの作法（約 2.5 頭身の大きな頭と目・1px の濃い色の線・光は左上の 3 段の塗り・明るく彩度の高い色・下の横長の状態の帯・丸みのある窓・太い縁取りの数字）だけに寄せ、形・顔・模様・色の組み合わせはすべてオリジナル。
+
+| 物 | 作り方 | 置き場所 |
+|---|---|---|
+| 主人公 | コードで描く（`js/avatar/parts.js`・`parts_fun.js`）。形を Mask（楕円・多角形・太い線の足し引き）で作り、`pixel.js` の `paintMask` で「線・明るい縁・ふつう・暗い縁」に塗る。頭 24×22（頭身 約 2.5）、目は手前 4×7・奥 3×6。美容院の髪型 7・髪の色 8・顔 5・感情表現 7・帽子 12・肌 4・服の色をそのまま使える。動きは今の型紙（`skeleton.js`）のまま（立ち 3・歩き 4・ジャンプ・構え・振り 3・突き・撃つ・投げ・詠唱・殴り・縄 2・はしご 2・伏せ・座る） | 実行時に描く |
+| 敵 | `node tools/make_art.mjs` が PNG を作る。M001 コロ貝・M003 ホコリダケ・M005 ポヨスライム・M006 ダイダイダケ・M007 大コロ貝（と色違いの M002 アオコロ貝・M004 アカコロ貝）。コマ: 立ち 3・動く 4・やられ 1・倒れる 3（跳ねる敵は宙 1 も）。大きさは monsters.json の width・height | `wwwroot/art/mobs/<ID>.png`・`art/mobs.json` |
+| UI | 9 分割の枠（窓・ボタン・金のボタン・スロット・下の帯）を `make_art.mjs` が作り、`style.css` の最後の章が border-image で使う。ダメージの数字は `render.js` の 6×8 の字の型を 2 倍（クリティカルは 3 倍）＋縁取り・上が明るい 2 色。名前の札・敵の HP バー・剣・振りの弧もドットで描く | `wwwroot/art/ui/*.png` |
+
+- 絵の無い敵・NPC は今までの仮の絵のまま（`js/art.js` が `art/mobs.json` にある敵だけ差し替える）。ドットは `imageSmoothingEnabled = false` と `image-rendering: pixelated`、整数倍の拡大でぼけない。
+- 見本の写真: `node tools/art_shots.mjs`（島の狩り場 S005 に 5 体を `dbgSpawn` で並べる → `shots/art_lineup.png`・`art_battle.png`・`art_window.png`・`art_hud.png`）、`--tag before` で直す前の同じ場面（`art_before_*.png`）。コマの一覧は `shots/art_mobs_sheet.png`（`make_art.mjs`）と `shots/art_hero_sheet.png`（`node tools/hero_sheet.mjs`）。
+- Unity へ: 主人公の基準点は ART_SPEC_UNITY.md の考え方（足元の中央・首・へそ・手・頭の中心 = brow）のまま。敵の PNG は右向き・足元の中央が基準点（`mobs.json` の ox・oy）なので、そのまま Sprite（PPU 1・Point）にできる。
 
 ## 操作
 
@@ -74,6 +89,6 @@ node classic-unity/Web/tools/playtest.mjs               # Chromium で自動で�
 
 ## まだ無い物（仮の試遊版の割り切り）
 
-- 絵は全部仮（敵は動きの種類ごとの形と色、ボスは冠）。スキルのエフェクト・飛び道具（主人公の矢・投げ星）の絵は無い（音とダメージの数字だけ）。
+- 絵は見本の物（主人公・島の敵 5 体＋色違い 2・UI）のほかは仮（敵は動きの種類ごとの形と色、ボスは冠）。スキルのエフェクト・飛び道具（主人公の矢・投げ星）の絵は無い（音とダメージの数字だけ）。
 - 時の裂け目・身代わり人形・秘術の扉・毒の霧・光る岩の専用の絵は無い（ボスの HP バーの「守られている」「潜っている」の字と予兆の四角だけ）。
 - ペット・極意の書・名札などの細かい窓は最低限（持ち物から「使う」）。キー設定の変更は無い。

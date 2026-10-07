@@ -118,6 +118,7 @@ namespace Lumina.Web
                 case "dbgPos": s.Teleport(n, double.Parse(a, CultureInfo.InvariantCulture)); return R(true, "Ok");
                 case "dbgMeso": s.Inventory.AddMeso(n); return R(true, "Ok");
                 case "dbgCard": s.Map.SpawnDrops(s.Body.X, s.Body.Y, new List<Lumina.Core.World.DropItem> { new Lumina.Core.World.DropItem { ItemId = Lumina.Core.Collection.MonsterBook.CardId(a) } }); return R(true, "Ok");
+                case "dbgSpawn": { var m = s.Map.Spawn(a, n, double.Parse(b, CultureInfo.InvariantCulture)); return R(m != null, m != null ? "Ok" : "No"); } // 見本の写真用（tools/art_shots.mjs）
                 case "dbgItem": { int rest = s.Inventory.Add(a, Math.Max(1, n)); return R(rest == 0, "Ok"); }
                 default: return Fun.Run(s, cmd, a, b, n) ?? R(false, "Unknown", "知らない操作: " + cmd); // 楽しさの要素（src/Fun.cs）
             }

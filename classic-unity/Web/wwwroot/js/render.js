@@ -3,6 +3,7 @@
 import { drawAvatar, DEFAULT_LOOK, FRAME_W } from './avatar/avatar.js';
 import { getFrame } from './avatar/skeleton.js';
 import { COLORS } from './avatar/parts.js';
+import { drawMobArt, hasMobArt } from './art.js';
 
 export const VIEW_W = 800, VIEW_H = 600, HUD_H = 64;
 
@@ -58,39 +59,65 @@ export function paletteFor(map) {
 
 const hash = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
 
-// ---------------------------------------------------------------- 小さなドットの数字（ダメージ）
+// ---------------------------------------------------------------- ダメージの数字（クラシック風: 丸い太字・上が明るく下が濃い 2 色・濃い色の太い縁取り）
+// 字は 6×8 の型（オリジナル）を 2 倍（クリティカルは 3 倍）にして、縁取り 1px と右下の影 1px を足す。数字どうしは少し重ねて詰める
 const GLYPH = {
-  0: ['111', '101', '101', '101', '111'], 1: ['010', '110', '010', '010', '111'], 2: ['111', '001', '111', '100', '111'],
-  3: ['111', '001', '111', '001', '111'], 4: ['101', '101', '111', '001', '001'], 5: ['111', '100', '111', '001', '111'],
-  6: ['111', '100', '111', '101', '111'], 7: ['111', '001', '010', '010', '010'], 8: ['111', '101', '111', '101', '111'],
-  9: ['111', '101', '111', '001', '111'], M: ['10001', '11011', '10101', '10001', '10001'], I: ['111', '010', '010', '010', '111'],
-  S: ['111', '100', '111', '001', '111'], '+': ['000', '010', '111', '010', '000'],
+  0: ['.####.', '##..##', '##..##', '##..##', '##..##', '##..##', '##..##', '.####.'],
+  1: ['..##..', '.###..', '..##..', '..##..', '..##..', '..##..', '..##..', '.####.'],
+  2: ['.####.', '##..##', '....##', '...##.', '..##..', '.##...', '##....', '######'],
+  3: ['.####.', '##..##', '....##', '..###.', '....##', '....##', '##..##', '.####.'],
+  4: ['...##.', '..###.', '.####.', '##.##.', '##.##.', '######', '...##.', '...##.'],
+  5: ['######', '##....', '#####.', '....##', '....##', '....##', '##..##', '.####.'],
+  6: ['.####.', '##....', '##....', '#####.', '##..##', '##..##', '##..##', '.####.'],
+  7: ['######', '....##', '...##.', '...##.', '..##..', '..##..', '..##..', '..##..'],
+  8: ['.####.', '##..##', '##..##', '.####.', '##..##', '##..##', '##..##', '.####.'],
+  9: ['.####.', '##..##', '##..##', '##..##', '.#####', '....##', '...##.', '.###..'],
+  M: ['##...##', '###.###', '#######', '##.#.##', '##...##', '##...##', '##...##', '##...##'],
+  I: ['####', '.##.', '.##.', '.##.', '.##.', '.##.', '.##.', '####'],
+  S: ['.####.', '##..##', '##....', '.####.', '....##', '....##', '##..##', '.####.'],
+  '+': ['......', '..##..', '..##..', '######', '######', '..##..', '..##..', '......'],
 };
+// 種類ごとの色 [上の明るい色, 下の濃い色, 縁取り]: 0 与えた・1 クリティカル・2 受けた・3 HP 回復・4 MP 回復・5 MISS・6 受けた（状態異常）
+const DMG_COL = [['#fff0a0', '#ff9a1a', '#4a1800'], ['#ffd0e0', '#ff3a5a', '#3a0010'], ['#f0c8ff', '#a050f0', '#24003a'], ['#d8ffb0', '#40c040', '#0a300a'],
+  ['#c8e8ff', '#3a84f0', '#0a1a4a'], ['#ffffff', '#b8bcc8', '#2a2c34'], ['#e8b0ff', '#9040c0', '#200030']];
 const glyphCache = new Map();
-function glyphs(text, fill, edge, px) {
-  const key = text + fill + px;
+function glyphs(text, kind, px) {
+  const key = text + '|' + kind + '|' + px;
   let c = glyphCache.get(key);
   if (c) return c;
-  const rows = 5; let w = 0;
-  for (const ch of text) w += (GLYPH[ch]?.[0].length || 3) + 1;
+  const [top, bot, edge] = DMG_COL[kind] || DMG_COL[0];
+  const H = 8 * px, pad = 2;
+  // 形（px 倍）
+  const on = new Set(); let x = 0;
+  for (const ch of text) {
+    const gl = GLYPH[ch]; if (!gl) { x += 4 * px; continue; }
+    for (let j = 0; j < 8; j++) for (let i = 0; i < gl[j].length; i++) if (gl[j][i] === '#') for (let a = 0; a < px; a++) for (let b = 0; b < px; b++) on.add((x + i * px + a) + ',' + (j * px + b));
+    x += gl[0].length * px + 1 - px; // 少し重ねて詰める
+  }
+  const W = x + px - 1;
   c = document.createElement('canvas');
-  c.width = (w + 2) * px; c.height = (rows + 2) * px;
+  c.width = W + pad * 2 + 1; c.height = H + pad * 2 + 1;
   const g = c.getContext('2d');
-  const draw = (color, ox, oy) => {
-    g.fillStyle = color; let x = 1;
-    for (const ch of text) {
-      const gl = GLYPH[ch]; if (!gl) { x += 4; continue; }
-      for (let j = 0; j < rows; j++) for (let i = 0; i < gl[j].length; i++) if (gl[j][i] === '1') g.fillRect((x + i + ox) * px, (1 + j + oy) * px, px, px);
-      x += gl[0].length + 1;
-    }
-  };
-  for (const [ox, oy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [1, 1]]) draw(edge, ox, oy);
-  draw(fill, 0, 0);
+  const has = (i, j) => on.has(i + ',' + j);
+  g.fillStyle = edge;
+  for (let j = -1; j <= H + 1; j++) for (let i = -1; i <= W + 1; i++) {
+    if (has(i, j)) continue;
+    let near = false;
+    for (let dj = -1; dj <= 1 && !near; dj++) for (let di = -1; di <= 1; di++) if (has(i + di, j + dj)) { near = true; break; }
+    if (!near && (has(i - 1, j - 1) || has(i - 1, j - 2) || has(i - 2, j - 1))) near = true; // 右下の影（縁取りを太く）
+    if (near) g.fillRect(i + pad, j + pad, 1, 1);
+  }
+  for (const k of on) {
+    const [i, j] = k.split(',').map(Number);
+    const t = j / H;
+    g.fillStyle = t < 0.18 ? '#ffffff' : t < 0.5 ? top : bot;
+    if (t < 0.18 && !has(i, j - 1)) g.fillStyle = top; // いちばん上の縁は明るい色
+    g.fillRect(i + pad, j + pad, 1, 1);
+  }
   if (glyphCache.size > 600) glyphCache.clear();
   glyphCache.set(key, c);
   return c;
 }
-const DMG_COL = [['#ffb030', '#5a2000'], ['#ff4040', '#4a0000'], ['#c070ff', '#2a0040'], ['#60e060', '#0a3a0a'], ['#60a0ff', '#0a1a4a'], ['#e0e0e0', '#303030'], ['#b050e0', '#200030']];
 
 // ---------------------------------------------------------------- 描く物
 export class Renderer {
@@ -107,6 +134,7 @@ export class Renderer {
     this.look = { ...DEFAULT_LOOK };
     this.npcLooks = new Map();
     this.bulbs = {};
+    this.mobY = new Map(); // 敵ごとの前のフレームの高さ（跳ねている絵を選ぶ）
   }
 
   resize(scale) {
@@ -118,7 +146,7 @@ export class Renderer {
   setMap(map, px, py) {
     this.map = map;
     this.pal = paletteFor(map);
-    this.nums = []; this.fx = [];
+    this.nums = []; this.fx = []; this.mobY.clear();
     this.snapCam(px, py);
     // 壁で囲まれた足場（岩・段）は下まで塗る
     for (const fh of map.footholds) {
@@ -340,12 +368,17 @@ export class Renderer {
   }
 
   // 名前の札（下が暗い四角・字は明るい）
+  // クラシック風: 角を 1 ドット落とした暗い札、上に 1px の明るい線、字は太めで下に影
   tag(g, text, x, y, color = '#ffffff') {
-    g.font = '11px sans-serif';
-    const w = Math.ceil(g.measureText(text).width) + 6;
-    g.fillStyle = 'rgba(0,0,0,0.55)'; g.fillRect(Math.round(x - w / 2), Math.round(y), w, 14);
-    g.fillStyle = color; g.textAlign = 'center'; g.textBaseline = 'top';
-    g.fillText(text, Math.round(x), Math.round(y) + 1);
+    g.font = 'bold 11px sans-serif';
+    const w = Math.ceil(g.measureText(text).width) + 8;
+    const bx = Math.round(x - w / 2), by = Math.round(y);
+    g.fillStyle = 'rgba(10,12,28,0.72)';
+    g.fillRect(bx + 1, by, w - 2, 15); g.fillRect(bx, by + 1, w, 13);
+    g.fillStyle = 'rgba(255,255,255,0.22)'; g.fillRect(bx + 1, by + 1, w - 2, 1);
+    g.textAlign = 'center'; g.textBaseline = 'top';
+    g.fillStyle = 'rgba(0,0,0,0.9)'; g.fillText(text, Math.round(x) + 1, by + 2);
+    g.fillStyle = color; g.fillText(text, Math.round(x), by + 1);
     g.textAlign = 'left';
   }
 
@@ -398,7 +431,7 @@ export class Renderer {
     if (flags & 4) alpha *= 0.6; // 分身
     g.globalAlpha = Math.max(0, alpha);
     // 影
-    g.fillStyle = 'rgba(0,0,0,0.25)'; g.fillRect(x - w / 2 + 2, y - 2, w - 4, 3);
+    g.fillStyle = 'rgba(0,0,0,0.25)'; g.fillRect(x - w / 2 + 4, y - 2, w - 8, 3); g.fillRect(x - w / 2 + 2, y - 1, w - 4, 1);
     const hit = motion === 'hit1';
     const atk = motion === 'attack1' || motion === 'skill1';
     const body = hit ? '#ffffff' : `hsl(${hue},55%,${atk ? 62 : 55}%)`;
@@ -407,6 +440,12 @@ export class Renderer {
     const move = mech === 'rock' ? 'rock' : def.move;
     const left = x - w / 2, top = y - h;
     const bob = motion === 'move' || motion === 'fly' ? Math.round(Math.sin(t * 10)) : 0;
+    // 跳ねて宙にいるか（前のフレームとの高さの差）
+    const py = this.mobY.get(uid); this.mobY.set(uid, y0);
+    const air = py != null && Math.abs(py - y0) > 0.4;
+    if (hasMobArt(id) && !mech) {
+      drawMobArt(g, id, motion, t, x, y, facing, air, fade);
+    } else {
     g.fillStyle = dark;
     if (move === 'crawl') {
       // 殻と体
@@ -450,6 +489,7 @@ export class Renderer {
       this.eyes(g, x + facing * w * 0.22, top + h * 0.3 + bob, facing);
       if (atk) { g.fillStyle = '#ffffff'; g.fillRect(x + facing * (w / 2 + 2) - 2, top + h * 0.4, 6, 3); }
     }
+    }
     if (flags & 16) { // ボス: 冠
       g.fillStyle = '#ffd040';
       const cxw = Math.min(30, w / 2);
@@ -461,9 +501,12 @@ export class Renderer {
     // HP バー（被弾した後）と名前
     if (flags & 2 || flags & 16) {
       const bw = Math.max(36, Math.min(80, w));
-      g.fillStyle = '#000'; g.fillRect(x - bw / 2 - 1, top - 9, bw + 2, 6);
-      g.fillStyle = '#400'; g.fillRect(x - bw / 2, top - 8, bw, 4);
-      g.fillStyle = '#ff3a3a'; g.fillRect(x - bw / 2, top - 8, Math.round(bw * Math.max(0, hp) / Math.max(1, maxHp)), 4);
+      const bx = Math.round(x - bw / 2), byy = Math.round(top - 9), fw2 = Math.round(bw * Math.max(0, hp) / Math.max(1, maxHp));
+      g.fillStyle = '#10142a'; g.fillRect(bx - 1, byy, bw + 2, 7); g.fillRect(bx, byy - 1, bw, 9);
+      g.fillStyle = '#3a1418'; g.fillRect(bx, byy + 1, bw, 5);
+      g.fillStyle = '#e8303a'; g.fillRect(bx, byy + 1, fw2, 5);
+      g.fillStyle = '#ff9a8a'; g.fillRect(bx, byy + 1, fw2, 1);
+      g.fillStyle = '#a01822'; g.fillRect(bx, byy + 5, fw2, 1);
     }
     if (!(flags & 4)) this.tag(g, (def.name || id) + ' Lv' + (def.lv || '?'), x, y + 3, flags & 64 ? '#ffd080' : '#ffffff');
   }
@@ -548,21 +591,28 @@ export class Renderer {
     if (/槍|矛/.test(type)) { len = 30; col = '#c0a070'; wdt = 2; }
     if (/短剣/.test(type)) len = 11;
     if (anim === 'stand1' || anim === 'walk1' || anim === 'alert' || anim === 'jump' || anim === 'sit') { dx = 0.35; dy = -1; const l2 = Math.hypot(dx, dy); dx /= l2; dy /= l2; }
-    g.strokeStyle = '#303038'; g.lineWidth = wdt + 2;
-    g.beginPath(); g.moveTo(hx, hy); g.lineTo(hx + facing * dx * len, hy + dy * len); g.stroke();
-    g.strokeStyle = col; g.lineWidth = wdt;
-    g.beginPath(); g.moveTo(hx, hy); g.lineTo(hx + facing * dx * len, hy + dy * len); g.stroke();
-    g.fillStyle = '#7a4a20'; g.fillRect(hx - 2, hy - 2, 4, 4);
+    // ドットの線で描く（ぼけない）: 縁 → 刃 → 光の筋 → つば・にぎり
+    const ex = hx + facing * dx * len, ey = hy + dy * len;
+    pixLine(g, hx, hy, ex, ey, wdt + 2, '#2a2a36');
+    pixLine(g, hx, hy, ex, ey, wdt, col);
+    if (wdt >= 3) pixLine(g, hx - 1, hy - 1, ex - 1, ey - 1, 1, '#ffffff');
+    const gx = Math.round(hx + facing * dx * 3), gy = Math.round(hy + dy * 3);
+    pixLine(g, gx - dy * 3 * facing, gy + dx * 3, gx + dy * 3 * facing, gy - dx * 3, 2, '#c08a20');
+    g.fillStyle = '#5a3414'; g.fillRect(hx - 2, hy - 2, 4, 4); g.fillStyle = '#9a6430'; g.fillRect(hx - 1, hy - 1, 2, 2);
   }
 
   drawSwingFx(g, akind, idx, x, y, facing) {
     g.save();
     g.globalAlpha = idx === 1 ? 0.8 : 0.4;
-    if (akind === 0 || akind === 5) { // 振り・殴り: 弧
-      g.strokeStyle = '#ffffff'; g.lineWidth = 3;
-      g.beginPath();
-      if (facing > 0) g.arc(x + 6, y - 28, 34, -1.3, 0.9); else g.arc(x - 6, y - 28, 34, Math.PI - 0.9, Math.PI + 1.3);
-      g.stroke();
+    if (akind === 0 || akind === 5) { // 振り・殴り: 三日月の弧（ドット。先が太く、尾が細い）
+      const cx = Math.round(x + facing * 6), cy = Math.round(y - 30);
+      for (let i = 0; i <= 28; i++) {
+        const u = i / 28, ang = -1.3 + 2.2 * u;
+        const r = 34, th = 1 + Math.round(3 * Math.sin(u * Math.PI));
+        const px = Math.round(cx + facing * Math.cos(ang) * r), py = Math.round(cy + Math.sin(ang) * r);
+        g.fillStyle = u > 0.35 && u < 0.75 ? '#ffffff' : '#c8f0ff';
+        g.fillRect(facing > 0 ? px - th + 1 : px, py, th, 2);
+      }
     } else if (akind === 1) { // 突き
       g.fillStyle = '#ffffff'; g.fillRect(facing > 0 ? x + 14 : x - 54, y - 24, 40, 3);
     } else if (akind === 4) { // 詠唱
@@ -613,7 +663,7 @@ export class Renderer {
   addNums(f) {
     for (const d of f.dm) {
       const [kind, value, x, y, stack, delay] = d;
-      this.nums.push({ kind, value, x, y: y - stack * 18, delay, t: 0 });
+      this.nums.push({ kind, value, x, y: y - stack * 20, delay, t: 0 });
     }
   }
 
@@ -626,16 +676,24 @@ export class Renderer {
       keep.push(n);
       const rise = Math.min(30, n.t * 40);
       const a = n.t < 0.9 ? 1 : Math.max(0, 1 - (n.t - 0.9) / 0.5);
-      const [fill, edge] = DMG_COL[n.kind] || DMG_COL[0];
       const text = n.kind === 5 ? 'MISS' : (n.kind === 3 || n.kind === 4 ? '+' : '') + n.value;
       const big = n.kind === 1 ? 3 : 2;
-      const img = glyphs(text, fill, edge, big);
+      const img = glyphs(text, n.kind, big);
+      // 出た瞬間だけ 1 段上から落ちて止まる（クラシック風の「ぽん」）
+      const pop = n.t < 0.08 ? -4 : 0;
       g.globalAlpha = a;
-      g.drawImage(img, Math.round(n.x - img.width / 2), Math.round(n.y - 20 - rise));
-      if (n.kind === 1) { g.fillStyle = '#ffe040'; g.fillRect(Math.round(n.x - img.width / 2) - 6, Math.round(n.y - 16 - rise), 5, 5); }
+      const ix = Math.round(n.x - img.width / 2), iy = Math.round(n.y - 22 - rise + pop);
+      g.drawImage(img, ix, iy);
+      if (n.kind === 1) this.critStar(g, ix - 7, iy + 6);
       g.globalAlpha = 1;
     }
     this.nums = keep;
+  }
+
+  // クリティカルの星（ドット）
+  critStar(g, x, y) {
+    const S = ['...o...', '..oyo..', 'ooyyyoo', '.oyyyo.', '.oyoyo.', 'oo...oo'];
+    for (let j = 0; j < S.length; j++) for (let i = 0; i < S[j].length; i++) { const ch = S[j][i]; if (ch === '.') continue; g.fillStyle = ch === 'o' ? '#6a3a00' : '#ffe040'; g.fillRect(x + i, y + j, 1, 1); }
   }
 
   addFx(kind, x, y, text) { this.fx.push({ kind, x, y, text, t: 0 }); }
@@ -722,6 +780,15 @@ export class Renderer {
     g.font = 'bold 15px monospace'; g.fillStyle = s < 60 ? '#ff8080' : '#fff'; g.textAlign = 'center'; g.textBaseline = 'top';
     g.fillText(`残り ${mm}:${ss}`, VIEW_W / 2, 55); g.textAlign = 'left';
   }
+}
+
+/** 太さのあるドットの線（ブレゼンハムの点ごとに w×w の四角） */
+function pixLine(g, x0, y0, x1, y1, w, color) {
+  x0 = Math.round(x0); y0 = Math.round(y0); x1 = Math.round(x1); y1 = Math.round(y1);
+  const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+  let e = dx + dy; const o = Math.floor(w / 2);
+  g.fillStyle = color;
+  for (let n = 0; n < 400; n++) { g.fillRect(x0 - o, y0 - o, w, w); if (x0 === x1 && y0 === y1) break; const e2 = 2 * e; if (e2 >= dy) { e += dy; x0 += sx; } if (e2 <= dx) { e += dx; y0 += sy; } }
 }
 
 export function itemColor(it) {
