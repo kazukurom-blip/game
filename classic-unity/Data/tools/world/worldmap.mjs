@@ -93,9 +93,15 @@ export function buildWorldMap(maps, raw, regions) {
     const ids = raw.map((r) => r[0]).filter((id) => maps[id] && regionOf(id) === rid);
     if (!ids.length) continue;
     const set = new Set(ids);
-    const edges = links.filter(([a, b]) => set.has(a) && set.has(b));
+    // 市場（V090）は大陸の 5 町すべてとつながるので、並べる時は引き合わせない（町が真ん中に固まらないように。線は描く）
+    const edges = links.filter(([a, b]) => set.has(a) && set.has(b) && a !== 'V090' && b !== 'V090');
     for (const [a, b] of travel) if (set.has(a) && set.has(b) && (maps[a].jump || maps[b].jump)) edges.push([a, b]); // 試練は町のそばに
     const pos = layoutRegion(ids, edges, rid);
+    if (pos.V090) {
+      // 市場はつながる町の真ん中あたりに置く
+      const nb = links.filter(([a, b]) => a === 'V090' || b === 'V090').map(([a, b]) => (a === 'V090' ? b : a)).filter((x) => pos[x]);
+      if (nb.length) pos.V090 = { x: Math.round(nb.reduce((t, x) => t + pos[x].x, 0) / nb.length) + 30, y: Math.round(nb.reduce((t, x) => t + pos[x].y, 0) / nb.length) - 20 };
+    }
     out.regions.push({ id: rid, name, note, maps: ids });
     for (const id of ids) {
       const r = RAW[id], m = maps[id];

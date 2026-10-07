@@ -21,7 +21,8 @@ const HOLD = {
 // V は話す・会話を進めるキー（クイックスロットの 6 番目は T）
 const QUICK_CODES = ['ShiftLeft|ShiftRight', 'KeyA', 'KeyD', 'KeyF', 'KeyG', 'KeyT', 'KeyB', 'KeyY', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8'];
 const quickOf = (code) => QUICK_CODES.findIndex((c) => c.split('|').includes(code));
-const WIN_KEYS = { KeyI: 'inv', KeyE: 'equip', KeyS: 'stat', KeyK: 'skill', KeyQ: 'quest', KeyO: 'opt' };
+// L 図鑑・N 勲章・U 記録・W 全体マップ（B はクイックスロットなので図鑑は L）
+const WIN_KEYS = { KeyI: 'inv', KeyE: 'equip', KeyS: 'stat', KeyK: 'skill', KeyQ: 'quest', KeyO: 'opt', KeyL: 'book', KeyN: 'medal', KeyU: 'record', KeyW: 'world' };
 
 class Input {
   constructor() {
@@ -60,6 +61,7 @@ class Game {
     this.data = data;
     const parse = (p, key) => { const o = {}; for (const x of JSON.parse(data[p])[key]) o[x.id] = x; return o; };
     this.db = { items: parse('items.json', 'items'), monsters: parse('monsters.json', 'monsters'), skills: parse('skills.json', 'skills'), npcs: parse('npcs.json', 'npcs') };
+    this.db.worldmap = data['worldmap.json'] ? JSON.parse(data['worldmap.json']) : { regions: [], maps: {}, links: [], outer: [], travel: [] }; // 全体マップ（W）
     this.maps = new Map();
     this.audio = new Audio(manifest, sfx, this.db);
     this.input = new Input();
@@ -191,7 +193,7 @@ class Game {
     this.audio.onFrame(f, dt);
     this.ui.hud(f);
     const t2 = performance.now();
-    this.renderer.draw(f, dt, { weaponType: st?.stats?.weapon, hideMinimap: this.hideMinimap, talking: this.talking() });
+    this.renderer.draw(f, dt, { weaponType: st?.stats?.weapon, hideMinimap: this.hideMinimap, talking: this.talking(), name: st?.name, medal: st?.medal });
     const t3 = performance.now();
     this.frameNo++;
     if (this.frameNo % 20 === 0) this.ui.refresh(false);
@@ -239,6 +241,12 @@ class Game {
         case 'RoomEntered': U.msg(`制限時間 ${Math.round(value / 60)} 分${text ? '（' + text + '）' : ''}`); break;
         case 'BossPhase': U.toast(text || '段階が変わった'); break;
         case 'BossKilled': case 'DungeonCleared': U.toast('撃破！'); break;
+        // やりこみ（図鑑・勲章・ジャンプの試練）
+        case 'CardPicked': U.msg(`${text}を手に入れた`, 'item'); this.renderer.addFx('card', f.p[0], f.p[1], value >= 5 ? '図鑑 完成！' : `カード ${value}/5`); dirty = true; break;
+        case 'BookLevelUp': U.msg(text, 'big'); U.toast(`図鑑の段 ${value}`); dirty = true; break;
+        case 'MedalEarned': U.msg(`勲章「${text}」を手に入れた！（N で付ける）`, 'big'); U.toast(`勲章「${text}」`); this.renderer.addFx('medal', f.p[0], f.p[1], text); dirty = true; break;
+        case 'MedalEquipped': dirty = true; break;
+        case 'JumpCleared': U.msg(text, 'big'); U.toast('てっぺん！'); dirty = true; break;
         case 'EquipChanged': case 'ApChanged': case 'SpChanged': case 'ItemUsed': case 'ItemBought': case 'ItemSold': case 'ScrollResult':
           dirty = true; if (type === 'ScrollResult' && text) U.msg(text); break;
         case 'Healed': if (text) U.msg(text); break;

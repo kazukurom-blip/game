@@ -341,6 +341,18 @@ export class Renderer {
     g.textAlign = 'left';
   }
 
+  medalTag(g, text, x, y) {
+    g.font = 'bold 11px sans-serif';
+    const w = Math.ceil(g.measureText(text).width) + 14;
+    const bx = Math.round(x - w / 2), by = Math.round(y);
+    g.fillStyle = '#5a3a00'; g.fillRect(bx - 1, by - 1, w + 2, 16);
+    g.fillStyle = '#c89020'; g.fillRect(bx, by, w, 14);
+    g.fillStyle = '#ffe890'; g.fillRect(bx, by, w, 2);
+    g.fillStyle = '#fff6d0'; g.textAlign = 'center'; g.textBaseline = 'top';
+    g.fillText(text, Math.round(x), by + 1);
+    g.textAlign = 'left';
+  }
+
   drawDrops(g, f) {
     for (const d of f.dr) {
       const x = Math.round(d[3]), y = Math.round(d[4]);
@@ -348,6 +360,14 @@ export class Renderer {
         const col = ['#c88a40', '#c88a40', '#d0d0e0', '#ffd040', '#ffd040'][d[5]];
         if (d[5] >= 4) { g.fillStyle = '#806010'; g.fillRect(x - 8, y - 12, 16, 12); g.fillStyle = col; g.fillRect(x - 7, y - 11, 14, 10); g.fillStyle = '#fff4a0'; g.fillRect(x - 4, y - 9, 3, 2); }
         else { g.fillStyle = '#5a3a00'; g.fillRect(x - 6, y - 12, 12, 12); g.fillStyle = col; g.fillRect(x - 5, y - 11, 10, 10); g.fillStyle = '#ffffff'; g.fillRect(x - 3, y - 9, 2, 2); }
+      } else if (d[1].startsWith('card.')) {
+        // 図鑑のカード（拾うと図鑑へ）: 縦長の札に敵の色の丸
+        const mob = this.db.monsters[d[1].slice(5)];
+        g.fillStyle = '#3a2a08'; g.fillRect(x - 7, y - 19, 14, 19);
+        g.fillStyle = '#fff4c8'; g.fillRect(x - 6, y - 18, 12, 17);
+        g.fillStyle = mobColor(mob); g.beginPath(); g.arc(x, y - 11, 4, 0, Math.PI * 2); g.fill();
+        g.fillStyle = '#c08a10'; g.fillRect(x - 6, y - 4, 12, 2);
+        if (Math.floor(this.time * 3) % 2) { g.fillStyle = 'rgba(255,255,255,0.8)'; g.fillRect(x + 3, y - 17, 2, 2); }
       } else {
         const it = this.db.items[d[1]];
         g.fillStyle = '#202020'; g.fillRect(x - 8, y - 16, 16, 16);
@@ -483,6 +503,9 @@ export class Renderer {
     }
     if (motion === 'sit') { g.fillStyle = '#7a4a20'; g.fillRect(Math.round(x) - 10, Math.round(y) - 12, 20, 12); g.fillStyle = '#b07840'; g.fillRect(Math.round(x) - 10, Math.round(y) - 14, 20, 3); }
     drawAvatar(g, this.look, anim, idx, x, y, facing);
+    // 名前の札と、付けている勲章の札（頭の上）
+    if (ui && ui.name) this.tag(g, ui.name, x, y + 2, '#ffffff');
+    if (ui && ui.medal) this.medalTag(g, ui.medal, x, y - 92);
     // 武器（仮）: 手前の手から
     if (anim !== 'rope' && anim !== 'ladder' && ui && ui.weaponType && ui.weaponType !== '素手') this.drawWeapon(g, anim, idx, x, y, facing, ui.weaponType);
     // 攻撃の軌跡
@@ -625,6 +648,11 @@ export class Renderer {
         g.fillStyle = `rgba(80,40,0,${a})`; g.fillText(e.text, e.x + 1, e.y - 100 - e.t * 10 + 1);
         g.fillStyle = `rgba(255,230,80,${a})`; g.fillText(e.text, e.x, e.y - 100 - e.t * 10);
         g.textAlign = 'left';
+      } else if (e.kind === 'card' || e.kind === 'medal') {
+        g.font = 'bold 13px sans-serif'; g.textAlign = 'center';
+        g.fillStyle = `rgba(60,30,0,${a})`; g.fillText(e.text, e.x + 1, e.y - 80 - e.t * 20 + 1);
+        g.fillStyle = e.kind === 'medal' ? `rgba(255,220,80,${a})` : `rgba(255,250,200,${a})`; g.fillText(e.text, e.x, e.y - 80 - e.t * 20);
+        g.textAlign = 'left';
       } else if (e.kind === 'text') {
         g.font = 'bold 13px sans-serif'; g.textAlign = 'center';
         g.fillStyle = `rgba(255,255,255,${a})`; g.fillText(e.text, e.x, e.y - 70 - e.t * 20);
@@ -704,4 +732,10 @@ export function itemColor(it) {
   if (it.tab === 'setup') return '#a06030';
   if (it.tab === 'special') return '#c060c0';
   return '#a08060';
+}
+
+/** 敵の仮の色（描く時と同じ: ID の hash の色相）。図鑑の窓・カードの絵で使う */
+export function mobColor(def) {
+  const id = def?.id || '';
+  return `hsl(${hash(id) % 360},55%,55%)`;
 }

@@ -21,8 +21,9 @@ classic-unity/
     Quests/    QuestDef・QuestLog
     World/     MapData（マップの JSON の形）・MapInstance（敵・落ちている物・湧き直し）
     Save/      SaveData・SaveSerializer・SaveMigrations・SaveStore（壊れない書き方）・FileSystem
+    Collection/ MonsterBook（敵の図鑑のカード・段）・BookIndex（図鑑に載る敵と地域）・Medals（勲章の条件）・PlayRecords（記録と統計）
     Town/      SystemsData（systems.json の形）・Storage（倉庫・共有の AccountData）・PetState・DailyLog（実時間の 1 日 N 回）・QuizSession
-    Game/      GameSession（全部をまとめる。Unity が持つのはこれ 1 つ。.Combat/.Skills/.Status/.Items/.Quests/.Mechanics/.Town/.Jobs/.Rooms/.Pets に分けてある）・PlayerInput・GameEvents・AvatarPose
+    Game/      GameSession（全部をまとめる。Unity が持つのはこれ 1 つ。.Combat/.Skills/.Status/.Items/.Quests/.Mechanics/.Town/.Jobs/.Rooms/.Pets/.Records/.Collection に分けてある）・PlayerInput・GameEvents・AvatarPose
     Data/      GameData（JSON を読む）・IDataSource
     Util/      Json（小さな読み書き）・Rng（決まった乱数）・Expr（スキルの式）
   Data/                     ← ゲームのデータ（JSON）。Unity では Assets/Resources/Lumina/ へコピー
@@ -30,7 +31,8 @@ classic-unity/
     tools/systems.mjs       ← 町と成長の仕組み（店の品ぞろえ・倉庫・タクシー・部屋の決まり・ペット・製作・クイズ・転職の試験）→ shops.json・systems.json・items.json の品
     tools/export_data.mjs   ← classic/tools/data/*.mjs → JSON（--check で書き出さずに検査）
     tools/skills_export.mjs ← skills.json = JOBS.md 4 章の表（名前・最大Lv・効果・MP・前提）＋ classic/tools/data/skills.mjs（範囲・式・動き・状態異常）
-    tools/world/            ← マップの生成器と検査（generate.mjs・check.mjs・specs.mjs（マップごとの違い）・npcs.mjs・island.mjs（島は手で置いた））
+    tools/world/            ← マップの生成器と検査（generate.mjs・check.mjs・specs.mjs（マップごとの違い）・npcs.mjs・island.mjs（島は手で置いた）・jump.mjs（ジャンプの試練 J001〜J005）・worldmap.mjs（全体マップ → worldmap.json））
+    tools/medals.mjs        ← 勲章（条件で手に入るメダル）の名前・文・能力 → items.json の eq.medal.<ID>
     tools/quest_goals.mjs   ← 文章だけだったクエストの目的を、判定できる形（talk/visit/interact/collect/event）に直した表
     tools/export_golden.mjs ← テストの期待値（ブラウザ版の物理・設計書の式）→ Tests/Golden/
   Tests/                    ← xUnit（net8.0）。PlaytestTests.cs は通しのボットのテスト（長い物は LUMINA_LONG=1 の時だけ）
@@ -243,7 +245,7 @@ session.Character / Stats / Inventory / Equipment / Skills / Buffs / Status / Qu
   `{"format":"lumina-save","seq":12,"length":3456,"crc32":"89abcdef","data":{…}}`
 - 書く順番: `.tmp` に書いて fsync → 読み直して確かめる → bak を 1 つずつ後ろへ → 今のセーブを bak1 へ → `.tmp` で一度に置き換え。**どこで落ちても、前の版か新しい版のどちらかが必ず読める**（テストで全部の手順で「落ちた」を再現。ちぎれた書き込みも）。
 - 読む順番: 今のセーブと `.tmp` のうち壊れていなくて `seq` の大きい方 → bak1 → bak2 → bak3。壊れていたら `LoadResult.Recovered` と理由（`Problems`）。全部壊れていても落ちずに「読めない」を返す。
-- 版: `version`（今は 2）。古い版は `SaveMigrations` で 1 つずつ直してから読む。新しすぎる版は断る（バックアップへ）。データに無いアイテムは外してお知らせ。
+- 版: `version`（今は 4。版 4 で やりこみ の `collection` を足した。4-12）。古い版は `SaveMigrations` で 1 つずつ直してから読む。新しすぎる版は断る（バックアップへ）。データに無いアイテムは外してお知らせ。
 - 版 3: ペット（`pets`）と実時間の回数（`daily`: ボスの間・ダンジョン・毎日の宝箱）を足した。版 2 は空で足して読む。
 - **倉庫はキャラ全員で共有**: キャラのセーブとは別の枠 `account`（同じ壊れない書き方。`SaveStore.SaveText/LoadText`、中身は `AccountData`）。`AttachSave` で読み、`SaveNow` でキャラより先に書く（間で落ちると品が両方に残る向き。消えはしない）。
 - 制限時間のある部屋（ボスの間・ダンジョン・試験）の中では、場所を戻り先にして保存する。
@@ -312,6 +314,21 @@ session.CureStatus(GameSession.CurableAll);       // 治すスキル（意志の
 - **boss_kill**: ボス・大ボス（kind boss/raid）を倒すと（R-21）。お知らせ `BossKilled`。
 - **ペット**（QUESTS.md 4 章）: ペット屋で買った「子犬」などを `UseItem` で迎える（`pet_adopted`）。連れて歩けるのは 1 匹（PET-07 の後 2 匹）。満腹度 0〜100（36 秒で 1 減る・餌 +30・0 で動かない）。親密度 Lv1〜30（Lv n → n+1 に 3n 点。餌 +3（お腹が空いている時）・芸の成功 +1（60%・10 秒に 1 回）・満腹度 50 以上で 5 分連れて歩くと +1・満腹度 0 のまま 10 分で −1）。親密度の目的（PET-04〜07）は「今の Lv」まで進む。技の本: 自動で拾う（80 px、範囲を広げると 200 px）・自動で薬（HP 50%・MP 30% を下回ると一番効く薬）。子竜は親密度 30 で「竜」。名札で名前を変える。数は全部「決めた値」（systems.mjs）。
 - お知らせ（GameEvents）: `StorageChanged`・`Crafted`・`ChestOpened`・`SatDown`/`StoodUp`・`PetAdopted`/`PetFed`/`PetCloseness`/`PetTrick`/`PetHungry`/`PetUsedPotion`・`RoomEntered`（Value = 制限時間、Text = あと何回）/`RoomTimeUp`/`RoomFailed`/`DungeonCleared`・`BossKilled`・`QuizQuestion`/`QuizAnswered`/`QuizCleared`。
+
+### 4-12. やりこみ — `Core/Collection/`・`GameSession.Collection.cs`（データは items.json の勲章・`Data/worldmap.json`・ジャンプの試練のマップ）
+
+| 仕組み | Core | 読む物・呼ぶ物 |
+|---|---|---|
+| **敵の図鑑（カード）** | `MonsterBook`（カードの数・段・上乗せ）・`BookIndex`（図鑑に載る敵と地域。worldmap.json の湧く所から） | `session.Book`（`Count(敵)`・`CompletedCount`・`Level`）・`session.BookIndex`。カードは `KillMob` で別の乱数（`cardRng`。ふつうのドロップの乱数の流れは変えない）で落ち、`DropItem.ItemId = "card.<敵>"`。拾う（`PickupDrop`・ペットも）と持ち物でなく図鑑へ（`CardPicked`・完成で段が上がると `BookLevelUp`）。段の上乗せは装備と同じに `StatCalc.Compute(..., extra)` で足す。`Book.Variants`（同じ敵の別の記録。珍しい色違いなど用の空き）も保存する |
+| **勲章** | `Medals`（ID → 条件・進み）。名前・文・能力は `Data/tools/medals.mjs` → items.json の `eq.medal.<ID>`（`medal.auto`） | 勲章 = メダルの品（装備の欄 `EquipSlot.Medal`）。クエストでもらうメダル（quest_items.mjs）と同じ欄・同じ窓。`MedalList()`・`HasMedal(id)`・`MedalCount()`・`EquipMedal(品の ID / null)`（条件の勲章は持ち物に入らず、付けた時だけ欄に出る）・`MedalsEarned`。0.5 秒ごと（倒した・拾った・書の後はすぐ）に `CheckMedals()` → `MedalEarned`（Id = 品）・地域の図鑑の勲章はお金も |
+| **記録と統計** | `PlayRecords`（倒した数・敵ごとの数・倒れた回数・拾ったお金/品・最大ダメージ・ボスを倒した回数と最短（最初に攻撃してから）・薬・書・ダンジョン・隠しポータル・椅子・ジャンプの試練） | `session.Records`。訪ねたマップ・倒した敵の種類・町・クエストの数は**冒険の記録**（`GameSession.Records.cs` の Flags `visit.*`・`kill.*`・`MapsVisited`・`TownsVisited`・`QuestsDone`）を使う（二重に数えない） |
+| **ジャンプの試練** | マップの `jump`（`MapData.Jump`: 入口の町・段の床・ごほうび） | `JumpStage`（今の段）・`JumpElapsed`（入ってからの秒）。てっぺんの宝箱（`<マップ>.chest`）を `Interact` → 初めて: `Jump.First` と勲章、2 回目から 1 日 1 回 `Jump.Daily`（`Daily` の `jump.<マップ>`）。`JumpCleared`（Value = 秒）。WORLD.md 8 章 |
+| **全体マップ** | `WorldMapData`（`GameData.WorldMap`） | `WorldMarks()` → マップ → ビット（`MarkAvailable` 1・`MarkCompletable` 2・`MarkObjective` 4・`MarkHere` 8・`MarkVisited` 16）。開いた時だけ呼ぶ（全 NPC の `NpcBulb` を見る） |
+
+- セーブの版 4: `collection`（`cards`・`variants`・`medals`・`records`・`cardRng`）。版 3 は空で足して読む（記録は 0 から）。付けている勲章は装備（メダルの欄）として残る。
+- お知らせ（GameEvents）: `CardPicked`・`BookLevelUp`・`MedalEarned`・`MedalEquipped`・`JumpCleared`。
+- 決めた値: カードの確率（ふつう 1.2%・強敵 8%・ボス 30%・大ボス 60%）・段の区切り（3・8・15・25・40・60・85・115・145・170 種）・上乗せ・勲章の能力・試練のごほうび（ITEMS.md 9 章・WORLD.md 8 章）。
+- 美容院（髪型・顔）は別の担当。
 
 ## 5. クラシックに比べてまだ違う所・次にやること
 

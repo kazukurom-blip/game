@@ -2,7 +2,7 @@
 //   node classic-unity/Web/tools/make_dist.mjs   # 先に dist/ を作る
 //   node classic-unity/Web/tools/playtest.mjs    # 確かめる（PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers）
 // 歩く・ジャンプ・NPC と V で話す（V だけで話を聞く→受ける→閉じる・セリフが変わる・頭の上の「？」と電球）・クエストを受ける・ポータル・縄・はしご・攻撃・敵を倒す・拾う・Lv アップ・AP/SP・
-// クイックスロット・窓・セーブして読み直す、をして、コンソールのエラーとフレームの時間を確かめる。
+// クイックスロット・窓・セーブして読み直す・図鑑のカードを拾う・図鑑/勲章/記録/全体マップの窓・ジャンプの試練に入る、をして、コンソールのエラーとフレームの時間を確かめる。
 import { createRequire } from 'node:module';
 import http from 'node:http';
 import fs from 'node:fs';
@@ -364,6 +364,77 @@ try {
     await sleep(1200);
     await shot('job_advanced');
   } else check('転職官のマップが見つかる', false);
+
+  // ---------------- やりこみ: 図鑑のカード・図鑑/勲章/記録/全体マップの窓・ジャンプの試練
+  {
+    const book0 = (await act('book')).data;
+    const n0 = book0.mobs.find((m) => m.id === 'M001')?.n ?? 0;
+    await act('dbgCard', 'M001'); await sleep(900);
+    await page.keyboard.down('z'); await sleep(500); await page.keyboard.up('z'); await sleep(200);
+    const book1 = (await act('book')).data;
+    const n1 = book1.mobs.find((m) => m.id === 'M001')?.n ?? 0;
+    check('図鑑のカードを拾うと数が増える（持ち物には入らない）', n1 === n0 + 1 && book1.cards === book0.cards + 1, `コロ貝 ${n0}→${n1}・全部 ${book0.cards}→${book1.cards}`);
+    await page.keyboard.press('l'); await sleep(300);
+    const tabS = await page.$('#w_book button[data-bookr="S"]'); // 芽吹きの島のタブ（倒した敵がいる）
+    if (tabS) { await tabS.click(); await sleep(200); }
+    const cards = await page.$$eval('#w_book .bcard', (l) => l.length);
+    const unseen = await page.$$eval('#w_book .bcard.unseen', (l) => l.length);
+    check('L で図鑑の窓が開く（地域ごと・未発見はシルエット）', cards > 0 && unseen > 0 && cards > unseen, `カード ${cards}・未発見 ${unseen}`);
+    const card = await page.$('#w_book .bcard[data-bookm="M001"]');
+    if (card) { await card.click(); await sleep(200); }
+    await shot('window_book');
+    await page.keyboard.press('l'); await sleep(100);
+
+    await page.keyboard.press('n'); await sleep(400);
+    const medals = await page.$$eval('#w_medal .row.medal', (l) => l.length);
+    check('N で勲章の窓が開く（40 個以上・条件のヒント）', medals >= 40, `${medals} 個`);
+    const wear = await page.$('#w_medal button[data-act="medal"][data-a="eq.medal.card1"]');
+    if (wear) { await wear.click(); await sleep(300); }
+    st = await U();
+    check('勲章を付けると名前の上に札（はじめてのカード）', st.medal === 'はじめてのカード', String(st.medal));
+    await shot('window_medal');
+    await page.keyboard.press('n'); await sleep(100);
+    await page.keyboard.press('e'); await sleep(250);
+    const medalRow = await page.$eval('#w_equip', (e) => e.textContent.includes('勲章') && e.textContent.includes('はじめてのカード')).catch(() => false);
+    check('装備の窓に勲章（メダル）の欄', medalRow);
+    await page.keyboard.press('e'); await sleep(100);
+
+    await page.keyboard.press('u'); await sleep(300);
+    const recOk = await page.$eval('#w_record', (e) => e.textContent.includes('倒した敵') && e.textContent.includes('最大ダメージ')).catch(() => false);
+    check('U で記録と統計の窓が開く', recOk);
+    await shot('window_record');
+    await page.keyboard.press('u'); await sleep(100);
+
+    await page.keyboard.press('w'); await sleep(500);
+    const here = await page.$$eval('#w_world .nd.here', (l) => l.map((x) => x.dataset.wm));
+    f = await F();
+    check('W で全体マップが開き、今いるマップに印', here.length === 1 && here[0] === f.m, `${here.join(',')} / ${f.m}`);
+    const marks = await page.$$eval('#w_world .qm, #w_world .bulb2, #w_world .obj', (l) => l.length);
+    log('全体マップの印（？・電球・★）', marks);
+    await shot('window_world');
+    await page.keyboard.press('w'); await sleep(100);
+
+    // ジャンプの試練: ポム丘の案内人から入る
+    await act('dbgWarp', 'V200', 'sp'); await sleep(600);
+    const jn = (await page.evaluate(() => window.game.map.npcs)).find((n) => n.id === 'jq_mokuren');
+    await act('dbgPos', String(jn.y), '', jn.x + 20); await sleep(300);
+    await page.evaluate(() => { const g = window.game; const r = g.act('talk', 'jq_mokuren'); g.ui.openDialog(r.dialog); });
+    await sleep(300);
+    await shot('jump_npc');
+    const tr = await page.$('#w_dialog button[data-act="travel"]');
+    if (tr) { await tr.click(); await sleep(800); }
+    f = await F();
+    const jqText = await page.$eval('#jq', (e) => e.textContent).catch(() => '');
+    check('ジャンプの試練に入れる（段と時間の表示）', f.m === 'J001' && Array.isArray(f.jq) && jqText.includes('段'), `${f.m} ${jqText}`);
+    // 1 つ目の足場へ: 足場の下まで歩いて跳ぶ
+    const jm = await page.evaluate(() => window.game.map);
+    const p1 = jm.footholds.find((x) => x.id === 's1p1');
+    await walkTo(p1.points[0][0] + 30, 6);
+    await tap('Alt', 120); await sleep(900);
+    f = await F();
+    check('ジャンプの試練の 1 つ目の足場に跳び乗れる', Math.abs(f.p[1] - p1.points[0][1]) < 2, `y=${f.p[1]} 足場 ${p1.points[0][1]}`);
+    await shot('jump_quest');
+  }
 
   // ---------------- 重さ・エラー
   const perf = await page.evaluate(() => { const P = window.game.perf; const a = (x) => x.reduce((s, v) => s + v, 0) / x.length; const p95 = (x) => [...x].sort((a, b) => a - b)[Math.floor(x.length * 0.95)]; return { core: a(P.frame), render: a(P.render), total: a(P.total), p95: p95(P.total), worst: P.worst, errors: window.game.errors }; });
