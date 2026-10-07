@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- ここ（クラウド）でのビルド用。Unity では Lumina.Core.asmdef が使われ、この csproj は無視される。
+       Unity 2021 LTS 以降・Unity 6 で読めるように netstandard2.1・C# 9 まで（record / init は使わない）。 -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <RootNamespace>Lumina.Core</RootNamespace>
+    <AssemblyName>Lumina.Core</AssemblyName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>
