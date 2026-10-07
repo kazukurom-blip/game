@@ -1039,6 +1039,7 @@ async function renderPreview({ files, outDir, root, cat, log }) {
   const byRel = new Map(files.map((f) => [f.rel, f.abs]));
   const srv = http.createServer((req, res) => {
     const u = decodeURIComponent(req.url.split('?')[0]);
+    if (u === '/__art/assets/sprites/webp.json') { res.writeHead(404); res.end(); return; } // 納品の PNG を使う（リポジトリの WebP に置き換わらないように）
     if (u === '/__art/assets/sprites/manifest.json') { res.writeHead(200, { 'Content-Type': MIME['.json'] }); res.end(JSON.stringify(plan.manifest)); return; }
     let f;
     if (u.startsWith('/__art/assets/sprites/')) { const rel = u.slice('/__art/assets/sprites/'.length); f = byRel.get(rel) || path.join(root, 'assets', 'sprites', rel); }
@@ -1098,6 +1099,7 @@ async function renderEnvPreview({ files, results, outDir, root, log }) {
   const byRel = new Map(use.map((f) => [f.rel, f.abs]));
   const srv = http.createServer((req, res) => {
     const u = decodeURIComponent(req.url.split('?')[0]);
+    if (u === '/__art/assets/sprites/webp.json') { res.writeHead(404); res.end(); return; } // 納品の PNG を使う（リポジトリの WebP に置き換わらないように）
     if (u === '/__art/assets/sprites/manifest.json') { res.writeHead(200, { 'Content-Type': MIME['.json'] }); res.end(JSON.stringify(man)); return; }
     let f;
     if (u.startsWith('/__art/assets/sprites/')) { const rel = u.slice('/__art/assets/sprites/'.length); f = byRel.get(rel) || path.join(root, 'assets', 'sprites', rel); }
