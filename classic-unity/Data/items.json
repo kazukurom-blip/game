@@ -20085,6 +20085,1437 @@
   {
    "tab": "equip",
    "maxStack": 1,
+   "id": "eq.medal.lv10",
+   "name": "若葉の冒険者",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "hp": 50
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "Lv 10 になる（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "成長",
+    "hint": "Lv 10 になる",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.lv30",
+   "name": "一人前の冒険者",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "str": 1,
+    "dex": 1,
+    "int": 1,
+    "luk": 1
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "Lv 30 になる（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "成長",
+    "hint": "Lv 30 になる",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.lv50",
+   "name": "腕利きの冒険者",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "str": 2,
+    "dex": 2,
+    "int": 2,
+    "luk": 2
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "Lv 50 になる（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "成長",
+    "hint": "Lv 50 になる",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.lv70",
+   "name": "名うての冒険者",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "str": 3,
+    "dex": 3,
+    "int": 3,
+    "luk": 3
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "Lv 70 になる（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "成長",
+    "hint": "Lv 70 になる",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.lv100",
+   "name": "百の峰を越えた者",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "str": 4,
+    "dex": 4,
+    "int": 4,
+    "luk": 4,
+    "hp": 100,
+    "mp": 100
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "Lv 100 になる（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "成長",
+    "hint": "Lv 100 になる",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.lv150",
+   "name": "星を仰ぐ者",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "str": 5,
+    "dex": 5,
+    "int": 5,
+    "luk": 5,
+    "watk": 2,
+    "matk": 2
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "Lv 150 になる（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "成長",
+    "hint": "Lv 150 になる",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.lv200",
+   "name": "頂に立つ者",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "str": 8,
+    "dex": 8,
+    "int": 8,
+    "luk": 8,
+    "watk": 5,
+    "matk": 5
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "Lv 200 になる（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "成長",
+    "hint": "Lv 200 になる",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.job1",
+   "name": "最初の道しるべ",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "hp": 30,
+    "mp": 30
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "1 次転職する（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "成長",
+    "hint": "1 次転職する",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.job2",
+   "name": "二つ目の道",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "acc": 5,
+    "avoid": 5
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "2 次転職する（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "成長",
+    "hint": "2 次転職する",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.job3",
+   "name": "三つ目の扉",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "watk": 2,
+    "matk": 2
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "3 次転職する（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "成長",
+    "hint": "3 次転職する",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.job4",
+   "name": "極みへ至る者",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "watk": 3,
+    "matk": 3,
+    "hp": 200
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "4 次転職する（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "成長",
+    "hint": "4 次転職する",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.play10h",
+   "name": "長い旅路",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "hp": 100,
+    "mp": 100
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "10 時間遊ぶ（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "成長",
+    "hint": "10 時間遊ぶ",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.kill100",
+   "name": "百の討伐",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "acc": 3
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "敵を 100 体倒す（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "討伐",
+    "hint": "敵を 100 体倒す",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.kill1000",
+   "name": "千の討伐",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "watk": 1,
+    "matk": 1
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "敵を 1,000 体倒す（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "討伐",
+    "hint": "敵を 1,000 体倒す",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.kill10000",
+   "name": "万の討伐",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "watk": 2,
+    "matk": 2,
+    "acc": 5
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "敵を 10,000 体倒す（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "討伐",
+    "hint": "敵を 10,000 体倒す",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.kill100000",
+   "name": "果てなき狩人",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "watk": 4,
+    "matk": 4,
+    "acc": 10
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "敵を 100,000 体倒す（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "討伐",
+    "hint": "敵を 100,000 体倒す",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.boss1",
+   "name": "主を討つ者",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "wdef": 10,
+    "mdef": 10
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "ボスを初めて倒す（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "討伐",
+    "hint": "ボスを初めて倒す",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.boss10",
+   "name": "ボスの天敵",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "wdef": 20,
+    "mdef": 20,
+    "hp": 100
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "ボスを 10 回倒す（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "討伐",
+    "hint": "ボスを 10 回倒す",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.bossAll",
+   "name": "すべての主を越えた者",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "watk": 5,
+    "matk": 5,
+    "wdef": 30,
+    "mdef": 30
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "ボスを全種類倒す（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "討伐",
+    "hint": "ボスを全種類倒す",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.raid1",
+   "name": "天を揺るがす者",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "hp": 300,
+    "mp": 300
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "大ボスを倒す（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "討伐",
+    "hint": "大ボスを倒す",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.bossFast",
+   "name": "疾風の討伐",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "speed": 5
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "ボスを 60 秒以内に倒す（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "討伐",
+    "hint": "ボスを 60 秒以内に倒す",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.dmg10k",
+   "name": "一撃一万",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "watk": 1,
+    "matk": 1
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "1 回で 10,000 以上のダメージ（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "討伐",
+    "hint": "1 回で 10,000 以上のダメージ",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.dmg100k",
+   "name": "一撃十万",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "watk": 3,
+    "matk": 3
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "1 回で 100,000 以上のダメージ（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "討伐",
+    "hint": "1 回で 100,000 以上のダメージ",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.visit50",
+   "name": "地図好き",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "speed": 3
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "50 のマップを訪ねる（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "旅",
+    "hint": "50 のマップを訪ねる",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.visit200",
+   "name": "歩く地図帳",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "speed": 5,
+    "jump": 2
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "200 のマップを訪ねる（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "旅",
+    "hint": "200 のマップを訪ねる",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.hidden1",
+   "name": "隠し部屋の発見者",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "luk": 2
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "隠し部屋を見つける（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "旅",
+    "hint": "隠し部屋を見つける",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.hiddenAll",
+   "name": "秘密を暴く者",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "luk": 5,
+    "avoid": 5
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "隠し部屋をすべて見つける（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "旅",
+    "hint": "隠し部屋をすべて見つける",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.quest10",
+   "name": "駆け出しの手伝い",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "hp": 50,
+    "mp": 50
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "クエストを 10 本終える（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "依頼",
+    "hint": "クエストを 10 本終える",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.quest50",
+   "name": "町の顔",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "hp": 100,
+    "mp": 100
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "クエストを 50 本終える（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "依頼",
+    "hint": "クエストを 50 本終える",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.quest200",
+   "name": "大陸の守り手",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "hp": 300,
+    "mp": 300,
+    "wdef": 20
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "クエストを 200 本終える（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "依頼",
+    "hint": "クエストを 200 本終える",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.card1",
+   "name": "はじめてのカード",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "luk": 1
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "敵のカードを 1 枚拾う（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "図鑑",
+    "hint": "敵のカードを 1 枚拾う",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.book10",
+   "name": "図鑑 10 種",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "acc": 3,
+    "avoid": 3
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "図鑑を 10 種完成させる（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "図鑑",
+    "hint": "図鑑を 10 種完成させる",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.book50",
+   "name": "図鑑 50 種",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "acc": 5,
+    "avoid": 5,
+    "hp": 100
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "図鑑を 50 種完成させる（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "図鑑",
+    "hint": "図鑑を 50 種完成させる",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.book100",
+   "name": "図鑑 100 種",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "watk": 2,
+    "matk": 2,
+    "hp": 200
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "図鑑を 100 種完成させる（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "図鑑",
+    "hint": "図鑑を 100 種完成させる",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.bookAll",
+   "name": "生き物の大博士",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "str": 5,
+    "dex": 5,
+    "int": 5,
+    "luk": 5,
+    "watk": 3,
+    "matk": 3
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "図鑑をすべて完成させる（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "図鑑",
+    "hint": "図鑑をすべて完成させる",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.book.S",
+   "name": "芽吹きの島の博物家",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "acc": 2,
+    "avoid": 2
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "芽吹きの島の敵の図鑑をすべて完成させる（3,000 ルド）（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "図鑑",
+    "hint": "芽吹きの島の敵の図鑑をすべて完成させる（3,000 ルド）",
+    "auto": true,
+    "meso": 3000
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.book.V",
+   "name": "ヴェルデ大陸の博物家",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "acc": 2,
+    "avoid": 2,
+    "hp": 30
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "ヴェルデ大陸の敵の図鑑をすべて完成させる（30,000 ルド）（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "図鑑",
+    "hint": "ヴェルデ大陸の敵の図鑑をすべて完成させる（30,000 ルド）",
+    "auto": true,
+    "meso": 30000
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.book.C",
+   "name": "空の都の博物家",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "acc": 2,
+    "avoid": 2,
+    "mp": 30
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "セレスの敵の図鑑をすべて完成させる（50,000 ルド）（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "図鑑",
+    "hint": "セレスの敵の図鑑をすべて完成させる（50,000 ルド）",
+    "auto": true,
+    "meso": 50000
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.book.F",
+   "name": "雪の里の博物家",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "acc": 2,
+    "avoid": 2,
+    "wdef": 5
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "ヒョウガ村の敵の図鑑をすべて完成させる（60,000 ルド）（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "図鑑",
+    "hint": "ヒョウガ村の敵の図鑑をすべて完成させる（60,000 ルド）",
+    "auto": true,
+    "meso": 60000
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.book.T",
+   "name": "おもちゃの町の博物家",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "acc": 2,
+    "avoid": 2,
+    "speed": 2
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "ティンクルの敵の図鑑をすべて完成させる（80,000 ルド）（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "図鑑",
+    "hint": "ティンクルの敵の図鑑をすべて完成させる（80,000 ルド）",
+    "auto": true,
+    "meso": 80000
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.book.M",
+   "name": "海の底の博物家",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "acc": 2,
+    "avoid": 2,
+    "mdef": 5
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "マリナの敵の図鑑をすべて完成させる（80,000 ルド）（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "図鑑",
+    "hint": "マリナの敵の図鑑をすべて完成させる（80,000 ルド）",
+    "auto": true,
+    "meso": 80000
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.book.P",
+   "name": "古の神殿の博物家",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "acc": 3,
+    "avoid": 3
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "古の神殿の敵の図鑑をすべて完成させる（120,000 ルド）（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "図鑑",
+    "hint": "古の神殿の敵の図鑑をすべて完成させる（120,000 ルド）",
+    "auto": true,
+    "meso": 120000
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.book.D",
+   "name": "竜の谷の博物家",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "acc": 3,
+    "avoid": 3,
+    "watk": 1
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "竜の谷の敵の図鑑をすべて完成させる（150,000 ルド）（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "図鑑",
+    "hint": "竜の谷の敵の図鑑をすべて完成させる（150,000 ルド）",
+    "auto": true,
+    "meso": 150000
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.book.H",
+   "name": "火の山の博物家",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "acc": 3,
+    "avoid": 3,
+    "matk": 1
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "焔の坑道の敵の図鑑をすべて完成させる（150,000 ルド）（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "図鑑",
+    "hint": "焔の坑道の敵の図鑑をすべて完成させる（150,000 ルド）",
+    "auto": true,
+    "meso": 150000
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.book.E",
+   "name": "星の果ての博物家",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "acc": 4,
+    "avoid": 4,
+    "str": 1,
+    "dex": 1,
+    "int": 1,
+    "luk": 1
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "星の果ての敵の図鑑をすべて完成させる（300,000 ルド）（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "図鑑",
+    "hint": "星の果ての敵の図鑑をすべて完成させる（300,000 ルド）",
+    "auto": true,
+    "meso": 300000
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.scroll3",
+   "name": "書の見習い",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "acc": 2
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "書で装備を +3 にする（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "書と財",
+    "hint": "書で装備を +3 にする",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.scroll7",
+   "name": "書の名工",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "watk": 2,
+    "matk": 2
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "書で装備を +7 にする（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "書と財",
+    "hint": "書で装備を +7 にする",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.scrollFail10",
+   "name": "めげない心",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "luk": 3
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "書を 10 回失敗する（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "書と財",
+    "hint": "書を 10 回失敗する",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.scrollBroken",
+   "name": "砕けた夢",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "hp": 50
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "呪いの書で装備を壊す（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "書と財",
+    "hint": "呪いの書で装備を壊す",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.meso1m",
+   "name": "小金持ち",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "luk": 2
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "拾ったお金の合計 1,000,000 ルド（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "書と財",
+    "hint": "拾ったお金の合計 1,000,000 ルド",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.meso100m",
+   "name": "大富豪",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "luk": 4
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "100,000,000 ルドを持つ（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "書と財",
+    "hint": "100,000,000 ルドを持つ",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.chair3",
+   "name": "椅子好き",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "hp": 50,
+    "mp": 50
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "椅子を 3 つ集める（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "書と財",
+    "hint": "椅子を 3 つ集める",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.petFriend",
+   "name": "相棒と共に",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "luk": 2
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "ペットを迎える（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "書と財",
+    "hint": "ペットを迎える",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.jump.J001",
+   "name": "梢の跳ね鳥",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "jump": 3,
+    "speed": 3
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "ジャンプの試練「そよ風の木登り」のてっぺんに着く（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "試練",
+    "hint": "ジャンプの試練「そよ風の木登り」のてっぺんに着く",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.jump.J002",
+   "name": "夜の屋根渡り",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "jump": 3,
+    "speed": 3,
+    "avoid": 2
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "ジャンプの試練「屋根伝いの夜道」のてっぺんに着く（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "試練",
+    "hint": "ジャンプの試練「屋根伝いの夜道」のてっぺんに着く",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.jump.J003",
+   "name": "雲を踏む者",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "jump": 4,
+    "speed": 4
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "ジャンプの試練「雲の柱のぼり」のてっぺんに着く（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "試練",
+    "hint": "ジャンプの試練「雲の柱のぼり」のてっぺんに着く",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.jump.J004",
+   "name": "ゼンマイの軽業師",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "jump": 4,
+    "speed": 4,
+    "avoid": 3
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "ジャンプの試練「ゼンマイ塔の階段」のてっぺんに着く（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "試練",
+    "hint": "ジャンプの試練「ゼンマイ塔の階段」のてっぺんに着く",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.jump.J005",
+   "name": "竜骨の登り手",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "jump": 5,
+    "speed": 5,
+    "avoid": 4
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "ジャンプの試練「竜骨の背のぼり」のてっぺんに着く（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "試練",
+    "hint": "ジャンプの試練「竜骨の背のぼり」のてっぺんに着く",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.jumpAll",
+   "name": "天空の跳躍王",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "jump": 6,
+    "speed": 6,
+    "avoid": 5
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "ジャンプの試練をすべて登りきる（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "試練",
+    "hint": "ジャンプの試練をすべて登りきる",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.die1",
+   "name": "転んでも立ち上がる",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "hp": 20
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "1 回倒れる（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "そのほか",
+    "hint": "1 回倒れる",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.die50",
+   "name": "不屈の魂",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "hp": 150,
+    "wdef": 10
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "50 回倒れる（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "そのほか",
+    "hint": "50 回倒れる",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.dungeon1",
+   "name": "ダンジョンの踏破者",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "acc": 3,
+    "avoid": 3
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "1 人用ダンジョンをクリアする（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "そのほか",
+    "hint": "1 人用ダンジョンをクリアする",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
+   "id": "eq.medal.medals20",
+   "name": "勲章の収集家",
+   "slot": "medal",
+   "job": "common",
+   "reqLevel": 0,
+   "stats": {
+    "str": 2,
+    "dex": 2,
+    "int": 2,
+    "luk": 2
+   },
+   "upgrades": 0,
+   "price": 0,
+   "sellPrice": 0,
+   "desc": "勲章を 20 個集める（入手: 条件を満たすと自動で）",
+   "medal": {
+    "group": "そのほか",
+    "hint": "勲章を 20 個集める",
+    "auto": true
+   }
+  },
+  {
+   "tab": "equip",
+   "maxStack": 1,
    "id": "eq.unique.M007",
    "name": "旅立ちの髪飾り",
    "slot": "cap",

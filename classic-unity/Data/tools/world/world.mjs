@@ -1,10 +1,11 @@
-// 全マップ（maps.mjs の 234 枚）を作る入口。芽吹きの島は手で置いた island.mjs、ほかは generate.mjs。
+// 全マップ（maps.mjs の 234 枚＋ジャンプの試練 5 枚）を作る入口。芽吹きの島は手で置いた island.mjs、ジャンプの試練は jump.mjs、ほかは generate.mjs。
 // 戻り: { maps: { id: json }, problems, stats }
 import { ISLAND, ISLAND_BGM, G as IG } from './island.mjs';
 import { NPCS } from './npcs.mjs';
 import { generateMap } from './generate.mjs';
 import { checkWorld } from './check.mjs';
 import { QUEST_OBJECTS, QUEST_SPAWNS } from '../../../../classic/tools/data/quests_more.mjs';
+import { JUMP_RAW, buildJumpMaps } from './jump.mjs';
 
 /** 死んだ時・帰還の書で戻る町: ポータルでたどって一番近い町（同じ距離なら同じ地域の町）。島は芽吹き村。 */
 export function returnTowns(raw) {
@@ -82,11 +83,14 @@ export function buildWorld({ MAPS_RAW, MONSTERS_RAW }) {
     }
   }
   problems.push(...placeQuestExtras(maps));
+  // ジャンプの試練（jump.mjs。maps.mjs の外の J001〜）
+  Object.assign(maps, buildJumpMaps());
+  for (const r of JUMP_RAW) RAW_BY[r[0]] = r;
   for (const n of NPCS) if (!RAW_BY[n[2]]) problems.push(`NPC ${n[0]} のマップ ${n[2]} が無い`);
   const ids = new Set();
   for (const n of NPCS) { if (ids.has(n[0])) problems.push(`NPC の ID が重なっている: ${n[0]}`); ids.add(n[0]); }
-  problems.push(...checkWorld(maps, MAPS_RAW));
-  return { maps, problems, stats: { maps: Object.keys(maps).length, generated: Object.keys(maps).length - Object.keys(ISLAND).length, attempts } };
+  problems.push(...checkWorld(maps, [...MAPS_RAW, ...JUMP_RAW]));
+  return { maps, problems, stats: { maps: Object.keys(maps).length, generated: Object.keys(maps).length - Object.keys(ISLAND).length - JUMP_RAW.length, jump: JUMP_RAW.length, attempts } };
 }
 
 // ---------------- クエストの隠し物・専用の敵（QUESTS.md 8 章。classic/tools/data/quests_more.mjs）

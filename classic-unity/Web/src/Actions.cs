@@ -1,6 +1,8 @@
 // UI からの操作（窓のボタン・会話の選択肢）→ GameSession の公開の操作（CORE.md 3 章の「UI から呼ぶ操作」）。
 // 戻り値は {"ok":bool,"r":"結果の名前","msg":"人が読む文", "dialog":{…}?}
 using System;
+using System.Collections.Generic;
+using Lumina.Core.Util;
 using System.Globalization;
 using Lumina.Core.Combat;
 using Lumina.Core.Game;
@@ -16,6 +18,8 @@ namespace Lumina.Web
             if (dialog != null) s = s.Substring(0, s.Length - 1) + ",\"dialog\":" + dialog + "}";
             return s;
         }
+
+        private static string Data(Dictionary<string, object> d) => Json.Serialize(new Dictionary<string, object> { { "ok", true }, { "r", "Ok" }, { "data", d } });
 
         private static string Redialog(GameSession s, string npc) => !string.IsNullOrEmpty(npc) ? Ui.Dialog(s, s.Talk(npc, true)) : null;
 
@@ -98,11 +102,22 @@ namespace Lumina.Web
                 case "petOut": { bool ok = s.SetPetOut(n, a == "1"); return R(ok, ok ? "Ok" : "No"); }
                 case "masterBook": { var r = s.UseMasterBook(a, b); return R(r == MasterBookResult.Ok, r.ToString()); }
                 case "stand": s.StandUp(); return R(true, "Ok");
+                // ---- やりこみ（図鑑・勲章・記録・全体マップ。CollectionUi.cs）
+                case "book": return Data(CollectionUi.Book(s));
+                case "medals": return Data(CollectionUi.MedalList(s));
+                case "records": return Data(CollectionUi.Records(s));
+                case "world": return Data(CollectionUi.World(s));
+                case "medal":
+                {
+                    var r = s.EquipMedal(string.IsNullOrEmpty(a) ? null : a);
+                    return R(r == MedalResult.Ok, r.ToString(), r == MedalResult.Ok ? (string.IsNullOrEmpty(a) ? "勲章を外した" : "勲章を付けた") : r == MedalResult.InventoryFull ? "持ち物がいっぱい" : "まだ持っていない");
+                }
                 // ---- 確かめ用（自動のテストが使う。ふつうの遊びでは呼ばない）
                 case "dbgExp": s.GainExp(n); return R(true, "Ok");
                 case "dbgWarp": s.ChangeMap(a, string.IsNullOrEmpty(b) ? null : b); return R(true, "Ok");
                 case "dbgPos": s.Teleport(n, double.Parse(a, CultureInfo.InvariantCulture)); return R(true, "Ok");
                 case "dbgMeso": s.Inventory.AddMeso(n); return R(true, "Ok");
+                case "dbgCard": s.Map.SpawnDrops(s.Body.X, s.Body.Y, new List<Lumina.Core.World.DropItem> { new Lumina.Core.World.DropItem { ItemId = Lumina.Core.Collection.MonsterBook.CardId(a) } }); return R(true, "Ok");
                 case "dbgItem": { int rest = s.Inventory.Add(a, Math.Max(1, n)); return R(rest == 0, "Ok"); }
                 default: return R(false, "Unknown", "知らない操作: " + cmd);
             }

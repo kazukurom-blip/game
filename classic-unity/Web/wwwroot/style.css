@@ -36,7 +36,7 @@ input[type=number] { width: 52px; }
 .qs span { position: absolute; left: 0; right: 0; top: 8px; text-align: center; font-size: 9px; color: #fff; text-shadow: 1px 1px 0 #000; white-space: nowrap; }
 .qs small { position: absolute; right: 1px; bottom: 0; font-size: 8px; color: #fff; text-shadow: 1px 1px 0 #000; }
 .qs.cd { filter: grayscale(0.8) brightness(0.6); }
-#hud .menu { display: grid; grid-template-columns: repeat(3, 26px); gap: 2px; align-content: center; }
+#hud .menu { display: grid; grid-template-columns: repeat(5, 26px); gap: 2px; align-content: center; }
 #hud .menu button { padding: 0; height: 24px; font-size: 11px; margin: 0; }
 
 /* メッセージ */
@@ -122,3 +122,47 @@ table.eq tr { border-bottom: 1px solid #2a2e48; }
 .buff small { position: absolute; right: 1px; bottom: 0; font-size: 9px; text-shadow: 1px 1px 0 #000; }
 .buff.end { animation: blink 0.5s steps(2) infinite; }
 #title .confirm { color: var(--bad); font-size: 13px; }
+
+/* やりこみの窓（図鑑 L・勲章 N・記録 U・全体マップ W） */
+#w_book { left: 20px; top: 16px; width: 560px; max-height: 512px; }
+#w_medal { left: 200px; top: 24px; width: 430px; max-height: 500px; }
+#w_record { left: 40px; top: 40px; width: 440px; max-height: 480px; }
+#w_world { left: 10px; top: 4px; width: 780px; max-height: 528px; }
+.gold { color: var(--gold); }
+.grp { margin: 6px 0 2px; padding: 1px 4px; background: rgba(255, 216, 96, 0.12); color: var(--gold); font-weight: bold; }
+.bookhead { margin-bottom: 4px; line-height: 1.5; }
+.book { display: grid; grid-template-columns: repeat(8, 62px); gap: 4px; }
+.bcard { width: 62px; height: 70px; background: #f4ecd0; border: 2px solid #8a6a20; border-radius: 3px; color: #2a1a00; text-align: center; cursor: pointer; overflow: hidden; }
+.bcard .pic { width: 34px; height: 34px; margin: 3px auto 1px; border-radius: 50%; border: 1px solid #5a3a00; color: #888; font-size: 18px; line-height: 32px; }
+.bcard .nm { font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 2px; }
+.bcard .pips { display: flex; gap: 2px; justify-content: center; margin-top: 2px; }
+.bcard .pips i { width: 7px; height: 7px; background: #c8b890; border: 1px solid #8a6a20; }
+.bcard .pips i.on { background: #e05a20; }
+.bcard.done { border-color: #ffd040; box-shadow: 0 0 6px #ffd040; }
+.bcard.unseen { background: #3a3a48; border-color: #555; color: #999; }
+.bcard.sel { outline: 2px solid #fff; }
+.row.medal.not { opacity: 0.6; }
+#jq { position: absolute; left: 200px; right: 200px; top: 6px; text-align: center; font-size: 13px; font-weight: bold; color: #fff; text-shadow: 1px 1px 0 #000, -1px 0 0 #000; background: rgba(0, 0, 0, 0.45); border: 1px solid #c8a040; border-radius: 3px; padding: 2px; }
+.wmwrap { background: radial-gradient(#34406e, #1a2038); border: 1px solid #556; border-radius: 3px; }
+.wmap { display: block; }
+.wmap .ln { stroke: #8a9ad0; stroke-width: 1.5; opacity: 0.7; }
+.wmap .ln.tr { stroke-dasharray: 4 3; stroke: #c0d0ff; }
+.wmap .nd { cursor: pointer; }
+.wmap .nd > rect, .wmap .nd > circle, .wmap .nd > polygon { stroke: #000; stroke-width: 1; }
+.wmap .nd.town > rect { fill: #ffd860; }
+.wmap .nd.field > circle { fill: #70d070; }
+.wmap .nd.cave > circle { fill: #c08a50; }
+.wmap .nd.boss > polygon { fill: #ff5a5a; }
+.wmap .nd.special > circle { fill: #c080ff; }
+.wmap .nd.move > circle { fill: #70b0ff; }
+.wmap .nd.jump > polygon { fill: #60f0f0; }
+.wmap .nd.unseen > circle, .wmap .nd.unseen > polygon { opacity: 0.45; }
+.wmap .nd.sel > rect:first-child, .wmap .nd.sel > circle:first-child, .wmap .nd.sel > polygon:first-child { stroke: #fff; stroke-width: 2; }
+.wmap .nd .hit { fill: transparent; stroke: none; }
+.wmap .ring { fill: none; stroke: #fff; stroke-width: 2; animation: blink 0.7s steps(2) infinite; }
+.wmap .lb { fill: #fff; font-size: 10px; text-anchor: middle; paint-order: stroke; stroke: #000; stroke-width: 2px; }
+.wmap .qm { fill: #ffe040; font-size: 12px; font-weight: bold; paint-order: stroke; stroke: #000; stroke-width: 2px; }
+.wmap .obj { fill: #ff9a30; font-size: 11px; paint-order: stroke; stroke: #000; stroke-width: 2px; }
+.wmap .out { fill: #a8b0d0; font-size: 8px; }
+.wmap .bulb2 circle { fill: #b0ff90; stroke: #000; } .wmap .bulb2 rect { fill: #888; }
+#wmInfo .obj { color: #ff9a30; }

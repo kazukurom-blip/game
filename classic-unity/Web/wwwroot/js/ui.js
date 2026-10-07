@@ -1,12 +1,12 @@
 // HUD と窓（DOM。800×600 の座標で置き、canvas と同じ倍率で拡大する）。
 // 中身は C# の GetUi()（能力値・持ち物・装備・スキル・クエスト・クイックスロット）と会話（Dialog）を読むだけ。
 // 操作は game.act(cmd, a, b, n) → C# の Actions.Run。
-import { itemColor } from './render.js';
+import { itemColor, mobColor } from './render.js';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const num = (n) => Number(n || 0).toLocaleString('ja-JP');
 const TABS = ['装備', '消費', '設置', 'その他', '特別'];
-const SLOT_NAMES = { cap: '帽子', face: '顔飾り', eye: '目飾り', earring: '耳飾り', top: '上着', bottom: '下衣', overall: '全身', shoes: '靴', gloves: '手袋', cape: 'マント', shield: '盾', weapon: '武器', ring1: '指輪1', ring2: '指輪2', pendant: '首飾り' };
+const SLOT_NAMES = { medal: '勲章', cap: '帽子', face: '顔飾り', eye: '目飾り', earring: '耳飾り', top: '上着', bottom: '下衣', overall: '全身', shoes: '靴', gloves: '手袋', cape: 'マント', shield: '盾', weapon: '武器', ring1: '指輪1', ring2: '指輪2', pendant: '首飾り' };
 const STAT_NAMES = { str: 'STR', dex: 'DEX', int: 'INT', luk: 'LUK', hp: 'HP', mp: 'MP', watk: '攻撃力', matk: '魔力', wdef: '防御', mdef: '魔防', acc: '命中', avoid: '回避', speed: '速さ', jump: 'ジャンプ' };
 const LINE_NAMES = { warrior: '戦士', magician: '魔法使い', bowman: '弓使い', thief: '盗賊', pirate: '海賊' };
 const OBJ_TYPES = { Kill: '倒す', Collect: '集める', Talk: '話す', Visit: '行く', Interact: '調べる', Event: 'する' };
@@ -27,6 +27,8 @@ export class Ui {
     this.shop = null; this.shopTab = 1; this.storageNpc = null;
     this.picker = null;     // クイックスロットに置く物
     this.msgs = [];
+    // やりこみの窓（図鑑 L・勲章 N・記録 U・全体マップ W）
+    this.bookRegion = null; this.bookSel = null; this.medalTab = 'all'; this.recTab = 'rec'; this.worldRegion = null; this.worldSel = null;
     this.build();
   }
 
@@ -48,9 +50,11 @@ export class Ui {
         <div id="quick"></div>
         <div class="menu">
           <button data-win="inv" title="持ち物 (I)">持</button><button data-win="equip" title="装備 (E)">装</button><button data-win="stat" title="能力値 (S)">能</button>
-          <button data-win="skill" title="スキル (K)">技</button><button data-win="quest" title="クエスト (Q)">ク</button><button data-win="opt" title="設定・セーブ (O)">設</button>
+          <button data-win="skill" title="スキル (K)">技</button><button data-win="quest" title="クエスト (Q)">ク</button><button data-win="book" title="敵の図鑑 (L)">図</button>
+          <button data-win="medal" title="勲章 (N)">勲</button><button data-win="record" title="記録と統計 (U)">記</button><button data-win="world" title="全体マップ (W)">地</button><button data-win="opt" title="設定・セーブ (O)">設</button>
         </div>
       </div>
+      <div id="jq"></div>
       <div id="wins"></div>
       <div id="modal"></div>`;
     this.el('keys').innerHTML = `<b>キー</b> <small>(H で隠す)</small><br>
@@ -60,6 +64,7 @@ export class Ui {
       会話中: V・Enter 決める / ↑↓ 選ぶ / Esc 閉じる<br>
       クイック: Shift A D F G T B Y ・ 1〜8<br>
       I 持ち物 E 装備 S 能力値 K スキル Q クエスト<br>
+      L 図鑑 N 勲章 U 記録 W 全体マップ<br>
       O 設定・セーブ / M ミニマップ / Esc 閉じる<br>
       NPC はクリックでも話せる`;
     const q = this.el('quick');
@@ -70,6 +75,11 @@ export class Ui {
       if (qs) { e.preventDefault(); this.game.act('quick', '', '', +qs.dataset.q); this.refresh(); }
     });
     this.root.addEventListener('keydown', (e) => e.stopPropagation()); // 窓の中の入力欄
+    // 全体マップ: 点にマウスを乗せると下の説明が変わる（窓は描き直さない）
+    this.root.addEventListener('mouseover', (e) => {
+      const g = e.target.closest?.('[data-wm]');
+      if (g && this.open.has('world') && this.worldSel !== g.dataset.wm) { this.worldSel = g.dataset.wm; const info = this.root.querySelector('#wmInfo'); if (info) info.outerHTML = this.worldInfo(); }
+    });
     try { if (localStorage.getItem('lumina.keysHidden') === '1') this.el('keys').style.display = 'none'; } catch { /* */ }
   }
 
@@ -101,6 +111,10 @@ export class Ui {
     if (!f.p[6] && this.deadShown) { this.deadShown = false; this.el('modal').innerHTML = ''; }
     if (f.qz) this.showQuiz(f.qz); else if (this.quizShown) { this.quizShown = null; if (!this.deadShown) this.el('modal').innerHTML = ''; }
     if (f.dl) this.openDialog(f.dl);
+    // ジャンプの試練: 今の段と時間（上の真ん中）
+    const jq = this.el('jq');
+    const jt = f.jq ? `ジャンプの試練　${Math.min(f.jq[0], f.jq[1])} / ${f.jq[1]} 段${f.jq[0] > f.jq[1] ? '（てっぺん！宝箱を V で）' : ''}　${f.jq[2] >= 0 ? fmtTime(f.jq[2]) : ''}` : '';
+    if (jq.textContent !== jt) { jq.textContent = jt; jq.style.display = jt ? '' : 'none'; }
   }
 
   quickHud() {
@@ -160,7 +174,7 @@ export class Ui {
   }
   closeTop() {
     if (this.picker) { this.picker = null; this.renderWins(); return true; }
-    const order = ['dialog', 'shop', 'storage', 'opt', 'quest', 'skill', 'stat', 'equip', 'inv'];
+    const order = ['dialog', 'shop', 'storage', 'world', 'record', 'medal', 'book', 'opt', 'quest', 'skill', 'stat', 'equip', 'inv'];
     for (const n of order) if (this.close(n)) return true;
     return false;
   }
@@ -180,6 +194,10 @@ export class Ui {
     if (this.open.has('skill')) parts.push(this.winSkill(s));
     if (this.open.has('quest')) parts.push(this.winQuest(s));
     if (this.open.has('opt')) parts.push(this.winOpt(s));
+    if (this.open.has('book')) parts.push(this.winBook(s));
+    if (this.open.has('medal')) parts.push(this.winMedal(s));
+    if (this.open.has('record')) parts.push(this.winRecord(s));
+    if (this.open.has('world')) parts.push(this.winWorld(s));
     if (this.open.has('dialog') && this.dialog) parts.push(this.winDialog(s));
     if (this.open.has('shop') && this.shop) parts.push(this.winShop(s));
     if (this.open.has('storage') && this.storageNpc) parts.push(this.winStorage(s));
@@ -241,16 +259,16 @@ export class Ui {
   }
 
   winEquip(s) {
-    const keys = ['cap', 'face', 'eye', 'earring', 'top', 'bottom', 'overall', 'shoes', 'gloves', 'cape', 'shield', 'weapon', 'ring1', 'ring2', 'pendant'];
+    const keys = ['cap', 'face', 'eye', 'earring', 'top', 'bottom', 'overall', 'shoes', 'gloves', 'cape', 'shield', 'weapon', 'ring1', 'ring2', 'pendant', 'medal'];
     let body = '<table class="eq">';
     for (const k of keys) {
       const it = s.eq[k];
-      if (!it && !['cap', 'top', 'bottom', 'shoes', 'gloves', 'weapon', 'shield'].includes(k)) continue;
+      if (!it && !['cap', 'top', 'bottom', 'shoes', 'gloves', 'weapon', 'shield', 'medal'].includes(k)) continue;
       const def = it && this.db.items[it.id];
       body += `<tr><th>${SLOT_NAMES[k]}</th><td>${it ? `<span class="sw" style="background:${itemColor(def)}"></span>${esc(def?.name || it.id)}${it.upg ? ' +' + it.upg : ''}<br><small class="dim">${Object.entries(it.st || {}).filter(([, v]) => v).map(([kk, v]) => `${STAT_NAMES[kk] || kk}+${v}`).join(' ')}</small>` : '<span class="dim">—</span>'}</td>
         <td>${it ? `<button data-act="unequip" data-a="${k}">外す</button>` : ''}</td></tr>`;
     }
-    body += '</table><div class="dim">装備するには 持ち物 (I) の装備のタブから。</div>';
+    body += '</table><div class="dim">装備するには 持ち物 (I) の装備のタブから。勲章は 勲章 (N) の窓から付けられる。</div>';
     return this.frame('equip', '装備 (E)', body);
   }
 
@@ -325,6 +343,159 @@ export class Ui {
       <div class="dim" id="perf"></div></div>`;
     return this.frame('opt', '設定・セーブ (O)', body);
   }
+
+  // ---------------- やりこみの窓のデータ（C# の CollectionUi.cs。開いている時・操作の後だけ）
+  data(cmd) { const r = this.game.act(cmd); return r.ok ? r.data : null; }
+
+  // ---------------- 敵の図鑑（L）: 地域ごと・未発見はシルエット・どこに出るか
+  winBook(s) {
+    const b = this.data('book'); if (!b) return '';
+    if (!this.bookRegion || !b.regions.some((r) => r.id === this.bookRegion)) {
+      const here = this.game.db.worldmap.maps[s.map]?.region;
+      this.bookRegion = b.regions.some((r) => r.id === here) ? here : b.regions[0]?.id;
+    }
+    const pct = (a, n) => (n ? Math.floor(a / n * 100) : 0);
+    let body = `<div class="bookhead"><b>図鑑の段 ${b.lv}</b>　完成 ${b.done} / ${b.total} 種（${pct(b.done, b.total)}%）・カード ${num(b.cards)} 枚<br>
+      <span class="dim">今の上乗せ: ${esc(b.bonus)}${b.next > 0 ? `　次の段まで あと ${b.next - b.done} 種（${esc(b.nextBonus)}）` : '　（最高の段）'}</span><br>
+      <span class="dim">敵を倒すと、まれに「その敵のカード」を落とす（強敵・ボスは多め）。1 種類 ${b.per} 枚で完成。</span></div>`;
+    body += `<div class="tabs">${b.regions.map((r) => `<button class="${r.id === this.bookRegion ? 'on' : ''}" data-bookr="${r.id}">${esc(r.name.replace(/（.*$/, ''))} ${r.done}/${r.total}${r.got ? '★' : ''}</button>`).join('')}</div>`;
+    const reg = b.regions.find((r) => r.id === this.bookRegion);
+    if (reg) body += `<div class="dim">この地域を全部完成させると 勲章「${esc(reg.medal || '')}」と ${num(reg.meso)} ルド${reg.got ? '（もらった）' : ''}</div>`;
+    body += '<div class="book">';
+    for (const m of b.mobs.filter((x) => x.r === this.bookRegion)) {
+      const def = this.db.monsters[m.id] || {};
+      const pips = Array.from({ length: b.per }, (_, i) => `<i class="${i < m.n ? 'on' : ''}"></i>`).join('');
+      body += `<div class="bcard${m.n >= b.per ? ' done' : ''}${m.seen ? '' : ' unseen'}${this.bookSel === m.id ? ' sel' : ''}" data-bookm="${m.id}" title="${m.seen ? esc(def.name) : '？？？'}">`
+        + `<div class="pic" style="background:${m.seen ? mobColor(def) : '#111'}">${m.seen ? '' : '？'}</div><div class="nm">${m.seen ? esc(def.name) : '？？？'}</div><div class="pips">${pips}</div></div>`;
+    }
+    body += '</div>';
+    const sel = b.mobs.find((x) => x.id === this.bookSel);
+    if (sel) {
+      const def = this.db.monsters[sel.id] || {};
+      const where = sel.maps.map((id) => esc(this.game.mapName(id))).join('・') + (sel.more ? ` ほか ${sel.more}` : '');
+      body += `<div class="info">${sel.seen ? `<b>${esc(def.name)}</b>　Lv ${def.lv ?? '?'}　HP ${num(def.hp)}　経験値 ${num(def.exp)}<br>倒した数 ${num(sel.kills)}　カード ${sel.n}/${b.per}${sel.n >= b.per ? ' <span class="good">完成</span>' : ''}` : '<b>？？？</b>　まだ会っていない敵'}<br><span class="dim">出る所: ${where}</span></div>`;
+    } else body += '<div class="info dim">カードをクリックすると、どこに出るかが出ます。</div>';
+    return this.frame('book', '敵の図鑑 (L)', body);
+  }
+
+  // ---------------- 勲章（N）: 取った物・まだの物と条件のヒント。1 つだけ付けられる（メダルの欄）
+  winMedal(s) {
+    const d = this.data('medals'); if (!d) return '';
+    const got = d.list.filter((m) => m.got).length;
+    let body = `<div>手に入れた勲章 <b>${got}</b> / ${d.list.length}　付けている: <b class="gold">${esc(d.worn ? this.itemName(d.worn) : 'なし')}</b> ${d.worn ? '<button data-act="medal" data-a="">外す</button>' : ''}</div>
+      <div class="dim">付けると名前の上に札が出て、小さな能力がつく（付けられるのは 1 つ・重ならない）。条件の勲章は自動で、クエストの勲章は依頼でもらえる。</div>`;
+    body += `<div class="tabs">${[['all', '全部'], ['got', '持っている'], ['not', 'まだ']].map(([k, t]) => `<button class="${k === this.medalTab ? 'on' : ''}" data-medaltab="${k}">${t}</button>`).join('')}</div><div class="list">`;
+    let group = null;
+    for (const m of d.list) {
+      if (this.medalTab === 'got' && !m.got) continue;
+      if (this.medalTab === 'not' && m.got) continue;
+      if (m.group !== group) { group = m.group; body += `<div class="grp">${esc(group)}</div>`; }
+      const st = Object.entries(m.stats || {}).filter(([, v]) => v).map(([k, v]) => `${STAT_NAMES[k] || k}+${v}`).join(' ');
+      const prog = m.prog ? ` <span class="dim">(${num(m.prog[0])}/${num(m.prog[1])})</span>` : '';
+      const worn = d.worn === m.id;
+      body += `<div class="row medal${m.got ? '' : ' not'}"><div class="ic" style="background:${m.got ? '#c89020' : '#333'}">${m.got ? '勲' : '？'}</div>`
+        + `<div class="tx"><b>${esc(m.name)}</b>${worn ? ' <span class="good">付けている</span>' : ''}<br><small>${esc(m.hint || '')}${prog}</small><br><small class="dim">${esc(st || '能力なし')}</small></div>`
+        + `<div class="bt">${m.got && !worn ? `<button data-act="medal" data-a="${m.id}">付ける</button>` : ''}</div></div>`;
+    }
+    body += '</div>';
+    return this.frame('medal', '勲章 (N)', body);
+  }
+
+  // ---------------- 記録と統計（U）・ジャンプの試練・椅子の一覧
+  winRecord(s) {
+    const r = this.data('records'); if (!r) return '';
+    let body = `<div class="tabs">${[['rec', '記録'], ['jump', 'ジャンプの試練'], ['chair', '椅子']].map(([k, t]) => `<button class="${k === this.recTab ? 'on' : ''}" data-rectab="${k}">${t}</button>`).join('')}</div>`;
+    if (this.recTab === 'rec') {
+      const row = (a, b, c, d) => `<tr><th>${a}</th><td>${b}</td><th>${c}</th><td>${d}</td></tr>`;
+      body += `<table class="st">
+        ${row('遊んだ時間', fmtTime(r.play), '倒れた回数', num(r.deaths))}
+        ${row('倒した敵', num(r.kills) + ' 体', '敵の種類', num(r.kinds))}
+        ${row('ボスを倒した', num(r.bossKills) + ' 回', 'ボスの種類', `${r.bossKinds} / ${r.bossTotal}`)}
+        ${row('最大ダメージ', num(r.maxDamage), 'クエスト', num(r.quests) + ' 本')}
+        ${row('拾ったお金', num(r.mesoPicked) + ' ルド', '一番多いお金', num(r.maxMeso))}
+        ${row('拾った品', num(r.itemsPicked), '飲んだ薬', num(r.potions))}
+        ${row('書 成功', num(r.scrollOk), '失敗・壊れた', `${num(r.scrollFail)}・${num(r.scrollBroken)}`)}
+        ${row('最高の強化', '+' + r.bestUpgrade, 'ダンジョン', num(r.dungeons) + ' 回')}
+        ${row('訪ねたマップ', `${r.maps} / ${r.mapsTotal}`, '訪ねた町', num(r.towns))}
+        ${row('隠し部屋', `${r.hidden} / ${r.hiddenTotal}`, '勲章', num(r.medals))}
+        ${row('図鑑のカード', num(r.cards) + ' 枚', '図鑑 完成', num(r.bookDone) + ' 種')}
+        </table>`;
+      body += '<div class="grp">ボスの最短撃破</div>' + (r.boss.length ? r.boss.map((b) => `<div>${esc(this.db.monsters[b.mob]?.name || b.mob)}　<b>${fmtTime(b.sec)}</b></div>`).join('') : '<div class="dim">まだ無い（最初に攻撃してから倒すまでの時間）</div>');
+    } else if (this.recTab === 'jump') {
+      body += '<div class="dim">足場を跳び継いで上まで登る、敵のいない試練。町の案内人から入る。落ちると今の段の床へ。てっぺんの宝箱で、初めてのごほうびと勲章（2 回目からは 1 日 1 回）。</div>';
+      for (const j of r.jumps) body += `<div class="row"><div class="tx"><b>${esc(j.name)}</b>（${j.stages} 段・入口 ${esc(this.game.mapName(j.town))}）<br><small>${j.clears ? `登った ${j.clears} 回・最短 ${fmtTime(j.best)}` : '<span class="dim">まだ登っていない</span>'}</small></div></div>`;
+    } else {
+      const have = r.chairs.filter((c) => c.got).length;
+      body += `<div>集めた椅子 ${have} / ${r.chairs.length}（座ると回復が速くなる）</div>`;
+      for (const c of r.chairs) body += `<div class="row"><div class="ic" style="background:${c.got ? '#8a5a2a' : '#333'}">${c.got ? '椅' : '？'}</div><div class="tx">${c.got ? esc(c.name) : '？？？'}${c.have ? ' <span class="good">持っている</span>' : ''}</div></div>`;
+    }
+    return this.frame('record', '記録と統計 (U)', body);
+  }
+
+  // ---------------- 全体マップ（W）: 地域ごとの絵地図・今いる所（点滅）・クエストの印
+  winWorld(s) {
+    const wm = this.game.db.worldmap;
+    const w = this.data('world'); if (!w) return '';
+    this.worldMarks = w;
+    const bk = this.data('book');
+    this.seenMobs = new Set((bk?.mobs || []).filter((m) => m.seen).map((m) => m.id));
+    if (!this.worldRegion || !wm.regions.some((r) => r.id === this.worldRegion)) this.worldRegion = w.region || wm.regions[0]?.id;
+    const reg = wm.regions.find((r) => r.id === this.worldRegion);
+    let body = `<div class="tabs">${wm.regions.map((r) => `<button class="${r.id === this.worldRegion ? 'on' : ''}" data-wmr="${r.id}">${esc(r.name.replace(/（.*$/, ''))}${r.id === w.region ? ' ●' : ''}</button>`).join('')}</div>`;
+    if (!reg) return this.frame('world', '全体マップ (W)', body);
+    const W = 760, H = 380, kx = W / 1000, ky = H / 600;
+    const ids = new Set(reg.maps);
+    const P = (id) => { const n = wm.maps[id]; return [Math.round(n.x * kx), Math.round(n.y * ky)]; };
+    let svg = `<svg class="wmap" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`;
+    for (const [a, b] of wm.links) if (ids.has(a) && ids.has(b)) { const [x1, y1] = P(a), [x2, y2] = P(b); svg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="ln"/>`; }
+    for (const [a, b] of wm.travel) if (ids.has(a) && ids.has(b)) { const [x1, y1] = P(a), [x2, y2] = P(b); svg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="ln tr"/>`; }
+    // 地域の外へのつながり（ポータル・乗り物）: 点の横に「→地域」
+    const outer = {};
+    for (const [a, b] of [...wm.outer, ...wm.travel]) {
+      if (ids.has(a) && !ids.has(b)) (outer[a] ||= new Set()).add(wm.maps[b]?.region);
+      if (ids.has(b) && !ids.has(a)) (outer[b] ||= new Set()).add(wm.maps[a]?.region);
+    }
+    for (const id of reg.maps) {
+      const n = wm.maps[id]; const [x, y] = P(id);
+      const mk = w.marks[id] || 0;
+      const seen = mk & 16;
+      const cls = { 町: 'town', 狩: 'field', 洞: 'cave', ボ: 'boss', 特: 'special', 移: 'move', 試: 'jump' }[n.type] || 'field';
+      svg += `<g class="nd ${cls}${seen ? '' : ' unseen'}${mk & 8 ? ' here' : ''}${this.worldSel === id ? ' sel' : ''}" data-wm="${id}">`;
+      if (n.type === '町') svg += `<rect x="${x - 7}" y="${y - 7}" width="14" height="14" rx="2"/>`;
+      else if (n.type === 'ボ') svg += `<polygon points="${x},${y - 7} ${x + 7},${y + 5} ${x - 7},${y + 5}"/>`;
+      else if (n.type === '試') svg += `<polygon points="${x},${y - 7} ${x + 6},${y} ${x},${y + 7} ${x - 6},${y}"/>`;
+      else svg += `<circle cx="${x}" cy="${y}" r="${n.type === '洞' || n.type === '特' ? 5 : 4.5}"/>`;
+      if (mk & 8) svg += `<circle cx="${x}" cy="${y}" r="12" class="ring"/>`;
+      if (n.type === '町' || mk & 8) svg += `<text x="${x}" y="${y + 19}" class="lb">${esc(seen || n.type === '町' ? n.name : '？？？')}</text>`;
+      if (mk & 2) svg += `<g class="bulb2"><circle cx="${x + 8}" cy="${y - 12}" r="4"/><rect x="${x + 6}" y="${y - 9}" width="4" height="3"/></g>`;
+      else if (mk & 1) svg += `<text x="${x + 8}" y="${y - 7}" class="qm">？</text>`;
+      if (mk & 4) svg += `<text x="${x - 12}" y="${y - 7}" class="obj">★</text>`;
+      if (outer[id]) svg += `<text x="${x + 9}" y="${y + 4}" class="out">→${[...outer[id]].filter(Boolean).map((r) => esc((wm.regions.find((q) => q.id === r)?.name || r).replace(/（.*$/, '').slice(0, 5))).join('・')}</text>`;
+      svg += `<rect x="${x - 10}" y="${y - 10}" width="20" height="20" class="hit"/></g>`;
+    }
+    svg += '</svg>';
+    body += `<div class="wmwrap">${svg}</div>`;
+    body += this.worldInfo();
+    body += '<div class="dim">■ 町　● 狩り場　▲ ボス　◆ ジャンプの試練　？ 受けられる　電球 報告できる　★ 進めているクエストの目的地　点線 乗り物。行ったことのない所は「？？？」。</div>';
+    return this.frame('world', `全体マップ (W)　${reg.name}`, body);
+  }
+
+  /** 全体マップの下の説明（マウスを乗せた点・無ければ今いる所） */
+  worldInfo() {
+    const wm = this.game.db.worldmap, w = this.worldMarks;
+    if (!w) return '<div class="info" id="wmInfo"></div>';
+    const id = this.worldSel || w.here;
+    const n = wm.maps[id];
+    if (!n) return '<div class="info" id="wmInfo"></div>';
+    const mk = w.marks[id] || 0;
+    const seen = mk & 16;
+    const mobs = (n.mobs || []).map((m) => (this.seenMobs?.has(m) ? esc(this.db.monsters[m]?.name || m) : '？')).join('・');
+    const bgm = this.game.audio.m?.bgm?.[n.bgm]?.title || n.bgm || '';
+    const lv = n.lv ? `Lv ${n.lv[0]}〜${n.lv[1]}` : n.type === '町' ? '町' : n.type === '試' ? 'ジャンプの試練' : '';
+    return `<div class="info" id="wmInfo"><b>${esc(seen || n.type === '町' ? n.name : '？？？')}</b>${mk & 8 ? ' <span class="good">← 今いる所</span>' : ''}　${lv}${seen ? `　曲「${esc(bgm)}」` : ''}<br>`
+      + `${mobs ? `出る敵: ${mobs}<br>` : ''}${mk & 2 ? '<span class="good">報告できるクエストがある</span>　' : ''}${mk & 1 ? '<span class="gold">受けられるクエストがある</span>　' : ''}${mk & 4 ? '<span class="obj">進めているクエストの目的地</span>' : ''}</div>`;
+  }
+
 
   // ---------------- 会話
   openDialog(d) {
@@ -471,7 +642,7 @@ export class Ui {
 
   // ---------------- クリック
   onClick(e) {
-    const t = e.target.closest('button, [data-inv], [data-skillsel], .qs');
+    const t = e.target.closest('button, [data-inv], [data-skillsel], [data-bookm], [data-wm], .qs');
     if (!t) return;
     if (t.blur) t.blur(); // Space・Enter でボタンがもう一度押されないように
     this.game.audio.unlock();
@@ -500,6 +671,12 @@ export class Ui {
     }
     if (ds.smeso) { const v = Math.max(1, +this.root.querySelector('#smeso').value || 0); this.doAct(ds.smeso === 'in' ? 'storeMesoIn' : 'storeMesoOut', this.storageNpc, '', v); return; }
     if (ds.sys) { this.game.sys(ds.sys); return; }
+    if (ds.bookr != null) { this.bookRegion = ds.bookr; this.bookSel = null; this.renderWins(); return; }
+    if (ds.bookm != null) { this.bookSel = ds.bookm; this.game.audio.sfx('ui_click'); this.renderWins(); return; }
+    if (ds.medaltab != null) { this.medalTab = ds.medaltab; this.renderWins(); return; }
+    if (ds.rectab != null) { this.recTab = ds.rectab; this.renderWins(); return; }
+    if (ds.wmr != null) { this.worldRegion = ds.wmr; this.worldSel = null; this.renderWins(); return; }
+    if (ds.wm != null) { this.worldSel = ds.wm; this.renderWins(); return; }
     if (ds.act) { this.doAct(ds.act, ds.a ?? '', ds.b ?? '', ds.n != null ? +ds.n : 0); }
   }
 
@@ -525,6 +702,12 @@ export class Ui {
     if (t.dataset.vol) { this.game.audio.vol[t.dataset.vol] = t.value / 100; this.game.audio.applyVolume(); }
     if (t.dataset.mute != null) { this.game.audio.vol.muted = t.checked; this.game.audio.applyVolume(); }
   }
+}
+
+function fmtTime(sec) {
+  const t = Math.max(0, Math.round(sec || 0));
+  const h = Math.floor(t / 3600), m = Math.floor(t / 60) % 60, s2 = t % 60;
+  return h ? `${h} 時間 ${m} 分` : m ? `${m} 分 ${s2} 秒` : `${s2} 秒`;
 }
 
 function greet(role) {

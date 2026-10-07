@@ -218,19 +218,19 @@
   {
    "id": "ruru",
    "name": "人形師ルル",
-   "x": 736,
+   "x": 680,
    "y": 520
   },
   {
    "id": "buro",
    "name": "積み木職人ブロ",
-   "x": 1096,
+   "x": 1000,
    "y": 520
   },
   {
    "id": "zenmai",
    "name": "武器屋ゼンマイ",
-   "x": 1440,
+   "x": 1320,
    "y": 520,
    "role": "weapon",
    "shop": "shop.T100.weapon"
@@ -238,7 +238,7 @@
   {
    "id": "wata",
    "name": "防具屋ワタ",
-   "x": 1848,
+   "x": 1640,
    "y": 520,
    "role": "armor",
    "shop": "shop.T100.armor"
@@ -246,7 +246,7 @@
   {
    "id": "ame",
    "name": "薬屋アメ",
-   "x": 2216,
+   "x": 1960,
    "y": 520,
    "role": "potion",
    "shop": "shop.T100.potion"
@@ -254,9 +254,23 @@
   {
    "id": "hakobe",
    "name": "倉庫番ハコベ",
-   "x": 2576,
+   "x": 2280,
    "y": 520,
    "role": "storage"
+  },
+  {
+   "id": "jq_gigi",
+   "name": "ねじ巻きギギ",
+   "x": 2600,
+   "y": 520,
+   "role": "jump",
+   "travel": {
+    "to": "J004",
+    "toPortal": "sp",
+    "minLevel": 0,
+    "oneWay": false,
+    "fee": 0
+   }
   },
   {
    "id": "clock",

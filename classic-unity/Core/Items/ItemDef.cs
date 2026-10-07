@@ -138,6 +138,9 @@ namespace Lumina.Core.Items
         public int AttackSpeed;         // 武器の速さの段階（2〜9）
         public bool Cosmetic;           // 見た目だけ（能力なし）
         public bool QuestOnly;          // クエストでしか手に入らない（店に並ばない・敵が落とさない。ITEMS.md 8 章）
+        /// <summary>勲章（条件を満たすと自動で手に入るメダル。Data/tools/medals.mjs・Core/Collection/Medals.cs）。組・条件の文・手に入れた時のお金</summary>
+        public bool MedalAuto; public string MedalGroup, MedalHint; public long MedalMeso;
+        public bool IsMedal => Slot == EquipSlot.Medal;
 
         // 消費・その他
         public UseEffect Use;
@@ -181,6 +184,8 @@ namespace Lumina.Core.Items
                 default: it.ReqStat = Stat.None; break;
             }
             it.Pet = J.Str(d, "pet"); it.PetSkill = J.Str(d, "petSkill"); it.Ticket = J.Str(d, "ticket");
+            var md = J.Obj(d, "medal");
+            if (md != null) { it.MedalAuto = J.Bool(md, "auto"); it.MedalGroup = J.Str(md, "group"); it.MedalHint = J.Str(md, "hint"); it.MedalMeso = J.Long(md, "meso"); }
             var ch = J.Obj(d, "chair");
             if (ch != null) it.ChairRegenMul = J.Num(ch, "regenMul", 1.5);
             var mb = J.Obj(d, "masterBook");

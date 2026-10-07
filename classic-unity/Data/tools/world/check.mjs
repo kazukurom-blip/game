@@ -403,8 +403,9 @@ export function readMapsDir(dir) {
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const HERE = path.dirname(fileURLToPath(import.meta.url));
   const { MAPS_RAW } = await import('../../../../classic/tools/data/maps.mjs');
+  const { JUMP_RAW } = await import('./jump.mjs');
   const maps = readMapsDir(path.resolve(HERE, '../../maps'));
-  const problems = checkWorld(maps, MAPS_RAW);
+  const problems = checkWorld(maps, [...MAPS_RAW, ...JUMP_RAW]);
   let segs = 0, ropes = 0, spawns = 0, oneWay = 0;
   for (const m of Object.values(maps)) { segs += m.footholds.length; ropes += (m.ropes || []).length; spawns += (m.spawns || []).length; oneWay += (m.portals || []).filter((p) => p.oneWay).length; }
   if (problems.length) {

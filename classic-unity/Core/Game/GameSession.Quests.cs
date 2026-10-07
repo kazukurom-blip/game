@@ -175,6 +175,7 @@ namespace Lumina.Core.Game
         private void OnVisitMap(string mapId)
         {
             RecordVisit(mapId); // 冒険の記録（GameSession.Records.cs）
+            OnVisitCollection(mapId); // 訪れたマップ・ジャンプの試練の時間（GameSession.Collection.cs）
             foreach (var note in Quests.Progress(ObjectiveType.Visit, mapId)) OnQuestNote(note);
             CheckAutoComplete();
         }
@@ -213,6 +214,7 @@ namespace Lumina.Core.Game
             foreach (var note in Quests.Progress(ObjectiveType.Interact, objectId)) OnQuestNote(note);
             CheckAutoComplete();
             OnInteractTown(found); // 毎日の宝箱・賢者の石（GameSession.Town.cs）
+            OnInteractCollection(found); // ジャンプの試練の宝箱（GameSession.Collection.cs）
             return true;
         }
 

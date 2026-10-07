@@ -162,6 +162,7 @@ namespace Lumina.Core.Game
 
             if (Dead)
             {
+                TickCollection(dt);
                 Map.StepWorld(dt, Rng);
                 StepMobs(dt);
                 Pose = poseTracker.Update(Body, null, true, dt, 0);
@@ -228,6 +229,7 @@ namespace Lumina.Core.Game
             Skills.Tick(dt);
             Regen(dt);
             TickTown(dt); // ペット・部屋の制限時間（GameSession.Town.cs）
+            TickCollection(dt); // 勲章の判定・記録（GameSession.Collection.cs）
 
             Pose = poseTracker.Update(Body, Attack, Dead, dt, Status.Mask);
             if (Sitting != null) Pose.Motion = "sit";
@@ -250,7 +252,7 @@ namespace Lumina.Core.Game
         /// <summary>最終の能力を計算し直す（装備・バフ・AP・スキルが変わった時。毎フレームも呼ばれる）。</summary>
         public void RefreshStats()
         {
-            Stats = StatCalc.Compute(Character, Equipment, Skills, Buffs, Inventory, Data);
+            Stats = StatCalc.Compute(Character, Equipment, Skills, Buffs, Inventory, Data, CollectionBonus()); // 図鑑の段の上乗せ（GameSession.Collection.cs）
             if (Status.Any)
             {
                 // 暗闇: 命中 −50%。呪い: 攻撃力・魔力・防御 −20%（STATS.md 4-3）
@@ -349,6 +351,7 @@ namespace Lumina.Core.Game
             }
             if (p.To != null && !CheckRoomEntry(p.To)) return false; // ボスの間・ダンジョン・試験の部屋（GameSession.Rooms.cs）
             Out.Add(GameEventType.PortalUsed, p.Name, x: p.X, y: p.Y);
+            if (p.Type == PortalType.Hidden) OnHiddenPortal(p); // 隠し部屋の記録（GameSession.Collection.cs）
             if (p.To == null)
             {
                 // 同じマップの中の別の位置（隠し部屋など）
@@ -440,6 +443,7 @@ namespace Lumina.Core.Game
                 return;
             }
             Dead = true;
+            Records.Deaths++;
             StandUp();
             Quiz = null;
             Character.Hp = 0;
@@ -526,6 +530,7 @@ namespace Lumina.Core.Game
             // 死んでいる時は、起き上がる町に置いておく（読み込んだら町から）
             if (Dead) { s.Map = CurrentRoom?.Exit ?? Map.Data.ReturnMap ?? StartMap; var md = Data.GetMap(s.Map); var p = md?.FindPortalByName("town"); s.X = p?.X ?? 0; s.Y = p?.Y ?? 0; }
             WriteTownSave(s); // 倉庫以外の町の仕組み（毎日の回数・ペット）
+            s.Collection = CollectionToDict(); // 図鑑・勲章・記録・見た目（版 4）
             return s;
         }
 
@@ -599,6 +604,8 @@ namespace Lumina.Core.Game
                 if (g.Map.Physics.SegBelow(pos.Item1, pos.Item2) == null) PlayerPhysics.PlaceOnGround(g.Body, g.Map.Physics, sp.x, sp.y);
             }
             g.ReadTownSave(s);
+            g.ReadCollection(s.Collection, r0 ^ r1);
+            g.Flags["visit." + md.Id] = true;
             g.RefreshStats();
             if (c.Hp <= 0) c.Hp = Math.Max(1, g.Stats.MaxHp / 2);
             g.Out.Clear();

@@ -218,6 +218,23 @@ export const NPCS = [
   // ===== クエストの追加（QUESTS.md 8 章）で足した人 =====
   ['sennin', '湯けむりの仙人', 'V619'],          // 谷の温泉の湯けむりの奥（隠しの依頼者。N-22〜N-24）
   ['memori', '冒険の記録係メモリ', 'V090'],      // 長い目標（敵の種類・町・クエストの数）とメダル（X 系）
+
+  // ===== ジャンプの試練（world/jump.mjs の J001〜J005。町の案内人から入り、試練の下と上の案内人で町へ戻る） =====
+  ['jq_mokuren', '木登り名人モクレン', 'V200', { role: 'jump', ...TRV('J001') }],
+  ['jq_mokuren_J001', '木登り名人モクレン', 'J001', { x: 200, role: 'jump', ...TRV('V200', { homeward: true }) }],
+  ['jq_mokuren_J001_top', '木登り名人モクレン', 'J001', { x: 960, top: true, role: 'jump', ...TRV('V200', { homeward: true }) }],
+  ['jq_yotaka', '屋根番ヨタカ', 'V500', { role: 'jump', ...TRV('J002') }],
+  ['jq_yotaka_J002', '屋根番ヨタカ', 'J002', { x: 200, role: 'jump', ...TRV('V500', { homeward: true }) }],
+  ['jq_yotaka_J002_top', '屋根番ヨタカ', 'J002', { x: 960, top: true, role: 'jump', ...TRV('V500', { homeward: true }) }],
+  ['jq_fuwari', '雲番フワリ', 'C100', { role: 'jump', ...TRV('J003') }],
+  ['jq_fuwari_J003', '雲番フワリ', 'J003', { x: 200, role: 'jump', ...TRV('C100', { homeward: true }) }],
+  ['jq_fuwari_J003_top', '雲番フワリ', 'J003', { x: 960, top: true, role: 'jump', ...TRV('C100', { homeward: true }) }],
+  ['jq_gigi', 'ねじ巻きギギ', 'T100', { role: 'jump', ...TRV('J004') }],
+  ['jq_gigi_J004', 'ねじ巻きギギ', 'J004', { x: 200, role: 'jump', ...TRV('T100', { homeward: true }) }],
+  ['jq_gigi_J004_top', 'ねじ巻きギギ', 'J004', { x: 960, top: true, role: 'jump', ...TRV('T100', { homeward: true }) }],
+  ['jq_garan', '骨守りガラン', 'D100', { role: 'jump', ...TRV('J005') }],
+  ['jq_garan_J005', '骨守りガラン', 'J005', { x: 200, role: 'jump', ...TRV('D100', { homeward: true }) }],
+  ['jq_garan_J005_top', '骨守りガラン', 'J005', { x: 960, top: true, role: 'jump', ...TRV('D100', { homeward: true }) }],
 ];
 
 /** 「名前@マップ」→ ID（クエストの依頼者を直す）。マップに同じ名前がいなければ名前だけで探す。 */
