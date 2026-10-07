@@ -1,0 +1,53 @@
+{
+ "note": "ITEMS.md 6 章（島の店だけ。ほかの町は後で足す）",
+ "shops": [
+  {
+   "id": "shop.S003.general",
+   "name": "芽吹き村の雑貨屋",
+   "items": [
+    {
+     "item": "eq.starter.0"
+    },
+    {
+     "item": "eq.starter.1"
+    },
+    {
+     "item": "eq.starter.4"
+    },
+    {
+     "item": "eq.starter.5"
+    },
+    {
+     "item": "eq.starter.7"
+    },
+    {
+     "item": "eq.starter.8"
+    },
+    {
+     "item": "eq.starter.10"
+    },
+    {
+     "item": "eq.starter.11"
+    },
+    {
+     "item": "eq.starter.12"
+    },
+    {
+     "item": "eq.starter.13"
+    }
+   ]
+  },
+  {
+   "id": "shop.S003.potion",
+   "name": "芽吹き村の薬屋",
+   "items": [
+    {
+     "item": "use.red_potion"
+    },
+    {
+     "item": "use.blue_potion"
+    }
+   ]
+  }
+ ]
+}

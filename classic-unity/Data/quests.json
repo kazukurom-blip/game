@@ -1,0 +1,8593 @@
+{
+ "note": "export_data.mjs が quests.mjs から書き出した。報酬の経験値・お金は QUESTS.md 1-3 の式。チュートリアル（S-01〜S-20）の目的は機械で判定できる形に書き直してある。",
+ "quests": [
+  {
+   "id": "S-01",
+   "name": "目覚めの浜",
+   "giver": "luka",
+   "giverName": "案内人ルカ",
+   "map": "S000",
+   "minLevel": 1,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "左右に歩き、ジャンプで岩を越えて S001 へ行く",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "S001"
+    }
+   ],
+   "end": "ganzo",
+   "exp": 8,
+   "meso": 40,
+   "rewards": [
+    {
+     "item": "use.red_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "赤ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "浜で目を覚ました主人公。記憶はあいまいで、覚えているのは「星の夢」だけ。少年ルカが村まで案内してくれる。移動とジャンプを覚える。",
+   "tutorial": true
+  },
+  {
+   "id": "S-02",
+   "name": "縄の上り方",
+   "giver": "ganzo",
+   "giverName": "縄職人ガンゾ",
+   "map": "S001",
+   "minLevel": 1,
+   "prereqs": [
+    "S-01"
+   ],
+   "size": "小",
+   "goalText": "縄につかまって上の段へ登り、木箱を調べる",
+   "objectives": [
+    {
+     "type": "interact",
+     "target": "S001.crate",
+     "label": "上の段の木箱を調べる"
+    }
+   ],
+   "end": "ganzo",
+   "exp": 8,
+   "meso": 40,
+   "rewards": [
+    {
+     "item": "use.red_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "赤ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "ガンゾが自慢の縄の使い方を教える。上キーでつかまる・飛び降りる、を覚える。",
+   "tutorial": true
+  },
+  {
+   "id": "S-03",
+   "name": "はじめての狩り",
+   "giver": "ganzo",
+   "giverName": "縄職人ガンゾ",
+   "map": "S001",
+   "minLevel": 1,
+   "prereqs": [
+    "S-02"
+   ],
+   "size": "小",
+   "goalText": "M001×3",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M001",
+     "count": 3
+    }
+   ],
+   "end": "ganzo",
+   "exp": 8,
+   "meso": 40,
+   "rewards": [
+    {
+     "item": "eq.starter.0",
+     "count": 1
+    }
+   ],
+   "rewardText": "麦わら帽子",
+   "rewardUnparsed": [],
+   "story": "小道をふさぐコロ貝を追い払う。攻撃キーと、敵の HP バーを覚える。",
+   "tutorial": true
+  },
+  {
+   "id": "S-04",
+   "name": "はしご番の頼み",
+   "giver": "poppo",
+   "giverName": "はしご番のポッポ",
+   "map": "S002",
+   "minLevel": 1,
+   "prereqs": [
+    "S-03"
+   ],
+   "size": "小",
+   "goalText": "M002×2",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M002",
+     "count": 2
+    }
+   ],
+   "end": "poppo",
+   "exp": 8,
+   "meso": 40,
+   "rewards": [
+    {
+     "item": "use.red_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "赤ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "はしごの上で落とし物を拾う練習。拾うキーと持ち物の「その他」タブを覚える。",
+   "tutorial": true
+  },
+  {
+   "id": "S-05",
+   "name": "芽吹き村へ",
+   "giver": "poppo",
+   "giverName": "はしご番のポッポ",
+   "map": "S002",
+   "minLevel": 2,
+   "prereqs": [
+    "S-04"
+   ],
+   "size": "小",
+   "goalText": "S003 の村長ヨモギに会う",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "yomogi"
+    }
+   ],
+   "end": "yomogi",
+   "exp": 8,
+   "meso": 49,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "丘を越えて村へ。村長は主人公を温かく迎え、しばらく村で暮らすよう勧める。",
+   "tutorial": true
+  },
+  {
+   "id": "S-06",
+   "name": "村のあいさつ回り",
+   "giver": "yomogi",
+   "giverName": "村長ヨモギ",
+   "map": "S003",
+   "minLevel": 2,
+   "prereqs": [
+    "S-05"
+   ],
+   "size": "小",
+   "goalText": "雑貨屋タタ・薬屋ニナ・宿屋のモモ・漁師トビオと話す",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "tata"
+    },
+    {
+     "type": "talk",
+     "npc": "nina"
+    },
+    {
+     "type": "talk",
+     "npc": "momo"
+    },
+    {
+     "type": "talk",
+     "npc": "tobio"
+    }
+   ],
+   "end": "yomogi",
+   "exp": 8,
+   "meso": 49,
+   "rewards": [
+    {
+     "item": "use.blue_potion",
+     "count": 5
+    }
+   ],
+   "rewardText": "青ポーション ×5",
+   "rewardUnparsed": [],
+   "story": "村の人に顔を覚えてもらう。店の画面（買う・売る）と宿屋（休む）を覚える。",
+   "tutorial": true
+  },
+  {
+   "id": "S-07",
+   "name": "訓練所へ",
+   "giver": "baldo",
+   "giverName": "教官バルド",
+   "map": "S011",
+   "minLevel": 2,
+   "prereqs": [
+    "S-06"
+   ],
+   "size": "小",
+   "goalText": "訓練所で薬をクイックスロットに置き、使ってみる",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "quickslot_set",
+     "label": "薬をクイックスロットに置く"
+    },
+    {
+     "type": "event",
+     "event": "use_potion",
+     "label": "薬を使う"
+    }
+   ],
+   "end": "baldo",
+   "exp": 8,
+   "meso": 49,
+   "rewards": [
+    {
+     "item": "use.red_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "赤ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "元冒険者の教官バルドが「準備の大切さ」を教える。クイックスロットを覚える。",
+   "tutorial": true
+  },
+  {
+   "id": "S-08",
+   "name": "能力の振り方",
+   "giver": "baldo",
+   "giverName": "教官バルド",
+   "map": "S011",
+   "minLevel": 3,
+   "prereqs": [
+    "S-07"
+   ],
+   "size": "小",
+   "goalText": "ステータスの画面で AP を 5 振る",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "ap_spent",
+     "count": 5,
+     "label": "AP を 5 振る"
+    }
+   ],
+   "end": "baldo",
+   "exp": 8,
+   "meso": 60,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "STR・DEX・INT・LUK がそれぞれ何に効くかを聞き、自分で振る。自動で振る機能は無いことを伝える。",
+   "tutorial": true
+  },
+  {
+   "id": "S-09",
+   "name": "スキルを覚えよう",
+   "giver": "baldo",
+   "giverName": "教官バルド",
+   "map": "S011",
+   "minLevel": 3,
+   "prereqs": [
+    "S-08"
+   ],
+   "size": "小",
+   "goalText": "スキルの画面で SP を 1 振り、そのスキルをキーに置いて使う",
+   "objectives": [
+    {
+     "type": "event",
+     "event": "sp_spent",
+     "count": 1,
+     "label": "SP を 1 振る"
+    },
+    {
+     "type": "event",
+     "event": "skill_used",
+     "count": 1,
+     "label": "スキルを使う"
+    }
+   ],
+   "end": "baldo",
+   "exp": 8,
+   "meso": 60,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "初心者のスキル（石つぶて・ひと休み・身軽な足）から 1 つ選ぶ。",
+   "tutorial": true
+  },
+  {
+   "id": "S-10",
+   "name": "畑を荒らす貝",
+   "giver": "riri",
+   "giverName": "少女リリ",
+   "map": "S003",
+   "minLevel": 3,
+   "prereqs": [
+    "S-06"
+   ],
+   "size": "小",
+   "goalText": "M002×10",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M002",
+     "count": 10
+    }
+   ],
+   "end": "riri",
+   "exp": 8,
+   "meso": 60,
+   "rewards": [
+    {
+     "item": "eq.starter.1",
+     "count": 1
+    }
+   ],
+   "rewardText": "布のバンダナ",
+   "rewardUnparsed": [],
+   "story": "リリの家の畑をアオコロ貝が荒らしている。",
+   "tutorial": true
+  },
+  {
+   "id": "S-11",
+   "name": "キノコの胞子",
+   "giver": "nina",
+   "giverName": "薬屋ニナ",
+   "map": "S003",
+   "minLevel": 4,
+   "prereqs": [
+    "S-06"
+   ],
+   "size": "小",
+   "goalText": "M003×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M003",
+     "count": 10
+    }
+   ],
+   "end": "nina",
+   "exp": 8,
+   "meso": 74,
+   "rewards": [
+    {
+     "item": "use.red_potion",
+     "count": 20
+    }
+   ],
+   "rewardText": "赤ポーション ×20",
+   "rewardUnparsed": [],
+   "story": "ニナは胞子から傷薬を作る。薬はこうして作られる、という小さな話。",
+   "tutorial": true
+  },
+  {
+   "id": "S-12",
+   "name": "泉の宝箱",
+   "giver": "gen",
+   "giverName": "ゲン爺",
+   "map": "S003",
+   "minLevel": 5,
+   "prereqs": [
+    "S-06"
+   ],
+   "size": "中",
+   "goalText": "S007 の泉の右の岩の裏の隠しポータルを見つけ、小部屋の箱を開ける",
+   "objectives": [
+    {
+     "type": "interact",
+     "target": "S007.box",
+     "label": "隠し部屋の箱を開ける"
+    }
+   ],
+   "end": "gen",
+   "exp": 16,
+   "meso": 226,
+   "rewards": [
+    {
+     "item": "eq.starter.7",
+     "count": 1
+    }
+   ],
+   "rewardText": "旅人の靴",
+   "rewardUnparsed": [],
+   "story": "ゲン爺が若いころ隠した箱の話。隠しポータルの存在を初めて知る。",
+   "tutorial": true
+  },
+  {
+   "id": "S-13",
+   "name": "ぷるぷるのしずく",
+   "giver": "momo",
+   "giverName": "宿屋のモモ",
+   "map": "S003",
+   "minLevel": 6,
+   "prereqs": [
+    "S-06"
+   ],
+   "size": "中",
+   "goalText": "M005×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M005",
+     "count": 15
+    }
+   ],
+   "end": "momo",
+   "exp": 45,
+   "meso": 277,
+   "rewards": [
+    {
+     "item": "use.red_potion",
+     "count": 30
+    }
+   ],
+   "rewardText": "赤ポーション ×30",
+   "rewardUnparsed": [],
+   "story": "モモの店の名物ゼリーの材料。",
+   "tutorial": true
+  },
+  {
+   "id": "S-14",
+   "name": "崖の上の見張り",
+   "giver": "tobio",
+   "giverName": "漁師トビオ",
+   "map": "S003",
+   "minLevel": 6,
+   "prereqs": [
+    "S-06"
+   ],
+   "size": "中",
+   "goalText": "M004×15",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M004",
+     "count": 15
+    }
+   ],
+   "end": "tobio",
+   "exp": 45,
+   "meso": 277,
+   "rewards": [
+    {
+     "item": "eq.starter.8",
+     "count": 1
+    }
+   ],
+   "rewardText": "綿の手袋",
+   "rewardUnparsed": [],
+   "story": "東の崖の上から海を見張りたいが、アカコロ貝が邪魔をする。",
+   "tutorial": true
+  },
+  {
+   "id": "S-15",
+   "name": "ダイダイダケのかさ",
+   "giver": "piko",
+   "giverName": "学者見習いピコ",
+   "map": "S003",
+   "minLevel": 7,
+   "prereqs": [
+    "S-06"
+   ],
+   "size": "中",
+   "goalText": "M006×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M006",
+     "count": 10
+    }
+   ],
+   "end": "piko",
+   "exp": 64,
+   "meso": 339,
+   "rewards": [
+    {
+     "item": "eq.starter.4",
+     "count": 1
+    }
+   ],
+   "rewardText": "旅人のチョッキ",
+   "rewardUnparsed": [],
+   "story": "ピコは島のキノコを調べている。",
+   "tutorial": true
+  },
+  {
+   "id": "S-16",
+   "name": "ピコの観察日記",
+   "giver": "piko",
+   "giverName": "学者見習いピコ",
+   "map": "S003",
+   "minLevel": 7,
+   "prereqs": [
+    "S-15"
+   ],
+   "size": "小",
+   "goalText": "S008 から大陸を眺め、見えた物をピコに伝える",
+   "objectives": [
+    {
+     "type": "interact",
+     "target": "S008.view",
+     "label": "高台から大陸を眺める"
+    }
+   ],
+   "end": "piko",
+   "exp": 32,
+   "meso": 136,
+   "rewards": [
+    {
+     "item": "eq.starter.5",
+     "count": 1
+    }
+   ],
+   "rewardText": "旅人のズボン",
+   "rewardUnparsed": [],
+   "story": "高台から海の向こうの大陸が見える。旅立ちへの気持ちが高まる。",
+   "tutorial": true
+  },
+  {
+   "id": "S-17",
+   "name": "大コロ貝のうわさ",
+   "giver": "tobio",
+   "giverName": "漁師トビオ",
+   "map": "S003",
+   "minLevel": 9,
+   "prereqs": [
+    "S-14"
+   ],
+   "size": "大",
+   "goalText": "M007×1",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M007",
+     "count": 1
+    }
+   ],
+   "end": "tobio",
+   "exp": 278,
+   "meso": 1220,
+   "rewards": [
+    {
+     "item": "use.safety_charm",
+     "count": 1
+    }
+   ],
+   "rewardText": "守りのお守り ×1",
+   "rewardUnparsed": [],
+   "story": "浜に現れる大きなコロ貝。島で一番の強敵（任意）。",
+   "tutorial": true
+  },
+  {
+   "id": "S-18",
+   "name": "旅立ちの準備",
+   "giver": "yomogi",
+   "giverName": "村長ヨモギ",
+   "map": "S003",
+   "minLevel": 7,
+   "prereqs": [
+    "S-09"
+   ],
+   "size": "中",
+   "goalText": "村の 4 人にお別れを言い、船長カイから切符を受け取る",
+   "objectives": [
+    {
+     "type": "talk",
+     "npc": "tata"
+    },
+    {
+     "type": "talk",
+     "npc": "nina"
+    },
+    {
+     "type": "talk",
+     "npc": "momo"
+    },
+    {
+     "type": "talk",
+     "npc": "tobio"
+    },
+    {
+     "type": "talk",
+     "npc": "kai"
+    }
+   ],
+   "end": "kai",
+   "exp": 64,
+   "meso": 339,
+   "rewards": [
+    {
+     "item": "special.letter_breeze",
+     "count": 1
+    }
+   ],
+   "rewardText": "ブリーズ港への推薦状",
+   "rewardUnparsed": [],
+   "story": "大陸へ渡り、自分の道（職業）を探すよう勧められる。",
+   "tutorial": true
+  },
+  {
+   "id": "S-19",
+   "name": "大陸への船",
+   "giver": "kai",
+   "giverName": "船長カイ",
+   "map": "S010",
+   "minLevel": 7,
+   "prereqs": [
+    "S-18"
+   ],
+   "size": "小",
+   "goalText": "船に乗る（V100 へ着く）",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "V100"
+    }
+   ],
+   "end": "auto",
+   "exp": 32,
+   "meso": 136,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "一度渡ると島へは戻れない。島でやり残しが無いか聞かれる。",
+   "tutorial": true
+  },
+  {
+   "id": "S-20",
+   "name": "貝の首飾り",
+   "giver": "riri",
+   "giverName": "少女リリ",
+   "map": "S003",
+   "minLevel": 5,
+   "prereqs": [
+    "S-10"
+   ],
+   "size": "小",
+   "goalText": "M001×5",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M001",
+     "count": 5
+    }
+   ],
+   "end": "riri",
+   "exp": 8,
+   "meso": 90,
+   "rewards": [
+    {
+     "item": "eq.cosmetic.shell_necklace",
+     "count": 1
+    }
+   ],
+   "rewardText": "貝の首飾り（顔飾り・見た目だけ）",
+   "rewardUnparsed": [],
+   "story": "リリが作るお守りの首飾り。旅立つ主人公への贈り物になる。",
+   "tutorial": true
+  },
+  {
+   "id": "V-01",
+   "name": "港長オルガ",
+   "giver": "olga",
+   "giverName": "港長オルガ",
+   "map": "V100",
+   "minLevel": 7,
+   "prereqs": [
+    "S-19"
+   ],
+   "size": "小",
+   "goalText": "推薦状を見せる",
+   "objectives": [],
+   "end": "olga",
+   "exp": 32,
+   "meso": 136,
+   "rewards": [
+    {
+     "item": "use.return.V100",
+     "count": 3
+    }
+   ],
+   "rewardText": "大陸の地図、ブリーズ港への帰還の書 ×3",
+   "rewardUnparsed": [
+    "大陸の地図"
+   ],
+   "story": "大陸と 5 つの町の説明。ワールドマップが使えるようになる。",
+   "tutorial": false
+  },
+  {
+   "id": "V-02",
+   "name": "弓の町への手紙",
+   "giver": "olga",
+   "giverName": "港長オルガ",
+   "map": "V100",
+   "minLevel": 7,
+   "prereqs": [
+    "V-01"
+   ],
+   "size": "小",
+   "goalText": "ポム丘の弓の師範エルナに手紙を届ける",
+   "objectives": [],
+   "end": "olga",
+   "exp": 32,
+   "meso": 136,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "大陸めぐり 1。町をめぐって職を知る連作。",
+   "tutorial": false
+  },
+  {
+   "id": "V-03",
+   "name": "森の町への手紙",
+   "giver": "弓の師範エルナ",
+   "giverName": "弓の師範エルナ",
+   "map": "V200",
+   "minLevel": 8,
+   "prereqs": [
+    "V-02"
+   ],
+   "size": "小",
+   "goalText": "シルワ森都の大魔導師オルフェに手紙を届ける",
+   "objectives": [],
+   "end": "弓の師範エルナ",
+   "exp": 46,
+   "meso": 166,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "大陸めぐり 2。",
+   "tutorial": false
+  },
+  {
+   "id": "V-04",
+   "name": "岩の町への手紙",
+   "giver": "大魔導師オルフェ",
+   "giverName": "大魔導師オルフェ",
+   "map": "V300",
+   "minLevel": 8,
+   "prereqs": [
+    "V-03"
+   ],
+   "size": "小",
+   "goalText": "ガルド岩台の戦士長ドルガに手紙を届ける",
+   "objectives": [],
+   "end": "大魔導師オルフェ",
+   "exp": 46,
+   "meso": 166,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "大陸めぐり 3。",
+   "tutorial": false
+  },
+  {
+   "id": "V-05",
+   "name": "霧の町への手紙",
+   "giver": "戦士長ドルガ",
+   "giverName": "戦士長ドルガ",
+   "map": "V400",
+   "minLevel": 9,
+   "prereqs": [
+    "V-04"
+   ],
+   "size": "小",
+   "goalText": "クロウ街の影の頭領ヤミに手紙を届ける",
+   "objectives": [],
+   "end": "戦士長ドルガ",
+   "exp": 67,
+   "meso": 204,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "大陸めぐり 4。ヤミの部屋には裏から入る。",
+   "tutorial": false
+  },
+  {
+   "id": "V-06",
+   "name": "海賊の船への手紙",
+   "giver": "影の頭領ヤミ",
+   "giverName": "影の頭領ヤミ",
+   "map": "V500",
+   "minLevel": 9,
+   "prereqs": [
+    "V-05"
+   ],
+   "size": "中",
+   "goalText": "潮風号のキャプテン・リオに手紙を届け、オルガに報告する",
+   "objectives": [],
+   "end": "影の頭領ヤミ",
+   "exp": 133,
+   "meso": 510,
+   "rewards": [],
+   "rewardText": "タクシーの回数券 ×5",
+   "rewardUnparsed": [
+    "タクシーの回数券 ×5"
+   ],
+   "story": "大陸めぐり 5。5 人の転職官に会い、どの職になるか決める材料がそろう。",
+   "tutorial": false
+  },
+  {
+   "id": "V-07",
+   "name": "灯台のランプ",
+   "giver": "灯台守ソル",
+   "giverName": "灯台守ソル",
+   "map": "V102",
+   "minLevel": 9,
+   "prereqs": [
+    "V-01"
+   ],
+   "size": "中",
+   "goalText": "M011×10 を集め、灯台のてっぺん（隠しポータル）のランプを掃除する",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M011",
+     "count": 10
+    }
+   ],
+   "end": "灯台守ソル",
+   "exp": 133,
+   "meso": 510,
+   "rewards": [
+    {
+     "item": "use.speed_tonic",
+     "count": 5
+    }
+   ],
+   "rewardText": "速さの薬 ×5",
+   "rewardUnparsed": [],
+   "story": "灯台のランプが曇って船が迷う。",
+   "tutorial": false
+  },
+  {
+   "id": "V-08",
+   "name": "浜のカニ退治",
+   "giver": "船乗りロッコ",
+   "giverName": "船乗りロッコ",
+   "map": "V100",
+   "minLevel": 8,
+   "prereqs": [
+    "V-01"
+   ],
+   "size": "小",
+   "goalText": "M010×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M010",
+     "count": 20
+    }
+   ],
+   "end": "船乗りロッコ",
+   "exp": 46,
+   "meso": 166,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "橙ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "荷揚げの邪魔をするハマガニ。",
+   "tutorial": false
+  },
+  {
+   "id": "V-09",
+   "name": "タコの墨",
+   "giver": "薬屋ポーラ",
+   "giverName": "薬屋ポーラ",
+   "map": "V100",
+   "minLevel": 12,
+   "prereqs": [
+    "V-01"
+   ],
+   "size": "中",
+   "goalText": "M012×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M012",
+     "count": 15
+    }
+   ],
+   "end": "薬屋ポーラ",
+   "exp": 332,
+   "meso": 745,
+   "rewards": [
+    {
+     "item": "use.eye_drop",
+     "count": 10
+    }
+   ],
+   "rewardText": "目薬 ×10",
+   "rewardUnparsed": [],
+   "story": "墨は目薬の材料になる。",
+   "tutorial": false
+  },
+  {
+   "id": "V-10",
+   "name": "しずくの洞窟の小部屋",
+   "giver": "釣り好きのウオ爺",
+   "giverName": "釣り好きのウオ爺",
+   "map": "V100",
+   "minLevel": 15,
+   "prereqs": [
+    "V-01"
+   ],
+   "size": "中",
+   "goalText": "V105 の行き止まりの水たまりを調べる",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "V105"
+    }
+   ],
+   "end": "釣り好きのウオ爺",
+   "exp": 756,
+   "meso": 968,
+   "rewards": [
+    {
+     "item": "scroll.A17.100",
+     "count": 1
+    }
+   ],
+   "rewardText": "靴速さの書 100%",
+   "rewardUnparsed": [],
+   "story": "昔、釣り竿を落とした場所。水の中に小さな部屋があった。",
+   "tutorial": false
+  },
+  {
+   "id": "V-11",
+   "name": "イワカメの甲羅",
+   "giver": "防具屋ミレ",
+   "giverName": "防具屋ミレ",
+   "map": "V100",
+   "minLevel": 15,
+   "prereqs": [
+    "V-01"
+   ],
+   "size": "中",
+   "goalText": "M013×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M013",
+     "count": 20
+    }
+   ],
+   "end": "防具屋ミレ",
+   "exp": 756,
+   "meso": 968,
+   "rewards": [],
+   "rewardText": "自分の職の Lv15 の上着",
+   "rewardUnparsed": [
+    "自分の職の Lv15 の上着"
+   ],
+   "story": "甲羅で盾を作りたい。",
+   "tutorial": false
+  },
+  {
+   "id": "V-12",
+   "name": "ヤドカリの家",
+   "giver": "船乗りロッコ",
+   "giverName": "船乗りロッコ",
+   "map": "V100",
+   "minLevel": 18,
+   "prereqs": [
+    "V-08"
+   ],
+   "size": "中",
+   "goalText": "M014×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M014",
+     "count": 15
+    }
+   ],
+   "end": "船乗りロッコ",
+   "exp": 1340,
+   "meso": 1260,
+   "rewards": [
+    {
+     "item": "use.safety_charm",
+     "count": 2
+    }
+   ],
+   "rewardText": "守りのお守り ×2",
+   "rewardUnparsed": [],
+   "story": "ヤドカリ兵の貝で船の飾りを作る。",
+   "tutorial": false
+  },
+  {
+   "id": "V-13",
+   "name": "倉庫の使い方",
+   "giver": "倉庫番ダン",
+   "giverName": "倉庫番ダン",
+   "map": "V100",
+   "minLevel": 10,
+   "prereqs": [
+    "V-01"
+   ],
+   "size": "小",
+   "goalText": "倉庫に何か 1 つ預け、もう一度取り出す",
+   "objectives": [],
+   "end": "倉庫番ダン",
+   "exp": 96,
+   "meso": 250,
+   "rewards": [],
+   "rewardText": "倉庫の枠 +4",
+   "rewardUnparsed": [
+    "倉庫の枠 +4"
+   ],
+   "story": "倉庫は全部の町でつながっていて、別のキャラとも共有だと教わる。",
+   "tutorial": false
+  },
+  {
+   "id": "V-14",
+   "name": "市場の案内",
+   "giver": "olga",
+   "giverName": "港長オルガ",
+   "map": "V100",
+   "minLevel": 10,
+   "prereqs": [
+    "V-01"
+   ],
+   "size": "小",
+   "goalText": "V090 の商人 3 人と話す",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "V090"
+    }
+   ],
+   "end": "olga",
+   "exp": 96,
+   "meso": 250,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "市場には日替わりの品がある。掲示板の依頼も受けられる。",
+   "tutorial": false
+  },
+  {
+   "id": "B-01",
+   "name": "風車の帆",
+   "giver": "風車守ボブ",
+   "giverName": "風車守ボブ",
+   "map": "V200",
+   "minLevel": 8,
+   "prereqs": [
+    "V-02"
+   ],
+   "size": "小",
+   "goalText": "M020×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M020",
+     "count": 10
+    }
+   ],
+   "end": "風車守ボブ",
+   "exp": 46,
+   "meso": 166,
+   "rewards": [
+    {
+     "item": "use.baked_apple",
+     "count": 10
+    }
+   ],
+   "rewardText": "焼きりんご ×10",
+   "rewardUnparsed": [],
+   "story": "破れた風車の帆をブタっぺの皮で継ぐ。",
+   "tutorial": false
+  },
+  {
+   "id": "B-02",
+   "name": "花畑のリボン",
+   "giver": "花売りのスイ",
+   "giverName": "花売りのスイ",
+   "map": "V200",
+   "minLevel": 11,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M022×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M022",
+     "count": 10
+    }
+   ],
+   "end": "花売りのスイ",
+   "exp": 126,
+   "meso": 273,
+   "rewards": [],
+   "rewardText": "花の髪飾り（見た目）",
+   "rewardUnparsed": [
+    "花の髪飾り（見た目）"
+   ],
+   "story": "リボンで花束を結びたい。",
+   "tutorial": false
+  },
+  {
+   "id": "B-03",
+   "name": "キノコのスープ",
+   "giver": "農家のマーサ",
+   "giverName": "農家のマーサ",
+   "map": "V200",
+   "minLevel": 10,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M021×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M021",
+     "count": 15
+    }
+   ],
+   "end": "農家のマーサ",
+   "exp": 96,
+   "meso": 250,
+   "rewards": [
+    {
+     "item": "use.baked_apple",
+     "count": 15
+    }
+   ],
+   "rewardText": "焼きりんご ×15",
+   "rewardUnparsed": [],
+   "story": "丘の名物のスープ。",
+   "tutorial": false
+  },
+  {
+   "id": "B-04",
+   "name": "ハチドリの羽",
+   "giver": "弓の師範エルナ",
+   "giverName": "弓の師範エルナ",
+   "map": "V200",
+   "minLevel": 13,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M023×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M023",
+     "count": 20
+    }
+   ],
+   "end": "弓の師範エルナ",
+   "exp": 437,
+   "meso": 813,
+   "rewards": [
+    {
+     "item": "use.arrow_bow",
+     "count": 1000
+    }
+   ],
+   "rewardText": "弓の矢 ×1000（弓使い）または 3,000 ルド",
+   "rewardUnparsed": [],
+   "story": "矢羽の材料。",
+   "tutorial": false
+  },
+  {
+   "id": "B-05",
+   "name": "アオダケの森",
+   "giver": "牧場の少年タロ",
+   "giverName": "牧場の少年タロ",
+   "map": "V200",
+   "minLevel": 15,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M024×30",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M024",
+     "count": 30
+    }
+   ],
+   "end": "牧場の少年タロ",
+   "exp": 756,
+   "meso": 968,
+   "rewards": [
+    {
+     "item": "scroll.A02.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "帽子 HP の書 60%",
+   "rewardUnparsed": [],
+   "story": "森から出てきたアオダケが牧場の牧草を食べる。",
+   "tutorial": false
+  },
+  {
+   "id": "B-06",
+   "name": "クマバチの巣",
+   "giver": "農家のマーサ",
+   "giverName": "農家のマーサ",
+   "map": "V200",
+   "minLevel": 17,
+   "prereqs": [
+    "B-03"
+   ],
+   "size": "中",
+   "goalText": "M025×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M025",
+     "count": 20
+    }
+   ],
+   "end": "農家のマーサ",
+   "exp": 1110,
+   "meso": 1150,
+   "rewards": [
+    {
+     "item": "use.honey_pot",
+     "count": 5
+    }
+   ],
+   "rewardText": "蜂蜜の壺 ×5（HP 600）",
+   "rewardUnparsed": [],
+   "story": "蜂の巣から蜂蜜を分けてもらう。",
+   "tutorial": false
+  },
+  {
+   "id": "B-07",
+   "name": "ノネズミ退治",
+   "giver": "農家のマーサ",
+   "giverName": "農家のマーサ",
+   "map": "V200",
+   "minLevel": 19,
+   "prereqs": [
+    "B-06"
+   ],
+   "size": "中",
+   "goalText": "M026×40",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M026",
+     "count": 40
+    }
+   ],
+   "end": "農家のマーサ",
+   "exp": 1630,
+   "meso": 1370,
+   "rewards": [
+    {
+     "item": "use.aim_tonic",
+     "count": 5
+    }
+   ],
+   "rewardText": "狙いの薬 ×5",
+   "rewardUnparsed": [],
+   "story": "畑のノネズミが増えすぎた。",
+   "tutorial": false
+  },
+  {
+   "id": "B-08",
+   "name": "動き出したカカシ",
+   "giver": "風車守ボブ",
+   "giverName": "風車守ボブ",
+   "map": "V200",
+   "minLevel": 21,
+   "prereqs": [
+    "B-01"
+   ],
+   "size": "大",
+   "goalText": "M027×20 と M027×10",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M027",
+     "count": 20
+    },
+    {
+     "type": "collect",
+     "item": "etc.M027",
+     "count": 10
+    }
+   ],
+   "end": "風車守ボブ",
+   "exp": 4780,
+   "meso": 3820,
+   "rewards": [
+    {
+     "item": "scroll.A16.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "靴ジャンプの書 60%",
+   "rewardUnparsed": [],
+   "story": "カカシが勝手に動き出した。わらの中に黒い光るかけらがあった（本筋の L-03 へ）。",
+   "tutorial": false
+  },
+  {
+   "id": "B-09",
+   "name": "キノコの女王",
+   "giver": "牧場の少年タロ",
+   "giverName": "牧場の少年タロ",
+   "map": "V200",
+   "minLevel": 28,
+   "prereqs": [
+    "B-05"
+   ],
+   "size": "特",
+   "goalText": "M029×1",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M029",
+     "count": 1
+    }
+   ],
+   "end": "牧場の少年タロ",
+   "exp": 26200,
+   "meso": 14600,
+   "rewards": [
+    {
+     "item": "scroll.A01.10",
+     "count": 1
+    }
+   ],
+   "rewardText": "帽子防御の書 10%",
+   "rewardUnparsed": [],
+   "story": "1 時間ごとに広場に現れる大きなキノコ（任意）。",
+   "tutorial": false
+  },
+  {
+   "id": "B-10",
+   "name": "鈴のブタ",
+   "giver": "牧場の少年タロ",
+   "giverName": "牧場の少年タロ",
+   "map": "V200",
+   "minLevel": 9,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "V202 で鈴の音のするブタっぺを見つけて話しかける（3 回連れ戻す）",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "V202"
+    }
+   ],
+   "end": "牧場の少年タロ",
+   "exp": 67,
+   "meso": 204,
+   "rewards": [],
+   "rewardText": "ブタの鈴（設置・飾り）",
+   "rewardUnparsed": [
+    "ブタの鈴（設置・飾り）"
+   ],
+   "story": "タロの飼っているブタが逃げた。",
+   "tutorial": false
+  },
+  {
+   "id": "B-11",
+   "name": "巣の見回り",
+   "giver": "弓の師範エルナ",
+   "giverName": "弓の師範エルナ",
+   "map": "V200",
+   "minLevel": 20,
+   "prereqs": [
+    "B-04"
+   ],
+   "size": "中",
+   "goalText": "M025×30",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M025",
+     "count": 30
+    }
+   ],
+   "end": "弓の師範エルナ",
+   "exp": 1980,
+   "meso": 11500,
+   "rewards": [],
+   "rewardText": "1 万ルド",
+   "rewardUnparsed": [],
+   "story": "巣が大きくなりすぎると丘が危ない。",
+   "tutorial": false
+  },
+  {
+   "id": "B-12",
+   "name": "風車のてっぺん",
+   "giver": "風車守ボブ",
+   "giverName": "風車守ボブ",
+   "map": "V200",
+   "minLevel": 12,
+   "prereqs": [
+    "B-01"
+   ],
+   "size": "中",
+   "goalText": "V202 の風車の羽を跳び渡り、てっぺんの旗に触る（ジャンプの道）",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "V202"
+    }
+   ],
+   "end": "風車守ボブ",
+   "exp": 332,
+   "meso": 745,
+   "rewards": [],
+   "rewardText": "風車の椅子",
+   "rewardUnparsed": [
+    "風車の椅子"
+   ],
+   "story": "動く羽の上を跳ぶ、最初のジャンプの道。",
+   "tutorial": false
+  },
+  {
+   "id": "B-13",
+   "name": "キノコ図鑑",
+   "giver": "農家のマーサ",
+   "giverName": "農家のマーサ",
+   "map": "V200",
+   "minLevel": 16,
+   "prereqs": [
+    "B-03"
+   ],
+   "size": "大",
+   "goalText": "M006×20・M021×20・M024×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M006",
+     "count": 20
+    },
+    {
+     "type": "collect",
+     "item": "etc.M021",
+     "count": 20
+    },
+    {
+     "type": "collect",
+     "item": "etc.M024",
+     "count": 20
+    }
+   ],
+   "end": "農家のマーサ",
+   "exp": 1910,
+   "meso": 2540,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 50
+    }
+   ],
+   "rewardText": "称号「キノコ博士」、橙ポーション ×50",
+   "rewardUnparsed": [
+    "称号「キノコ博士」"
+   ],
+   "story": "丘のキノコを全部調べる。",
+   "tutorial": false
+  },
+  {
+   "id": "B-14",
+   "name": "丘の東の見張り小屋",
+   "giver": "牧場の少年タロ",
+   "giverName": "牧場の少年タロ",
+   "map": "V200",
+   "minLevel": 18,
+   "prereqs": [
+    "B-05"
+   ],
+   "size": "小",
+   "goalText": "V212 の見張り小屋の望遠鏡をのぞく",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "V212"
+    }
+   ],
+   "end": "牧場の少年タロ",
+   "exp": 672,
+   "meso": 504,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "遠くに「ねむりの森」が見える。地下に古いダンジョンがあるといううわさ。",
+   "tutorial": false
+  },
+  {
+   "id": "W-01",
+   "name": "森の図書館",
+   "giver": "司書リブラ",
+   "giverName": "司書リブラ",
+   "map": "V300",
+   "minLevel": 8,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "V301・V302・V303 で光る本を 1 冊ずつ拾う",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "V301"
+    },
+    {
+     "type": "visit",
+     "map": "V302"
+    },
+    {
+     "type": "visit",
+     "map": "V303"
+    }
+   ],
+   "end": "司書リブラ",
+   "exp": 46,
+   "meso": 166,
+   "rewards": [
+    {
+     "item": "use.magic_tonic",
+     "count": 3
+    }
+   ],
+   "rewardText": "魔力の薬 ×3",
+   "rewardUnparsed": [],
+   "story": "風で飛ばされた図書館の本。",
+   "tutorial": false
+  },
+  {
+   "id": "W-02",
+   "name": "緑のしずく",
+   "giver": "薬草屋ハーブ",
+   "giverName": "薬草屋ハーブ",
+   "map": "V300",
+   "minLevel": 12,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M033×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M033",
+     "count": 20
+    }
+   ],
+   "end": "薬草屋ハーブ",
+   "exp": 166,
+   "meso": 298,
+   "rewards": [
+    {
+     "item": "use.blue_potion",
+     "count": 20
+    }
+   ],
+   "rewardText": "青ポーション ×20",
+   "rewardUnparsed": [],
+   "story": "MP の薬の材料。",
+   "tutorial": false
+  },
+  {
+   "id": "W-03",
+   "name": "ヒトツメのしっぽ",
+   "giver": "薬草屋ハーブ",
+   "giverName": "薬草屋ハーブ",
+   "map": "V300",
+   "minLevel": 15,
+   "prereqs": [
+    "W-02"
+   ],
+   "size": "中",
+   "goalText": "M030×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M030",
+     "count": 20
+    }
+   ],
+   "end": "薬草屋ハーブ",
+   "exp": 756,
+   "meso": 968,
+   "rewards": [
+    {
+     "item": "use.mana_elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "魔力のエリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "目薬の材料。",
+   "tutorial": false
+  },
+  {
+   "id": "W-04",
+   "name": "妖精の粉",
+   "giver": "妖精の使いティア",
+   "giverName": "妖精の使いティア",
+   "map": "V300",
+   "minLevel": 20,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M031×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M031",
+     "count": 20
+    }
+   ],
+   "end": "妖精の使いティア",
+   "exp": 1980,
+   "meso": 11500,
+   "rewards": [],
+   "rewardText": "1 万ルド",
+   "rewardUnparsed": [],
+   "story": "妖精の女王が病気になった。粉は薬になる。",
+   "tutorial": false
+  },
+  {
+   "id": "W-05",
+   "name": "女王の薬",
+   "giver": "妖精の使いティア",
+   "giverName": "妖精の使いティア",
+   "map": "V300",
+   "minLevel": 21,
+   "prereqs": [
+    "W-04"
+   ],
+   "size": "大",
+   "goalText": "M032×15 を集め、薬草屋ハーブに薬を作ってもらう",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M032",
+     "count": 15
+    }
+   ],
+   "end": "妖精の使いティア",
+   "exp": 4780,
+   "meso": 3820,
+   "rewards": [
+    {
+     "item": "eq.common.earring.15",
+     "count": 1
+    }
+   ],
+   "rewardText": "銅の耳飾り",
+   "rewardUnparsed": [],
+   "story": "女王は元気になり、森の奥の異変を教えてくれる。",
+   "tutorial": false
+  },
+  {
+   "id": "W-06",
+   "name": "つるの迷い道の地図",
+   "giver": "木こりの青年ウッド",
+   "giverName": "木こりの青年ウッド",
+   "map": "V300",
+   "minLevel": 22,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "V305 の一番奥の切り株に印を付けて戻る",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "V305"
+    }
+   ],
+   "end": "木こりの青年ウッド",
+   "exp": 2640,
+   "meso": 1690,
+   "rewards": [
+    {
+     "item": "scroll.A12.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "全身 INT の書 60%",
+   "rewardUnparsed": [],
+   "story": "迷い道の地図を作る。",
+   "tutorial": false
+  },
+  {
+   "id": "W-07",
+   "name": "サルの木の実",
+   "giver": "木こりの青年ウッド",
+   "giverName": "木こりの青年ウッド",
+   "map": "V300",
+   "minLevel": 24,
+   "prereqs": [
+    "W-06"
+   ],
+   "size": "中",
+   "goalText": "M034×25",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M034",
+     "count": 25
+    }
+   ],
+   "end": "木こりの青年ウッド",
+   "exp": 3530,
+   "meso": 1910,
+   "rewards": [
+    {
+     "item": "use.nut_soup",
+     "count": 20
+    }
+   ],
+   "rewardText": "木の実のスープ ×20",
+   "rewardUnparsed": [],
+   "story": "サルに投げつけられた木の実で、実はおいしいスープができる。",
+   "tutorial": false
+  },
+  {
+   "id": "W-08",
+   "name": "クマの毛皮",
+   "giver": "ローブ屋フィオ",
+   "giverName": "ローブ屋フィオ",
+   "map": "V300",
+   "minLevel": 27,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M035×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M035",
+     "count": 20
+    }
+   ],
+   "end": "ローブ屋フィオ",
+   "exp": 5450,
+   "meso": 2290,
+   "rewards": [],
+   "rewardText": "自分の職の Lv25 の上着（全身）",
+   "rewardUnparsed": [
+    "自分の職の Lv25 の上着（全身）"
+   ],
+   "story": "冬のローブの材料。",
+   "tutorial": false
+  },
+  {
+   "id": "W-09",
+   "name": "夜の森の便",
+   "giver": "駅員ノア",
+   "giverName": "駅員ノア",
+   "map": "V310",
+   "minLevel": 25,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M036×30",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M036",
+     "count": 30
+    }
+   ],
+   "end": "駅員ノア",
+   "exp": 4080,
+   "meso": 2030,
+   "rewards": [],
+   "rewardText": "雲の船の切符 ×3",
+   "rewardUnparsed": [
+    "雲の船の切符 ×3"
+   ],
+   "story": "夜の便の上をフクロウが飛び回る。",
+   "tutorial": false
+  },
+  {
+   "id": "W-10",
+   "name": "木の上の小道",
+   "giver": "魔法の武器屋ミント",
+   "giverName": "魔法の武器屋ミント",
+   "map": "V300",
+   "minLevel": 13,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M030×20（V312）",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M030",
+     "count": 20
+    },
+    {
+     "type": "visit",
+     "map": "V312"
+    }
+   ],
+   "end": "魔法の武器屋ミント",
+   "exp": 218,
+   "meso": 325,
+   "rewards": [
+    {
+     "item": "scroll.W15.100",
+     "count": 1
+    }
+   ],
+   "rewardText": "ワンド魔力の書 100%",
+   "rewardUnparsed": [],
+   "story": "店の上の枝にヒトツメが入り込んだ。",
+   "tutorial": false
+  },
+  {
+   "id": "W-11",
+   "name": "雲の船の切符",
+   "giver": "駅員ノア",
+   "giverName": "駅員ノア",
+   "map": "V310",
+   "minLevel": 20,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "雲の船に乗り、C100 でステラに会う",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "C100"
+    }
+   ],
+   "end": "駅員ノア",
+   "exp": 1980,
+   "meso": 1500,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "はじめての空の旅。世界が広いことを知る。",
+   "tutorial": false
+  },
+  {
+   "id": "W-12",
+   "name": "古いインク",
+   "giver": "司書リブラ",
+   "giverName": "司書リブラ",
+   "map": "V300",
+   "minLevel": 30,
+   "prereqs": [
+    "W-01"
+   ],
+   "size": "中",
+   "goalText": "M083×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M083",
+     "count": 20
+    }
+   ],
+   "end": "司書リブラ",
+   "exp": 8400,
+   "meso": 2750,
+   "rewards": [
+    {
+     "item": "use.sp_reset",
+     "count": 1
+    }
+   ],
+   "rewardText": "SP 振り直しの書 ×1",
+   "rewardUnparsed": [],
+   "story": "鱗粉で古い本の字を読み解く。「星の封印」の記述がある（本筋）。",
+   "tutorial": false
+  },
+  {
+   "id": "W-13",
+   "name": "森の奥の異変",
+   "giver": "大魔導師オルフェ",
+   "giverName": "大魔導師オルフェ",
+   "map": "V300",
+   "minLevel": 38,
+   "prereqs": [
+    "W-05"
+   ],
+   "size": "大",
+   "goalText": "M035×40",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M035",
+     "count": 40
+    }
+   ],
+   "end": "大魔導師オルフェ",
+   "exp": 48500,
+   "meso": 9310,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "エリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "森のクマが荒れている。大樹に何かが起きている。",
+   "tutorial": false
+  },
+  {
+   "id": "W-14",
+   "name": "大樹の声",
+   "giver": "妖精の使いティア",
+   "giverName": "妖精の使いティア",
+   "map": "V300",
+   "minLevel": 40,
+   "prereqs": [
+    "W-13"
+   ],
+   "size": "大",
+   "goalText": "M036×30 と M031×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M036",
+     "count": 30
+    },
+    {
+     "type": "collect",
+     "item": "etc.M031",
+     "count": 30
+    }
+   ],
+   "end": "妖精の使いティア",
+   "exp": 62500,
+   "meso": 10100,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "妖精の力で大樹の根元への扉を開く。",
+   "tutorial": false
+  },
+  {
+   "id": "W-15",
+   "name": "森の主",
+   "giver": "大魔導師オルフェ",
+   "giverName": "大魔導師オルフェ",
+   "map": "V300",
+   "minLevel": 42,
+   "prereqs": [
+    "W-14"
+   ],
+   "size": "特",
+   "goalText": "M039×1",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M039",
+     "count": 1
+    }
+   ],
+   "end": "大魔導師オルフェ",
+   "exp": 153000,
+   "meso": 27600,
+   "rewards": [
+    {
+     "item": "scroll.A12.10",
+     "count": 1
+    },
+    {
+     "item": "use.elixir",
+     "count": 10
+    }
+   ],
+   "rewardText": "全身 INT の書 10%、エリクサー ×10",
+   "rewardUnparsed": [],
+   "story": "黒いかけらに取りつかれた大樹の怪を鎮める。",
+   "tutorial": false
+  },
+  {
+   "id": "G-01",
+   "name": "焚き火の枝",
+   "giver": "鍛冶屋カジ",
+   "giverName": "鍛冶屋カジ",
+   "map": "V400",
+   "minLevel": 6,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M040×15",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M040",
+     "count": 15
+    }
+   ],
+   "end": "鍛冶屋カジ",
+   "exp": 22,
+   "meso": 111,
+   "rewards": [
+    {
+     "item": "use.red_potion",
+     "count": 20
+    }
+   ],
+   "rewardText": "赤ポーション ×20",
+   "rewardUnparsed": [],
+   "story": "鍛冶の火を起こす枝。",
+   "tutorial": false
+  },
+  {
+   "id": "G-02",
+   "name": "固い枝",
+   "giver": "鍛冶屋カジ",
+   "giverName": "鍛冶屋カジ",
+   "map": "V400",
+   "minLevel": 11,
+   "prereqs": [
+    "G-01"
+   ],
+   "size": "小",
+   "goalText": "M041×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M041",
+     "count": 20
+    }
+   ],
+   "end": "鍛冶屋カジ",
+   "exp": 126,
+   "meso": 273,
+   "rewards": [
+    {
+     "item": "use.orange_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "橙ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "炭にする固い枝。",
+   "tutorial": false
+  },
+  {
+   "id": "G-03",
+   "name": "斧の刃の回収",
+   "giver": "武器屋ガンテツ",
+   "giverName": "武器屋ガンテツ",
+   "map": "V400",
+   "minLevel": 17,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M042×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M042",
+     "count": 20
+    }
+   ],
+   "end": "武器屋ガンテツ",
+   "exp": 1110,
+   "meso": 1150,
+   "rewards": [],
+   "rewardText": "自分の職の Lv15 の武器",
+   "rewardUnparsed": [
+    "自分の職の Lv15 の武器"
+   ],
+   "story": "古い斧の刃を溶かして新しい武器を作る。",
+   "tutorial": false
+  },
+  {
+   "id": "G-04",
+   "name": "黒い斧の丘",
+   "giver": "戦士長ドルガ",
+   "giverName": "戦士長ドルガ",
+   "map": "V400",
+   "minLevel": 22,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M043×40",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M043",
+     "count": 40
+    }
+   ],
+   "end": "戦士長ドルガ",
+   "exp": 2640,
+   "meso": 1690,
+   "rewards": [
+    {
+     "item": "use.power_tonic",
+     "count": 5
+    }
+   ],
+   "rewardText": "力の薬 ×5",
+   "rewardUnparsed": [],
+   "story": "町へ続く道を守る。",
+   "tutorial": false
+  },
+  {
+   "id": "G-05",
+   "name": "イノシシの牙",
+   "giver": "防具屋ハガネ",
+   "giverName": "防具屋ハガネ",
+   "map": "V400",
+   "minLevel": 25,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M044×25",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M044",
+     "count": 25
+    }
+   ],
+   "end": "防具屋ハガネ",
+   "exp": 4080,
+   "meso": 2030,
+   "rewards": [],
+   "rewardText": "自分の職の Lv25 の帽子",
+   "rewardUnparsed": [
+    "自分の職の Lv25 の帽子"
+   ],
+   "story": "牙の飾りの兜。",
+   "tutorial": false
+  },
+  {
+   "id": "G-06",
+   "name": "頂の祈りの石",
+   "giver": "祈祷師トト",
+   "giverName": "祈祷師トト",
+   "map": "V400",
+   "minLevel": 26,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "V414 の祈りの石を調べ、M044×30",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "V414"
+    },
+    {
+     "type": "kill",
+     "mob": "M044",
+     "count": 30
+    }
+   ],
+   "end": "祈祷師トト",
+   "exp": 4720,
+   "meso": 17160,
+   "rewards": [],
+   "rewardText": "1.5 万ルド",
+   "rewardUnparsed": [],
+   "story": "岩台の頂の石が黒く光っている（本筋へ）。",
+   "tutorial": false
+  },
+  {
+   "id": "G-07",
+   "name": "焦げた牙",
+   "giver": "薬屋ジンジャー",
+   "giverName": "薬屋ジンジャー",
+   "map": "V400",
+   "minLevel": 32,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M045×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M045",
+     "count": 30
+    }
+   ],
+   "end": "薬屋ジンジャー",
+   "exp": 10800,
+   "meso": 3000,
+   "rewards": [
+    {
+     "item": "use.white_potion",
+     "count": 30
+    }
+   ],
+   "rewardText": "白ポーション ×30",
+   "rewardUnparsed": [],
+   "story": "火傷の薬の材料。",
+   "tutorial": false
+  },
+  {
+   "id": "G-08",
+   "name": "発掘場の調査",
+   "giver": "発掘隊長ロッシ",
+   "giverName": "発掘隊長ロッシ",
+   "map": "V400",
+   "minLevel": 30,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M046×40",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M046",
+     "count": 40
+    }
+   ],
+   "end": "発掘隊長ロッシ",
+   "exp": 8400,
+   "meso": 2750,
+   "rewards": [
+    {
+     "item": "scroll.A01.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "帽子防御の書 60%",
+   "rewardUnparsed": [],
+   "story": "発掘場に骨の犬が出て作業が止まった。",
+   "tutorial": false
+  },
+  {
+   "id": "G-09",
+   "name": "化石の部屋",
+   "giver": "発掘隊長ロッシ",
+   "giverName": "発掘隊長ロッシ",
+   "map": "V400",
+   "minLevel": 33,
+   "prereqs": [
+    "G-08"
+   ],
+   "size": "大",
+   "goalText": "V409 の左端の壁の隠し部屋で化石を 3 つ調べる",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "V409"
+    }
+   ],
+   "end": "発掘隊長ロッシ",
+   "exp": 25800,
+   "meso": 7510,
+   "rewards": [
+    {
+     "item": "scroll.A30.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "耳飾り INT の書 60%",
+   "rewardUnparsed": [],
+   "story": "大昔の巨大な竜の骨の化石（竜の谷の伏線）。",
+   "tutorial": false
+  },
+  {
+   "id": "G-10",
+   "name": "古い包帯",
+   "giver": "祈祷師トト",
+   "giverName": "祈祷師トト",
+   "map": "V400",
+   "minLevel": 36,
+   "prereqs": [
+    "G-08"
+   ],
+   "size": "中",
+   "goalText": "M047×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M047",
+     "count": 30
+    }
+   ],
+   "end": "祈祷師トト",
+   "exp": 18000,
+   "meso": 3560,
+   "rewards": [
+    {
+     "item": "use.holy_water",
+     "count": 10
+    }
+   ],
+   "rewardText": "聖水 ×10",
+   "rewardUnparsed": [],
+   "story": "ミイラの犬の包帯に古い呪いの文字。",
+   "tutorial": false
+  },
+  {
+   "id": "G-11",
+   "name": "鉄のたてがみ",
+   "giver": "防具屋ハガネ",
+   "giverName": "防具屋ハガネ",
+   "map": "V400",
+   "minLevel": 37,
+   "prereqs": [
+    "G-05"
+   ],
+   "size": "大",
+   "goalText": "M050×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M050",
+     "count": 20
+    }
+   ],
+   "end": "防具屋ハガネ",
+   "exp": 42800,
+   "meso": 8920,
+   "rewards": [],
+   "rewardText": "自分の職の Lv35 の上着",
+   "rewardUnparsed": [
+    "自分の職の Lv35 の上着"
+   ],
+   "story": "鉄のイノシシのたてがみで鎧を補強する。",
+   "tutorial": false
+  },
+  {
+   "id": "G-12",
+   "name": "隊長の勲章",
+   "giver": "発掘隊長ロッシ",
+   "giverName": "発掘隊長ロッシ",
+   "map": "V400",
+   "minLevel": 45,
+   "prereqs": [
+    "G-10"
+   ],
+   "size": "大",
+   "goalText": "M049×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M049",
+     "count": 10
+    }
+   ],
+   "end": "発掘隊長ロッシ",
+   "exp": 103000,
+   "meso": 12600,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "エリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "古い戦の記録。骨の大将が眠っている。",
+   "tutorial": false
+  },
+  {
+   "id": "G-13",
+   "name": "ガイコツ大将",
+   "giver": "戦士長ドルガ",
+   "giverName": "戦士長ドルガ",
+   "map": "V400",
+   "minLevel": 52,
+   "prereqs": [
+    "G-12"
+   ],
+   "size": "特",
+   "goalText": "M059×1",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M059",
+     "count": 1
+    }
+   ],
+   "end": "戦士長ドルガ",
+   "exp": 399000,
+   "meso": 41500,
+   "rewards": [],
+   "rewardText": "両手剣攻撃力の書 10%（戦士）または 10 万ルド",
+   "rewardUnparsed": [
+    "両手剣攻撃力の書 10%（戦士）または 10 万ルド"
+   ],
+   "story": "墓所の大将を眠らせる。",
+   "tutorial": false
+  },
+  {
+   "id": "G-14",
+   "name": "鍛冶屋の弟子入り",
+   "giver": "鍛冶屋カジ",
+   "giverName": "鍛冶屋カジ",
+   "map": "V400",
+   "minLevel": 20,
+   "prereqs": [
+    "G-02"
+   ],
+   "size": "中",
+   "goalText": "青銅の原石 10 個を集め、カジに板にしてもらう",
+   "objectives": [],
+   "end": "鍛冶屋カジ",
+   "exp": 1980,
+   "meso": 1500,
+   "rewards": [],
+   "rewardText": "青銅の板 ×1、製作の手引き",
+   "rewardUnparsed": [
+    "青銅の板 ×1",
+    "製作の手引き"
+   ],
+   "story": "精錬と製作を覚える。",
+   "tutorial": false
+  },
+  {
+   "id": "K-01",
+   "name": "路地裏のコウモリ",
+   "giver": "情報屋ネズ",
+   "giverName": "情報屋ネズ",
+   "map": "V500",
+   "minLevel": 14,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M060×25",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M060",
+     "count": 25
+    }
+   ],
+   "end": "情報屋ネズ",
+   "exp": 287,
+   "meso": 355,
+   "rewards": [
+    {
+     "item": "use.dodge_tonic",
+     "count": 3
+    }
+   ],
+   "rewardText": "身軽の薬 ×3",
+   "rewardUnparsed": [],
+   "story": "路地を飛び回るコウモリが情報屋の商売の邪魔。",
+   "tutorial": false
+  },
+  {
+   "id": "K-02",
+   "name": "ネジ集め",
+   "giver": "工事の親方ボルト",
+   "giverName": "工事の親方ボルト",
+   "map": "V500",
+   "minLevel": 17,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M061×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M061",
+     "count": 20
+    }
+   ],
+   "end": "工事の親方ボルト",
+   "exp": 556,
+   "meso": 10461,
+   "rewards": [],
+   "rewardText": "1 万ルド",
+   "rewardUnparsed": [],
+   "story": "ネズミがネジを持って行く。",
+   "tutorial": false
+  },
+  {
+   "id": "K-03",
+   "name": "鉄骨の上の忘れ物",
+   "giver": "工事の親方ボルト",
+   "giverName": "工事の親方ボルト",
+   "map": "V500",
+   "minLevel": 20,
+   "prereqs": [
+    "K-02"
+   ],
+   "size": "中",
+   "goalText": "V504 のてっぺんの道具箱を取ってくる（ジャンプの道）",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "V504"
+    }
+   ],
+   "end": "工事の親方ボルト",
+   "exp": 1980,
+   "meso": 1500,
+   "rewards": [
+    {
+     "item": "use.safety_charm",
+     "count": 1
+    }
+   ],
+   "rewardText": "工事の帽子（見た目）、守りのお守り ×1",
+   "rewardUnparsed": [
+    "工事の帽子（見た目）"
+   ],
+   "story": "高い鉄骨の上を渡る。",
+   "tutorial": false
+  },
+  {
+   "id": "K-04",
+   "name": "ガラクタロボ",
+   "giver": "工事の親方ボルト",
+   "giverName": "工事の親方ボルト",
+   "map": "V500",
+   "minLevel": 28,
+   "prereqs": [
+    "K-03"
+   ],
+   "size": "大",
+   "goalText": "M065×30 と M065×10",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M065",
+     "count": 30
+    },
+    {
+     "type": "collect",
+     "item": "etc.M065",
+     "count": 10
+    }
+   ],
+   "end": "工事の親方ボルト",
+   "exp": 13100,
+   "meso": 5850,
+   "rewards": [
+    {
+     "item": "scroll.A18.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "手袋攻撃力の書 60%",
+   "rewardUnparsed": [],
+   "story": "ゴミから生まれたロボが現場を荒らす。",
+   "tutorial": false
+  },
+  {
+   "id": "K-05",
+   "name": "地下鉄の切符",
+   "giver": "駅員テツ",
+   "giverName": "駅員テツ",
+   "map": "V500",
+   "minLevel": 20,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M063×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M063",
+     "count": 20
+    }
+   ],
+   "end": "駅員テツ",
+   "exp": 990,
+   "meso": 10600,
+   "rewards": [],
+   "rewardText": "1 万ルド",
+   "rewardUnparsed": [],
+   "story": "切符売り場にチビ亡霊が出る。",
+   "tutorial": false
+  },
+  {
+   "id": "K-06",
+   "name": "亡霊のかけら",
+   "giver": "駅員テツ",
+   "giverName": "駅員テツ",
+   "map": "V500",
+   "minLevel": 25,
+   "prereqs": [
+    "K-05"
+   ],
+   "size": "中",
+   "goalText": "M063×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M063",
+     "count": 20
+    }
+   ],
+   "end": "駅員テツ",
+   "exp": 4080,
+   "meso": 2030,
+   "rewards": [
+    {
+     "item": "use.holy_water",
+     "count": 10
+    }
+   ],
+   "rewardText": "聖水 ×10",
+   "rewardUnparsed": [],
+   "story": "亡霊の正体を調べる。",
+   "tutorial": false
+  },
+  {
+   "id": "K-07",
+   "name": "2 番線の奥",
+   "giver": "駅員テツ",
+   "giverName": "駅員テツ",
+   "map": "V500",
+   "minLevel": 30,
+   "prereqs": [
+    "K-06"
+   ],
+   "size": "大",
+   "goalText": "M066×40",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M066",
+     "count": 40
+    }
+   ],
+   "end": "駅員テツ",
+   "exp": 17500,
+   "meso": 6600,
+   "rewards": [
+    {
+     "item": "scroll.A09.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "下衣 DEX の書 60%",
+   "rewardUnparsed": [],
+   "story": "止まった電車を動かすために亡霊を払う。",
+   "tutorial": false
+  },
+  {
+   "id": "K-08",
+   "name": "電車の落とし物",
+   "giver": "駅員テツ",
+   "giverName": "駅員テツ",
+   "map": "V500",
+   "minLevel": 23,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "V506 の停まった電車の中の落とし物を探す",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "V506"
+    }
+   ],
+   "end": "駅員テツ",
+   "exp": 3060,
+   "meso": 1800,
+   "rewards": [],
+   "rewardText": "古い懐中時計（売ると 2 万ルド）",
+   "rewardUnparsed": [
+    "古い懐中時計（売ると 2 万ルド）"
+   ],
+   "story": "持ち主はティンクルの時計番（後の T 系の伏線）。",
+   "tutorial": false
+  },
+  {
+   "id": "K-09",
+   "name": "ヘビの皮",
+   "giver": "ナイフ屋スー",
+   "giverName": "ナイフ屋スー",
+   "map": "V500",
+   "minLevel": 21,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M062×25",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M062",
+     "count": 25
+    }
+   ],
+   "end": "ナイフ屋スー",
+   "exp": 2290,
+   "meso": 1590,
+   "rewards": [],
+   "rewardText": "自分の職の Lv20 の靴",
+   "rewardUnparsed": [
+    "自分の職の Lv20 の靴"
+   ],
+   "story": "靴の材料。",
+   "tutorial": false
+  },
+  {
+   "id": "K-10",
+   "name": "ワニの皮",
+   "giver": "ナイフ屋スー",
+   "giverName": "ナイフ屋スー",
+   "map": "V500",
+   "minLevel": 26,
+   "prereqs": [
+    "K-09"
+   ],
+   "size": "中",
+   "goalText": "M064×25",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M064",
+     "count": 25
+    }
+   ],
+   "end": "ナイフ屋スー",
+   "exp": 4720,
+   "meso": 2160,
+   "rewards": [],
+   "rewardText": "自分の職の Lv25 の手袋",
+   "rewardUnparsed": [
+    "自分の職の Lv25 の手袋"
+   ],
+   "story": "手袋の材料。",
+   "tutorial": false
+  },
+  {
+   "id": "K-11",
+   "name": "泥の人形",
+   "giver": "情報屋ネズ",
+   "giverName": "情報屋ネズ",
+   "map": "V500",
+   "minLevel": 34,
+   "prereqs": [],
+   "size": "大",
+   "goalText": "M067×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M067",
+     "count": 30
+    }
+   ],
+   "end": "情報屋ネズ",
+   "exp": 29000,
+   "meso": 7840,
+   "rewards": [
+    {
+     "item": "use.all_cure",
+     "count": 10
+    }
+   ],
+   "rewardText": "万能薬 ×10",
+   "rewardUnparsed": [],
+   "story": "沼の泥から人形が湧く理由を探る。",
+   "tutorial": false
+  },
+  {
+   "id": "K-12",
+   "name": "下水の大ワニ",
+   "giver": "情報屋ネズ",
+   "giverName": "情報屋ネズ",
+   "map": "V500",
+   "minLevel": 40,
+   "prereqs": [
+    "K-11"
+   ],
+   "size": "特",
+   "goalText": "M069×1",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M069",
+     "count": 1
+    }
+   ],
+   "end": "情報屋ネズ",
+   "exp": 125000,
+   "meso": 25400,
+   "rewards": [
+    {
+     "item": "scroll.A16.10",
+     "count": 1
+    }
+   ],
+   "rewardText": "靴ジャンプの書 10%",
+   "rewardUnparsed": [],
+   "story": "下水の主の大ワニ。",
+   "tutorial": false
+  },
+  {
+   "id": "K-13",
+   "name": "屋上の配達",
+   "giver": "情報屋ネズ",
+   "giverName": "情報屋ネズ",
+   "map": "V500",
+   "minLevel": 16,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "V514 の屋上を渡って V707 の荷物番に包みを届ける",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "V514"
+    },
+    {
+     "type": "visit",
+     "map": "V707"
+    }
+   ],
+   "end": "情報屋ネズ",
+   "exp": 458,
+   "meso": 423,
+   "rewards": [
+    {
+     "item": "use.speed_tonic",
+     "count": 5
+    }
+   ],
+   "rewardText": "速さの薬 ×5",
+   "rewardUnparsed": [],
+   "story": "屋上を走る配達。",
+   "tutorial": false
+  },
+  {
+   "id": "K-14",
+   "name": "情報屋の試験",
+   "giver": "情報屋ネズ",
+   "giverName": "情報屋ネズ",
+   "map": "V500",
+   "minLevel": 21,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "1 人用ダンジョン「裏路地の試練」を 1 回クリアする",
+   "objectives": [],
+   "end": "情報屋ネズ",
+   "exp": 2290,
+   "meso": 1590,
+   "rewards": [],
+   "rewardText": "試練のメダル（裏路地）×3",
+   "rewardUnparsed": [
+    "試練のメダル（裏路地）×3"
+   ],
+   "story": "ネズは腕の立つ人にしか情報を売らない。",
+   "tutorial": false
+  },
+  {
+   "id": "N-01",
+   "name": "谷の宿",
+   "giver": "宿屋のネム",
+   "giverName": "宿屋のネム",
+   "map": "V600",
+   "minLevel": 20,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M070×30",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M070",
+     "count": 30
+    }
+   ],
+   "end": "宿屋のネム",
+   "exp": 990,
+   "meso": 600,
+   "rewards": [],
+   "rewardText": "宿の無料券 ×3",
+   "rewardUnparsed": [
+    "宿の無料券 ×3"
+   ],
+   "story": "谷の森のツノダケが宿の裏まで来る。",
+   "tutorial": false
+  },
+  {
+   "id": "N-02",
+   "name": "アリの巣の入口",
+   "giver": "温泉番ユウ",
+   "giverName": "温泉番ユウ",
+   "map": "V600",
+   "minLevel": 23,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M071×25",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M071",
+     "count": 25
+    }
+   ],
+   "end": "温泉番ユウ",
+   "exp": 3060,
+   "meso": 1800,
+   "rewards": [],
+   "rewardText": "温泉の入浴券 ×5",
+   "rewardUnparsed": [
+    "温泉の入浴券 ×5"
+   ],
+   "story": "温泉の湯にゾンビダケのかさが詰まる。",
+   "tutorial": false
+  },
+  {
+   "id": "N-03",
+   "name": "ジロリの目",
+   "giver": "学者ドク",
+   "giverName": "学者ドク",
+   "map": "V600",
+   "minLevel": 27,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M072×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M072",
+     "count": 30
+    }
+   ],
+   "end": "学者ドク",
+   "exp": 5450,
+   "meso": 22290,
+   "rewards": [],
+   "rewardText": "2 万ルド",
+   "rewardUnparsed": [],
+   "story": "目玉の魔物の研究。",
+   "tutorial": false
+  },
+  {
+   "id": "N-04",
+   "name": "冷たい目玉",
+   "giver": "学者ドク",
+   "giverName": "学者ドク",
+   "map": "V600",
+   "minLevel": 32,
+   "prereqs": [
+    "N-03"
+   ],
+   "size": "中",
+   "goalText": "M073×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M073",
+     "count": 30
+    }
+   ],
+   "end": "学者ドク",
+   "exp": 10800,
+   "meso": 3000,
+   "rewards": [
+    {
+     "item": "use.mana_elixir",
+     "count": 20
+    }
+   ],
+   "rewardText": "魔力のエリクサー ×20",
+   "rewardUnparsed": [],
+   "story": "冷気を出す理由を調べる。",
+   "tutorial": false
+  },
+  {
+   "id": "N-05",
+   "name": "学者の研究所",
+   "giver": "学者ドク",
+   "giverName": "学者ドク",
+   "map": "V600",
+   "minLevel": 25,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "V601 の大木のうろの研究所に入り、日記を持ってくる",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "V601"
+    }
+   ],
+   "end": "学者ドク",
+   "exp": 4080,
+   "meso": 2030,
+   "rewards": [],
+   "rewardText": "黒い石のかけら（本筋 L-04）",
+   "rewardUnparsed": [
+    "黒い石のかけら（本筋 L-04）"
+   ],
+   "story": "ドクの昔の研究所。「黒いかけら」の研究記録。",
+   "tutorial": false
+  },
+  {
+   "id": "N-06",
+   "name": "眠りの鱗粉",
+   "giver": "薬屋のマユ",
+   "giverName": "薬屋のマユ",
+   "map": "V600",
+   "minLevel": 30,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M083×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M083",
+     "count": 30
+    }
+   ],
+   "end": "薬屋のマユ",
+   "exp": 8400,
+   "meso": 2750,
+   "rewards": [
+    {
+     "item": "use.all_cure",
+     "count": 10
+    }
+   ],
+   "rewardText": "万能薬 ×10",
+   "rewardUnparsed": [],
+   "story": "眠り薬（売り物）の材料。",
+   "tutorial": false
+  },
+  {
+   "id": "N-07",
+   "name": "ドレイクのうろこ",
+   "giver": "学者ドク",
+   "giverName": "学者ドク",
+   "map": "V600",
+   "minLevel": 36,
+   "prereqs": [
+    "N-04"
+   ],
+   "size": "大",
+   "goalText": "M074×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M074",
+     "count": 30
+    }
+   ],
+   "end": "学者ドク",
+   "exp": 37500,
+   "meso": 8540,
+   "rewards": [
+    {
+     "item": "scroll.A05.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "上着防御の書 60%",
+   "rewardUnparsed": [],
+   "story": "地下の竜の仲間を調べる。",
+   "tutorial": false
+  },
+  {
+   "id": "N-08",
+   "name": "ドレイクの角",
+   "giver": "雑貨屋のコロ",
+   "giverName": "雑貨屋のコロ",
+   "map": "V600",
+   "minLevel": 42,
+   "prereqs": [],
+   "size": "大",
+   "goalText": "M075×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M075",
+     "count": 30
+    }
+   ],
+   "end": "雑貨屋のコロ",
+   "exp": 76300,
+   "meso": 11100,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "エリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "角の粉は高く売れる。",
+   "tutorial": false
+  },
+  {
+   "id": "N-09",
+   "name": "寺跡の石",
+   "giver": "封印の番人シグ",
+   "giverName": "封印の番人シグ",
+   "map": "V600",
+   "minLevel": 46,
+   "prereqs": [],
+   "size": "大",
+   "goalText": "M078×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M078",
+     "count": 30
+    }
+   ],
+   "end": "封印の番人シグ",
+   "exp": 114000,
+   "meso": 13100,
+   "rewards": [
+    {
+     "item": "scroll.A21.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "盾防御の書 60%",
+   "rewardUnparsed": [],
+   "story": "寺跡の石に封印の文字。",
+   "tutorial": false
+  },
+  {
+   "id": "N-10",
+   "name": "苔の寺跡",
+   "giver": "封印の番人シグ",
+   "giverName": "封印の番人シグ",
+   "map": "V600",
+   "minLevel": 54,
+   "prereqs": [
+    "N-09"
+   ],
+   "size": "大",
+   "goalText": "M080×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M080",
+     "count": 30
+    }
+   ],
+   "end": "封印の番人シグ",
+   "exp": 233000,
+   "meso": 17600,
+   "rewards": [
+    {
+     "item": "scroll.A26.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "マント INT の書 60%",
+   "rewardUnparsed": [],
+   "story": "苔に隠れた文字を読む。",
+   "tutorial": false
+  },
+  {
+   "id": "N-11",
+   "name": "牛頭の砦",
+   "giver": "封印の番人シグ",
+   "giverName": "封印の番人シグ",
+   "map": "V600",
+   "minLevel": 60,
+   "prereqs": [
+    "N-10"
+   ],
+   "size": "大",
+   "goalText": "M082×50",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M082",
+     "count": 50
+    }
+   ],
+   "end": "封印の番人シグ",
+   "exp": 375000,
+   "meso": 21200,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "大エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "牛頭の兵が封印の門へ向かっている。",
+   "tutorial": false
+  },
+  {
+   "id": "N-12",
+   "name": "封印の鍵",
+   "giver": "封印の番人シグ",
+   "giverName": "封印の番人シグ",
+   "map": "V600",
+   "minLevel": 62,
+   "prereqs": [
+    "N-11"
+   ],
+   "size": "大",
+   "goalText": "M077×20 と M082×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M077",
+     "count": 20
+    },
+    {
+     "type": "collect",
+     "item": "etc.M082",
+     "count": 20
+    }
+   ],
+   "end": "封印の番人シグ",
+   "exp": 428000,
+   "meso": 22500,
+   "rewards": [],
+   "rewardText": "封印の鍵",
+   "rewardUnparsed": [
+    "封印の鍵"
+   ],
+   "story": "封印の間へ入る鍵を作る。",
+   "tutorial": false
+  },
+  {
+   "id": "N-13",
+   "name": "黒角の魔獣",
+   "giver": "封印の番人シグ",
+   "giverName": "封印の番人シグ",
+   "map": "V600",
+   "minLevel": 65,
+   "prereqs": [
+    "N-12"
+   ],
+   "size": "特",
+   "goalText": "M089×1",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M089",
+     "count": 1
+    }
+   ],
+   "end": "封印の番人シグ",
+   "exp": 1050000,
+   "meso": 61800,
+   "rewards": [],
+   "rewardText": "称号「大陸の英雄」、呪いの書 30% ×1",
+   "rewardUnparsed": [
+    "称号「大陸の英雄」",
+    "呪いの書 30% ×1"
+   ],
+   "story": "大陸の最も深い所に封じられていた魔獣。黒いかけらの力で目覚めかけていた。",
+   "tutorial": false
+  },
+  {
+   "id": "N-14",
+   "name": "闇の水晶",
+   "giver": "封印の番人シグ",
+   "giverName": "封印の番人シグ",
+   "map": "V600",
+   "minLevel": 68,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M079×10 と M076×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M079",
+     "count": 10
+    },
+    {
+     "type": "collect",
+     "item": "etc.M076",
+     "count": 10
+    }
+   ],
+   "end": "封印の番人シグ",
+   "exp": 305000,
+   "meso": 11300,
+   "rewards": [],
+   "rewardText": "闇の水晶（3 次転職に使う）",
+   "rewardUnparsed": [
+    "闇の水晶（3 次転職に使う）"
+   ],
+   "story": "シグが石から闇の水晶を作ってくれる。",
+   "tutorial": false
+  },
+  {
+   "id": "N-15",
+   "name": "ゾンビダケの王",
+   "giver": "温泉番ユウ",
+   "giverName": "温泉番ユウ",
+   "map": "V600",
+   "minLevel": 45,
+   "prereqs": [
+    "N-02"
+   ],
+   "size": "特",
+   "goalText": "M088×1",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M088",
+     "count": 1
+    }
+   ],
+   "end": "温泉番ユウ",
+   "exp": 206000,
+   "meso": 31500,
+   "rewards": [
+    {
+     "item": "scroll.A02.10",
+     "count": 1
+    }
+   ],
+   "rewardText": "帽子 HP の書 10%",
+   "rewardUnparsed": [],
+   "story": "地下の広間の王（任意）。",
+   "tutorial": false
+  },
+  {
+   "id": "C-01",
+   "name": "雲の都",
+   "giver": "都の巫女ステラ",
+   "giverName": "都の巫女ステラ",
+   "map": "C100",
+   "minLevel": 28,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "駅員ルナ・受付ネフェ・天の階段の船頭と話す",
+   "objectives": [],
+   "end": "都の巫女ステラ",
+   "exp": 3140,
+   "meso": 974,
+   "rewards": [
+    {
+     "item": "use.return.C100",
+     "count": 3
+    }
+   ],
+   "rewardText": "セレスへの帰還の書 ×3",
+   "rewardUnparsed": [],
+   "story": "空の都の案内。",
+   "tutorial": false
+  },
+  {
+   "id": "C-02",
+   "name": "星のかけら",
+   "giver": "都の巫女ステラ",
+   "giverName": "都の巫女ステラ",
+   "map": "C100",
+   "minLevel": 30,
+   "prereqs": [
+    "C-01"
+   ],
+   "size": "中",
+   "goalText": "M100×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M100",
+     "count": 30
+    }
+   ],
+   "end": "都の巫女ステラ",
+   "exp": 8400,
+   "meso": 22750,
+   "rewards": [],
+   "rewardText": "2 万ルド",
+   "rewardUnparsed": [],
+   "story": "都の灯りは星のかけらで灯る。",
+   "tutorial": false
+  },
+  {
+   "id": "C-03",
+   "name": "月のかけら",
+   "giver": "都の巫女ステラ",
+   "giverName": "都の巫女ステラ",
+   "map": "C100",
+   "minLevel": 36,
+   "prereqs": [
+    "C-02"
+   ],
+   "size": "中",
+   "goalText": "M101×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M101",
+     "count": 30
+    }
+   ],
+   "end": "都の巫女ステラ",
+   "exp": 18000,
+   "meso": 33560,
+   "rewards": [],
+   "rewardText": "3 万ルド",
+   "rewardUnparsed": [],
+   "story": "月の灯り。",
+   "tutorial": false
+  },
+  {
+   "id": "C-04",
+   "name": "日のかけら",
+   "giver": "都の巫女ステラ",
+   "giverName": "都の巫女ステラ",
+   "map": "C100",
+   "minLevel": 43,
+   "prereqs": [
+    "C-03"
+   ],
+   "size": "大",
+   "goalText": "M102×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M102",
+     "count": 30
+    }
+   ],
+   "end": "都の巫女ステラ",
+   "exp": 84500,
+   "meso": 11500,
+   "rewards": [],
+   "rewardText": "星月日のペンダント（全能力 +1）",
+   "rewardUnparsed": [
+    "星月日のペンダント（全能力 +1）"
+   ],
+   "story": "3 つの灯りがそろい、都の空が明るくなる。",
+   "tutorial": false
+  },
+  {
+   "id": "C-05",
+   "name": "植物園の手入れ",
+   "giver": "庭師ハナ",
+   "giverName": "庭師ハナ",
+   "map": "C100",
+   "minLevel": 38,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M103×30 と M104×20",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M103",
+     "count": 30
+    },
+    {
+     "type": "kill",
+     "mob": "M104",
+     "count": 20
+    }
+   ],
+   "end": "庭師ハナ",
+   "exp": 23300,
+   "meso": 3880,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "大白ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "ハラペコソウが増えすぎた。",
+   "tutorial": false
+  },
+  {
+   "id": "C-06",
+   "name": "塔を降りる手紙",
+   "giver": "駅員ルナ",
+   "giverName": "駅員ルナ",
+   "map": "C101",
+   "minLevel": 40,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "雲の塔を 1 階まで降り、ヒョウガ村の村長ヴァンに手紙を届ける",
+   "objectives": [],
+   "end": "駅員ルナ",
+   "exp": 30000,
+   "meso": 4230,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "雪の村への道が開く。",
+   "tutorial": false
+  },
+  {
+   "id": "C-07",
+   "name": "見張り石のかけら",
+   "giver": "駅員ルナ",
+   "giverName": "駅員ルナ",
+   "map": "C101",
+   "minLevel": 42,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M105×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M105",
+     "count": 30
+    }
+   ],
+   "end": "駅員ルナ",
+   "exp": 36600,
+   "meso": 4610,
+   "rewards": [
+    {
+     "item": "scroll.A03.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "帽子 INT の書 60%",
+   "rewardUnparsed": [],
+   "story": "塔の見張り石が乱れている。",
+   "tutorial": false
+  },
+  {
+   "id": "C-08",
+   "name": "炎と氷の石",
+   "giver": "塔の魔導師ゼノ",
+   "giverName": "塔の魔導師ゼノ",
+   "map": "C100",
+   "minLevel": 50,
+   "prereqs": [],
+   "size": "大",
+   "goalText": "M106×20 と M107×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M106",
+     "count": 20
+    },
+    {
+     "type": "collect",
+     "item": "etc.M107",
+     "count": 20
+    }
+   ],
+   "end": "塔の魔導師ゼノ",
+   "exp": 170000,
+   "meso": 15600,
+   "rewards": [
+    {
+     "item": "use.magic_tonic",
+     "count": 10
+    },
+    {
+     "item": "use.power_tonic",
+     "count": 10
+    }
+   ],
+   "rewardText": "魔力の薬 ×10、力の薬 ×10",
+   "rewardUnparsed": [],
+   "story": "塔の灯りの燃料。",
+   "tutorial": false
+  },
+  {
+   "id": "C-09",
+   "name": "子天馬の羽",
+   "giver": "都の巫女ステラ",
+   "giverName": "都の巫女ステラ",
+   "map": "C100",
+   "minLevel": 54,
+   "prereqs": [
+    "C-04"
+   ],
+   "size": "大",
+   "goalText": "M108×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M108",
+     "count": 30
+    }
+   ],
+   "end": "都の巫女ステラ",
+   "exp": 233000,
+   "meso": 17600,
+   "rewards": [],
+   "rewardText": "天馬の羽の椅子",
+   "rewardUnparsed": [
+    "天馬の羽の椅子"
+   ],
+   "story": "巫女の儀式の羽。",
+   "tutorial": false
+  },
+  {
+   "id": "C-10",
+   "name": "雲の綿",
+   "giver": "庭師ハナ",
+   "giverName": "庭師ハナ",
+   "map": "C100",
+   "minLevel": 56,
+   "prereqs": [
+    "C-05"
+   ],
+   "size": "大",
+   "goalText": "M109×40",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M109",
+     "count": 40
+    }
+   ],
+   "end": "庭師ハナ",
+   "exp": 273000,
+   "meso": 18800,
+   "rewards": [],
+   "rewardText": "雲のクッション（椅子）",
+   "rewardUnparsed": [
+    "雲のクッション（椅子）"
+   ],
+   "story": "雲の綿でクッションを作る。",
+   "tutorial": false
+  },
+  {
+   "id": "C-11",
+   "name": "塔の守り人",
+   "giver": "塔の魔導師ゼノ",
+   "giverName": "塔の魔導師ゼノ",
+   "map": "C100",
+   "minLevel": 60,
+   "prereqs": [
+    "C-08"
+   ],
+   "size": "大",
+   "goalText": "M110×50",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M110",
+     "count": 50
+    }
+   ],
+   "end": "塔の魔導師ゼノ",
+   "exp": 375000,
+   "meso": 21200,
+   "rewards": [
+    {
+     "item": "scroll.A28.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "マント魔防の書 60%",
+   "rewardUnparsed": [],
+   "story": "守り人が暴れ出した。",
+   "tutorial": false
+  },
+  {
+   "id": "C-12",
+   "name": "雲の魔女",
+   "giver": "都の巫女ステラ",
+   "giverName": "都の巫女ステラ",
+   "map": "C100",
+   "minLevel": 68,
+   "prereqs": [
+    "C-11"
+   ],
+   "size": "特",
+   "goalText": "M119×1",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M119",
+     "count": 1
+    }
+   ],
+   "end": "都の巫女ステラ",
+   "exp": 1270000,
+   "meso": 67700,
+   "rewards": [],
+   "rewardText": "全能力の薬（10 分）×3",
+   "rewardUnparsed": [
+    "全能力の薬（10 分）×3"
+   ],
+   "story": "祭壇を乗っ取った魔女。黒いかけらを持っていた。",
+   "tutorial": false
+  },
+  {
+   "id": "F-01",
+   "name": "雪の村",
+   "giver": "村長ヴァン",
+   "giverName": "村長ヴァン",
+   "map": "F100",
+   "minLevel": 40,
+   "prereqs": [
+    "C-06"
+   ],
+   "size": "中",
+   "goalText": "M120×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M120",
+     "count": 20
+    }
+   ],
+   "end": "村長ヴァン",
+   "exp": 30000,
+   "meso": 4230,
+   "rewards": [
+    {
+     "item": "use.return.F100",
+     "count": 3
+    }
+   ],
+   "rewardText": "ヒョウガ村への帰還の書 ×3",
+   "rewardUnparsed": [],
+   "story": "毛布にする毛皮。",
+   "tutorial": false
+  },
+  {
+   "id": "F-02",
+   "name": "白い牙",
+   "giver": "猟師ボルグ",
+   "giverName": "猟師ボルグ",
+   "map": "F100",
+   "minLevel": 48,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M121×40",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M121",
+     "count": 40
+    }
+   ],
+   "end": "猟師ボルグ",
+   "exp": 66800,
+   "meso": 5960,
+   "rewards": [
+    {
+     "item": "use.warm_milk",
+     "count": 20
+    }
+   ],
+   "rewardText": "温かい乳 ×20",
+   "rewardUnparsed": [],
+   "story": "群れが村に近づく。",
+   "tutorial": false
+  },
+  {
+   "id": "F-03",
+   "name": "雪の玉",
+   "giver": "雪ん子ユキ",
+   "giverName": "雪ん子ユキ",
+   "map": "F100",
+   "minLevel": 45,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M125×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M125",
+     "count": 20
+    }
+   ],
+   "end": "雪ん子ユキ",
+   "exp": 24700,
+   "meso": 2100,
+   "rewards": [],
+   "rewardText": "雪だるまの帽子（見た目）",
+   "rewardUnparsed": [
+    "雪だるまの帽子（見た目）"
+   ],
+   "story": "雪合戦の玉。",
+   "tutorial": false
+  },
+  {
+   "id": "F-04",
+   "name": "イエティの角",
+   "giver": "猟師ボルグ",
+   "giverName": "猟師ボルグ",
+   "map": "F100",
+   "minLevel": 50,
+   "prereqs": [
+    "F-02"
+   ],
+   "size": "大",
+   "goalText": "M122×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M122",
+     "count": 30
+    }
+   ],
+   "end": "猟師ボルグ",
+   "exp": 170000,
+   "meso": 15600,
+   "rewards": [
+    {
+     "item": "scroll.A15.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "靴 DEX の書 60%",
+   "rewardUnparsed": [],
+   "story": "角で弓を作る。",
+   "tutorial": false
+  },
+  {
+   "id": "F-05",
+   "name": "ペンギンの兵隊",
+   "giver": "雪ん子ユキ",
+   "giverName": "雪ん子ユキ",
+   "map": "F100",
+   "minLevel": 52,
+   "prereqs": [
+    "F-03"
+   ],
+   "size": "中",
+   "goalText": "M123×40",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M123",
+     "count": 40
+    }
+   ],
+   "end": "雪ん子ユキ",
+   "exp": 95600,
+   "meso": 36910,
+   "rewards": [],
+   "rewardText": "3 万ルド",
+   "rewardUnparsed": [],
+   "story": "ペンギン兵が雪原を占拠。",
+   "tutorial": false
+  },
+  {
+   "id": "F-06",
+   "name": "黒い雪",
+   "giver": "村長ヴァン",
+   "giverName": "村長ヴァン",
+   "map": "F100",
+   "minLevel": 56,
+   "prereqs": [
+    "F-01"
+   ],
+   "size": "大",
+   "goalText": "M124×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M124",
+     "count": 30
+    }
+   ],
+   "end": "村長ヴァン",
+   "exp": 273000,
+   "meso": 18800,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 10
+    }
+   ],
+   "rewardText": "エリクサー ×10",
+   "rewardUnparsed": [],
+   "story": "黒いイエティの毛から黒いかけらの気配。",
+   "tutorial": false
+  },
+  {
+   "id": "F-07",
+   "name": "坑道の通行証",
+   "giver": "坑道の番人ザック",
+   "giverName": "坑道の番人ザック",
+   "map": "F100",
+   "minLevel": 55,
+   "prereqs": [],
+   "size": "大",
+   "goalText": "M128×50",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M128",
+     "count": 50
+    }
+   ],
+   "end": "坑道の番人ザック",
+   "exp": 253000,
+   "meso": 18200,
+   "rewards": [],
+   "rewardText": "坑道の通行証",
+   "rewardUnparsed": [
+    "坑道の通行証"
+   ],
+   "story": "坑道に入る許し。",
+   "tutorial": false
+  },
+  {
+   "id": "F-08",
+   "name": "さびたつるはし",
+   "giver": "坑道の番人ザック",
+   "giverName": "坑道の番人ザック",
+   "map": "F100",
+   "minLevel": 63,
+   "prereqs": [
+    "F-07"
+   ],
+   "size": "大",
+   "goalText": "M129×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M129",
+     "count": 30
+    }
+   ],
+   "end": "坑道の番人ザック",
+   "exp": 458000,
+   "meso": 23200,
+   "rewards": [
+    {
+     "item": "scroll.A19.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "手袋 DEX の書 60%",
+   "rewardUnparsed": [],
+   "story": "坑夫の形見。",
+   "tutorial": false
+  },
+  {
+   "id": "F-09",
+   "name": "骨の兵の印",
+   "giver": "坑道の番人ザック",
+   "giverName": "坑道の番人ザック",
+   "map": "F100",
+   "minLevel": 68,
+   "prereqs": [
+    "F-08"
+   ],
+   "size": "大",
+   "goalText": "M130×30 と M131×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M130",
+     "count": 30
+    },
+    {
+     "type": "collect",
+     "item": "etc.M131",
+     "count": 20
+    }
+   ],
+   "end": "坑道の番人ザック",
+   "exp": 635000,
+   "meso": 27100,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 3
+    }
+   ],
+   "rewardText": "大エリクサー ×3",
+   "rewardUnparsed": [],
+   "story": "骨の兵は火山から来ている。",
+   "tutorial": false
+  },
+  {
+   "id": "F-10",
+   "name": "将軍の骨",
+   "giver": "坑道の番人ザック",
+   "giverName": "坑道の番人ザック",
+   "map": "F100",
+   "minLevel": 78,
+   "prereqs": [
+    "F-09"
+   ],
+   "size": "大",
+   "goalText": "M132×40",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M132",
+     "count": 40
+    }
+   ],
+   "end": "坑道の番人ザック",
+   "exp": 1120000,
+   "meso": 34100,
+   "rewards": [],
+   "rewardText": "焔の門の通行証",
+   "rewardUnparsed": [
+    "焔の門の通行証"
+   ],
+   "story": "坑道の奥の門の先に火山がある。",
+   "tutorial": false
+  },
+  {
+   "id": "F-11",
+   "name": "雪の森のオオカミ男",
+   "giver": "猟師ボルグ",
+   "giverName": "猟師ボルグ",
+   "map": "F100",
+   "minLevel": 72,
+   "prereqs": [
+    "F-04"
+   ],
+   "size": "大",
+   "goalText": "M126×50",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M126",
+     "count": 50
+    }
+   ],
+   "end": "猟師ボルグ",
+   "exp": 808000,
+   "meso": 30000,
+   "rewards": [
+    {
+     "item": "scroll.A06.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "上着 STR の書 60%",
+   "rewardUnparsed": [],
+   "story": "夜の森で人が襲われた。",
+   "tutorial": false
+  },
+  {
+   "id": "F-12",
+   "name": "ライカンの長",
+   "giver": "猟師ボルグ",
+   "giverName": "猟師ボルグ",
+   "map": "F100",
+   "minLevel": 78,
+   "prereqs": [
+    "F-11"
+   ],
+   "size": "大",
+   "goalText": "M127×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M127",
+     "count": 20
+    }
+   ],
+   "end": "猟師ボルグ",
+   "exp": 1120000,
+   "meso": 34100,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 50
+    }
+   ],
+   "rewardText": "大白ポーション ×50",
+   "rewardUnparsed": [],
+   "story": "群れの長を追う。",
+   "tutorial": false
+  },
+  {
+   "id": "F-13",
+   "name": "雪原の大狼",
+   "giver": "村長ヴァン",
+   "giverName": "村長ヴァン",
+   "map": "F100",
+   "minLevel": 82,
+   "prereqs": [
+    "F-06"
+   ],
+   "size": "特",
+   "goalText": "M139×1",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M139",
+     "count": 1
+    }
+   ],
+   "end": "村長ヴァン",
+   "exp": 2760000,
+   "meso": 92600,
+   "rewards": [],
+   "rewardText": "全能力の薬 ×3、呪いの書 70%",
+   "rewardUnparsed": [
+    "全能力の薬 ×3",
+    "呪いの書 70%"
+   ],
+   "story": "頂の巣の主。",
+   "tutorial": false
+  },
+  {
+   "id": "T-01",
+   "name": "おもちゃの町",
+   "giver": "町長トイ",
+   "giverName": "町長トイ",
+   "map": "T100",
+   "minLevel": 25,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "時計番のクロック婆・受付ギア・受付パズと話す",
+   "objectives": [],
+   "end": "町長トイ",
+   "exp": 2040,
+   "meso": 812,
+   "rewards": [
+    {
+     "item": "use.return.T100",
+     "count": 3
+    }
+   ],
+   "rewardText": "ティンクルへの帰還の書 ×3",
+   "rewardUnparsed": [],
+   "story": "町の案内。",
+   "tutorial": false
+  },
+  {
+   "id": "T-02",
+   "name": "ボタンの目",
+   "giver": "人形師ルル",
+   "giverName": "人形師ルル",
+   "map": "T100",
+   "minLevel": 26,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M140×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M140",
+     "count": 30
+    }
+   ],
+   "end": "人形師ルル",
+   "exp": 4720,
+   "meso": 22160,
+   "rewards": [],
+   "rewardText": "2 万ルド",
+   "rewardUnparsed": [],
+   "story": "人形の目を直す。",
+   "tutorial": false
+  },
+  {
+   "id": "T-03",
+   "name": "ピンクの綿",
+   "giver": "人形師ルル",
+   "giverName": "人形師ルル",
+   "map": "T100",
+   "minLevel": 29,
+   "prereqs": [
+    "T-02"
+   ],
+   "size": "中",
+   "goalText": "M141×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M141",
+     "count": 30
+    }
+   ],
+   "end": "人形師ルル",
+   "exp": 7270,
+   "meso": 2590,
+   "rewards": [],
+   "rewardText": "くまのぬいぐるみ（設置）",
+   "rewardUnparsed": [
+    "くまのぬいぐるみ（設置）"
+   ],
+   "story": "人形の綿。",
+   "tutorial": false
+  },
+  {
+   "id": "T-04",
+   "name": "積み木を直す",
+   "giver": "積み木職人ブロ",
+   "giverName": "積み木職人ブロ",
+   "map": "T100",
+   "minLevel": 32,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M142×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M142",
+     "count": 30
+    }
+   ],
+   "end": "積み木職人ブロ",
+   "exp": 10800,
+   "meso": 3000,
+   "rewards": [
+    {
+     "item": "scroll.A08.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "下衣防御の書 60%",
+   "rewardUnparsed": [],
+   "story": "崩れた家の積み木。",
+   "tutorial": false
+  },
+  {
+   "id": "T-05",
+   "name": "ゼンマイの音",
+   "giver": "時計番のクロック婆",
+   "giverName": "時計番のクロック婆",
+   "map": "T100",
+   "minLevel": 35,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M143×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M143",
+     "count": 30
+    }
+   ],
+   "end": "時計番のクロック婆",
+   "exp": 15800,
+   "meso": 33410,
+   "rewards": [],
+   "rewardText": "3 万ルド",
+   "rewardUnparsed": [],
+   "story": "時計塔のゼンマイ。K-08 の懐中時計を持っていると追加の話（クロック婆の昔話）とお礼。",
+   "tutorial": false
+  },
+  {
+   "id": "T-06",
+   "name": "ネジ集め",
+   "giver": "積み木職人ブロ",
+   "giverName": "積み木職人ブロ",
+   "map": "T100",
+   "minLevel": 38,
+   "prereqs": [
+    "T-04"
+   ],
+   "size": "大",
+   "goalText": "M144×30 と M145×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M144",
+     "count": 30
+    },
+    {
+     "type": "collect",
+     "item": "etc.M145",
+     "count": 20
+    }
+   ],
+   "end": "積み木職人ブロ",
+   "exp": 48500,
+   "meso": 9310,
+   "rewards": [
+    {
+     "item": "scroll.A31.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "耳飾り DEX の書 60%",
+   "rewardUnparsed": [],
+   "story": "町の機械のネジ。",
+   "tutorial": false
+  },
+  {
+   "id": "T-07",
+   "name": "木馬兵",
+   "giver": "町長トイ",
+   "giverName": "町長トイ",
+   "map": "T100",
+   "minLevel": 42,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M146×40",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M146",
+     "count": 40
+    }
+   ],
+   "end": "町長トイ",
+   "exp": 36600,
+   "meso": 4610,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 10
+    }
+   ],
+   "rewardText": "大白ポーション ×10",
+   "rewardUnparsed": [],
+   "story": "回廊で木馬が暴走。",
+   "tutorial": false
+  },
+  {
+   "id": "T-08",
+   "name": "工場の異変",
+   "giver": "町長トイ",
+   "giverName": "町長トイ",
+   "map": "T100",
+   "minLevel": 46,
+   "prereqs": [
+    "T-07"
+   ],
+   "size": "大",
+   "goalText": "M148×40",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M148",
+     "count": 40
+    }
+   ],
+   "end": "町長トイ",
+   "exp": 114000,
+   "meso": 13100,
+   "rewards": [
+    {
+     "item": "scroll.A18.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "手袋攻撃力の書 60%",
+   "rewardUnparsed": [],
+   "story": "おもちゃ工場の機械が勝手に動く。",
+   "tutorial": false
+  },
+  {
+   "id": "T-09",
+   "name": "時計の針",
+   "giver": "時計番のクロック婆",
+   "giverName": "時計番のクロック婆",
+   "map": "T100",
+   "minLevel": 50,
+   "prereqs": [
+    "T-05"
+   ],
+   "size": "大",
+   "goalText": "M149×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M149",
+     "count": 30
+    }
+   ],
+   "end": "時計番のクロック婆",
+   "exp": 170000,
+   "meso": 65600,
+   "rewards": [],
+   "rewardText": "5 万ルド",
+   "rewardUnparsed": [],
+   "story": "止まった時計を動かす。",
+   "tutorial": false
+  },
+  {
+   "id": "T-10",
+   "name": "隊長のバネ",
+   "giver": "積み木職人ブロ",
+   "giverName": "積み木職人ブロ",
+   "map": "T100",
+   "minLevel": 54,
+   "prereqs": [
+    "T-06"
+   ],
+   "size": "大",
+   "goalText": "M150×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M150",
+     "count": 20
+    }
+   ],
+   "end": "積み木職人ブロ",
+   "exp": 233000,
+   "meso": 17600,
+   "rewards": [
+    {
+     "item": "scroll.A23.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "盾 LUK の書 60%",
+   "rewardUnparsed": [],
+   "story": "強いバネで町の昇降機を直す。",
+   "tutorial": false
+  },
+  {
+   "id": "T-11",
+   "name": "時の塔の亡霊",
+   "giver": "時計番のクロック婆",
+   "giverName": "時計番のクロック婆",
+   "map": "T100",
+   "minLevel": 62,
+   "prereqs": [
+    "T-09"
+   ],
+   "size": "大",
+   "goalText": "M152×40 と M153×40",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M152",
+     "count": 40
+    },
+    {
+     "type": "kill",
+     "mob": "M153",
+     "count": 40
+    }
+   ],
+   "end": "時計番のクロック婆",
+   "exp": 428000,
+   "meso": 22500,
+   "rewards": [
+    {
+     "item": "use.holy_water",
+     "count": 20
+    }
+   ],
+   "rewardText": "聖水 ×20",
+   "rewardUnparsed": [],
+   "story": "時の塔の上の階に亡霊が。",
+   "tutorial": false
+  },
+  {
+   "id": "T-12",
+   "name": "死神のぬいぐるみ",
+   "giver": "時計番のクロック婆",
+   "giverName": "時計番のクロック婆",
+   "map": "T100",
+   "minLevel": 72,
+   "prereqs": [
+    "T-11"
+   ],
+   "size": "大",
+   "goalText": "M155×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M155",
+     "count": 30
+    }
+   ],
+   "end": "時計番のクロック婆",
+   "exp": 808000,
+   "meso": 30000,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 10
+    }
+   ],
+   "rewardText": "エリクサー ×10",
+   "rewardUnparsed": [],
+   "story": "鎌を持つぬいぐるみの正体。",
+   "tutorial": false
+  },
+  {
+   "id": "T-13",
+   "name": "時の鍵",
+   "giver": "時計番のクロック婆",
+   "giverName": "時計番のクロック婆",
+   "map": "T100",
+   "minLevel": 100,
+   "prereqs": [
+    "T-12"
+   ],
+   "size": "大",
+   "goalText": "M156×20・M157×20・M158×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M156",
+     "count": 20
+    },
+    {
+     "type": "collect",
+     "item": "etc.M157",
+     "count": 20
+    },
+    {
+     "type": "collect",
+     "item": "etc.M158",
+     "count": 20
+    }
+   ],
+   "end": "時計番のクロック婆",
+   "exp": 3250000,
+   "meso": 54000,
+   "rewards": [],
+   "rewardText": "時の鍵",
+   "rewardUnparsed": [
+    "時の鍵"
+   ],
+   "story": "時の門を開ける鍵を作る。",
+   "tutorial": false
+  },
+  {
+   "id": "T-14",
+   "name": "時計塔の魔物",
+   "giver": "町長トイ",
+   "giverName": "町長トイ",
+   "map": "T100",
+   "minLevel": 110,
+   "prereqs": [
+    "T-13"
+   ],
+   "size": "特",
+   "goalText": "M160×1",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M160",
+     "count": 1
+    }
+   ],
+   "end": "町長トイ",
+   "exp": 10500000,
+   "meso": 155000,
+   "rewards": [],
+   "rewardText": "極意の書 20（自分の職の★スキル 1 つ）",
+   "rewardUnparsed": [
+    "極意の書 20（自分の職の★スキル 1 つ）"
+   ],
+   "story": "塔の時を狂わせていた魔物。",
+   "tutorial": false
+  },
+  {
+   "id": "M-01",
+   "name": "泡の都",
+   "giver": "女王の侍女ルリ",
+   "giverName": "女王の侍女ルリ",
+   "map": "M100",
+   "minLevel": 40,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "町を回り、潜水船の船長ノーマと受付シェルに会う",
+   "objectives": [],
+   "end": "女王の侍女ルリ",
+   "exp": 15000,
+   "meso": 1690,
+   "rewards": [
+    {
+     "item": "use.return.M100",
+     "count": 3
+    }
+   ],
+   "rewardText": "マリナへの帰還の書 ×3",
+   "rewardUnparsed": [],
+   "story": "海の底の都の案内。",
+   "tutorial": false
+  },
+  {
+   "id": "M-02",
+   "name": "泡の玉",
+   "giver": "泡職人アワジ",
+   "giverName": "泡職人アワジ",
+   "map": "M100",
+   "minLevel": 42,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M170×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M170",
+     "count": 30
+    }
+   ],
+   "end": "泡職人アワジ",
+   "exp": 36600,
+   "meso": 4610,
+   "rewards": [
+    {
+     "item": "use.seaweed_dango",
+     "count": 20
+    }
+   ],
+   "rewardText": "海藻団子 ×20",
+   "rewardUnparsed": [],
+   "story": "ドームの泡を直す。",
+   "tutorial": false
+  },
+  {
+   "id": "M-03",
+   "name": "クラゲの足",
+   "giver": "女王の侍女ルリ",
+   "giverName": "女王の侍女ルリ",
+   "map": "M100",
+   "minLevel": 45,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M171×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M171",
+     "count": 30
+    }
+   ],
+   "end": "女王の侍女ルリ",
+   "exp": 49400,
+   "meso": 5240,
+   "rewards": [
+    {
+     "item": "use.all_cure",
+     "count": 10
+    }
+   ],
+   "rewardText": "万能薬 ×10",
+   "rewardUnparsed": [],
+   "story": "女王の薬。",
+   "tutorial": false
+  },
+  {
+   "id": "M-04",
+   "name": "ヨロイガニ",
+   "giver": "料理人シオ",
+   "giverName": "料理人シオ",
+   "map": "M100",
+   "minLevel": 50,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M173×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M173",
+     "count": 30
+    }
+   ],
+   "end": "料理人シオ",
+   "exp": 81600,
+   "meso": 6500,
+   "rewards": [],
+   "rewardText": "カニの甲羅焼き ×10（HP 1,500）",
+   "rewardUnparsed": [
+    "カニの甲羅焼き ×10（HP 1,500）"
+   ],
+   "story": "名物料理。",
+   "tutorial": false
+  },
+  {
+   "id": "M-05",
+   "name": "タコの洞くつ",
+   "giver": "泡職人アワジ",
+   "giverName": "泡職人アワジ",
+   "map": "M100",
+   "minLevel": 55,
+   "prereqs": [
+    "M-02"
+   ],
+   "size": "大",
+   "goalText": "M174×50",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M174",
+     "count": 50
+    }
+   ],
+   "end": "泡職人アワジ",
+   "exp": 253000,
+   "meso": 18200,
+   "rewards": [
+    {
+     "item": "scroll.A04.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "帽子命中の書 60%",
+   "rewardUnparsed": [],
+   "story": "洞くつに泡が流れ込まない。",
+   "tutorial": false
+  },
+  {
+   "id": "M-06",
+   "name": "イカ戦士",
+   "giver": "近衛兵マリン",
+   "giverName": "近衛兵マリン",
+   "map": "M100",
+   "minLevel": 58,
+   "prereqs": [],
+   "size": "大",
+   "goalText": "M175×50",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M175",
+     "count": 50
+    }
+   ],
+   "end": "近衛兵マリン",
+   "exp": 320000,
+   "meso": 69900,
+   "rewards": [],
+   "rewardText": "5 万ルド",
+   "rewardUnparsed": [],
+   "story": "都の外の見張り。",
+   "tutorial": false
+  },
+  {
+   "id": "M-07",
+   "name": "サメの歯",
+   "giver": "料理人シオ",
+   "giverName": "料理人シオ",
+   "map": "M100",
+   "minLevel": 62,
+   "prereqs": [
+    "M-04"
+   ],
+   "size": "大",
+   "goalText": "M176×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M176",
+     "count": 30
+    }
+   ],
+   "end": "料理人シオ",
+   "exp": 428000,
+   "meso": 22500,
+   "rewards": [
+    {
+     "item": "use.big_white_potion",
+     "count": 30
+    }
+   ],
+   "rewardText": "大白ポーション ×30",
+   "rewardUnparsed": [],
+   "story": "包丁の材料。",
+   "tutorial": false
+  },
+  {
+   "id": "M-08",
+   "name": "骨の海",
+   "giver": "近衛兵マリン",
+   "giverName": "近衛兵マリン",
+   "map": "M100",
+   "minLevel": 70,
+   "prereqs": [
+    "M-06"
+   ],
+   "size": "大",
+   "goalText": "M177×60",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M177",
+     "count": 60
+    }
+   ],
+   "end": "近衛兵マリン",
+   "exp": 725000,
+   "meso": 28800,
+   "rewards": [
+    {
+     "item": "scroll.A07.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "上着 LUK の書 60%",
+   "rewardUnparsed": [],
+   "story": "骨の魚が増えた。",
+   "tutorial": false
+  },
+  {
+   "id": "M-09",
+   "name": "沈んだ宝箱",
+   "giver": "潜水船の船長ノーマ",
+   "giverName": "潜水船の船長ノーマ",
+   "map": "M113",
+   "minLevel": 70,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M107 の大きな骨の口の中の宝箱を開ける",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "M107"
+    }
+   ],
+   "end": "潜水船の船長ノーマ",
+   "exp": 348000,
+   "meso": 112000,
+   "rewards": [],
+   "rewardText": "10 万ルド、書（ランダム 60%）",
+   "rewardUnparsed": [
+    "書（ランダム 60%）"
+   ],
+   "story": "昔沈んだ船の宝。",
+   "tutorial": false
+  },
+  {
+   "id": "M-10",
+   "name": "暗い海の光",
+   "giver": "女王の侍女ルリ",
+   "giverName": "女王の侍女ルリ",
+   "map": "M100",
+   "minLevel": 80,
+   "prereqs": [
+    "M-03"
+   ],
+   "size": "大",
+   "goalText": "M178×30 と M180×10",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M178",
+     "count": 30
+    },
+    {
+     "type": "collect",
+     "item": "etc.M180",
+     "count": 10
+    }
+   ],
+   "end": "女王の侍女ルリ",
+   "exp": 1250000,
+   "meso": 35500,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 10
+    }
+   ],
+   "rewardText": "エリクサー ×10",
+   "rewardUnparsed": [],
+   "story": "海が暗くなっていく。",
+   "tutorial": false
+  },
+  {
+   "id": "M-11",
+   "name": "冷たい海",
+   "giver": "近衛兵マリン",
+   "giverName": "近衛兵マリン",
+   "map": "M100",
+   "minLevel": 83,
+   "prereqs": [
+    "M-08"
+   ],
+   "size": "大",
+   "goalText": "M179×60",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M179",
+     "count": 60
+    }
+   ],
+   "end": "近衛兵マリン",
+   "exp": 1450000,
+   "meso": 37800,
+   "rewards": [
+    {
+     "item": "scroll.A29.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "マント HP の書 60%",
+   "rewardUnparsed": [],
+   "story": "冷たい海流。",
+   "tutorial": false
+  },
+  {
+   "id": "M-12",
+   "name": "海の溝のうろこ",
+   "giver": "近衛兵マリン",
+   "giverName": "近衛兵マリン",
+   "map": "M100",
+   "minLevel": 95,
+   "prereqs": [
+    "M-11"
+   ],
+   "size": "大",
+   "goalText": "M181×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M181",
+     "count": 30
+    }
+   ],
+   "end": "近衛兵マリン",
+   "exp": 2580000,
+   "meso": 48600,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "大エリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "溝の底に大きな影。",
+   "tutorial": false
+  },
+  {
+   "id": "M-13",
+   "name": "深淵の大魚",
+   "giver": "女王の侍女ルリ",
+   "giverName": "女王の侍女ルリ",
+   "map": "M100",
+   "minLevel": 110,
+   "prereqs": [
+    "M-12"
+   ],
+   "size": "特",
+   "goalText": "M189×1",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M189",
+     "count": 1
+    }
+   ],
+   "end": "女王の侍女ルリ",
+   "exp": 10500000,
+   "meso": 155000,
+   "rewards": [],
+   "rewardText": "極意の書 20（自分の職の★スキル 1 つ）",
+   "rewardUnparsed": [
+    "極意の書 20（自分の職の★スキル 1 つ）"
+   ],
+   "story": "深い海の主。",
+   "tutorial": false
+  },
+  {
+   "id": "A-01",
+   "name": "天の階段",
+   "giver": "神殿の巫女アルマ",
+   "giverName": "神殿の巫女アルマ",
+   "map": "P100",
+   "minLevel": 85,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M190×40",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M190",
+     "count": 40
+    }
+   ],
+   "end": "神殿の巫女アルマ",
+   "exp": 768000,
+   "meso": 16400,
+   "rewards": [
+    {
+     "item": "use.return.P100",
+     "count": 3
+    }
+   ],
+   "rewardText": "神殿前の野営地への帰還の書 ×3",
+   "rewardUnparsed": [],
+   "story": "神殿の入口の石像が動き出した。",
+   "tutorial": false
+  },
+  {
+   "id": "A-02",
+   "name": "黄金のかけら",
+   "giver": "神殿の巫女アルマ",
+   "giverName": "神殿の巫女アルマ",
+   "map": "P100",
+   "minLevel": 92,
+   "prereqs": [
+    "A-01"
+   ],
+   "size": "大",
+   "goalText": "M191×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M191",
+     "count": 30
+    }
+   ],
+   "end": "神殿の巫女アルマ",
+   "exp": 2250000,
+   "meso": 145700,
+   "rewards": [],
+   "rewardText": "10 万ルド",
+   "rewardUnparsed": [],
+   "story": "黄金の番人のかけら。",
+   "tutorial": false
+  },
+  {
+   "id": "A-03",
+   "name": "騎士の紋章",
+   "giver": "神殿の巫女アルマ",
+   "giverName": "神殿の巫女アルマ",
+   "map": "P100",
+   "minLevel": 96,
+   "prereqs": [
+    "A-02"
+   ],
+   "size": "大",
+   "goalText": "M192×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M192",
+     "count": 30
+    }
+   ],
+   "end": "神殿の巫女アルマ",
+   "exp": 2700000,
+   "meso": 49700,
+   "rewards": [],
+   "rewardText": "マント STR/DEX/INT/LUK の書 60% から 1 枚",
+   "rewardUnparsed": [
+    "マント STR/DEX/INT/LUK の書 60% から 1 枚"
+   ],
+   "story": "迷い騎士の名前を調べる。",
+   "tutorial": false
+  },
+  {
+   "id": "A-04",
+   "name": "祈りの布",
+   "giver": "神殿の巫女アルマ",
+   "giverName": "神殿の巫女アルマ",
+   "map": "P100",
+   "minLevel": 100,
+   "prereqs": [
+    "A-03"
+   ],
+   "size": "大",
+   "goalText": "M193×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M193",
+     "count": 30
+    }
+   ],
+   "end": "神殿の巫女アルマ",
+   "exp": 3250000,
+   "meso": 54000,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "大エリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "祈り続ける霊を解き放つ。",
+   "tutorial": false
+  },
+  {
+   "id": "A-05",
+   "name": "神殿の石",
+   "giver": "神殿の巫女アルマ",
+   "giverName": "神殿の巫女アルマ",
+   "map": "P100",
+   "minLevel": 106,
+   "prereqs": [
+    "A-04"
+   ],
+   "size": "大",
+   "goalText": "M194×60",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M194",
+     "count": 60
+    }
+   ],
+   "end": "神殿の巫女アルマ",
+   "exp": 4330000,
+   "meso": 58700,
+   "rewards": [
+    {
+     "item": "scroll.A14.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "全身防御の書 60%",
+   "rewardUnparsed": [],
+   "story": "ゴーレムが奥への道をふさぐ。",
+   "tutorial": false
+  },
+  {
+   "id": "A-06",
+   "name": "司祭の書",
+   "giver": "神殿の巫女アルマ",
+   "giverName": "神殿の巫女アルマ",
+   "map": "P100",
+   "minLevel": 110,
+   "prereqs": [
+    "A-05"
+   ],
+   "size": "大",
+   "goalText": "M195×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M195",
+     "count": 30
+    }
+   ],
+   "end": "神殿の巫女アルマ",
+   "exp": 5250000,
+   "meso": 212000,
+   "rewards": [],
+   "rewardText": "15 万ルド",
+   "rewardUnparsed": [],
+   "story": "封印の司祭の書に予言。",
+   "tutorial": false
+  },
+  {
+   "id": "A-07",
+   "name": "残像のかけら",
+   "giver": "神殿の巫女アルマ",
+   "giverName": "神殿の巫女アルマ",
+   "map": "P100",
+   "minLevel": 114,
+   "prereqs": [
+    "A-06"
+   ],
+   "size": "大",
+   "goalText": "M196×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M196",
+     "count": 30
+    }
+   ],
+   "end": "神殿の巫女アルマ",
+   "exp": 6380000,
+   "meso": 65600,
+   "rewards": [],
+   "rewardText": "回復の書 ×1",
+   "rewardUnparsed": [
+    "回復の書 ×1"
+   ],
+   "story": "時の残像。",
+   "tutorial": false
+  },
+  {
+   "id": "A-08",
+   "name": "神殿の守護神",
+   "giver": "神殿の巫女アルマ",
+   "giverName": "神殿の巫女アルマ",
+   "map": "P100",
+   "minLevel": 120,
+   "prereqs": [
+    "A-07"
+   ],
+   "size": "特",
+   "goalText": "M199×1",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M199",
+     "count": 1
+    }
+   ],
+   "end": "神殿の巫女アルマ",
+   "exp": 17000000,
+   "meso": 178000,
+   "rewards": [],
+   "rewardText": "極意の書 30（自分の職の★スキル 1 つ）",
+   "rewardUnparsed": [
+    "極意の書 30（自分の職の★スキル 1 つ）"
+   ],
+   "story": "黒いかけらに縛られた守護神を解き放つ。",
+   "tutorial": false
+  },
+  {
+   "id": "D-01",
+   "name": "竜の背の村",
+   "giver": "村長ハルカ",
+   "giverName": "村長ハルカ",
+   "map": "D100",
+   "minLevel": 98,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "鳥使いホーク・鍛冶屋ドラン・大老ヴァルドに会う",
+   "objectives": [],
+   "end": "村長ハルカ",
+   "exp": 714000,
+   "meso": 8630,
+   "rewards": [
+    {
+     "item": "use.return.D100",
+     "count": 3
+    }
+   ],
+   "rewardText": "竜の背の村への帰還の書 ×3",
+   "rewardUnparsed": [],
+   "story": "竜と暮らす村の案内。",
+   "tutorial": false
+  },
+  {
+   "id": "D-02",
+   "name": "トカゲの翼",
+   "giver": "鳥使いホーク",
+   "giverName": "鳥使いホーク",
+   "map": "D101",
+   "minLevel": 100,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M200×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M200",
+     "count": 30
+    }
+   ],
+   "end": "鳥使いホーク",
+   "exp": 1560000,
+   "meso": 122500,
+   "rewards": [],
+   "rewardText": "10 万ルド",
+   "rewardUnparsed": [],
+   "story": "鳥の巣の材料。",
+   "tutorial": false
+  },
+  {
+   "id": "D-03",
+   "name": "青い竜の革",
+   "giver": "鍛冶屋ドラン",
+   "giverName": "鍛冶屋ドラン",
+   "map": "D100",
+   "minLevel": 106,
+   "prereqs": [],
+   "size": "大",
+   "goalText": "M201×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M201",
+     "count": 30
+    }
+   ],
+   "end": "鍛冶屋ドラン",
+   "exp": 4330000,
+   "meso": 58700,
+   "rewards": [
+    {
+     "item": "scroll.A17.60",
+     "count": 1
+    }
+   ],
+   "rewardText": "靴速さの書 60%",
+   "rewardUnparsed": [],
+   "story": "竜の革の鎧。",
+   "tutorial": false
+  },
+  {
+   "id": "D-04",
+   "name": "赤い竜の革",
+   "giver": "鍛冶屋ドラン",
+   "giverName": "鍛冶屋ドラン",
+   "map": "D100",
+   "minLevel": 110,
+   "prereqs": [
+    "D-03"
+   ],
+   "size": "大",
+   "goalText": "M202×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M202",
+     "count": 30
+    }
+   ],
+   "end": "鍛冶屋ドラン",
+   "exp": 5250000,
+   "meso": 62000,
+   "rewards": [
+    {
+     "item": "scroll.A18.60",
+     "count": 2
+    }
+   ],
+   "rewardText": "手袋攻撃力の書 60% ×2",
+   "rewardUnparsed": [],
+   "story": "火に強い革。",
+   "tutorial": false
+  },
+  {
+   "id": "D-05",
+   "name": "黒い翼の谷",
+   "giver": "村長ハルカ",
+   "giverName": "村長ハルカ",
+   "map": "D100",
+   "minLevel": 116,
+   "prereqs": [],
+   "size": "大",
+   "goalText": "M203×60",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M203",
+     "count": 60
+    }
+   ],
+   "end": "村長ハルカ",
+   "exp": 7000000,
+   "meso": 67400,
+   "rewards": [
+    {
+     "item": "use.xl_potion",
+     "count": 30
+    }
+   ],
+   "rewardText": "特大ポーション ×30",
+   "rewardUnparsed": [],
+   "story": "谷の空が黒い翼で覆われる。",
+   "tutorial": false
+  },
+  {
+   "id": "D-06",
+   "name": "骨竜",
+   "giver": "村長ハルカ",
+   "giverName": "村長ハルカ",
+   "map": "D100",
+   "minLevel": 121,
+   "prereqs": [
+    "D-05"
+   ],
+   "size": "大",
+   "goalText": "M204×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M204",
+     "count": 30
+    }
+   ],
+   "end": "村長ハルカ",
+   "exp": 8930000,
+   "meso": 72200,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 10
+    }
+   ],
+   "rewardText": "大エリクサー ×10",
+   "rewardUnparsed": [],
+   "story": "骨だけで動く竜。",
+   "tutorial": false
+  },
+  {
+   "id": "D-07",
+   "name": "番兵の道",
+   "giver": "竜の大老ヴァルド",
+   "giverName": "竜の大老ヴァルド",
+   "map": "D115",
+   "minLevel": 126,
+   "prereqs": [
+    "D-06"
+   ],
+   "size": "大",
+   "goalText": "M205×60",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M205",
+     "count": 60
+    }
+   ],
+   "end": "竜の大老ヴァルド",
+   "exp": 11400000,
+   "meso": 277400,
+   "rewards": [],
+   "rewardText": "20 万ルド",
+   "rewardUnparsed": [],
+   "story": "竜人の番兵が村を警戒。",
+   "tutorial": false
+  },
+  {
+   "id": "D-08",
+   "name": "洞くつの封印",
+   "giver": "竜の大老ヴァルド",
+   "giverName": "竜の大老ヴァルド",
+   "map": "D115",
+   "minLevel": 150,
+   "prereqs": [
+    "D-07"
+   ],
+   "size": "大",
+   "goalText": "M207×10・M208×10・M209×10 を封印の石にはめ、D113 を抜ける",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M207",
+     "count": 10
+    },
+    {
+     "type": "collect",
+     "item": "etc.M208",
+     "count": 10
+    },
+    {
+     "type": "collect",
+     "item": "etc.M209",
+     "count": 10
+    },
+    {
+     "type": "visit",
+     "map": "D113"
+    }
+   ],
+   "end": "竜の大老ヴァルド",
+   "exp": 35000000,
+   "meso": 108000,
+   "rewards": [],
+   "rewardText": "黒竜の洞くつの通行証",
+   "rewardUnparsed": [
+    "黒竜の洞くつの通行証"
+   ],
+   "story": "黒竜の洞くつへの封印を解く。",
+   "tutorial": false
+  },
+  {
+   "id": "D-09",
+   "name": "三つ首の黒竜",
+   "giver": "竜の大老ヴァルド",
+   "giverName": "竜の大老ヴァルド",
+   "map": "D115",
+   "minLevel": 155,
+   "prereqs": [
+    "D-08"
+   ],
+   "size": "特",
+   "goalText": "M219×1",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M219",
+     "count": 1
+    }
+   ],
+   "end": "竜の大老ヴァルド",
+   "exp": 87500000,
+   "meso": 284000,
+   "rewards": [],
+   "rewardText": "称号「竜を討つ者」、回復の書 ×1",
+   "rewardUnparsed": [
+    "称号「竜を討つ者」",
+    "回復の書 ×1"
+   ],
+   "story": "目覚めた黒竜を倒す。",
+   "tutorial": false
+  },
+  {
+   "id": "D-10",
+   "name": "キメラの尾",
+   "giver": "鍛冶屋ドラン",
+   "giverName": "鍛冶屋ドラン",
+   "map": "D100",
+   "minLevel": 131,
+   "prereqs": [
+    "D-04"
+   ],
+   "size": "大",
+   "goalText": "M206×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M206",
+     "count": 30
+    }
+   ],
+   "end": "鍛冶屋ドラン",
+   "exp": 14400000,
+   "meso": 83000,
+   "rewards": [],
+   "rewardText": "竜牙の武器の製作の権利",
+   "rewardUnparsed": [
+    "竜牙の武器の製作の権利"
+   ],
+   "story": "4 次の武器を作る。",
+   "tutorial": false
+  },
+  {
+   "id": "D-11",
+   "name": "古竜の言葉",
+   "giver": "村長ハルカ",
+   "giverName": "村長ハルカ",
+   "map": "D100",
+   "minLevel": 147,
+   "prereqs": [
+    "D-06"
+   ],
+   "size": "大",
+   "goalText": "M210×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M210",
+     "count": 20
+    }
+   ],
+   "end": "村長ハルカ",
+   "exp": 30500000,
+   "meso": 404000,
+   "rewards": [],
+   "rewardText": "30 万ルド",
+   "rewardUnparsed": [],
+   "story": "老竜は黒竜の昔を知っている。",
+   "tutorial": false
+  },
+  {
+   "id": "H-01",
+   "name": "坑道の調査",
+   "giver": "野営地の隊長ガロン",
+   "giverName": "野営地の隊長ガロン",
+   "map": "H100",
+   "minLevel": 110,
+   "prereqs": [
+    "F-10"
+   ],
+   "size": "大",
+   "goalText": "M220×60 と M221×40",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M220",
+     "count": 60
+    },
+    {
+     "type": "kill",
+     "mob": "M221",
+     "count": 40
+    }
+   ],
+   "end": "野営地の隊長ガロン",
+   "exp": 5250000,
+   "meso": 62000,
+   "rewards": [
+    {
+     "item": "use.return.H100",
+     "count": 3
+    }
+   ],
+   "rewardText": "焔の門前の野営地への帰還の書 ×3",
+   "rewardUnparsed": [],
+   "story": "火山の奥に巨大な何かがいる。",
+   "tutorial": false
+  },
+  {
+   "id": "H-02",
+   "name": "巨像の試練",
+   "giver": "巨像の試練の番人イグニ",
+   "giverName": "巨像の試練の番人イグニ",
+   "map": "H100",
+   "minLevel": 125,
+   "prereqs": [
+    "H-01"
+   ],
+   "size": "大",
+   "goalText": "H106 の迷路とジャンプの道を抜け、奥の石碑に触る",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "H106"
+    }
+   ],
+   "end": "巨像の試練の番人イグニ",
+   "exp": 10800000,
+   "meso": 76400,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "溶岩の上を跳ぶ長い試練。",
+   "tutorial": false
+  },
+  {
+   "id": "H-03",
+   "name": "焔の目",
+   "giver": "巨像の試練の番人イグニ",
+   "giverName": "巨像の試練の番人イグニ",
+   "map": "H100",
+   "minLevel": 130,
+   "prereqs": [
+    "H-02"
+   ],
+   "size": "大",
+   "goalText": "M222×30 と M224×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M222",
+     "count": 30
+    },
+    {
+     "type": "collect",
+     "item": "etc.M224",
+     "count": 30
+    }
+   ],
+   "end": "巨像の試練の番人イグニ",
+   "exp": 13800000,
+   "meso": 81800,
+   "rewards": [],
+   "rewardText": "焔の目（祭壇へ入る品）",
+   "rewardUnparsed": [
+    "焔の目（祭壇へ入る品）"
+   ],
+   "story": "祭壇の扉を開く品を作る。",
+   "tutorial": false
+  },
+  {
+   "id": "H-04",
+   "name": "焔の巨像",
+   "giver": "野営地の隊長ガロン",
+   "giverName": "野営地の隊長ガロン",
+   "map": "H100",
+   "minLevel": 140,
+   "prereqs": [
+    "H-03"
+   ],
+   "size": "特",
+   "goalText": "M229×1",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M229",
+     "count": 1
+    }
+   ],
+   "end": "野営地の隊長ガロン",
+   "exp": 44000000,
+   "meso": 235000,
+   "rewards": [],
+   "rewardText": "称号「焔を鎮めた者」",
+   "rewardUnparsed": [
+    "称号「焔を鎮めた者」"
+   ],
+   "story": "火山の巨像を倒す。",
+   "tutorial": false
+  },
+  {
+   "id": "H-05",
+   "name": "灰の兵舎",
+   "giver": "野営地の隊長ガロン",
+   "giverName": "野営地の隊長ガロン",
+   "map": "H100",
+   "minLevel": 124,
+   "prereqs": [
+    "H-01"
+   ],
+   "size": "大",
+   "goalText": "M223×60",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M223",
+     "count": 60
+    }
+   ],
+   "end": "野営地の隊長ガロン",
+   "exp": 10300000,
+   "meso": 75300,
+   "rewards": [
+    {
+     "item": "use.xl_potion",
+     "count": 30
+    }
+   ],
+   "rewardText": "特大ポーション ×30",
+   "rewardUnparsed": [],
+   "story": "灰の兵が野営地へ向かってくる。",
+   "tutorial": false
+  },
+  {
+   "id": "H-06",
+   "name": "溶岩のしずく",
+   "giver": "野営地の隊長ガロン",
+   "giverName": "野営地の隊長ガロン",
+   "map": "H100",
+   "minLevel": 112,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "M220×30",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M220",
+     "count": 30
+    }
+   ],
+   "end": "野営地の隊長ガロン",
+   "exp": 2770000,
+   "meso": 176600,
+   "rewards": [],
+   "rewardText": "15 万ルド",
+   "rewardUnparsed": [],
+   "story": "溶岩で武器を鍛える。",
+   "tutorial": false
+  },
+  {
+   "id": "E-01",
+   "name": "星への道",
+   "giver": "鳥使いホーク",
+   "giverName": "鳥使いホーク",
+   "map": "D101",
+   "minLevel": 150,
+   "prereqs": [
+    "L-12"
+   ],
+   "size": "中",
+   "goalText": "大きな鳥で E100 へ行き、塔の主アストラに会う",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "E100"
+    }
+   ],
+   "end": "鳥使いホーク",
+   "exp": 16800000,
+   "meso": 45000,
+   "rewards": [
+    {
+     "item": "use.return.E100",
+     "count": 3
+    }
+   ],
+   "rewardText": "星見の塔への帰還の書 ×3",
+   "rewardUnparsed": [],
+   "story": "雲より上の塔へ。",
+   "tutorial": false
+  },
+  {
+   "id": "E-02",
+   "name": "星屑",
+   "giver": "塔の主アストラ",
+   "giverName": "塔の主アストラ",
+   "map": "E100",
+   "minLevel": 152,
+   "prereqs": [
+    "E-01"
+   ],
+   "size": "大",
+   "goalText": "M230×40",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M230",
+     "count": 40
+    }
+   ],
+   "end": "塔の主アストラ",
+   "exp": 38300000,
+   "meso": 610000,
+   "rewards": [],
+   "rewardText": "50 万ルド",
+   "rewardUnparsed": [],
+   "story": "星屑で塔の灯りを守る。",
+   "tutorial": false
+  },
+  {
+   "id": "E-03",
+   "name": "廃都の門",
+   "giver": "塔の主アストラ",
+   "giverName": "塔の主アストラ",
+   "map": "E100",
+   "minLevel": 158,
+   "prereqs": [
+    "E-02"
+   ],
+   "size": "大",
+   "goalText": "M231×80",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M231",
+     "count": 80
+    }
+   ],
+   "end": "塔の主アストラ",
+   "exp": 50300000,
+   "meso": 117000,
+   "rewards": [
+    {
+     "item": "use.xl_potion",
+     "count": 50
+    }
+   ],
+   "rewardText": "特大ポーション ×50",
+   "rewardUnparsed": [],
+   "story": "廃都の騎士が門を守る。",
+   "tutorial": false
+  },
+  {
+   "id": "E-04",
+   "name": "虚ろの書",
+   "giver": "塔の主アストラ",
+   "giverName": "塔の主アストラ",
+   "map": "E100",
+   "minLevel": 165,
+   "prereqs": [
+    "E-03"
+   ],
+   "size": "大",
+   "goalText": "M232×40",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M232",
+     "count": 40
+    }
+   ],
+   "end": "塔の主アストラ",
+   "exp": 68300000,
+   "meso": 126000,
+   "rewards": [],
+   "rewardText": "極意の書 30（自分の職の★スキル 1 つ）",
+   "rewardUnparsed": [
+    "極意の書 30（自分の職の★スキル 1 つ）"
+   ],
+   "story": "廃都の歴史を読む。",
+   "tutorial": false
+  },
+  {
+   "id": "E-05",
+   "name": "天の野",
+   "giver": "塔の主アストラ",
+   "giverName": "塔の主アストラ",
+   "map": "E100",
+   "minLevel": 172,
+   "prereqs": [
+    "E-04"
+   ],
+   "size": "大",
+   "goalText": "M233×80",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M233",
+     "count": 80
+    }
+   ],
+   "end": "塔の主アストラ",
+   "exp": 92500000,
+   "meso": 135000,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 20
+    }
+   ],
+   "rewardText": "大エリクサー ×20",
+   "rewardUnparsed": [],
+   "story": "天の獣の群れ。",
+   "tutorial": false
+  },
+  {
+   "id": "E-06",
+   "name": "星喰いの淵",
+   "giver": "塔の主アストラ",
+   "giverName": "塔の主アストラ",
+   "map": "E100",
+   "minLevel": 180,
+   "prereqs": [
+    "E-05"
+   ],
+   "size": "大",
+   "goalText": "M234×40",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M234",
+     "count": 40
+    }
+   ],
+   "end": "塔の主アストラ",
+   "exp": 130000000,
+   "meso": 1147000,
+   "rewards": [],
+   "rewardText": "100 万ルド",
+   "rewardUnparsed": [],
+   "story": "星を食べる魔物の淵。",
+   "tutorial": false
+  },
+  {
+   "id": "E-07",
+   "name": "使徒の羽",
+   "giver": "塔の主アストラ",
+   "giverName": "塔の主アストラ",
+   "map": "E100",
+   "minLevel": 190,
+   "prereqs": [
+    "E-06"
+   ],
+   "size": "大",
+   "goalText": "M235×40",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M235",
+     "count": 40
+    }
+   ],
+   "end": "塔の主アストラ",
+   "exp": 200000000,
+   "meso": 163000,
+   "rewards": [],
+   "rewardText": "回復の書 ×2",
+   "rewardUnparsed": [
+    "回復の書 ×2"
+   ],
+   "story": "最後の玉座を守る使徒。",
+   "tutorial": false
+  },
+  {
+   "id": "E-08",
+   "name": "守り手の核",
+   "giver": "塔の主アストラ",
+   "giverName": "塔の主アストラ",
+   "map": "E100",
+   "minLevel": 196,
+   "prereqs": [
+    "E-07"
+   ],
+   "size": "大",
+   "goalText": "M236×20",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M236",
+     "count": 20
+    }
+   ],
+   "end": "塔の主アストラ",
+   "exp": 263000000,
+   "meso": 173000,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "玉座の間を守る者。",
+   "tutorial": false
+  },
+  {
+   "id": "E-09",
+   "name": "七つの封印のかけら",
+   "giver": "塔の主アストラ",
+   "giverName": "塔の主アストラ",
+   "map": "E100",
+   "minLevel": 198,
+   "prereqs": [
+    "E-08"
+   ],
+   "size": "特",
+   "goalText": "M089×1・M119×1・M139×1・M160×1・M189×1・M229×1・M219×1 を集める",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M089",
+     "count": 1
+    },
+    {
+     "type": "collect",
+     "item": "etc.M119",
+     "count": 1
+    },
+    {
+     "type": "collect",
+     "item": "etc.M139",
+     "count": 1
+    },
+    {
+     "type": "collect",
+     "item": "etc.M160",
+     "count": 1
+    },
+    {
+     "type": "collect",
+     "item": "etc.M189",
+     "count": 1
+    },
+    {
+     "type": "collect",
+     "item": "etc.M229",
+     "count": 1
+    },
+    {
+     "type": "collect",
+     "item": "etc.M219",
+     "count": 1
+    }
+   ],
+   "end": "塔の主アストラ",
+   "exp": 575000000,
+   "meso": 441000,
+   "rewards": [],
+   "rewardText": "星の玉座の鍵",
+   "rewardUnparsed": [
+    "星の玉座の鍵"
+   ],
+   "story": "各地のボスが持っていた「黒いかけら」は、星を呑む者の封印のかけらだった。",
+   "tutorial": false
+  },
+  {
+   "id": "E-10",
+   "name": "最後の封印",
+   "giver": "塔の主アストラ",
+   "giverName": "塔の主アストラ",
+   "map": "E100",
+   "minLevel": 200,
+   "prereqs": [
+    "E-09"
+   ],
+   "size": "特",
+   "goalText": "M239×1",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M239",
+     "count": 1
+    }
+   ],
+   "end": "塔の主アストラ",
+   "exp": 600000000,
+   "meso": 450000,
+   "rewards": [],
+   "rewardText": "称号「星を見た者」、エンディング",
+   "rewardUnparsed": [
+    "称号「星を見た者」",
+    "エンディング"
+   ],
+   "story": "星を呑む者を倒し、世界の空を取り戻す。",
+   "tutorial": false
+  },
+  {
+   "id": "L-01",
+   "name": "星の夢",
+   "giver": "luka",
+   "giverName": "案内人ルカ",
+   "map": "S003",
+   "minLevel": 5,
+   "prereqs": [
+    "S-06"
+   ],
+   "size": "小",
+   "goalText": "S008 の古い石碑を調べる",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "S008"
+    }
+   ],
+   "end": "luka",
+   "exp": 8,
+   "meso": 90,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "主人公が見る「星の夢」と同じ模様の石碑。ルカは「大陸に行けば何か分かる」と言う。",
+   "tutorial": false
+  },
+  {
+   "id": "L-02",
+   "name": "港の占い師",
+   "giver": "olga",
+   "giverName": "港長オルガ",
+   "map": "V100",
+   "minLevel": 12,
+   "prereqs": [
+    "L-01"
+   ],
+   "size": "小",
+   "goalText": "V090 の占い師の露店を訪ねる",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "V090"
+    }
+   ],
+   "end": "olga",
+   "exp": 166,
+   "meso": 298,
+   "rewards": [
+    {
+     "item": "use.safety_charm",
+     "count": 1
+    }
+   ],
+   "rewardText": "守りのお守り ×1",
+   "rewardUnparsed": [],
+   "story": "占い師は「黒いかけらが目を覚ます」と告げる。",
+   "tutorial": false
+  },
+  {
+   "id": "L-03",
+   "name": "カカシのかけら",
+   "giver": "風車守ボブ",
+   "giverName": "風車守ボブ",
+   "map": "V200",
+   "minLevel": 22,
+   "prereqs": [
+    "B-08"
+   ],
+   "size": "中",
+   "goalText": "カカシから出た黒いかけらを、シルワの司書リブラに見せる",
+   "objectives": [],
+   "end": "風車守ボブ",
+   "exp": 2640,
+   "meso": 1690,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "かけらは古い本に出てくる「星の封印」の一部らしい。",
+   "tutorial": false
+  },
+  {
+   "id": "L-04",
+   "name": "学者の研究",
+   "giver": "学者ドク",
+   "giverName": "学者ドク",
+   "map": "V600",
+   "minLevel": 35,
+   "prereqs": [
+    "N-05"
+   ],
+   "size": "大",
+   "goalText": "黒いかけらをドクに見せ、M072×20 で調べる道具を作る",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M072",
+     "count": 20
+    }
+   ],
+   "end": "学者ドク",
+   "exp": 33000,
+   "meso": 8180,
+   "rewards": [],
+   "rewardText": "かけらの探知機（黒いかけらのある敵の上に印が出る）",
+   "rewardUnparsed": [
+    "かけらの探知機（黒いかけらのある敵の上に印が出る）"
+   ],
+   "story": "かけらは魔物を強くする。大陸の奥に大きな反応。",
+   "tutorial": false
+  },
+  {
+   "id": "L-05",
+   "name": "魔獣の正体",
+   "giver": "封印の番人シグ",
+   "giverName": "封印の番人シグ",
+   "map": "V600",
+   "minLevel": 65,
+   "prereqs": [
+    "N-13"
+   ],
+   "size": "大",
+   "goalText": "黒角の魔獣が落とした黒い角を C100 の巫女ステラに見せる",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "C100"
+    }
+   ],
+   "end": "封印の番人シグ",
+   "exp": 523000,
+   "meso": 24700,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "魔獣はかけらで目覚めていた。空の都に古い言い伝えがある。",
+   "tutorial": false
+  },
+  {
+   "id": "L-06",
+   "name": "雲の上の言い伝え",
+   "giver": "都の巫女ステラ",
+   "giverName": "都の巫女ステラ",
+   "map": "C100",
+   "minLevel": 70,
+   "prereqs": [
+    "L-05"
+   ],
+   "size": "大",
+   "goalText": "F100 の村長ヴァン、T100 の時計番、M100 の侍女ルリに話を聞く",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "F100"
+    },
+    {
+     "type": "visit",
+     "map": "T100"
+    },
+    {
+     "type": "visit",
+     "map": "M100"
+    }
+   ],
+   "end": "都の巫女ステラ",
+   "exp": 725000,
+   "meso": 28800,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "大昔、空の果てに封じられた「星を呑む者」の話。",
+   "tutorial": false
+  },
+  {
+   "id": "L-07",
+   "name": "時の塔の記憶",
+   "giver": "時計番のクロック婆",
+   "giverName": "時計番のクロック婆",
+   "map": "T100",
+   "minLevel": 90,
+   "prereqs": [
+    "L-06"
+   ],
+   "size": "大",
+   "goalText": "T115 の古い時計を調べる",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "T115"
+    }
+   ],
+   "end": "時計番のクロック婆",
+   "exp": 2050000,
+   "meso": 43800,
+   "rewards": [
+    {
+     "item": "use.elixir",
+     "count": 20
+    }
+   ],
+   "rewardText": "エリクサー ×20",
+   "rewardUnparsed": [],
+   "story": "時の塔は封印の時を数える塔だった。",
+   "tutorial": false
+  },
+  {
+   "id": "L-08",
+   "name": "海の底の歌",
+   "giver": "女王の侍女ルリ",
+   "giverName": "女王の侍女ルリ",
+   "map": "M100",
+   "minLevel": 100,
+   "prereqs": [
+    "L-07"
+   ],
+   "size": "大",
+   "goalText": "M111 で歌う貝を探す",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "M111"
+    }
+   ],
+   "end": "女王の侍女ルリ",
+   "exp": 3250000,
+   "meso": 54000,
+   "rewards": [
+    {
+     "item": "use.power_elixir",
+     "count": 5
+    }
+   ],
+   "rewardText": "大エリクサー ×5",
+   "rewardUnparsed": [],
+   "story": "女王が封印の歌を思い出す。",
+   "tutorial": false
+  },
+  {
+   "id": "L-09",
+   "name": "神殿の予言",
+   "giver": "神殿の巫女アルマ",
+   "giverName": "神殿の巫女アルマ",
+   "map": "P100",
+   "minLevel": 120,
+   "prereqs": [
+    "L-08"
+   ],
+   "size": "大",
+   "goalText": "P108 の石板を読む",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "P108"
+    }
+   ],
+   "end": "神殿の巫女アルマ",
+   "exp": 8500000,
+   "meso": 71300,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "「焔・竜・星」の 3 つの試練の予言。",
+   "tutorial": false
+  },
+  {
+   "id": "L-10",
+   "name": "焔の中の声",
+   "giver": "野営地の隊長ガロン",
+   "giverName": "野営地の隊長ガロン",
+   "map": "H100",
+   "minLevel": 140,
+   "prereqs": [
+    "H-04"
+   ],
+   "size": "大",
+   "goalText": "巨像の目を巫女アルマに届ける",
+   "objectives": [],
+   "end": "野営地の隊長ガロン",
+   "exp": 22000000,
+   "meso": 94000,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "巨像も封印の番人の一つだった。",
+   "tutorial": false
+  },
+  {
+   "id": "L-11",
+   "name": "黒竜の封印の歌",
+   "giver": "竜の大老ヴァルド",
+   "giverName": "竜の大老ヴァルド",
+   "map": "D115",
+   "minLevel": 150,
+   "prereqs": [
+    "L-10"
+   ],
+   "size": "大",
+   "goalText": "海の底の歌をヴァルドに伝える",
+   "objectives": [],
+   "end": "竜の大老ヴァルド",
+   "exp": 35000000,
+   "meso": 108000,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "黒竜の洞くつの奥に星の果てへの道がある。",
+   "tutorial": false
+  },
+  {
+   "id": "L-12",
+   "name": "星の果てへ",
+   "giver": "竜の大老ヴァルド",
+   "giverName": "竜の大老ヴァルド",
+   "map": "D115",
+   "minLevel": 150,
+   "prereqs": [
+    "L-11"
+   ],
+   "size": "大",
+   "goalText": "鳥使いホークに頼み、星の果てへ渡る準備をする",
+   "objectives": [],
+   "end": "竜の大老ヴァルド",
+   "exp": 35000000,
+   "meso": 108000,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "最終地域が開く（E-01 へ）。",
+   "tutorial": false
+  },
+  {
+   "id": "PET-01",
+   "name": "はじめてのペット",
+   "giver": "ペット屋チコ",
+   "giverName": "ペット屋チコ",
+   "map": "V200",
+   "minLevel": 10,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "ペット（子犬・子猫・子うさぎ・子パンダ・子ペンギン から 1 匹）を 1 万ルドで迎える",
+   "objectives": [],
+   "end": "ペット屋チコ",
+   "exp": 96,
+   "meso": 250,
+   "rewards": [
+    {
+     "item": "use.pet_food",
+     "count": 10
+    }
+   ],
+   "rewardText": "ペットの餌 ×10",
+   "rewardUnparsed": [],
+   "story": "ペットの飼い方。満腹度と親密度。",
+   "tutorial": false
+  },
+  {
+   "id": "PET-02",
+   "name": "ごはんの時間",
+   "giver": "ペット屋チコ",
+   "giverName": "ペット屋チコ",
+   "map": "V200",
+   "minLevel": 10,
+   "prereqs": [
+    "PET-01"
+   ],
+   "size": "小",
+   "goalText": "ペットに餌を 3 回あげる",
+   "objectives": [],
+   "end": "ペット屋チコ",
+   "exp": 96,
+   "meso": 250,
+   "rewards": [
+    {
+     "item": "use.pet_food",
+     "count": 20
+    }
+   ],
+   "rewardText": "ペットの餌 ×20",
+   "rewardUnparsed": [],
+   "story": "満腹度が減ると元気が無くなる。",
+   "tutorial": false
+  },
+  {
+   "id": "PET-03",
+   "name": "お散歩",
+   "giver": "ペット屋チコ",
+   "giverName": "ペット屋チコ",
+   "map": "V200",
+   "minLevel": 12,
+   "prereqs": [
+    "PET-02"
+   ],
+   "size": "小",
+   "goalText": "ペットを連れて V201・V202・V203 を歩く",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "V201"
+    },
+    {
+     "type": "visit",
+     "map": "V202"
+    },
+    {
+     "type": "visit",
+     "map": "V203"
+    }
+   ],
+   "end": "ペット屋チコ",
+   "exp": 166,
+   "meso": 298,
+   "rewards": [],
+   "rewardText": "ペットの名札",
+   "rewardUnparsed": [
+    "ペットの名札"
+   ],
+   "story": "ペットは話しかけると芸をする（「お座り」「お手」など。親密度で増える）。",
+   "tutorial": false
+  },
+  {
+   "id": "PET-04",
+   "name": "拾う芸",
+   "giver": "ペット屋チコ",
+   "giverName": "ペット屋チコ",
+   "map": "V200",
+   "minLevel": 15,
+   "prereqs": [
+    "PET-03"
+   ],
+   "size": "中",
+   "goalText": "ペットの親密度を 10 にする",
+   "objectives": [],
+   "end": "ペット屋チコ",
+   "exp": 756,
+   "meso": 968,
+   "rewards": [],
+   "rewardText": "ペットの技の本「自動で拾う」",
+   "rewardUnparsed": [
+    "ペットの技の本「自動で拾う」"
+   ],
+   "story": "ペットが落ちた物を拾うようになる。",
+   "tutorial": false
+  },
+  {
+   "id": "PET-05",
+   "name": "もっと遠くまで",
+   "giver": "ペット屋チコ",
+   "giverName": "ペット屋チコ",
+   "map": "V200",
+   "minLevel": 25,
+   "prereqs": [
+    "PET-04"
+   ],
+   "size": "中",
+   "goalText": "ペットの親密度を 15 にする",
+   "objectives": [],
+   "end": "ペット屋チコ",
+   "exp": 4080,
+   "meso": 2030,
+   "rewards": [],
+   "rewardText": "ペットの技の本「拾う範囲を広げる」",
+   "rewardUnparsed": [
+    "ペットの技の本「拾う範囲を広げる」"
+   ],
+   "story": "",
+   "tutorial": false
+  },
+  {
+   "id": "PET-06",
+   "name": "薬の世話",
+   "giver": "ペット屋チコ",
+   "giverName": "ペット屋チコ",
+   "map": "V200",
+   "minLevel": 35,
+   "prereqs": [
+    "PET-05"
+   ],
+   "size": "大",
+   "goalText": "ペットの親密度を 20 にする",
+   "objectives": [],
+   "end": "ペット屋チコ",
+   "exp": 33000,
+   "meso": 8180,
+   "rewards": [],
+   "rewardText": "ペットの技の本「自動で HP/MP 薬」",
+   "rewardUnparsed": [
+    "ペットの技の本「自動で HP/MP 薬」"
+   ],
+   "story": "HP・MP が決めた割合を下回ると、ペットが薬を飲ませてくれる。",
+   "tutorial": false
+  },
+  {
+   "id": "PET-07",
+   "name": "2 匹目のペット",
+   "giver": "ペット屋チコ",
+   "giverName": "ペット屋チコ",
+   "map": "V200",
+   "minLevel": 50,
+   "prereqs": [
+    "PET-06"
+   ],
+   "size": "大",
+   "goalText": "ペットの親密度を 25 にする",
+   "objectives": [],
+   "end": "ペット屋チコ",
+   "exp": 170000,
+   "meso": 15600,
+   "rewards": [],
+   "rewardText": "ペットを 2 匹連れて歩ける",
+   "rewardUnparsed": [
+    "ペットを 2 匹連れて歩ける"
+   ],
+   "story": "クラシックの「複数のペット」。",
+   "tutorial": false
+  },
+  {
+   "id": "PET-08",
+   "name": "子竜の卵",
+   "giver": "鍛冶屋ドラン",
+   "giverName": "鍛冶屋ドラン",
+   "map": "D100",
+   "minLevel": 100,
+   "prereqs": [
+    "PET-07"
+   ],
+   "size": "大",
+   "goalText": "M201×20 で卵を温める",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M201",
+     "count": 20
+    }
+   ],
+   "end": "鍛冶屋ドラン",
+   "exp": 3250000,
+   "meso": 54000,
+   "rewards": [],
+   "rewardText": "ペット「子竜」（親密度 30 で「竜」に育つ）",
+   "rewardUnparsed": [
+    "ペット「子竜」（親密度 30 で「竜」に育つ）"
+   ],
+   "story": "竜の背の村のめずらしいペット。",
+   "tutorial": false
+  },
+  {
+   "id": "R-01",
+   "name": "募集: コロ貝とキノコ",
+   "giver": "掲示板係ボード",
+   "giverName": "掲示板係ボード",
+   "map": "V090",
+   "minLevel": 10,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M021×40",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M021",
+     "count": 40
+    }
+   ],
+   "end": "掲示板係ボード",
+   "exp": 96,
+   "meso": 250,
+   "rewards": [],
+   "rewardText": "経験値 2 倍の券（30 分）または 5,000 ルド",
+   "rewardUnparsed": [
+    "経験値 2 倍の券（30 分）または 5,000 ルド"
+   ],
+   "story": "",
+   "tutorial": false
+  },
+  {
+   "id": "R-02",
+   "name": "募集: 港の掃除",
+   "giver": "掲示板係ボード",
+   "giverName": "掲示板係ボード",
+   "map": "V090",
+   "minLevel": 15,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M013×40",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M013",
+     "count": 40
+    }
+   ],
+   "end": "掲示板係ボード",
+   "exp": 378,
+   "meso": 387,
+   "rewards": [],
+   "rewardText": "同上",
+   "rewardUnparsed": [
+    "同上"
+   ],
+   "story": "",
+   "tutorial": false
+  },
+  {
+   "id": "R-03",
+   "name": "募集: 丘の害獣",
+   "giver": "掲示板係ボード",
+   "giverName": "掲示板係ボード",
+   "map": "V090",
+   "minLevel": 20,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M026×40",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M026",
+     "count": 40
+    }
+   ],
+   "end": "掲示板係ボード",
+   "exp": 990,
+   "meso": 600,
+   "rewards": [],
+   "rewardText": "同上",
+   "rewardUnparsed": [
+    "同上"
+   ],
+   "story": "",
+   "tutorial": false
+  },
+  {
+   "id": "R-04",
+   "name": "募集: 地下鉄の見回り",
+   "giver": "掲示板係ボード",
+   "giverName": "掲示板係ボード",
+   "map": "V090",
+   "minLevel": 25,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M063×50",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M063",
+     "count": 50
+    }
+   ],
+   "end": "掲示板係ボード",
+   "exp": 2040,
+   "meso": 812,
+   "rewards": [],
+   "rewardText": "同上",
+   "rewardUnparsed": [
+    "同上"
+   ],
+   "story": "",
+   "tutorial": false
+  },
+  {
+   "id": "R-05",
+   "name": "募集: 発掘場の護衛",
+   "giver": "掲示板係ボード",
+   "giverName": "掲示板係ボード",
+   "map": "V090",
+   "minLevel": 30,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M046×50",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M046",
+     "count": 50
+    }
+   ],
+   "end": "掲示板係ボード",
+   "exp": 4200,
+   "meso": 1100,
+   "rewards": [],
+   "rewardText": "同上",
+   "rewardUnparsed": [
+    "同上"
+   ],
+   "story": "",
+   "tutorial": false
+  },
+  {
+   "id": "R-06",
+   "name": "募集: 雲の公園",
+   "giver": "掲示板係ボード",
+   "giverName": "掲示板係ボード",
+   "map": "V090",
+   "minLevel": 35,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M101×50",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M101",
+     "count": 50
+    }
+   ],
+   "end": "掲示板係ボード",
+   "exp": 7920,
+   "meso": 1360,
+   "rewards": [],
+   "rewardText": "同上",
+   "rewardUnparsed": [
+    "同上"
+   ],
+   "story": "",
+   "tutorial": false
+  },
+  {
+   "id": "R-07",
+   "name": "募集: 洞窟の竜",
+   "giver": "掲示板係ボード",
+   "giverName": "掲示板係ボード",
+   "map": "V090",
+   "minLevel": 40,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M075×50",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M075",
+     "count": 50
+    }
+   ],
+   "end": "掲示板係ボード",
+   "exp": 15000,
+   "meso": 1690,
+   "rewards": [],
+   "rewardText": "同上",
+   "rewardUnparsed": [
+    "同上"
+   ],
+   "story": "",
+   "tutorial": false
+  },
+  {
+   "id": "R-08",
+   "name": "募集: 雪原の狼",
+   "giver": "掲示板係ボード",
+   "giverName": "掲示板係ボード",
+   "map": "V090",
+   "minLevel": 50,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M121×60",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M121",
+     "count": 60
+    }
+   ],
+   "end": "掲示板係ボード",
+   "exp": 40800,
+   "meso": 2600,
+   "rewards": [],
+   "rewardText": "同上",
+   "rewardUnparsed": [
+    "同上"
+   ],
+   "story": "",
+   "tutorial": false
+  },
+  {
+   "id": "R-09",
+   "name": "募集: 海の見張り",
+   "giver": "掲示板係ボード",
+   "giverName": "掲示板係ボード",
+   "map": "V090",
+   "minLevel": 60,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M176×60",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M176",
+     "count": 60
+    }
+   ],
+   "end": "掲示板係ボード",
+   "exp": 90000,
+   "meso": 3530,
+   "rewards": [],
+   "rewardText": "同上",
+   "rewardUnparsed": [
+    "同上"
+   ],
+   "story": "",
+   "tutorial": false
+  },
+  {
+   "id": "R-10",
+   "name": "募集: 時の塔",
+   "giver": "掲示板係ボード",
+   "giverName": "掲示板係ボード",
+   "map": "V090",
+   "minLevel": 70,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M155×60",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M155",
+     "count": 60
+    }
+   ],
+   "end": "掲示板係ボード",
+   "exp": 174000,
+   "meso": 4800,
+   "rewards": [],
+   "rewardText": "同上",
+   "rewardUnparsed": [
+    "同上"
+   ],
+   "story": "",
+   "tutorial": false
+  },
+  {
+   "id": "R-11",
+   "name": "募集: 坑道の骨",
+   "giver": "掲示板係ボード",
+   "giverName": "掲示板係ボード",
+   "map": "V090",
+   "minLevel": 75,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M131×60",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M131",
+     "count": 60
+    }
+   ],
+   "end": "掲示板係ボード",
+   "exp": 229000,
+   "meso": 5330,
+   "rewards": [],
+   "rewardText": "同上",
+   "rewardUnparsed": [
+    "同上"
+   ],
+   "story": "",
+   "tutorial": false
+  },
+  {
+   "id": "R-12",
+   "name": "募集: 暗い海",
+   "giver": "掲示板係ボード",
+   "giverName": "掲示板係ボード",
+   "map": "V090",
+   "minLevel": 80,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M178×60",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M178",
+     "count": 60
+    }
+   ],
+   "end": "掲示板係ボード",
+   "exp": 300000,
+   "meso": 5920,
+   "rewards": [],
+   "rewardText": "同上",
+   "rewardUnparsed": [
+    "同上"
+   ],
+   "story": "",
+   "tutorial": false
+  },
+  {
+   "id": "R-13",
+   "name": "募集: 神殿の番人",
+   "giver": "掲示板係ボード",
+   "giverName": "掲示板係ボード",
+   "map": "V090",
+   "minLevel": 90,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M191×60",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M191",
+     "count": 60
+    }
+   ],
+   "end": "掲示板係ボード",
+   "exp": 492000,
+   "meso": 7300,
+   "rewards": [],
+   "rewardText": "ドロップ 2 倍の券（30 分）または 5 万ルド",
+   "rewardUnparsed": [
+    "ドロップ 2 倍の券（30 分）または 5 万ルド"
+   ],
+   "story": "",
+   "tutorial": false
+  },
+  {
+   "id": "R-14",
+   "name": "募集: 祈りの間",
+   "giver": "掲示板係ボード",
+   "giverName": "掲示板係ボード",
+   "map": "V090",
+   "minLevel": 100,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M193×60",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M193",
+     "count": 60
+    }
+   ],
+   "end": "掲示板係ボード",
+   "exp": 780000,
+   "meso": 9000,
+   "rewards": [],
+   "rewardText": "同上",
+   "rewardUnparsed": [
+    "同上"
+   ],
+   "story": "",
+   "tutorial": false
+  },
+  {
+   "id": "R-15",
+   "name": "募集: 翼竜の森",
+   "giver": "掲示板係ボード",
+   "giverName": "掲示板係ボード",
+   "map": "V090",
+   "minLevel": 110,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M202×60",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M202",
+     "count": 60
+    }
+   ],
+   "end": "掲示板係ボード",
+   "exp": 1260000,
+   "meso": 10300,
+   "rewards": [],
+   "rewardText": "同上",
+   "rewardUnparsed": [
+    "同上"
+   ],
+   "story": "",
+   "tutorial": false
+  },
+  {
+   "id": "R-16",
+   "name": "募集: 火山の兵",
+   "giver": "掲示板係ボード",
+   "giverName": "掲示板係ボード",
+   "map": "V090",
+   "minLevel": 125,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M223×60",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M223",
+     "count": 60
+    }
+   ],
+   "end": "掲示板係ボード",
+   "exp": 2590000,
+   "meso": 12700,
+   "rewards": [],
+   "rewardText": "同上",
+   "rewardUnparsed": [
+    "同上"
+   ],
+   "story": "",
+   "tutorial": false
+  },
+  {
+   "id": "R-17",
+   "name": "募集: 竜の巣",
+   "giver": "掲示板係ボード",
+   "giverName": "掲示板係ボード",
+   "map": "V090",
+   "minLevel": 135,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M207×60",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M207",
+     "count": 60
+    }
+   ],
+   "end": "掲示板係ボード",
+   "exp": 4180000,
+   "meso": 14600,
+   "rewards": [],
+   "rewardText": "同上",
+   "rewardUnparsed": [
+    "同上"
+   ],
+   "story": "",
+   "tutorial": false
+  },
+  {
+   "id": "R-18",
+   "name": "募集: 古竜の道",
+   "giver": "掲示板係ボード",
+   "giverName": "掲示板係ボード",
+   "map": "V090",
+   "minLevel": 148,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M210×60",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M210",
+     "count": 60
+    }
+   ],
+   "end": "掲示板係ボード",
+   "exp": 7680000,
+   "meso": 17500,
+   "rewards": [],
+   "rewardText": "同上",
+   "rewardUnparsed": [
+    "同上"
+   ],
+   "story": "",
+   "tutorial": false
+  },
+  {
+   "id": "R-19",
+   "name": "募集: 廃都",
+   "giver": "掲示板係ボード",
+   "giverName": "掲示板係ボード",
+   "map": "V090",
+   "minLevel": 165,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M232×80",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M232",
+     "count": 80
+    }
+   ],
+   "end": "掲示板係ボード",
+   "exp": 16400000,
+   "meso": 21000,
+   "rewards": [],
+   "rewardText": "同上",
+   "rewardUnparsed": [
+    "同上"
+   ],
+   "story": "",
+   "tutorial": false
+  },
+  {
+   "id": "R-20",
+   "name": "募集: 星喰い",
+   "giver": "掲示板係ボード",
+   "giverName": "掲示板係ボード",
+   "map": "V090",
+   "minLevel": 185,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "M234×80",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M234",
+     "count": 80
+    }
+   ],
+   "end": "掲示板係ボード",
+   "exp": 38700000,
+   "meso": 25700,
+   "rewards": [],
+   "rewardText": "同上",
+   "rewardUnparsed": [
+    "同上"
+   ],
+   "story": "",
+   "tutorial": false
+  },
+  {
+   "id": "R-21",
+   "name": "週の大募集: ボス",
+   "giver": "掲示板係ボード",
+   "giverName": "掲示板係ボード",
+   "map": "V090",
+   "minLevel": 30,
+   "prereqs": [],
+   "size": "大",
+   "goalText": "自分の Lv に合った地域のボスを 1 体倒す（週 1 回）",
+   "objectives": [],
+   "end": "掲示板係ボード",
+   "exp": 17500,
+   "meso": 6600,
+   "rewards": [],
+   "rewardText": "書（ランダム 60%）×3",
+   "rewardUnparsed": [
+    "書（ランダム 60%）×3"
+   ],
+   "story": "",
+   "tutorial": false
+  },
+  {
+   "id": "R-22",
+   "name": "日課: 1 人用ダンジョン",
+   "giver": "掲示板係ボード",
+   "giverName": "掲示板係ボード",
+   "map": "V090",
+   "minLevel": 21,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "1 人用ダンジョンをどれか 1 回クリア（1 日 1 回）",
+   "objectives": [],
+   "end": "掲示板係ボード",
+   "exp": 2290,
+   "meso": 1590,
+   "rewards": [],
+   "rewardText": "試練のメダル（そのダンジョン）×2",
+   "rewardUnparsed": [
+    "試練のメダル（そのダンジョン）×2"
+   ],
+   "story": "",
+   "tutorial": false
+  },
+  {
+   "id": "PQ-1",
+   "name": "裏路地の試練",
+   "giver": "受付ラット",
+   "giverName": "受付ラット",
+   "map": "V515",
+   "minLevel": 21,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "ダンジョン「裏路地の試練」を最後までクリア（1 日 5 回まで）",
+   "objectives": [],
+   "end": "受付ラット",
+   "exp": 2290,
+   "meso": 1590,
+   "rewards": [
+    {
+     "item": "etc.unique.M068",
+     "count": 1
+    }
+   ],
+   "rewardText": "試練のメダル（裏路地）、ランダムの報酬",
+   "rewardUnparsed": [
+    "ランダムの報酬"
+   ],
+   "story": "クロウ街の盗賊ギルドが新人を試す。",
+   "tutorial": false
+  },
+  {
+   "id": "PQ-2",
+   "name": "からくり迷宮",
+   "giver": "受付ギア",
+   "giverName": "受付ギア",
+   "map": "T118",
+   "minLevel": 35,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "ダンジョン「からくり迷宮」を最後までクリア（1 日 5 回まで）",
+   "objectives": [],
+   "end": "受付ギア",
+   "exp": 15800,
+   "meso": 3410,
+   "rewards": [
+    {
+     "item": "etc.unique.M068",
+     "count": 1
+    }
+   ],
+   "rewardText": "試練のメダル（からくり）、ランダムの報酬",
+   "rewardUnparsed": [
+    "ランダムの報酬"
+   ],
+   "story": "暴走したからくりの王を止める。",
+   "tutorial": false
+  },
+  {
+   "id": "PQ-3",
+   "name": "おもちゃ箱の迷路",
+   "giver": "受付パズ",
+   "giverName": "受付パズ",
+   "map": "T119",
+   "minLevel": 51,
+   "prereqs": [],
+   "size": "中",
+   "goalText": "ダンジョン「おもちゃ箱の迷路」を出口まで（1 日 5 回まで）",
+   "objectives": [],
+   "end": "受付パズ",
+   "exp": 88300,
+   "meso": 6700,
+   "rewards": [
+    {
+     "item": "etc.unique.M068",
+     "count": 1
+    }
+   ],
+   "rewardText": "試練のメダル（迷路）、ランダムの報酬",
+   "rewardUnparsed": [
+    "ランダムの報酬"
+   ],
+   "story": "迷い込んだ子どもたちを探す。",
+   "tutorial": false
+  },
+  {
+   "id": "PQ-4",
+   "name": "雲の女神の塔",
+   "giver": "受付ネフェ",
+   "giverName": "受付ネフェ",
+   "map": "C117",
+   "minLevel": 51,
+   "prereqs": [],
+   "size": "大",
+   "goalText": "ダンジョン「雲の女神の塔」を最上階まで（1 日 5 回まで）",
+   "objectives": [],
+   "end": "受付ネフェ",
+   "exp": 184000,
+   "meso": 16100,
+   "rewards": [
+    {
+     "item": "etc.unique.M068",
+     "count": 1
+    }
+   ],
+   "rewardText": "試練のメダル（雲）、ランダムの報酬",
+   "rewardUnparsed": [
+    "ランダムの報酬"
+   ],
+   "story": "女神の像を直す。",
+   "tutorial": false
+  },
+  {
+   "id": "PQ-5",
+   "name": "沈没船の救出",
+   "giver": "受付シェル",
+   "giverName": "受付シェル",
+   "map": "M114",
+   "minLevel": 70,
+   "prereqs": [],
+   "size": "大",
+   "goalText": "ダンジョン「沈没船の救出」を最後まで（1 日 5 回まで）",
+   "objectives": [],
+   "end": "受付シェル",
+   "exp": 725000,
+   "meso": 28800,
+   "rewards": [
+    {
+     "item": "etc.unique.M068",
+     "count": 1
+    }
+   ],
+   "rewardText": "試練のメダル（沈没船）、ランダムの報酬",
+   "rewardUnparsed": [
+    "ランダムの報酬"
+   ],
+   "story": "亡霊の船に囚われた船員を助ける。",
+   "tutorial": false
+  },
+  {
+   "id": "PQ-6",
+   "name": "竜の巣の卵",
+   "giver": "受付ネスト",
+   "giverName": "受付ネスト",
+   "map": "D116",
+   "minLevel": 100,
+   "prereqs": [],
+   "size": "大",
+   "goalText": "ダンジョン「竜の巣の卵」を最後まで（1 日 5 回まで）",
+   "objectives": [],
+   "end": "受付ネスト",
+   "exp": 3250000,
+   "meso": 54000,
+   "rewards": [
+    {
+     "item": "etc.unique.M068",
+     "count": 1
+    }
+   ],
+   "rewardText": "試練のメダル（竜の巣）、ランダムの報酬",
+   "rewardUnparsed": [
+    "ランダムの報酬"
+   ],
+   "story": "盗まれた卵を巣へ返す。",
+   "tutorial": false
+  },
+  {
+   "id": "J1-1",
+   "name": "戦士への道",
+   "giver": "戦士長ドルガ",
+   "giverName": "戦士長ドルガ",
+   "map": "V400",
+   "minLevel": 10,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "STR35 以上で 戦士長ドルガ と話す",
+   "objectives": [],
+   "end": "戦士長ドルガ",
+   "exp": 96,
+   "meso": 250,
+   "rewards": [],
+   "rewardText": "武器 1 つ、持ち物の枠 +4",
+   "rewardUnparsed": [
+    "武器 1 つ",
+    "持ち物の枠 +4"
+   ],
+   "story": "1 次転職（JOBS.md 3-1）。戦士になる。",
+   "tutorial": false
+  },
+  {
+   "id": "J1-2",
+   "name": "推薦状",
+   "giver": "戦士長ドルガ",
+   "giverName": "戦士長ドルガ",
+   "map": "V400",
+   "minLevel": 30,
+   "prereqs": [
+    "J1-1"
+   ],
+   "size": "小",
+   "goalText": "2 次の試験官への推薦状を受け取る",
+   "objectives": [],
+   "end": "戦士長ドルガ",
+   "exp": 4200,
+   "meso": 1100,
+   "rewards": [],
+   "rewardText": "推薦状",
+   "rewardUnparsed": [
+    "推薦状"
+   ],
+   "story": "2 次転職の始まり。",
+   "tutorial": false
+  },
+  {
+   "id": "J1-3",
+   "name": "試しの珠",
+   "giver": "戦士長ドルガ",
+   "giverName": "戦士長ドルガ",
+   "map": "V413",
+   "minLevel": 30,
+   "prereqs": [
+    "J1-2"
+   ],
+   "size": "中",
+   "goalText": "M301×30（20 分以内、修練場の中で）",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M301",
+     "count": 30
+    }
+   ],
+   "end": "戦士長ドルガ",
+   "exp": 8400,
+   "meso": 2750,
+   "rewards": [],
+   "rewardText": "試験の証",
+   "rewardUnparsed": [
+    "試験の証"
+   ],
+   "story": "修練場での試験（JOBS.md 3-2）。",
+   "tutorial": false
+  },
+  {
+   "id": "J1-4",
+   "name": "道を選ぶ",
+   "giver": "戦士長ドルガ",
+   "giverName": "戦士長ドルガ",
+   "map": "V400",
+   "minLevel": 30,
+   "prereqs": [
+    "J1-3"
+   ],
+   "size": "中",
+   "goalText": "試験の証を渡し、2 次の職を選ぶ",
+   "objectives": [],
+   "end": "戦士長ドルガ",
+   "exp": 8400,
+   "meso": 2750,
+   "rewards": [
+    {
+     "item": "use.sp_reset",
+     "count": 1
+    }
+   ],
+   "rewardText": "SP 振り直しの書 ×1",
+   "rewardUnparsed": [],
+   "story": "2 次の職の説明を聞いて選ぶ。",
+   "tutorial": false
+  },
+  {
+   "id": "J1-5",
+   "name": "長老の手紙",
+   "giver": "戦士の長老グレン",
+   "giverName": "戦士の長老グレン",
+   "map": "F117",
+   "minLevel": 70,
+   "prereqs": [
+    "J1-4"
+   ],
+   "size": "小",
+   "goalText": "戦士の長老グレンの手紙を 戦士長ドルガ に届ける",
+   "objectives": [],
+   "end": "戦士の長老グレン",
+   "exp": 174000,
+   "meso": 4800,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "3 次転職の始まり（JOBS.md 3-3）。",
+   "tutorial": false
+  },
+  {
+   "id": "J1-6",
+   "name": "もう一人の自分",
+   "giver": "戦士長ドルガ",
+   "giverName": "戦士長ドルガ",
+   "map": "F118",
+   "minLevel": 70,
+   "prereqs": [
+    "J1-5"
+   ],
+   "size": "大",
+   "goalText": "M300×1（20 分以内）",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M300",
+     "count": 1
+    }
+   ],
+   "end": "戦士長ドルガ",
+   "exp": 725000,
+   "meso": 28800,
+   "rewards": [
+    {
+     "item": "etc.M300",
+     "count": 1
+    }
+   ],
+   "rewardText": "黒いお守り",
+   "rewardUnparsed": [],
+   "story": "自分の影と戦う。",
+   "tutorial": false
+  },
+  {
+   "id": "J1-7",
+   "name": "賢者の石",
+   "giver": "戦士の長老グレン",
+   "giverName": "戦士の長老グレン",
+   "map": "F107",
+   "minLevel": 70,
+   "prereqs": [
+    "J1-6"
+   ],
+   "size": "大",
+   "goalText": "黒いお守りと闇の水晶（N-14）を賢者の石に捧げ、5 問のクイズに答える",
+   "objectives": [],
+   "end": "戦士の長老グレン",
+   "exp": 725000,
+   "meso": 28800,
+   "rewards": [
+    {
+     "item": "use.sp_reset",
+     "count": 1
+    }
+   ],
+   "rewardText": "AP +5、SP 振り直しの書 ×1",
+   "rewardUnparsed": [
+    "AP +5"
+   ],
+   "story": "3 次の職になる。",
+   "tutorial": false
+  },
+  {
+   "id": "J1-8",
+   "name": "大老への推薦状",
+   "giver": "戦士の長老グレン",
+   "giverName": "戦士の長老グレン",
+   "map": "F117",
+   "minLevel": 120,
+   "prereqs": [
+    "J1-7"
+   ],
+   "size": "小",
+   "goalText": "竜の大老ヴァルドへの推薦状を受け取り、D115 へ届ける",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "D115"
+    }
+   ],
+   "end": "戦士の長老グレン",
+   "exp": 2040000,
+   "meso": 11900,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "4 次転職の始まり（JOBS.md 3-4）。",
+   "tutorial": false
+  },
+  {
+   "id": "J1-9",
+   "name": "紅と蒼の印",
+   "giver": "竜の大老ヴァルド",
+   "giverName": "竜の大老ヴァルド",
+   "map": "D115",
+   "minLevel": 120,
+   "prereqs": [
+    "J1-8"
+   ],
+   "size": "特",
+   "goalText": "M211×1、M212×1。落とした紅の印・蒼の印を大老に渡す",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M211",
+     "count": 1
+    },
+    {
+     "type": "kill",
+     "mob": "M212",
+     "count": 1
+    }
+   ],
+   "end": "竜の大老ヴァルド",
+   "exp": 17000000,
+   "meso": 178000,
+   "rewards": [],
+   "rewardText": "AP +5、極意の書 20 ×1",
+   "rewardUnparsed": [
+    "AP +5",
+    "極意の書 20 ×1"
+   ],
+   "story": "4 次の職になる。",
+   "tutorial": false
+  },
+  {
+   "id": "J2-1",
+   "name": "魔法使いへの道",
+   "giver": "大魔導師オルフェ",
+   "giverName": "大魔導師オルフェ",
+   "map": "V300",
+   "minLevel": 8,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "INT20 以上で 大魔導師オルフェ と話す",
+   "objectives": [],
+   "end": "大魔導師オルフェ",
+   "exp": 46,
+   "meso": 166,
+   "rewards": [],
+   "rewardText": "武器 1 つ、持ち物の枠 +4",
+   "rewardUnparsed": [
+    "武器 1 つ",
+    "持ち物の枠 +4"
+   ],
+   "story": "1 次転職（JOBS.md 3-1）。魔法使いになる。",
+   "tutorial": false
+  },
+  {
+   "id": "J2-2",
+   "name": "推薦状",
+   "giver": "大魔導師オルフェ",
+   "giverName": "大魔導師オルフェ",
+   "map": "V300",
+   "minLevel": 30,
+   "prereqs": [
+    "J2-1"
+   ],
+   "size": "小",
+   "goalText": "2 次の試験官への推薦状を受け取る",
+   "objectives": [],
+   "end": "大魔導師オルフェ",
+   "exp": 4200,
+   "meso": 1100,
+   "rewards": [],
+   "rewardText": "推薦状",
+   "rewardUnparsed": [
+    "推薦状"
+   ],
+   "story": "2 次転職の始まり。",
+   "tutorial": false
+  },
+  {
+   "id": "J2-3",
+   "name": "試しの珠",
+   "giver": "大魔導師オルフェ",
+   "giverName": "大魔導師オルフェ",
+   "map": "V311",
+   "minLevel": 30,
+   "prereqs": [
+    "J2-2"
+   ],
+   "size": "中",
+   "goalText": "M301×30（20 分以内、修練場の中で）",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M301",
+     "count": 30
+    }
+   ],
+   "end": "大魔導師オルフェ",
+   "exp": 8400,
+   "meso": 2750,
+   "rewards": [],
+   "rewardText": "試験の証",
+   "rewardUnparsed": [
+    "試験の証"
+   ],
+   "story": "修練場での試験（JOBS.md 3-2）。",
+   "tutorial": false
+  },
+  {
+   "id": "J2-4",
+   "name": "道を選ぶ",
+   "giver": "大魔導師オルフェ",
+   "giverName": "大魔導師オルフェ",
+   "map": "V300",
+   "minLevel": 30,
+   "prereqs": [
+    "J2-3"
+   ],
+   "size": "中",
+   "goalText": "試験の証を渡し、2 次の職を選ぶ",
+   "objectives": [],
+   "end": "大魔導師オルフェ",
+   "exp": 8400,
+   "meso": 2750,
+   "rewards": [
+    {
+     "item": "use.sp_reset",
+     "count": 1
+    }
+   ],
+   "rewardText": "SP 振り直しの書 ×1",
+   "rewardUnparsed": [],
+   "story": "2 次の職の説明を聞いて選ぶ。",
+   "tutorial": false
+  },
+  {
+   "id": "J2-5",
+   "name": "長老の手紙",
+   "giver": "魔法使いの長老フロスト",
+   "giverName": "魔法使いの長老フロスト",
+   "map": "F117",
+   "minLevel": 70,
+   "prereqs": [
+    "J2-4"
+   ],
+   "size": "小",
+   "goalText": "魔法使いの長老フロストの手紙を 大魔導師オルフェ に届ける",
+   "objectives": [],
+   "end": "魔法使いの長老フロスト",
+   "exp": 174000,
+   "meso": 4800,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "3 次転職の始まり（JOBS.md 3-3）。",
+   "tutorial": false
+  },
+  {
+   "id": "J2-6",
+   "name": "もう一人の自分",
+   "giver": "大魔導師オルフェ",
+   "giverName": "大魔導師オルフェ",
+   "map": "F118",
+   "minLevel": 70,
+   "prereqs": [
+    "J2-5"
+   ],
+   "size": "大",
+   "goalText": "M300×1（20 分以内）",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M300",
+     "count": 1
+    }
+   ],
+   "end": "大魔導師オルフェ",
+   "exp": 725000,
+   "meso": 28800,
+   "rewards": [
+    {
+     "item": "etc.M300",
+     "count": 1
+    }
+   ],
+   "rewardText": "黒いお守り",
+   "rewardUnparsed": [],
+   "story": "自分の影と戦う。",
+   "tutorial": false
+  },
+  {
+   "id": "J2-7",
+   "name": "賢者の石",
+   "giver": "魔法使いの長老フロスト",
+   "giverName": "魔法使いの長老フロスト",
+   "map": "F107",
+   "minLevel": 70,
+   "prereqs": [
+    "J2-6"
+   ],
+   "size": "大",
+   "goalText": "黒いお守りと闇の水晶（N-14）を賢者の石に捧げ、5 問のクイズに答える",
+   "objectives": [],
+   "end": "魔法使いの長老フロスト",
+   "exp": 725000,
+   "meso": 28800,
+   "rewards": [
+    {
+     "item": "use.sp_reset",
+     "count": 1
+    }
+   ],
+   "rewardText": "AP +5、SP 振り直しの書 ×1",
+   "rewardUnparsed": [
+    "AP +5"
+   ],
+   "story": "3 次の職になる。",
+   "tutorial": false
+  },
+  {
+   "id": "J2-8",
+   "name": "大老への推薦状",
+   "giver": "魔法使いの長老フロスト",
+   "giverName": "魔法使いの長老フロスト",
+   "map": "F117",
+   "minLevel": 120,
+   "prereqs": [
+    "J2-7"
+   ],
+   "size": "小",
+   "goalText": "竜の大老ヴァルドへの推薦状を受け取り、D115 へ届ける",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "D115"
+    }
+   ],
+   "end": "魔法使いの長老フロスト",
+   "exp": 2040000,
+   "meso": 11900,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "4 次転職の始まり（JOBS.md 3-4）。",
+   "tutorial": false
+  },
+  {
+   "id": "J2-9",
+   "name": "紅と蒼の印",
+   "giver": "竜の大老ヴァルド",
+   "giverName": "竜の大老ヴァルド",
+   "map": "D115",
+   "minLevel": 120,
+   "prereqs": [
+    "J2-8"
+   ],
+   "size": "特",
+   "goalText": "M211×1、M212×1。落とした紅の印・蒼の印を大老に渡す",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M211",
+     "count": 1
+    },
+    {
+     "type": "kill",
+     "mob": "M212",
+     "count": 1
+    }
+   ],
+   "end": "竜の大老ヴァルド",
+   "exp": 17000000,
+   "meso": 178000,
+   "rewards": [],
+   "rewardText": "AP +5、極意の書 20 ×1",
+   "rewardUnparsed": [
+    "AP +5",
+    "極意の書 20 ×1"
+   ],
+   "story": "4 次の職になる。",
+   "tutorial": false
+  },
+  {
+   "id": "J3-1",
+   "name": "弓使いへの道",
+   "giver": "弓の師範エルナ",
+   "giverName": "弓の師範エルナ",
+   "map": "V200",
+   "minLevel": 10,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "DEX25 以上で 弓の師範エルナ と話す",
+   "objectives": [],
+   "end": "弓の師範エルナ",
+   "exp": 96,
+   "meso": 250,
+   "rewards": [],
+   "rewardText": "武器 1 つ、持ち物の枠 +4",
+   "rewardUnparsed": [
+    "武器 1 つ",
+    "持ち物の枠 +4"
+   ],
+   "story": "1 次転職（JOBS.md 3-1）。弓使いになる。",
+   "tutorial": false
+  },
+  {
+   "id": "J3-2",
+   "name": "推薦状",
+   "giver": "弓の師範エルナ",
+   "giverName": "弓の師範エルナ",
+   "map": "V200",
+   "minLevel": 30,
+   "prereqs": [
+    "J3-1"
+   ],
+   "size": "小",
+   "goalText": "2 次の試験官への推薦状を受け取る",
+   "objectives": [],
+   "end": "弓の師範エルナ",
+   "exp": 4200,
+   "meso": 1100,
+   "rewards": [],
+   "rewardText": "推薦状",
+   "rewardUnparsed": [
+    "推薦状"
+   ],
+   "story": "2 次転職の始まり。",
+   "tutorial": false
+  },
+  {
+   "id": "J3-3",
+   "name": "試しの珠",
+   "giver": "弓の師範エルナ",
+   "giverName": "弓の師範エルナ",
+   "map": "V211",
+   "minLevel": 30,
+   "prereqs": [
+    "J3-2"
+   ],
+   "size": "中",
+   "goalText": "M301×30（20 分以内、修練場の中で）",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M301",
+     "count": 30
+    }
+   ],
+   "end": "弓の師範エルナ",
+   "exp": 8400,
+   "meso": 2750,
+   "rewards": [],
+   "rewardText": "試験の証",
+   "rewardUnparsed": [
+    "試験の証"
+   ],
+   "story": "修練場での試験（JOBS.md 3-2）。",
+   "tutorial": false
+  },
+  {
+   "id": "J3-4",
+   "name": "道を選ぶ",
+   "giver": "弓の師範エルナ",
+   "giverName": "弓の師範エルナ",
+   "map": "V200",
+   "minLevel": 30,
+   "prereqs": [
+    "J3-3"
+   ],
+   "size": "中",
+   "goalText": "試験の証を渡し、2 次の職を選ぶ",
+   "objectives": [],
+   "end": "弓の師範エルナ",
+   "exp": 8400,
+   "meso": 2750,
+   "rewards": [
+    {
+     "item": "use.sp_reset",
+     "count": 1
+    }
+   ],
+   "rewardText": "SP 振り直しの書 ×1",
+   "rewardUnparsed": [],
+   "story": "2 次の職の説明を聞いて選ぶ。",
+   "tutorial": false
+  },
+  {
+   "id": "J3-5",
+   "name": "長老の手紙",
+   "giver": "弓使いの長老ハイネ",
+   "giverName": "弓使いの長老ハイネ",
+   "map": "F117",
+   "minLevel": 70,
+   "prereqs": [
+    "J3-4"
+   ],
+   "size": "小",
+   "goalText": "弓使いの長老ハイネの手紙を 弓の師範エルナ に届ける",
+   "objectives": [],
+   "end": "弓使いの長老ハイネ",
+   "exp": 174000,
+   "meso": 4800,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "3 次転職の始まり（JOBS.md 3-3）。",
+   "tutorial": false
+  },
+  {
+   "id": "J3-6",
+   "name": "もう一人の自分",
+   "giver": "弓の師範エルナ",
+   "giverName": "弓の師範エルナ",
+   "map": "F118",
+   "minLevel": 70,
+   "prereqs": [
+    "J3-5"
+   ],
+   "size": "大",
+   "goalText": "M300×1（20 分以内）",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M300",
+     "count": 1
+    }
+   ],
+   "end": "弓の師範エルナ",
+   "exp": 725000,
+   "meso": 28800,
+   "rewards": [
+    {
+     "item": "etc.M300",
+     "count": 1
+    }
+   ],
+   "rewardText": "黒いお守り",
+   "rewardUnparsed": [],
+   "story": "自分の影と戦う。",
+   "tutorial": false
+  },
+  {
+   "id": "J3-7",
+   "name": "賢者の石",
+   "giver": "弓使いの長老ハイネ",
+   "giverName": "弓使いの長老ハイネ",
+   "map": "F107",
+   "minLevel": 70,
+   "prereqs": [
+    "J3-6"
+   ],
+   "size": "大",
+   "goalText": "黒いお守りと闇の水晶（N-14）を賢者の石に捧げ、5 問のクイズに答える",
+   "objectives": [],
+   "end": "弓使いの長老ハイネ",
+   "exp": 725000,
+   "meso": 28800,
+   "rewards": [
+    {
+     "item": "use.sp_reset",
+     "count": 1
+    }
+   ],
+   "rewardText": "AP +5、SP 振り直しの書 ×1",
+   "rewardUnparsed": [
+    "AP +5"
+   ],
+   "story": "3 次の職になる。",
+   "tutorial": false
+  },
+  {
+   "id": "J3-8",
+   "name": "大老への推薦状",
+   "giver": "弓使いの長老ハイネ",
+   "giverName": "弓使いの長老ハイネ",
+   "map": "F117",
+   "minLevel": 120,
+   "prereqs": [
+    "J3-7"
+   ],
+   "size": "小",
+   "goalText": "竜の大老ヴァルドへの推薦状を受け取り、D115 へ届ける",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "D115"
+    }
+   ],
+   "end": "弓使いの長老ハイネ",
+   "exp": 2040000,
+   "meso": 11900,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "4 次転職の始まり（JOBS.md 3-4）。",
+   "tutorial": false
+  },
+  {
+   "id": "J3-9",
+   "name": "紅と蒼の印",
+   "giver": "竜の大老ヴァルド",
+   "giverName": "竜の大老ヴァルド",
+   "map": "D115",
+   "minLevel": 120,
+   "prereqs": [
+    "J3-8"
+   ],
+   "size": "特",
+   "goalText": "M211×1、M212×1。落とした紅の印・蒼の印を大老に渡す",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M211",
+     "count": 1
+    },
+    {
+     "type": "kill",
+     "mob": "M212",
+     "count": 1
+    }
+   ],
+   "end": "竜の大老ヴァルド",
+   "exp": 17000000,
+   "meso": 178000,
+   "rewards": [],
+   "rewardText": "AP +5、極意の書 20 ×1",
+   "rewardUnparsed": [
+    "AP +5",
+    "極意の書 20 ×1"
+   ],
+   "story": "4 次の職になる。",
+   "tutorial": false
+  },
+  {
+   "id": "J4-1",
+   "name": "盗賊への道",
+   "giver": "影の頭領ヤミ",
+   "giverName": "影の頭領ヤミ",
+   "map": "V500",
+   "minLevel": 10,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "DEX25 以上で 影の頭領ヤミ と話す",
+   "objectives": [],
+   "end": "影の頭領ヤミ",
+   "exp": 96,
+   "meso": 250,
+   "rewards": [],
+   "rewardText": "武器 1 つ、持ち物の枠 +4",
+   "rewardUnparsed": [
+    "武器 1 つ",
+    "持ち物の枠 +4"
+   ],
+   "story": "1 次転職（JOBS.md 3-1）。盗賊になる。",
+   "tutorial": false
+  },
+  {
+   "id": "J4-2",
+   "name": "推薦状",
+   "giver": "影の頭領ヤミ",
+   "giverName": "影の頭領ヤミ",
+   "map": "V500",
+   "minLevel": 30,
+   "prereqs": [
+    "J4-1"
+   ],
+   "size": "小",
+   "goalText": "2 次の試験官への推薦状を受け取る",
+   "objectives": [],
+   "end": "影の頭領ヤミ",
+   "exp": 4200,
+   "meso": 1100,
+   "rewards": [],
+   "rewardText": "推薦状",
+   "rewardUnparsed": [
+    "推薦状"
+   ],
+   "story": "2 次転職の始まり。",
+   "tutorial": false
+  },
+  {
+   "id": "J4-3",
+   "name": "試しの珠",
+   "giver": "影の頭領ヤミ",
+   "giverName": "影の頭領ヤミ",
+   "map": "V513",
+   "minLevel": 30,
+   "prereqs": [
+    "J4-2"
+   ],
+   "size": "中",
+   "goalText": "M301×30（20 分以内、修練場の中で）",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M301",
+     "count": 30
+    }
+   ],
+   "end": "影の頭領ヤミ",
+   "exp": 8400,
+   "meso": 2750,
+   "rewards": [],
+   "rewardText": "試験の証",
+   "rewardUnparsed": [
+    "試験の証"
+   ],
+   "story": "修練場での試験（JOBS.md 3-2）。",
+   "tutorial": false
+  },
+  {
+   "id": "J4-4",
+   "name": "道を選ぶ",
+   "giver": "影の頭領ヤミ",
+   "giverName": "影の頭領ヤミ",
+   "map": "V500",
+   "minLevel": 30,
+   "prereqs": [
+    "J4-3"
+   ],
+   "size": "中",
+   "goalText": "試験の証を渡し、2 次の職を選ぶ",
+   "objectives": [],
+   "end": "影の頭領ヤミ",
+   "exp": 8400,
+   "meso": 2750,
+   "rewards": [
+    {
+     "item": "use.sp_reset",
+     "count": 1
+    }
+   ],
+   "rewardText": "SP 振り直しの書 ×1",
+   "rewardUnparsed": [],
+   "story": "2 次の職の説明を聞いて選ぶ。",
+   "tutorial": false
+  },
+  {
+   "id": "J4-5",
+   "name": "長老の手紙",
+   "giver": "盗賊の長老ミスト",
+   "giverName": "盗賊の長老ミスト",
+   "map": "F117",
+   "minLevel": 70,
+   "prereqs": [
+    "J4-4"
+   ],
+   "size": "小",
+   "goalText": "盗賊の長老ミストの手紙を 影の頭領ヤミ に届ける",
+   "objectives": [],
+   "end": "盗賊の長老ミスト",
+   "exp": 174000,
+   "meso": 4800,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "3 次転職の始まり（JOBS.md 3-3）。",
+   "tutorial": false
+  },
+  {
+   "id": "J4-6",
+   "name": "もう一人の自分",
+   "giver": "影の頭領ヤミ",
+   "giverName": "影の頭領ヤミ",
+   "map": "F118",
+   "minLevel": 70,
+   "prereqs": [
+    "J4-5"
+   ],
+   "size": "大",
+   "goalText": "M300×1（20 分以内）",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M300",
+     "count": 1
+    }
+   ],
+   "end": "影の頭領ヤミ",
+   "exp": 725000,
+   "meso": 28800,
+   "rewards": [
+    {
+     "item": "etc.M300",
+     "count": 1
+    }
+   ],
+   "rewardText": "黒いお守り",
+   "rewardUnparsed": [],
+   "story": "自分の影と戦う。",
+   "tutorial": false
+  },
+  {
+   "id": "J4-7",
+   "name": "賢者の石",
+   "giver": "盗賊の長老ミスト",
+   "giverName": "盗賊の長老ミスト",
+   "map": "F107",
+   "minLevel": 70,
+   "prereqs": [
+    "J4-6"
+   ],
+   "size": "大",
+   "goalText": "黒いお守りと闇の水晶（N-14）を賢者の石に捧げ、5 問のクイズに答える",
+   "objectives": [],
+   "end": "盗賊の長老ミスト",
+   "exp": 725000,
+   "meso": 28800,
+   "rewards": [
+    {
+     "item": "use.sp_reset",
+     "count": 1
+    }
+   ],
+   "rewardText": "AP +5、SP 振り直しの書 ×1",
+   "rewardUnparsed": [
+    "AP +5"
+   ],
+   "story": "3 次の職になる。",
+   "tutorial": false
+  },
+  {
+   "id": "J4-8",
+   "name": "大老への推薦状",
+   "giver": "盗賊の長老ミスト",
+   "giverName": "盗賊の長老ミスト",
+   "map": "F117",
+   "minLevel": 120,
+   "prereqs": [
+    "J4-7"
+   ],
+   "size": "小",
+   "goalText": "竜の大老ヴァルドへの推薦状を受け取り、D115 へ届ける",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "D115"
+    }
+   ],
+   "end": "盗賊の長老ミスト",
+   "exp": 2040000,
+   "meso": 11900,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "4 次転職の始まり（JOBS.md 3-4）。",
+   "tutorial": false
+  },
+  {
+   "id": "J4-9",
+   "name": "紅と蒼の印",
+   "giver": "竜の大老ヴァルド",
+   "giverName": "竜の大老ヴァルド",
+   "map": "D115",
+   "minLevel": 120,
+   "prereqs": [
+    "J4-8"
+   ],
+   "size": "特",
+   "goalText": "M211×1、M212×1。落とした紅の印・蒼の印を大老に渡す",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M211",
+     "count": 1
+    },
+    {
+     "type": "kill",
+     "mob": "M212",
+     "count": 1
+    }
+   ],
+   "end": "竜の大老ヴァルド",
+   "exp": 17000000,
+   "meso": 178000,
+   "rewards": [],
+   "rewardText": "AP +5、極意の書 20 ×1",
+   "rewardUnparsed": [
+    "AP +5",
+    "極意の書 20 ×1"
+   ],
+   "story": "4 次の職になる。",
+   "tutorial": false
+  },
+  {
+   "id": "J5-1",
+   "name": "海賊への道",
+   "giver": "キャプテン・リオ",
+   "giverName": "キャプテン・リオ",
+   "map": "V107",
+   "minLevel": 10,
+   "prereqs": [],
+   "size": "小",
+   "goalText": "DEX20 以上で キャプテン・リオ と話す",
+   "objectives": [],
+   "end": "キャプテン・リオ",
+   "exp": 96,
+   "meso": 250,
+   "rewards": [],
+   "rewardText": "武器 1 つ、持ち物の枠 +4",
+   "rewardUnparsed": [
+    "武器 1 つ",
+    "持ち物の枠 +4"
+   ],
+   "story": "1 次転職（JOBS.md 3-1）。海賊になる。",
+   "tutorial": false
+  },
+  {
+   "id": "J5-2",
+   "name": "推薦状",
+   "giver": "キャプテン・リオ",
+   "giverName": "キャプテン・リオ",
+   "map": "V107",
+   "minLevel": 30,
+   "prereqs": [
+    "J5-1"
+   ],
+   "size": "小",
+   "goalText": "2 次の試験官への推薦状を受け取る",
+   "objectives": [],
+   "end": "キャプテン・リオ",
+   "exp": 4200,
+   "meso": 1100,
+   "rewards": [],
+   "rewardText": "推薦状",
+   "rewardUnparsed": [
+    "推薦状"
+   ],
+   "story": "2 次転職の始まり。",
+   "tutorial": false
+  },
+  {
+   "id": "J5-3",
+   "name": "試しの珠",
+   "giver": "キャプテン・リオ",
+   "giverName": "キャプテン・リオ",
+   "map": "V108",
+   "minLevel": 30,
+   "prereqs": [
+    "J5-2"
+   ],
+   "size": "中",
+   "goalText": "M301×30（20 分以内、修練場の中で）",
+   "objectives": [
+    {
+     "type": "collect",
+     "item": "etc.M301",
+     "count": 30
+    }
+   ],
+   "end": "キャプテン・リオ",
+   "exp": 8400,
+   "meso": 2750,
+   "rewards": [],
+   "rewardText": "試験の証",
+   "rewardUnparsed": [
+    "試験の証"
+   ],
+   "story": "修練場での試験（JOBS.md 3-2）。",
+   "tutorial": false
+  },
+  {
+   "id": "J5-4",
+   "name": "道を選ぶ",
+   "giver": "キャプテン・リオ",
+   "giverName": "キャプテン・リオ",
+   "map": "V107",
+   "minLevel": 30,
+   "prereqs": [
+    "J5-3"
+   ],
+   "size": "中",
+   "goalText": "試験の証を渡し、2 次の職を選ぶ",
+   "objectives": [],
+   "end": "キャプテン・リオ",
+   "exp": 8400,
+   "meso": 2750,
+   "rewards": [
+    {
+     "item": "use.sp_reset",
+     "count": 1
+    }
+   ],
+   "rewardText": "SP 振り直しの書 ×1",
+   "rewardUnparsed": [],
+   "story": "2 次の職の説明を聞いて選ぶ。",
+   "tutorial": false
+  },
+  {
+   "id": "J5-5",
+   "name": "長老の手紙",
+   "giver": "海賊の長老キール",
+   "giverName": "海賊の長老キール",
+   "map": "F117",
+   "minLevel": 70,
+   "prereqs": [
+    "J5-4"
+   ],
+   "size": "小",
+   "goalText": "海賊の長老キールの手紙を キャプテン・リオ に届ける",
+   "objectives": [],
+   "end": "海賊の長老キール",
+   "exp": 174000,
+   "meso": 4800,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "3 次転職の始まり（JOBS.md 3-3）。",
+   "tutorial": false
+  },
+  {
+   "id": "J5-6",
+   "name": "もう一人の自分",
+   "giver": "キャプテン・リオ",
+   "giverName": "キャプテン・リオ",
+   "map": "F118",
+   "minLevel": 70,
+   "prereqs": [
+    "J5-5"
+   ],
+   "size": "大",
+   "goalText": "M300×1（20 分以内）",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M300",
+     "count": 1
+    }
+   ],
+   "end": "キャプテン・リオ",
+   "exp": 725000,
+   "meso": 28800,
+   "rewards": [
+    {
+     "item": "etc.M300",
+     "count": 1
+    }
+   ],
+   "rewardText": "黒いお守り",
+   "rewardUnparsed": [],
+   "story": "自分の影と戦う。",
+   "tutorial": false
+  },
+  {
+   "id": "J5-7",
+   "name": "賢者の石",
+   "giver": "海賊の長老キール",
+   "giverName": "海賊の長老キール",
+   "map": "F107",
+   "minLevel": 70,
+   "prereqs": [
+    "J5-6"
+   ],
+   "size": "大",
+   "goalText": "黒いお守りと闇の水晶（N-14）を賢者の石に捧げ、5 問のクイズに答える",
+   "objectives": [],
+   "end": "海賊の長老キール",
+   "exp": 725000,
+   "meso": 28800,
+   "rewards": [
+    {
+     "item": "use.sp_reset",
+     "count": 1
+    }
+   ],
+   "rewardText": "AP +5、SP 振り直しの書 ×1",
+   "rewardUnparsed": [
+    "AP +5"
+   ],
+   "story": "3 次の職になる。",
+   "tutorial": false
+  },
+  {
+   "id": "J5-8",
+   "name": "大老への推薦状",
+   "giver": "海賊の長老キール",
+   "giverName": "海賊の長老キール",
+   "map": "F117",
+   "minLevel": 120,
+   "prereqs": [
+    "J5-7"
+   ],
+   "size": "小",
+   "goalText": "竜の大老ヴァルドへの推薦状を受け取り、D115 へ届ける",
+   "objectives": [
+    {
+     "type": "visit",
+     "map": "D115"
+    }
+   ],
+   "end": "海賊の長老キール",
+   "exp": 2040000,
+   "meso": 11900,
+   "rewards": [],
+   "rewardText": "-",
+   "rewardUnparsed": [],
+   "story": "4 次転職の始まり（JOBS.md 3-4）。",
+   "tutorial": false
+  },
+  {
+   "id": "J5-9",
+   "name": "紅と蒼の印",
+   "giver": "竜の大老ヴァルド",
+   "giverName": "竜の大老ヴァルド",
+   "map": "D115",
+   "minLevel": 120,
+   "prereqs": [
+    "J5-8"
+   ],
+   "size": "特",
+   "goalText": "M211×1、M212×1。落とした紅の印・蒼の印を大老に渡す",
+   "objectives": [
+    {
+     "type": "kill",
+     "mob": "M211",
+     "count": 1
+    },
+    {
+     "type": "kill",
+     "mob": "M212",
+     "count": 1
+    }
+   ],
+   "end": "竜の大老ヴァルド",
+   "exp": 17000000,
+   "meso": 178000,
+   "rewards": [],
+   "rewardText": "AP +5、極意の書 20 ×1",
+   "rewardUnparsed": [
+    "AP +5",
+    "極意の書 20 ×1"
+   ],
+   "story": "4 次の職になる。",
+   "tutorial": false
+  }
+ ]
+}

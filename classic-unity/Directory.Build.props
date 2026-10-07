@@ -1,0 +1,8 @@
+<Project>
+  <!-- ビルドの中間物・出力を Core/ の外（.build/）へ出す。
+       Core/ は Unity の Assets/ にそのまま入れるので、obj/ の .cs が混ざらないようにする。 -->
+  <PropertyGroup>
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory).build/obj/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
+    <BaseOutputPath>$(MSBuildThisFileDirectory).build/bin/$(MSBuildProjectName)/</BaseOutputPath>
+  </PropertyGroup>
+</Project>
