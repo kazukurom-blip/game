@@ -6922,13 +6922,18 @@
     }
    ],
    "end": "board",
+   "repeat": "daily",
+   "board": true,
    "exp": 96,
    "meso": 250,
-   "rewards": [],
-   "rewardText": "経験値 2 倍の券（30 分）または 5,000 ルド",
-   "rewardUnparsed": [
-    "経験値 2 倍の券（30 分）または 5,000 ルド"
+   "rewards": [
+    {
+     "item": "use.exp_coupon",
+     "count": 1
+    }
    ],
+   "rewardText": "経験値 2 倍の券（30 分）または 5,000 ルド",
+   "rewardUnparsed": [],
    "story": "",
    "tutorial": false
   },
@@ -6950,13 +6955,18 @@
     }
    ],
    "end": "board",
+   "repeat": "daily",
+   "board": true,
    "exp": 378,
    "meso": 387,
-   "rewards": [],
-   "rewardText": "同上",
-   "rewardUnparsed": [
-    "同上"
+   "rewards": [
+    {
+     "item": "use.exp_coupon",
+     "count": 1
+    }
    ],
+   "rewardText": "同上",
+   "rewardUnparsed": [],
    "story": "",
    "tutorial": false
   },
@@ -6978,13 +6988,18 @@
     }
    ],
    "end": "board",
+   "repeat": "daily",
+   "board": true,
    "exp": 990,
    "meso": 600,
-   "rewards": [],
-   "rewardText": "同上",
-   "rewardUnparsed": [
-    "同上"
+   "rewards": [
+    {
+     "item": "use.exp_coupon",
+     "count": 1
+    }
    ],
+   "rewardText": "同上",
+   "rewardUnparsed": [],
    "story": "",
    "tutorial": false
   },
@@ -7006,13 +7021,18 @@
     }
    ],
    "end": "board",
+   "repeat": "daily",
+   "board": true,
    "exp": 2040,
    "meso": 812,
-   "rewards": [],
-   "rewardText": "同上",
-   "rewardUnparsed": [
-    "同上"
+   "rewards": [
+    {
+     "item": "use.exp_coupon",
+     "count": 1
+    }
    ],
+   "rewardText": "同上",
+   "rewardUnparsed": [],
    "story": "",
    "tutorial": false
   },
@@ -7034,13 +7054,18 @@
     }
    ],
    "end": "board",
+   "repeat": "daily",
+   "board": true,
    "exp": 4200,
    "meso": 1100,
-   "rewards": [],
-   "rewardText": "同上",
-   "rewardUnparsed": [
-    "同上"
+   "rewards": [
+    {
+     "item": "use.exp_coupon",
+     "count": 1
+    }
    ],
+   "rewardText": "同上",
+   "rewardUnparsed": [],
    "story": "",
    "tutorial": false
   },
@@ -7062,13 +7087,18 @@
     }
    ],
    "end": "board",
+   "repeat": "daily",
+   "board": true,
    "exp": 7920,
    "meso": 1360,
-   "rewards": [],
-   "rewardText": "同上",
-   "rewardUnparsed": [
-    "同上"
+   "rewards": [
+    {
+     "item": "use.exp_coupon",
+     "count": 1
+    }
    ],
+   "rewardText": "同上",
+   "rewardUnparsed": [],
    "story": "",
    "tutorial": false
   },
@@ -7090,13 +7120,18 @@
     }
    ],
    "end": "board",
+   "repeat": "daily",
+   "board": true,
    "exp": 15000,
    "meso": 1690,
-   "rewards": [],
-   "rewardText": "同上",
-   "rewardUnparsed": [
-    "同上"
+   "rewards": [
+    {
+     "item": "use.exp_coupon",
+     "count": 1
+    }
    ],
+   "rewardText": "同上",
+   "rewardUnparsed": [],
    "story": "",
    "tutorial": false
   },
@@ -7118,13 +7153,18 @@
     }
    ],
    "end": "board",
+   "repeat": "daily",
+   "board": true,
    "exp": 40800,
    "meso": 2600,
-   "rewards": [],
-   "rewardText": "同上",
-   "rewardUnparsed": [
-    "同上"
+   "rewards": [
+    {
+     "item": "use.exp_coupon",
+     "count": 1
+    }
    ],
+   "rewardText": "同上",
+   "rewardUnparsed": [],
    "story": "",
    "tutorial": false
   },
@@ -7146,13 +7186,18 @@
     }
    ],
    "end": "board",
+   "repeat": "daily",
+   "board": true,
    "exp": 90000,
    "meso": 3530,
-   "rewards": [],
-   "rewardText": "同上",
-   "rewardUnparsed": [
-    "同上"
+   "rewards": [
+    {
+     "item": "use.exp_coupon",
+     "count": 1
+    }
    ],
+   "rewardText": "同上",
+   "rewardUnparsed": [],
    "story": "",
    "tutorial": false
   },
@@ -7174,13 +7219,18 @@
     }
    ],
    "end": "board",
+   "repeat": "daily",
+   "board": true,
    "exp": 174000,
    "meso": 4800,
-   "rewards": [],
-   "rewardText": "同上",
-   "rewardUnparsed": [
-    "同上"
+   "rewards": [
+    {
+     "item": "use.exp_coupon",
+     "count": 1
+    }
    ],
+   "rewardText": "同上",
+   "rewardUnparsed": [],
    "story": "",
    "tutorial": false
   },
@@ -7202,13 +7252,18 @@
     }
    ],
    "end": "board",
+   "repeat": "daily",
+   "board": true,
    "exp": 229000,
    "meso": 5330,
-   "rewards": [],
-   "rewardText": "同上",
-   "rewardUnparsed": [
-    "同上"
+   "rewards": [
+    {
+     "item": "use.exp_coupon",
+     "count": 1
+    }
    ],
+   "rewardText": "同上",
+   "rewardUnparsed": [],
    "story": "",
    "tutorial": false
   },
@@ -7230,13 +7285,18 @@
     }
    ],
    "end": "board",
+   "repeat": "daily",
+   "board": true,
    "exp": 300000,
    "meso": 5920,
-   "rewards": [],
-   "rewardText": "同上",
-   "rewardUnparsed": [
-    "同上"
+   "rewards": [
+    {
+     "item": "use.exp_coupon",
+     "count": 1
+    }
    ],
+   "rewardText": "同上",
+   "rewardUnparsed": [],
    "story": "",
    "tutorial": false
   },
@@ -7258,13 +7318,18 @@
     }
    ],
    "end": "board",
+   "repeat": "daily",
+   "board": true,
    "exp": 492000,
    "meso": 7300,
-   "rewards": [],
-   "rewardText": "ドロップ 2 倍の券（30 分）または 5 万ルド",
-   "rewardUnparsed": [
-    "ドロップ 2 倍の券（30 分）または 5 万ルド"
+   "rewards": [
+    {
+     "item": "use.drop_coupon",
+     "count": 1
+    }
    ],
+   "rewardText": "ドロップ 2 倍の券（30 分）または 5 万ルド",
+   "rewardUnparsed": [],
    "story": "",
    "tutorial": false
   },
@@ -7286,13 +7351,18 @@
     }
    ],
    "end": "board",
+   "repeat": "daily",
+   "board": true,
    "exp": 780000,
    "meso": 9000,
-   "rewards": [],
-   "rewardText": "同上",
-   "rewardUnparsed": [
-    "同上"
+   "rewards": [
+    {
+     "item": "use.drop_coupon",
+     "count": 1
+    }
    ],
+   "rewardText": "同上",
+   "rewardUnparsed": [],
    "story": "",
    "tutorial": false
   },
@@ -7314,13 +7384,18 @@
     }
    ],
    "end": "board",
+   "repeat": "daily",
+   "board": true,
    "exp": 1260000,
    "meso": 10300,
-   "rewards": [],
-   "rewardText": "同上",
-   "rewardUnparsed": [
-    "同上"
+   "rewards": [
+    {
+     "item": "use.drop_coupon",
+     "count": 1
+    }
    ],
+   "rewardText": "同上",
+   "rewardUnparsed": [],
    "story": "",
    "tutorial": false
   },
@@ -7342,13 +7417,18 @@
     }
    ],
    "end": "board",
+   "repeat": "daily",
+   "board": true,
    "exp": 2590000,
    "meso": 12700,
-   "rewards": [],
-   "rewardText": "同上",
-   "rewardUnparsed": [
-    "同上"
+   "rewards": [
+    {
+     "item": "use.drop_coupon",
+     "count": 1
+    }
    ],
+   "rewardText": "同上",
+   "rewardUnparsed": [],
    "story": "",
    "tutorial": false
   },
@@ -7370,13 +7450,18 @@
     }
    ],
    "end": "board",
+   "repeat": "daily",
+   "board": true,
    "exp": 4180000,
    "meso": 14600,
-   "rewards": [],
-   "rewardText": "同上",
-   "rewardUnparsed": [
-    "同上"
+   "rewards": [
+    {
+     "item": "use.drop_coupon",
+     "count": 1
+    }
    ],
+   "rewardText": "同上",
+   "rewardUnparsed": [],
    "story": "",
    "tutorial": false
   },
@@ -7398,13 +7483,18 @@
     }
    ],
    "end": "board",
+   "repeat": "daily",
+   "board": true,
    "exp": 7680000,
    "meso": 17500,
-   "rewards": [],
-   "rewardText": "同上",
-   "rewardUnparsed": [
-    "同上"
+   "rewards": [
+    {
+     "item": "use.drop_coupon",
+     "count": 1
+    }
    ],
+   "rewardText": "同上",
+   "rewardUnparsed": [],
    "story": "",
    "tutorial": false
   },
@@ -7426,13 +7516,18 @@
     }
    ],
    "end": "board",
+   "repeat": "daily",
+   "board": true,
    "exp": 16400000,
    "meso": 21000,
-   "rewards": [],
-   "rewardText": "同上",
-   "rewardUnparsed": [
-    "同上"
+   "rewards": [
+    {
+     "item": "use.drop_coupon",
+     "count": 1
+    }
    ],
+   "rewardText": "同上",
+   "rewardUnparsed": [],
    "story": "",
    "tutorial": false
   },
@@ -7454,13 +7549,18 @@
     }
    ],
    "end": "board",
+   "repeat": "daily",
+   "board": true,
    "exp": 38700000,
    "meso": 25700,
-   "rewards": [],
-   "rewardText": "同上",
-   "rewardUnparsed": [
-    "同上"
+   "rewards": [
+    {
+     "item": "use.drop_coupon",
+     "count": 1
+    }
    ],
+   "rewardText": "同上",
+   "rewardUnparsed": [],
    "story": "",
    "tutorial": false
   },
@@ -7482,6 +7582,7 @@
     }
    ],
    "end": "board",
+   "repeat": "weekly",
    "exp": 17500,
    "meso": 6600,
    "rewards": [],
@@ -7510,6 +7611,7 @@
     }
    ],
    "end": "board",
+   "repeat": "daily",
    "exp": 2290,
    "meso": 1590,
    "rewards": [],

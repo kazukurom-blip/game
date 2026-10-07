@@ -119,6 +119,9 @@ export function weaponAtk(type, lv) {
   return { watk: Math.round(logInterp(WATK, lv) * t[3]), matk: t[4] ? Math.round(logInterp(MATK, lv) * t[4]) : 0 };
 }
 
+// 1 次転職の条件（JOBS.md 3-1）。1 次の帯の武器の必要な能力値もこれにする
+export const FIRST_JOB_REQ = { 戦士: 'STR 35', 魔法使い: 'INT 20', 弓使い: 'DEX 25', 盗賊: 'DEX 25', 海賊: 'DEX 20' };
+
 export function weaponList() {
   const out = [];
   for (const [type, job, noun, , , speed, note] of WEAPON_TYPES) {
@@ -128,7 +131,9 @@ export function weaponList() {
       const main = MAIN_STAT[job].split('/')[0];
       const reqStat = type === '銃' ? 'DEX' : type === 'ナックル' ? 'STR' : main;
       const bonus = lv >= 30 ? (matk ? `INT+${Math.round(lv / 15)}` : `${reqStat}+${Math.round(lv / 25)}`) : '';
-      out.push({ job, type, lv, name: `${SERIES[job][bi]}の${noun}`, req: `${reqStat} ${reqMain(lv)}`, watk, matk, speed, bonus, upg: 7, price: priceOf(lv, 1.5), note });
+      // 1 次の帯（Lv10・魔法使い Lv8）の武器は、転職の条件と同じ能力値で持てる（転職官からもらってすぐ使えるように）
+      const req = bi === 0 ? FIRST_JOB_REQ[job] : `${reqStat} ${reqMain(lv)}`;
+      out.push({ job, type, lv, name: `${SERIES[job][bi]}の${noun}`, req, watk, matk, speed, bonus, upg: 7, price: priceOf(lv, 1.5), note });
     });
     for (const [lv, pre, src] of HIGH) {
       const { watk, matk } = weaponAtk(type, lv);

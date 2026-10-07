@@ -20,8 +20,9 @@ namespace Lumina.Core.Game
     {
         // ふつうの攻撃の当たる範囲（似）
         public const double MeleeFront = 70, MeleeBack = 10, MeleeUp = 60, MeleeDown = 10;
-        /// <summary>弓・クロスボウで矢が無い時の弱い殴り（武器係数。ふつうの弓は 3.4）。似。</summary>
+        /// <summary>弾・矢・投げ星が無い時の弱い殴り（武器係数。ふつうの弓は 3.4・クローは 3.6）。似。</summary>
         public const double BowWhackMul = 1.4;
+        private bool ammoOutNoted; // 「弾が無い」を 1 度だけ知らせる
 
         private static double RangedReach(string weaponType)
         {
@@ -80,11 +81,13 @@ namespace Lumina.Core.Game
             {
                 if (Stats.AmmoItem == null)
                 {
-                    // 弓・クロスボウは矢が無いと弱く殴る（クラシックどおり）。クロー・銃はお知らせだけ
-                    if (w.Type == "弓" || w.Type == "クロスボウ") whack = true;
-                    else { Out.Add(GameEventType.SkillFailed, text: AmmoName(w) + "が無い"); return false; }
+                    // 弾・矢・投げ星が無いと弱く殴る（クラシックどおり。弓・クロスボウは弓で、クローは拳で、銃は銃身で）。
+                    // 弾が尽きても攻撃できなくなって詰まないように（PLAYTEST.md）。お知らせも出す
+                    whack = true;
+                    if (!ammoOutNoted) Out.Add(GameEventType.Message, w.Ammo, text: AmmoName(w) + "が無い（弱く殴る）");
+                    ammoOutNoted = true;
                 }
-                else Inventory.Remove(Stats.AmmoItem, 1);
+                else { Inventory.Remove(Stats.AmmoItem, 1); ammoOutNoted = false; }
             }
             bool fromStealth = Stats.Stealth;
             Buffs.RemoveStealth();
@@ -572,7 +575,7 @@ namespace Lumina.Core.Game
             stolenFrom.Remove(mob);
             GainExp((long)Math.Max(1, Math.Round(def.Exp * mul)));
             foreach (var note in Quests.Progress(ObjectiveType.Kill, def.Id)) OnQuestNote(note);
-            var drops = DropRoller.Roll(def, Data, Rng, 1, 1 + Stats.Mods.MesoPct / 100);
+            var drops = DropRoller.Roll(def, Data, Rng, 1 + Stats.Mods.DropPct / 100, 1 + Stats.Mods.MesoPct / 100);
             AddQuestDrops(def, drops);   // 転職の試験の印（GameSession.Rooms.cs）
             OnMobKilledTown(mob);        // boss_kill・ダンジョンのクリア
             if (drops.Count > 0)

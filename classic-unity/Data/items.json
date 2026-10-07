@@ -310,6 +310,32 @@
    }
   },
   {
+   "id": "use.exp_coupon",
+   "name": "経験値 2 倍の券（30 分）",
+   "tab": "use",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 5000,
+   "use": {
+    "expPct": 100,
+    "buffSec": 1800
+   },
+   "desc": "30 分、敵の経験値が 2 倍。店で売ると 5,000 ルド"
+  },
+  {
+   "id": "use.drop_coupon",
+   "name": "ドロップ 2 倍の券（30 分）",
+   "tab": "use",
+   "maxStack": 100,
+   "price": 0,
+   "sellPrice": 50000,
+   "use": {
+    "dropPct": 100,
+    "buffSec": 1800
+   },
+   "desc": "30 分、敵の落とす物が 2 倍の率。店で売ると 5 万ルド"
+  },
+  {
    "id": "use.safety_charm",
    "name": "守りのお守り",
    "tab": "use",
@@ -15575,7 +15601,7 @@
    "job": "magician",
    "reqLevel": 8,
    "reqStat": "INT",
-   "reqValue": 30,
+   "reqValue": 20,
    "stats": {
     "watk": 7,
     "matk": 30
@@ -15967,7 +15993,7 @@
    "job": "magician",
    "reqLevel": 8,
    "reqStat": "INT",
-   "reqValue": 30,
+   "reqValue": 20,
    "stats": {
     "watk": 8,
     "matk": 35
@@ -16359,7 +16385,7 @@
    "job": "bowman",
    "reqLevel": 10,
    "reqStat": "DEX",
-   "reqValue": 35,
+   "reqValue": 25,
    "stats": {
     "watk": 27
    },
@@ -16733,7 +16759,7 @@
    "job": "bowman",
    "reqLevel": 10,
    "reqStat": "DEX",
-   "reqValue": 35,
+   "reqValue": 25,
    "stats": {
     "watk": 29
    },
@@ -17106,8 +17132,8 @@
    "slot": "weapon",
    "job": "thief",
    "reqLevel": 10,
-   "reqStat": "LUK",
-   "reqValue": 35,
+   "reqStat": "DEX",
+   "reqValue": 25,
    "stats": {
     "watk": 11
    },
@@ -17480,8 +17506,8 @@
    "slot": "weapon",
    "job": "thief",
    "reqLevel": 10,
-   "reqStat": "LUK",
-   "reqValue": 35,
+   "reqStat": "DEX",
+   "reqValue": 25,
    "stats": {
     "watk": 28
    },
@@ -17854,8 +17880,8 @@
    "slot": "weapon",
    "job": "pirate",
    "reqLevel": 10,
-   "reqStat": "STR",
-   "reqValue": 35,
+   "reqStat": "DEX",
+   "reqValue": 20,
    "stats": {
     "watk": 23
    },
@@ -18229,7 +18255,7 @@
    "job": "pirate",
    "reqLevel": 10,
    "reqStat": "DEX",
-   "reqValue": 35,
+   "reqValue": 20,
    "stats": {
     "watk": 17
    },

@@ -41,8 +41,8 @@ namespace Lumina.Core.Tests
             var d = TestData.Get();
             var expect = new (string id, int hp, int exp, int atk, int def, int avoid, int meso)[]
             {
-                ("M001", 8, 3, 6, 0, 1, 4), ("M002", 13, 4, 7, 1, 1, 5), ("M003", 20, 6, 8, 1, 1, 6), ("M004", 28, 8, 10, 1, 2, 7),
-                ("M005", 55, 13, 14, 2, 2, 11), ("M006", 88, 19, 17, 4, 3, 17), ("M007", 1400, 224, 31, 10, 5, 150),
+                ("M001", 8, 3, 6, 0, 1, 4), ("M002", 13, 4, 7, 1, 1, 5), ("M003", 20, 6, 8, 1, 1, 6), ("M004", 28, 8, 10, 1, 2, 8),
+                ("M005", 55, 13, 14, 2, 2, 13), ("M006", 88, 19, 17, 4, 3, 22), ("M007", 1400, 224, 31, 10, 4, 214),
             };
             foreach (var e in expect)
             {
@@ -271,7 +271,7 @@ namespace Lumina.Core.Tests
             }
             Assert.InRange(meso / (double)n, 0.58, 0.62);
             Assert.InRange(etc / (double)n, 0.53, 0.57);
-            Assert.InRange(red / (double)n, 0.03, 0.05);
+            Assert.InRange(red / (double)n, 0.06, 0.08); // 薬 7%（curves.mjs の POT_DROP）
             // 強敵は Lv 帯の装備を 30% で落とす
             int eq = 0;
             for (int i = 0; i < 2000; i++) eq += DropRoller.Roll(d.Mob("M007"), d, rng).Count(x => x.Equip != null && x.ItemId != "eq.unique.M007");

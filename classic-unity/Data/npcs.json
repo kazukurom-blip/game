@@ -1012,7 +1012,8 @@
     "toPortal": "sp",
     "minLevel": 0,
     "oneWay": false,
-    "fee": 1000
+    "fee": 1000,
+    "homeward": true
    }
   },
   {
@@ -1349,7 +1350,8 @@
     "toPortal": "sp",
     "minLevel": 0,
     "oneWay": false,
-    "fee": 1000
+    "fee": 1000,
+    "homeward": true
    }
   },
   {
@@ -1440,7 +1442,8 @@
     "toPortal": "sp",
     "minLevel": 0,
     "oneWay": false,
-    "fee": 1500
+    "fee": 1500,
+    "homeward": true
    }
   },
   {
@@ -1485,7 +1488,8 @@
     "toPortal": "sp",
     "minLevel": 0,
     "oneWay": false,
-    "fee": 2000
+    "fee": 2000,
+    "homeward": true
    }
   },
   {
@@ -1564,7 +1568,8 @@
     "toPortal": "sp",
     "minLevel": 0,
     "oneWay": false,
-    "fee": 3000
+    "fee": 3000,
+    "homeward": true
    }
   },
   {

@@ -5,8 +5,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { expTable, mobBase, KIND_MUL, soloMul, nice } from './lib/curves.mjs';
-import { MONSTERS_RAW } from './data/monsters.mjs';
+import { earlyHpMul, FRAIL_AVOID, POT_DROP, expTable, mobBase, KIND_MUL, soloMul, nice } from './lib/curves.mjs';
+import { MONSTERS_RAW, MOB_TUNE } from './data/monsters.mjs';
 import { MAPS_RAW, REGIONS, TRAVEL } from './data/maps.mjs';
 import { armorList, extraList, weaponList, STARTER } from './data/equips.mjs';
 import { SCROLLS, scrollsFor } from './data/scrolls.mjs';
@@ -14,6 +14,7 @@ import { huntTable, killsPerMin } from './hunt_speed.mjs';
 import { QUESTS_RAW } from './data/quests.mjs';
 import { expToNext } from './lib/curves.mjs';
 import { check } from './balance_check.mjs';
+import { playerAcc, hitChance } from './lib/combat.mjs';
 
 const DOCS = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'docs');
 const CHECK_ONLY = process.argv.includes('--check');
@@ -29,12 +30,14 @@ const BAND = (lv) => [10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 80, 90, 100, 110, 
 export const MONSTERS = MONSTERS_RAW.map(([id, name, lv, kind, move, atkType, el, etc, special, note, speed = 0]) => {
   const b = mobBase(lv);
   const k = KIND_MUL[kind];
+  const t = MOB_TUNE[id] || {};
   const magic = atkType.includes('魔');
+  const atk = b.atk * k.atk * (t.atk ?? 1);
   return {
-    id, name, lv, kind, move, atkType, el, etc, special, note, speed,
-    hp: nice(b.hp * k.hp), mp: magic ? nice(lv * 6 + 10) : nice(lv * 2), exp: nice(b.exp * k.exp),
-    atk: nice(b.atk * k.atk), matk: magic ? nice(b.atk * k.atk * 1.1) : 0, def: nice(b.def * k.def), mdef: nice(b.def * k.def * (magic ? 1.3 : 0.8)),
-    avoid: Math.round(b.avoid * (kind === 'frail' ? 1.5 : 1)), acc: Math.round(lv * 1.4 + 5), meso: nice(b.meso * (kind === 'boss' ? 30 : kind === 'raid' ? 100 : kind === 'elite' ? 6 : 1)),
+    id, name, lv, kind, move, atkType, el, etc, special, note, speed, etcChance: t.etc ?? 0.55,
+    hp: nice(b.hp * k.hp * earlyHpMul(lv, kind) * (t.hp ?? 1)), mp: magic ? nice(lv * 6 + 10) : nice(lv * 2), exp: nice(b.exp * k.exp),
+    atk: nice(atk), matk: magic ? nice(atk * 1.1) : 0, def: nice(b.def * k.def), mdef: nice(b.def * k.def * (magic ? 1.3 : 0.8)),
+    avoid: Math.round(b.avoid * (kind === 'frail' ? FRAIL_AVOID : 1)), acc: Math.round(lv * 1.4 + 5), meso: nice(b.dropMeso * (kind === 'boss' ? 30 : kind === 'raid' ? 100 : kind === 'elite' ? 6 : 1)),
     maps: [],
   };
 });
@@ -71,7 +74,7 @@ function dropsOf(m) {
   const [hp, mp] = POT(m.lv);
   const big = ['boss', 'raid'].includes(m.kind);
   const sc = scrollsFor(m.id).map((s) => SCROLLS.find((x) => x[0] === s)).map((s) => `${s[1]}${s[2]}の書`);
-  const parts = [`${m.etc} 55%`, `${hp}・${mp} 各 4%`, `${ORE(m.lv)} 2%`];
+  const parts = [`${m.etc} ${Math.round(m.etcChance * 100)}%`, `${hp}・${mp} 各 ${Math.round(POT_DROP * 100)}%`, `${ORE(m.lv)} 2%`];
   if (m.lv >= 15) parts.push(`${GEM(m.lv)} 1%`);
   if (m.lv >= 10) parts.push(`装備(Lv${BAND(m.lv) || 10}帯) ${big ? '100%×3 個' : m.kind === 'elite' ? '30%' : '0.8%'}`);
   parts.push(`${sc.join('・')} 60%版 ${big ? '30%' : '0.3%'} / 10%版 ${big ? '10%' : '0.1%'}`);
@@ -205,6 +208,20 @@ function genHunt() {
   }
   return out.join('\n');
 }
+// 命中の目安（STATS.md 2-3）: 近接職（戦士・海賊）の振り方ごとに、ふつうの敵（回避は curves.mjs）に当たる率。装備・スキルの命中は入れない
+function genHit() {
+  const builds = [['DEX 4（振らない）', () => 4], ['DEX Lv÷3+4', (lv) => Math.round(lv / 3 + 4)], ['DEX Lv×0.55+4', (lv) => Math.round(lv * 0.55 + 4)]];
+  const diffs = [-5, 0, 5, 10];
+  const out = ['| Lv | 振り方 | 命中 | 敵 Lv−5 | 同じ Lv | 敵 Lv+5 | 敵 Lv+10 |', '|---|---|---|---|---|---|---|'];
+  for (const lv of [10, 30, 50, 70, 120, 160, 200]) {
+    for (const [name, dex] of builds) {
+      const acc = playerAcc({ lv, dex: dex(lv), luk: 4 });
+      const cells = diffs.map((d) => { const ml = Math.max(1, lv + d); return Math.round(100 * hitChance(acc, Math.round(mobBase(ml).avoid), lv, ml)) + '%'; });
+      out.push(`| ${lv} | ${name} | ${Math.round(acc)} | ${cells.join(' | ')} |`);
+    }
+  }
+  return out.join('\n');
+}
 function genBalance() {
   const out = ['| Lv | 戦士 撃破/分 | 魔法使い | 弓使い | 盗賊 | 海賊 | 想定 | 戦士 耐える回数 | 魔法使い | 弓使い | 盗賊 | 海賊 |', '|---|---|---|---|---|---|---|---|---|---|---|---|'];
   for (const lv of [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 199]) {
@@ -257,7 +274,7 @@ function genCounts() {
 const BLOCKS = {
   'MONSTERS.md': { monsters: genMonsters, bosstime: genBossTime },
   'WORLD.md': { maps: genMaps, travel: genTravel },
-  'STATS.md': { exp: genExp, hunt: genHunt, balance: genBalance },
+  'STATS.md': { exp: genExp, hit: genHit, hunt: genHunt, balance: genBalance },
   'ITEMS.md': { equips: genEquips, scrolls: genScrolls },
   'DESIGN.md': { counts: genCounts },
   'QUESTS.md': { quests: genQuests, qstats: genQStats },

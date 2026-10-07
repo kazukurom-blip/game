@@ -62,6 +62,8 @@ namespace Lumina.Core.World
     {
         public string To, ToPortal, RequiresQuest;
         public int MinLevel; public long Fee; public bool OneWay;
+        /// <summary>帰りの便（大陸の方へ戻る乗り物）。お金が足りない時は有り金だけで乗せてくれる（乗り物でしか出入りできない地域で詰まないように。PLAYTEST.md）</summary>
+        public bool Homeward;
     }
 
     /// <summary>タクシー（行き先がいくつもある乗り物）。初心者（0 次）は料金 ÷ BeginnerDiv。</summary>
@@ -168,7 +170,7 @@ namespace Lumina.Core.World
                     npc.Travel = new TravelData
                     {
                         To = J.Str(tr, "to"), ToPortal = J.Str(tr, "toPortal"), RequiresQuest = J.Str(tr, "requiresQuest"),
-                        MinLevel = J.Int(tr, "minLevel"), Fee = J.Long(tr, "fee"), OneWay = J.Bool(tr, "oneWay"),
+                        MinLevel = J.Int(tr, "minLevel"), Fee = J.Long(tr, "fee"), OneWay = J.Bool(tr, "oneWay"), Homeward = J.Bool(tr, "homeward"),
                     };
                 }
                 var tx = J.Obj(r, "taxi");

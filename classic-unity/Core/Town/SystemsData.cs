@@ -99,6 +99,8 @@ namespace Lumina.Core.Town
         public int InventoryPlus = 4;
         /// <summary>1 次転職でもらう物（JOBS.md 3-1）。系統 → 品と個数。</summary>
         public readonly Dictionary<string, List<CraftIngredient>> FirstJobItems = new Dictionary<string, List<CraftIngredient>>();
+        /// <summary>系統 → 転職のクエストの頭（warrior → J1）。J1-1 の依頼者がその系統の転職官。</summary>
+        public readonly Dictionary<string, string> Lines = new Dictionary<string, string>();
     }
 
     public sealed class ChestDef
@@ -185,6 +187,8 @@ namespace Lumina.Core.Town
                     s.Jobs.QuestDrops.Add(new QuestDrop { Quest = J.Str(x, "quest"), Mob = J.Str(x, "mob"), Item = J.Str(x, "item") });
                 }
                 s.Jobs.InventoryPlus = J.Int(jb, "inventoryPlus", 4);
+                var ln = J.Obj(jb, "lines");
+                if (ln != null) foreach (var kv in ln) s.Jobs.Lines[kv.Key] = kv.Value as string;
                 var fj = J.Obj(jb, "firstJobItems");
                 if (fj != null)
                     foreach (var kv in fj)

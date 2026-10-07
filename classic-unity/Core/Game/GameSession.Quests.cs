@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using Lumina.Core.Quests;
+using Lumina.Core.Town;
+using Lumina.Core.Util;
 using Lumina.Core.World;
 
 namespace Lumina.Core.Game
@@ -91,6 +93,7 @@ namespace Lumina.Core.Game
             }
             foreach (var o in q.Objectives) if (o.Type == ObjectiveType.Collect) Inventory.Remove(o.Target, o.Count);
             Quests.MarkCompleted(q.Id, (long)PlaySec);
+            if (q.Repeat != null) Daily.Use(RepeatKey(q), Clock(), q.Weekly); // 繰り返し: 今日（今週）はもう受けられない
             Out.Add(GameEventType.QuestCompleted, q.Id, q.Exp, text: q.Name);
             if (q.Meso > 0) { Inventory.AddMeso(q.Meso); Out.Add(GameEventType.MesoPicked, q.Id, q.Meso); }
             foreach (var rw in q.Rewards)
@@ -104,6 +107,33 @@ namespace Lumina.Core.Game
             RefreshStats();
             AutoSave.Request("quest");
             return CompleteResult.Ok;
+        }
+
+        // ---------------- 繰り返しのクエスト（R 系。QUESTS.md 5 章）
+
+        /// <summary>1 日に掲示板に出る本数</summary>
+        public const int BoardPerDay = 3;
+        /// <summary>掲示板の候補にする数（自分の Lv 以下で Lv の近い順）。この中から日付で 3 本を選ぶ</summary>
+        public const int BoardPool = 5;
+
+        private static string RepeatKey(QuestDef q) => "quest." + q.Id;
+
+        /// <summary>
+        /// 今日の募集の掲示板（自分の Lv に合う 3 本）。受けられる Lv の物のうち Lv の近い 5 本から、日付で 3 本を選ぶ（毎日入れ替わる）。
+        /// 週の大募集（R-21）と日課（R-22）は掲示板の 3 本とは別にいつも出る（board ではない）。
+        /// </summary>
+        public List<string> BoardToday()
+        {
+            var cand = new List<QuestDef>();
+            foreach (var q in Data.QuestList) if (q.Board && q.MinLevel <= Character.Level) cand.Add(q);
+            cand.Sort((a, b) => b.MinLevel.CompareTo(a.MinLevel) != 0 ? b.MinLevel.CompareTo(a.MinLevel) : string.CompareOrdinal(a.Id, b.Id));
+            if (cand.Count > BoardPool) cand.RemoveRange(BoardPool, cand.Count - BoardPool);
+            int day = DailyLog.DayNumber(Clock());
+            var rng = new Rng(0xB0A2D5EEDUL ^ (ulong)day * 0x9E3779B97F4A7C15UL);
+            for (int i = cand.Count - 1; i > 0; i--) { int j = rng.Range(0, i); (cand[i], cand[j]) = (cand[j], cand[i]); }
+            var r = new List<string>();
+            for (int i = 0; i < cand.Count && r.Count < BoardPerDay; i++) r.Add(cand[i].Id);
+            return r;
         }
 
         private bool CollectFreesRoom(QuestDef q, Items.ItemDef reward)
@@ -169,7 +199,7 @@ namespace Lumina.Core.Game
             return true;
         }
 
-        /// <summary>乗り物（船など）に乗る。島の船は Lv7 以上・片道。useTicket = true なら雲の船の切符を 1 枚使う（料金なし）。</summary>
+        /// <summary>乗り物（船など）に乗る。島の船は Lv7 以上・片道。useTicket = true なら雲の船の切符を 1 枚使う（料金なし）。帰りの便（Homeward）はお金が足りなければ有り金で乗れる。</summary>
         public bool Travel(string npcId, bool useTicket = false)
         {
             var n = Map.Npc(npcId);
@@ -179,7 +209,13 @@ namespace Lumina.Core.Game
             if (t.RequiresQuest != null && Quests.Status(t.RequiresQuest) == QuestStatus.None) { Out.Add(GameEventType.Message, npcId, text: "まだ乗れない"); return false; }
             long fee = t.Fee;
             if (useTicket && fee > 0 && Inventory.Has("use.ship_ticket")) { Inventory.Remove("use.ship_ticket"); fee = 0; }
-            if (Inventory.Meso < fee) { Out.Add(GameEventType.Message, npcId, text: "お金が足りない"); return false; }
+            if (Inventory.Meso < fee)
+            {
+                // 帰りの便は有り金だけで乗せてくれる（乗り物でしか出入りできない地域でお金が尽きても大陸へ戻れる）
+                if (!t.Homeward) { Out.Add(GameEventType.Message, npcId, text: "お金が足りない"); return false; }
+                fee = Inventory.Meso;
+                Out.Add(GameEventType.Message, npcId, text: "足りない分はまけてもらった");
+            }
             Inventory.AddMeso(-fee);
             string from = Map.Data.Region;
             Out.Add(GameEventType.Travel, t.To);

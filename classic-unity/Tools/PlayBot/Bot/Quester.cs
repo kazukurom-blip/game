@@ -349,6 +349,8 @@ namespace Lumina.PlayBot
                                        : S.Quests.CanStart(q.Id, S.Character) == StartResult.Ok && Feasible(q, out _);
                     bool startable = S.Quests.Status(q.Id) != QuestStatus.None || S.Quests.CanStart(q.Id, S.Character) == StartResult.Ok;
                     if (Level >= 10 && (!feasibleNow || !startable)) { Note("island", q.Id, "Lv" + Level + " で島のクエスト " + q.Id + " ができないまま島を出る"); continue; }
+                    // STR で殴らない系統（魔法使い・弓使い・盗賊）は、初心者のうちは木の剣で弱い。島の強敵（S-17）は待たずに Lv10 で大陸へ行って転職する（人もそうする）
+                    if (Level >= 10 && MainStat != Lumina.Core.Combat.Stat.STR && q.Objectives.Any(o => o.Type == ObjectiveType.Kill && D.Mob(o.Target)?.IsElite == true)) { Note("island", q.Id, "Lv" + Level + " で島の強敵（" + q.Id + "）は後回しにして島を出る"); continue; }
                     if (Level >= 14) { Note("island", q.Id, "Lv14 でも島のクエスト " + q.Id + " が終わらない（先に島を出る）"); continue; }
                     return false;
                 }
@@ -784,7 +786,7 @@ namespace Lumina.PlayBot
                     return P("1 次転職（" + Line + "）", Dist(NpcMap(q.Giver)) - 20, () =>
                     {
                         if (!GoToNpc(q.Giver)) return false;
-                        var r = S.AdvanceJob(Line);
+                        var r = S.AdvanceJob(Line, q.Giver);
                         if (r != AdvanceResult.Ok) { Note("advance", "1", "1 次転職できない: " + r); return false; }
                         AfterAdvanceBot();
                         return done();

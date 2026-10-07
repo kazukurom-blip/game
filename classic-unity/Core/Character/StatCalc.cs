@@ -79,7 +79,7 @@ namespace Lumina.Core.Character
         public double ChainStarChance;
         public double StealthAttackPct; public bool StealthNoSlow;
         public double BerserkHpPct;
-        public double ExpPct, MesoPct, MpCostPct;
+        public double ExpPct, MesoPct, MpCostPct, DropPct;
         public bool NoAmmo, NoMp, Invincible, StatusImmune;
         public double Reflect, MagicReflect, ShadowPartner, InfinityPct;
     }
@@ -88,8 +88,8 @@ namespace Lumina.Core.Character
     {
         /// <summary>素手の攻撃力（初心者が武器を持たない時）。STATS.md「攻撃力は Lv で決まる」→ 8 + Lv（最大 20）。似。</summary>
         public static int BareHandWatk(int level) => Math.Min(20, 8 + level);
-        /// <summary>基礎の命中（レベルで自然に上がる分）。DEX に振らない初心者でも同じくらいの Lv の敵に当たるように: 5 + Lv × 0.5（STATS.md 2 章）</summary>
-        public static double BaseAcc(int level) => 5 + level * 0.5;
+        /// <summary>基礎の命中（レベルで自然に上がる分）。DEX に振らない近接職でも同じくらいの Lv の敵にほぼ当たるように（STATS.md 2-3。式は Formulas.BaseAcc）</summary>
+        public static double BaseAcc(int level) => Formulas.BaseAcc(level);
 
         public static FinalStats Compute(CharacterState c, Equipment eq, SkillBook book, BuffSet buffs, Inventory inv, GameData data)
         {
@@ -166,7 +166,7 @@ namespace Lumina.Core.Character
             f.Wdef = es.Wdef + bs.Wdef + ps.Wdef + f.Str / 10 + (int)Math.Floor(shieldWdef * shieldDefPct / 100);
             f.Mdef = es.Mdef + bs.Mdef + ps.Mdef + f.Int / 2;
             // 命中・回避
-            f.Acc = BaseAcc(c.Level) + f.Dex * 0.8 + f.Luk * 0.5 + es.Acc + bs.Acc + ps.Acc;
+            f.Acc = Formulas.PlayerAcc(c.Level, f.Dex, f.Luk, es.Acc + bs.Acc + ps.Acc);
             f.Avoid = f.Dex * 0.25 + f.Luk * 0.5 + es.Avoid + bs.Avoid + ps.Avoid;
             f.AvoidCap = Jobs.Get(c.Line).AvoidCap;
             // 速さ・ジャンプ（100 が基準、最大 140 / 123）
@@ -185,7 +185,7 @@ namespace Lumina.Core.Character
                 mods.ChargeElement = buffs.ChargeBuff?.Element;
                 foreach (var b in buffs.List) if (b.OnHitStatus != null) mods.OnHitStatus.AddRange(b.OnHitStatus);
                 mods.DamageTakenPct += buffs.DamageReduce;
-                mods.ExpPct = buffs.ExpPct; mods.MesoPct = buffs.MesoPct; mods.MpCostPct = buffs.MpCostPct;
+                mods.ExpPct = buffs.ExpPct; mods.MesoPct = buffs.MesoPct; mods.MpCostPct = buffs.MpCostPct; mods.DropPct = buffs.DropPct;
                 mods.NoAmmo = buffs.NoAmmo; mods.NoMp = buffs.NoMp; mods.Invincible = buffs.Invincible; mods.StatusImmune = buffs.StatusImmune;
                 mods.Reflect = buffs.Reflect; mods.MagicReflect = buffs.MagicReflect; mods.ShadowPartner = buffs.ShadowPartner;
                 mods.InfinityPct = buffs.InfinityPct;

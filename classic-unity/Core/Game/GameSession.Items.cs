@@ -99,10 +99,11 @@ namespace Lumina.Core.Game
             if (u.HpPct > 0) { HealHp((int)Math.Floor(Stats.MaxHp * u.HpPct * heal)); did = true; }
             if (u.MpPct > 0) { HealMp((int)Math.Floor(Stats.MaxMp * u.MpPct * heal)); did = true; }
             bool potion = did;
-            if (u.Buff != null && u.BuffSec > 0)
+            if ((u.Buff != null || u.ExpPct > 0 || u.DropPct > 0) && u.BuffSec > 0)
             {
-                double sec = u.BuffSec * time;
-                Buffs.Apply(new ActiveBuff { Id = itemId, Name = def.Name, Stats = u.Buff.Clone(), Total = sec, Remaining = sec });
+                // 券（経験値・ドロップ 2 倍）は調合上手の時間 +% はのらない
+                double sec = u.Buff != null ? u.BuffSec * time : u.BuffSec;
+                Buffs.Apply(new ActiveBuff { Id = itemId, Name = def.Name, Stats = u.Buff?.Clone() ?? new StatBlock(), Total = sec, Remaining = sec, ExpPct = u.ExpPct, DropPct = u.DropPct });
                 Out.Add(GameEventType.BuffStarted, itemId, (long)sec);
                 did = true;
             }
@@ -314,8 +315,35 @@ namespace Lumina.Core.Game
             }
         }
 
-        /// <summary>1 次転職（JOBS.md 3-1。試験は別）。持ち物の枠が装備・消費・その他で +4、職の武器などをもらう。</summary>
+        /// <summary>その系統の 1 次の転職官（J?-1 の依頼者。戦士 → 戦士長ドルガ など）。</summary>
+        public string InstructorOf(string line)
+            => line != null && Data.Systems.Jobs.Lines.TryGetValue(line, out var pre) ? Data.Quest(pre + "-1")?.Giver : null;
+
+        /// <summary>
+        /// 1 次転職（JOBS.md 3-1。試験は別）。持ち物の枠が装備・消費・その他で +4、職の武器などをもらう。
+        /// 転職官のいるマップでは、その転職官の系統にしかなれない（盗賊の転職官の前で戦士にはなれない）。
+        /// </summary>
         public AdvanceResult AdvanceJob(string line)
+        {
+            string mine = InstructorOf(line);
+            bool anyInstructor = false;
+            foreach (var kv in Data.Systems.Jobs.Lines)
+            {
+                string npc = InstructorOf(kv.Key);
+                if (npc != null && Map.Npc(npc) != null) anyInstructor = true;
+            }
+            if (anyInstructor && (mine == null || Map.Npc(mine) == null)) return AdvanceResult.WrongNpc;
+            return AdvanceFirstJob(line);
+        }
+
+        /// <summary>話している転職官（npcId）から 1 次転職する（UI から呼ぶ形）。転職官がこのマップにいて、その系統の転職官でないと WrongNpc。</summary>
+        public AdvanceResult AdvanceJob(string line, string npcId)
+        {
+            if (npcId == null || Map.Npc(npcId) == null || InstructorOf(line) != npcId) return AdvanceResult.WrongNpc;
+            return AdvanceFirstJob(line);
+        }
+
+        private AdvanceResult AdvanceFirstJob(string line)
         {
             var r = Character.AdvanceFirst(line, Rng);
             if (r != AdvanceResult.Ok) return r;

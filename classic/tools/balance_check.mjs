@@ -3,7 +3,7 @@
 // 各職の「その Lv の標準的な育て方」（AP の振り方・店で買える装備・代表的な狩りスキル）で、
 // 自分の Lv-2 のふつうの敵を倒すのに何回攻撃が要るか、1 分で何匹倒せるか、敵から何回殴られると倒れるかを出す。
 // 目標: 1 分の撃破数が hunt_speed.mjs の想定（killsPerMin）以上、倒れるまでの被弾回数が戦士 8 回以上・魔法使い 3 回以上。
-import { mobBase, KIND_MUL } from './lib/curves.mjs';
+import { mobBase, KIND_MUL, earlyHpMul } from './lib/curves.mjs';
 import { physRange, magicRange, afterDef, damageTaken } from './lib/combat.mjs';
 import { weaponAtk, BANDS, HIGH } from './data/equips.mjs';
 import { killsPerMin } from './hunt_speed.mjs';
@@ -40,7 +40,8 @@ export function check(job, lv) {
   const p = player(job, lv);
   const [k, targets, aps, mastery] = PLAN[job].stages[stageOf(lv, job)];
   const mobLv = Math.max(1, lv - 2);
-  const mob = mobBase(mobLv);
+  const mob = { ...mobBase(mobLv) };
+  mob.hp *= earlyHpMul(mobLv); // ふつうの敵（1 次〜2 次の始めの HP の補正込み）
   let avg;
   if (PLAN[job].magic) {
     const r = magicRange({ int: p.main, matk: p.matk, spell: k, mastery });

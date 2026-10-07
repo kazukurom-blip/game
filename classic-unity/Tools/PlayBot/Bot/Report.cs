@@ -40,7 +40,8 @@ namespace Lumina.PlayBot
             sb.AppendLine("- お金の出入り（1 時間あたり）: 拾った " + (MesoDropped / hrs).ToString("N0") + "・売った " + (MesoSold / hrs).ToString("N0") + "・クエスト " + (MesoQuest / hrs).ToString("N0")
                 + " / 薬 " + (PotionMesoUsed / hrs).ToString("N0") + "（" + (PotionsUsed / hrs).ToString("0") + " 個）・店で使った全部 " + (MesoSpent / hrs).ToString("N0"));
             sb.AppendLine("- 時間の使い方: " + string.Join("・", TimeUse.OrderByDescending(k => k.Value).Select(k => k.Key + " " + (100 * k.Value / Math.Max(1, S.PlaySec)).ToString("0") + "%"))
-                + "・受けたダメージ " + DamageTaken.ToString("N0") + "（" + HitsTaken + " 回・1 体あたり " + (Kills > 0 ? (double)HitsTaken / Kills : 0).ToString("0.00") + " 回）");
+                + "・受けたダメージ " + DamageTaken.ToString("N0") + "（" + HitsTaken + " 回・1 体あたり " + (Kills > 0 ? (double)HitsTaken / Kills : 0).ToString("0.00") + " 回。"
+                + string.Join("・", DamageByBucket.OrderByDescending(k => k.Value).Select(k => k.Key + " " + (100.0 * k.Value / Math.Max(1, DamageTaken)).ToString("0") + "%")) + "）");
             sb.AppendLine("- 攻撃: 振った " + Swings + "（1 体も当たらなかった " + Whiffs + "）・当たった " + MobHits + "・MISS " + Misses + "（" + (MobHits + Misses > 0 ? 100.0 * Misses / (MobHits + Misses) : 0).ToString("0") + "%）・1 体あたり " + (Kills > 0 ? (double)Swings / Kills : 0).ToString("0.0") + " 振り・1 撃 " + (MobHits > 0 ? DamageDealt / MobHits : 0));
             sb.AppendLine("- 経験値: クエスト " + QuestExp.ToString("N0") + " / 全部 " + MobExp.ToString("N0") + "（クエストの割合 " + (MobExp > 0 ? (100.0 * QuestExp / MobExp).ToString("0.0") : "0") + "%）");
             sb.AppendLine("- セーブ→読み込み " + SaveChecks + " 回（違い " + SaveMismatches + " 回）");

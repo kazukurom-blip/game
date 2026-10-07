@@ -239,18 +239,7 @@ namespace Lumina.PlayBot
 
         public void WearBest()
         {
-            // 弾・投げ星が無くて職の武器で攻撃できない時は、持っている「弾の要らない武器」に持ち替える（木の剣など）
-            if (S.Stats.NeedsAmmo && S.Stats.AmmoItem == null && !S.Stats.Mods.NoAmmo && S.Stats.WeaponType != "弓" && S.Stats.WeaponType != "クロスボウ")
-            {
-                for (int i = 0; i < S.Inventory.SlotCount(InvTab.Equip); i++)
-                {
-                    var it = S.Inventory.Get(InvTab.Equip, i);
-                    var def = it != null ? D.Item(it.ItemId) : null;
-                    if (def == null || def.Slot != EquipSlot.Weapon || !CanWear(def)) continue;
-                    if (RangedReach(def.WeaponType) > 0 && def.WeaponType != "弓") continue;
-                    if (S.EquipFromInventory(i) == EquipResult.Ok) { Note("ammo", Line, "弾が無いので " + def.Name + " に持ち替えた（Lv" + Level + "）"); return; }
-                }
-            }
+            // 弾・投げ星が無くても職の武器で弱く殴れる（Core）ので、持ち替えない（買えるようになるまで殴って稼ぐ）
             for (int pass = 0; pass < 3; pass++)
             {
                 bool changed = false;
@@ -260,7 +249,6 @@ namespace Lumina.PlayBot
                     if (it == null) continue;
                     var def = D.Item(it.ItemId);
                     if (!CanWear(def)) continue;
-                    if (def.Slot == EquipSlot.Weapon && AmmoKind != null && WeaponTypes.Contains(def.WeaponType) && def.WeaponType != "弓" && AmmoCount() == 0 && !S.Stats.Mods.NoAmmo) continue; // 投げ星が無いクローは持たない
                     if (EquipScore(def, it.Stats) > WornScore(def) + 0.5)
                     {
                         if (S.EquipFromInventory(i) == EquipResult.Ok) changed = true;
@@ -626,6 +614,8 @@ namespace Lumina.PlayBot
                     int have = AmmoCount();
                     if (have >= 1500) break;
                     long unit = e.Price;
+                    // 弾がほとんど無い時は 1 束を何より先に（弱く殴るだけでは稼げず、薬だけ買っても抜け出せない）
+                    if (have < 200 && unit <= S.Inventory.Meso) { if (S.Buy(n.Shop, e.Item, 1) == ShopResult.Ok) { budget = Math.Max(0, budget - unit); MesoSpent += unit; } continue; }
                     if (unit > budget * 0.5) continue;
                     int packs = (int)Math.Max(1, Math.Min((2000 - have) / Math.Max(1, D.Item(e.Item).MaxStack) + 1, budget * 0.5 / Math.Max(1, unit)));
                     for (int i = 0; i < packs; i++) if (S.Buy(n.Shop, e.Item, 1) == ShopResult.Ok) { budget -= unit; MesoSpent += unit; } else break;

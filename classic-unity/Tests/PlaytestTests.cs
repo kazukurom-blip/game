@@ -8,6 +8,7 @@ using Lumina.Core.Character;
 using Lumina.Core.Game;
 using Lumina.Core.Items;
 using Lumina.Core.Quests;
+using Lumina.Core.Combat;
 using Lumina.PlayBot;
 using Xunit;
 using Xunit.Abstractions;
@@ -80,6 +81,147 @@ namespace Lumina.Core.Tests
             Assert.Equal(StartResult.Ok, s.AcceptQuest("J3-6"));
             s.Quests.MarkCompleted("J3-6", 0);
             Assert.Equal(RoomEntryResult.NeedQuest, s.CanEnterRoom("F118"));
+        }
+    }
+
+    /// <summary>通しの検証の後の調整（PLAYTEST.md 8 章: 強さ担当）。</summary>
+    public class PlaytestBalanceTests
+    {
+        private static readonly DateTime Day1 = new DateTime(2026, 10, 7, 12, 0, 0, DateTimeKind.Utc);
+
+        private static GameSession At(string map, int level, ulong seed = 5)
+        {
+            var s = GameSession.NewGame(TestData.Get(), "調整", seed);
+            s.Clock = () => Day1;
+            s.Character.Level = level;
+            s.Character.Str = 40; s.Character.Dex = 40; s.Character.Int = 40; s.Character.Luk = 40;
+            foreach (var q in TestData.Get().QuestList.Where(q => q.Tutorial)) s.Quests.MarkCompleted(q.Id, 0);
+            s.ChangeMap(map);
+            s.RefreshStats();
+            return s;
+        }
+
+        [Theory]
+        [InlineData("thief", "use.star_iron")]
+        [InlineData("pirate", "use.bullet_lead")]
+        [InlineData("bowman", "use.arrow_bow")]
+        public void NoAmmoMeansAWeakWhackNotAStuckCharacter(string line, string ammo)
+        {
+            // 投げ星・弾が尽きた盗賊・海賊も、弓と同じく弱く殴れる（クラシックどおり）。攻撃できずに詰まない
+            var s = At("V100", 10);
+            Assert.Equal(AdvanceResult.Ok, s.AdvanceJob(line));
+            if (line == "pirate") s.EquipItem("eq.pirate.gun.10"); else s.EquipItem(s.Inventory.All().First(t => TestData.Get().Item(t.item.ItemId)?.Slot == EquipSlot.Weapon && TestData.Get().Item(t.item.ItemId).WeaponType != "片手剣").item.ItemId);
+            s.Inventory.Remove(ammo, s.Inventory.Count(ammo));
+            s.RefreshStats();
+            Assert.True(s.Stats.NeedsAmmo);
+            Assert.Null(s.Stats.AmmoItem);
+            Assert.True(s.StartBasicAttack());
+            Assert.True(s.Attack.Whack);
+            Assert.Contains(s.Out.Events, e => e.Type == GameEventType.Message && e.Text != null && e.Text.Contains("弱く殴る"));
+        }
+
+        [Fact]
+        public void HomewardRideTakesWhatYouHave()
+        {
+            // 乗り物でしか出入りできない地域（雲の上など）でお金が尽きても、帰りの便は有り金で乗せてくれる
+            var s = At("C101", 30);
+            s.Inventory.AddMeso(300 - s.Inventory.Meso);
+            Assert.False(s.Travel("sora"));              // ティンクル行き（帰りの便ではない）は 1,000 要る
+            Assert.Equal("C101", s.Map.Data.Id);
+            Assert.True(s.Travel("luna"));               // 大陸（森都の駅）へ戻る便
+            Assert.Equal("V310", s.Map.Data.Id);
+            Assert.Equal(0, s.Inventory.Meso);
+            // お金があれば運賃どおり
+            var t = At("T101", 30);
+            t.Inventory.AddMeso(5000 - t.Inventory.Meso);
+            Assert.True(t.Travel("kippu"));
+            Assert.Equal(4000, t.Inventory.Meso);
+        }
+
+        [Fact]
+        public void FirstJobOnlyFromThatLinesInstructor()
+        {
+            // 盗賊の転職官ヤミの前では盗賊にしかなれない（AdvanceJob が転職官の系統を確かめる）
+            var s = At("V500", 10);
+            Assert.Equal("yami", s.InstructorOf("thief"));
+            Assert.Equal(AdvanceResult.WrongNpc, s.AdvanceJob("warrior"));
+            Assert.Equal(AdvanceResult.WrongNpc, s.AdvanceJob("warrior", "yami"));
+            Assert.Equal(AdvanceResult.WrongNpc, s.AdvanceJob("thief", "dorga")); // ドルガはここにいない
+            Assert.Equal(0, s.Character.Tier);
+            Assert.Equal(AdvanceResult.Ok, s.AdvanceJob("thief", "yami"));
+            Assert.Equal("thief", s.Character.Line);
+        }
+
+        [Theory]
+        [InlineData("thief", "eq.thief.claw.10", 25, 4)]
+        [InlineData("bowman", "eq.bowman.bow.10", 25, 4)]
+        [InlineData("pirate", "eq.pirate.knuckle.10", 20, 4)]
+        [InlineData("magician", "eq.magician.wand.8", 4, 20)]
+        public void FirstJobWeaponNeedsOnlyTheAdvanceStat(string line, string weapon, int dex, int intel)
+        {
+            // 1 次でもらう武器は、転職の条件と同じ能力値で持てる（盗賊 DEX25 で LUK が低くてもクローを持てる）
+            var s = At("V100", line == "magician" ? 8 : 10);
+            s.Character.Str = 4; s.Character.Dex = dex; s.Character.Int = intel; s.Character.Luk = 4;
+            s.RefreshStats();
+            Assert.Equal(AdvanceResult.Ok, s.AdvanceJob(line));
+            Assert.Equal(EquipResult.Ok, s.EquipItem(weapon));
+        }
+
+        [Fact]
+        public void RepeatQuestsAreDailyFromTheBoard()
+        {
+            // 募集の掲示板（QUESTS.md 5 章）: 毎日、自分の Lv に合う 3 本。同じ物は 1 日 1 回。報酬は券（売ると 5,000 ルド）
+            var s = At("V090", 32);
+            var today = s.BoardToday();
+            Assert.Equal(3, today.Count);
+            foreach (var id in today) Assert.True(TestData.Get().Quest(id).MinLevel <= 32);
+            var off = TestData.Get().QuestList.First(q => q.Board && q.MinLevel <= 32 && !today.Contains(q.Id));
+            Assert.Equal(StartResult.NotToday, s.Quests.CanStart(off.Id, s.Character));
+            var q0 = TestData.Get().Quest(today[0]);
+            Assert.Equal(StartResult.Ok, s.AcceptQuest(q0.Id));
+            s.Quests.Progress(ObjectiveType.Kill, q0.Objectives[0].Target, q0.Objectives[0].Count);
+            Assert.Equal(CompleteResult.Ok, s.CompleteQuest(q0.Id));
+            string coupon = q0.MinLevel <= 75 ? "use.exp_coupon" : "use.drop_coupon";
+            Assert.Equal(1, s.Inventory.Count(coupon));
+            Assert.Equal(StartResult.AlreadyCompleted, s.Quests.CanStart(q0.Id, s.Character)); // 今日はもう受けられない
+            // 次の日は、掲示板に出ていればまた受けられる
+            for (int d = 1; d < 30; d++)
+            {
+                var day = Day1.AddDays(d);
+                s.Clock = () => day;
+                if (!s.BoardToday().Contains(q0.Id)) { Assert.Equal(StartResult.NotToday, s.Quests.CanStart(q0.Id, s.Character)); continue; }
+                Assert.Equal(StartResult.Ok, s.Quests.CanStart(q0.Id, s.Character));
+                break;
+            }
+            // 券: 使うと 30 分 経験値 2 倍。売ると 5,000 ルド
+            Assert.True(s.UseItem(coupon));
+            if (coupon == "use.exp_coupon") Assert.Equal(100, s.Stats.Mods.ExpPct, 9); else Assert.Equal(100, s.Stats.Mods.DropPct, 9);
+            Assert.Equal(5000, TestData.Get().Item("use.exp_coupon").SellPrice);
+        }
+
+        [Fact]
+        public void WeeklyBossRequestOncePerWeek()
+        {
+            var s = At("V090", 40);
+            Assert.Equal(StartResult.Ok, s.AcceptQuest("R-21"));
+            s.Quests.MarkCompleted("R-21", 0);
+            s.Daily.Use("quest.R-21", Day1, weekly: true);
+            Assert.Equal(StartResult.AlreadyCompleted, s.Quests.CanStart("R-21", s.Character));
+            var next = Day1.AddDays(7);
+            s.Clock = () => next;
+            Assert.Equal(StartResult.Ok, s.Quests.CanStart("R-21", s.Character));
+        }
+
+        [Fact]
+        public void JobTestMonstersAreSoloable()
+        {
+            var d = TestData.Get();
+            // 2 次の試しの魔物: ふつうの Lv25 の半分の HP、珠は 80%
+            Assert.Equal(0.8, d.Mob("M301").Drops.First(x => x.Item == "etc.M301").Chance, 9);
+            Assert.True(d.Mob("M301").Hp < 700);
+            // 4 次の紅翼の主・蒼翼の主: HP ×0.5・攻撃 ×0.7、30 分ごとに出る
+            foreach (var id in new[] { "M211", "M212" }) { Assert.Equal(403000, d.Mob(id).Hp); Assert.True(d.Mob(id).Atk < 700); }
+            Assert.Contains(d.GetMap("D105").TimedSpawns, t => t.Mob == "M211" && t.IntervalSec == 1800);
         }
     }
 

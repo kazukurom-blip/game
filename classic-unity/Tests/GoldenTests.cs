@@ -111,6 +111,7 @@ namespace Lumina.Core.Tests
                 Near(J.Num(d, "def"), b.Def, "def", lv);
                 Near(J.Num(d, "avoid"), b.Avoid, "avoid", lv);
                 Near(J.Num(d, "meso"), b.Meso, "meso", lv);
+                Near(J.Num(d, "dropMeso"), b.DropMeso, "dropMeso", lv);
                 Near(J.Num(d, "solo"), Curves.SoloMul(lv), "solo", lv);
             }
             foreach (var o in J.Arr(G, "nice"))
@@ -174,6 +175,11 @@ namespace Lumina.Core.Tests
             {
                 var d = (Dictionary<string, object>)o;
                 Assert.Equal(J.Num(d, "out"), Formulas.HitChance(J.Num(d, "acc"), J.Num(d, "avoid"), J.Int(d, "p"), J.Int(d, "m")), 12);
+            }
+            foreach (var o in J.Arr(G, "accs"))
+            {
+                var d = (Dictionary<string, object>)o;
+                Assert.Equal(J.Num(d, "out"), Formulas.PlayerAcc(J.Int(d, "lv"), J.Num(d, "dex"), J.Num(d, "luk"), J.Num(d, "extra")), 12);
             }
             foreach (var o in J.Arr(G, "taken"))
             {

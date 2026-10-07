@@ -42,7 +42,7 @@ namespace Lumina.PlayBot
             var st = S.Stats;
             double reach = RangedReach(st.WeaponType);
             bool canShoot = reach > 0 && (!st.NeedsAmmo || st.Mods.NoAmmo || st.AmmoItem != null);
-            if (reach > 0 && st.WeaponType != "弓" && st.WeaponType != "クロスボウ" && !canShoot) return null; // クロー・銃で弾が無い
+            // 弾が無い時はどの武器も弱く殴れる（Core: 弓・クロスボウ・クロー・銃とも）
             if (canShoot) return new AttackPlan { Front = reach + st.RangeBonus, Back = 0, Up = 40, Down = 20, Ranged = true, Score = 100 };
             return new AttackPlan { Front = GameSession.MeleeFront, Back = GameSession.MeleeBack, Up = GameSession.MeleeUp, Down = GameSession.MeleeDown, Score = reach > 0 ? 30 : 100 };
         }
@@ -218,10 +218,10 @@ namespace Lumina.PlayBot
                 if (!S.Body.OnGround) { if (Settle() == null) return false; continue; }
                 int dir = m.X >= S.Body.X ? 1 : -1;
                 // 遠くから撃つ職: 敵が近づいたら離れてから撃つ（引き撃ち）
-                if (plan.Ranged && S.Attack == null && S.Body.OnGround && Math.Abs(m.X - S.Body.X) < 75 && retreats < 8 && CurNode() is string cn && cn == MobNode(m))
+                if (plan.Ranged && S.Attack == null && S.Body.OnGround && Math.Abs(m.X - S.Body.X) < 110 && retreats < 12 && CurNode() is string cn && cn == MobNode(m))
                 {
                     var (ra, rb) = R.StandRange(cn);
-                    double tx = Math.Max(ra, Math.Min(rb, S.Body.X - dir * 140));
+                    double tx = Math.Max(ra, Math.Min(rb, S.Body.X - dir * 220));
                     if (Math.Abs(tx - S.Body.X) > 50) { retreats++; WalkTo(tx, 50); continue; }
                 }
                 // 敵が体に重なっている（後ろへ回られる）: 少し下がってから（人と同じ）
@@ -231,13 +231,16 @@ namespace Lumina.PlayBot
                     for (int k = 0; k < 10; k++) Frame(new PlayerInput { Left = S.Body.Facing > 0, Right = S.Body.Facing < 0 });
                     continue;
                 }
-                if (InRange(plan, m, dir, plan.Ranged ? 0 : RangeMargin) && S.Attack == null)
+                // 跳ねる敵が体のそばにいる（跳んでいて縦の範囲から外れる）: 離れて間合いを取ろうとすると追われて殴られ続けるので、
+                // その場で振る（着地に当たる。人と同じ）
+                bool closeHopper = !plan.Ranged && S.Body.OnGround && m.Def.Move == MobMove.Jump && Math.Abs(m.X - S.Body.X) < plan.Front && m.Y < S.Body.Y + 20 && S.Body.Y - m.Y < 140;
+                if ((closeHopper || InRange(plan, m, dir, plan.Ranged ? 0 : RangeMargin)) && S.Attack == null)
                 {
                     if (S.Body.Facing != dir) { Frame(new PlayerInput { Left = dir < 0, Right = dir > 0 }); continue; }
                     var inp = plan.SkillId != null ? new PlayerInput { SkillHeld = plan.SkillId, SkillPressed = plan.SkillId } : new PlayerInput { Attack = true };
                     int sw0 = Swings, wh0 = Whiffs; double bx0 = S.Body.X, mx0 = m.X;
                     Frame(inp);
-                    if (S.Attack == null) { Frame(new PlayerInput()); continue; } // 使えなかった（MP など）
+                    if (S.Attack == null) { if (TraceFight) Say("  使えなかった " + (plan.SkillId ?? "basic") + " MP " + S.Character.Mp + " 動ける " + S.Status.CanAct + " 縄 " + S.Body.OnRope + " 状態 " + string.Join(",", S.Status.Active.Select(a => a.Kind))); Frame(new PlayerInput()); continue; } // 使えなかった（MP など）
                     for (int i = 0; i < 150 && S.Attack != null; i++) Frame(new PlayerInput());
                     if (TraceFight && Whiffs > wh0) Say("  空振り " + (plan.SkillId ?? "basic") + " 始め: 自分 " + bx0.ToString("0") + " 敵 " + mx0.ToString("0") + "（幅 " + m.Def.Width + "）→ 当たる時 自分 " + S.Body.X.ToString("0") + " 敵 " + m.X.ToString("0") + " 向き " + S.Body.Facing + " 敵の状態 " + m.State + " 生きている " + m.Alive + " y " + S.Body.Y.ToString("0") + "/" + m.Y.ToString("0"));
                     continue;

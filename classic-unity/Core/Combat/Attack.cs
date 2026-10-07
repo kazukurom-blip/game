@@ -64,7 +64,7 @@ namespace Lumina.Core.Combat
         public double Pre;              // 詠唱・溜め（秒）。この間は 1 コマ目のまま、その後に振る
         public double DashSpeed, DashTime; // 突進（攻撃の始めから DashTime 秒、前へ DashSpeed px/秒）
         public bool FromStealth;        // 闇隠れから出した攻撃（暗殺・影の衣）
-        public bool Whack;              // 弓・クロスボウで矢が無い時の弱い殴り
+        public bool Whack;              // 弾・矢・投げ星が無い時の弱い殴り（矢・星・弾は減らない）
         public double ComboPct;         // 始めた時の闘気のダメージ +%
 
         public bool Finished => Elapsed >= Duration;

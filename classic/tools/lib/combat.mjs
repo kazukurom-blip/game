@@ -53,6 +53,12 @@ export function levelPenalty(playerLv, mobLv) {
   return Math.max(0.5, 1 - 0.02 * d);
 }
 
+// 自分の命中（STATS.md 2-3）。基礎の命中（Lv で上がる分）+ DEX × 0.8 + LUK × 0.5 + 装備・スキル（extra）。
+// 基礎の命中は「DEX に振らない近接職でも同じくらいの Lv の敵にはほぼ当たる」ように（ユーザーの決定「命中の底上げ」）。
+// 5 + Lv × 1.0（初めは Lv × 0.5。通しの検証で Lv が上がるほど近接職の MISS が増えたので、敵の回避を Lv × 0.36 に下げるのと合わせて上げた）。
+export function baseAcc(lv) { return 5 + lv * 1.0; }
+export function playerAcc({ lv, dex, luk, extra = 0 }) { return baseAcc(lv) + dex * 0.8 + luk * 0.5 + extra; }
+
 // 命中率（物理）。acc: 命中、avoid: 敵の回避。
 export function hitChance(acc, avoid, playerLv, mobLv) {
   const d = Math.max(0, mobLv - playerLv);
