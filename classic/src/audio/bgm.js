@@ -82,12 +82,15 @@ export class BgmPlayer {
 }
 
 // ---------------------------------------------------------------- 書き出し（ブラウザで動かす）
-// 返り値: { sampleRate, introLen, loopLen, loopStart, length, left, right }（Float32Array）
-// イントロ → ループ → ループ と鳴らし、2 周目のループを書き出しのループ部分に使う。
-// 2 周目の頭には 1 周目の最後の残響が入っているので、loopStart〜末尾をくり返してもつなぎ目が出ない。
+// イントロ → ループ → ループ と続けて鳴らした音をそのまま返す（Float32Array）。
+// 返り値: { sampleRate, introLen, loopLen, length, left, right }
+// 書き出す側（tools/render_bgm.mjs）で 2 周目のループ [introLen+loopLen, introLen+2*loopLen) を
+// ループ部分に使う。2 周目の頭には 1 周目の最後の残響が入っているので、そこをくり返してもつなぎ目が出ない。
 export async function renderSong(song, { sampleRate = 44100, level = 0.9 } = {}) {
   const comp = compileSong(song);
-  const I = comp.intro.len, L = comp.loop.len;
+  // イントロとループの長さをサンプルの整数倍にそろえる（1 サンプル未満のずれ。書き出しで切る位置をはっきりさせる）。
+  // なお Chrome では 1 周目と 2 周目で音の始まりが数サンプルずれることがあるので、書き出す側でつなぎ目をなめらかにする
+  const I = Math.round(comp.intro.len * sampleRate) / sampleRate, L = Math.round(comp.loop.len * sampleRate) / sampleRate;
   const OAC = globalThis.OfflineAudioContext || globalThis.webkitOfflineAudioContext;
   const ctx = new OAC(2, Math.ceil((I + 2 * L) * sampleRate) + 16, sampleRate);
   const master = ctx.createGain(); master.gain.value = level;
@@ -108,13 +111,5 @@ export async function renderSong(song, { sampleRate = 44100, level = 0.9 } = {})
     ctx.suspend(k * CHUNK).then(() => { upTo((k + 2) * CHUNK); ctx.resume(); });
   }
   const buf = await ctx.startRendering();
-  const ls = Math.round(I * sampleRate), ln = Math.round(L * sampleRate), n = ls + ln;
-  const out = [0, 1].map((ch) => {
-    const src = buf.getChannelData(ch);
-    const d = new Float32Array(n);
-    d.set(src.subarray(0, ls), 0);
-    d.set(src.subarray(ls + ln, ls + 2 * ln), ls);
-    return d;
-  });
-  return { sampleRate, introLen: I, loopLen: L, loopStart: ls, length: n, left: out[0], right: out[1] };
+  return { sampleRate, introLen: I, loopLen: L, length: buf.length, left: buf.getChannelData(0), right: buf.getChannelData(1) };
 }
