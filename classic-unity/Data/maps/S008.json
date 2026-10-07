@@ -1,0 +1,120 @@
+{
+ "id": "S008",
+ "name": "島の高台",
+ "region": "S",
+ "type": "狩",
+ "lv": [
+  6,
+  9
+ ],
+ "width": 2000,
+ "height": 720,
+ "bgm": "island_field",
+ "returnMap": "S003",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     640
+    ],
+    [
+     500,
+     640
+    ],
+    [
+     700,
+     540
+    ],
+    [
+     1300,
+     540
+    ],
+    [
+     1500,
+     640
+    ],
+    [
+     2000,
+     640
+    ]
+   ]
+  }
+ ],
+ "ropes": [],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 120,
+   "y": 640
+  },
+  {
+   "name": "to_S005",
+   "type": "visible",
+   "x": 60,
+   "y": 640,
+   "to": "S005",
+   "toPortal": "to_S008"
+  },
+  {
+   "name": "to_S006",
+   "type": "visible",
+   "x": 1000,
+   "y": 540,
+   "to": "S006",
+   "toPortal": "to_S008"
+  },
+  {
+   "name": "to_S009",
+   "type": "visible",
+   "x": 1940,
+   "y": 640,
+   "to": "S009",
+   "toPortal": "to_S008"
+  }
+ ],
+ "spawns": [
+  {
+   "mob": "M006",
+   "x": 300,
+   "y": 640
+  },
+  {
+   "mob": "M006",
+   "x": 800,
+   "y": 540
+  },
+  {
+   "mob": "M004",
+   "x": 1150,
+   "y": 540
+  },
+  {
+   "mob": "M006",
+   "x": 1700,
+   "y": 640
+  },
+  {
+   "mob": "M004",
+   "x": 1850,
+   "y": 640
+  }
+ ],
+ "mobMax": 8,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [],
+ "objects": [
+  {
+   "id": "S008.view",
+   "name": "見晴らし台",
+   "x": 900,
+   "y": 540
+  }
+ ],
+ "note": "島で一番高い所。遠くに大陸が見える。"
+}

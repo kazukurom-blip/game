@@ -1,0 +1,56 @@
+{
+ "id": "V100",
+ "name": "ブリーズ港",
+ "region": "V",
+ "type": "町",
+ "width": 2400,
+ "height": 720,
+ "bgm": "island_town",
+ "returnMap": "V100",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     640
+    ],
+    [
+     2400,
+     640
+    ]
+   ]
+  }
+ ],
+ "ropes": [],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 1200,
+   "y": 640
+  },
+  {
+   "name": "town",
+   "type": "town",
+   "x": 1200,
+   "y": 640
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "olga",
+   "name": "港長オルガ",
+   "x": 1250,
+   "y": 640
+  }
+ ],
+ "objects": [],
+ "note": "仮（大陸のマップはまだ作っていない。島からの船の着く所だけ）"
+}

@@ -1,0 +1,162 @@
+{
+ "id": "S003",
+ "name": "芽吹き村",
+ "region": "S",
+ "type": "町",
+ "width": 2400,
+ "height": 720,
+ "bgm": "island_town",
+ "returnMap": "S003",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     640
+    ],
+    [
+     1400,
+     640
+    ],
+    [
+     1500,
+     620
+    ],
+    [
+     2400,
+     620
+    ]
+   ]
+  },
+  {
+   "id": "roof",
+   "points": [
+    [
+     1550,
+     556
+    ],
+    [
+     1850,
+     556
+    ]
+   ]
+  }
+ ],
+ "ropes": [],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 1200,
+   "y": 640
+  },
+  {
+   "name": "town",
+   "type": "town",
+   "x": 1200,
+   "y": 640
+  },
+  {
+   "name": "to_S002",
+   "type": "visible",
+   "x": 60,
+   "y": 640,
+   "to": "S002",
+   "toPortal": "to_S003"
+  },
+  {
+   "name": "to_S004",
+   "type": "visible",
+   "x": 300,
+   "y": 640,
+   "to": "S004",
+   "toPortal": "to_S003"
+  },
+  {
+   "name": "to_S011",
+   "type": "visible",
+   "x": 1000,
+   "y": 640,
+   "to": "S011",
+   "toPortal": "to_S003"
+  },
+  {
+   "name": "to_S010",
+   "type": "visible",
+   "x": 2150,
+   "y": 620,
+   "to": "S010",
+   "toPortal": "to_S003"
+  },
+  {
+   "name": "to_S006",
+   "type": "visible",
+   "x": 2340,
+   "y": 620,
+   "to": "S006",
+   "toPortal": "to_S003"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "yomogi",
+   "name": "村長ヨモギ",
+   "x": 1180,
+   "y": 640
+  },
+  {
+   "id": "tata",
+   "name": "雑貨屋タタ",
+   "x": 620,
+   "y": 640,
+   "shop": "shop.S003.general"
+  },
+  {
+   "id": "nina",
+   "name": "薬屋ニナ",
+   "x": 820,
+   "y": 640,
+   "shop": "shop.S003.potion"
+  },
+  {
+   "id": "momo",
+   "name": "宿屋のモモ",
+   "x": 1450,
+   "y": 630,
+   "inn": 30
+  },
+  {
+   "id": "tobio",
+   "name": "漁師トビオ",
+   "x": 1720,
+   "y": 620
+  },
+  {
+   "id": "riri",
+   "name": "少女リリ",
+   "x": 1900,
+   "y": 620
+  },
+  {
+   "id": "gen",
+   "name": "ゲン爺",
+   "x": 1320,
+   "y": 640
+  },
+  {
+   "id": "piko",
+   "name": "学者見習いピコ",
+   "x": 2000,
+   "y": 620
+  }
+ ],
+ "objects": [],
+ "note": "島の村。雑貨屋・薬屋・宿屋（休むと HP/MP 全回復）。最初のクエストが集まる。"
+}

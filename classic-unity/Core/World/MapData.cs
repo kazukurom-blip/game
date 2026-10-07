@@ -52,7 +52,20 @@ namespace Lumina.Core.World
     }
 
     public sealed class SpawnData { public string Mob; public double X, Y; public double IntervalSec; }
-    public sealed class NpcData { public string Id, Name, Shop; public double X, Y; }
+    /// <summary>乗り物（船など）。NPC に話して乗る。</summary>
+    public sealed class TravelData
+    {
+        public string To, ToPortal, RequiresQuest;
+        public int MinLevel; public long Fee; public bool OneWay;
+    }
+
+    public sealed class NpcData
+    {
+        public string Id, Name, Shop;
+        public double X, Y;
+        public int InnFee = -1;          // 宿屋（休むと HP/MP 全回復）の料金。-1 = 宿屋でない
+        public TravelData Travel;
+    }
     public sealed class MapObjectData { public string Id, Name; public double X, Y; }
 
     public sealed class MapData
@@ -129,7 +142,17 @@ namespace Lumina.Core.World
             foreach (var o in J.Arr(d, "npcs"))
             {
                 var r = (Dictionary<string, object>)o;
-                m.Npcs.Add(new NpcData { Id = J.Str(r, "id"), Name = J.Str(r, "name", ""), Shop = J.Str(r, "shop"), X = J.Num(r, "x"), Y = J.Num(r, "y") });
+                var npc = new NpcData { Id = J.Str(r, "id"), Name = J.Str(r, "name", ""), Shop = J.Str(r, "shop"), X = J.Num(r, "x"), Y = J.Num(r, "y"), InnFee = J.Int(r, "inn", -1) };
+                var tr = J.Obj(r, "travel");
+                if (tr != null)
+                {
+                    npc.Travel = new TravelData
+                    {
+                        To = J.Str(tr, "to"), ToPortal = J.Str(tr, "toPortal"), RequiresQuest = J.Str(tr, "requiresQuest"),
+                        MinLevel = J.Int(tr, "minLevel"), Fee = J.Long(tr, "fee"), OneWay = J.Bool(tr, "oneWay"),
+                    };
+                }
+                m.Npcs.Add(npc);
             }
             foreach (var o in J.Arr(d, "objects"))
             {

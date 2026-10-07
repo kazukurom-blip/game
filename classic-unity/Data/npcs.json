@@ -1,0 +1,99 @@
+{
+ "npcs": [
+  {
+   "id": "luka",
+   "name": "案内人ルカ",
+   "map": "S000",
+   "x": 260
+  },
+  {
+   "id": "ganzo",
+   "name": "縄職人ガンゾ",
+   "map": "S001",
+   "x": 560
+  },
+  {
+   "id": "poppo",
+   "name": "はしご番のポッポ",
+   "map": "S002",
+   "x": 300
+  },
+  {
+   "id": "yomogi",
+   "name": "村長ヨモギ",
+   "map": "S003",
+   "x": 1180
+  },
+  {
+   "id": "tata",
+   "name": "雑貨屋タタ",
+   "map": "S003",
+   "x": 620,
+   "shop": "shop.S003.general"
+  },
+  {
+   "id": "nina",
+   "name": "薬屋ニナ",
+   "map": "S003",
+   "x": 820,
+   "shop": "shop.S003.potion"
+  },
+  {
+   "id": "momo",
+   "name": "宿屋のモモ",
+   "map": "S003",
+   "x": 1450,
+   "inn": 30
+  },
+  {
+   "id": "tobio",
+   "name": "漁師トビオ",
+   "map": "S003",
+   "x": 1720
+  },
+  {
+   "id": "riri",
+   "name": "少女リリ",
+   "map": "S003",
+   "x": 1900
+  },
+  {
+   "id": "gen",
+   "name": "ゲン爺",
+   "map": "S003",
+   "x": 1320
+  },
+  {
+   "id": "piko",
+   "name": "学者見習いピコ",
+   "map": "S003",
+   "x": 2000
+  },
+  {
+   "id": "baldo",
+   "name": "教官バルド",
+   "map": "S011",
+   "x": 500
+  },
+  {
+   "id": "kai",
+   "name": "船長カイ",
+   "map": "S010",
+   "x": 900,
+   "travel": {
+    "to": "V100",
+    "toPortal": "sp",
+    "minLevel": 7,
+    "oneWay": true,
+    "fee": 0,
+    "requiresQuest": "S-19"
+   }
+  },
+  {
+   "id": "olga",
+   "name": "港長オルガ",
+   "map": "V100",
+   "x": 1250
+  }
+ ]
+}

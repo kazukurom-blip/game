@@ -1,0 +1,130 @@
+{
+ "id": "S001",
+ "name": "はじめの小道",
+ "region": "S",
+ "type": "狩",
+ "lv": [
+  1,
+  2
+ ],
+ "width": 1800,
+ "height": 720,
+ "bgm": "island_field",
+ "returnMap": "S003",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     640
+    ],
+    [
+     1800,
+     640
+    ]
+   ]
+  },
+  {
+   "id": "step",
+   "points": [
+    [
+     780,
+     592
+    ],
+    [
+     1080,
+     592
+    ]
+   ]
+  },
+  {
+   "id": "upper",
+   "points": [
+    [
+     1200,
+     512
+    ],
+    [
+     1560,
+     512
+    ]
+   ]
+  }
+ ],
+ "ropes": [
+  {
+   "x": 1340,
+   "top": 512,
+   "bottom": 616
+  }
+ ],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 120,
+   "y": 640
+  },
+  {
+   "name": "to_S000",
+   "type": "visible",
+   "x": 60,
+   "y": 640,
+   "to": "S000",
+   "toPortal": "to_S001"
+  },
+  {
+   "name": "to_S002",
+   "type": "visible",
+   "x": 1740,
+   "y": 640,
+   "to": "S002",
+   "toPortal": "to_S001"
+  }
+ ],
+ "spawns": [
+  {
+   "mob": "M001",
+   "x": 320,
+   "y": 640
+  },
+  {
+   "mob": "M001",
+   "x": 700,
+   "y": 640
+  },
+  {
+   "mob": "M001",
+   "x": 900,
+   "y": 592
+  },
+  {
+   "mob": "M001",
+   "x": 1500,
+   "y": 640
+  }
+ ],
+ "mobMax": 6,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "ganzo",
+   "name": "縄職人ガンゾ",
+   "x": 560,
+   "y": 640
+  }
+ ],
+ "objects": [
+  {
+   "id": "S001.crate",
+   "name": "木箱",
+   "x": 1480,
+   "y": 512
+  }
+ ],
+ "note": "段差のジャンプと縄（ロープ）を教わる。コロ貝が少しだけ出る。"
+}

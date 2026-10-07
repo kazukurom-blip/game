@@ -1,0 +1,58 @@
+{
+ "id": "S011",
+ "name": "村の訓練所",
+ "region": "S",
+ "type": "特",
+ "width": 1000,
+ "height": 720,
+ "bgm": "island_field",
+ "returnMap": "S003",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     640
+    ],
+    [
+     1000,
+     640
+    ]
+   ]
+  }
+ ],
+ "ropes": [],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 120,
+   "y": 640
+  },
+  {
+   "name": "to_S003",
+   "type": "visible",
+   "x": 60,
+   "y": 640,
+   "to": "S003",
+   "toPortal": "to_S011"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "baldo",
+   "name": "教官バルド",
+   "x": 500,
+   "y": 640
+  }
+ ],
+ "objects": [],
+ "note": "クイックスロット・ポーション・スキル・ステータス振りを教わる部屋。"
+}

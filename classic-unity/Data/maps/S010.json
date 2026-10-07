@@ -1,0 +1,66 @@
+{
+ "id": "S010",
+ "name": "旅立ちの桟橋",
+ "region": "S",
+ "type": "移",
+ "width": 1200,
+ "height": 720,
+ "bgm": "island_field",
+ "returnMap": "S003",
+ "footholds": [
+  {
+   "id": "g",
+   "ground": true,
+   "points": [
+    [
+     0,
+     640
+    ],
+    [
+     1200,
+     640
+    ]
+   ]
+  }
+ ],
+ "ropes": [],
+ "walls": [],
+ "portals": [
+  {
+   "name": "sp",
+   "type": "spawn",
+   "x": 120,
+   "y": 640
+  },
+  {
+   "name": "to_S003",
+   "type": "visible",
+   "x": 60,
+   "y": 640,
+   "to": "S003",
+   "toPortal": "to_S010"
+  }
+ ],
+ "spawns": [],
+ "mobMax": 0,
+ "respawnSec": 7,
+ "timedSpawns": [],
+ "npcs": [
+  {
+   "id": "kai",
+   "name": "船長カイ",
+   "x": 900,
+   "y": 640,
+   "travel": {
+    "to": "V100",
+    "toPortal": "sp",
+    "minLevel": 7,
+    "oneWay": true,
+    "fee": 0,
+    "requiresQuest": "S-19"
+   }
+  }
+ ],
+ "objects": [],
+ "note": "大陸のブリーズ港へ行く船（Lv7 以上、片道）。"
+}
