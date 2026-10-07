@@ -389,7 +389,7 @@
     }
    ],
    "end": "gen",
-   "exp": 16,
+   "exp": 15,
    "meso": 226,
    "rewards": [
     {
@@ -422,7 +422,7 @@
     }
    ],
    "end": "momo",
-   "exp": 45,
+   "exp": 19,
    "meso": 277,
    "rewards": [
     {
@@ -455,7 +455,7 @@
     }
    ],
    "end": "tobio",
-   "exp": 45,
+   "exp": 19,
    "meso": 277,
    "rewards": [
     {
@@ -488,7 +488,7 @@
     }
    ],
    "end": "piko",
-   "exp": 64,
+   "exp": 28,
    "meso": 339,
    "rewards": [
     {
@@ -521,7 +521,7 @@
     }
    ],
    "end": "piko",
-   "exp": 32,
+   "exp": 14,
    "meso": 136,
    "rewards": [
     {
@@ -554,7 +554,7 @@
     }
    ],
    "end": "tobio",
-   "exp": 278,
+   "exp": 113,
    "meso": 1220,
    "rewards": [
     {
@@ -602,7 +602,7 @@
     }
    ],
    "end": "kai",
-   "exp": 64,
+   "exp": 28,
    "meso": 339,
    "rewards": [
     {
@@ -634,7 +634,7 @@
     }
    ],
    "end": "auto",
-   "exp": 32,
+   "exp": 14,
    "meso": 136,
    "rewards": [],
    "rewardText": "-",
@@ -696,7 +696,7 @@
     }
    ],
    "end": "olga",
-   "exp": 32,
+   "exp": 14,
    "meso": 136,
    "rewards": [
     {
@@ -731,7 +731,7 @@
     }
    ],
    "end": "erna",
-   "exp": 32,
+   "exp": 14,
    "meso": 136,
    "rewards": [],
    "rewardText": "-",
@@ -759,7 +759,7 @@
     }
    ],
    "end": "orfe",
-   "exp": 46,
+   "exp": 19,
    "meso": 166,
    "rewards": [],
    "rewardText": "-",
@@ -787,7 +787,7 @@
     }
    ],
    "end": "dorga",
-   "exp": 46,
+   "exp": 19,
    "meso": 166,
    "rewards": [],
    "rewardText": "-",
@@ -815,7 +815,7 @@
     }
    ],
    "end": "yami",
-   "exp": 67,
+   "exp": 27,
    "meso": 204,
    "rewards": [],
    "rewardText": "-",
@@ -843,7 +843,7 @@
     }
    ],
    "end": "olga",
-   "exp": 133,
+   "exp": 54,
    "meso": 510,
    "rewards": [
     {
@@ -881,7 +881,7 @@
     }
    ],
    "end": "sol",
-   "exp": 133,
+   "exp": 54,
    "meso": 510,
    "rewards": [
     {
@@ -914,7 +914,7 @@
     }
    ],
    "end": "rokko",
-   "exp": 46,
+   "exp": 19,
    "meso": 166,
    "rewards": [
     {
@@ -947,7 +947,7 @@
     }
    ],
    "end": "pola",
-   "exp": 332,
+   "exp": 265,
    "meso": 745,
    "rewards": [
     {
@@ -1082,7 +1082,7 @@
    ],
    "end": "dan",
    "unlock": "storage+4",
-   "exp": 96,
+   "exp": 66,
    "meso": 250,
    "rewards": [],
    "rewardText": "倉庫の枠 +4",
@@ -1111,7 +1111,7 @@
     }
    ],
    "end": "olga",
-   "exp": 96,
+   "exp": 66,
    "meso": 250,
    "rewards": [],
    "rewardText": "-",
@@ -1139,7 +1139,7 @@
     }
    ],
    "end": "bob",
-   "exp": 46,
+   "exp": 19,
    "meso": 166,
    "rewards": [
     {
@@ -1170,7 +1170,7 @@
     }
    ],
    "end": "sui",
-   "exp": 126,
+   "exp": 94,
    "meso": 273,
    "rewards": [
     {
@@ -1201,7 +1201,7 @@
     }
    ],
    "end": "marsa",
-   "exp": 96,
+   "exp": 66,
    "meso": 250,
    "rewards": [
     {
@@ -1232,7 +1232,7 @@
     }
    ],
    "end": "erna",
-   "exp": 437,
+   "exp": 376,
    "meso": 813,
    "rewards": [
     {
@@ -1432,7 +1432,7 @@
     }
    ],
    "end": "taro",
-   "exp": 67,
+   "exp": 27,
    "meso": 204,
    "rewards": [],
    "rewardText": "ブタの鈴（設置・飾り）",
@@ -1490,7 +1490,7 @@
     }
    ],
    "end": "bob",
-   "exp": 332,
+   "exp": 265,
    "meso": 745,
    "rewards": [
     {
@@ -1606,7 +1606,7 @@
     }
    ],
    "end": "libra",
-   "exp": 46,
+   "exp": 19,
    "meso": 166,
    "rewards": [
     {
@@ -1637,7 +1637,7 @@
     }
    ],
    "end": "herb",
-   "exp": 166,
+   "exp": 133,
    "meso": 298,
    "rewards": [
     {
@@ -1892,7 +1892,7 @@
     }
    ],
    "end": "mint",
-   "exp": 218,
+   "exp": 188,
    "meso": 325,
    "rewards": [
     {
@@ -2090,7 +2090,7 @@
     }
    ],
    "end": "kaji",
-   "exp": 22,
+   "exp": 10,
    "meso": 111,
    "rewards": [
     {
@@ -2123,7 +2123,7 @@
     }
    ],
    "end": "kaji",
-   "exp": 126,
+   "exp": 94,
    "meso": 273,
    "rewards": [
     {
@@ -2538,7 +2538,7 @@
     }
    ],
    "end": "nez",
-   "exp": 287,
+   "exp": 266,
    "meso": 355,
    "rewards": [
     {
@@ -6341,7 +6341,7 @@
     }
    ],
    "end": "olga",
-   "exp": 166,
+   "exp": 133,
    "meso": 298,
    "rewards": [
     {
@@ -6678,7 +6678,7 @@
     }
    ],
    "end": "chiko",
-   "exp": 96,
+   "exp": 66,
    "meso": 250,
    "rewards": [
     {
@@ -6712,7 +6712,7 @@
     }
    ],
    "end": "chiko",
-   "exp": 96,
+   "exp": 66,
    "meso": 250,
    "rewards": [
     {
@@ -6752,7 +6752,7 @@
     }
    ],
    "end": "chiko",
-   "exp": 166,
+   "exp": 133,
    "meso": 298,
    "rewards": [
     {
@@ -6952,7 +6952,7 @@
    "end": "board",
    "repeat": "daily",
    "board": true,
-   "exp": 96,
+   "exp": 66,
    "meso": 250,
    "rewards": [
     {
@@ -7869,7 +7869,7 @@
    "minStats": {
     "STR": 35
    },
-   "exp": 96,
+   "exp": 66,
    "meso": 250,
    "rewards": [],
    "rewardText": "武器 1 つ、持ち物の枠 +4",
@@ -8197,7 +8197,7 @@
    "minStats": {
     "INT": 20
    },
-   "exp": 46,
+   "exp": 19,
    "meso": 166,
    "rewards": [],
    "rewardText": "武器 1 つ、持ち物の枠 +4",
@@ -8525,7 +8525,7 @@
    "minStats": {
     "DEX": 25
    },
-   "exp": 96,
+   "exp": 66,
    "meso": 250,
    "rewards": [],
    "rewardText": "武器 1 つ、持ち物の枠 +4",
@@ -8853,7 +8853,7 @@
    "minStats": {
     "DEX": 25
    },
-   "exp": 96,
+   "exp": 66,
    "meso": 250,
    "rewards": [],
    "rewardText": "武器 1 つ、持ち物の枠 +4",
@@ -9181,7 +9181,7 @@
    "minStats": {
     "DEX": 20
    },
-   "exp": 96,
+   "exp": 66,
    "meso": 250,
    "rewards": [],
    "rewardText": "武器 1 つ、持ち物の枠 +4",
@@ -9788,7 +9788,7 @@
    ],
    "end": "gen",
    "ordered": true,
-   "exp": 16,
+   "exp": 7.5,
    "meso": 166,
    "rewards": [
     {
@@ -9821,7 +9821,7 @@
     }
    ],
    "end": "gen",
-   "exp": 67,
+   "exp": 28,
    "meso": 599,
    "rewards": [
     {
@@ -9860,7 +9860,7 @@
    ],
    "end": "gen",
    "ordered": true,
-   "exp": 32,
+   "exp": 13,
    "meso": 250,
    "rewards": [],
    "rewardText": "-",
@@ -9898,7 +9898,7 @@
     }
    ],
    "end": "gen",
-   "exp": 47,
+   "exp": 19,
    "meso": 306,
    "rewards": [
     {
@@ -9936,7 +9936,7 @@
     }
    ],
    "end": "piko",
-   "exp": 23,
+   "exp": 10,
    "meso": 204,
    "rewards": [
     {
@@ -9973,7 +9973,7 @@
     20,
     4
    ],
-   "exp": 11,
+   "exp": 5,
    "meso": 81,
    "rewards": [
     {
@@ -10039,7 +10039,7 @@
     }
    ],
    "end": "baldo",
-   "exp": 16,
+   "exp": 7.5,
    "meso": 166,
    "rewards": [
     {
@@ -10077,7 +10077,7 @@
     }
    ],
    "end": "baldo",
-   "exp": 32,
+   "exp": 13,
    "meso": 250,
    "rewards": [
     {
@@ -10143,7 +10143,7 @@
     }
    ],
    "end": "luka_S003",
-   "exp": 11,
+   "exp": 5,
    "meso": 81,
    "rewards": [
     {
@@ -10174,7 +10174,7 @@
     }
    ],
    "end": "kai",
-   "exp": 11,
+   "exp": 5,
    "meso": 81,
    "rewards": [
     {
@@ -10290,7 +10290,7 @@
     }
    ],
    "end": "momo",
-   "exp": 23,
+   "exp": 10,
    "meso": 204,
    "rewards": [
     {
@@ -10323,7 +10323,7 @@
     }
    ],
    "end": "riri",
-   "exp": 8,
+   "exp": 4,
    "meso": 66,
    "rewards": [
     {
@@ -10357,7 +10357,7 @@
    ],
    "end": "tobio",
    "needItem": "etc.M007",
-   "exp": 67,
+   "exp": 46,
    "meso": 375,
    "rewards": [
     {
@@ -10391,7 +10391,7 @@
     }
    ],
    "end": "yomogi",
-   "exp": 8,
+   "exp": 4,
    "meso": 66,
    "rewards": [
     {
@@ -10424,7 +10424,7 @@
     }
    ],
    "end": "olga",
-   "exp": 58,
+   "exp": 46,
    "meso": 179,
    "rewards": [
     {
@@ -10468,7 +10468,7 @@
    ],
    "end": "uo",
    "ordered": true,
-   "exp": 58,
+   "exp": 46,
    "meso": 179,
    "rewards": [
     {
@@ -10507,7 +10507,7 @@
    ],
    "end": "uo",
    "ordered": true,
-   "exp": 153,
+   "exp": 131,
    "meso": 488,
    "rewards": [
     {
@@ -10639,7 +10639,7 @@
     }
    ],
    "end": "jan",
-   "exp": 16,
+   "exp": 7,
    "meso": 100,
    "rewards": [
     {
@@ -10672,7 +10672,7 @@
     }
    ],
    "end": "jan",
-   "exp": 201,
+   "exp": 186,
    "meso": 532,
    "rewards": [
     {
@@ -10705,7 +10705,7 @@
     }
    ],
    "end": "mire",
-   "exp": 34,
+   "exp": 23,
    "meso": 150,
    "rewards": [
     {
@@ -10738,7 +10738,7 @@
     }
    ],
    "end": "pola",
-   "exp": 23,
+   "exp": 9,
    "meso": 122,
    "rewards": [
     {
@@ -10771,7 +10771,7 @@
     }
    ],
    "end": "dan",
-   "exp": 34,
+   "exp": 23,
    "meso": 150,
    "rewards": [
     {
@@ -10815,7 +10815,7 @@
     }
    ],
    "end": "marco",
-   "exp": 58,
+   "exp": 46,
    "meso": 179,
    "rewards": [
     {
@@ -10848,7 +10848,7 @@
     }
    ],
    "end": "rokko",
-   "exp": 116,
+   "exp": 93,
    "meso": 447,
    "rewards": [
     {
@@ -10882,7 +10882,7 @@
    ],
    "end": "rokko",
    "repeat": "daily",
-   "exp": 16,
+   "exp": 7,
    "meso": 100,
    "rewards": [
     {
@@ -10925,7 +10925,7 @@
     }
    ],
    "end": "ichiba",
-   "exp": 34,
+   "exp": 23,
    "meso": 150,
    "rewards": [
     {
@@ -10997,7 +10997,7 @@
     19,
     5
    ],
-   "exp": 44,
+   "exp": 33,
    "meso": 164,
    "rewards": [
     {
@@ -11221,7 +11221,7 @@
     }
    ],
    "end": "dan",
-   "exp": 101,
+   "exp": 93,
    "meso": 213,
    "rewards": [
     {
@@ -11252,7 +11252,7 @@
     }
    ],
    "end": "battsu",
-   "exp": 58,
+   "exp": 46,
    "meso": 179,
    "rewards": [
     {
@@ -11288,7 +11288,7 @@
     }
    ],
    "end": "guri",
-   "exp": 201,
+   "exp": 186,
    "meso": 532,
    "rewards": [
     {
@@ -11351,7 +11351,7 @@
    ],
    "end": "guri",
    "repeat": "daily",
-   "exp": 34,
+   "exp": 23,
    "meso": 150,
    "rewards": [
     {
@@ -11645,7 +11645,7 @@
     }
    ],
    "end": "toma",
-   "exp": 44,
+   "exp": 33,
    "meso": 164,
    "rewards": [
     {
@@ -11676,7 +11676,7 @@
     }
    ],
    "end": "lana",
-   "exp": 23,
+   "exp": 9,
    "meso": 122,
    "rewards": [
     {
@@ -11740,7 +11740,7 @@
     }
    ],
    "end": "chiko",
-   "exp": 34,
+   "exp": 23,
    "meso": 150,
    "rewards": [
     {
@@ -11771,7 +11771,7 @@
     }
    ],
    "end": "hako",
-   "exp": 58,
+   "exp": 46,
    "meso": 179,
    "rewards": [
     {
@@ -11802,7 +11802,7 @@
     }
    ],
    "end": "taxi_pom",
-   "exp": 23,
+   "exp": 9,
    "meso": 122,
    "rewards": [
     {
@@ -11833,7 +11833,7 @@
     }
    ],
    "end": "fin",
-   "exp": 58,
+   "exp": 46,
    "meso": 179,
    "rewards": [
     {
@@ -11871,7 +11871,7 @@
     }
    ],
    "end": "sui",
-   "exp": 201,
+   "exp": 186,
    "meso": 532,
    "rewards": [
     {
@@ -11947,7 +11947,7 @@
     }
    ],
    "end": "taro",
-   "exp": 76,
+   "exp": 66,
    "meso": 195,
    "rewards": [
     {
@@ -12021,7 +12021,7 @@
    ],
    "end": "erna",
    "repeat": "daily",
-   "exp": 58,
+   "exp": 46,
    "meso": 179,
    "rewards": [
     {
@@ -12137,7 +12137,7 @@
     }
    ],
    "end": "chiko",
-   "exp": 101,
+   "exp": 93,
    "meso": 213,
    "rewards": [
     {
@@ -12170,7 +12170,7 @@
     }
    ],
    "end": "popo",
-   "exp": 76,
+   "exp": 66,
    "meso": 195,
    "rewards": [
     {
@@ -12458,7 +12458,7 @@
     }
    ],
    "end": "mint",
-   "exp": 101,
+   "exp": 93,
    "meso": 213,
    "rewards": [
     {
@@ -12554,7 +12554,7 @@
     }
    ],
    "end": "taxi_silva",
-   "exp": 76,
+   "exp": 66,
    "meso": 195,
    "rewards": [
     {
@@ -12761,7 +12761,7 @@
    ],
    "end": "libra",
    "repeat": "daily",
-   "exp": 58,
+   "exp": 46,
    "meso": 179,
    "rewards": [
     {
@@ -13190,7 +13190,7 @@
     }
    ],
    "end": "gantetsu",
-   "exp": 16,
+   "exp": 7,
    "meso": 100,
    "rewards": [
     {
@@ -13491,7 +13491,7 @@
    ],
    "end": "kaji",
    "repeat": "daily",
-   "exp": 34,
+   "exp": 23,
    "meso": 150,
    "rewards": [
     {
@@ -15126,7 +15126,7 @@
     }
    ],
    "end": "mate",
-   "exp": 58,
+   "exp": 46,
    "meso": 179,
    "rewards": [
     {
@@ -15158,7 +15158,7 @@
    ],
    "end": "mate",
    "repeat": "daily",
-   "exp": 34,
+   "exp": 23,
    "meso": 150,
    "rewards": [
     {
@@ -15413,7 +15413,7 @@
     }
    ],
    "end": "memori",
-   "exp": 34,
+   "exp": 23,
    "meso": 150,
    "rewards": [
     {
@@ -15547,7 +15547,7 @@
     }
    ],
    "end": "memori",
-   "exp": 58,
+   "exp": 46,
    "meso": 179,
    "rewards": [
     {

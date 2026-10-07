@@ -28,10 +28,10 @@ namespace Lumina.Core.Character
             return JsRound(v / p) * p;
         }
 
-        private static readonly long[] ExpHead = { 15, 34, 57, 92, 135 };
+        private static readonly long[] ExpHead = { 15, 30, 50, 75, 110, 160, 230, 320, 450 }; // Lv10 まではサクサク（JS の curves.mjs と同じ）
         public static readonly double[,] ExpAnchors =
         {
-            { 5, 135 }, { 6, 372 }, { 10, 1600 }, { 15, 6300 }, { 20, 16500 }, { 30, 70000 }, { 40, 250000 }, { 50, 680000 },
+            { 9, 450 }, { 10, 1100 }, { 15, 6300 }, { 20, 16500 }, { 30, 70000 }, { 40, 250000 }, { 50, 680000 },
             { 60, 1500000 }, { 70, 2900000 }, { 80, 5000000 }, { 90, 8200000 }, { 100, 13000000 }, { 110, 21000000 },
             { 120, 34000000 }, { 130, 55000000 }, { 140, 88000000 }, { 150, 140000000 }, { 160, 220000000 },
             { 170, 340000000 }, { 180, 520000000 }, { 190, 800000000 }, { 199, 1200000000 },
@@ -50,7 +50,7 @@ namespace Lumina.Core.Character
             {
                 var c = new long[MaxLevel + 1];
                 for (int l = 1; l < MaxLevel; l++)
-                    c[l] = l <= 5 ? ExpHead[l - 1] : (long)Math.Round(Nice(LogInterp(ExpAnchors, l)));
+                    c[l] = l <= ExpHead.Length ? ExpHead[l - 1] : (long)Math.Round(Nice(LogInterp(ExpAnchors, l)));
                 expCache = c;
             }
             return expCache[lv];

@@ -58,7 +58,7 @@ namespace Lumina.Core.Tests
             var c = NewChar();
             c.GainExp(100000, new Rng(2), default);
             Assert.Equal(2, c.Level);
-            Assert.Equal(34 - 1, c.Exp); // あふれた分は「次の必要量 − 1」まで
+            Assert.Equal(30 - 1, c.Exp); // あふれた分は「次の必要量 − 1」まで
         }
 
         [Fact]

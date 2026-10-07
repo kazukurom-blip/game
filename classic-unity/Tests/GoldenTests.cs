@@ -89,11 +89,11 @@ namespace Lumina.Core.Tests
             }
             // STATS.md の表の値を直接いくつか
             Assert.Equal(15, Curves.ExpToNext(1));
-            Assert.Equal(1600, Curves.ExpToNext(10));
+            Assert.Equal(1100, Curves.ExpToNext(10)); // Lv10 まではサクサク（ユーザーの希望で 1600 → 1100）
             Assert.Equal(70000, Curves.ExpToNext(30));
             Assert.Equal(1200000000, Curves.ExpToNext(199));
             Assert.Equal(0, Curves.ExpToNext(200));
-            Assert.Equal(27692370022L, Curves.ExpTotalAt(200));
+            Assert.Equal(27692365880L, Curves.ExpTotalAt(200));
         }
 
         [Fact]

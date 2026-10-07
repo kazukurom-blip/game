@@ -171,7 +171,7 @@ namespace Lumina.Core.Tests
             var d = TestData.Get();
             Assert.True(d.Quests.Count >= 600, "クエストが " + d.Quests.Count + " 本"); // QUESTS.md 8 章で 286 → 600 本以上
             var q = d.Quest("S-17");
-            Assert.Equal(278, q.Exp);
+            Assert.Equal(113, q.Exp); // 経験値は Lv の必要量に比べた割合（Lv10 までの表をならしたので小さくなった）
             Assert.Equal(1220, q.Meso);
             Assert.Equal(9, q.MinLevel);
             Assert.Equal(new[] { "S-14" }, q.Prereqs.ToArray());
