@@ -36,6 +36,7 @@ async function boot() {
 function toTitle() {
   running = false;
   if (game.started) save();
+  audio.music?.('title');
   showTitle(root, game, { onStart: startGame });
 }
 
