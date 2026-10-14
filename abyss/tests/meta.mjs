@@ -102,6 +102,18 @@ t('祭壇: 自動化・放置・鞄・速度の旗', () => {
   ok(ps.reqProblem('auto_rebirth'), '転生 3 回が必要');
   st.meta.rebirths = 3; ok(!ps.reqProblem('auto_rebirth'));
 });
+t('節目で自動化がただで解放（ボスに負けた・バッグが半分）・裂け目の中では転生しない', () => {
+  const g = fresh(); const st = g.state; const ps = g.sys.prestige;
+  ok(!st.meta.unlocks.autoBoss);
+  g.events.emit('bossFail', { reason: 'test' });
+  ok(st.meta.unlocks.autoBoss === true); ok(st.meta.prestige.freeUnlocks.auto_boss);
+  while (st.inv.bag.length < st.inv.bagSize / 2) st.inv.bag.push({ uid: 900000 + st.inv.bag.length, rarity: 'common', slot: 'ring', base: 'ring_1', ilvl: 1, affixes: [], sockets: [] });
+  g.events.emit('invChanged', {});
+  eq(ps.level('auto_salvage'), 1);
+  st.meta.prestige.unlocked = true; st.meta.prestige.life.maxLevel = 70;
+  ok(ps.canRebirth().ok);
+  st.world.mode = 'rift'; ok(!ps.canRebirth().ok); st.world.mode = 'campaign';
+});
 t('自動の修練: スキルポイントを自動で振る', () => {
   const g = fresh(); const st = g.state;
   st.meta.souls = 100; g.sys.prestige.buy('auto_skill');
@@ -278,20 +290,21 @@ t('ペット: 戦闘で手助けする（倒れない・ダメージを数える
   sys.givePet('stormferret');
   sys.setActive('stormferret');
   run(g, 60);
-  const u = g.combat.units.find((x) => x.kind === 'pet');
-  ok(u, 'ペットの体がいる');
-  ok(!u.dead);
+  const u = sys.unit;
+  ok(u && u.kind === 'pet', 'ペットの体がいる');
+  ok(!g.combat.units.includes(u), '敵に狙われないように戦闘の一覧には入れない');
+  ok(Math.abs(u.x - g.combat.hero.x) < 700, 'ついてくる');
   const br = g.sys.achievements.lifetimeBreakdown();
   ok(br.some((x) => x.id === 'pet' && x.dmg > 0), JSON.stringify(br.map((x) => x.id)));
   sys.setActive(null); run(g, 1);
-  ok(!g.combat.units.some((x) => x.kind === 'pet' && !x.dead));
+  ok(!sys.unit);
 });
 t('ペット: すべての手助けの種類が動く', () => {
   for (const id of ['emberfox', 'ashcrow', 'mossling', 'lanternmoth', 'pebble', 'sporecap', 'gearowl', 'voidwisp', 'abyssfox', 'phoenixchick']) {
     const g = fresh('ranger', 8); g.sys.pets.givePet(id); g.sys.pets.setActive(id);
     run(g, 25);
     ok(g.sys.pets.abilityText(id).length > 5, id);
-    ok(g.combat.units.some((x) => x.kind === 'pet'), id);
+    ok(g.sys.pets.unit?.pet === id, id);
   }
 });
 

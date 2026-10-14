@@ -157,7 +157,7 @@ const main = async () => {
     await page.evaluate(() => { const g = window.__game; for (let i = 0; i < 20 * 20; i++) g.tick(0.05); });
     await page.waitForTimeout(1200);
     await shot('pet_battle');
-    const petUnit = await page.evaluate(() => window.__game.combat.units.some((u) => u.kind === 'pet' && !u.dead));
+    const petUnit = await page.evaluate(() => !!window.__game.sys.pets.unit && Math.abs(window.__game.sys.pets.unit.x - window.__game.combat.hero.x) < 700);
     check('ペットが戦闘についてくる', petUnit);
     await openTab('prestige', '転生'); await shot('prestige');
     check('転生の見込みが出る', (await page.textContent('.pr-gain'))?.includes('+'));

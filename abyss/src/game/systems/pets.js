@@ -4,12 +4,12 @@
 // 孵卵器（2 つ）に入れて、決まった数の敵を倒すと孵る（放置の間も進む）。
 // 同じペットが出たら覚醒 ★+1（最大 5。1 つごとに効果 +20%）。5★のあとは経験値。
 // 餌（ゴールド）でも経験値が入る。レベル 1〜50。
-// 連れているペットは戦闘で手助けする（味方の 1 体。敵には狙われにくい位置＝主人公の後ろにいる）。
+// 連れているペットは戦闘で手助けする。体は game.sys.pets.unit（combat.units の外。敵に狙われず、攻撃も当たらない）。
 //
 // 外から: game.sys.pets.addEgg(kind, n) / incubate(kind) / hatch(i) / hatchReady() / setActive(id) / feed(id, n) / feedCost(id)
 //         ownedList() / petBonus(id) / abilityText(id) / pity()
 // 状態: state.meta.pets { owned: { id: { lvl, xp, stars, at } }, active, eggs: { kind: 数 }, incubator: [{ kind, prog, need }], pity, seen: {} }
-// 出来事: 'eggFound' { kind } / 'petHatched' { id, dup, stars } / 'petLevel' { id, lvl } / 'metaChanged'
+// 出来事: 'eggFound' { kind } / 'eggReady' { kind } / 'petHatched' { id, dup, stars } / 'petLevel' { id, lvl } / 'metaChanged'
 
 import { PETS, PET, EGGS, EGG, PET_BAL, PET_RARITIES } from '../../data/pets.js';
 import { BAL } from '../../data/balance.js';
@@ -23,8 +23,9 @@ export class PetSystem {
     this.id = 'pets';
     this.ver = 0;
     this.cache = null;
-    this.unit = null;
+    this.unit = null; // 連れているペットの体（combat.units には入れない）
     this.unitPet = null;
+    this.unitCombat = null;
     this.abCd = 1.5;
     this.checkT = 0;
     this.t = 0;
@@ -61,7 +62,12 @@ export class PetSystem {
   onKill(u) {
     const ps = this.ps;
     // 孵卵器の進み
-    for (const inc of ps.incubator) if (inc.prog < inc.need) inc.prog++;
+    for (const inc of ps.incubator) {
+      if (inc.prog < inc.need) {
+        inc.prog++;
+        if (inc.prog >= inc.need) { this.game.events.emit('eggReady', { kind: inc.kind, name: EGG[inc.kind]?.name }); this.game.events.emit('metaChanged', { kind: 'pets' }); }
+      }
+    }
     if (!u || !ELIGIBLE.has(u.rank)) return;
     ps.pity++;
     const ch = (PET_BAL.EGG_CHANCE[u.rank] || 0) * this.eggMul();
@@ -261,53 +267,50 @@ export class PetSystem {
     };
   }
 
-  despawn(c) {
-    if (this.unit) { this.unit.dead = true; this.unit.deadT = 99; }
-    this.unit = null; this.unitPet = null;
-    if (c) c.units = c.units.filter((u) => u.kind !== 'pet');
-  }
+  despawn() { this.unit = null; this.unitPet = null; }
 
+  /**
+   * 連れているペットの体。combat.units には入れない（敵に狙われない・敵の範囲攻撃も当たらない）。
+   * 見た目は ui/petart.js が sceneHooks.drawFx で描く。形: { id, kind: 'pet', team: 'hero', pet, art, x, y, z, face, anim, size, level }
+   */
   spawn(c, h) {
     const def = PET[this.ps.active];
-    if (!def || !c.H) return null;
-    c.units = c.units.filter((u) => u.kind !== 'pet');
-    const p = this.params(def);
-    const u = c.spawnMinion('pet', p, { art: `pet.${def.id}`, size: def.size || 0.8, name: def.name });
-    if (!u) return null;
-    u.kind = 'pet'; u.pet = def.id; u.range = 99999; u.atkT = 1e9; u.aps = 0.0001; u.speed = 280;
-    u.flags = { pet: true, untargetable: true }; u.untargetable = true;
-    u.x = h.x - 60; u.y = h.y + 24;
-    this.unit = u; this.unitPet = def.id;
+    if (!def) return null;
+    this.unit = {
+      id: -1, kind: 'pet', team: 'hero', pet: def.id, name: def.name, art: `pet.${def.id}`, x: h.x - 64, y: h.y + 24, z: 0, vx: 0,
+      face: 1, anim: { s: 'idle', t: 0 }, size: def.size || 0.8, level: h.level || 1, statuses: {}, hitFlash: 0, dead: false, life: 1, maxLife: 1,
+      flags: { pet: true, untargetable: true },
+    };
+    this.unitPet = def.id;
     this.abCd = Math.min(this.abCd, 1.5);
-    return u;
+    this.dashT = 0;
+    return this.unit;
   }
 
   combatTick(c, h, dt) {
     const st = this.game.state;
     const active = st?.meta?.pets?.active;
-    if (!active) { if (this.unit) this.despawn(c); return; }
-    this.checkT -= dt;
-    if (!this.unit || this.unitPet !== active || (this.checkT <= 0 && !c.units.includes(this.unit))) {
-      this.checkT = 0.5;
+    if (!active) { if (this.unit) this.despawn(); return; }
+    if (!this.unit || this.unitPet !== active || this.unitCombat !== c.hero) {
+      this.unitCombat = c.hero;
       if (!this.spawn(c, h)) return;
+      c.emit({ t: 'summon', x: this.unit.x, y: this.unit.y, unit: this.unit, pet: true });
     }
-    if (this.checkT <= 0) this.checkT = 0.5;
     const u = this.unit;
     const def = PET[active];
-    // 倒れない・止まらない
-    if (u.dead) { u.dead = false; u.deadT = 0; u.anim = { s: 'idle', t: 0 }; }
-    u.life = u.maxLife;
-    u.atkT = 1e9;
-    for (const k in u.statuses) delete u.statuses[k];
-    // 位置: 近い敵から見て主人公の後ろ
+    u.anim.t += dt;
+    u.level = h.level || 1;
+    // 位置: 近い敵から見て主人公の後ろ（飛びかかった後は戻る）
     const tgt = c.nearestEnemy(h.x, h.y, 900);
     const side = tgt ? (tgt.x >= h.x ? 1 : -1) : (h.face || 1);
     if (this.dashT > 0) this.dashT -= dt;
-    else if (tgt) {
+    else {
       const want = h.x - 64 * side;
       const dx = want - u.x;
-      if (Math.abs(dx) > 10) {
-        const sp = Math.max(280, (c.H?.move || 220) * 1.25);
+      const far = Math.abs(dx) > 600;
+      if (far) u.x = want;
+      else if (Math.abs(dx) > 8) {
+        const sp = Math.max(300, (c.H?.move || 220) * 1.3);
         u.x += Math.sign(dx) * Math.min(Math.abs(dx), sp * dt);
         u.face = Math.sign(dx) || side;
         if (u.anim.s !== 'walk' && u.anim.s !== 'attack') u.anim = { s: 'walk', t: 0 };
@@ -318,6 +321,7 @@ export class PetSystem {
       u.y += (h.y + 24 - u.y) * Math.min(1, dt * 3);
     }
     if (u.anim.s === 'attack' && u.anim.t > 0.45) u.anim = { s: 'idle', t: 0 };
+    if (h.dead) return;
     // 手助け
     this.abCd -= dt;
     if (this.abCd <= 0 && def?.ability) {
@@ -349,10 +353,10 @@ export class PetSystem {
         break;
       }
       case 'bite': {
-        if (Math.abs(tgt.x - u.x) > 700) break;
-        const side = tgt.x >= h.x ? 1 : -1;
-        u.x = tgt.x - 34 * side; u.face = side;
-        this.dashT = 0.45;
+        if (Math.abs(tgt.x - u.x) > 800) break;
+        const side = tgt.x >= u.x ? 1 : -1;
+        u.x = tgt.x - 34 * side; u.y = tgt.y + 10; u.face = side;
+        this.dashT = 0.5;
         const dmg = c.hitUnit(u, tgt, p, 1);
         c.emit({ t: 'swing', x: tgt.x, y: tgt.y, el: p.element, small: true, src: u });
         if (ab.lifesteal && dmg > 0 && !h.dead) h.life = Math.min(h.maxLife, h.life + dmg * ab.lifesteal);

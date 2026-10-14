@@ -10,6 +10,7 @@ import { tabs, card, bar, live, setBar } from '../metaui.js';
 import { injectCss } from '../dom.js';
 
 let view = 'rebirth';
+const FREE_HINT = { auto_boss: 'はじめてボスに負けると解放', auto_salvage: 'バッグが半分を超えると解放' };
 let altarCat = 'offense';
 
 const HELP = `
@@ -138,7 +139,7 @@ function upgradeCard(ui, u, opts) {
     h('div.nm', [h('span', u.name), h('span.lv', max ? `Lv ${lvl}（最大）` : `Lv ${lvl}${u.max ? ` / ${u.max}` : ''}`)]),
     h('div.ds', lvl > 0 ? upgradeDesc(u, lvl) : (u.unlock ? u.desc : `いま: なし`)),
     !max && !u.unlock ? h('div.nx', `次: ${upgradeDesc(u, lvl + 1)}`) : null,
-    u.unlock && lvl > 0 ? h('div.nx', '解放ずみ') : null,
+    u.unlock && lvl > 0 ? h('div.nx', opts.free?.(u.id) ? `解放ずみ（${opts.free(u.id)}）` : '解放ずみ') : null,
     req ? h('div.bad.small', req) : null,
     u.keep && !opts.star ? h('div.dim.small', '超越しても残る') : null,
     btns.length ? h('div.ft', btns) : null,
@@ -152,7 +153,7 @@ function renderAltar(ui, el) {
   el.append(h('div.tabs.small', ALTAR_CATS.map((c) => h(`button.tab${altarCat === c.id ? '.on' : ''}`, { style: { color: c.color }, onclick: () => { altarCat = c.id; ui.renderPanel(); } }, `${c.name}（${ALTAR.filter((u) => u.cat === c.id).length}）`))));
   const grid = h('div.pr-upgs');
   for (const u of ALTAR.filter((x) => x.cat === altarCat)) {
-    grid.append(upgradeCard(ui, u, { level: (id) => ps.level(id), cost: (id) => ps.cost(id), req: (id) => ps.reqProblem(id), have: () => g.state.meta.souls, buy: (id, n) => ps.buy(id, n), unit: '魂', unitName: '魂', multi: true }));
+    grid.append(upgradeCard(ui, u, { level: (id) => ps.level(id), cost: (id) => ps.cost(id), req: (id) => ps.reqProblem(id), have: () => g.state.meta.souls, buy: (id, n) => ps.buy(id, n), unit: '魂', unitName: '魂', multi: true, free: (id) => g.state.meta.prestige.freeUnlocks?.[id] }));
   }
   el.append(grid);
   const d = ps.discount();
@@ -167,7 +168,7 @@ function renderAuto(ui, el) {
     const owned = ps.level(u.id) > 0;
     const on = ps.toggleOn(u.unlock);
     const row = h(`div.pr-auto${owned ? '' : '.off'}`, [
-      h('div.mt-grow', [h('b', u.name), h('div.small', u.desc), !owned ? h('div.dim.small', `魂の祭壇で 魂 ${fmt(ps.cost(u.id))}${u.req?.rebirths ? `（転生 ${u.req.rebirths} 回で解放）` : ''}`) : null]),
+      h('div.mt-grow', [h('b', u.name), h('div.small', u.desc), !owned ? h('div.dim.small', `魂の祭壇で 魂 ${fmt(ps.cost(u.id))}${u.req?.rebirths ? `（転生 ${u.req.rebirths} 回で解放）` : ''}${FREE_HINT[u.id] ? `・または ${FREE_HINT[u.id]}` : ''}`) : p.freeUnlocks?.[u.id] ? h('div.good.small', `${p.freeUnlocks[u.id]}ので解放`) : null]),
       owned ? h('label.chk', [h('input', { type: 'checkbox', checked: on || undefined, onchange: (e) => ps.setToggle(u.unlock, e.target.checked) }), on ? ' ON' : ' OFF']) : h('span.dim', '未解放'),
     ]);
     if (owned && u.unlock === 'autoSalvage') {

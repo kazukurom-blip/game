@@ -35,6 +35,26 @@ export class PrestigeSystem {
     this.cache = null;
     this.t = 0; this.t2 = 0; this.t5 = 0;
     game.events.on('zoneClear', (e) => this.onZoneClear(e));
+    // 自動化の一部は遊びの節目でも解放（REFERENCE I12: ボスに初めて負けた・バッグが初めて半分を超えた）
+    game.events.on('bossFail', () => this.grantFree('auto_boss', 'はじめてボスに負けた'));
+    game.events.on('invChanged', () => {
+      const inv = this.game.state?.inv;
+      if (inv && inv.bag.length >= inv.bagSize / 2) this.grantFree('auto_salvage', 'バッグが半分を超えた');
+    });
+  }
+
+  /** 祭壇の自動化をただで解放する（節目の報酬） */
+  grantFree(id, why) {
+    const st = this.game.state;
+    const u = ALTAR_BY_ID[id];
+    if (!st?.meta?.prestige || !u || this.level(id) > 0) return false;
+    st.meta.upgrades[id] = 1;
+    st.meta.prestige.freeUnlocks[id] = why;
+    this.ver++;
+    this.applyUnlocks();
+    this.game.events.emit('automationUnlocked', { id, name: u.name, why });
+    this.game.events.emit('metaChanged', { kind: 'prestige' });
+    return true;
   }
 
   get state() { return this.game.state; }
@@ -59,6 +79,7 @@ export class PrestigeSystem {
     p.salvagePreset ||= 'auto';
     p.autoAt ??= 50;
     p.bagApplied ??= 0;
+    p.freeUnlocks ||= {};
     p.life ||= blankLife(st);
     // 古いセーブ: 第五章のボスを倒していれば解放
     const z = ZONES[PRESTIGE.UNLOCK_ZONE];
@@ -111,6 +132,7 @@ export class PrestigeSystem {
 
   canRebirth() {
     if (!this.isUnlocked()) return { ok: false, reason: '第五章のボスを倒すと解放されます' };
+    if (this.state.world.mode && this.state.world.mode !== 'campaign') return { ok: false, reason: '物語の地域に戻ると転生できます（裂け目などの中ではできない）' };
     const s = this.previewSouls();
     if (s < 1) return { ok: false, reason: `エリア Lv ${PRESTIGE.SOUL_BASE_LEVEL + 1} 以上に着くと魂が得られます` };
     if (this.meta.rebirths > 0 && this.lifeSec() < PRESTIGE.MIN_LIFE_SEC) return { ok: false, reason: `この周回をあと ${Math.ceil((PRESTIGE.MIN_LIFE_SEC - this.lifeSec()) / 60)} 分遊ぶと転生できます` };

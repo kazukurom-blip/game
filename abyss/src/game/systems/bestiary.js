@@ -106,7 +106,15 @@ export class BestiarySystem {
       this.st.meta.codexSeen.unseen = (this.st.meta.codexSeen.unseen || 0) + 1;
       if (!silent) this.game.events.emit('collectionFind', { kind, id, name: name || id });
     };
-    const uid = item.uniqueId || item.setPiece || item.mythicId;
+    let uid = item.uniqueId || item.setPiece || item.pieceId || item.mythicId;
+    if (item.rarity === 'set') {
+      const pcs = setPieces();
+      if (!pcs.some((p) => p.id === uid)) {
+        // 部位の id が付いていないとき: セットの id と部位から探す
+        const pc = pcs.find((p) => (p.setId === item.setId || p.setId === uid) && (p.slot === item.slot || p.base === item.base));
+        if (pc) uid = pc.id;
+      }
+    }
     if (item.rarity === 'unique' && uid) reg('uniques', uid, UNIQUES.find((u) => u.id === uid)?.name);
     if (item.rarity === 'set' && uid) reg('sets', uid, setPieces().find((p) => p.id === uid)?.name);
     if (item.rarity === 'mythic' && uid) reg('mythics', uid, MYTHICS.find((u) => u.id === uid)?.name);

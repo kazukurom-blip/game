@@ -130,3 +130,29 @@ export function ensurePetPainter(assets, PET) {
     return true;
   } catch (e) { console.error(e); return false; }
 }
+
+const FLY = new Set(['flyer', 'elemental']);
+
+/** 連れているペットを戦闘の画面に描く（sceneHooks.drawFx から毎フレーム）。体は game.sys.pets.unit */
+export function drawPetUnit(scene, ctx, assets, PET) {
+  const g = scene.game;
+  const u = g?.sys?.pets?.unit;
+  if (!u || !g.state?.meta?.pets?.active || !g.combat?.hero) return;
+  const x = typeof scene.sx === 'function' ? scene.sx(u.x) : u.x - (scene.camX || 0);
+  const y = typeof scene.sy === 'function' ? scene.sy(u.y) : 560 + u.y * 0.9;
+  if (x < -200 || x > 1500) return;
+  const t = scene.t || 0; const a = u.anim || { s: 'idle', t: 0 };
+  const def = PET[u.pet];
+  let dx = 0; let dy = 0; let rot = 0; let sx = 1; let sy = 1;
+  if (a.s === 'walk') { dy = -Math.abs(Math.sin(a.t * 11)) * 5; rot = Math.sin(a.t * 11) * 0.05; }
+  else if (a.s === 'attack') { const k = Math.min(1, a.t / 0.45); dx = (u.face || 1) * Math.sin(k * Math.PI) * 16; sy = 1 + 0.08 * Math.sin(k * Math.PI); }
+  else { const b = Math.sin(t * 3 + 1); dy = b * 1.5; sy = 1 + b * 0.02; }
+  const fly = FLY.has(def?.body);
+  if (fly) dy += -28 + Math.sin(t * 4) * 6;
+  const sz = u.size || 0.8;
+  ctx.save();
+  ctx.globalAlpha = 0.3; ctx.fillStyle = '#000';
+  ctx.beginPath(); ctx.ellipse(x, y, 24 * sz, 6 * sz, 0, 0, TAU); ctx.fill();
+  ctx.restore();
+  assets.draw(ctx, u.art, x + dx, y + dy, { scale: sz, sx, sy, rot, flip: (u.face || 1) < 0, t });
+}

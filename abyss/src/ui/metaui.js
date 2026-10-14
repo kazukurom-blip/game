@@ -8,7 +8,9 @@ import { MATERIAL } from '../data/materials.js';
 import { fmt } from '../engine/format.js';
 import { assets } from '../render/assets.js';
 import { PET } from '../data/pets.js';
-import { ensurePetPainter } from './petart.js';
+import { MONSTER, FAMILIES } from '../data/monsters.js';
+import { ensurePetPainter, drawPetUnit } from './petart.js';
+import { sceneHooks } from '../render/scene.js';
 
 export const MAT_NAMES = { scrap: '鉄屑', dust: '魔塵', crystal: '秘晶', echo: '伝説の残響', core: '原初の核', shard: '深淵の欠片' };
 export const matName = (id) => MATERIAL[id]?.name || MAT_NAMES[id] || id;
@@ -71,19 +73,22 @@ export function bindMetaUi(ui) {
   on('transcend', (e) => ui.toast(`✧ 超越した　星晶 +${e.stars}`, 'level.mtbig'));
   on('automationUnlocked', (e) => ui.toast(`⚙ 自動化「${e.name}」を解放した（転生の窓の「自動化」で ON/OFF）`, 'good'));
   on('eggFound', (e) => ui.toast(`🥚 ${e.name}${e.n > 1 ? ` ×${e.n}` : ''} を手に入れた！ ペットの窓で孵卵器へ`, 'good.mtegg'));
+  on('eggReady', (e) => { if (!ui.game.state.meta.unlocks.autoHatch) ui.toast(`🥚 ${e.name || '卵'}が孵ります！ ペットの窓で孵そう`, 'good.mtegg'); });
   on('petHatched', (e) => ui.toast(e.dup ? (e.stars ? `🐾 ${e.name} が重なった　覚醒 ★${e.stars}` : `🐾 ${e.name} が重なった　経験値 +`) : `🐾 ${e.name} が生まれた！`, e.rarity === 'legendary' ? 'r-legendary' : 'good'));
   on('petLevel', (e) => ui.toastOnce(`pl-${e.id}`, `🐾 ${e.name} が Lv ${e.lvl} になった`, 'good'));
   on('bountyDone', (e) => ui.toast(`📜 ${e.name} を達成！ 日課の窓で受け取れます`, 'good'));
   on('loginClaim', (e) => ui.toast(`🎁 ログインの贈り物（${e.day} 日目）を受け取った`, 'good'));
   on('collectionFind', (e) => ui.toast(`📖 宝物図鑑に「${e.name}」を登録`, 'good.mtcol'));
-  on('bestiaryNew', (e) => ui.toastOnce(`bn-${e.id}`, `📖 魔物図鑑に新しい魔物を登録`, ''));
-  on('bestiaryTier', (e) => { if (e.tier >= 3) ui.toast(`📖 魔物図鑑の段が上がった（段 ${e.tier}）`, 'good'); });
+  on('bestiaryNew', (e) => ui.toastOnce(`bn-${e.id}`, `📖 魔物図鑑に「${MONSTER[e.id]?.name || '新しい魔物'}」を登録`, ''));
+  on('bestiaryTier', (e) => { if (e.tier >= 3) ui.toast(`📖 魔物図鑑「${MONSTER[e.id]?.name || ''}」が段 ${e.tier} に（${MONSTER[e.id] ? `${FAMILIES[MONSTER[e.id].family] || ''}へのダメージ +1%` : ''}）`, 'good'); });
   on('metaChanged', (e) => { ui.markDirty('meta'); if (e.kind) ui.markDirty(`meta:${e.kind}`); });
   on('unlocksChanged', () => ui.markDirty('meta'));
   badgeTimer = setInterval(() => { if (!ui.root?.isConnected) { clearInterval(badgeTimer); return; } ui.markDirty('badge'); }, 2000);
 }
 
 hudHooks.build.push((hud) => { bindMetaUi(hud.ui); return null; });
+// 連れているペット（combat.units の外にいるので、ここで描く）
+sceneHooks.drawFx.push((scene, ctx) => { try { drawPetUnit(scene, ctx, assets, PET); } catch (e) { console.error(e); } });
 
 // ---------------- 見た目
 injectCss('meta-ui', `
