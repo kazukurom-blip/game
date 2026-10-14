@@ -1,0 +1,278 @@
+{
+  "_note": "型紙の一覧（node tools/export_templates.mjs で作る）",
+  "size": 560,
+  "templates": [
+    {
+      "id": "hero.warrior.body",
+      "label": "剣闘士（体・基本の服）",
+      "file": "hero.warrior.body.png",
+      "cat": "hero",
+      "w": 150,
+      "h": 200
+    },
+    {
+      "id": "hero.warrior.outfit.cloth",
+      "label": "剣闘士（布の鎧を着た姿）",
+      "file": "hero.warrior.outfit.cloth.png",
+      "cat": "hero",
+      "w": 150,
+      "h": 200
+    },
+    {
+      "id": "hero.warrior.portrait",
+      "label": "剣闘士（立ち絵・クラス選択の画面）",
+      "file": "hero.warrior.portrait.png",
+      "cat": "hero",
+      "w": 300,
+      "h": 420
+    },
+    {
+      "id": "gear.sword",
+      "label": "片手剣（手に持った姿）",
+      "file": "gear.sword.png",
+      "cat": "gear",
+      "w": 110,
+      "h": 150
+    },
+    {
+      "id": "gear.bow",
+      "label": "弓（手に持った姿）",
+      "file": "gear.bow.png",
+      "cat": "gear",
+      "w": 110,
+      "h": 150
+    },
+    {
+      "id": "gear.staff",
+      "label": "杖（手に持った姿）",
+      "file": "gear.staff.png",
+      "cat": "gear",
+      "w": 110,
+      "h": 150
+    },
+    {
+      "id": "gear.shield",
+      "label": "盾（副手）",
+      "file": "gear.shield.png",
+      "cat": "gear",
+      "w": 90,
+      "h": 110
+    },
+    {
+      "id": "gear.quiver",
+      "label": "矢筒（副手）",
+      "file": "gear.quiver.png",
+      "cat": "gear",
+      "w": 90,
+      "h": 110
+    },
+    {
+      "id": "gear.helm.cloth",
+      "label": "布の兜",
+      "file": "gear.helm.cloth.png",
+      "cat": "gear",
+      "w": 80,
+      "h": 70
+    },
+    {
+      "id": "gear.chest.cloth",
+      "label": "布の鎧（重ね着の部品）",
+      "file": "gear.chest.cloth.png",
+      "cat": "gear",
+      "w": 150,
+      "h": 200
+    },
+    {
+      "id": "icon.item.sword",
+      "label": "片手剣のアイコン",
+      "file": "icon.item.sword.png",
+      "cat": "icon",
+      "w": 96,
+      "h": 96
+    },
+    {
+      "id": "icon.item.helm.cloth",
+      "label": "布の兜のアイコン",
+      "file": "icon.item.helm.cloth.png",
+      "cat": "icon",
+      "w": 96,
+      "h": 96
+    },
+    {
+      "id": "icon.item.amulet",
+      "label": "首飾りのアイコン",
+      "file": "icon.item.amulet.png",
+      "cat": "icon",
+      "w": 96,
+      "h": 96
+    },
+    {
+      "id": "icon.mat.scrap",
+      "label": "素材「鉄屑」のアイコン",
+      "file": "icon.mat.scrap.png",
+      "cat": "icon",
+      "w": 64,
+      "h": 64
+    },
+    {
+      "id": "icon.skill.w_slash",
+      "label": "スキル「強打」のアイコン",
+      "file": "icon.skill.w_slash.png",
+      "cat": "icon",
+      "w": 96,
+      "h": 96
+    },
+    {
+      "id": "fx.w_slash.swing",
+      "label": "「強打」の斬撃・振りの軌跡",
+      "file": "fx.w_slash.swing.png",
+      "cat": "fx",
+      "w": 200,
+      "h": 200
+    },
+    {
+      "id": "fx.w_slash.hit",
+      "label": "「強打」の当たった瞬間",
+      "file": "fx.w_slash.hit.png",
+      "cat": "fx",
+      "w": 120,
+      "h": 120
+    },
+    {
+      "id": "fx.w_cleave.area",
+      "label": "「大旋斬」の範囲（地面・爆発）",
+      "file": "fx.w_cleave.area.png",
+      "cat": "fx",
+      "w": 256,
+      "h": 256
+    },
+    {
+      "id": "fx.r_shot.proj",
+      "label": "「速射」の弾",
+      "file": "fx.r_shot.proj.png",
+      "cat": "fx",
+      "w": 90,
+      "h": 46
+    },
+    {
+      "id": "fx.n_skeleton.summon",
+      "label": "「骸骨召喚」の呼び出す魔法陣",
+      "file": "fx.n_skeleton.summon.png",
+      "cat": "fx",
+      "w": 200,
+      "h": 120
+    },
+    {
+      "id": "fx.enemy.arrow",
+      "label": "敵の弾（矢）",
+      "file": "fx.enemy.arrow.png",
+      "cat": "fx",
+      "w": 70,
+      "h": 40
+    },
+    {
+      "id": "monster.rot_zombie",
+      "label": "敵「腐れ屍」",
+      "file": "monster.rot_zombie.png",
+      "cat": "monster",
+      "w": 150,
+      "h": 150
+    },
+    {
+      "id": "monster.ash_wolf",
+      "label": "敵「灰狼」",
+      "file": "monster.ash_wolf.png",
+      "cat": "monster",
+      "w": 150,
+      "h": 150
+    },
+    {
+      "id": "monster.grave_bat",
+      "label": "敵「墓場の蝙蝠」",
+      "file": "monster.grave_bat.png",
+      "cat": "monster",
+      "w": 150,
+      "h": 150
+    },
+    {
+      "id": "monster.bog_slime",
+      "label": "敵「沼の粘体」",
+      "file": "monster.bog_slime.png",
+      "cat": "monster",
+      "w": 150,
+      "h": 150
+    },
+    {
+      "id": "monster.cultist",
+      "label": "敵「灰の信徒」",
+      "file": "monster.cultist.png",
+      "cat": "monster",
+      "w": 150,
+      "h": 150
+    },
+    {
+      "id": "monster.boss_butcher",
+      "label": "ボス「肉屋のグロム」",
+      "file": "monster.boss_butcher.png",
+      "cat": "monster",
+      "w": 240,
+      "h": 240
+    },
+    {
+      "id": "minion.skeleton",
+      "label": "召喚物「骸骨の戦士」",
+      "file": "minion.skeleton.png",
+      "cat": "minion",
+      "w": 120,
+      "h": 140
+    },
+    {
+      "id": "pet.emberfox",
+      "label": "ペット「火狐のほむら」",
+      "file": "pet.emberfox.png",
+      "cat": "minion",
+      "w": 90,
+      "h": 90
+    },
+    {
+      "id": "bg.act1",
+      "label": "第一章　灰の村（背景・一番奥）",
+      "file": "bg.act1.png",
+      "cat": "bg",
+      "w": 1280,
+      "h": 720
+    },
+    {
+      "id": "bg.act1.mid",
+      "label": "第一章　灰の村（背景・中景、横につながる絵）",
+      "file": "bg.act1.mid.png",
+      "cat": "bg",
+      "w": 1280,
+      "h": 720
+    },
+    {
+      "id": "bg.act1.ground",
+      "label": "第一章　灰の村（地面、横につながる絵）",
+      "file": "bg.act1.ground.png",
+      "cat": "bg",
+      "w": 1280,
+      "h": 220
+    },
+    {
+      "id": "ui.logo",
+      "label": "タイトルロゴ",
+      "file": "ui.logo.png",
+      "cat": "ui",
+      "w": 720,
+      "h": 240
+    },
+    {
+      "id": "ui.title",
+      "label": "タイトル画面の背景",
+      "file": "ui.title.png",
+      "cat": "ui",
+      "w": 1280,
+      "h": 720
+    }
+  ]
+}
