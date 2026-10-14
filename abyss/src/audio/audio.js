@@ -193,6 +193,8 @@ export const audio = {
       if (this.game?.state) ensureAudioSettings(this.game.state.settings);
       this.applyPrefs();
       this.auto = true; this.manual = null;
+      this.engine.muffle(false);
+      this.hudButton?.update();
     }
     if (!this.auto) return;
     if (type === 'stageStart' && payload?.boss) {

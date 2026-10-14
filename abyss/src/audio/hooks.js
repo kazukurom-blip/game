@@ -134,8 +134,9 @@ export function makeFxHandler(A) {
         const u = e.unit || {};
         if (u.goblin || u.def?.goblin || u.flags?.goblin) { A.play('chest', { pan }); return; }
         if (u.boss) { A.play('kill_boss', { pan: 0 }); A.duck(0.4, 1.2); return; }
-        if (u.rank === 'champion' || u.rank === 'rare') { A.play('kill_elite', { pan }); return; }
-        A.play('kill', { pan, vol: 0.8 });
+        const rate = Math.max(0.7, Math.min(1.25, 1 / Math.sqrt(u.size || 1))); // 大きい敵ほど低い音
+        if (u.rank === 'champion' || u.rank === 'rare') { A.play('kill_elite', { pan, rate }); return; }
+        A.play('kill', { pan, vol: 0.8, rate });
         return;
       }
       case 'loot': A.loot(e); return;
@@ -156,7 +157,8 @@ export function makeFxHandler(A) {
         if (id === 'freeze' || id === 'shock' || id === 'stun') A.play(id, { pan });
         return;
       }
-      case 'heroDeath': A.play('hero_death'); A.duck(0.4, 1.6); return;
+      case 'heroDeath': A.play('hero_death'); A.duck(0.4, 1.6); A.engine.muffle?.(true); return;
+      case 'revive': A.play('revive'); A.engine.muffle?.(false); return;
       case 'ult': A.play('ult'); A.duck(0.45, 1.1); return;
       default: {
         const id = FX_SIMPLE[e.t];

@@ -52,7 +52,10 @@ export class AudioEngine {
       this.master = ctx.createGain(); this.master.connect(this.comp);
       this.sfxBus = ctx.createGain(); this.sfxBus.connect(this.master);
       this.duckGain = ctx.createGain(); this.duckGain.connect(this.master);
-      this.musicBus = ctx.createGain(); this.musicBus.connect(this.duckGain);
+      // 主人公が倒れている間だけ BGM をこもらせる低域通過（ふだんは開いている）
+      this.muffleLp = ctx.createBiquadFilter(); this.muffleLp.type = 'lowpass'; this.muffleLp.frequency.value = 20000; this.muffleLp.Q.value = 0.5;
+      this.muffleLp.connect(this.duckGain);
+      this.musicBus = ctx.createGain(); this.musicBus.connect(this.muffleLp);
       this.verbIn = ctx.createGain();
       try {
         this.verb = ctx.createConvolver();
@@ -115,6 +118,18 @@ export class AudioEngine {
       g.linearRampToValueAtTime(1, t + 0.06 + hold + release);
     } catch { /* ignore */ }
     this.duckUntil = t + 0.06 + hold; this.duckDepth = depth;
+  }
+
+  /** BGM をこもらせる（on）・戻す（off）。戻し忘れても maxSec 秒で戻る */
+  muffle(on, maxSec = 8) {
+    if (!this.ctx || !this.muffleLp) return;
+    const f = this.muffleLp.frequency; const t = this.ctx.currentTime;
+    try {
+      f.cancelScheduledValues(t);
+      f.setTargetAtTime(on ? 520 : 20000, t, on ? 0.25 : 0.6);
+      if (on) f.setTargetAtTime(20000, t + maxSec, 0.6);
+    } catch { /* ignore */ }
+    this.muffled = !!on;
   }
 
   // ---------------------------------------------------------------- 音の素材

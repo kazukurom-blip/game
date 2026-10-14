@@ -44,11 +44,11 @@ export function installAudioUi(A) {
   hudHooks.build.push((hud) => muteButton(A, hud));
 }
 
-function muteButton(A) {
+function muteButton(A, hud) {
   injectCss('audio', CSS);
   const b = h('button.hud-btn.snd-hud', { title: '音を出す／消す（細かい設定は 設定 → 音）' });
   const upd = () => { const m = A.prefs.mute; b.textContent = m ? '♪ 消音中' : '♪ 音'; b.classList.toggle('off', !!m); };
-  b.addEventListener('click', (e) => { e.stopPropagation(); A.unlock(); A.setMuted(!A.prefs.mute); upd(); if (!A.prefs.mute) A.play('ui_toggle'); });
+  b.addEventListener('click', (e) => { e.stopPropagation(); A.unlock(); A.setMuted(!A.prefs.mute); upd(); if (!A.prefs.mute) A.play('ui_toggle'); if (hud?.ui?.current?.id === 'settings') hud.ui.renderPanel(); });
   upd();
   A.hudButton = { el: b, update: upd };
   return b;
