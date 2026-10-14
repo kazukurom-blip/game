@@ -8,9 +8,17 @@ import { h, button } from './dom.js';
 const lvl = (g) => g.state.hero.level || 1;
 const found = (g, ...r) => r.some((id) => (g.state.meta.stats?.itemsFound?.[id] || 0) > 0);
 const hasAny = (o) => !!o && Object.values(o).some((v) => (Array.isArray(v) ? v.length : v) > 0);
-function anySocket(g) {
-  const items = [...(g.state.inv.bag || []), ...Object.values(g.state.hero.equip || {})];
-  return items.some((it) => it?.sockets?.length);
+/** 中身が数でないマップ（ペット { id: { lvl } }・力の書庫 { id: 強さ 0〜1 }）の数 */
+const keys = (o) => (o && typeof o === 'object' ? Object.keys(o).length : 0);
+/**
+ * 宝石・ルーン・深淵の宝石を持っているか（持ち物か、装備のソケットにはまっている）。
+ * 空いたソケットだけでは数えない（最初の装備にもソケットが付くことがあり、始めて数秒で開いてしまうため）。
+ */
+function hasGemOrRune(g) {
+  const inv = g.state.inv;
+  if (hasAny(inv.gems) || hasAny(inv.runes) || keys(inv.lgems) > 0) return true;
+  const items = [...(inv.bag || []), ...(inv.stash || []).flat(), ...Object.values(g.state.hero.equip || {})];
+  return items.some((it) => it?.sockets?.some(Boolean));
 }
 
 /**
@@ -32,12 +40,12 @@ export const FEATURES = [
     intro: 'これまでの記録と、能力がどこから来ているかの内訳、スキルごとのダメージが見られます。' },
   { id: 'merchant', name: '商人', when: 'はじめての深淵の欠片（エリートが落とす）', cond: (g) => (g.state.inv.mats?.shard || 0) > 0 || lvl(g) >= 15,
     intro: '深淵の欠片で、部位を選んで品物を買えます（中身はレア以上）。極致の核を集めると、好きなミシックと交換できます。' },
-  { id: 'gems', name: '宝石', when: 'はじめての宝石かソケット', cond: (g) => hasAny(g.state.inv.gems) || hasAny(g.state.inv.runes) || anySocket(g) || lvl(g) >= 18,
+  { id: 'gems', name: '宝石', when: 'はじめての宝石かルーン（エリート・ボスが落とす）', cond: (g) => hasGemOrRune(g) || lvl(g) >= 18,
     intro: 'ソケットの空いた装備に宝石やルーンをはめます。同じ宝石 3 つでひとつ上の段に合成できます。' },
-  { id: 'codex', name: '極意', when: 'はじめてのレジェンダリー', cond: (g) => found(g, 'legendary', 'set', 'unique', 'mythic') || hasAny(g.state.meta.codex?.powers) || lvl(g) >= 25,
+  { id: 'codex', name: '極意', when: 'はじめてのレジェンダリー', cond: (g) => found(g, 'legendary', 'set', 'unique', 'mythic') || keys(g.state.meta.codex?.powers) > 0 || lvl(g) >= 25,
     intro: 'レジェンダリーから伝説の力を抜き出して登録し、装備に付いていなくても 3 つまで着けられます（抜き出した装備は消えます）。' },
-  { id: 'pets', name: 'ペット', when: 'はじめての卵（エリート・ボスがまれに落とす）', cond: (g) => (g.sys.pets?.eggCount?.() || 0) > 0 || hasAny(g.state.meta.pets?.owned) || (g.state.meta.pets?.incubator?.length || 0) > 0,
-    intro: '卵を孵卵器に入れると、戦うほど育って孵ります。1 匹を連れて歩けて、持っているだけで効く効果もあります。' },
+  { id: 'pets', name: 'ペット', when: 'はじめての卵（エリート・ボスがまれに落とす）', cond: (g) => (g.sys.pets?.eggCount?.() || 0) > 0 || keys(g.state.meta.pets?.owned) > 0 || (g.state.meta.pets?.incubator?.length || 0) > 0,
+    intro: '卵は空いた孵卵器へ自動で入り、敵を倒すほど育って孵ります。孵ったら「孵す」を押してください。1 匹を連れて歩けて、持っているだけで効く効果もあります。' },
   { id: 'prestige', name: '転生', when: '第五章のボスを倒す', cond: (g) => !!g.sys.prestige?.isUnlocked?.() || !!g.state.meta.unlocks?.prestige || (g.state.meta.rebirths || 0) > 0,
     intro: '物語の進みとお金を手放して魂を得ます。レベル・装備・星座盤などは残ります。魂は魂の祭壇で永続の強化と自動化に使います。' },
   { id: 'rift', name: '裂け目', when: '物語の最後（第十章の深淵王）を倒す', cond: (g) => !!g.sys.rift?.available?.(),

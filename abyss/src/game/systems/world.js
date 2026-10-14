@@ -3,7 +3,8 @@
 // 流れ: ステージ開始 → ウェーブを WAVES_PER_STAGE 回（全滅させると次）→ ステージクリア
 //       → 自動前進なら次のステージへ。stage 10 はボス（制限時間）。倒すと次の地域を解放。
 //       ボスに負けたら自動前進を切ってステージ 9 で稼ぐ。state.meta.unlocks.autoBoss があれば、
-//       火力が足りたとき（または 5 分ごと）に自動で再挑戦する。
+//       火力が足りたとき（または 3 分ごと）に自動で再挑戦する（はじめてボスに負けたときに無料で開く）。
+//       ふつうのステージで倒れたら、ステージの最初ではなく WAVE_CHECKPOINT ウェーブごとの区切りから続ける。
 // 外から: game.sys.world.travel(zoneId, stage) / challengeBoss() / setAutoAdvance(bool)
 //         setTorment(t) / setTormentAuto(bool) / tormentAutoOn() / canTormentAuto() / tormentInfo(t) / bossNeed(zone) / estDps() / zoneAdvice(zone)
 //         （苦行の自動最適化は魂の祭壇「苦行の見極め」= state.meta.unlocks.autoTorment が 1 つだけのスイッチ）
@@ -43,6 +44,9 @@ export const AUTO_BOSS = { minGap: 30, maxGap: 180, margin: 1.0 }; // 強さ担�
 // 見張り: ふつうのステージで、この秒数だれも倒れないか、STALL_WAVE_SEC 秒ウェーブが進まなければステージをやり直す
 export const STALL_RESTART_SEC = 120;
 export const STALL_WAVE_SEC = 600;
+// ふつうのステージで倒れたときに戻る区切り（ウェーブ 5・10・15 の後）。1 ステージが 20 ウェーブなので、
+// 最初からやり直すと 1 回倒れるたびに数分の進みを失い、倒れやすい主人公が同じステージから何十分も出られなかった
+export const WAVE_CHECKPOINT = 5;
 
 export function isWeekend(date = new Date()) { const d = date.getDay(); return d === 0 || d === 6; }
 
@@ -417,7 +421,8 @@ export class WorldSystem {
     const w = this.w;
     if (!st.meta.unlocks?.autoBoss || w.mode !== 'campaign') return false;
     const z = this.zone();
-    if (w.bossFailZone !== z.id || w.cleared[z.id] || w.stage >= STAGES_PER_ZONE) return false;
+    // 魔境はどの地域も踏破済みなので、踏破したかでは止めない（負けたボスに自動で挑み直さず、ステージ 9 に留まり続けていた）
+    if (w.bossFailZone !== z.id || (w.cleared[z.id] && !(w.torment > 0)) || w.stage >= STAGES_PER_ZONE) return false;
     const log = this.logFor(z.id);
     const since = st.playTime - log.lastTry;
     if (since >= AUTO_BOSS.maxGap) return true;
@@ -494,7 +499,22 @@ export class WorldSystem {
     const c = this.combat;
     c.reviveHero();
     if (this.bossUnit || this.isBossStage()) { this.onBossFail('力尽きた'); return; }
-    this.startStage();
+    this.resumeStage();
+  }
+
+  /** 倒れたあと: 同じステージを、倒れたウェーブの前の区切り（WAVE_CHECKPOINT ごと）から続ける */
+  resumeStage() {
+    const from = Math.max(0, Math.floor((this.wave - 1) / WAVE_CHECKPOINT) * WAVE_CHECKPOINT);
+    if (from <= 0) { this.startStage(); return; }
+    const c = this.combat;
+    c.clearEnemies();
+    clearSched(c);
+    this.wave = from;
+    this.bossUnit = null;
+    this.bossTimer = 0;
+    this.transition = 0.6;
+    const z = this.zone();
+    this.banner = { text: `${z.name}　${this.w.stage}/${STAGES_PER_ZONE}　ウェーブ ${from + 1} から`, t: 2.2 };
   }
 
   /** 地域とステージを選んで移動 */

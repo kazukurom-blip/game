@@ -10,6 +10,7 @@ import { RNG, hashStr } from '../../engine/rng.js';
 import { BAL } from '../../data/balance.js';
 import { ACTS, ZONES } from '../../data/world.js';
 import { EGG } from '../../data/pets.js';
+import { riftClears } from './achievements.js';
 
 export const BOUNTY_TYPES = {
   kills: { name: '討伐', desc: (b) => `敵を ${b.target.toLocaleString('en-US')} 体倒す` },
@@ -83,6 +84,10 @@ export class BountySystem {
     b.list = b.list.filter((x) => x && x.uid && BOUNTY_TYPES[x.type]);
     if (b.weekly && !BOUNTY_TYPES[b.weekly.type]) b.weekly = null;
     b.weekly ??= null;
+    // 前の版の「裂け目」の日課は挑んだ回数（やめた・時間切れも）で数えていた。今の進み具合を保って、踏破の回数に数え直す
+    for (const x of [...b.list, b.weekly]) {
+      if (x?.type === 'rift' && x.ctr !== 'clears') { if (!x.done) x.base = riftClears(st) - (x.prog || 0); x.ctr = 'clears'; }
+    }
     b.seq ??= 1;
     b.done ??= 0;
     const d = (m.daily ||= {});
@@ -102,7 +107,7 @@ export class BountySystem {
     const s = st.meta.stats; const r = st.meta.record || {};
     return {
       kills: s.kills || 0, elites: s.elites || 0, bosses: s.bosses || 0, salvage: s.salvaged || 0, gold: s.goldEarned || 0,
-      stages: r.stages || 0, craft: Math.max(s.crafted || 0, r.crafted || 0), enhance: r.enhanced || 0, rift: st.world.rift?.runs || 0, actKills: r.actKills || {},
+      stages: r.stages || 0, craft: Math.max(s.crafted || 0, r.crafted || 0), enhance: r.enhanced || 0, rift: riftClears(st), actKills: r.actKills || {},
     };
   }
   counterOf(type, arg, c = this.counters()) { return type === 'actKills' ? (c.actKills[arg] || 0) : (c[type] || 0); }
@@ -145,7 +150,7 @@ export class BountySystem {
       const sys = this.game.sys.crafting;
       return !!sys && Object.getOwnPropertyNames(Object.getPrototypeOf(sys)).length > 2 && st.hero.level >= 8;
     }
-    if (type === 'rift') return (st.world.rift?.runs || 0) > 0;
+    if (type === 'rift') return riftClears(st) > 0; // 踏破したことがある人だけ（挑むだけで終わる日課ではない）
     if (type === 'enhance') return (st.meta.record?.enhanced || 0) > 0;
     if (type === 'actKills') return true;
     return true;
@@ -177,6 +182,7 @@ export class BountySystem {
       default: break;
     }
     const b = { uid: `b${this.b.seq++}`, day, type, arg, target, base: this.counterOf(type, arg), prog: 0, done: false, claimed: false, weekly, reward: this.makeReward(rng, weekly ? 'weekly' : 'daily') };
+    if (type === 'rift') b.ctr = 'clears'; // 踏破の回数で数える（前の版は挑んだ回数）
     return b;
   }
 

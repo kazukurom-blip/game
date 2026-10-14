@@ -14,6 +14,7 @@ import { newState, migrate } from './state.js';
 import { Combat } from './combat.js';
 import { SYSTEMS } from './systems/index.js';
 import { flushWorldPending } from './systems/world.js';
+import { MIN_OFFLINE_SEC } from './systems/offline.js';
 import { generateItem, dropCount, setUidCounter, peekUid } from './loot.js';
 import { BAL } from '../data/balance.js';
 import { CLASS } from '../data/classes.js';
@@ -142,6 +143,13 @@ export class Game {
 
   /** タブを離れていた間など */
   catchUp(sec) {
+    // 放置の稼ぎの下限（30 秒）より短い空白は、その時間ぶんふつうに戦って進める（以前は何も渡さずに消えていた。最大 600 ティック）
+    if (sec < MIN_OFFLINE_SEC) {
+      const n = Math.floor(Math.max(0, sec) / BAL.TICK);
+      for (let i = 0; i < n; i++) this.tick(BAL.TICK);
+      this.state.lastTick = Date.now();
+      return null;
+    }
     const rep = this.sys.offline.grant(sec, { reason: 'away' });
     this.state.lastTick = Date.now();
     return rep;
