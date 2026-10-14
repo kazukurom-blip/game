@@ -72,9 +72,9 @@ export class RiftSystem {
   ensureState(state) {
     const w = state.world;
     if (w.mode === 'gate') {
-      // 門番の戦いは続きから再開できないので欠片を返す
+      // 門番の戦いは続きから再開できないので欠片を返す（勝ち負けが出たあとの数秒にセーブされた物は返さない）
       const run = w.gate?.run;
-      if (run) for (let k = 0; k < 4; k++) { const key = `${GATE_GROUPS[run.gi].id}_${k}`; w.gate.frags[key] = (w.gate.frags[key] || 0) + 1; }
+      if (run && run.phase !== 'done' && GATE_GROUPS[run.gi]) for (let k = 0; k < 4; k++) { const key = `${GATE_GROUPS[run.gi].id}_${k}`; w.gate.frags[key] = (w.gate.frags[key] || 0) + 1; }
       if (w.gate) w.gate.run = null;
       if (run?.returnZone) { w.zone = run.returnZone; w.stage = run.returnStage || 1; w.torment = run.returnTorment ?? w.torment; }
       w.mode = 'campaign';
@@ -273,6 +273,11 @@ export class RiftSystem {
     const R = this.R;
     const run = R.run;
     if (!run) return;
+    // 結果はもう出ている（終わったあとの数秒に「戻る」・門番を呼んだ・次の裂け目を始めた）: 記録を二重にしない
+    if (run.phase === 'done') {
+      if (keepMode) { R.lastReturn = { zone: run.returnZone, stage: run.returnStage, torment: run.returnTorment }; R.run = null; } else if (abandoned) this.toCampaign();
+      return;
+    }
     const g = run.level;
     const ws = this.ws;
     const ratio = Math.max(0, run.timeLeft / run.limit);
@@ -488,6 +493,8 @@ export class RiftSystem {
     const w = this.w;
     const run = w.gate.run;
     if (!run) return;
+    // 勝ち負けはもう出ている（結果の数秒の間に移動・超越した）: 欠片を戻さない（以前は勝ったあとでも 4 つ戻り、何度でも門番を呼べた）
+    if (run.phase === 'done') { if (abandoned || silent) this.toCampaignFromGate(); return; }
     const g = GATE_GROUPS[run.gi];
     const ws = this.ws;
     const res = { gi: run.gi, ok, at: Date.now(), tier: run.tier };

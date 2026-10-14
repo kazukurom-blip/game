@@ -293,7 +293,7 @@ export class WorldSystem {
 
   /**
    * 見張り: 敵がいるのに 20 秒間だれにもダメージが入らなければ、主人公に重なった敵を少し離す。
-   * 40 秒続いたらそのステージをやり直す（放置で永久に止まらないように）。
+   * 40 秒続いたらそのステージを区切り（WAVE_CHECKPOINT）からやり直す（放置で永久に止まらないように）。
    */
   watchdog(dt) {
     const c = this.combat;
@@ -301,14 +301,14 @@ export class WorldSystem {
     const wd = this.watch;
     if (!h || h.dead || this.transition > 0) { wd.t = 0; wd.dmg = c.stats.dmgDone; return; }
     // 倒しきれない敵（再生するエリート・手下を呼び続ける敵など）に当て続けて止まるのを防ぐ: ふつうのステージで
-    // 2 分だれも倒れないか、10 分ウェーブが進まなければやり直す（手下は倒れ続けるので、撃破数だけでは見張れない。
+    // 2 分だれも倒れないか、10 分ウェーブが進まなければ区切りからやり直す（群れは作り直される。手下は倒れ続けるので、撃破数だけでは見張れない。
     // 弱い主人公の遅いウェーブまでやり直すと、ステージが終わらずボスに再挑戦できなくなるので、ウェーブの方は長めに）
     const kills = this.game.state.meta.stats.kills;
     const key = `${this.w.zone}:${this.w.stage}:${this.wave}`;
     if (wd.key !== key || !c.enemies().length || this.bossUnit || this.w.mode !== 'campaign') { wd.key = key; wd.kills = kills; wd.kt = 0; wd.wt = 0; } else {
       if (wd.kills !== kills) { wd.kills = kills; wd.kt = 0; } else wd.kt = (wd.kt || 0) + dt;
       wd.wt = (wd.wt || 0) + dt;
-      if (wd.kt >= STALL_RESTART_SEC || wd.wt >= STALL_WAVE_SEC) { wd.kt = 0; wd.wt = 0; this.stuckRestarts = (this.stuckRestarts || 0) + 1; this.startStage(); return; }
+      if (wd.kt >= STALL_RESTART_SEC || wd.wt >= STALL_WAVE_SEC) { wd.kt = 0; wd.wt = 0; this.stuckRestarts = (this.stuckRestarts || 0) + 1; this.resumeStage(); return; }
     }
     if (c.stats.dmgDone !== wd.dmg) { wd.dmg = c.stats.dmgDone; wd.t = 0; wd.nudged = false; return; }
     const foes = c.enemies();
@@ -320,7 +320,7 @@ export class WorldSystem {
     } else if (wd.t >= 40) {
       wd.t = 0; wd.nudged = false;
       this.stuckRestarts = (this.stuckRestarts || 0) + 1;
-      if (this.w.mode === 'campaign') this.startStage();
+      if (this.w.mode === 'campaign') this.resumeStage();
       else for (const u of foes) u.x = h.x + 300;
     }
   }

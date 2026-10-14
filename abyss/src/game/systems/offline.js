@@ -163,6 +163,8 @@ export class OfflineSystem {
     for (const [rar, n0] of Object.entries(lowExtra)) {
       const n = Math.round(n0);
       found[rar] = (found[rar] || 0) + n;
+      // 拾った数（記録・実績「マジックを N 個拾う」など）にも数える。作って受け取った分は receive() が数える
+      const fs = st.meta.stats.itemsFound; fs[rar] = (fs[rar] || 0) + n;
       rolledSalvaged += n;
       const per = lowMats[rar]; const cnt = lowN[rar] || 0;
       const add = {};

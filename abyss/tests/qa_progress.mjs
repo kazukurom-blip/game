@@ -90,6 +90,19 @@ t(`ふつうのステージで倒れても、ステージの最初ではなく�
   ws.wave = 4; killHero(g); untilAlive();
   eq(ws.wave, 0, '最初の区切りの前なら最初から');
 });
+t('見張り（2 分だれも倒れない）のやり直しも、ステージの最初ではなく区切りから', () => {
+  const g = fresh('warrior', 5);
+  const ws = g.sys.world;
+  run(g, 2);
+  ws.wave = 13; g.combat.clearEnemies(); ws.spawnWave(); ws.wave = 13;
+  const r0 = ws.stuckRestarts || 0;
+  for (let i = 0; i < 20 * 130 && (ws.stuckRestarts || 0) === r0; i++) {
+    for (const u of g.combat.enemies()) { u.life = u.maxLife = 1e30; u.dmg = 0; }
+    g.tick(0.05);
+  }
+  ok((ws.stuckRestarts || 0) > r0, '見張りがやり直した');
+  ok(ws.wave >= 10 && ws.wave <= 11, `ウェーブ ${ws.wave}（区切り 10 から）`);
+});
 t('倒れ続ける弱い主人公（放置・装備もスキルも触らない影刃）でも、同じステージに 10 分以上は止まらない', () => {
   // 以前は 1 回倒れるたびに 20 ウェーブの最初からやり直し、a1z2 の 1 つのステージに 16 分（倒れること 12 回）止まっていた
   const g = new Game({ seed: 7 }); g.newGame('assassin', 'qa');
@@ -253,6 +266,40 @@ t('門番と戦っている途中で超越すると、欠片は戻る', () => {
   for (let k = 0; k < 4; k++) eq(g.state.world.gate.frags[`${gid}_${k}`], 1, `欠片 ${k}`);
 });
 
+t('門番に勝ったあとの数秒に移動・セーブして読み直しても、欠片は戻らない（何度でも呼べてしまう）', () => {
+  const g = fresh('warrior', 1); storyDone(g); makeStrong(g, 1e12);
+  g.sys.world.setTorment(1);
+  const gid = GATE_GROUPS[0].id;
+  const fr = (gg) => [0, 1, 2, 3].map((k) => gg.state.world.gate.frags[`${gid}_${k}`] || 0).join(',');
+  const win = () => {
+    for (let k = 0; k < 4; k++) g.state.world.gate.frags[`${gid}_${k}`] = 1;
+    ok(g.sys.rift.summonGate(0).ok);
+    for (let i = 0; i < 2000 && g.state.world.gate.run?.phase !== 'done'; i++) g.tick(0.05);
+    eq(g.state.world.gate.run?.phase, 'done'); ok(g.state.world.gate.history[0].ok, '勝った');
+  };
+  win();
+  const h0 = g.state.world.gate.history.length;
+  g.sys.world.travel('a1z1', 1);
+  eq(fr(g), '0,0,0,0', '移動しても欠片は戻らない');
+  eq(g.state.world.gate.history.length, h0, '記録も増えない');
+  eq(g.state.world.mode, 'campaign'); eq(g.state.world.gate.run, null);
+  win();
+  const snap = JSON.parse(JSON.stringify(g.snapshot()));
+  const g2 = new Game({ seed: 2 }); g2.load(snap);
+  eq(fr(g2), '0,0,0,0', '読み直しても欠片は戻らない');
+  eq(g2.state.world.mode, 'campaign');
+});
+t('裂け目を踏破したあとの数秒に「戻る」を押しても、記録が二重にならない', () => {
+  const g = fresh('warrior', 1); storyDone(g); makeStrong(g, 1e12);
+  g.sys.rift.begin(1); g.state.world.rift.run.progress = 399.9;
+  for (let i = 0; i < 4000 && g.state.world.rift.run?.phase !== 'done'; i++) g.tick(0.05);
+  const R = g.state.world.rift;
+  eq(R.clears, 1); const runs = R.runs; const hist = R.history.length;
+  ok(g.sys.rift.abandon());
+  eq(R.runs, runs, '挑んだ回数'); eq(R.history.length, hist, '記録');
+  eq(g.state.world.mode, 'campaign'); eq(R.run, null);
+});
+
 // ---------------- 短い留守
 t('5〜30 秒の空白（タブを少し離れた）は、その時間ぶん進める（放置の稼ぎの下限より短くても消えない）', () => {
   const g = fresh('warrior', 6);
@@ -265,6 +312,17 @@ t('5〜30 秒の空白（タブを少し離れた）は、その時間ぶん進�
   let rep = null; g.events.on('offlineReport', (r) => { rep = r; });
   g.update(45);
   ok(rep && rep.seconds === 45, '45 秒は放置の稼ぎ');
+});
+
+t('長い放置の報告の「拾った数」と、記録・実績の拾った数が合う（1,500 個を超えた分も数える）', () => {
+  const g = fresh('warrior', 8);
+  run(g, 120);
+  const before = { ...g.state.meta.stats.itemsFound };
+  const rep = g.sys.offline.grant(8 * 3600);
+  ok(rep.drops > 1500, `前提: 1,500 個を超える（${rep.drops}）`);
+  let got = 0; let shown = 0;
+  for (const k of Object.keys(rep.found)) { got += (g.state.meta.stats.itemsFound[k] || 0) - (before[k] || 0); shown += rep.found[k]; }
+  ok(Math.abs(got - shown) <= Object.keys(rep.found).length, `記録 +${got} / 報告 ${shown}`);
 });
 
 // ---------------- 実績の説明
