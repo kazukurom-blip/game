@@ -38,7 +38,7 @@ function def(id, use, opts = {}) {
 
 // ---------------- 動き
 def('charge', (c, u, t, a) => {
-  const tx = t.x - dirTo(u, t) * 50;
+  const tx = t.x - dirTo(u, t) * (60 + 20 * (u.size || 1)); // 近すぎると速い弾がすり抜けるので、少し手前で止まる
   telegraph(c, u, { x: t.x, y: t.y, r: 95, delay: a.delay, mult: a.mult, el: u.element, art: 'fx.enemy.slam' });
   control(u, { kind: 'dash', t: 0, wind: a.delay - 0.2, dur: 0.2, x0: u.x, x1: tx });
   c.emit({ t: 'charge', unit: u, x: u.x, tx });

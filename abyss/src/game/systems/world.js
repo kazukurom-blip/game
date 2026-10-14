@@ -13,7 +13,7 @@
 // 出来事（game.events）: stageStart, stageClear, bossSpawn, bossFail, zoneClear, storyClear, tormentUnlock, tormentChanged,
 //                         goblinSpawn, goblinKill, goblinEscape, miniEvent, autoBossRetry
 
-import { ZONES, ZONE, ACT, STAGES_PER_ZONE, WAVES_PER_STAGE, BOSS_TIME, ACT_BOSS_TIME_MUL, FINAL_BOSS_TIME_MUL, ACT_BOSS_LIFE_MUL, stageLevel, FINAL_ZONE } from '../../data/world.js';
+import { ZONES, ZONE, ACT, STAGES_PER_ZONE, WAVES_PER_STAGE, BOSS_TIME, ACT_BOSS_TIME_MUL, FINAL_BOSS_TIME_MUL, ACT_BOSS_LIFE_MUL, EARLY_BOSS, stageLevel, FINAL_ZONE } from '../../data/world.js';
 import { MONSTER, ELITE_AFFIXES } from '../../data/monsters.js';
 import { BAL } from '../../data/balance.js';
 import { runSched, clearSched } from '../content/world/util.js';
@@ -59,6 +59,7 @@ export class WorldSystem {
     this.lastEventAt = -999;
     this.tw = { t: 0, kills: 0, deaths: 0 }; // 苦行の自動最適化の窓
     this.festivalOverride = null; // テスト用（true/false で週末の祭を固定）
+    this.watch = { t: 0, dmg: 0, nudged: false }; // 止まってしまったときの見張り
     this.bossStart = 0;
   }
 
@@ -77,7 +78,8 @@ export class WorldSystem {
     w.bossLog ||= {};
     w.clearedAt ||= {};
     w.events ||= {};
-    w.dpsK ??= 0.8;
+    w.dpsK ??= 1;
+    w.goblinEscaped ||= 0;
     if (!(w.goblinT >= 0)) w.goblinT = g.rng.range(...GOBLIN_SPAWN.first);
     w.maxStage ||= {};
     w.maxStage[ZONES[0].id] ||= 1;
@@ -149,6 +151,7 @@ export class WorldSystem {
   bossLifeMul(z) {
     const def = MONSTER[z.boss];
     if (def?.kind === 'final') return 1.5 * ACT_BOSS_LIFE_MUL;
+    if (EARLY_BOSS[z.global] && !(this.w.torment > 0)) return EARLY_BOSS[z.global][0];
     return z.zoneIdx === 4 ? ACT_BOSS_LIFE_MUL : 1;
   }
 
@@ -169,7 +172,7 @@ export class WorldSystem {
     if (this.isBossStage()) {
       const isAct = z.zoneIdx === 4;
       const def = MONSTER[z.boss];
-      const u = c.spawnMonster(z.boss, { level: L + 1, rank: isAct ? 'actboss' : 'boss', x: h.x + 620, y: 0, lifeMul: diff.life * this.bossLifeMul(z), dmgMul: diff.dmg });
+      const u = c.spawnMonster(z.boss, { level: L + 1, rank: isAct ? 'actboss' : 'boss', x: h.x + 620, y: 0, lifeMul: diff.life * this.bossLifeMul(z), dmgMul: diff.dmg * (EARLY_BOSS[z.global] && !(this.w.torment > 0) ? EARLY_BOSS[z.global][1] : 1) });
       this.bossUnit = u;
       this.bossTimer = this.bossTimeFor(z);
       this.bossStart = this.game.time;
@@ -212,6 +215,7 @@ export class WorldSystem {
     if (!h) return;
     runSched(c);
     if (this.banner) { this.banner.t -= dt; if (this.banner.t <= 0) this.banner = null; }
+    this.watchdog(dt);
     const m = this.mode();
     if (m?.tick) { m.tick(this, dt); return; }
     this.tickCampaignExtras(dt);
@@ -266,9 +270,33 @@ export class WorldSystem {
 
   festival() { return this.festivalOverride ?? isWeekend(); }
 
+  /**
+   * 見張り: 敵がいるのに 20 秒間だれにもダメージが入らなければ、主人公に重なった敵を少し離す。
+   * 40 秒続いたらそのステージをやり直す（放置で永久に止まらないように）。
+   */
+  watchdog(dt) {
+    const c = this.combat;
+    const h = c.hero;
+    const wd = this.watch;
+    if (!h || h.dead || this.transition > 0) { wd.t = 0; wd.dmg = c.stats.dmgDone; return; }
+    if (c.stats.dmgDone !== wd.dmg) { wd.dmg = c.stats.dmgDone; wd.t = 0; wd.nudged = false; return; }
+    const foes = c.enemies();
+    if (!foes.length) { wd.t = 0; return; }
+    wd.t += dt;
+    if (wd.t >= 20 && !wd.nudged) {
+      wd.nudged = true;
+      for (const u of foes) if (Math.abs(u.x - h.x) < 100) { u.x = h.x + 110 * (h.face || 1); if (u.ctl && !u.goblin) { u.ctl = null; u.windup = 0; } }
+    } else if (wd.t >= 40) {
+      wd.t = 0; wd.nudged = false;
+      this.stuckRestarts = (this.stuckRestarts || 0) + 1;
+      if (this.w.mode === 'campaign') this.startStage();
+      else for (const u of foes) u.x = h.x + 300;
+    }
+  }
+
   onKill(unit) {
     this.stageKills++;
-    this.tw.kills++;
+    if (this.w.mode === 'campaign') this.tw.kills++;
     const m = this.mode();
     if (m?.onKill) m.onKill(this, unit);
   }
@@ -282,18 +310,16 @@ export class WorldSystem {
   /** 1 体に与えられる火力の測定値（補正なし） */
   estDpsRaw() {
     const s = this.samples;
-    if (s.length < 4) {
-      // まだ測れていない: スキルの見積もり
-      return this.skillDps() * 0.8;
-    }
+    const sk = this.skillDps() * 0.75; // スキルの見積もり（下限）
+    if (s.length < 4) return sk;
     let a = 0; let b = 0;
     for (const x of s) { a += x.life; b += x.ttk; }
-    return a / Math.max(0.01, b);
+    return Math.max(sk, a / Math.max(0.01, b));
   }
 
   /** ボスへの火力の見積もり（前のボス戦の実測で補正） */
   estDps(zoneId = this.w.zone) {
-    const k = this.w.bossLog[zoneId]?.k ?? this.w.dpsK ?? 0.8;
+    const k = this.w.bossLog[zoneId]?.k ?? this.w.dpsK ?? 1;
     return this.estDpsRaw() * Math.max(0.25, Math.min(1.6, k));
   }
 
@@ -331,7 +357,7 @@ export class WorldSystem {
       if ((dur >= 6 || won) && this.bossEstAtStart > 0) {
         const k = Math.max(0.2, Math.min(2, dps / this.bossEstAtStart));
         log.k = log.k ? log.k * 0.5 + k * 0.5 : k;
-        this.w.dpsK = (this.w.dpsK ?? 0.8) * 0.7 + k * 0.3;
+        this.w.dpsK = (this.w.dpsK ?? 1) * 0.7 + k * 0.3;
       }
     }
     const now = this.game.state.playTime;
@@ -430,7 +456,7 @@ export class WorldSystem {
   }
 
   onHeroDeath() {
-    this.tw.deaths++;
+    if (this.w.mode === 'campaign') this.tw.deaths++;
     const m = this.mode();
     if (m?.onHeroDeath) { m.onHeroDeath(this); return; }
     this.deadTimer = 0;
@@ -542,10 +568,20 @@ export class WorldSystem {
     const L = this.campaignLevel(z, 5, torment);
     const rec = this.recommendedPower(L, torment);
     const power = this.heroPower();
-    const ratio = rec > 0 ? power / rec : 1;
+    // 目安の言葉は「火力（ボスの必要 DPS に対して）」と「耐久（ボスの攻撃 12 回ぶん）」の弱い方で決める
+    const nd = this.bossNeed(z, torment);
+    const dpsRatio = nd.need > 0 ? this.estDps(z.id) / nd.need : 1;
+    const H = this.game.H;
+    const Lb = nd.level || L + 1;
+    const sc = BAL.monsterScale(Lb - 1);
+    const rk = BAL.RANK[z.zoneIdx === 4 ? 'actboss' : 'boss'];
+    const needEhp = BAL.monsterDmg(Lb) * rk.dmg * (torment > 0 ? BAL.torment(torment).dmg : 1) * sc.dmg * 12;
+    const ehpRatio = H ? character.effectiveLife(H, Lb) / Math.max(1, needEhp) : 1;
+    const ratio = Math.min(dpsRatio, ehpRatio);
     const label = ratio >= 1.6 ? '楽勝' : ratio >= 1 ? 'ちょうどよい' : ratio >= 0.7 ? '手ごわい' : '危険';
     const cls = ratio >= 1.6 ? 'easy' : ratio >= 1 ? 'ok' : ratio >= 0.7 ? 'hard' : 'danger';
-    return { level: L, rec, power, ratio, label, cls, recLevel: Math.max(1, Math.min(100, z.level + 2)) };
+    const weak = ratio >= 1 ? null : dpsRatio <= ehpRatio ? '火力' : '耐久';
+    return { level: L, rec, power, ratio, dpsRatio, ehpRatio, weak, label, cls, recLevel: Math.max(1, Math.min(100, z.level + 2)) };
   }
 
   /** 転生などで物語の進み具合を戻す。warpGlobal（通し番号）までの地域は踏破済みにして、そこへ移動する */

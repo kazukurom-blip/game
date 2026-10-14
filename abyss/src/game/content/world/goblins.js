@@ -35,7 +35,7 @@ unitHooks.onMonsterTick.push((c, u, dt) => {
     c.emit({ t: 'goblin', unit: u, kind: 'escape' });
     c.emit({ t: 'text', x: u.x, y: u.y, z: 100, text: '逃げられた…', color: '#c0b080' });
     c.game.events.emit('goblinEscape', { unit: u });
-    c.game.state.meta.stats.goblinsEscaped = (c.game.state.meta.stats.goblinsEscaped || 0) + 1;
+    c.game.state.world.goblinEscaped = (c.game.state.world.goblinEscaped || 0) + 1;
     return;
   }
   if (c.isFrozen(u)) return;

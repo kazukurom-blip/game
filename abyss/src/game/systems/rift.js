@@ -406,7 +406,7 @@ export class RiftSystem {
     const H = game.H;
     if (!H) return { win: 0, dps: 0, need: spec.life / spec.time, ttk: Infinity, ttd: 0 };
     const ws = this.ws;
-    const dps = Math.max(1, ws.estDpsRaw() * Math.max(0.25, Math.min(1.6, this.w.dpsK ?? 0.8)));
+    const dps = Math.max(1, ws.estDpsRaw() * Math.max(0.25, Math.min(1.6, this.w.dpsK ?? 1)));
     const ehp = character.effectiveLife(H, spec.level);
     const mitig = ehp / Math.max(1, H.life);
     const incoming = (spec.dmg * 1.5) / Math.max(0.5, spec.atkCd);

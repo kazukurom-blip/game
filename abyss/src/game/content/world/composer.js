@@ -36,13 +36,15 @@ export function composeWave(sys, { zone, stage, wave, level, rng }) {
   const elitePool = zone.elites?.length ? zone.elites : mons;
   // 出来事
   let ev = null;
-  if (stage >= 3 && sys.game.time - (sys.lastEventAt ?? -EVENT_CD) >= EVENT_CD && rng.chance(EVENT_CHANCE)) {
+  if (stage >= 3 && level >= 5 && sys.game.time - (sys.lastEventAt ?? -EVENT_CD) >= EVENT_CD && rng.chance(EVENT_CHANCE)) {
     ev = rng.pick(['ambush', 'shrine', 'shrine', 'chest', 'march']);
     sys.lastEventAt = sys.game.time;
   }
   const roll = rng.next();
-  const champChance = 0.06 + stage * 0.004 + t * 0.005;
-  const rareChance = 0.04 + stage * 0.003 + t * 0.004;
+  // 序盤（Lv 3 未満）はエリートを出さない。Lv 8 までは半分
+  const early = level < 3 ? 0 : level < 8 ? 0.5 : 1;
+  const champChance = (0.06 + stage * 0.004 + t * 0.005) * early;
+  const rareChance = (0.04 + stage * 0.003 + t * 0.004) * early;
   if (ev === 'chest') {
     const id = rng.pick(elitePool);
     const aff = pickAffixes(rng, affixCount(level), level);

@@ -118,6 +118,70 @@ const main = async () => {
     check('スマホで横にはみ出さない', !overflow);
     await m.close();
   }
+  // ======== ワールド担当（world）: 地図・苦行・裂け目・門番・ため込み屋・ボスの特技 ========
+  if (want('world')) {
+    await page.evaluate(() => { const g = window.__game; g.newGame('sorcerer', 'world'); for (let i = 0; i < 20 * 60; i++) g.tick(0.05); });
+    await page.click('.navbtn[data-id="map"]');
+    await page.waitForTimeout(400);
+    await page.screenshot({ path: path.join(SHOTS, 'world_map.png') });
+    check('地図: 章のカードが出る', (await page.$$('.wm-act')).length === 10);
+    // 終盤まで進めた状態にする
+    await page.evaluate(() => {
+      const g = window.__game; const w = g.state.world;
+      w.maxZone = 49; for (let i = 0; i < 49; i++) { const id = `a${Math.floor(i / 5) + 1}z${(i % 5) + 1}`; w.cleared[id] = true; w.maxStage[id] = 10; }
+      w.maxStage.a10z5 = 10; w.maxTorment = 4; w.rift.unlocked = 12; w.rift.best = 9;
+      for (const k of ['g1_0', 'g1_1', 'g1_2', 'g1_3', 'g2_1', 'g2_3']) w.gate.frags[k] = 1;
+      g.state.hero.level = 70; g.combat.recalc(true);
+      g.sys.world.setTorment(2);
+    });
+    await page.click('.navbtn[data-id="rift"]');
+    await page.click('.navbtn[data-id="map"]');
+    await page.waitForTimeout(300);
+    await page.screenshot({ path: path.join(SHOTS, 'world_map_torment.png') });
+    check('地図: 苦行の段を選べる', (await page.$$('.tm-btn:not([disabled])')).length >= 5);
+    // 地域のボス戦（特技の予告）。写真のために主人公を硬くする
+    await page.evaluate(() => {
+      const g = window.__game; const c = g.combat;
+      g.sys.world.setTorment(0);
+      c.buffs.push({ id: 'smoke_guard', mods: [{ s: 'life', v: 1e9 }, { s: 'dr', v: 60 }], t: 1e6, name: '写真用の守り' }); c.recalc(true);
+      g.sys.world.travel('a2z5', 9); g.sys.world.challengeBoss();
+      for (let i = 0; i < 20 * 2; i++) g.tick(0.05);
+      const b = g.sys.world.bossUnit; if (b) { b.x = c.hero.x + 330; for (const k in b.abilityT) b.abilityT[k] = 0.05; }
+      for (let i = 0; i < 10; i++) g.tick(0.05);
+    });
+    await page.waitForTimeout(700);
+    await page.screenshot({ path: path.join(SHOTS, 'world_boss.png') });
+    check('ボス戦: 必要 DPS の目安が出る', await page.$('.hud-line.wl.boss'));
+    // 裂け目
+    await page.click('.navbtn[data-id="rift"]');
+    await page.waitForTimeout(250);
+    await page.screenshot({ path: path.join(SHOTS, 'world_rift_select.png') });
+    await page.click('.panel-rift .btn-primary');
+    await page.evaluate(() => { const g = window.__game; for (let i = 0; i < 20 * 4; i++) g.tick(0.05); });
+    await page.waitForTimeout(1500);
+    await page.screenshot({ path: path.join(SHOTS, 'world_rift_run.png') });
+    const rs = await page.evaluate(() => ({ mode: window.__game.state.world.mode, hud: !!document.querySelector('.hud-line.wl.rift'), en: window.__game.combat.enemies().length }));
+    check('裂け目: 始められて HUD に残り時間と進行', rs.mode === 'rift' && rs.hud && rs.en > 0, JSON.stringify(rs));
+    await page.evaluate(() => { const g = window.__game; const r = g.state.world.rift.run; r.progress = r.need - 0.5; const u = g.combat.enemies()[0]; if (u) g.combat.killUnit(u, g.combat.hero); for (let i = 0; i < 20 * 2; i++) g.tick(0.05); });
+    await page.waitForTimeout(800);
+    await page.screenshot({ path: path.join(SHOTS, 'world_rift_guardian.png') });
+    check('裂け目: 守護者が出る', await page.evaluate(() => window.__game.state.world.rift.run?.phase === 'guardian'));
+    await page.evaluate(() => { const g = window.__game; g.sys.rift.abandon(); g.combat.buffs = g.combat.buffs.filter((b) => b.id !== 'smoke_guard'); g.combat.recalc(true); });
+    // 門番
+    await page.click('.panel-rift .tab:nth-child(3)');
+    await page.waitForTimeout(250);
+    await page.screenshot({ path: path.join(SHOTS, 'world_gate.png') });
+    check('門番: 組のカードと推定勝率', (await page.$$('.gk-card')).length === 5 && await page.$('.gk-odds'));
+    await page.click('.panel-rift .tab:nth-child(4)');
+    await page.waitForTimeout(200);
+    await page.screenshot({ path: path.join(SHOTS, 'world_rift_log.png') });
+    // ため込み屋
+    await page.evaluate(() => { const g = window.__game; g.sys.world.travel('a3z2', 3); for (let i = 0; i < 20; i++) g.tick(0.05); const c = g.combat; c.spawnMonster('goblin_gem', { level: 60, rank: 'goblin', x: c.hero.x + 380, lifeMul: 50 }); for (let i = 0; i < 20 * 1.5; i++) g.tick(0.05); });
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: path.join(SHOTS, 'world_goblin.png') });
+    check('ため込み屋: HUD に逃げる時間', await page.$('.hud-line.wl.gob'));
+  }
+  // ======== ワールド担当ここまで ========
   check('エラーが 0 件', errors.length === 0, errors.slice(0, 5).join(' | '));
   await browser.close();
   srv.close();

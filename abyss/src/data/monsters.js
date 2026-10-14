@@ -36,7 +36,7 @@ export const BOSS_ABILITIES = {
   poison_pool: { name: '毒の沼', cd: 9, range: 800, mult: 0.12, delay: 0.6, dur: 6, r: 120, desc: '主人公の足元に 6 秒残る毒の沼（0.5 秒ごとに 12%）' },
   enrage: { name: '激昂', passive: true, at: 0.3, desc: 'ライフが 30% を切ると、攻撃力 +50%・攻撃の速さ +40%・移動 +30%' },
   shield: { name: '障壁', passive: true, at: [0.6, 0.25], pct: 0.12, dur: 8, desc: 'ライフ 60% と 25% で、最大ライフ 12% ぶんの障壁を張る（8 秒。張っている間は受けるダメージ -50%）' },
-  teleport: { name: '瞬身', cd: 8, range: 900, desc: '主人公のすぐ後ろへ瞬間移動し、すぐに攻撃する' },
+  teleport: { name: '瞬身', cd: 8, range: 900, desc: '主人公の背中側（95 先）へ瞬間移動し、0.2 秒後に攻撃する' },
   beam: { name: '光線', cd: 10, range: 700, mult: 1.6, delay: 1.0, desc: '1.0 秒の予告のあと、主人公へ一直線の光線（160%）' },
   totems: { name: '呪いの柱', cd: 18, range: 900, count: 2, desc: '柱を 2 本立てる。柱が残っている間、ボスの受けるダメージ -40%' },
   drain: { name: '生命吸収', cd: 12, range: 600, mult: 0.35, dur: 2.5, desc: '2.5 秒のあいだ主人公の生命を吸う（0.5 秒ごとに 35%、吸った量の 300% 回復）' },

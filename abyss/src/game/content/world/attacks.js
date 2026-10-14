@@ -37,7 +37,7 @@ unitHooks.onMonsterTick.push((c, u, dt) => {
       if (d >= CHARGE.min && d <= CHARGE.max && !c.isFrozen(u)) {
         u._chT = CHARGE.cd * c.rng.range(0.8, 1.2);
         const dir = h.x >= u.x ? 1 : -1;
-        const tx = h.x - dir * 45;
+        const tx = h.x - dir * 72; // 近すぎると速い弾がすり抜けるので、少し手前で止まる
         control(u, { kind: 'dash', t: 0, wind: CHARGE.wind, dur: CHARGE.dur, x0: u.x, x1: tx, onArrive: (cc, uu) => {
           const hh = cc.hero;
           if (hh && !hh.dead && Math.abs(hh.x - uu.x) <= uu.range + 50) cc.damageAlly(hh, uu.dmg * CHARGE.mult, uu.element, uu);
@@ -54,7 +54,7 @@ unitHooks.onMonsterTick.push((c, u, dt) => {
       u._boom = true;
       control(u, { kind: 'hold', t: 0, dur: EXPLODE.delay + 1 });
       telegraph(c, u, { x: u.x, y: u.y, r: EXPLODE.r, delay: EXPLODE.delay, mult: EXPLODE.mult, el: u.element, art: 'fx.enemy.blast', onFire: () => {
-        if (!u.dead) { c.emit({ t: 'selfDestruct', unit: u }); c.killUnit(u, h); }
+        if (!u.dead) { u._selfKill = true; c.emit({ t: 'selfDestruct', unit: u }); c.killUnit(u, h); }
       } });
       say(c, u, '！', '#ff6060');
     }

@@ -67,7 +67,7 @@ unitHooks.onMonsterHit.push((c, u, hit) => {
 
 // 火力の測定（ボス以外。呼び出された手下・柱は数えない）
 unitHooks.onMonsterDeath.push((c, u) => {
-  if (u.boss || u.isAdd || !u._fh || u.def?.kind === 'goblin') return;
+  if (u.boss || u.isAdd || !u._fh || u._selfKill || u.def?.kind === 'goblin') return;
   const ws = c.game.sys.world;
   ws.noteKill?.(u.maxLife, Math.max(0.5, c.time - u._fh));
 });
