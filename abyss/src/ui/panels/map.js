@@ -21,6 +21,7 @@ export const WORLD_CSS = `
 .wm-power > div { background: #0f0d13; border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; font-size: 11px; color: var(--dim); }
 .wm-power b { display: block; font-size: 15px; color: var(--text); }
 .wm-adv { font-weight: 700; }
+.wm-weak { display: inline-block; white-space: nowrap; font-size: .8em; }
 .wm-adv.easy { color: #6ee08a; } .wm-adv.ok { color: #d9e86e; } .wm-adv.hard { color: #ffb050; } .wm-adv.danger { color: #ff6b6b; }
 .wm-act { border: 1px solid var(--line); border-left: 4px solid var(--ac); border-radius: 8px; margin-bottom: 10px; background: #120f16; overflow: hidden; }
 .wm-act.locked { opacity: .55; }
@@ -59,6 +60,7 @@ export const WORLD_CSS = `
 .hud-line.wl { background: rgba(10,8,12,.72); border: 1px solid var(--line); border-radius: 7px; padding: 4px 9px; font-size: 12px; max-width: 360px; line-height: 1.45; }
 .hud-line.wl b { color: var(--gold2); }
 .hud-line.wl .ok { color: #6ee08a; font-weight: 700; } .hud-line.wl .ng { color: #ff8a7a; font-weight: 700; }
+.hud-line.wl .ok, .hud-line.wl .ng { white-space: nowrap; } /* 「あと 82% 足りない」を途中で折らない */
 .hud-line.wl.boss { border-color: #7a3a2a; }
 .hud-line.wl.gob { border-color: #c8a040; color: #ffe08a; animation: wlpulse .8s infinite alternate; }
 .hud-line.wl.rift { border-color: #7a4ac0; min-width: 240px; }
@@ -123,8 +125,8 @@ function powerRow(g, z) {
   const est = ws.estDps(z.id);
   return h('div.wm-power', [
     h('div', [h('b', fmt(adv.power)), '今の戦力']),
-    h('div', [h('b', fmt(adv.rec)), `推奨の戦力（敵 Lv ${adv.level}）`]),
-    h('div', [h(`b.wm-adv.${adv.cls}`, `${adv.label}${adv.weak ? `（${adv.weak}不足）` : ''}`), `ボス必要 DPS ${fmt(nd.need)} ／ 今 ${fmt(est)}　耐久 ${ratioText(adv.ehpRatio)}`]),
+    h('div', [h('b', fmt(adv.rec)), `推奨の戦力（敵 Lv\u00a0${adv.level}）`]),
+    h('div', [h(`b.wm-adv.${adv.cls}`, [adv.label, adv.weak ? h('span.wm-weak', `（${adv.weak}不足）`) : null]), `ボス必要 DPS ${fmt(nd.need)} ／ 今 ${fmt(est)}　耐久 ${ratioText(adv.ehpRatio)}`]),
   ]);
 }
 

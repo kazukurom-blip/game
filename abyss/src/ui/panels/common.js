@@ -7,6 +7,8 @@ import { BASE, SLOT_NAMES } from '../../data/items.js';
 import { MATERIAL } from '../../data/materials.js';
 import { attachTip, itemCard, tooltip, RARITY_MARK, RARITY_DOTS } from '../tooltip.js';
 import { itemIconId } from '../../render/manifest.js';
+import { itemName } from '../../game/items.js';
+import { fmt } from '../../engine/format.js';
 
 /** レアリティの 1 文字（色だけに頼らない印。REFERENCE U07）と ●の数（ノーマル 1 〜 ミシック 6）。中身は tooltip.js */
 export { RARITY_MARK, RARITY_DOTS };
@@ -63,8 +65,14 @@ export function itemMenu(ui, item, equipped = false) {
     btns.push({ label: prob ? `装備できない（${prob}）` : '装備する', kind: 'primary', onclick: () => { if (prob) return false; const r = inv.equip(item.uid); if (!r.ok) ui.toast(r.msg, 'bad'); return true; } });
     if (item.slot === 'ring') btns.push({ label: '右の指輪に', onclick: () => { const r = inv.equip(item.uid, 'ring2'); if (!r.ok) ui.toast(r.msg, 'bad'); } });
     btns.push({ label: item.locked ? '鍵を外す' : '鍵をかける', onclick: () => inv.lock(item.uid) });
-    if (!item.locked) btns.push({ label: '分解', kind: 'danger', onclick: () => { const r = inv.salvage([item.uid]); ui.toast(`分解: ${matText(r.got)}`, 'good'); } });
-    if (!item.locked) btns.push({ label: '売る', onclick: () => { const r = inv.sell([item.uid]); ui.toast(`${r.gold} G で売った`, 'good'); } });
+    // レジェンダリー以上・覚醒/極致・強化 +5 以上は、1 回押しただけで消えないように確かめる（元に戻せないため）
+    const precious = (RARITY[item.rarity]?.idx || 0) >= 4 || item.q || (item.enh || 0) >= 5;
+    const guard = (verb, run) => () => {
+      if (!precious) { run(); return; }
+      ui.confirm(`「${itemName(item)}」を${verb}します。元に戻せません。`, `${verb}する`).then((ok) => { if (ok) { run(); ui.afterAction?.(); } });
+    };
+    if (!item.locked) btns.push({ label: '分解', kind: 'danger', onclick: guard('分解', () => { const r = inv.salvage([item.uid]); ui.toast(`分解: ${matText(r.got)}`, 'good'); }) });
+    if (!item.locked) btns.push({ label: '売る', onclick: guard('売却', () => { const r = inv.sell([item.uid]); ui.toast(`${fmt(r.gold)} G で売った`, 'good'); }) });
   }
   for (const f of itemMenuHooks) { try { btns.push(...(f(ui, item, equipped) || [])); } catch (e) { console.error(e); } }
   btns.push({ label: '閉じる' });

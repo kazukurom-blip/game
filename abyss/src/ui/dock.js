@@ -100,7 +100,7 @@ export class Dock {
     on('levelUp', (e) => this.addLog(`レベル ${e.level} になった`, 'level'));
     on('paragonUp', (e) => this.addLog(`アビスLv ${e.level} になった`, 'level'));
     on('skillLearned', (e) => { if (!e.quiet && SKILL[e.id]) this.addLog(`スキル「${SKILL[e.id].name}」を覚えた`, 'level'); });
-    on('achievement', (e) => { if (e.def) this.addLog(`実績「${e.def.name}」`, 'good'); });
+    on('achievement', (e) => { if (e.def) this.addLog(`実績「${e.def.name}」を達成`, 'good'); });
     on('eggFound', (e) => this.addLog(`${e.name || '卵'}を手に入れた`, 'good'));
     on('autoEquip', (e) => { if (e.item) this.addLog(`自動で装備: ${itemName(e.item)}`, 'good'); });
     on('goblinSpawn', (e) => this.addLog(`${MONSTER[e.unit?.defId]?.name || 'ため込み屋'}が現れた`, 'gob'));

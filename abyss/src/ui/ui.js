@@ -314,6 +314,7 @@ export class UI {
   update(dt) {
     this.hud.update(dt);
     this.dock.update(dt);
+    tooltip.check(); // 押して窓が描き直され、説明の元が消えたら隠す
     this.lastTop += dt;
     if (this.lastTop > 0.25) { this.lastTop = 0; this.updateTop(); }
     this.unlockT += dt;

@@ -257,6 +257,67 @@ const main = async () => {
       return { n: document.querySelectorAll('#hud .hud-skills .skslot').length, size: g.sys.skills.barSize() };
     });
     check('HUD: スキルの枠が増えたら HUD の枠も増える', sk.size === 6 && sk.n === 6, JSON.stringify(sk));
+    // 説明（ツールチップ）: 押して窓が描き直され、元の要素が消えたら説明も消える（宝石のはめる候補）
+    await p.evaluate(async () => {
+      const g = window.__game;
+      const { generateItem } = await import('./src/game/loot.js');
+      const kit = await import('./src/ui/panels/itemkit.js');
+      const white = generateItem(g.rng, { ilvl: 40, rarity: 'common', slot: 'helm', noSockets: true }); white.sockets = [null, null];
+      g.state.inv.bag.push(white);
+      g.state.inv.gems = { ember_1: 7, frost_1: 4 };
+      kit.selectItem('gems', white.uid);
+      window.__ui.openPanel('gems');
+      await new Promise((r) => setTimeout(r, 50));
+      [...document.querySelectorAll('#panelbody .tab')].find((t) => t.textContent.startsWith('ソケット'))?.click();
+    });
+    await p.waitForTimeout(800);
+    await p.hover('#panelbody .ik-chip');
+    await p.waitForTimeout(150);
+    const tipVis = () => p.evaluate(() => document.getElementById('tooltip')?.style.display || 'none');
+    const shown = await tipVis();
+    await p.click('#panelbody .ik-chip');
+    await p.waitForTimeout(150);
+    await p.mouse.move(400, 300);
+    await p.waitForTimeout(300);
+    const after = await tipVis();
+    check('説明: 押して元の要素が消えたら説明も消える（残らない）', shown === 'block' && after === 'none', `${shown} → ${after}`);
+    // 指で触ったとき（互換の mouseenter）は説明を出さない。マウスなら出す
+    const touch = await p.evaluate(async () => {
+      window.__ui.openPanel('bag');
+      await new Promise((r) => setTimeout(r, 50));
+      const cell = document.querySelector('#panelbody .grid .cell:not(.empty)');
+      const tip = () => document.getElementById('tooltip').style.display;
+      window.dispatchEvent(new PointerEvent('pointerover', { pointerType: 'touch', bubbles: true }));
+      cell.dispatchEvent(new MouseEvent('mouseenter'));
+      const t1 = tip();
+      cell.dispatchEvent(new MouseEvent('mouseleave'));
+      window.dispatchEvent(new PointerEvent('pointerover', { pointerType: 'mouse', bubbles: true }));
+      cell.dispatchEvent(new MouseEvent('mouseenter'));
+      const t2 = tip();
+      cell.dispatchEvent(new MouseEvent('mouseleave'));
+      return { t1, t2 };
+    });
+    check('説明: 指で触ったときは出さず、マウスなら出す', touch.t1 !== 'block' && touch.t2 === 'block', JSON.stringify(touch));
+    // アイテムの窓の「分解」: レジェンダリー以上は 1 回押しただけでは消えない（確かめの窓）。ノーマルはすぐ分解
+    const sal = await p.evaluate(async () => {
+      const g = window.__game; const inv = g.state.inv;
+      const { itemMenu } = await import('./src/ui/panels/common.js');
+      const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+      const pressIn = (txt) => { const b = [...document.querySelectorAll('#modals .modal-foot .btn')].pop && [...document.querySelectorAll('#modals .modal-foot .btn')].find((x) => x.textContent === txt); b?.click(); return !!b; };
+      const leg = inv.bag.find((x) => ['legendary', 'unique', 'mythic', 'set'].includes(x.rarity) && !x.locked);
+      itemMenu(window.__ui, leg); await wait(50);
+      pressIn('分解'); await wait(80);
+      const asked = [...document.querySelectorAll('#modals .modal-body')].map((x) => x.textContent).join('');
+      const still1 = inv.bag.includes(leg);
+      pressIn('やめる'); await wait(80);
+      const still2 = inv.bag.includes(leg);
+      const { generateItem } = await import('./src/game/loot.js');
+      const com = generateItem(g.rng, { ilvl: 10, rarity: 'common', noSockets: true }); inv.bag.push(com);
+      itemMenu(window.__ui, com); await wait(50);
+      pressIn('分解'); await wait(80);
+      return { asked: asked.includes('元に戻せません'), still1, still2, comGone: !inv.bag.includes(com), left: document.querySelectorAll('#modals .modal-wrap').length };
+    });
+    check('アイテム: レジェンダリー以上の分解は確かめてから（やめると残る）・ノーマルはすぐ', sal.asked && sal.still1 && sal.still2 && sal.comGone && sal.left === 0, JSON.stringify(sal));
     await ctx.close();
   }
 
