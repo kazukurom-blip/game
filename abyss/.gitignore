@@ -1,2 +1,4 @@
 tests/screenshots/
 node_modules/
+# tools/build_artifact.mjs の出力（公開用 dist/artifact）と、tests/qa_publish.mjs が作る確かめ用の写し（dist/qa-*）
+dist/

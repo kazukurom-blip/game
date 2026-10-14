@@ -36,6 +36,8 @@
 html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; }
 body { overflow: hidden; }
 #app { height: 100%; display: flex; flex-direction: column; background: var(--bg); }
+/* 横向きのスマホのノッチ・横のシステムバー（Artifact の viewport-fit-sides）に文字やボタンが隠れないように。ふだんは 0 */
+#app { padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
 .boot { margin: auto; color: var(--dim); }
 button { font-family: inherit; }
 .dim { color: var(--dim); }
@@ -390,7 +392,7 @@ table.kv.keys td { text-align: left; }
 .as-btns { grid-column: 1 / 3; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 
 /* ---------- 窓（確認・説明） */
-.modal-wrap { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 950; padding: 16px; }
+.modal-wrap { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 950; padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
 .modal { background: var(--panel); border: 1px solid var(--line2); border-radius: 10px; max-width: 440px; width: 100%; max-height: 90%; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,.8); min-width: 0; }
 .modal.wide { max-width: 720px; }
 .modal-head { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--line); gap: 8px; }
@@ -422,6 +424,9 @@ table.kv.keys td { text-align: left; }
 .ht-rar { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 4px 10px; padding: 4px 12px 10px; font-size: 12.5px; }
 .ht-r { display: flex; align-items: center; gap: 6px; }
 .set-note { font-size: 11.5px; color: var(--dim); margin: 2px 0 6px 22px; }
+/* 保存できないブラウザ（非公開のウィンドウ・埋め込み先の制限）の注意 */
+.set-warn, .title-warn { font-size: 12px; line-height: 1.6; color: #ffcf9a; background: rgba(90, 40, 16, .55); border: 1px solid #8a4a24; border-radius: 8px; padding: 6px 10px; margin: 6px 0; }
+.title-warn { margin: 0 0 10px; }
 
 /* ---------- タイトル */
 #title { position: relative; height: 100%; overflow-y: auto; overflow-x: hidden; background: radial-gradient(circle at 50% 30%, #2a1a24, #08070a 70%); }
@@ -543,7 +548,7 @@ html.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after 
   .navbtn .nav-ic { font-size: 12px; }
   .navbtn.active { background: #3a2f22; }
   /* まとまりのタブ: 画面の下に固定 */
-  .nav-groups { position: fixed; left: 0; right: 0; bottom: 0; z-index: 800; height: calc(var(--bottom-h) + env(safe-area-inset-bottom, 0px)); padding: 0 4px env(safe-area-inset-bottom, 0px); gap: 0; background: linear-gradient(#1a161e, #0e0c11); border-top: 1px solid var(--line2); box-shadow: 0 -4px 16px rgba(0,0,0,.5); }
+  .nav-groups { position: fixed; left: 0; right: 0; bottom: 0; z-index: 800; height: calc(var(--bottom-h) + env(safe-area-inset-bottom, 0px)); padding: 0 calc(4px + env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) calc(4px + env(safe-area-inset-left, 0px)); gap: 0; background: linear-gradient(#1a161e, #0e0c11); border-top: 1px solid var(--line2); box-shadow: 0 -4px 16px rgba(0,0,0,.5); }
   .navgrp { flex-direction: column; gap: 1px; border: none; border-radius: 0; padding: 6px 2px 4px; font-size: 10.5px; font-weight: 700; background: transparent !important; }
   .navgrp .ng-ic { font-size: 19px; line-height: 1.1; filter: grayscale(.6); opacity: .8; }
   .navgrp.active { color: var(--gold2); box-shadow: inset 0 2px 0 var(--gold); }

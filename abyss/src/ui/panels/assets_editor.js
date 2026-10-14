@@ -10,7 +10,7 @@ import { assets, blobToImage, inspectImage, autoProc, processImage, detectAnchor
 import { slotPrompt, ANCHOR_NAMES, describeUnknown } from '../../render/manifest.js';
 import { renderTemplate } from '../../render/template.js';
 import { drawPreview, previewKind, showInBattle, zoneForAct } from './assets_preview.js';
-import { copyText, downloadBlob, ensureRightsNotice, checker, FACING_JA, BLEND_JA, SOURCE_JA, installStudioCss } from './assets_util.js';
+import { copyText, copyImage, downloadBlob, canDownload, ensureRightsNotice, checker, FACING_JA, BLEND_JA, SOURCE_JA, installStudioCss } from './assets_util.js';
 import { ACTS } from '../../data/world.js';
 
 const ANCHOR_COL = { base: '#ff4040', hand: '#3ad06a', offhand: '#3a9cff', head: '#ffd23a', back: '#c06aff', chest: '#ff8a3a' };
@@ -343,7 +343,7 @@ export async function openEditor(ui, id, o = {}) {
   const md = ui.modal(title, content, [
     { label: '保存して使う', kind: 'primary', onclick: () => { save(); return false; } },
     { label: st.existing === 'studio' ? '入れた画像を消す（元に戻す）' : '入れた画像を捨てる', onclick: () => { reset(); return false; } },
-    { label: '型紙を保存', onclick: () => { saveTemplate(ui, id); return false; } },
+    { label: canDownload() ? '型紙を保存' : '型紙を見る', onclick: () => { saveTemplate(ui, id); return false; } },
     { label: '閉じる', onclick: () => { tryClose(); return false; } },
   ], { wide: true, sticky: true, onClose: close });
   md.box.classList.add('studio');
@@ -439,22 +439,29 @@ function promptBox(ui, spec, pr, st) {
   ]);
 }
 
-/** 型紙を PNG で保存（だめなら画像を表示して長押し・右クリックで保存してもらう） */
+/** 型紙を PNG で保存（埋め込み先などダウンロードできない所では、画像を出してコピー・長押し・右クリックで保存してもらう） */
 export async function saveTemplate(ui, id) {
+  if (!canDownload()) { showTemplate(ui, id); return; }
   const c = renderTemplate(id, { maxSide: 1024 });
   const blob = await canvasToBlob(c);
-  if (blob && downloadBlob(blob, `${id}.template.png`)) ui.toast('型紙を保存しました（保存されないときは「型紙を見る」から）', 'good');
-  else showTemplate(ui, id);
+  const r = blob ? await downloadBlob(blob, `${id}.template.png`) : false;
+  if (r === 'saved') ui.toast('型紙を保存しました（保存されないときは「型紙を見る」から）', 'good');
+  else if (!r) showTemplate(ui, id);
 }
 
 export function showTemplate(ui, id) {
   const c = renderTemplate(id, { maxSide: 900 });
   let url = '';
   try { url = c.toDataURL('image/png'); } catch { url = ''; }
+  const dl = canDownload();
+  const btns = [];
+  if (typeof ClipboardItem !== 'undefined') btns.push({ label: '画像をコピー', kind: dl ? '' : 'primary', onclick: () => { (async () => { const ok = await copyImage(canvasToBlob(renderTemplate(id, { maxSide: 1024 }))); ui.toast(ok ? '型紙をコピーしました。AI の画面に貼り付けられます' : 'コピーできませんでした。画像を長押し・右クリックして保存してください', ok ? 'good' : ''); })(); return false; } });
+  if (dl) btns.unshift({ label: '保存する', kind: 'primary', onclick: () => { saveTemplate(ui, id); return false; } });
+  btns.push({ label: '閉じる' });
   ui.modal(`型紙: ${id}`, h('div', [
     url ? h('img', { src: url, alt: id, style: { width: '100%', height: 'auto', display: 'block', borderRadius: '6px' } }) : c,
     h('p.dim.small', '画像を長押し（スマホ）・右クリック（パソコン）で保存できます。灰色の形はコードの絵で、位置と大きさの目安です。'),
-  ]), [{ label: '保存する', kind: 'primary', onclick: () => { saveTemplate(ui, id); return false; } }, { label: '閉じる' }], { wide: true });
+  ]), btns, { wide: true });
 }
 
 const round3 = (v) => Math.round(v * 1000) / 1000;

@@ -71,3 +71,80 @@ export function injectCss(id, css) {
   el.textContent = css;
   document.head.appendChild(el);
 }
+
+// ---------------------------------------------------------------- 埋め込み先（claude.ai の Artifact など）
+// iframe の中では、ダウンロード（a[download]）・window.open・confirm / alert / prompt が止められる。
+// クリップボードへの書き込みも、親が許していないと使えない（そのときは文字を選んで「コピー」の操作をしてもらう）。
+
+/** iframe の中で動いているか */
+export function isEmbedded() {
+  try { return globalThis.self !== globalThis.top; } catch { return true; }
+}
+
+// claude.ai の Artifact として公開するときに capabilities: { downloads: true } を付けると、
+// window.claude.use('downloads') の save で、見る人に確かめてから保存できる（無ければ null）。
+let platformDl = null;
+let platformDlP = null;
+/** 起動のときに 1 回呼ぶ（答えは後から来る。答えが無ければ 10 秒で null） */
+export function initPlatformDownloads() {
+  if (platformDlP) return platformDlP;
+  platformDlP = (async () => {
+    try { platformDl = globalThis.claude?.use ? ((await globalThis.claude.use('downloads')) || null) : null; } catch { platformDl = null; }
+    return platformDl;
+  })();
+  return platformDlP;
+}
+
+/** ファイルとして保存（ダウンロード）を出してよいか。埋め込み先（downloads の力が無い）ではボタンを出さず、文字のコピーや画像の表示にする */
+export function canDownload() { return typeof document !== 'undefined' && (!isEmbedded() || !!platformDl); }
+
+/** クリップボードに書いてよいと許されているか（許されていないのに呼ぶと、ブラウザがエラーを出す） */
+function clipboardAllowed() {
+  try {
+    const pp = document.permissionsPolicy || document.featurePolicy;
+    if (pp?.allowsFeature) return pp.allowsFeature('clipboard-write');
+  } catch { /* 調べられない */ }
+  return true;
+}
+
+/** 文字をクリップボードへ。だめならテキスト欄を選んで「コピー」の操作を案内する。戻り値: 成功したか */
+export async function copyText(text, fallbackEl = null) {
+  if (clipboardAllowed() && globalThis.navigator?.clipboard?.writeText) {
+    try { await navigator.clipboard.writeText(text); return true; } catch { /* 次へ */ }
+  }
+  try {
+    const ta = fallbackEl || document.createElement('textarea');
+    if (!fallbackEl) { ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.append(ta); }
+    ta.focus(); ta.select();
+    const ok = document.execCommand('copy');
+    if (!fallbackEl) ta.remove();
+    return ok;
+  } catch { return false; }
+}
+
+/** PNG 画像をクリップボードへ（AI の画面にそのまま貼れる）。blob は Blob か Promise<Blob>（押した直後に呼ぶため）。戻り値: 成功したか */
+export async function copyImage(blob) {
+  if (!blob || !clipboardAllowed() || typeof ClipboardItem === 'undefined' || !navigator.clipboard?.write) return false;
+  try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); return true; } catch { return false; }
+}
+
+/**
+ * ダウンロード。戻り値: Promise<'saved'（渡せた） | 'declined'（見る人がやめた） | false（できない → 呼んだ側が文字のコピーや画像の表示にする）>
+ * 埋め込み先では a[download] が何もしないので使わない（downloads の力があればそれで保存する）。
+ */
+export async function downloadBlob(blob, name) {
+  if (platformDl) {
+    try { await platformDl.save({ filename: name, data: blob }); return 'saved'; } catch (e) {
+      return e?.code === 'declined' || e?.code === 'rate_limited' ? 'declined' : false;
+    }
+  }
+  if (!canDownload()) return false;
+  try {
+    const url = URL.createObjectURL(blob);
+    const a = h('a', { href: url, download: name, style: { display: 'none' } });
+    document.body.append(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 4000);
+    return 'saved';
+  } catch { return false; }
+}

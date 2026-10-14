@@ -7,6 +7,7 @@ const PREFIX = 'abyssdrop.save.';
 const META = 'abyssdrop.meta';
 export const SLOT_COUNT = 3;
 
+/** 保存する。戻り値: このブラウザに残せたか（false でも、開いている間はメモリに残る） */
 export function saveSlot(slot, state) {
   try {
     const json = JSON.stringify(state);
@@ -24,6 +25,11 @@ export function loadSlot(slot) {
   if (!raw) return null;
   try { return JSON.parse(raw); } catch { return null; }
 }
+
+export const SAVE_FAIL_TEXT = '保存できません（このブラウザでは保存が使えないため、閉じると消えます）。設定の「書き出す」で文字列を残してください';
+
+/** セーブをこのブラウザに残せるか（false なら閉じると消える。書き出しで残してもらう） */
+export function canPersist() { return local.persistent(); }
 
 export function deleteSlot(slot) { local.remove(PREFIX + slot); }
 

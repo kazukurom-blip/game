@@ -8,9 +8,10 @@ import { Scene } from './render/scene.js';
 import { UI } from './ui/ui.js';
 import { showTitle } from './ui/title.js';
 import { showOfflineReport } from './ui/offline.js';
-import { saveSlot, loadSlot } from './engine/save.js';
+import { saveSlot, loadSlot, SAVE_FAIL_TEXT } from './engine/save.js';
 import { setNumberMode } from './engine/format.js';
 import { audio } from './audio/audio.js';
+import { initPlatformDownloads } from './ui/dom.js';
 
 const root = document.getElementById('app');
 const game = new Game();
@@ -25,6 +26,7 @@ window.__game = game; // 調べもの・テスト用
 window.__assets = assets;
 
 async function boot() {
+  initPlatformDownloads(); // claude.ai の Artifact で downloads の力があれば、ファイルの保存に使う（答えは後から）
   installManifest();
   installPainters();
   try { await assets.init({ baseUrl: '' }); } catch (e) { console.warn('[assets.init]', e); }
@@ -36,6 +38,8 @@ async function boot() {
 function toTitle() {
   running = false;
   if (game.started) save();
+  // 今の画面の知らせ（出来事・画像の変化）を外す。外さないと、始め直すたびに前の画面が丸ごと残る
+  ui?.dispose();
   audio.music?.('title');
   showTitle(root, game, { onStart: startGame });
 }
@@ -59,7 +63,7 @@ function startGame(opts) {
   ui = new UI(game, scene, root, {
     onSave: save,
     onTitle: toTitle,
-    onImport: (st) => { game.load(st); save(); ui.renderPanel(); ui.hud.buildSkills(); },
+    onImport: (st) => { game.load(st); game.state.lastTick = Date.now(); save(); ui.renderPanel(); ui.hud.buildSkills(); },
     onOfflineReport: (rep) => showOfflineReport(ui, rep),
   });
   window.__ui = ui;
@@ -67,6 +71,7 @@ function startGame(opts) {
   // 離れていた時間の稼ぎ
   const away = (Date.now() - (game.state.lastTick || Date.now())) / 1000;
   if (!opts.cls && away > 60) game.sys.offline.grant(away, { reason: 'offline' });
+  game.state.lastTick = Date.now(); // 渡し終えた（毎フレームの「長い空白」の計算で、もう一度渡さない）
   save();
   running = true;
   lastFrame = performance.now();
@@ -76,24 +81,32 @@ function startGame(opts) {
 
 function loop(now) {
   if (!running) return;
-  const dt = Math.min(10, (now - lastFrame) / 1000);
+  let dt = (now - lastFrame) / 1000;
   lastFrame = now;
+  // 長い空白: 埋め込み先（iframe）で枠が隠される・画面の外へ流れると、タブはそのままなので visibilitychange が来ず、
+  // rAF だけが止まる。時計で測った「最後に進めた時から」の時間を、放置の稼ぎとしてまとめて渡す（5 秒より長ければ game.update が catchUp）
+  const away = (Date.now() - (game.state.lastTick || Date.now())) / 1000;
+  if (away > 5 && away > dt) dt = away;
   try {
     game.update(dt);
     scene.frame(Math.min(0.1, dt));
-    ui.update(dt);
+    ui.update(Math.min(10, dt));
   } catch (e) {
     console.error('[loop]', e);
     window.__lastError = e;
   }
-  saveTimer += dt;
+  saveTimer += Math.min(10, dt);
   if (saveTimer >= (game.state.settings.autoSaveSec || 30)) { saveTimer = 0; save(); }
   requestAnimationFrame(loop);
 }
 
+let saveWarned = false;
+/** 保存する。戻り値: このブラウザに残せたか（残せないときは 1 回だけ知らせる。開いている間はメモリに残る） */
 function save() {
   if (!game.state) return false;
-  return saveSlot(slot, game.snapshot());
+  const ok = saveSlot(slot, game.snapshot());
+  if (!ok && !saveWarned && ui && game.started) { saveWarned = true; ui.toast(SAVE_FAIL_TEXT, 'bad'); }
+  return ok;
 }
 
 // タブを離れたとき・戻ったとき
@@ -105,5 +118,6 @@ document.addEventListener('visibilitychange', () => {
   lastFrame = performance.now();
 });
 window.addEventListener('beforeunload', () => { if (running) save(); });
+window.addEventListener('pagehide', () => { if (running) save(); }); // スマホの Safari・埋め込み先の入れ替えでは beforeunload が来ないことがある
 
 boot();

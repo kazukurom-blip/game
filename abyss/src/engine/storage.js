@@ -1,17 +1,26 @@
 // localStorage と IndexedDB を安全に使う小さな包み。どちらも使えない環境（非公開ウィンドウ等）でも落ちない。
 
 const mem = new Map();
+const memOnly = new Set(); // 最後の書き込みが localStorage に入らなかった鍵（満杯など）。読むときはメモリの値を優先する
+let works = null; // localStorage に書けるか（最初に調べて覚える）
 
 export const local = {
   get(key) {
+    if (memOnly.has(key)) return mem.get(key) ?? null;
     try { const v = globalThis.localStorage?.getItem(key); return v ?? (mem.has(key) ? mem.get(key) : null); } catch { return mem.has(key) ? mem.get(key) : null; }
   },
   set(key, value) {
     mem.set(key, value);
-    try { globalThis.localStorage?.setItem(key, value); return true; } catch { return false; }
+    try {
+      if (!globalThis.localStorage) throw new Error('no localStorage');
+      globalThis.localStorage.setItem(key, value);
+      memOnly.delete(key);
+      return true;
+    } catch { memOnly.add(key); return false; }
   },
   remove(key) {
     mem.delete(key);
+    memOnly.delete(key);
     try { globalThis.localStorage?.removeItem(key); } catch { /* ignore */ }
   },
   keys(prefix = '') {
@@ -21,6 +30,18 @@ export const local = {
       if (ls) for (let i = 0; i < ls.length; i++) { const k = ls.key(i); if (k && k.startsWith(prefix)) out.add(k); }
     } catch { /* ignore */ }
     return [...out];
+  },
+  /** このブラウザに残せるか（非公開のウィンドウ・サイトのデータを止めている・埋め込み先の制限では false。閉じると消える） */
+  persistent() {
+    if (works !== null) return works;
+    try {
+      const ls = globalThis.localStorage;
+      const k = '__abyss_probe__';
+      ls.setItem(k, '1');
+      works = ls.getItem(k) === '1';
+      ls.removeItem(k);
+    } catch { works = false; }
+    return works;
   },
 };
 
