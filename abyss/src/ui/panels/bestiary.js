@@ -233,7 +233,7 @@ const CSS = `
 .bs-mon { position: relative; border: 1px solid var(--line); border-radius: 8px; padding: 5px 5px 6px; background: radial-gradient(circle at 50% 35%, #2a2230, #110e14 75%); text-align: center; cursor: pointer; display: flex; flex-direction: column; gap: 3px; align-items: center; min-width: 0; }
 .bs-mon:hover { filter: brightness(1.2); }
 .bs-mon.boss { border-color: #6a3a2a; background: radial-gradient(circle at 50% 35%, #3a2020, #110e14 75%); }
-.bs-mon .mt-bar { width: 100%; height: 10px; } .bs-mon .mt-bar > span { font-size: 8.5px; line-height: 9px; }
+.bs-mon .mt-bar { width: 100%; height: 12px; } .bs-mon .mt-bar > span { font-size: 9.5px; line-height: 11px; }
 .bs-pic { height: 64px; display: flex; align-items: center; justify-content: center; }
 .bs-mon.unknown .bs-pic canvas, .bs-big.unknown canvas { filter: brightness(0) drop-shadow(0 0 2px #6a5a7a); opacity: .85; }
 .bs-nm { font-size: 11.5px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }

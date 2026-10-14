@@ -203,7 +203,7 @@ textarea.savebox { width: 100%; font-family: monospace; font-size: 11px; }
 .skslot.nores { filter: grayscale(.8) brightness(.6); }
 .skslot.casting { box-shadow: 0 0 10px var(--gold2); border-color: var(--gold2); }
 .skslot .cd { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: rgba(0,0,0,.65); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
-.skslot .key { position: absolute; left: 3px; top: 1px; font-size: 9px; color: var(--dim); text-shadow: 0 0 2px #000; }
+.skslot .key { position: absolute; left: 2px; top: 1px; font-size: 9px; line-height: 1.25; color: #d8cfbf; text-shadow: 0 0 2px #000; background: rgba(0,0,0,.55); border-radius: 3px; padding: 0 2px; z-index: 1; }
 .skslot .empty { color: var(--dim); }
 .hud-buffs { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; }
 .hud-buffs:empty { display: none; }
@@ -529,7 +529,7 @@ html.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after 
   .hud-bottom:has(.hud-buffs:empty) .hud-skills, .hud-bottom:has(.hud-buffs:empty) .hud-bars { grid-row: 1; }
   .skslot { width: 36px; height: 36px; border-radius: 7px; }
   .skslot canvas { width: 30px !important; height: 30px !important; }
-  .skslot .key { font-size: 8px; }
+  .skslot .key { font-size: 8.5px; }
   .bar { height: 14px; } .bar .txt { line-height: 13px; font-size: 10px; }
   .bar.res { height: 12px; } .bar.res .txt { line-height: 11px; font-size: 10px; }
   /* 知らせは戦闘の画面の下の端（HUD の帯のすぐ上）に小さく */
