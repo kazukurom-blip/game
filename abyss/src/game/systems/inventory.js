@@ -15,6 +15,8 @@ export const invHooks = {
   onFound: [], // (game, item) => void … 図鑑などに記録
   salvageExtra: [], // (game, item, out) => void … 分解の追加の素材
   canEquip: [], // (game, item, slot) => string|null … 着けられない理由
+  keepRules: [], // (game, item, keep) => true|false|null … 拾ったときに残すか（自動の振り分けの細かい規則。null は変えない）
+  onSell: [], // (game, item) => void … 売る前（はまっている宝石を戻すなど）
 };
 
 export class InventorySystem {
@@ -151,6 +153,7 @@ export class InventorySystem {
     for (const uid of uids) {
       const f = this.findItem(uid);
       if (!f || f.where === 'equip' || f.item.locked) continue;
+      for (const fn of invHooks.onSell) { try { fn(this.game, f.item); } catch (e) { console.error(e); } }
       this.remove(f);
       gold += sellValue(f.item);
       n++;
@@ -224,6 +227,7 @@ export class InventorySystem {
     const r = RARITY[item.rarity];
     let keep = !f.autoSalvage[item.rarity];
     if (!keep && this.wanted(item)) keep = true;
+    for (const fn of invHooks.keepRules) { try { const r = fn(g, item, keep); if (r === true || r === false) keep = r; } catch (e) { console.error(e); } }
     let upgrade = false;
     if (f.keepUpgrades || f.autoEquip) upgrade = r.idx >= 1 && this.isUpgrade(item);
     if (!keep && f.keepUpgrades && upgrade) keep = true;

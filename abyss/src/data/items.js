@@ -9,6 +9,8 @@
 // }
 // dmg・armor・implicit の scale 値は「Lv1 での値」。アイテムの数値 = 値 × P(ilvl) × (1 + 0.04 × (tier-1))
 
+import { registerStat } from './stats.js';
+
 export const SLOTS = ['weapon', 'offhand', 'helm', 'chest', 'gloves', 'belt', 'legs', 'boots', 'amulet', 'ring1', 'ring2'];
 export const SLOT_NAMES = { weapon: '武器', offhand: '副手', helm: '頭', chest: '胴', gloves: '手', belt: '腰', legs: '脚', boots: '足', amulet: '首飾り', ring1: '指輪', ring2: '指輪', ring: '指輪' };
 // ベースの slot（ring は ring1/ring2 のどちらにも着けられる）
@@ -102,82 +104,183 @@ export const OFFHAND_KINDS = Object.keys(OFFHANDS);
 export const weaponInfo = (kind) => WEAPONS[kind];
 
 // ---------------- オプション（アフィックス）
-// { id, s, type:'prefix'|'suffix', slots:[...base slot or 'all'|'armor'|'jewelry'|'weapon'], weight,
-//   tiers: [[minIlvl, min, max], ...] … 下から順に良くなる。scale 能力は min/max が Lv1 の値（P(ilvl) 倍）
-//   group … 同じグループは 1 つのアイテムに 1 つだけ }
-// 表示の段階は「T1 が最高」。
-const ARMOR_SLOTS = ['helm', 'chest', 'gloves', 'belt', 'legs', 'boots', 'offhand'];
-const JEWELRY = ['amulet', 'ring'];
-const ALL = ['weapon', ...ARMOR_SLOTS, ...JEWELRY];
-const T = (rows) => rows; // 見やすさのため
+// { id, s, type:'prefix'|'suffix', slots:[...base slot], on: { slot: '*' | [kind...] }, weight,
+//   tiers: [[minIlvl, min, max], ...] … 下から順に良くなる（最大 10 段）。scale 能力は min/max が Lv1 の値（P(ilvl) 倍）
+//   group … 同じグループは 1 つのアイテムに 1 つだけ
+//   s に '*' を含むもの（'skill_dmg:*' など）は、付くときにスキルが 1 つ選ばれる（主人公のクラスのスキルが出やすい） }
+// 表示の段階は「T1 が最高」。T1・T2 はアイテムレベル 100 以上（苦行・深淵の裂け目）でしか出ない。
+// 1 部位（武器・副手は種類ごと）のオプションは 12〜18 種に絞ってある（どの行も何かのビルドで欲しくなる物だけ）。
 
-export const AFFIXES = [
-  // 攻撃（主に武器・装飾品・手）
-  { id: 'add_phys', s: 'add_phys', type: 'prefix', slots: ['weapon', 'gloves', 'ring', 'amulet'], weight: 100, tiers: T([[1, 1, 2], [12, 1.6, 2.6], [30, 2.2, 3.4], [55, 2.8, 4.2], [80, 3.4, 5]]) },
-  { id: 'add_fire', s: 'add_fire', type: 'prefix', slots: ['weapon', 'gloves', 'ring', 'amulet'], weight: 70, tiers: T([[1, 1, 2], [14, 1.6, 2.6], [32, 2.2, 3.4], [58, 2.8, 4.2], [82, 3.4, 5]]) },
-  { id: 'add_cold', s: 'add_cold', type: 'prefix', slots: ['weapon', 'gloves', 'ring', 'amulet'], weight: 70, tiers: T([[1, 1, 2], [14, 1.6, 2.6], [32, 2.2, 3.4], [58, 2.8, 4.2], [82, 3.4, 5]]) },
-  { id: 'add_lightning', s: 'add_lightning', type: 'prefix', slots: ['weapon', 'gloves', 'ring', 'amulet'], weight: 70, tiers: T([[1, 0.5, 3], [14, 0.8, 4.2], [32, 1.1, 5.4], [58, 1.4, 6.6], [82, 1.7, 7.8]]) },
-  { id: 'add_poison', s: 'add_poison', type: 'prefix', slots: ['weapon', 'gloves', 'ring'], weight: 50, tiers: T([[5, 1, 2], [20, 1.6, 2.6], [40, 2.2, 3.4], [65, 2.8, 4.2], [88, 3.4, 5]]) },
-  { id: 'inc_dmg', s: 'inc_dmg', type: 'prefix', slots: ['weapon', 'amulet', 'ring', 'gloves'], weight: 90, tiers: T([[1, 5, 9], [10, 10, 15], [22, 16, 22], [38, 23, 30], [55, 31, 39], [72, 40, 49], [90, 50, 60]]) },
-  { id: 'inc_elemental', s: 'inc_elemental', type: 'prefix', slots: ['weapon', 'amulet', 'ring', 'offhand'], weight: 60, tiers: T([[5, 6, 10], [18, 11, 16], [35, 17, 24], [55, 25, 33], [78, 34, 44]]) },
-  { id: 'inc_phys', s: 'inc_phys', type: 'prefix', slots: ['weapon', 'amulet'], weight: 60, tiers: T([[1, 8, 14], [15, 15, 24], [32, 25, 36], [52, 37, 50], [75, 51, 66], [92, 67, 85]]) },
-  { id: 'weapon_dmg', s: 'weapon_dmg', type: 'prefix', slots: ['weapon'], weight: 80, tiers: T([[1, 10, 19], [12, 20, 34], [26, 35, 54], [44, 55, 79], [64, 80, 109], [84, 110, 140]]) },
-  { id: 'attack_speed', s: 'attack_speed', type: 'suffix', slots: ['weapon', 'gloves', 'amulet', 'ring', 'offhand'], weight: 70, tiers: T([[1, 3, 5], [15, 5, 7], [35, 7, 9], [60, 9, 11], [85, 11, 14]]) },
-  { id: 'crit_chance', s: 'crit_chance', type: 'suffix', slots: ['weapon', 'gloves', 'helm', 'amulet', 'ring'], weight: 70, tiers: T([[1, 1.5, 2.5], [15, 2.5, 3.5], [32, 3.5, 4.5], [55, 4.5, 5.5], [80, 5.5, 7]]) },
-  { id: 'crit_damage', s: 'crit_damage', type: 'suffix', slots: ['weapon', 'gloves', 'amulet', 'ring'], weight: 70, tiers: T([[1, 8, 14], [15, 15, 22], [32, 23, 32], [55, 33, 42], [80, 43, 55]]) },
-  { id: 'multistrike', s: 'multistrike', type: 'suffix', slots: ['weapon', 'gloves'], weight: 30, tiers: T([[20, 3, 5], [45, 6, 8], [75, 9, 12]]) },
-  { id: 'area', s: 'area', type: 'suffix', slots: ['weapon', 'helm', 'amulet', 'offhand'], weight: 40, tiers: T([[8, 6, 10], [30, 11, 16], [60, 17, 24]]) },
-  { id: 'cdr', s: 'cdr', type: 'suffix', slots: ['helm', 'gloves', 'amulet', 'ring', 'offhand'], weight: 40, tiers: T([[10, 3, 4], [30, 4, 6], [55, 6, 7], [80, 7, 8]]) },
-  { id: 'cost_red', s: 'cost_red', type: 'suffix', slots: ['helm', 'amulet', 'ring', 'offhand'], weight: 30, tiers: T([[10, 4, 6], [35, 6, 8], [65, 8, 10]]) },
-  { id: 'res_pen', s: 'res_pen', type: 'suffix', slots: ['weapon', 'amulet'], weight: 20, tiers: T([[40, 4, 6], [65, 7, 9], [88, 10, 13]]) },
-  { id: 'dmg_elite', s: 'dmg_elite', type: 'suffix', slots: ['weapon', 'ring', 'amulet', 'offhand'], weight: 40, tiers: T([[5, 5, 8], [25, 9, 13], [50, 14, 18], [80, 19, 25]]) },
-  { id: 'dmg_boss', s: 'dmg_boss', type: 'suffix', slots: ['weapon', 'ring', 'amulet'], weight: 30, tiers: T([[10, 5, 8], [30, 9, 13], [55, 14, 18], [82, 19, 25]]) },
-  { id: 'skill_lvl', s: 'skill_lvl', type: 'suffix', slots: ['amulet', 'helm', 'weapon'], weight: 8, tiers: T([[30, 1, 1], [70, 1, 2], [95, 2, 2]]) },
-  { id: 'life_on_hit', s: 'life_on_hit', type: 'suffix', slots: ['weapon', 'gloves', 'ring'], weight: 40, tiers: T([[1, 0.6, 1.0], [20, 1.0, 1.4], [45, 1.4, 1.8], [75, 1.8, 2.4]]) },
-  { id: 'leech', s: 'leech', type: 'suffix', slots: ['weapon', 'gloves', 'ring', 'amulet'], weight: 30, tiers: T([[10, 0.5, 0.9], [30, 0.9, 1.3], [55, 1.3, 1.7], [80, 1.7, 2.2]]) },
-  { id: 'ignite', s: 'ignite_chance', type: 'suffix', slots: ['weapon', 'gloves'], weight: 20, tiers: T([[10, 5, 9], [40, 10, 15], [70, 16, 22]]) },
-  { id: 'freeze', s: 'freeze_chance', type: 'suffix', slots: ['weapon', 'gloves'], weight: 20, tiers: T([[10, 3, 5], [40, 5, 8], [70, 8, 11]]) },
-  { id: 'shock', s: 'shock_chance', type: 'suffix', slots: ['weapon', 'gloves'], weight: 20, tiers: T([[10, 5, 9], [40, 10, 15], [70, 16, 22]]) },
-  { id: 'poisonc', s: 'poison_chance', type: 'suffix', slots: ['weapon', 'gloves'], weight: 20, tiers: T([[10, 6, 10], [40, 11, 17], [70, 18, 25]]) },
-  { id: 'bleed', s: 'bleed_chance', type: 'suffix', slots: ['weapon', 'gloves'], weight: 20, tiers: T([[10, 6, 10], [40, 11, 17], [70, 18, 25]]) },
+/** 段階ごとの必要アイテムレベル（10 段のとき）。少ない段のオプションは上の方だけを使う */
+export const TIER_ILVL = [1, 8, 18, 30, 44, 58, 72, 86, 100, 110];
+/** 武器の種類のまとまり */
+const MELEE_W = ['sword', 'axe', 'mace', 'greatsword', 'dagger', 'claw'];
+const PHYS_W = ['sword', 'axe', 'mace', 'greatsword', 'bow', 'crossbow', 'dagger', 'claw'];
 
-  // 能力
-  { id: 'str', s: 'str', type: 'suffix', slots: ALL, weight: 60, group: 'attr_str', tiers: T([[1, 3, 6], [12, 7, 12], [25, 13, 20], [40, 21, 30], [55, 31, 42], [70, 43, 56], [85, 57, 72], [97, 73, 90]]) },
-  { id: 'dex', s: 'dex', type: 'suffix', slots: ALL, weight: 60, group: 'attr_dex', tiers: T([[1, 3, 6], [12, 7, 12], [25, 13, 20], [40, 21, 30], [55, 31, 42], [70, 43, 56], [85, 57, 72], [97, 73, 90]]) },
-  { id: 'int', s: 'int', type: 'suffix', slots: ALL, weight: 60, group: 'attr_int', tiers: T([[1, 3, 6], [12, 7, 12], [25, 13, 20], [40, 21, 30], [55, 31, 42], [70, 43, 56], [85, 57, 72], [97, 73, 90]]) },
-  { id: 'vit', s: 'vit', type: 'suffix', slots: ALL, weight: 60, group: 'attr_vit', tiers: T([[1, 3, 6], [12, 7, 12], [25, 13, 20], [40, 21, 30], [55, 31, 42], [70, 43, 56], [85, 57, 72], [97, 73, 90]]) },
-  { id: 'all_attr', s: 'all_attr', type: 'suffix', slots: ['amulet', 'ring', 'helm'], weight: 15, tiers: T([[20, 4, 8], [50, 9, 15], [80, 16, 24]]) },
+// 能力の追加（このファイルのオプションでだけ使う物）
+registerStat('gem_find', '宝石の発見率', { cat: 'utility', desc: 'エリート・ボスが宝石を落とす確率' });
+registerStat('rune_find', 'ルーンの発見率', { cat: 'utility', desc: 'エリート・ボスがルーンを落とす確率' });
+registerStat('shard_find', '深淵の欠片の獲得', { cat: 'utility', desc: '深淵の欠片が多く手に入る' });
+registerStat('luck_gain', '幸運ゲージの上昇', { cat: 'utility', desc: 'レジェンダリー・ミシックの幸運ゲージがたまりやすくなる' });
+export const FAMILY_STAT_NAMES = { undead: '不死', beast: '獣', demon: '悪魔', elemental: '精霊', aberration: '異形', human: '人', insect: '虫', construct: '機巧', aquatic: '水棲', dragon: '竜', plant: '植物', spirit: '霊' };
+for (const [f, n] of Object.entries(FAMILY_STAT_NAMES)) registerStat(`family_dmg:${f}`, `${n}へのダメージ`, { cat: 'offense', dyn: 'family_dmg', arg: f });
 
-  // 防御
-  { id: 'life', s: 'life', type: 'prefix', slots: [...ARMOR_SLOTS, ...JEWELRY], weight: 100, tiers: T([[1, 5, 9], [10, 7, 12], [25, 9, 15], [45, 11, 18], [70, 13, 21], [90, 15, 24]]) },
-  { id: 'inc_life', s: 'inc_life', type: 'prefix', slots: ['chest', 'helm', 'belt', 'legs', 'amulet', 'offhand'], weight: 50, tiers: T([[8, 3, 5], [25, 5, 8], [45, 8, 11], [70, 11, 14]]) },
-  { id: 'armor', s: 'armor', type: 'prefix', slots: ARMOR_SLOTS, weight: 80, tiers: T([[1, 2, 4], [15, 3, 6], [35, 4, 8], [60, 5, 10], [85, 6, 12]]) },
-  { id: 'inc_armor', s: 'inc_armor', type: 'prefix', slots: ARMOR_SLOTS, weight: 50, tiers: T([[1, 10, 18], [20, 19, 30], [45, 31, 45], [75, 46, 62]]) },
-  { id: 'life_regen', s: 'life_regen', type: 'suffix', slots: [...ARMOR_SLOTS, ...JEWELRY], weight: 40, tiers: T([[1, 0.3, 0.6], [20, 0.5, 0.9], [45, 0.7, 1.2], [75, 0.9, 1.5]]) },
-  { id: 'res_fire', s: 'res_fire', type: 'suffix', slots: [...ARMOR_SLOTS, ...JEWELRY], weight: 60, group: 'res_fire', tiers: T([[1, 6, 11], [15, 12, 17], [32, 18, 24], [55, 25, 31], [80, 32, 40]]) },
-  { id: 'res_cold', s: 'res_cold', type: 'suffix', slots: [...ARMOR_SLOTS, ...JEWELRY], weight: 60, group: 'res_cold', tiers: T([[1, 6, 11], [15, 12, 17], [32, 18, 24], [55, 25, 31], [80, 32, 40]]) },
-  { id: 'res_lightning', s: 'res_lightning', type: 'suffix', slots: [...ARMOR_SLOTS, ...JEWELRY], weight: 60, group: 'res_lightning', tiers: T([[1, 6, 11], [15, 12, 17], [32, 18, 24], [55, 25, 31], [80, 32, 40]]) },
-  { id: 'res_poison', s: 'res_poison', type: 'suffix', slots: [...ARMOR_SLOTS, ...JEWELRY], weight: 50, group: 'res_poison', tiers: T([[5, 6, 11], [20, 12, 17], [38, 18, 24], [60, 25, 31], [85, 32, 40]]) },
-  { id: 'res_void', s: 'res_void', type: 'suffix', slots: ['chest', 'helm', 'amulet', 'offhand'], weight: 15, group: 'res_void', tiers: T([[60, 5, 9], [85, 10, 15]]) },
-  { id: 'res_all', s: 'res_all', type: 'suffix', slots: ['chest', 'helm', 'amulet', 'ring', 'offhand', 'boots'], weight: 30, tiers: T([[10, 4, 6], [30, 7, 10], [55, 11, 14], [80, 15, 18]]) },
-  { id: 'dodge', s: 'dodge', type: 'suffix', slots: ['boots', 'legs', 'gloves', 'chest'], weight: 30, tiers: T([[5, 1.5, 2.5], [25, 2.5, 3.5], [50, 3.5, 4.5], [80, 4.5, 6]]) },
-  { id: 'block', s: 'block', type: 'suffix', slots: ['offhand'], weight: 30, tiers: T([[5, 3, 5], [30, 5, 7], [60, 7, 10]]) },
-  { id: 'dr', s: 'dr', type: 'suffix', slots: ['chest', 'belt', 'offhand'], weight: 15, tiers: T([[30, 2, 3], [60, 3, 4], [88, 4, 6]]) },
-  { id: 'thorns', s: 'thorns', type: 'suffix', slots: ['chest', 'offhand', 'legs'], weight: 25, tiers: T([[1, 2, 4], [25, 3, 6], [55, 4, 8], [85, 5, 10]]) },
+/**
+ * 段の表を作る。lo = いちばん下の段の [min, max]、hi = いちばん上の段の [min, max]。
+ * o: { n（段の数・既定 10）, gates（必要アイテムレベルの配列）, int（整数に丸める）, curve（伸び方。1 = 一定） }
+ */
+function tiers(lo, hi, o = {}) {
+  const n = o.n || 10;
+  const gates = o.gates || TIER_ILVL.slice(TIER_ILVL.length - n);
+  const rows = [];
+  for (let i = 0; i < n; i++) {
+    const f = n === 1 ? 1 : (i / (n - 1)) ** (o.curve || 1);
+    let a = lo[0] + (hi[0] - lo[0]) * f;
+    let b = lo[1] + (hi[1] - lo[1]) * f;
+    if (o.int) { a = Math.round(a); b = Math.max(a, Math.round(b)); } else { a = Math.round(a * 10) / 10; b = Math.round(b * 10) / 10; }
+    rows.push([gates[i], a, b]);
+  }
+  return rows;
+}
 
-  // 便利
-  { id: 'move_speed', s: 'move_speed', type: 'suffix', slots: ['boots'], weight: 70, tiers: T([[1, 4, 7], [15, 8, 11], [35, 12, 15], [60, 16, 20], [85, 21, 25]]) },
-  { id: 'gold_find', s: 'gold_find', type: 'suffix', slots: ['helm', 'amulet', 'ring', 'belt', 'gloves'], weight: 40, tiers: T([[1, 5, 10], [20, 11, 18], [45, 19, 28], [75, 29, 40]]) },
-  { id: 'magic_find', s: 'magic_find', type: 'suffix', slots: ['helm', 'amulet', 'ring', 'boots', 'belt'], weight: 35, tiers: T([[1, 4, 8], [20, 9, 14], [45, 15, 21], [75, 22, 30]]) },
-  { id: 'xp_bonus', s: 'xp_bonus', type: 'suffix', slots: ['helm', 'amulet', 'ring'], weight: 25, tiers: T([[5, 3, 5], [30, 6, 9], [60, 10, 14]]) },
-  { id: 'max_resource', s: 'max_resource', type: 'suffix', slots: ['helm', 'chest', 'amulet', 'offhand'], weight: 30, tiers: T([[1, 5, 10], [25, 11, 18], [55, 19, 28], [85, 29, 40]]) },
-  { id: 'resource_regen', s: 'resource_regen', type: 'suffix', slots: ['helm', 'amulet', 'ring', 'offhand', 'weapon'], weight: 30, tiers: T([[1, 6, 10], [25, 11, 16], [55, 17, 24], [85, 25, 32]]) },
-  { id: 'minion_life', s: 'minion_life', type: 'suffix', slots: ['helm', 'chest', 'amulet', 'offhand'], weight: 20, tiers: T([[1, 8, 14], [30, 15, 24], [65, 25, 36]]) },
-  { id: 'inc_minion', s: 'inc_minion', type: 'prefix', slots: ['weapon', 'amulet', 'offhand', 'helm'], weight: 25, tiers: T([[1, 8, 14], [25, 15, 24], [50, 25, 36], [80, 37, 50]]) },
-];
+const AF = [];
+/** オプションを 1 つ登録。on = { 部位: '*' | [種類...] } */
+function A(id, s, type, on, weight, lo, hi, o = {}) {
+  AF.push({ id, s, type: type === 'P' ? 'prefix' : 'suffix', slots: Object.keys(on), on, weight, tiers: o.rows || tiers(lo, hi, o), ...(o.group ? { group: o.group } : {}), ...(o.desc ? { desc: o.desc } : {}) });
+}
+const W = '*';
+const ARMOR6 = ['helm', 'chest', 'gloves', 'belt', 'legs', 'boots'];
+const on = (...slots) => Object.fromEntries(slots.map((s) => (Array.isArray(s) ? s : [s, W])));
+const OFF_ALL = ['offhand', W];
+
+// ===== 攻撃・接頭（武器の基本ダメージに足す・増加）
+A('add_phys', 'add_phys', 'P', on('weapon', 'gloves', 'ring'), 100, [1, 2], [4.4, 6.2]);
+A('add_fire', 'add_fire', 'P', on('weapon', 'gloves', 'ring'), 70, [1, 2], [4.4, 6.2]);
+A('add_cold', 'add_cold', 'P', on('weapon', 'gloves', 'ring'), 70, [1, 2], [4.4, 6.2]);
+A('add_lightning', 'add_lightning', 'P', on('weapon', 'gloves', 'ring'), 70, [0.5, 3], [1.5, 9.4]);
+A('add_poison', 'add_poison', 'P', on('weapon'), 50, [1, 2], [4.4, 6.2]);
+A('add_void', 'add_void', 'P', on('weapon'), 40, [1, 2.2], [4.6, 6.6]);
+A('weapon_dmg', 'weapon_dmg', 'P', on('weapon'), 80, [8, 16], [125, 150]);
+A('inc_phys', 'inc_phys', 'P', on(['weapon', PHYS_W], 'amulet'), 60, [6, 10], [72, 88]);
+A('inc_elemental', 'inc_elemental', 'P', on('weapon', ['offhand', ['orb']]), 60, [5, 8], [46, 56]);
+A('inc_dmg', 'inc_dmg', 'P', on('gloves', 'amulet', 'ring'), 90, [3, 6], [42, 50]);
+A('inc_fire', 'inc_fire', 'P', on('amulet'), 40, [5, 9], [58, 68], { group: 'el_amulet' });
+A('inc_cold', 'inc_cold', 'P', on('amulet'), 40, [5, 9], [58, 68], { group: 'el_amulet' });
+A('inc_lightning', 'inc_lightning', 'P', on('amulet'), 40, [5, 9], [58, 68], { group: 'el_amulet' });
+A('inc_poison', 'inc_poison', 'P', on('amulet'), 35, [5, 9], [58, 68], { group: 'el_amulet' });
+A('inc_void', 'inc_void', 'P', on('amulet'), 25, [5, 9], [58, 68], { group: 'el_amulet' });
+A('inc_attack', 'inc_attack', 'P', on(['offhand', ['quiver', 'offblade']]), 50, [5, 9], [52, 62]);
+A('inc_spell', 'inc_spell', 'P', on(['weapon', ['staff', 'wand']], ['offhand', ['orb']]), 60, [6, 10], [60, 72]);
+A('inc_melee', 'inc_melee', 'P', on(['offhand', ['shield', 'offblade']]), 45, [5, 9], [52, 62]);
+A('inc_projectile', 'inc_projectile', 'P', on(['offhand', ['quiver']]), 45, [5, 9], [52, 62]);
+A('inc_area', 'inc_area', 'P', on(['offhand', ['orb']]), 40, [5, 9], [52, 62]);
+A('inc_dot', 'inc_dot', 'P', on(['offhand', ['grimoire', 'offblade']]), 40, [6, 10], [58, 70]);
+A('inc_minion', 'inc_minion', 'P', on(['weapon', ['scythe', 'rod']], ['offhand', ['grimoire']], 'amulet'), 40, [6, 10], [60, 72]);
+A('skill_dmg', 'skill_dmg:*', 'P', on('weapon'), 30, [10, 16], [80, 95], { desc: '1 つのスキルのダメージ' });
+
+// ===== 攻撃・接尾
+A('attack_speed', 'attack_speed', 'S', on('weapon', 'gloves', 'ring', ['offhand', ['quiver', 'offblade']]), 70, [2, 3], [12, 15]);
+A('crit_chance', 'crit_chance', 'S', on('weapon', 'gloves', 'helm', 'amulet', 'ring', ['offhand', ['quiver', 'orb', 'offblade']]), 70, [1, 1.6], [7, 8.5]);
+A('crit_damage', 'crit_damage', 'S', on('weapon', 'gloves', 'amulet', 'ring', ['offhand', ['quiver', 'offblade']]), 70, [6, 10], [56, 66]);
+A('multistrike', 'multistrike', 'S', on(['weapon', MELEE_W]), 30, [2, 3], [12, 15], { n: 8 });
+A('area', 'area', 'S', on('helm', ['offhand', ['orb']]), 40, [4, 6], [24, 30], { n: 8 });
+A('cdr', 'cdr', 'S', on('helm', OFF_ALL), 40, [1.5, 2.5], [8, 9.5], { n: 8 });
+A('cost_red', 'cost_red', 'S', on('ring', ['offhand', ['orb', 'grimoire']]), 30, [2, 3], [10, 12], { n: 8 });
+A('res_pen', 'res_pen', 'S', on('weapon'), 20, [2, 3], [12, 15], { n: 7 });
+A('dmg_elite', 'dmg_elite', 'S', on('amulet'), 40, [3, 5], [26, 32]);
+A('dmg_boss', 'dmg_boss', 'S', on('weapon'), 30, [3, 5], [26, 32]);
+A('skill_lvl', 'skill_lvl', 'S', on('amulet'), 8, null, null, { rows: [[44, 1, 1], [86, 1, 2], [110, 2, 2]] });
+A('life_on_hit', 'life_on_hit', 'S', on('ring'), 40, [0.4, 0.7], [2.4, 3]);
+A('leech', 'leech', 'S', on('weapon'), 30, [0.3, 0.5], [2.2, 2.7], { n: 8 });
+A('ignite', 'ignite_chance', 'S', on('gloves'), 20, [3, 5], [20, 25], { n: 8 });
+A('freeze', 'freeze_chance', 'S', on('gloves'), 20, [2, 3], [10, 12], { n: 8 });
+A('shock', 'shock_chance', 'S', on('gloves'), 20, [3, 5], [20, 25], { n: 8 });
+A('poisonc', 'poison_chance', 'S', on('gloves', ['offhand', ['offblade']]), 20, [4, 6], [22, 28], { n: 8 });
+A('bleed', 'bleed_chance', 'S', on('gloves', ['offhand', ['offblade']]), 20, [4, 6], [22, 28], { n: 8 });
+A('dmg_vs_low', 'dmg_vs_low', 'S', on(['offhand', ['quiver', 'offblade']]), 30, [4, 6], [30, 36]);
+A('status_dmg', 'status_dmg', 'S', on(['offhand', ['grimoire']]), 30, [5, 8], [46, 56]);
+A('skill_cdr', 'skill_cdr:*', 'S', on('amulet'), 20, [3, 5], [18, 22], { n: 8, desc: '1 つのスキルのクールダウン短縮' });
+A('fam_undead', 'family_dmg:undead', 'S', on(['weapon', ['mace', 'staff', 'scythe']]), 25, [4, 7], [38, 46]);
+A('fam_beast', 'family_dmg:beast', 'S', on(['weapon', ['axe', 'bow', 'crossbow', 'claw']]), 25, [4, 7], [38, 46]);
+A('fam_demon', 'family_dmg:demon', 'S', on(['weapon', ['sword', 'greatsword', 'rod']]), 25, [4, 7], [38, 46]);
+A('fam_elemental', 'family_dmg:elemental', 'S', on(['weapon', ['wand', 'dagger']]), 25, [4, 7], [38, 46]);
+A('fam_aberration', 'family_dmg:aberration', 'S', on(['offhand', ['shield', 'quiver', 'offblade']]), 25, [4, 7], [38, 46]);
+
+// ===== 能力（主能力は 1 につきダメージ +0.25%）
+const ATTR_ON = on(...ARMOR6, 'ring');
+A('str', 'str', 'S', ATTR_ON, 60, [2, 4], [72, 90], { int: true, group: 'attr_str' });
+A('dex', 'dex', 'S', ATTR_ON, 60, [2, 4], [72, 90], { int: true, group: 'attr_dex' });
+A('int', 'int', 'S', ATTR_ON, 60, [2, 4], [72, 90], { int: true, group: 'attr_int' });
+A('vit', 'vit', 'S', on('helm', 'chest', 'belt', 'legs', 'boots', 'ring'), 60, [2, 4], [72, 90], { int: true, group: 'attr_vit' });
+A('all_attr', 'all_attr', 'S', on('amulet'), 15, [3, 5], [26, 32], { n: 8, int: true });
+
+// ===== 防御
+A('life', 'life', 'P', on(OFF_ALL, ...ARMOR6, 'ring'), 100, [4, 6], [16, 21]);
+A('inc_life', 'inc_life', 'P', on('helm', 'chest', 'belt', 'legs'), 50, [2, 3], [13, 16], { n: 8 });
+A('armor', 'armor', 'P', on(['offhand', ['shield']], ...ARMOR6), 80, [2, 3], [10, 13]);
+A('inc_armor', 'inc_armor', 'P', on(['offhand', ['shield']], 'helm', 'chest', 'belt', 'legs', 'boots'), 50, [8, 14], [56, 70]);
+A('life_regen', 'life_regen', 'S', on('chest', 'legs', ['offhand', ['shield']]), 40, [0.2, 0.4], [1.4, 1.8]);
+A('life_regen_pct', 'life_regen_pct', 'S', on('belt', 'boots'), 20, [0.1, 0.2], [0.8, 1.0], { n: 8 });
+const RES_ON = on('helm', 'chest', 'belt', 'legs', 'boots');
+A('res_fire', 'res_fire', 'S', RES_ON, 60, [4, 8], [36, 42], { group: 'res_fire' });
+A('res_cold', 'res_cold', 'S', RES_ON, 60, [4, 8], [36, 42], { group: 'res_cold' });
+A('res_lightning', 'res_lightning', 'S', RES_ON, 60, [4, 8], [36, 42], { group: 'res_lightning' });
+A('res_poison', 'res_poison', 'S', RES_ON, 50, [4, 8], [36, 42], { group: 'res_poison' });
+A('res_void', 'res_void', 'S', on('chest'), 15, [3, 6], [17, 21], { n: 6, group: 'res_void' });
+A('res_all', 'res_all', 'S', on('helm', 'chest', 'boots', 'amulet', 'ring', OFF_ALL), 30, [2, 4], [17, 21], { n: 8 });
+A('dodge', 'dodge', 'S', on('chest', 'legs', 'boots'), 30, [1, 1.5], [6.2, 7.6], { n: 8 });
+A('block', 'block', 'S', on(['offhand', ['shield']]), 30, [2, 3], [10, 12.5], { n: 8 });
+A('dr', 'dr', 'S', on('chest', 'belt', ['offhand', ['shield']]), 15, [1, 1.5], [6, 7.2], { n: 6 });
+A('thorns', 'thorns', 'S', on('chest', 'legs', ['offhand', ['shield']]), 25, [1, 3], [8, 12]);
+A('life_on_kill', 'life_on_kill', 'S', on('legs', ['offhand', ['shield']]), 30, [1, 2], [9, 13]);
+
+// ===== 便利
+A('move_speed', 'move_speed', 'S', on('boots'), 70, [3, 5], [24, 28]);
+A('gold_find', 'gold_find', 'S', on('ring'), 40, [4, 8], [42, 52]);
+A('magic_find', 'magic_find', 'S', on('helm', 'belt', 'ring', 'amulet'), 35, [3, 6], [33, 40]);
+A('xp_bonus', 'xp_bonus', 'S', on('amulet'), 25, [2, 4], [15, 19], { n: 8 });
+A('item_quantity', 'item_quantity', 'S', on('amulet'), 10, [1, 2], [8, 10], { n: 6 });
+A('max_resource', 'max_resource', 'S', on(OFF_ALL), 30, [3, 6], [34, 42], { int: true });
+A('resource_regen', 'resource_regen', 'S', on(['offhand', ['orb', 'grimoire']]), 30, [5, 8], [29, 35]);
+A('resource_on_hit', 'resource_on_hit', 'S', on('legs'), 20, [1, 1], [4, 5], { n: 6, int: true });
+A('offline_gain', 'offline_gain', 'S', on('belt'), 15, [3, 5], [18, 22], { n: 8 });
+A('mat_find', 'mat_find', 'S', on('belt'), 20, [4, 6], [31, 37], { n: 8 });
+A('luck_gain', 'luck_gain', 'S', on('belt'), 10, [2, 3], [14, 18], { n: 8 });
+A('gem_find', 'gem_find', 'S', on('legs'), 15, [5, 8], [42, 52], { n: 8 });
+A('shard_find', 'shard_find', 'S', on('boots'), 15, [5, 8], [42, 52], { n: 8 });
+A('rune_find', 'rune_find', 'S', on('boots'), 15, [5, 8], [42, 52], { n: 8 });
+A('skill_lvl1', 'skill_lvl:*', 'S', on('helm', OFF_ALL), 10, null, null, { rows: [[30, 1, 1], [72, 1, 2], [100, 2, 3], [110, 3, 3]], desc: '1 つのスキルのレベル' });
+
+// ===== 召喚
+A('minion_life', 'minion_life', 'S', on(['offhand', ['grimoire']]), 20, [6, 10], [38, 46]);
+A('minion_count', 'minion_count', 'S', on(['offhand', ['grimoire']]), 8, null, null, { rows: [[58, 1, 1], [100, 1, 2]] });
+A('minion_as', 'minion_as', 'S', on(['offhand', ['grimoire']]), 25, [3, 5], [20, 25], { n: 8 });
+A('proj_count', 'proj_count', 'S', on(['offhand', ['quiver']]), 10, null, null, { rows: [[44, 1, 1], [100, 1, 2]] });
+A('pierce', 'pierce', 'S', on(['offhand', ['quiver']]), 15, null, null, { rows: [[18, 1, 1], [58, 1, 2], [100, 2, 3]] });
+A('chain', 'chain', 'S', on(['offhand', ['orb']]), 15, null, null, { rows: [[30, 1, 1], [72, 1, 2], [105, 2, 2]] });
+
+export const AFFIXES = AF;
 export const AFFIX = Object.fromEntries(AFFIXES.map((a) => [a.id, a]));
 
-/** スロットの別名を展開（'ring' と 'amulet' はそのまま） */
+/** スロットで付けられるか（ring と amulet はそのまま） */
 export function affixAllowed(affix, baseSlot) {
   return affix.slots.includes(baseSlot) || affix.slots.includes('all');
 }
+
+/** ベース（種類）まで見て付けられるか。武器・副手は種類ごとに付くオプションが違う */
+export function affixAllowedBase(affix, base) {
+  if (!base) return false;
+  if (!affixAllowed(affix, base.slot)) return false;
+  const k = affix.on?.[base.slot];
+  return !k || k === W || k.includes(base.kind);
+}
+
+/** その部位・種類で付けられるオプションの一覧 */
+export function affixPool(base) {
+  return AFFIXES.filter((a) => affixAllowedBase(a, base));
+}
+
+/** 部位ごとのソケットの上限（武器 3・胴/頭/脚 2・ほか 1） */
+export const SOCKET_MAX = { weapon: 3, chest: 2, helm: 2, legs: 2, offhand: 1, gloves: 1, belt: 1, boots: 1, amulet: 1, ring: 1 };
+/** ソケットの場所の分類（宝石の効果が変わる） */
+export const socketKind = (slot) => (slot === 'weapon' ? 'weapon' : slot === 'amulet' || slot === 'ring' ? 'jewelry' : 'armor');

@@ -95,7 +95,8 @@ export const BAL = {
   ITEM_DROP_CHANCE: 0.12, // 普通の敵 1 体あたり
   GOLD_DROP_CHANCE: 0.35,
   // レアリティの重み（普通の敵）。MF はレア以上を (1+MF/100) 倍
-  RARITY_WEIGHTS: { common: 55, magic: 32, rare: 10.5, epic: 2.0, legendary: 0.35, unique: 0.12, set: 0.08, mythic: 0.003 },
+  // アイテム担当が調整: 1〜1.5 体/秒でレア ≈1 分に 1 個・エピック ≈8〜10 分に 1 個（REFERENCE A09）。旧: rare 10.5・epic 2.0・legendary 0.35
+  RARITY_WEIGHTS: { common: 56, magic: 33, rare: 7.5, epic: 0.8, legendary: 0.45, unique: 0.12, set: 0.08, mythic: 0.003 },
   mfEffective: (mf) => (mf <= 0 ? mf : mf * 100 / (mf + 100) * 2), // 逓減（MF 100 → 実効 100、300 → 150）
 
   // ---- 経済

@@ -1,7 +1,7 @@
 // アイテムの生成（ドロップ・ガチャ・報酬）。レアリティ → ベース → オプションの順に決める。
 // ユニーク・セット・ミシック・伝説の力は、アイテム担当が registry と hooks で足す（rollSpecial）。
 
-import { BASES, AFFIXES, affixAllowed, SLOTS, baseSlotOf, TIER_REQ } from '../data/items.js';
+import { BASES, BASE, AFFIXES, AFFIX, affixAllowed, affixAllowedBase, SLOTS, baseSlotOf, TIER_REQ } from '../data/items.js';
 import { RARITIES, RARITY } from '../data/rarity.js';
 import { CLASS } from '../data/classes.js';
 import { statDef } from '../data/stats.js';
@@ -17,6 +17,8 @@ export const lootHooks = {
   finish: [],
   // (rng) => string … レアの名前
   rareName: null,
+  // (affix, item, rng, ctx) => '能力のキー' | null … s に '*' を含むオプション（スキル指定など）の中身を決める
+  dynStat: null,
 };
 
 const BASE_SLOTS = ['weapon', 'offhand', 'helm', 'chest', 'gloves', 'belt', 'legs', 'boots', 'amulet', 'ring'];
@@ -28,7 +30,8 @@ export function rollRarity(rng, { mf = 0, rank = 'normal', minRarity = null, tor
   const mfe = BAL.mfEffective(mf);
   const boost = rank === 'normal' ? 1 : rank === 'champion' ? 2.5 : rank === 'rare' ? 3.5 : rank === 'goblin' ? 6 : 8;
   for (const r of RARITIES) {
-    if (r.idx >= 2) w[r.id] *= (1 + mfe / 100) * boost;
+    if (r.id === 'mythic') w[r.id] *= Math.sqrt((1 + mfe / 100) * boost); // ミシックは発見率・格の効きを弱める（とても珍しいまま）
+    else if (r.idx >= 2) w[r.id] *= (1 + mfe / 100) * boost;
     if (r.idx === 1) w[r.id] *= 1 + mfe / 300;
   }
   if (rank !== 'normal') w.common *= 0.3;
@@ -89,24 +92,27 @@ export function rollAffixValue(rng, affix, tierIdx, ilvl, { greater = false, qua
 }
 
 /** item にオプションを n 個足す（同じ能力・同じグループは重ならない） */
-export function addAffixes(rng, item, n, { tierBias = 0, greaterChance = 0.02 } = {}) {
+export function addAffixes(rng, item, n, { tierBias = 0, greaterChance = 0.02, ctx = null } = {}) {
   const have = new Set((item.affixes || []).map((a) => a.id));
-  const groups = new Set((item.affixes || []).map((a) => AFFIXES.find((x) => x.id === a.id)?.group).filter(Boolean));
+  const groups = new Set((item.affixes || []).map((a) => AFFIX[a.id]?.group).filter(Boolean));
   const stats = new Set((item.affixes || []).map((a) => a.s));
-  let prefixes = (item.affixes || []).filter((a) => AFFIXES.find((x) => x.id === a.id)?.type === 'prefix').length;
+  let prefixes = (item.affixes || []).filter((a) => AFFIX[a.id]?.type === 'prefix').length;
+  const base = BASE[item.base];
   let suffixes = (item.affixes || []).length - prefixes;
   const maxEach = Math.ceil(Math.max(n + (item.affixes?.length || 0), 2) / 2) + 1;
   item.affixes ||= [];
   for (let k = 0; k < n; k++) {
-    const pool = AFFIXES.filter((a) => affixAllowed(a, item.slot) && !have.has(a.id) && !stats.has(a.s) && !(a.group && groups.has(a.group)) && a.tiers[0][0] <= item.ilvl
+    const pool = AFFIXES.filter((a) => (base ? affixAllowedBase(a, base) : affixAllowed(a, item.slot)) && !have.has(a.id) && !stats.has(a.s) && !(a.group && groups.has(a.group)) && a.tiers[0][0] <= item.ilvl
       && (a.type === 'prefix' ? prefixes < maxEach : suffixes < maxEach));
     const a = rng.weighted(pool, (x) => x.weight);
     if (!a) break;
     const t = rollTier(rng, a, item.ilvl, tierBias);
     if (t === null) continue;
+    let s = a.s;
+    if (s.includes('*')) { s = lootHooks.dynStat ? lootHooks.dynStat(a, item, rng, ctx) : null; if (!s || stats.has(s)) { have.add(a.id); k--; if (have.size > 200) break; continue; } }
     const g = rng.chance(greaterChance);
-    item.affixes.push({ id: a.id, s: a.s, t, v: rollAffixValue(rng, a, t, item.ilvl, { greater: g }), ...(g ? { g: 1 } : {}) });
-    have.add(a.id); stats.add(a.s); if (a.group) groups.add(a.group);
+    item.affixes.push({ id: a.id, s, t, v: rollAffixValue(rng, a, t, item.ilvl, { greater: g }), ...(g ? { g: 1 } : {}) });
+    have.add(a.id); stats.add(s); if (a.group) groups.add(a.group);
     if (a.type === 'prefix') prefixes++; else suffixes++;
   }
   return item;
@@ -150,7 +156,7 @@ export function generateItem(rng, opts = {}) {
   let n = rng.int(lo, hi);
   if (item.rarity === 'rare' && ilvl >= 40 && rng.chance(0.3)) n += 1;
   const tierBias = rr.idx >= 3 ? 1.5 : rr.idx === 2 ? 0.5 : 0;
-  addAffixes(rng, item, n, { tierBias, greaterChance: rr.idx >= 3 ? 0.06 : 0.015 });
+  addAffixes(rng, item, n, { tierBias, greaterChance: rr.idx >= 3 ? 0.06 : 0.015, ctx });
   if (rr.power && lootHooks.addPower) lootHooks.addPower(item, ctx);
   if ((item.rarity === 'rare' || item.rarity === 'epic') && lootHooks.rareName) item.name = lootHooks.rareName(rng, item);
   for (const f of lootHooks.finish) f(item, ctx);
@@ -158,9 +164,10 @@ export function generateItem(rng, opts = {}) {
 }
 
 /** 普通の敵 1 体を倒したときに落ちるアイテムの数 */
-export function dropCount(rng, { rank = 'normal', quantity = 0, lootMult = 1 } = {}) {
+export function dropCount(rng, { rank = 'normal', quantity = 0, lootMult = 1, lootMul = 1 } = {}) {
   const rk = BAL.RANK[rank] || BAL.RANK.normal;
-  const mean = BAL.ITEM_DROP_CHANCE * rk.loot * lootMult * (1 + quantity / 100);
+  // lootMul（game.js が渡す名前）と lootMult のどちらでも受ける
+  const mean = BAL.ITEM_DROP_CHANCE * rk.loot * lootMult * lootMul * (1 + quantity / 100);
   if (rank === 'boss' || rank === 'actboss' || rank === 'guardian') return Math.max(2, rng.poisson(mean));
   return rng.poisson(mean);
 }
