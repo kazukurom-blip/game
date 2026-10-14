@@ -102,7 +102,7 @@ export class WorldSystem {
 
   campaignLevel(z, stage, t = 0) {
     const base = stageLevel(z, stage);
-    if (t > 0) return Math.max(base, BAL.torment(t).level) + Math.floor((z.global || 0) / 5);
+    if (t > 0) return Math.max(base, BAL.torment(t).level) + Math.floor((z.global || 0) / 10); // 苦行では 2 章ごとに +1
     return base;
   }
 
@@ -152,7 +152,8 @@ export class WorldSystem {
     const def = MONSTER[z.boss];
     if (def?.kind === 'final') return 1.5 * ACT_BOSS_LIFE_MUL;
     if (EARLY_BOSS[z.global] && !(this.w.torment > 0)) return EARLY_BOSS[z.global][0];
-    return z.zoneIdx === 4 ? ACT_BOSS_LIFE_MUL : 1;
+    // 第一章のボスは「最初の壁」なので軽くしない
+    return z.zoneIdx === 4 && z.actIdx > 0 ? ACT_BOSS_LIFE_MUL : 1;
   }
 
   bossTimeFor(z) {
@@ -568,14 +569,15 @@ export class WorldSystem {
     const L = this.campaignLevel(z, 5, torment);
     const rec = this.recommendedPower(L, torment);
     const power = this.heroPower();
-    // 目安の言葉は「火力（ボスの必要 DPS に対して）」と「耐久（ボスの攻撃 12 回ぶん）」の弱い方で決める
+    // 目安の言葉は「火力（ボスの必要 DPS に対して）」と「耐久（ボスの攻撃 8 回ぶん）」の弱い方で決める
     const nd = this.bossNeed(z, torment);
     const dpsRatio = nd.need > 0 ? this.estDps(z.id) / nd.need : 1;
     const H = this.game.H;
     const Lb = nd.level || L + 1;
     const sc = BAL.monsterScale(Lb - 1);
     const rk = BAL.RANK[z.zoneIdx === 4 ? 'actboss' : 'boss'];
-    const needEhp = BAL.monsterDmg(Lb) * rk.dmg * (torment > 0 ? BAL.torment(torment).dmg : 1) * sc.dmg * 12;
+    const early = EARLY_BOSS[z.global] && !(torment > 0) ? EARLY_BOSS[z.global][1] : 1;
+    const needEhp = BAL.monsterDmg(Lb) * rk.dmg * (torment > 0 ? BAL.torment(torment).dmg : 1) * sc.dmg * early * 8;
     const ehpRatio = H ? character.effectiveLife(H, Lb) / Math.max(1, needEhp) : 1;
     const ratio = Math.min(dpsRatio, ehpRatio);
     const label = ratio >= 1.6 ? '楽勝' : ratio >= 1 ? 'ちょうどよい' : ratio >= 0.7 ? '手ごわい' : '危険';

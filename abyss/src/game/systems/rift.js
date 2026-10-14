@@ -33,7 +33,7 @@ export const RIFT = {
   doneDelay: 4,
   maxAliveBase: 7,
 };
-export const GATE = { time: 120, levelAdd: 10, mythicBase: 0.04, mythicPerTier: 0.005, mythicCap: 0.15, refund: 2, badge: { dmg: 4, life: 4 } };
+export const GATE = { time: 120, levelAdd: 5, mythicBase: 0.04, mythicPerTier: 0.005, mythicCap: 0.15, refund: 2, badge: { dmg: 4, life: 4 } };
 
 /** 段階 g の数値（敵ライフ・攻撃・報酬の倍率） */
 export function riftDifficulty(g) {

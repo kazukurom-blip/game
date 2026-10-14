@@ -15,7 +15,7 @@ export const ACT_BOSS_TIME_MUL = 1.8;
 export const FINAL_BOSS_TIME_MUL = 2.5;
 // 最初の 2 地域のボスはやさしく（はじめての 5 分で負けないように）。[ライフ, 攻撃] の倍率
 export const EARLY_BOSS = { 0: [0.6, 0.6], 1: [0.85, 0.85] };
-export const ACT_BOSS_LIFE_MUL = 0.75; // 章のボスのライフ（BAL.RANK.actboss に掛ける。章の終わりの壁を「少し稼げば越えられる」に）
+export const ACT_BOSS_LIFE_MUL = 0.75; // 第二章からの章のボスのライフ（BAL.RANK.actboss に掛ける。章の終わりの壁を「少し稼げば越えられる」に）
 
 export const ACTS = [
   {
