@@ -322,7 +322,7 @@ export class SkillSystem {
     const h = this.hero;
     const pts = this.spentPoints();
     if (h.level < SKILL_RESET_FREE_LEVEL || pts <= 0) return 0;
-    return Math.round(20 * P(h.level) ** 0.85 * pts);
+    return Math.round(8 * P(h.level) ** 0.85 * pts);
   }
 
   spentPoints() { let pts = 0; for (const id in this.hero.skills) pts += Math.max(0, (this.hero.skills[id].lvl || 0) - 1); return pts; }

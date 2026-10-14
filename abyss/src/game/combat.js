@@ -85,7 +85,8 @@ export class Combat {
     this.leechBudget = 0;
     this.castCount = 0;
     this.critFxT = 0;
-    this.stats = { dmgDone: 0, dmgTaken: 0, window: [] };
+    // 合計は増えるだけにする（HUD の DPS は前の値との差で出すので、新しく始めても負にならないように）
+    this.stats = { dmgDone: this.stats?.dmgDone || 0, dmgTaken: this.stats?.dmgTaken || 0, window: [] };
   }
 
   get state() { return this.game.state; }

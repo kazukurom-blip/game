@@ -25,7 +25,7 @@
 //   ult        { skill, cls, unit, x, y, el, dur }            奥義の発動（画面全体の演出・暗転・カットインなど）。cls はクラスの id
 //   crit       { x, y, z, v, el, skill }                      主人公のクリティカル（0.15 秒に 1 回まで。ヒットストップ向け）
 //   leap       { unit, x0, y0, x1, y1, dur, skill, el, ult? } 跳躍の始まり（unit.z が高さ。着地で nova{land:true}）
-//   dash       { unit, x0, y0, x1, y1, dur, skill, el, back?, roll? }  突進・後転（残像・砂ぼこり）
+//   dash       { unit, x0, y0, x1, y1, dur, skill, el, back?, roll? }  突進・後転（残像・砂ぼこり。当たった所に swing{fallbackOf:'dash'}）
 //   blink      { unit, x0, y0, x1, y1, skill }                瞬間移動（冥府の舞）
 //   beam       { unit, x1, y1, x2, y2, w, dur, skill, el }    光線（dur 秒続く。unit について動く。毎刻み chain{fallbackOf:'beam'}）
 //   channel    { unit, skill, kind, dur, el }                 詠唱し続ける技の始まり（kind: whirl / beam / flurry）
@@ -41,7 +41,7 @@
 //   wall       { x, y, len, depth, dur, skill, el }           横に長い炎の壁（areas に kind:'wall'、shape:'line'、len）
 //   meteor     { x, y, r, delay, skill, el, ult? }            隕石の予告（delay 秒後に落ちる。areas に kind:'meteor'）
 //   barrage    { x, y, r, dur, count, skill, el }             矢の嵐（星落としの矢）
-//   curse      { x, y, r, skill, el, curse, single, unit }    呪いをかけた（敵の u.statuses.curse が続く間は呪いの印）
+//   curse      { x, y, r, skill, el, curse, single, unit }    呪いをかけた（敵の u.statuses.curse が続く間は呪いの印。倒した敵から移るときは chain{fallbackOf:'curse'}）
 //   shield     { unit, v, max, dur, skill, el }               障壁を張った（unit.shield / unit.shieldMax で残り）
 //   shieldBreak{ unit }                                       障壁が壊れた
 //   corpse     { x, y, r, skill, el }                         死体が爆発した（同時に nova{fallbackOf:'corpse'}）

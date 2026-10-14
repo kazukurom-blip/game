@@ -30,26 +30,26 @@ const CSS = `
 .sk2-sp { font-size:14px; } .sk2-sp b { color:var(--gold2); font-size:20px; margin:0 2px; }
 .sk2-power { font-size:12px; color:var(--dim); } .sk2-power b { color:#ffd88a; font-size:14px; }
 .sk2-toggles { display:flex; flex-wrap:wrap; gap:2px 8px; font-size:12px; color:var(--dim); }
-.sk2-bar { display:grid; grid-template-columns:repeat(var(--n,5), 1fr); gap:6px; margin:4px 0 6px; }
-.sk2-slot { position:relative; background:linear-gradient(#1c1722,#110e14); border:1px solid var(--line); border-radius:8px; padding:6px 2px 4px; display:flex; flex-direction:column; align-items:center; gap:2px; min-height:92px; cursor:pointer; transition:border-color .15s, box-shadow .15s; }
+.sk2-bar { display:grid; grid-template-columns:repeat(var(--n,5), minmax(0, 1fr)); gap:6px; margin:4px 0 6px; }
+.sk2-slot { min-width:0; position:relative; background:linear-gradient(#1c1722,#110e14); border:1px solid var(--line); border-radius:8px; padding:6px 2px 4px; display:flex; flex-direction:column; align-items:center; gap:2px; min-height:92px; cursor:pointer; transition:border-color .15s, box-shadow .15s; }
 .sk2-slot.basic { border-color:#5a4a3a; }
 .sk2-slot.sel { border-color:var(--gold2); box-shadow:0 0 10px rgba(245,217,138,.45); }
 .sk2-slot.drop { border-color:var(--good); box-shadow:0 0 10px rgba(110,224,138,.5); }
 .sk2-slot .no { position:absolute; left:4px; top:2px; font-size:9px; color:var(--dim); }
-.sk2-slot .nm { font-size:10.5px; text-align:center; line-height:1.15; min-height:24px; color:var(--text); padding:0 2px; }
+.sk2-slot .nm { font-size:10.5px; text-align:center; line-height:1.15; min-height:24px; color:var(--text); padding:0 2px; overflow-wrap:anywhere; max-width:100%; }
 .sk2-slot .empty { width:44px; height:44px; border:1px dashed #4a4050; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#5a5062; font-size:20px; }
-.sk2-slot .mv { display:flex; gap:2px; }
+.sk2-slot .mv { display:flex; gap:2px; flex-wrap:wrap; justify-content:center; }
 .sk2-slot .mv button { background:#241d2a; border:1px solid var(--line); color:var(--dim); border-radius:4px; font-size:10px; padding:0 5px; cursor:pointer; line-height:16px; }
 .sk2-slot .mv button:hover { color:var(--gold2); }
 .sk2-slot .ic { border-radius:8px; box-shadow:0 0 0 1px rgba(0,0,0,.6); }
 .sk2-hint { font-size:11px; color:var(--dim); margin:0 0 8px; }
 .sk2-group { font-family:var(--serif); color:var(--gold); font-size:14px; margin:12px 0 6px; display:flex; align-items:center; gap:8px; }
 .sk2-group::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,var(--line2),transparent); }
-.sk2-card { border:1px solid var(--line); border-radius:9px; margin-bottom:7px; background:linear-gradient(180deg,#16121b,#110e14); overflow:hidden; }
+.sk2-card { min-width:0; border:1px solid var(--line); border-radius:9px; margin-bottom:7px; background:linear-gradient(180deg,#16121b,#110e14); overflow:hidden; }
 .sk2-card.inbar { border-color:#6a5a3a; }
 .sk2-card.locked { opacity:.55; }
 .sk2-card.ult { border-color:#7a3a4a; background:linear-gradient(180deg,#1d1218,#110e14); }
-.sk2-top { display:grid; grid-template-columns:52px 1fr auto; gap:9px; padding:9px; cursor:pointer; align-items:start; }
+.sk2-top { display:grid; grid-template-columns:52px minmax(0, 1fr) auto; gap:9px; padding:9px; cursor:pointer; align-items:start; }
 .sk2-top .ic { border-radius:9px; }
 .sk2-name { display:flex; align-items:baseline; gap:6px; flex-wrap:wrap; }
 .sk2-name b { color:var(--gold2); font-size:14.5px; }
@@ -91,9 +91,14 @@ const CSS = `
 .gl-pick { max-height:60vh; overflow:auto; }
 .gl-pick .gl-row { cursor:pointer; } .gl-pick .gl-row:hover { filter:brightness(1.2); }
 .gl-pick .gl-row.no { opacity:.4; cursor:default; }
+.gl-codex { display:flex; flex-wrap:wrap; gap:4px; } .gl-codex span { font-size:11px; padding:1px 8px; border-radius:10px; border:1px solid #2a2230; color:#5a5062; background:#100d13; } .gl-codex span.on { color:var(--gc); border-color:color-mix(in srgb, var(--gc) 50%, transparent); background:color-mix(in srgb, var(--gc) 10%, #100d13); }
 .gl-sum { display:flex; gap:10px; flex-wrap:wrap; font-size:12px; color:var(--dim); margin:4px 0 8px; }
-@media (max-width: 900px) { .sk2-bar { gap:4px; } .sk2-slot .nm { font-size:9.5px; } .sk2-runes { grid-template-columns:1fr; } .sk2-top { grid-template-columns:44px 1fr; } .sk2-btns { grid-column:1 / 3; flex-direction:row; } .sk2-btns > * { flex:1; } }
+@media (max-width: 900px) { #main { grid-template-columns:minmax(0, 1fr); } #main > #battle, #main > #panel { min-width:0; } }
+@media (max-width: 900px) { .sk2-bar { gap:3px; } .sk2-slot { padding:4px 1px 3px; min-height:84px; } .sk2-slot .nm { font-size:9px; min-height:20px; } .sk2-slot .mv button { padding:0 3px; font-size:9px; } .sk2-slot .ic, .sk2-slot .empty { width:36px !important; height:36px !important; } .sk2-runes { grid-template-columns:1fr; } .sk2-top { grid-template-columns:44px minmax(0, 1fr); } .sk2-top > .ic { width:44px !important; height:44px !important; } .sk2-btns { grid-column:1 / 3; flex-direction:row; } .sk2-btns > * { flex:1; } .sk2-sock { min-width:0; flex-basis:100%; } .gl-row { grid-template-columns:32px minmax(0, 1fr) auto; } }
 `;
+
+// 読み込んだときに入れておく（スマホで #main が横に広がらないための 1 行も含む）
+injectCss('skills', CSS);
 
 function iconOf(id, size) { const c = spriteImg(assets, `icon.skill.${id}`, size); c.classList.add('ic'); return c; }
 function groupOf(def) { return def.kind === 'buff' || def.kind === 'summon' ? 'support' : (def.kind || (def.basic ? 'basic' : 'active')); }
@@ -104,7 +109,7 @@ function glyphEl(g, opts = {}) {
   if (!sup) return h('div');
   const next = g.lvl < SUPPORT_MAX_LEVEL ? glyphXpFor(g.lvl + 1) : null;
   const cur = glyphXpFor(g.lvl);
-  return h('div.gl-row', { style: { '--gc': glyphColor(g.id) }, class: opts.cls, onclick: opts.onclick }, [
+  return h('div.gl-row', { style: `--gc:${glyphColor(g.id)}`, class: opts.cls, onclick: opts.onclick }, [
     h('div.gl-ic', String(g.lvl)),
     h('div', [
       h('div.gl-name', [h('b', sup.name), ` Lv ${g.lvl}${g.lvl >= SUPPORT_MAX_LEVEL ? '（最大）' : ''}`, opts.where ? h('span.dim', `　${opts.where}`) : null]),
@@ -124,6 +129,11 @@ export const skillsPanel = {
   render(ui, el) {
     injectCss('skills', CSS);
     const g = ui.game;
+    // 窓の上にマウスがあると UI は描き直しを待つので、操作のあとは自分で描き直す
+    const rerender = () => setTimeout(() => { if (ui.current?.id === 'skills') ui.renderPanel(); }, 0);
+    el.addEventListener('click', (e) => { if (e.target.closest('select,input,option')) return; if (e.target.closest('.sk2-top') && !e.target.closest('button')) return; rerender(); }, true);
+    el.addEventListener('change', rerender, true);
+    el.addEventListener('drop', rerender, true);
     el.append(h('div.tabs', [
       h(`button.tab${tab === 'skills' ? '.on' : ''}`, { onclick: () => { tab = 'skills'; ui.renderPanel(); } }, 'スキル'),
       h(`button.tab${tab === 'glyphs' ? '.on' : ''}`, { onclick: () => { tab = 'glyphs'; ui.renderPanel(); } }, `補助の刻印（${g.state.inv.glyphs.length}）`),
@@ -148,7 +158,7 @@ function renderSkills(ui, el) {
       button(resetCost ? `振り直し（${fmt(resetCost)} G）` : '振り直し（無料）', async () => {
         if (!sys.spentPoints()) { ui.toast('振り直すポイントがありません'); return; }
         if (!(await ui.confirm(`スキルのレベルを Lv1 に戻し、ポイント ${sys.spentPoints()} を返します。${resetCost ? `${fmt(resetCost)} G かかります。` : '（Lv 20 までは無料）'}`, '振り直す'))) return;
-        if (!sys.reset()) ui.toast('お金が足りません', 'bad'); else ui.toast('スキルを振り直しました', 'good');
+        if (!sys.reset()) ui.toast('お金が足りません', 'bad'); else { ui.toast('スキルを振り直しました', 'good'); ui.renderPanel(); }
       }, { kind: 'small' }),
     ]),
   ]));
@@ -157,7 +167,7 @@ function renderSkills(ui, el) {
     h('label.chk', { title: 'レベルが上がったとき、並びのスキルに自動でポイントを振ります' }, [h('input', { type: 'checkbox', checked: hero.autoSkill || undefined, onchange: (e) => sys.setAutoSpend(e.target.checked) }), ' ポイントを自動で振る']),
   ]));
   // 並び
-  const bar = h('div.sk2-bar', { style: { '--n': size } });
+  const bar = h('div.sk2-bar', { style: `--n:${size}` });
   for (let i = 0; i < size; i++) {
     const id = hero.bar[i];
     const def = id ? SKILL[id] : null;
@@ -285,7 +295,7 @@ function detail(ui, def, sk, p, m) {
     if (!gl) return h('div.sk2-sock', { onclick: () => pickGlyph(ui, def.id, i) }, [h('b', '＋ 刻印をはめる'), h('small', `合う刻印 ${countFits(g, def)} 個`)]);
     const sup = SUPPORT[gl.id];
     const fits = sup && supportFits(sup, def);
-    return h('div.sk2-sock.full', { style: { '--gc': glyphColor(gl.id) }, onclick: () => socketMenu(ui, def.id, i) }, [h('b', `${sup?.name || gl.id} Lv ${gl.lvl}`), h('small', fits ? sup.desc(gl.lvl) : 'このスキルには効かない')]);
+    return h('div.sk2-sock.full', { style: `--gc:${glyphColor(gl.id)}`, onclick: () => socketMenu(ui, def.id, i) }, [h('b', `${sup?.name || gl.id} Lv ${gl.lvl}`), h('small', fits ? sup.desc(gl.lvl) : 'このスキルには効かない')]);
   }))]));
   // 自動
   if (!def.basic) {
@@ -320,7 +330,7 @@ function pickGlyph(ui, skillId, slot) {
   let modal = null;
   const rows = list.map((gl) => {
     const prob = sys.socketProblem(skillId, slot, gl);
-    return glyphEl(gl, { cls: prob ? 'no' : '', right: prob ? h('span.dim', { style: { fontSize: '10px', maxWidth: '90px' } }, prob) : h('span.good', { style: { fontSize: '12px' } }, 'はめる'), onclick: () => { if (prob) return; const r = sys.socket(skillId, slot, gl.uid); if (!r.ok) ui.toast(r.msg, 'bad'); else { ui.toast(`「${SUPPORT[gl.id].name}」をはめました`, 'good'); modal?.close(); } } });
+    return glyphEl(gl, { cls: prob ? 'no' : '', right: prob ? h('span.dim', { style: { fontSize: '10px', maxWidth: '90px' } }, prob) : h('span.good', { style: { fontSize: '12px' } }, 'はめる'), onclick: () => { if (prob) return; const r = sys.socket(skillId, slot, gl.uid); if (!r.ok) ui.toast(r.msg, 'bad'); else { ui.toast(`「${SUPPORT[gl.id].name}」をはめました`, 'good'); modal?.close(); ui.renderPanel(); } } });
   });
   modal = ui.modal(`「${def.name}」の穴 ${slot + 1} に刻印をはめる`, h('div.gl-pick', rows.length ? rows : h('p.dim', '補助の刻印をまだ持っていません。敵（特にエリート・ボス）が落とします。')), [{ label: '閉じる' }]);
 }
@@ -333,9 +343,9 @@ function socketMenu(ui, skillId, slot) {
   if (!gl) return;
   const dupes = g.state.inv.glyphs.filter((x) => x.id === gl.id);
   ui.modal('補助の刻印', h('div', [glyphEl(gl), dupes.length ? h('p.hint', `持ち物に同じ刻印が ${dupes.length} 個あります。合成するとレベルが上がります。`) : null]), [
-    { label: '外す', onclick: () => { sys.unsocket(skillId, slot); } },
+    { label: '外す', onclick: () => { sys.unsocket(skillId, slot); ui.renderPanel(); } },
     { label: '入れ替える', onclick: () => { setTimeout(() => pickGlyph(ui, skillId, slot), 0); } },
-    dupes.length && gl.lvl < SUPPORT_MAX_LEVEL ? { label: `同じ刻印を合成（${dupes.length}）`, kind: 'primary', onclick: () => { for (const d of dupes) sys.fuse(gl.uid, d.uid); ui.toast(`Lv ${gl.lvl} になりました`, 'good'); } } : null,
+    dupes.length && gl.lvl < SUPPORT_MAX_LEVEL ? { label: `同じ刻印を合成（${dupes.length}）`, kind: 'primary', onclick: () => { for (const d of dupes) sys.fuse(gl.uid, d.uid); ui.toast(`Lv ${gl.lvl} になりました`, 'good'); ui.renderPanel(); } } : null,
     { label: '閉じる' },
   ].filter(Boolean));
 }
@@ -378,7 +388,7 @@ function renderGlyphs(ui, el) {
   }
   el.append(h('h3.sec-title', `刻印の図鑑（${SUPPORTS.length} 種）`));
   const known = new Set([...inv.glyphs.map((x) => x.id), ...socketed.map((s) => s.gl.id)]);
-  el.append(h('div.hint', SUPPORTS.map((s) => (known.has(s.id) ? s.name : '？？？')).join('　')));
+  el.append(h('div.gl-codex', SUPPORTS.map((s) => (known.has(s.id) ? h('span.on', { style: `--gc:${glyphColor(s.id)}`, title: `${s.desc(1)}（${supportReqText(s)}）` }, s.name) : h('span', '？？？')))));
 }
 
 /** 持ち物の刻印から、はめるスキルを選ぶ */
@@ -398,7 +408,7 @@ function socketWizard(ui, gl) {
       if (prob && prob !== '同じ刻印は 1 つのスキルに 1 つまで') continue;
       if (prob) continue;
       const cur = sk.supports[i];
-      rows.push(h('div.gl-row', { style: { '--gc': glyphColor(gl.id), cursor: 'pointer' }, onclick: () => { const r = sys.socket(def.id, i, gl.uid); if (!r.ok) ui.toast(r.msg, 'bad'); else { ui.toast(`「${def.name}」にはめました`, 'good'); modal?.close(); } } }, [
+      rows.push(h('div.gl-row', { style: `--gc:${glyphColor(gl.id)};cursor:pointer`, onclick: () => { const r = sys.socket(def.id, i, gl.uid); if (!r.ok) ui.toast(r.msg, 'bad'); else { ui.toast(`「${def.name}」にはめました`, 'good'); modal?.close(); ui.renderPanel(); } } }, [
         iconOf(def.id, 36), h('div', [h('div.gl-name', [h('b', def.name), ` 穴 ${i + 1}${hero.bar.includes(def.id) ? '（並び）' : ''}`]), h('div.gl-req', cur ? `今: ${SUPPORT[cur.id]?.name} Lv ${cur.lvl}（入れ替え）` : '空き')]), h('span.good', 'はめる'),
       ]));
     }

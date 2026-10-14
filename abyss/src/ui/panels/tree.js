@@ -28,7 +28,7 @@ const CSS = `
 .tr-canvas.drag { cursor:grabbing; }
 .tr-zoom { position:absolute; right:8px; top:8px; display:flex; flex-direction:column; gap:4px; }
 .tr-zoom button { width:30px; height:30px; border-radius:6px; background:rgba(20,16,24,.85); border:1px solid var(--line2); color:var(--gold2); font-size:16px; cursor:pointer; }
-.tr-legend { position:absolute; left:8px; bottom:6px; font-size:10.5px; color:var(--dim); pointer-events:none; text-shadow:0 0 3px #000; }
+.tr-legend { position:absolute; left:8px; bottom:6px; font-size:10.5px; color:var(--dim); pointer-events:none; text-shadow:0 0 3px #000; background:rgba(7,6,10,.72); padding:1px 7px; border-radius:5px; }
 .tr-search { position:absolute; left:8px; top:8px; display:flex; gap:4px; }
 .tr-search input { width:150px; font-size:12px; padding:4px 7px; background:rgba(12,10,15,.9); }
 .tr-count { font-size:11px; color:var(--gold2); align-self:center; text-shadow:0 0 3px #000; }
@@ -41,7 +41,7 @@ const CSS = `
 .tr-tip .ty { font-size:11px; color:var(--dim); margin-bottom:4px; }
 .tr-tip .md { color:#8ab8ff; }
 .tr-tip .ksd { color:#ffc0c8; margin:3px 0; line-height:1.45; }
-.tr-tip .st { margin-top:5px; font-size:11.5px; }
+.tr-tip .tst { margin-top:5px; font-size:11.5px; }
 .tr-tip .dl { display:flex; gap:10px; font-weight:700; margin-top:3px; }
 .tr-tip .up { color:var(--good); } .tr-tip .down { color:var(--bad); } .tr-tip .same { color:var(--dim); }
 .tr-sum { columns:2; column-gap:14px; font-size:11.5px; color:#c8c0b0; }
@@ -66,6 +66,9 @@ export const treePanel = {
   render(ui, el) {
     injectCss('tree', CSS);
     const g = ui.game;
+    // 窓の上にマウスがあると UI は描き直しを待つので、ボタンの操作のあとは自分で描き直す（キャンバスの操作は除く）
+    const rerender = () => setTimeout(() => { if (ui.current?.id === 'tree') ui.renderPanel(); }, 0);
+    el.addEventListener('click', (e) => { if (e.target.closest('button') && !e.target.closest('.tr-zoom')) rerender(); }, true);
     const free = g.sys.tree.paragonFree();
     el.append(h('div.tabs', [
       h(`button.tab${tab === 'tree' ? '.on' : ''}`, { onclick: () => { tab = 'tree'; ui.renderPanel(); } }, `星座盤（${g.state.hero.tree.points}）`),
@@ -96,7 +99,7 @@ function renderTree(ui, el) {
       button(cost ? `振り直し（${fmt(cost)} G）` : `振り直し（Lv ${TREE_FREE_RESPEC_LEVEL} まで無料）`, async () => {
         if (!sys.spent()) { ui.toast('振ってある点がありません'); return; }
         if (!(await ui.confirm(`星座盤の点 ${sys.spent()} をすべて外して返します。${cost ? `${fmt(cost)} G かかります。` : ''}`, '振り直す'))) return;
-        const r = sys.respec(); ui.toast(r.ok ? `${r.n} 点を返しました` : r.msg, r.ok ? 'good' : 'bad');
+        const r = sys.respec(); ui.toast(r.ok ? `${r.n} 点を返しました` : r.msg, r.ok ? 'good' : 'bad'); ui.renderPanel();
       }, { kind: 'small' }),
     ]),
   ]));
@@ -123,7 +126,7 @@ function renderTree(ui, el) {
       const toRemove = t.alloc.filter((id) => id !== TREE_START[cls] && !b.alloc.includes(id)).length;
       const c = sys.deallocCost(toRemove);
       if (c > 0 && !(await ui.confirm(`構成 ${i + 1} に振り直します（${fmt(c)} G）。`, '振り直す'))) return;
-      const r = sys.loadBuild(i); ui.toast(r.ok ? (r.missing ? `点が足りず ${r.missing} 点ぶん振れませんでした` : `構成 ${i + 1} にしました`) : r.msg, r.ok ? 'good' : 'bad');
+      const r = sys.loadBuild(i); ui.toast(r.ok ? (r.missing ? `点が足りず ${r.missing} 点ぶん振れませんでした` : `構成 ${i + 1} にしました`) : r.msg, r.ok ? 'good' : 'bad'); ui.renderPanel();
     }, { kind: 'small' }) : null,
   ]))));
   // 要石と合計
@@ -331,7 +334,7 @@ function clickNode(ui, n, e) {
   if (sys.isAllocated(n.id)) {
     const rm = sys.removalSet(n.id);
     const cost = sys.deallocCost(rm.length);
-    const go = () => { const r = sys.deallocate(n.id); ui.toast(r.ok ? `${r.n} 点を外しました${r.cost ? `（${fmt(r.cost)} G）` : ''}` : r.msg, r.ok ? 'good' : 'bad'); };
+    const go = () => { const r = sys.deallocate(n.id); ui.toast(r.ok ? `${r.n} 点を外しました${r.cost ? `（${fmt(r.cost)} G）` : ''}` : r.msg, r.ok ? 'good' : 'bad'); hoverId = null; ui.renderPanel(); };
     if (rm.length > 1 || cost > 0) ui.confirm(`「${nodeLabel(n)}」を外します。つながらなくなる点を含めて ${rm.length} 点が外れます。${cost ? `${fmt(cost)} G かかります。` : ''}`, '外す').then((ok) => { if (ok) go(); });
     else go();
     return;
@@ -339,6 +342,7 @@ function clickNode(ui, n, e) {
   const path = sys.pathTo(n.id);
   if (!path) { ui.toast('ここには道がつながっていません', 'bad'); return; }
   const r = sys.allocate(n.id);
+  if (r.ok) { hoverId = null; ui.renderPanel(); }
   if (!r.ok) ui.toast(r.msg, 'bad');
   else if (n.type === 'keystone') ui.toast(`要石「${n.name}」を振った`, 'level');
   else if (n.type === 'notable') ui.toast(`要の星「${n.name}」を振った`, 'good');
@@ -361,9 +365,9 @@ function showTip(ui, n, mx, my) {
     h('div.ty', `${TYPE_NAMES[n.type]}${n.theme && THEME_NAMES[n.theme] ? `・${THEME_NAMES[n.theme]}` : ''}`),
     n.type === 'keystone' ? h('div.ksd', KEYSTONE[n.ks]?.desc) : null,
     ...n.mods.filter((m) => !m.s.startsWith('ks_')).map((m) => h('div.md', describeMod(m, (x) => fmt(x)))),
-    h('div.st', on ? (n.type === 'start' ? '出発点' : '振ってある（押すと外す）') : !path ? '道がつながっていない' : `あと ${path.length} 点で振れる（残り ${g.state.hero.tree.points} 点）`),
+    h('div.tst', on ? (n.type === 'start' ? '出発点' : '振ってある（押すと外す）') : !path ? '道がつながっていない' : `あと ${path.length} 点で振れる（残り ${g.state.hero.tree.points} 点）`),
     d ? h('div.dl', [deltaEl('火力', d.dpsPct), deltaEl('耐久', d.ehpPct), h('span', { class: d.power >= d.powerBefore ? 'up' : 'down' }, `戦力 ${fmt(d.power)}`)]) : null,
-    d && on && d.cost ? h('div.st.bad', `外すのに ${fmt(d.cost)} G`) : null,
+    d && on && d.cost ? h('div.tst.bad', `外すのに ${fmt(d.cost)} G`) : null,
   ]);
   tooltip.show(tip, { left: mx, right: mx + 12, top: my + 12, bottom: my + 12 });
 }
@@ -386,12 +390,12 @@ function renderParagon(ui, el) {
     h('div', [h('div.tr-pts', ['パラゴン Lv ', h('b', String(par.level)), `　残り ${free} 点`]), h('div.tr-sub', unlocked ? `次のパラゴンまで 経験値 ${fmt(par.xp)} / ${fmt(BAL.paragonXpToNext(par.level))}` : `主人公 Lv ${BAL.MAX_LEVEL} から、経験値でパラゴンのレベルが上がります（上限なし）`)]),
     h('div.toolbar', [
       button('おまかせで振る', () => { const n = sys.autoParagon(); ui.toast(n ? `${n} 点を振りました` : '振る点がありません', n ? 'good' : ''); }, { kind: 'small', disabled: !free }),
-      button('全部戻す', async () => { if (!sys.paragonSpent()) return; if (await ui.confirm('パラゴンの点をすべて戻します（無料）。', '戻す')) sys.resetParagon(); }, { kind: 'small' }),
+      button('全部戻す', async () => { if (!sys.paragonSpent()) return; if (await ui.confirm('パラゴンの点をすべて戻します（無料）。', '戻す')) { sys.resetParagon(); ui.renderPanel(); } }, { kind: 'small' }),
     ]),
   ]));
   const cls = CLASS[st.hero.cls];
   for (const b of PARAGON_BOARDS) {
-    const box = h('div.pg-board', { style: { '--bc': b.color } }, [h('h4', [h('span', `${b.name}の盤`), h('span.dim', { style: { fontSize: '11px' } }, b.desc)])]);
+    const box = h('div.pg-board', { style: `--bc:${b.color}` }, [h('h4', [h('span', `${b.name}の盤`), h('span.dim', { style: { fontSize: '11px' } }, b.desc)])]);
     for (const l of b.lines) {
       const key = `${b.id}.${l.id}`;
       const L = PARAGON_LINE[key];
