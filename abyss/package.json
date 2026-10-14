@@ -1,0 +1,14 @@
+{
+  "name": "abyss-drop",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ABYSS DROP — 放置ハクスラ（HTML5 / ES Modules / ビルド不要）",
+  "scripts": {
+    "serve": "http-server . -p 8090 -c-1",
+    "test": "npm run test:unit && npm run test:sim && npm run test:smoke",
+    "test:unit": "node tests/unit.mjs",
+    "test:sim": "node tests/sim.mjs",
+    "test:smoke": "node tests/smoke.mjs"
+  }
+}
