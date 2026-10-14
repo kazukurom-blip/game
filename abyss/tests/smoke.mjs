@@ -212,6 +212,26 @@ const main = async () => {
     const tipOk = await page.$('#tooltip .ik-flavor, #tooltip .ik-setbox');
     check('ツールチップ: 言い伝え・セット効果が出る', !!tipOk);
     await page.mouse.move(5, 5);
+    // スマホの幅でアイテムの窓がはみ出さない
+    const mc = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+    const mp = await mc.newPage();
+    mp.on('pageerror', (e) => errors.push(`items mobile pageerror: ${e.message}`));
+    mp.on('console', (m) => { if (m.type() === 'error') errors.push(`items mobile console: ${m.text()}`); });
+    await mp.goto(`http://127.0.0.1:${PORT}/index.html`);
+    await mp.waitForSelector('#title');
+    await mp.evaluate(() => localStorage.clear());
+    await mp.reload(); await mp.waitForSelector('#title');
+    await mp.click('.slot.empty .btn'); await mp.click('.title-box .btn-primary'); await mp.waitForSelector('#scene');
+    await mp.evaluate(async () => { const g = window.__game; const { generateItem } = await import('/src/game/loot.js'); g.state.hero.level = 40; for (let i = 0; i < 8; i++) g.state.inv.bag.push(generateItem(g.rng, { ilvl: 40, rarity: i % 2 ? 'legendary' : 'unique', cls: g.state.hero.cls })); g.state.inv.gems = { ember_2: 5, star_1: 3 }; g.state.inv.mats.shard = 200; });
+    let wide = [];
+    for (const id of ['craft', 'gems', 'codex', 'merchant', 'bag']) {
+      await mp.evaluate((pid) => window.__ui.openPanel(pid), id);
+      await mp.waitForTimeout(150);
+      if (await mp.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1)) wide.push(id);
+      if (id === 'craft' || id === 'gems') { await mp.evaluate(() => document.querySelector('#panel')?.scrollIntoView()); await mp.screenshot({ path: path.join(SHOTS, `items_mobile_${id}.png`) }); }
+    }
+    check('アイテムの窓: スマホで横にはみ出さない', !wide.length, wide.join(','));
+    await mc.close();
   }
   // ===================== アイテム担当ここまで =====================
   check('エラーが 0 件', errors.length === 0, errors.slice(0, 5).join(' | '));

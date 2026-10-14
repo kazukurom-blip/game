@@ -30,7 +30,8 @@ export function rollRarity(rng, { mf = 0, rank = 'normal', minRarity = null, tor
   const mfe = BAL.mfEffective(mf);
   const boost = rank === 'normal' ? 1 : rank === 'champion' ? 2.5 : rank === 'rare' ? 3.5 : rank === 'goblin' ? 6 : 8;
   for (const r of RARITIES) {
-    if (r.idx >= 2) w[r.id] *= (1 + mfe / 100) * boost;
+    if (r.id === 'mythic') w[r.id] *= Math.sqrt((1 + mfe / 100) * boost); // ミシックは発見率・格の効きを弱める（とても珍しいまま）
+    else if (r.idx >= 2) w[r.id] *= (1 + mfe / 100) * boost;
     if (r.idx === 1) w[r.id] *= 1 + mfe / 300;
   }
   if (rank !== 'normal') w.common *= 0.3;

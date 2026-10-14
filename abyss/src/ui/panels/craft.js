@@ -221,7 +221,7 @@ const OP_RENDER = {
     const info = c.corruptInfo(item);
     if (!info.ok) return opBox('堕落', [h('p.bad', info.msg)]);
     return opBox('堕落（最後の賭け）', [
-      h('div.ik-odds', info.outcomes.flatMap((o) => [h('span', ''), h('span', o.text), h('span.pct', `${o.pct}%`)])),
+      h('div', info.outcomes.map((o, i) => h('div.ik-sub', [h('span', `${'①②③④'[i]} ${o.text}`), h('b', `${o.pct}%`)]))),
       h('p.bad', '堕落した装備は、強化・付け替え・振り直し・穿孔が二度とできなくなる（宝石の付け外しはできる）。'),
       costRow(g, info.cost),
       h('div.ik-actions', [button('堕落させる', async () => {

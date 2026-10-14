@@ -13,7 +13,8 @@ import { GEMS, GEM_TIERS, RUNES, LEGENDARY_GEMS } from '../../../data/gems.js';
 
 export const LUCK = {
   leg: { max: 400, soft: 0.6, name: 'レジェンダリー以上' },
-  myth: { max: 12000, soft: 0.6, name: 'ミシック' },
+  // 序盤（1 時間に約 600 回）で約 33 時間。自然に出る分と合わせて 15〜25 時間に 1 個ほど
+  myth: { max: 20000, soft: 0.6, name: 'ミシック' },
 };
 const LEG_PLUS = ['legendary', 'set', 'unique', 'mythic'];
 const LEG_WEIGHTS = [['legendary', 0.35], ['unique', 0.12], ['set', 0.08]];
