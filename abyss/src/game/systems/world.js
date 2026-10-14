@@ -5,7 +5,8 @@
 //       ボスに負けたら自動前進を切ってステージ 9 で稼ぐ。state.meta.unlocks.autoBoss があれば、
 //       火力が足りたとき（または 5 分ごと）に自動で再挑戦する。
 // 外から: game.sys.world.travel(zoneId, stage) / challengeBoss() / setAutoAdvance(bool)
-//         setTorment(t) / setTormentAuto(bool) / tormentInfo(t) / bossNeed(zone) / estDps() / zoneAdvice(zone)
+//         setTorment(t) / setTormentAuto(bool) / tormentAutoOn() / canTormentAuto() / tormentInfo(t) / bossNeed(zone) / estDps() / zoneAdvice(zone)
+//         （苦行の自動最適化は魂の祭壇「苦行の見極め」= state.meta.unlocks.autoTorment が 1 つだけのスイッチ）
 //         heroPower() / recommendedPower(level) / resetCampaign(warpGlobal)（転生で使う）
 // 差し込み口: worldHooks.waveComposer(sys, ctx) … ウェーブの中身（content/world/composer.js）
 //             worldHooks.modes[mode] = { start, tick, onKill, onHeroDeath, level, difficulty, label }（裂け目・門番は systems/rift.js）
@@ -73,7 +74,8 @@ export class WorldSystem {
     const g = this.game;
     w.rift = { best: 0, runs: 0, keys: 0, level: 1, unlocked: 1, clears: 0, history: [], auto: 'off', run: null, bestTime: {}, ...(w.rift || {}) };
     w.gate = { frags: {}, kills: {}, tries: 0, wins: 0, history: [], ...(w.gate || {}) };
-    w.tormentAuto ??= false;
+    // 苦行の自動最適化のスイッチは魂の祭壇「苦行の見極め」の 1 つだけ（state.meta.unlocks.autoTorment）。前の形の w.tormentAuto は捨てる
+    delete w.tormentAuto;
     w.tormentStats ||= {};
     w.bossLog ||= {};
     w.clearedAt ||= {};
@@ -252,7 +254,7 @@ export class WorldSystem {
         this.pendingGoblin = this.game.rng.weighted(Object.keys(ws), (k) => ws[k]);
       }
     }
-    if (w.tormentAuto && (w.maxTorment || 0) >= 1) {
+    if ((w.maxTorment || 0) >= 1 && this.tormentAutoOn()) {
       const tw = this.tw;
       tw.t += dt;
       if (tw.t >= TORMENT_AUTO.window) {
@@ -518,7 +520,17 @@ export class WorldSystem {
     return true;
   }
 
-  setTormentAuto(v) { this.w.tormentAuto = !!v; this.tw = { t: 0, kills: 0, deaths: 0 }; }
+  /** 苦行の自動最適化が動いているか（魂の祭壇「苦行の見極め」を持っていて ON） */
+  tormentAutoOn() { return !!this.game.state.meta.unlocks?.autoTorment; }
+  /** 自動最適化を使えるか（祭壇の「苦行の見極め」を持っている） */
+  canTormentAuto() { return (this.game.sys.prestige?.level?.('auto_torment') || 0) > 0; }
+  /** スイッチ（祭壇の ON/OFF と同じ物）。持っていなければ false を返して何もしない */
+  setTormentAuto(v) {
+    if (!this.canTormentAuto()) return false;
+    this.game.sys.prestige.setToggle('autoTorment', !!v);
+    this.tw = { t: 0, kills: 0, deaths: 0 };
+    return true;
+  }
 
   // ---------------- 小さな出来事（composer.js から）
   onMiniEvent(ev, rng) {

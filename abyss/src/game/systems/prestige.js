@@ -187,6 +187,7 @@ export class PrestigeSystem {
     w.maxZone = target;
     w.cleared = {};
     w.maxStage = {};
+    w.bossFailZone = null; // 前の周回で負けていたボスの印は持ち越さない（苦行の解放 maxTorment と裂け目の記録は残す）
     for (const z of ZONES) {
       if (z.global < target) { w.cleared[z.id] = true; w.maxStage[z.id] = STAGES_PER_ZONE; }
     }
@@ -350,12 +351,17 @@ export class PrestigeSystem {
     if (changed) this.game.events.emit('invChanged', {});
   }
 
-  /** スキルポイントを自動で振る（並びのスキルを低い順に。余ったら覚えていないスキルを覚える） */
+  /** 自動で振る点があるか（スキルポイント・星座盤の点・パラゴンの点） */
+  hasAutoPoints() {
+    const hero = this.state.hero;
+    return hero.skillPoints > 0 || (hero.tree?.points || 0) > 0 || (hero.level >= 100 && (this.game.sys.tree?.paragonFree?.() || 0) > 0);
+  }
+
+  /** スキルポイントを自動で振る（並びのスキルを低い順に。余ったら覚えていないスキルを覚える）。星座盤・パラゴンの点も振る */
   autoSkills() {
     const g = this.game; const hero = this.state.hero; const sk = g.sys.skills;
-    if (!sk || hero.skillPoints <= 0) return 0;
     let n = 0;
-    for (let guard = 0; guard < 200 && hero.skillPoints > 0; guard++) {
+    for (let guard = 0; sk && guard < 200 && hero.skillPoints > 0; guard++) {
       const cand = hero.bar.filter((id) => id && sk.canLevel(id)).sort((a, b) => (hero.skills[a]?.lvl || 0) - (hero.skills[b]?.lvl || 0));
       let id = cand[0];
       if (!id) {
@@ -365,7 +371,8 @@ export class PrestigeSystem {
       if (!id || !sk.levelUp(id)) break;
       n++;
     }
-    try { g.sys.tree?.autoAllocate?.(); } catch (e) { console.error(e); }
+    // 星座盤は 1 回に 30 点まで（重くならないように。2 秒ごとに呼ばれるので残りは次に振る）
+    try { if ((hero.tree?.points || 0) > 0) g.sys.tree?.autoAllocate?.(30); } catch (e) { console.error(e); }
     try { if (hero.level >= 100) g.sys.tree?.autoParagon?.(); } catch (e) { console.error(e); }
     return n;
   }
@@ -383,7 +390,7 @@ export class PrestigeSystem {
     }
     if (this.t2 >= 2) {
       this.t2 = 0;
-      if (st.meta.unlocks.autoSkill && st.hero.skillPoints > 0) this.autoSkills();
+      if (st.meta.unlocks.autoSkill && this.hasAutoPoints()) this.autoSkills();
       if (st.meta.unlocks.autoSalvage) this.applySalvagePreset();
     }
     if (this.t5 >= 5) {

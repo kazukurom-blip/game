@@ -37,7 +37,7 @@ unitHooks.onMonsterTick.push((c, u, dt) => {
       if (d >= CHARGE.min && d <= CHARGE.max && !c.isFrozen(u)) {
         u._chT = CHARGE.cd * c.rng.range(0.8, 1.2);
         const dir = h.x >= u.x ? 1 : -1;
-        const tx = h.x - dir * 72; // 近すぎると速い弾がすり抜けるので、少し手前で止まる
+        const tx = h.x - dir * (30 + 20 * (u.size || 1)); // 体の大きさぶん離れて止まる（弾は線分で当たりを調べるので、近くてもすり抜けない）
         control(u, { kind: 'dash', t: 0, wind: CHARGE.wind, dur: CHARGE.dur, x0: u.x, x1: tx, onArrive: (cc, uu) => {
           const hh = cc.hero;
           if (hh && !hh.dead && Math.abs(hh.x - uu.x) <= uu.range + 50) cc.damageAlly(hh, uu.dmg * CHARGE.mult, uu.element, uu);

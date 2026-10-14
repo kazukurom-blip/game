@@ -5,6 +5,7 @@
 //   game.sys.gems.unsocket(uid, index)  … 外すのは無料（ルーン語にしたルーンは外せない）
 //   game.sys.gems.onRiftComplete(level, timeLeftRatio) … 深淵の裂け目を踏破したら呼ぶ（ワールド担当）。深淵の宝石が育つ
 //   game.sys.gems.setLgemTarget(id) / lgemLevel(id) / ownedLegendaryGems()
+//   game.sys.gems.grantRandom(tier, type?) → { id, key, type, tier, name, color } … 宝石を 1 つ渡す（日課の宝箱など）
 // state: inv.gems { key: 数 }, inv.runes { id: 数 }, inv.lgems { id: { lvl, uid } }, inv.lgemTarget
 
 import { GEMS, GEM, GEM_TIERS, gemCombineGold, RUNES, RUNE, runeCombineGold, RUNEWORDS, LEGENDARY_GEMS, LEGENDARY_GEM, LGEM_MAX_LEVEL, lgemUpgradeChance } from '../../data/gems.js';
@@ -177,6 +178,19 @@ export class GemSystem {
     const seq = [];
     for (const k of item.sockets) { if (!k) break; const s = parseSocket(k); if (s?.type !== 'rune') return []; seq.push(s.id); }
     return RUNEWORDS.filter((w) => w.slots.includes(item.slot) && w.runes.length === item.sockets.length && seq.every((r, i) => w.runes[i] === r));
+  }
+
+  /**
+   * 宝石を 1 つ渡す（種類はランダム、段階は tier。日課の宝箱などの報酬）。
+   * 戻り値: { id（持ち物のキー '<種類>_<段階>'）, type, tier, name, color }
+   */
+  grantRandom(tier = 1, type = null) {
+    const t = Math.max(1, Math.min(GEM_TIERS, Math.round(Number(tier) || 1)));
+    const g = (type && GEM[type]) || this.game.rng.pick(GEMS);
+    const key = gemKey(g.id, t);
+    this.inv.gems[key] = (this.inv.gems[key] || 0) + 1;
+    this.changed();
+    return { id: key, key, type: g.id, tier: t, name: gemName(g.id, t), color: g.color };
   }
 
   // ---------------- 深淵の宝石

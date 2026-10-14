@@ -6,6 +6,7 @@
 //   saveBuild(i) / loadBuild(i)（構成の保存 2 つ）
 //   previewDelta(id, mode) → { dps, ehp, dpsPct, ehpPct, cost }（点を振ったら・外したら）
 //   paragonFree() / addParagon(key, n) / autoParagon() / resetParagon()
+//   autoAllocate(max?) … 星座盤の残りの点をおまかせで振る（戦力の伸びが大きい道から。要石は振らない）→ 振った点の数
 // セーブ（ensureState で用意）:
 //   hero.tree = { alloc: [id...], points（未使用の点）, respecs, builds: [{ name, alloc } | null, null], bonusGiven }
 //   hero.paragon = { level, xp, alloc: { 'off.main': 点, ... } }
@@ -300,6 +301,63 @@ export class TreeSystem {
   }
 
   keystones() { return this.t.alloc.map((id) => TREE_NODE[id]).filter((n) => n?.type === 'keystone').map((n) => KEYSTONE[n.ks]); }
+
+  // ---------------- おまかせ（魂の祭壇「自動の修練」・試算）
+  /**
+   * 星座盤の点をおまかせで振る。振ってある点から AUTO_REACH 歩以内の点を候補にし、
+   * 道ごと振ったときの「戦力の伸び ÷ 必要な点」が一番大きい道を選ぶ（点が足りなければ道の手前から振り、次にまた選び直す）。
+   * 要石（代償のある点）は振らない。max … 1 回で振る点の上限（重くならないように）。戻り値: 振った点の数
+   */
+  autoAllocate(max = Infinity) {
+    const g = this.game; const st = g.state; const t = this.t;
+    let n = 0;
+    for (let guard = 0; guard < 500 && t.points > 0 && n < max; guard++) {
+      const cands = this.autoCandidates();
+      if (!cands.length) break;
+      const base = heroPower(computeHero(st, g), st);
+      let best = null; let bv = -Infinity;
+      for (const c of cands) {
+        this.preview = [...t.alloc, ...c.path];
+        let p = 0;
+        try { p = heroPower(computeHero(st, g), st); } catch { p = 0; } finally { this.preview = null; }
+        const v = (p - base) / c.path.length;
+        if (v > bv + 1e-9) { bv = v; best = c; }
+      }
+      if (!best) break;
+      const k = Math.min(best.path.length, t.points, max - n);
+      t.alloc.push(...best.path.slice(0, k));
+      t.points -= k; n += k;
+    }
+    if (n) this.changed();
+    return n;
+  }
+
+  /** 振ってある点から reach 歩以内の点と、そこまでの道 [{ id, path }]（出発点・要石は除く。近い順） */
+  autoCandidates(reach = AUTO_REACH) {
+    const have = this.allocSet();
+    const prev = new Map(); const dist = new Map();
+    const q = [];
+    for (const a of have) { prev.set(a, null); dist.set(a, 0); q.push(a); }
+    const out = [];
+    for (let i = 0; i < q.length; i++) {
+      const cur = q[i];
+      const d = dist.get(cur);
+      if (d >= reach) continue;
+      for (const l of TREE_NODE[cur]?.links || []) {
+        if (prev.has(l)) continue;
+        const nd = TREE_NODE[l];
+        if (!nd || nd.type === 'start' || nd.type === 'keystone') continue;
+        prev.set(l, cur); dist.set(l, d + 1); q.push(l);
+        const path = []; let x = l;
+        while (x && !have.has(x)) { path.unshift(x); x = prev.get(x); }
+        out.push({ id: l, path });
+      }
+    }
+    return out;
+  }
 }
+
+/** おまかせで星座盤を振るときに見る範囲（歩） */
+export const AUTO_REACH = 4;
 
 export { TREE_NODES };

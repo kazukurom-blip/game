@@ -38,6 +38,28 @@ function runHooks(list, ...args) { for (const f of list) { try { f(...args); } c
 const ELITE = Object.fromEntries(ELITE_AFFIXES.map((a) => [a.id, a]));
 
 export const GROUND_Y = 0;
+/** 弾の当たりの楕円の縦横比（縦は横の 0.9 倍） */
+const PROJ_Y_RATIO = 0.9;
+/**
+ * 1 ティックで弾が進んだ線分 (x0,y0)→(x1,y1) と、(cx,cy) を中心とする半径 r の円（縦は 0.9 倍の楕円）の当たり。
+ * 当たった位置を線分の割合 0〜1 で返す（始点が中に入っていれば 0）。外れは -1。
+ * 速い弾は 1 ティックに 60px 以上進むので、点で調べると近くの敵をすり抜ける（線分で調べる）。
+ */
+export function sweepHit(x0, y0, x1, y1, cx, cy, r) {
+  const k = 1 / PROJ_Y_RATIO;
+  const ax = x0 - cx; const ay = (y0 - cy) * k;
+  const c0 = ax * ax + ay * ay - r * r;
+  if (c0 <= 0) return 0;
+  const dx = x1 - x0; const dy = (y1 - y0) * k;
+  const a = dx * dx + dy * dy;
+  if (a < 1e-9) return -1;
+  const b = ax * dx + ay * dy;
+  if (b >= 0) return -1; // 離れていく向き
+  const disc = b * b - a * c0;
+  if (disc < 0) return -1;
+  const t = (-b - Math.sqrt(disc)) / a;
+  return t <= 1 ? t : -1;
+}
 const HERO_TEAM = 'hero';
 const ENEMY_TEAM = 'enemy';
 /** 詠唱し続ける動き（動作の後、duration の間ずっと続く） */
@@ -822,14 +844,25 @@ export class Combat {
         }
       }
       const dx = pr.vx * dt; const dy = pr.vy * dt;
-      pr.x += dx; pr.y += dy; pr.dist += Math.hypot(dx, dy);
-      if (pr.dist > pr.range) { pr.dead = true; continue; }
+      const x0 = pr.x; const y0 = pr.y;
+      const x1 = x0 + dx; const y1 = y0 + dy;
+      pr.x = x1; pr.y = y1; pr.dist += Math.hypot(dx, dy);
+      // このティックに進んだ線分（出た位置を含む）で当たりを調べ、近い順に当てる（すり抜け防止）
       const foes = pr.team === HERO_TEAM ? ENEMY_TEAM : HERO_TEAM;
+      let hits = null;
       for (const u of this.units) {
         if (u.dead || u.team !== foes || pr.hit.has(u.id)) continue;
         const rr = (pr.hitR || 34) * (pr.hitR ? 1 : (u.size || 1)) + 10 + (pr.hitR ? 20 * (u.size || 1) : 0);
-        if (Math.abs(u.x - pr.x) < rr && Math.abs(u.y - pr.y) < rr * 0.9) {
+        const at = sweepHit(x0, y0, x1, y1, u.x, u.y, rr);
+        // 出た位置が中に入っている敵（at = 0）は、中心が近い順に先に当てる
+        if (at >= 0) (hits ||= []).push({ u, at, key: at > 0 ? at : -1 + Math.hypot(u.x - x0, (u.y - y0) / PROJ_Y_RATIO) / 1e5 });
+      }
+      if (hits) {
+        if (hits.length > 1) hits.sort((a, b) => a.key - b.key);
+        for (const { u, at } of hits) {
+          if (u.dead) continue; // 先の爆発などで倒れた
           pr.hit.add(u.id);
+          pr.x = x0 + dx * at; pr.y = y0 + dy * at; // 当たった位置（爆発・演出はここ）
           if (pr.team === HERO_TEAM) {
             this.hitUnit(pr.src, u, pr.p, pr.mult, { aoeHit: pr.hit.size > 1 });
             if (pr.onHit) pr.onHit(this, pr, u);
@@ -845,7 +878,9 @@ export class Combat {
           if (!pr.wave) this.emit({ t: 'hit', x: pr.x, y: pr.y, z: pr.z, el: pr.el, skill: pr.p?.id });
           if (pr.pierce-- <= 0) { pr.dead = true; break; }
         }
+        if (!pr.dead) { pr.x = x1; pr.y = y1; }
       }
+      if (pr.dist > pr.range) pr.dead = true;
     }
     this.projs = this.projs.filter((p) => !p.dead);
   }
