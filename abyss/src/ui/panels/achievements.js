@@ -1,7 +1,7 @@
 // 実績の窓: 種類ごとの一覧と進み具合・実績ポイントの効果・称号を選ぶ。担当: メタ担当。
 
 import { h, button, injectCss } from '../dom.js';
-import { fmt } from '../../engine/format.js';
+import { fmt, fmtInt } from '../../engine/format.js';
 import { ACHIEVEMENTS, ACH_CATEGORIES, POINT_BONUS, TITLES, TITLE, ACH } from '../../data/achievements.js';
 import { describeMod } from '../../data/stats.js';
 import { tabs, card, bar } from '../metaui.js';
@@ -51,7 +51,7 @@ export const achievementsPanel = {
         h('div.ac-main', [
           h('div.ac-name', [hidden ? '？？？' : d.name, d.title && TITLE[d.title] ? h('span.ac-title', `称号「${TITLE[d.title].name}」`) : null]),
           h('div.ac-desc', hidden ? '秘密の実績。条件は達成するまで分かりません。' : d.desc),
-          !done && !hidden ? bar(pr.pct, `${fmt(Math.min(pr.cur, d.n))} / ${fmt(d.n)}`, 'gold') : null,
+          !done && !hidden ? bar(pr.pct, `${fmtInt(Math.min(pr.cur, d.n))} / ${fmt(d.n)}`, 'gold') : null,
           done ? h('div.ac-when', `${new Date(got[d.id]).toLocaleDateString('ja-JP')} に達成`) : null,
         ]),
         h('div.ac-pts', [h('b', `${d.points}`), h('small', 'pt')]),

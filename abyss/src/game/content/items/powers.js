@@ -358,7 +358,7 @@ power({ id: 'pw_u_butcher', name: '解体の名手', cat: 'util', slots: SL.AJ, 
 power({ id: 'pw_u_horn', name: '豊穣の角', cat: 'util', slots: SL.J, range: [8, 15],
   desc: (v) => `アイテム発見数 +${n(v)}%。`, mods: (v) => [{ s: 'item_quantity', v }] });
 power({ id: 'pw_u_goblin', name: '財宝嗅ぎ', cat: 'util', slots: SL.AJ, range: [50, 100],
-  desc: (v) => `宝ゴブリンへのダメージ +${n(v)}%。宝ゴブリンを倒すとアイテムが 3 個増える。`,
+  desc: (v) => `ため込み屋へのダメージ +${n(v)}%。ため込み屋を倒すとアイテムが 3 個増える。`,
   hooks: {
     onHit(c, hit, v) { if (hit.target.rank === 'goblin') mul(hit, v); },
     onKill(c, u) { if (u.rank === 'goblin') c.game.sys.merchant?.bonusDrops?.(u, 3); },

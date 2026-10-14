@@ -1,7 +1,7 @@
 // 設定の窓: 遊び方（案内・キー操作）・数字の表記・演出・音・機能の開き方・セーブの書き出しと読み込み。
 
 import { h, button } from '../dom.js';
-import { setNumberMode, fmt, fmtTime } from '../../engine/format.js';
+import { setNumberMode, fmtTime } from '../../engine/format.js';
 import { exportString, importString } from '../../engine/save.js';
 import { howtoSection } from '../guide.js';
 import { FEATURES, tutorialOf } from '../unlocks.js';
@@ -65,6 +65,5 @@ export const settingsPanel = {
       h('p.dim', '主人公・装備・敵・スキルの演出・背景の絵を、ほかの AI で作った画像に差し替えられます。'),
       button('画像の差し替えを開く', () => ui.openPanel('assets'), { kind: 'primary' }),
     ]));
-    el.append(h('div.dim.small', `所持金 ${fmt(g.state.meta.gold)} G`));
   },
 };

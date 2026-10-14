@@ -11,7 +11,7 @@ import { h, clear, button } from './dom.js';
 import { PANELS } from './panels/index.js';
 import { Hud } from './hud.js';
 import { tooltip } from './tooltip.js';
-import { fmt } from '../engine/format.js';
+import { fmt, fmtInt } from '../engine/format.js';
 import { BAL } from '../data/balance.js';
 import { heroPower } from '../game/character.js';
 import { MATERIAL } from '../data/materials.js';
@@ -347,7 +347,7 @@ export class UI {
     e.xpbar.firstChild.style.width = `${pct}%`;
     e.xpbar.title = `経験値 ${fmt(cur)} / ${fmt(need)}（${Math.floor(pct)}%）`;
     e.xpbar.setAttribute('aria-valuenow', String(Math.floor(pct)));
-    e.gold.textContent = `${fmt(st.meta.gold)} G`;
+    e.gold.textContent = `${fmtInt(st.meta.gold)} G`;
     const souls = st.meta.souls || st.meta.rebirths ? `魂 ${fmt(st.meta.souls)}${st.meta.rebirths ? `・転生 ${st.meta.rebirths}` : ''}` : '';
     if (e.souls.textContent !== souls) e.souls.textContent = souls;
     e.souls.style.display = souls ? '' : 'none';

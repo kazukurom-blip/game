@@ -4,7 +4,7 @@
 // 報告の項目は game/systems/offline.js の先頭。ほかの担当が足した項目（luck・gems・runes）も、あれば出す。
 
 import { h, button, injectCss } from './dom.js';
-import { fmt, fmtTime, fmtPct } from '../engine/format.js';
+import { fmt, fmtInt, fmtTime, fmtPct } from '../engine/format.js';
 import { RARITIES, RARITY } from '../data/rarity.js';
 import { EGG } from '../data/pets.js';
 import { itemCell } from './panels/common.js';
@@ -18,7 +18,7 @@ export function showOfflineReport(ui, rep) {
   injectCss('meta-offline', CSS);
   const g = ui.game;
   if (rep.reason === 'away' && rep.seconds < SHORT_SEC) {
-    ui.toast(`離れていた ${fmtTime(rep.seconds, true)} の稼ぎ: 撃破 ${fmt(rep.kills)}・ゴールド +${fmt(rep.gold)}${rep.levels ? `・Lv +${rep.levels}` : ''}`, 'good');
+    ui.toast(`離れていた ${fmtTime(rep.seconds, true)} の稼ぎ: 撃破 ${fmt(rep.kills)}・ゴールド +${fmtInt(rep.gold)}${rep.levels ? `・Lv +${rep.levels}` : ''}`, 'good');
     for (const it of rep.best || []) if (RARITY[it.rarity]?.idx >= 4) ui.toast(`放置中に ${RARITY[it.rarity].name}「${itemName(it)}」を拾った`, `r-${it.rarity}`);
     return;
   }
@@ -40,7 +40,7 @@ export function showOfflineReport(ui, rep) {
   root.append(S(h('div.ofr-cards', [
     ocard('倒した敵', fmt(rep.kills), rep.elites ? `エリート ${fmt(rep.elites)}` : `${fmt((rep.rate?.kills || 0) * 3600)} 体/時`),
     ocard('経験値', `+${fmt(rep.xp)}`, rep.levels ? `Lv ${rep.levelFrom} → ${rep.levelTo}` : rep.paragon ? `アビスLv ${rep.paragonFrom} → ${rep.paragonTo}` : `Lv ${g.state.hero.level}`, rep.levels || rep.paragon ? 'up' : ''),
-    ocard('ゴールド', `+${fmt(rep.gold)}`, `いま ${fmt(g.state.meta.gold)}`, 'gold'),
+    ocard('ゴールド', `+${fmtInt(rep.gold)}`, `いま ${fmtInt(g.state.meta.gold)}`, 'gold'),
     ocard('拾った装備', fmt(rep.drops ?? Object.values(rep.found || {}).reduce((s, v) => s + v, 0)), `分解 ${fmt(rep.salvaged || 0)}`),
   ])));
   // レアリティの順にめくる
@@ -157,7 +157,7 @@ function countView(v, label) {
 function nextActions(g, rep) {
   const st = g.state; const out = [];
   if (st.hero.skillPoints > 0) out.push(`スキルポイントが ${st.hero.skillPoints} あります（スキルの窓）`);
-  if (st.hero.tree?.points > 0) out.push(`パッシブの点が ${st.hero.tree.points} あります（星座盤の窓）`);
+  if (st.hero.tree?.points > 0) out.push(`パッシブの点が ${st.hero.tree.points} あります（パッシブの窓）`);
   const aff = g.sys.prestige?.affordableCount?.() || 0;
   if (aff) out.push(`魂の祭壇で ${aff} 個の強化が買えます（転生の窓）`);
   if (g.sys.prestige?.canRebirth?.().ok) out.push(`いま転生すると 魂 +${fmt(g.sys.prestige.previewSouls())}`);

@@ -122,8 +122,12 @@ class Tooltip {
     el.innerHTML = '';
     el.append(content);
     el.style.display = 'block';
+    el.style.transform = '';
     const vw = window.innerWidth; const vh = window.innerHeight;
-    const tw = el.offsetWidth; const th = el.offsetHeight;
+    let tw = el.offsetWidth; let th = el.offsetHeight;
+    // 画面より背の高い説明（横向きのスマホ・低い窓）は、縮めて全部見せる（スクロールできない物なので）
+    const k = th > vh - 16 ? Math.max(0.5, (vh - 16) / th) : 1;
+    if (k < 1) { el.style.transformOrigin = '0 0'; el.style.transform = `scale(${k})`; tw *= k; th *= k; }
     let x = rect.right + 10; let y = rect.top;
     if (x + tw > vw - 8) x = rect.left - tw - 10;
     if (x < 8) x = Math.max(8, (vw - tw) / 2);

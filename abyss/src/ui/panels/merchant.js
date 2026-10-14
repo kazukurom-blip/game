@@ -48,7 +48,7 @@ function renderGamble(ui, el) {
     info.bagFree <= 0 ? h('p.bad', 'バッグがいっぱいです') : null,
   ]));
   if (last && g.sys.inv.findItem(last.uid)) el.append(h('div.ik-result', [h('div.t', '今回の品物'), itemCard(g, last, { compare: true })]));
-  el.append(h('p.hint', `深淵の欠片は、エリート（12%）・地域のボス（2〜4 個）・章のボス（6〜10 個）・宝ゴブリン（5〜8 個）から。持っている数: ${fmt(g.state.inv.mats.shard || 0)}`));
+  el.append(h('p.hint', `深淵の欠片は、エリート（12%）・地域のボス（2〜4 個）・章のボス（6〜10 個）・ため込み屋（5〜8 個）から。持っている数: ${fmt(g.state.inv.mats.shard || 0)}`));
 }
 
 function renderExpand(ui, el) {
