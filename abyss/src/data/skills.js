@@ -60,20 +60,20 @@ export const SKILLS = [
   // 剣闘士（怒り）: 近接の範囲・跳躍・雄叫び
   // =====================================================================
   {
-    id: 'w_slash', cls: 'warrior', kind: 'basic', name: '強打', desc: '目の前の敵を武器で叩き、半径 {radius} の範囲に {dmg} のダメージ。怒り +9。',
+    id: 'w_slash', cls: 'warrior', kind: 'basic', name: '強打', desc: '目の前の敵を武器で叩き、半径 {radius} の範囲に {dmg} のダメージ。怒り +12。',
     tags: ['attack', 'melee'], element: 'phys', unlock: 1, basic: true, behavior: 'melee',
-    cost: -9, cd: 0, castTime: 0.55, dmg: [185, 8.5], range: 110, radius: 70,
+    cost: -12, cd: 0, castTime: 0.55, dmg: [240, 11], range: 110, radius: 70,
     runes: [
       R('fire', '燃える刃', '火炎ダメージになり、25% の確率で炎上させる', FIRE(0.25)),
       R('wide', '薙ぎ払い', '当たる範囲が 2 倍、ダメージ ×0.85', { radius: 2, dmgMul: 0.85 }),
-      R('rage', '怒りの一撃', '怒りの回復が 2 倍（+18）', { costAdd: -9 }),
+      R('rage', '怒りの一撃', '怒りの回復が 2 倍（+24）', { costAdd: -12 }),
       R('quake', '地鳴り', '20% の確率で敵を 0.8 秒気絶させる', { status: { id: 'stun', chance: 0.2, dur: 0.8 } }),
     ],
   },
   {
     id: 'w_cleave', cls: 'warrior', kind: 'active', name: '大旋斬', desc: '武器を振り回し、半径 {radius} の敵すべてに {dmg} のダメージ。',
     tags: ['attack', 'melee', 'area'], element: 'phys', unlock: 1, behavior: 'nova',
-    cost: 16, cd: 0, castTime: 0.7, dmg: [245, 12], radius: 170,
+    cost: 14, cd: 0, castTime: 0.7, dmg: [245, 12], radius: 170,
     runes: [
       R('quake', '地割れ', '範囲 +40%', { radius: 1.4 }),
       R('bleed', '血の旋風', '50% の確率で出血させる（4 秒の継続ダメージ）', { status: { id: 'bleed', chance: 0.5 } }),
@@ -104,9 +104,9 @@ export const SKILLS = [
     ],
   },
   {
-    id: 'w_bash', cls: 'warrior', kind: 'basic', name: '盾打ち', desc: '重い一撃で {dmg} のダメージ。15% の確率で 1 秒気絶。怒り +9。',
+    id: 'w_bash', cls: 'warrior', kind: 'basic', name: '盾打ち', desc: '重い一撃で {dmg} のダメージ。15% の確率で 1 秒気絶。怒り +12。',
     tags: ['attack', 'melee'], element: 'phys', unlock: 11, basic: true, behavior: 'melee',
-    cost: -9, cd: 0, castTime: 0.7, dmg: [195, 8], range: 110, radius: 60, status: { id: 'stun', chance: 0.15, dur: 1 },
+    cost: -12, cd: 0, castTime: 0.7, dmg: [255, 10.5], range: 110, radius: 60, status: { id: 'stun', chance: 0.15, dur: 1 },
     runes: [
       R('shock', '雷の盾', '雷撃ダメージになり、30% の確率で感電させる', LIGHT(0.3)),
       R('heavy', '重い一撃', 'ダメージ ×1.35、動作 +25%', { dmgMul: 1.35, castMul: 1.25 }),
@@ -253,7 +253,7 @@ export const SKILLS = [
   {
     id: 'r_snipe', cls: 'ranger', kind: 'basic', name: '狙い撃ち', desc: 'じっくり狙い、{dmg} のダメージ。貫通 {pierce}、当たると半径 {explode} で弾ける。クリティカル率 +15%。',
     tags: ['attack', 'projectile'], element: 'phys', unlock: 11, basic: true, behavior: 'projectile',
-    cost: 0, cd: 0, castTime: 0.85, dmg: [205, 9], range: 700, speed: 1900, count: 1, pierce: 3, explode: 120, extra: { critBonus: 0.15 },
+    cost: 0, cd: 0, castTime: 0.85, dmg: [255, 12], range: 700, speed: 1900, count: 1, pierce: 3, explode: 160, extra: { critBonus: 0.15 },
     runes: [
       R('heavy', '重い矢', 'ダメージ ×1.3、動作 +20%', { dmgMul: 1.3, castMul: 1.2 }),
       R('frost', '凍てる狙撃', '冷気ダメージになり、15% の確率で凍結させる', COLD(0.15)),
@@ -606,7 +606,7 @@ export const SKILLS = [
   {
     id: 'a_stab', cls: 'assassin', kind: 'basic', name: '連刃', desc: '素早く切りつけ {dmg} のダメージ。',
     tags: ['attack', 'melee'], element: 'phys', unlock: 1, basic: true, behavior: 'melee',
-    cost: 0, cd: 0, castTime: 0.38, dmg: [115, 5], range: 100, radius: 40,
+    cost: 0, cd: 0, castTime: 0.38, dmg: [100, 4.5], range: 100, radius: 40,
     runes: [
       R('venom', '毒刃', '毒ダメージになり、40% の確率で毒を与える', POIS(0.4)),
       R('twin', '双刃', '2 回切りつける（1 回 ×0.6）', { dmgMul: 0.6, extra: { hits: 2 } }),
@@ -617,7 +617,7 @@ export const SKILLS = [
   {
     id: 'a_fan', cls: 'assassin', kind: 'active', name: '刃の扇', desc: '周りに刃をばらまき、半径 {radius} に {dmg} のダメージ。35% の確率で出血させる。',
     tags: ['attack', 'area'], element: 'phys', unlock: 1, behavior: 'nova',
-    cost: 22, cd: 0, castTime: 0.5, dmg: [150, 7], radius: 160, status: { id: 'bleed', chance: 0.35 },
+    cost: 22, cd: 0, castTime: 0.5, dmg: [125, 6], radius: 160, status: { id: 'bleed', chance: 0.35 },
     runes: [
       R('shadow', '影の扇', '虚無ダメージになり、ダメージ ×1.1', { element: 'void', dmgMul: 1.1 }),
       R('poison', '毒の扇', '毒ダメージになり、50% の確率で毒を与える', POIS(0.5)),
@@ -628,7 +628,7 @@ export const SKILLS = [
   {
     id: 'a_dash', cls: 'assassin', kind: 'active', name: '影走り', desc: '影になって {range} 先まで駆け抜け、通り抜けた敵に {dmg} のダメージ。クリティカル率 +20%。',
     tags: ['attack', 'melee', 'movement'], element: 'phys', unlock: 3, behavior: 'dash',
-    cost: 20, cd: 4, castTime: 0.35, dmg: [205, 10], range: 380, radius: 60, extra: { critBonus: 0.2 },
+    cost: 20, cd: 4, castTime: 0.35, dmg: [180, 9], range: 380, radius: 60, extra: { critBonus: 0.2 },
     runes: [
       R('poison', '毒の足跡', '毒ダメージになり、60% の確率で毒を与える', POIS(0.6)),
       R('return', '往復', '駆け抜けたあと戻りながらもう一度当てる（×0.7）', { extra: { back: 0.7 } }),
@@ -661,7 +661,7 @@ export const SKILLS = [
   {
     id: 'a_clone', cls: 'assassin', kind: 'summon', name: '影分身', desc: '影の分身を {summons} 体呼ぶ（{ttl} 秒）。分身は素早く切りつけ、武器ダメージの {dmgp} のダメージ。',
     tags: ['minion', 'summon'], element: 'phys', unlock: 11, behavior: 'summon',
-    cost: 35, cd: 12, castTime: 0.4, dmg: [85, 4], maxSummons: 2, summon: { unit: 'clone', life: 2, aps: 1.6, range: 100, ttl: 12 },
+    cost: 35, cd: 12, castTime: 0.4, dmg: [70, 3.3], maxSummons: 2, summon: { unit: 'clone', life: 2, aps: 1.6, range: 100, ttl: 12 },
     runes: [
       R('more', '分身の群れ', '分身 +1、1 体あたり ×0.8', { maxSummons: 1, dmgMul: 0.8 }),
       R('long', '長い残影', 'いる時間 +60%', { summon: { ttlMul: 1.6 } }),
@@ -683,7 +683,7 @@ export const SKILLS = [
   {
     id: 'a_blades', cls: 'assassin', kind: 'active', name: '刃の嵐', desc: '{count} 枚の刃が {dur} 秒間まわりを回り、触れた敵に {dmg} のダメージ（同じ敵には {tick} 秒ごと）。',
     tags: ['attack', 'area'], element: 'phys', unlock: 18, behavior: 'orbit',
-    cost: 30, cd: 9, castTime: 0.4, dmg: [62, 3], count: 5, radius: 110, duration: 6, tick: 0.3,
+    cost: 30, cd: 9, castTime: 0.4, dmg: [50, 2.4], count: 5, radius: 110, duration: 6, tick: 0.3,
     runes: [
       R('more', '刃の竜巻', '刃 +3、1 枚あたり ×0.85', { countAdd: 3, dmgMul: 0.85 }),
       R('poison', '毒の嵐', '毒ダメージになり、30% の確率で毒を与える', POIS(0.3)),

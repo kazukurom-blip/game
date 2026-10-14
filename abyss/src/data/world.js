@@ -15,8 +15,14 @@ export const ACT_BOSS_TIME_MUL = 1.8;
 export const FINAL_BOSS_TIME_MUL = 2.5;
 // 最初の 2 地域のボスはやさしく（はじめての 5 分で負けないように）。[ライフ, 攻撃] の倍率
 export const EARLY_BOSS = { 0: [0.6, 0.6], 1: [0.85, 0.85] };
-export const ACT_BOSS_LIFE_MUL = 0.75;
-export const FINAL_BOSS_LIFE_MUL = 1.25; // 深淵王のライフ（章のボスの倍率にさらに掛ける。段階の変化が 2 回あるので重め） // 第二章からの章のボスのライフ（BAL.RANK.actboss に掛ける。章の終わりの壁を「少し稼げば越えられる」に）
+export const ACT_BOSS_LIFE_MUL = 0.75; // 第二章からの章のボスのライフ（BAL.RANK.actboss に掛ける。章の終わりの壁を「少し稼げば越えられる」に）
+export const FINAL_BOSS_LIFE_MUL = 1.25; // 深淵王のライフ（章のボスの倍率にさらに掛ける。段階の変化が 2 回あるので重め）
+export const FINAL_BOSS_DMG_MUL = 0.8; // 深淵王の攻撃（段階の変化で ×1.15 ずつ強くなるぶんを先に軽く）
+// ボスに続けて負けるほど、そのボスが少し弱る（勝つと元に戻る）。壁を「少し稼げば越えられる」長さ（10〜20 分）に収めるため（強さ担当）
+// 負け 1 回ごとにライフ -6%（最大 -40%）・攻撃 -4%（最大 -30%）
+export const BOSS_FAIL_EASE = { life: 0.06, lifeMax: 0.4, dmg: 0.04, dmgMax: 0.3 };
+// ボスが出たとき、奥義の残りの待ち時間をこの秒数までにする（ボス戦の手応えを毎回そろえる）
+export const BOSS_ULT_READY = 2;
 
 export const ACTS = [
   {

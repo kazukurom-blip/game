@@ -29,7 +29,7 @@ export const BAL = {
   CDR_CAP: 60,
   COST_CAP: 60,
   ARMOR_CAP: 0.85,
-  ARMOR_K: 80, // 減り方 = armor / (armor + ARMOR_K × P(敵のレベル))
+  ARMOR_K: 60, // 減り方 = armor / (armor + ARMOR_K × P(敵のレベル))（強さ担当: 80 → 60。鎧の軽い近接職が物理で倒れ続けないように）
   MOVE_CAP: 150,
   BASE_MOVE: 220, // 1 秒に進む距離（px）
   LEECH_CAP_PER_SEC: 0.2, // 1 秒に最大ライフの 20% まで
@@ -46,7 +46,7 @@ export const BAL = {
   heroLifePerLevel: 0, // 曲線に含む
   MAX_LEVEL: 100,
   // レベル l → l+1 に必要な経験値。「同じレベルの敵を何体倒すか」で決める
-  killsToLevel: (l) => Math.round(24 * l ** 1.45 * Math.min(1, 0.05 + 0.04 * l)),
+  killsToLevel: (l) => Math.round(30 * l ** 1.45 * Math.min(1, 0.04 + 0.032 * l)),
   xpToNext: (l) => Math.round(BAL.killsToLevel(l) * BAL.monsterXp(l)),
   // パラゴン（Lv100 以降、上限なし）
   paragonXpToNext: (p) => Math.round(BAL.xpToNext(100) * 0.12 * (1 + p * 0.015)),
@@ -76,12 +76,12 @@ export const BAL = {
     champion: { life: 4, dmg: 1.4, xp: 4, gold: 3, loot: 3 },
     rare: { life: 6, dmg: 1.6, xp: 6, gold: 4, loot: 4 }, // 群れの長（エリート詞つき）
     goblin: { life: 6.4, dmg: 0, xp: 3, gold: 30, loot: 12 },
-    boss: { life: 27, dmg: 1.7, xp: 30, gold: 25, loot: 10 },
-    actboss: { life: 54, dmg: 2.0, xp: 80, gold: 60, loot: 18 },
+    boss: { life: 22, dmg: 1.7, xp: 30, gold: 25, loot: 10 },
+    actboss: { life: 44, dmg: 2.0, xp: 80, gold: 60, loot: 18 },
     guardian: { life: 96, dmg: 2.2, xp: 60, gold: 50, loot: 15 },
   },
   // 経験値の Lv 差の補正（低すぎる敵は少なく、自分より強い敵は多めに。先へ進みすぎて装備を着けられなくなるのを防ぐ追い上げ）
-  XP_CATCHUP: { per: 0.08, max: 1.5 }, // 敵が 1 Lv 上につき +8%（最大 +150%）
+  XP_CATCHUP: { per: 0.15, max: 3.0 }, // 敵が 1 Lv 上につき +15%（最大 +300%）
   xpLevelPenalty: (heroLvl, L) => {
     const d = heroLvl - L;
     if (d < 0) return 1 + Math.min(BAL.XP_CATCHUP.max, -d * BAL.XP_CATCHUP.per);

@@ -13,8 +13,9 @@
 // 出来事（game.events）: stageStart, stageClear, bossSpawn, bossFail, zoneClear, storyClear, tormentUnlock, tormentChanged,
 //                         goblinSpawn, goblinKill, goblinEscape, miniEvent, autoBossRetry
 
-import { ZONES, ZONE, ACT, STAGES_PER_ZONE, WAVES_PER_STAGE, BOSS_TIME, ACT_BOSS_TIME_MUL, FINAL_BOSS_TIME_MUL, ACT_BOSS_LIFE_MUL, FINAL_BOSS_LIFE_MUL, EARLY_BOSS, stageLevel, FINAL_ZONE } from '../../data/world.js';
+import { ZONES, ZONE, ACT, STAGES_PER_ZONE, WAVES_PER_STAGE, BOSS_TIME, ACT_BOSS_TIME_MUL, FINAL_BOSS_TIME_MUL, ACT_BOSS_LIFE_MUL, FINAL_BOSS_LIFE_MUL, FINAL_BOSS_DMG_MUL, BOSS_FAIL_EASE, BOSS_ULT_READY, EARLY_BOSS, stageLevel, FINAL_ZONE } from '../../data/world.js';
 import { MONSTER, ELITE_AFFIXES } from '../../data/monsters.js';
+import { SKILL } from '../../data/skills.js';
 import { BAL } from '../../data/balance.js';
 import { runSched, clearSched } from '../content/world/util.js';
 import { estimateDps } from '../skills.js';
@@ -152,10 +153,18 @@ export class WorldSystem {
   /** 地域のボスのライフの追加の倍率（章のボスは少し軽く、深淵王は重く） */
   bossLifeMul(z) {
     const def = MONSTER[z.boss];
-    if (def?.kind === 'final') return FINAL_BOSS_LIFE_MUL * ACT_BOSS_LIFE_MUL;
-    if (EARLY_BOSS[z.global] && !(this.w.torment > 0)) return EARLY_BOSS[z.global][0];
+    const ease = this.bossEase(z).life;
+    if (def?.kind === 'final') return FINAL_BOSS_LIFE_MUL * ACT_BOSS_LIFE_MUL * ease;
+    if (EARLY_BOSS[z.global] && !(this.w.torment > 0)) return EARLY_BOSS[z.global][0] * ease;
     // 第一章のボスは「最初の壁」なので軽くしない
-    return z.zoneIdx === 4 && z.actIdx > 0 ? ACT_BOSS_LIFE_MUL : 1;
+    return (z.zoneIdx === 4 && z.actIdx > 0 ? ACT_BOSS_LIFE_MUL : 1) * ease;
+  }
+
+  /** 続けて負けるほどボスが少し弱る（BOSS_FAIL_EASE。勝つと戻る）。{ life, dmg, pct } */
+  bossEase(z) {
+    const n = Math.max(0, this.w.bossLog?.[z.id]?.streak || 0);
+    const E = BOSS_FAIL_EASE;
+    return { life: 1 - Math.min(E.lifeMax, n * E.life), dmg: 1 - Math.min(E.dmgMax, n * E.dmg), pct: Math.round(Math.min(E.lifeMax, n * E.life) * 100) };
   }
 
   bossTimeFor(z) {
@@ -175,9 +184,11 @@ export class WorldSystem {
     if (this.isBossStage()) {
       const isAct = z.zoneIdx === 4;
       const def = MONSTER[z.boss];
-      const u = c.spawnMonster(z.boss, { level: L + 1, rank: isAct ? 'actboss' : 'boss', x: h.x + 620, y: 0, lifeMul: diff.life * this.bossLifeMul(z), dmgMul: diff.dmg * (EARLY_BOSS[z.global] && !(this.w.torment > 0) ? EARLY_BOSS[z.global][1] : 1) });
+      const u = c.spawnMonster(z.boss, { level: L + 1, rank: isAct ? 'actboss' : 'boss', x: h.x + 620, y: 0, lifeMul: diff.life * this.bossLifeMul(z), dmgMul: diff.dmg * this.bossEase(z).dmg * (def?.kind === 'final' ? FINAL_BOSS_DMG_MUL : 1) * (EARLY_BOSS[z.global] && !(this.w.torment > 0) ? EARLY_BOSS[z.global][1] : 1) });
       this.bossUnit = u;
       this.bossTimer = this.bossTimeFor(z);
+      // ボス戦の始めに奥義の待ち時間を BOSS_ULT_READY 秒以下にする（直前の群れで使ってしまい、勝ち負けが運で決まるのを防ぐ）
+      if (h?.cds) for (const id in h.cds) if (SKILL[id]?.kind === 'ult') h.cds[id] = Math.min(h.cds[id], BOSS_ULT_READY);
       this.bossStart = this.game.time;
       this.bossEstAtStart = this.estDpsRaw();
       // お供
