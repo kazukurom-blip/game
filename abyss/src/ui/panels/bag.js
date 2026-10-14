@@ -65,7 +65,13 @@ function renderBag(ui, el) {
         ui.toast(`${r.n} 個を分解: ${matText(r.got)}`, 'good');
         ui.renderPanel();
       }, { kind: 'danger', disabled: !sel.length }),
-      button('売る', () => { const r = sys.sell(sel.map((x) => x.uid)); picked.clear(); ui.toast(`${r.n} 個を ${fmt(r.gold)} G で売った`, 'good'); ui.renderPanel(); }, { kind: 'small', disabled: !sel.length }),
+      button('売る', async () => {
+        if (!sel.length) return;
+        // レジェンダリー以上・覚醒/極致・強化 +5 以上が入っていたら確かめる（1 つずつ売るときと同じ。元に戻せない）
+        const precious = sel.filter((x) => (RARITY[x.rarity]?.idx || 0) >= 4 || x.q || (x.enh || 0) >= 5).length;
+        if (precious && !(await ui.confirm(`${sel.length} 個を売ります（レジェンダリー以上・覚醒・強化した物 ${precious} 個を含む）。元に戻せません。`, '売る'))) return;
+        const r = sys.sell(sel.map((x) => x.uid)); picked.clear(); ui.toast(`${r.n} 個を ${fmt(r.gold)} G で売った`, 'good'); ui.renderPanel();
+      }, { kind: 'small', disabled: !sel.length }),
       button('倉庫へ', () => { let n = 0; for (const x of sel) if (stashAny(g, x.uid, stashTab) >= 0) n++; picked.clear(); ui.toast(n < sel.length ? `${n} 個を倉庫へ（倉庫がいっぱいで ${sel.length - n} 個は残った）` : `${n} 個を倉庫へ`, n < sel.length ? 'bad' : 'good'); ui.renderPanel(); }, { kind: 'small', disabled: !sel.length }),
       button('やめる', () => { multi = false; picked.clear(); ui.renderPanel(); }, { kind: 'small' }),
     ]));

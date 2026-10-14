@@ -432,7 +432,7 @@ if (want('ui')) {
     ok(/副手のダメージ/.test(txt), txt.slice(0, 120));
   });
 
-  await ta('I05 説明の窓: 指輪は左右のどちらと比べたかを出す', async () => {
+  await ta('I05 説明の窓: 指輪は 1・2 のどちらと比べたかを出す', async () => {
     const uid = await page.evaluate(async () => {
       const g = window.__game; const { generateItem } = await import('/src/game/loot.js');
       g.state.hero.equip.ring1 = generateItem(g.rng, { ilvl: 30, rarity: 'rare', slot: 'ring' });
@@ -441,7 +441,7 @@ if (want('ui')) {
       const it = generateItem(g.rng, { ilvl: 30, rarity: 'rare', slot: 'ring' }); g.state.inv.bag.push(it); return it.uid;
     });
     const txt = await cardText(uid);
-    ok(/(左|右)の指輪と比べると/.test(txt), txt.slice(-80));
+    ok(/今の指輪 [12]と比べると/.test(txt), txt.slice(-80));
   });
 
   await ta('I02 図鑑: 発見率の「実際の効き」の説明が数と食い違わない', async () => {
@@ -470,6 +470,29 @@ if (want('ui')) {
     await page.waitForTimeout(200);
     const where = await page.evaluate((u) => window.__game.sys.inv.findItem(u)?.where, uid);
     ok(where === 'stash', `場所 ${where}`);
+  });
+
+  await ta('I20 持ち物: まとめて売るときもレジェンダリー以上が入っていれば確かめる', async () => {
+    const uid = await page.evaluate(async () => {
+      const g = window.__game; const { generateItem } = await import('/src/game/loot.js');
+      document.querySelectorAll('.modal-wrap').forEach((m) => m.remove());
+      const it = generateItem(g.rng, { ilvl: 20, rarity: 'legendary', slot: 'boots' }); g.state.inv.bag.unshift(it);
+      window.__ui.openPanel('bag'); return it.uid;
+    });
+    await page.waitForTimeout(200);
+    const click = (t) => page.evaluate((x) => { const b = [...document.querySelectorAll('#panelbody button')].find((e) => e.textContent.trim() === x && !e.disabled); b?.click(); return !!b; }, t);
+    ok(await click('選んで分解'), '選んで分解');
+    await page.waitForTimeout(150);
+    await page.click('#panelbody .grid .cell:not(.empty)');
+    await page.waitForTimeout(150);
+    ok(await click('売る'), '売る');
+    await page.waitForTimeout(250);
+    const modal = await page.$('.modal');
+    const still = await page.evaluate((u) => !!window.__game.sys.inv.findItem(u), uid);
+    ok(modal && still, `確かめずに売った（窓 ${!!modal}・残っている ${still}）`);
+    await page.evaluate(() => { const b = [...document.querySelectorAll('.modal .modal-foot button')].find((e) => /やめる|キャンセル|閉じる/.test(e.textContent)); if (b) b.click(); else document.querySelector('.modal .modal-x')?.click(); });
+    await page.waitForTimeout(150);
+    await click('やめる');
   });
 
   ok(true);

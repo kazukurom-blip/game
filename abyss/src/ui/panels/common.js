@@ -63,7 +63,8 @@ export function itemMenu(ui, item, equipped = false) {
   else {
     const prob = inv.equipProblem(item, item.slot === 'ring' ? 'ring1' : item.slot);
     btns.push({ label: prob ? `装備できない（${prob}）` : '装備する', kind: 'primary', onclick: () => { if (prob) return false; const r = inv.equip(item.uid); if (!r.ok) ui.toast(r.msg, 'bad'); return true; } });
-    if (item.slot === 'ring') btns.push({ label: '右の指輪に', onclick: () => { const r = inv.equip(item.uid, 'ring2'); if (!r.ok) ui.toast(r.msg, 'bad'); } });
+    // 指輪: 「装備する」は弱い方と入れ替える。枠を選んで着けることもできる
+    if (item.slot === 'ring' && !prob) for (const s of ['ring1', 'ring2']) btns.push({ label: `${SLOT_NAMES[s]} に`, onclick: () => { const r = inv.equip(item.uid, s); if (!r.ok) ui.toast(r.msg, 'bad'); } });
     btns.push({ label: item.locked ? '鍵を外す' : '鍵をかける', onclick: () => inv.lock(item.uid) });
     // レジェンダリー以上・覚醒/極致・強化 +5 以上は、1 回押しただけで消えないように確かめる（元に戻せないため）
     const precious = (RARITY[item.rarity]?.idx || 0) >= 4 || item.q || (item.enh || 0) >= 5;

@@ -218,13 +218,31 @@ export class InventorySystem {
     }
     slot ||= item.slot;
     const st = this.game.state;
-    const before = computeHero(st, this.game); // 戦闘中の強化（バフ・祠）を入れずに比べる（after と同じ条件。入れると空いた枠にも着けなくなる）
+    const base = this.baseline(); // 今の装備の数値（戦闘中の強化（バフ・祠）は入れない。after と同じ条件。入れると空いた枠にも着けなくなる）
+    const before = base.H;
     const over = { [slot]: item };
     if (slot === 'weapon' && weaponStats(item)?.twoHanded) over.offhand = null;
     const after = computeHero(st, this.game, { equipOverride: over });
-    const dpsB = this.dpsOf(before); const dpsA = this.dpsOf(after);
-    const ehpB = effectiveLife(before); const ehpA = effectiveLife(after);
+    const dpsB = base.dps; const dpsA = this.dpsOf(after);
+    const ehpB = base.ehp; const ehpA = effectiveLife(after);
     return { slot, dps: dpsA, ehp: ehpA, dpsPct: dpsB > 0 ? (dpsA / dpsB - 1) * 100 : 0, ehpPct: ehpB > 0 ? (ehpA / ehpB - 1) * 100 : 0, before, after };
+  }
+
+  /**
+   * 比べの元（今の装備の H・DPS・耐久）。持ち物を並べるときに何百回も作り直さないように、
+   * 戦闘の数値（combat.H。能力が変わると作り直される）と装備の中身が同じ間は使い回す
+   */
+  baseline() {
+    const st = this.game.state;
+    const eq = st.hero.equip;
+    const sk = Object.entries(st.hero.skills || {}).map(([k, v]) => `${k}${v?.lvl || 0}${v?.rune || ''}`).join(',');
+    const sig = `${st.hero.cls}|${st.hero.level}|${(st.hero.bar || []).join(',')}|${sk}|${SLOTS.map((s) => { const it = eq[s]; return it ? `${it.uid}.${it.enh || 0}.${(it.sockets || []).join('/')}.${it.affixes?.length || 0}.${it.q || 0}` : '-'; }).join(',')}`;
+    const H0 = this.game.combat?.H || null;
+    const c = this._base;
+    if (c && H0 && c.H0 === H0 && c.sig === sig) return c;
+    const H = computeHero(st, this.game);
+    this._base = { H0, sig, H, dps: this.dpsOf(H), ehp: effectiveLife(H) };
+    return this._base;
   }
 
   /** 比べに使う DPS: スキルの並び全体の目安。並びが無い・出せないときは先頭のスキル（基本攻撃）だけ */

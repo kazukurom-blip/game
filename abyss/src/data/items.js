@@ -12,7 +12,7 @@
 import { registerStat } from './stats.js';
 
 export const SLOTS = ['weapon', 'offhand', 'helm', 'chest', 'gloves', 'belt', 'legs', 'boots', 'amulet', 'ring1', 'ring2'];
-export const SLOT_NAMES = { weapon: '武器', offhand: '副手', helm: '頭', chest: '胴', gloves: '手', belt: '腰', legs: '脚', boots: '足', amulet: '首飾り', ring1: '指輪', ring2: '指輪', ring: '指輪' };
+export const SLOT_NAMES = { weapon: '武器', offhand: '副手', helm: '頭', chest: '胴', gloves: '手', belt: '腰', legs: '脚', boots: '足', amulet: '首飾り', ring1: '指輪 1', ring2: '指輪 2', ring: '指輪' };
 // ベースの slot（ring は ring1/ring2 のどちらにも着けられる）
 export const baseSlotOf = (equipSlot) => (equipSlot === 'ring1' || equipSlot === 'ring2' ? 'ring' : equipSlot);
 
