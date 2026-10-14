@@ -1,6 +1,6 @@
 {
   "_note": "型紙の一覧（node tools/export_templates.mjs で作る）",
-  "size": 512,
+  "size": 400,
   "templates": [
     {
       "id": "hero.warrior.body",
@@ -38,6 +38,14 @@
       "id": "gear.bow",
       "label": "弓（手に持った姿）",
       "file": "gear.bow.png",
+      "cat": "gear",
+      "w": 110,
+      "h": 150
+    },
+    {
+      "id": "gear.crossbow",
+      "label": "弩（手に持った姿）",
+      "file": "gear.crossbow.png",
       "cat": "gear",
       "w": 110,
       "h": 150
@@ -81,6 +89,22 @@
       "cat": "gear",
       "w": 150,
       "h": 200
+    },
+    {
+      "id": "gear.u.u_grief",
+      "label": "ユニーク「慟哭の刃」（着た姿）",
+      "file": "gear.u.u_grief.png",
+      "cat": "gear",
+      "w": 110,
+      "h": 150
+    },
+    {
+      "id": "icon.u.u_grief",
+      "label": "ユニーク「慟哭の刃」のアイコン",
+      "file": "icon.u.u_grief.png",
+      "cat": "icon",
+      "w": 96,
+      "h": 96
     },
     {
       "id": "icon.item.sword",
@@ -147,25 +171,97 @@
       "h": 256
     },
     {
-      "id": "fx.r_shot.proj",
-      "label": "「速射」の弾",
-      "file": "fx.r_shot.proj.png",
+      "id": "fx.w_shout.buff",
+      "label": "「鬨の声」の強化のオーラ（体を包む）",
+      "file": "fx.w_shout.buff.png",
+      "cat": "fx",
+      "w": 180,
+      "h": 240
+    },
+    {
+      "id": "fx.w_quake.proj",
+      "label": "「地裂き」の弾",
+      "file": "fx.w_quake.proj.png",
       "cat": "fx",
       "w": 90,
       "h": 46
     },
     {
-      "id": "fx.n_skeleton.summon",
-      "label": "「骸骨召喚」の呼び出す魔法陣",
-      "file": "fx.n_skeleton.summon.png",
+      "id": "fx.w_charge.trail",
+      "label": "「猛進」の突進の残像",
+      "file": "fx.w_charge.trail.png",
+      "cat": "fx",
+      "w": 260,
+      "h": 90
+    },
+    {
+      "id": "fx.r_trap.trap",
+      "label": "「炸裂罠」の罠の置き物",
+      "file": "fx.r_trap.trap.png",
+      "cat": "fx",
+      "w": 90,
+      "h": 70
+    },
+    {
+      "id": "fx.r_beast.summon",
+      "label": "「狩りの相棒」の呼び出す魔法陣",
+      "file": "fx.r_beast.summon.png",
       "cat": "fx",
       "w": 200,
+      "h": 120
+    },
+    {
+      "id": "fx.r_turret.totem",
+      "label": "「弩の砲台」のトーテム・砲台",
+      "file": "fx.r_turret.totem.png",
+      "cat": "fx",
+      "w": 90,
+      "h": 160
+    },
+    {
+      "id": "fx.r_chain.chain",
+      "label": "「稲妻矢」の連鎖の稲妻（横に伸ばす）",
+      "file": "fx.r_chain.chain.png",
+      "cat": "fx",
+      "w": 200,
+      "h": 60
+    },
+    {
+      "id": "fx.s_beam.beam",
+      "label": "「灼光線」の光線（横に伸ばす）",
+      "file": "fx.s_beam.beam.png",
+      "cat": "fx",
+      "w": 300,
+      "h": 80
+    },
+    {
+      "id": "fx.n_curse.curse",
+      "label": "「衰弱の呪い」の呪いの紋",
+      "file": "fx.n_curse.curse.png",
+      "cat": "fx",
+      "w": 120,
+      "h": 120
+    },
+    {
+      "id": "fx.n_curse.aura",
+      "label": "「衰弱の呪い」の足元のオーラ",
+      "file": "fx.n_curse.aura.png",
+      "cat": "fx",
+      "w": 260,
       "h": 120
     },
     {
       "id": "fx.enemy.arrow",
       "label": "敵の弾（矢）",
       "file": "fx.enemy.arrow.png",
+      "cat": "fx",
+      "w": 70,
+      "h": 40
+    },
+    {
+      "id": "fx.pet.proj",
+      "label": "ペットの手助け（弾）",
+      "file": "fx.pet.proj.png",
       "cat": "fx",
       "w": 70,
       "h": 40
@@ -211,8 +307,128 @@
       "h": 150
     },
     {
+      "id": "monster.ash_wisp",
+      "label": "敵「灰の鬼火」",
+      "file": "monster.ash_wisp.png",
+      "cat": "monster",
+      "w": 150,
+      "h": 150
+    },
+    {
+      "id": "monster.carrion_spider",
+      "label": "敵「屍肉蜘蛛」",
+      "file": "monster.carrion_spider.png",
+      "cat": "monster",
+      "w": 150,
+      "h": 150
+    },
+    {
+      "id": "monster.dune_scorpion",
+      "label": "敵「砂丘の大蠍」",
+      "file": "monster.dune_scorpion.png",
+      "cat": "monster",
+      "w": 150,
+      "h": 150
+    },
+    {
+      "id": "monster.sand_serpent",
+      "label": "敵「砂潜りの大蛇」",
+      "file": "monster.sand_serpent.png",
+      "cat": "monster",
+      "w": 150,
+      "h": 150
+    },
+    {
+      "id": "monster.sand_golem",
+      "label": "敵「砂岩の巨人」",
+      "file": "monster.sand_golem.png",
+      "cat": "monster",
+      "w": 150,
+      "h": 150
+    },
+    {
+      "id": "monster.dust_djinn",
+      "label": "敵「砂塵の精」",
+      "file": "monster.dust_djinn.png",
+      "cat": "monster",
+      "w": 150,
+      "h": 150
+    },
+    {
+      "id": "monster.yeti",
+      "label": "敵「雪原の大猿」",
+      "file": "monster.yeti.png",
+      "cat": "monster",
+      "w": 150,
+      "h": 150
+    },
+    {
+      "id": "monster.ice_shard",
+      "label": "敵「氷晶の精」",
+      "file": "monster.ice_shard.png",
+      "cat": "monster",
+      "w": 150,
+      "h": 150
+    },
+    {
+      "id": "monster.scale_guard",
+      "label": "敵「鱗の衛兵」",
+      "file": "monster.scale_guard.png",
+      "cat": "monster",
+      "w": 150,
+      "h": 150
+    },
+    {
+      "id": "monster.storm_jelly",
+      "label": "敵「雷傘の水母」",
+      "file": "monster.storm_jelly.png",
+      "cat": "monster",
+      "w": 150,
+      "h": 150
+    },
+    {
+      "id": "monster.fire_imp",
+      "label": "敵「火の小鬼」",
+      "file": "monster.fire_imp.png",
+      "cat": "monster",
+      "w": 150,
+      "h": 150
+    },
+    {
+      "id": "monster.forge_slave",
+      "label": "敵「炉の奴隷」",
+      "file": "monster.forge_slave.png",
+      "cat": "monster",
+      "w": 150,
+      "h": 150
+    },
+    {
+      "id": "monster.forge_construct",
+      "label": "敵「鍛冶の機兵」",
+      "file": "monster.forge_construct.png",
+      "cat": "monster",
+      "w": 150,
+      "h": 150
+    },
+    {
+      "id": "monster.myconid",
+      "label": "敵「茸人」",
+      "file": "monster.myconid.png",
+      "cat": "monster",
+      "w": 150,
+      "h": 150
+    },
+    {
+      "id": "monster.sentry_drone",
+      "label": "敵「浮遊砲」",
+      "file": "monster.sentry_drone.png",
+      "cat": "monster",
+      "w": 150,
+      "h": 150
+    },
+    {
       "id": "monster.boss_butcher",
-      "label": "ボス「肉屋のグロム」",
+      "label": "ボス「屍肉断ちのグロム」",
       "file": "monster.boss_butcher.png",
       "cat": "monster",
       "w": 240,
@@ -273,6 +489,30 @@
       "cat": "ui",
       "w": 1280,
       "h": 720
+    },
+    {
+      "id": "icon.gem.blood",
+      "label": "宝石「血晶」のアイコン",
+      "file": "icon.gem.blood.png",
+      "cat": "icon",
+      "w": 64,
+      "h": 64
+    },
+    {
+      "id": "icon.rune.hai",
+      "label": "ルーン「灰」のアイコン",
+      "file": "icon.rune.hai.png",
+      "cat": "icon",
+      "w": 64,
+      "h": 64
+    },
+    {
+      "id": "icon.support.sup_multi",
+      "label": "補助の刻印「拡散の刻印」のアイコン",
+      "file": "icon.support.sup_multi.png",
+      "cat": "icon",
+      "w": 64,
+      "h": 64
     }
   ]
 }
