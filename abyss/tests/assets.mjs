@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assets, parseAssetFileName, normalizeCustomList, validatePack, suggestIds, keyOut, cornerColor, transparencyRatio, alphaBBox, findFeet, guessAnchors, seamBlend, blackToAlpha, crushBlack, cleanOpts, procFromOpts, autoProc, targetSize } from '../src/render/assets.js';
-import { buildManifest, installManifest, slotPrompt, fxPartsOf, itemIconId, describeUnknown, CATEGORIES, GROUPS, addSlots, HERO_ANCHORS } from '../src/render/manifest.js';
+import { buildManifest, installManifest, slotPrompt, fxPartsOf, itemIconId, describeUnknown, CATEGORIES, GROUPS, addSlots, HERO_ANCHORS, optionalSlotBuilders } from '../src/render/manifest.js';
 import { colorName, idWords, buildPrompt } from '../src/render/prompts.js';
 import { CLASSES } from '../src/data/classes.js';
 import { SKILLS } from '../src/data/skills.js';
@@ -123,6 +123,18 @@ await t('ID の単語', () => { eq(idWords('boss_ash_wolf'), 'ash wolf'); eq(idW
 await t('知らない枠の説明', () => { ok(describeUnknown('fx.s_bolt.cast').includes('魔弾')); ok(describeUnknown('fx.enemy.meteor').includes('敵')); ok(describeUnknown('foo.bar').length > 3); });
 await t('親の枠: 専用の画像が無い敵の攻撃・召喚物はまとめて差し替えられる', () => { ok(has('fx.enemy') && has('minion')); eq(assets.spec('fx.enemy.meteor_rain').id, 'fx.enemy'); eq(assets.spec('minion.clone').id, has('minion.clone') ? 'minion.clone' : 'minion'); });
 await t('担当が後から足した枠も登録される', () => { addSlots([{ id: 'icon.test_extra', cat: 'icon', label: 'テストの枠', w: 64, h: 64, ax: 0.5, ay: 0.5 }]); ok(assets.slots.has('icon.test_extra')); eq(assets.slots.get('icon.test_extra').group, 'other'); assets.slots.delete('icon.test_extra'); });
+await t('宝石・ルーン・刻印のデータがあれば枠を作る（ルーン語は作らない）', () => {
+  const g = optionalSlotBuilders.gems({ GEMS: [{ id: 'ruby', name: '紅玉', color: '#e03030' }, { id: 'topaz', name: '黄玉', color: '#f0c040' }], RUNES: [{ id: 'el', name: 'エル' }], RUNEWORDS: [{ id: 'oath', name: '誓い' }], LEGENDARY_GEMS: [{ id: 'abyss_eye', name: '深淵の瞳' }], OTHER: 3 });
+  const ids = g.map((s) => s.id);
+  for (const id of ['icon.gem.ruby', 'icon.gem.topaz', 'icon.rune.el', 'icon.gem.abyss_eye', 'icon.gem', 'icon.rune']) ok(ids.includes(id), id);
+  ok(!ids.some((x) => x.includes('oath')), 'ルーン語');
+  ok(g.find((s) => s.id === 'icon.gem.abyss_eye').label.includes('深淵の宝石'));
+  const sp = optionalSlotBuilders.supports({ SUPPORTS: [{ id: 'sup_pierce', name: '貫きの刻印' }] });
+  ok(sp.some((s) => s.id === 'icon.support.sup_pierce') && sp.some((s) => s.id === 'icon.support'));
+  for (const s of [...g, ...sp]) { const p = buildPrompt({ ...s, kind: s.kind }); ok(p.en.length > 100 && p.ja.length > 40, s.id); }
+  eq(optionalSlotBuilders.gems({}).length, 0);
+});
+await t('枠の一覧を作るのは速い（20 回で 1 秒未満）', () => { const t0 = Date.now(); for (let i = 0; i < 20; i++) buildManifest(); ok(Date.now() - t0 < 1000, `${Date.now() - t0}ms`); });
 await t('buildPrompt は知らない種類でも文を返す', () => { const p = buildPrompt({ id: 'misc.thing', w: 64, h: 64, kind: 'misc' }); ok(p.en.length > 50 && p.ja.length > 20); });
 
 // ---------------------------------------------------------------- ファイル名・一覧・パック

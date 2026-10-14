@@ -321,6 +321,9 @@ async function moduleExists(url) {
   } catch { return false; }
 }
 
+/** テスト用: まだ無いデータから枠を作る関数 */
+export const optionalSlotBuilders = { gems: (mod) => gemSlots(mod), supports: (mod) => supportSlots(mod) };
+
 function arraysOf(mod) {
   return Object.entries(mod).filter(([, v]) => Array.isArray(v) && v.length && v.every((x) => x && typeof x === 'object' && typeof x.id === 'string'));
 }

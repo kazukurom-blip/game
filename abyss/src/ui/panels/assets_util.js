@@ -73,7 +73,10 @@ export function installStudioCss() {
 .st-chip.on { color: var(--gold2); border-color: var(--gold); background: #2a2010; }
 .st-find { display: flex; gap: 6px; margin-bottom: 8px; }
 .st-find input { flex: 1; min-width: 0; }
-.st-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px; }
+.st-find select { max-width: 45%; }
+.st-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr)); gap: 6px; min-width: 0; }
+.st-grid > * { min-width: 0; }
+.panel-assets { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
 .as-card { display: grid; grid-template-columns: 64px 1fr; gap: 4px 8px; padding: 6px; border: 1px solid var(--line); border-radius: 8px; background: #120f16; cursor: pointer; position: relative; }
 .as-card:hover { border-color: var(--line2); background: #17131c; }
 .as-card.on { border-color: #3a7a4a; box-shadow: inset 0 0 0 1px #2a5a3a; }

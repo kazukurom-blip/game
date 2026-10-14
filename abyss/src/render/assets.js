@@ -781,8 +781,10 @@ export function processImage(src, proc = {}, spec = {}, o = {}) {
   const frames = Math.max(1, o.frames || 1);
   const sw = src.naturalWidth || src.width; const sh = src.naturalHeight || src.height;
   const info = { srcW: sw, srcH: sh, removed: 0, bg: null, transparent: 0 };
-  // 1. 大きすぎる画像は先に縮める（1 コマの長い辺 2048 まで）
-  const k0 = Math.min(1, MAX_SIDE / Math.max(sw / frames, sh), 8192 / sw);
+  // 1. 大きすぎる画像は先に縮める（1 コマの長い辺 2048 まで。ゲームで使う大きさの 2 倍あれば十分なので、そこまで縮めてから加工する → 速い）
+  const t0 = targetSize(spec, o.scale);
+  const pre = o.noResize ? 1 : t0.h ? Math.min(1, (t0.h * 2) / sh) : Math.min(1, (t0.w * 1.25) / (sw / frames));
+  const k0 = Math.min(1, MAX_SIDE / Math.max(sw / frames, sh), 8192 / sw, pre);
   let c = resizeCanvas(src, Math.max(frames, Math.round(sw * k0 / frames) * frames), Math.max(1, Math.round(sh * k0)));
   if (!c) return { canvas: null, info };
   // 2. 切り抜き（各コマの上下左右を %）
