@@ -15,7 +15,7 @@ export const petsPanel = {
   help: `<p>エリート・ボスを倒すと、まれに<b>卵</b>が落ちます（チャンピオン 1/220、ボス 1/150、章のボス 1/80 など）。エリート・ボスを ${PET_BAL.PITY} 体倒しても出なければ必ず落ちます（天井）。主人公より ${PET_BAL.LEVEL_GAP} Lv 以上低い敵からは落ちません。</p>
 <p>卵は<b>孵卵器</b>（${PET_BAL.INCUBATORS} つ）に入れ、決まった数の敵を倒すと孵ります。放置していた間も進みます。</p>
 <p>連れているペット 1 匹が戦闘で手助けをし（主人公の後ろにいて敵には狙われにくい）、効果を与えます。持っているペットすべての<b>所持効果</b>も効きます。</p>
-<p>同じペットが出ると<b>覚醒 ★</b>（最大 5、1 つごとに効果 +20%）。餌（ゴールド）でレベルが上がります（最大 ${PET_BAL.MAX_LEVEL}）。</p>`,
+<p>同じペットが出ると<b>進化 ★</b>（最大 5、1 つごとに効果 +20%）。餌（ゴールド）でレベルが上がります（最大 ${PET_BAL.MAX_LEVEL}）。</p>`,
   badge: (g) => (g.sys.pets?.hatchReady?.() || 0) + (g.sys.pets?.freeIncubators?.() > 0 && g.sys.pets?.eggCount?.() > 0 ? 1 : 0),
   render(ui, el) {
     injectCss('meta-pets', CSS);
@@ -149,7 +149,7 @@ function hatchModal(ui, r) {
     h('div.pt-burst', { style: `--rc:${rr.color}` }, petPortrait(def.id, 150)),
     h('div.pt-hn', { style: { color: rr.color } }, def.name),
     h('div', rr.name),
-    r.dup ? h('div.gold', r.stars ? `重なった！ 覚醒 ★${r.stars}（効果 +${Math.round(r.stars * 20)}%）` : '重なった！ 経験値 +200') : h('div.good', '新しいペット！'),
+    r.dup ? h('div.gold', r.stars ? `重なった！ 進化 ★${r.stars}（効果 +${Math.round(r.stars * 20)}%）` : '重なった！ 経験値 +200') : h('div.good', '新しいペット！'),
     h('div.small', ui.game.sys.pets.abilityText(def.id)),
   ]), [{ label: 'やったね', kind: 'primary' }]);
 }

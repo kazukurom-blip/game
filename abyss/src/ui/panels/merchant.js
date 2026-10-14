@@ -20,7 +20,7 @@ export const merchantPanel = {
   id: 'merchant', name: '商人', icon: '⚖',
   refreshOn: ['inv', 'gear', 'level', 'stats', 'world', 'gold'],
   visible: () => true,
-  help: '目利き: 部位を選び、深淵の欠片で品物を買います（中身はレア以上。確率は下の表のとおり）。<br>ミシック交換: 原初の核と伝説の残響を集めると、好きなミシックを 1 つ選んで手に入れられます（確定ルート）。',
+  help: '目利き: 部位を選び、深淵の欠片で品物を買います（中身はレア以上。確率は下の表のとおり）。<br>ミシック交換: 極致の核と伝説の残響を集めると、好きなミシックを 1 つ選んで手に入れられます（確定ルート）。',
   render(ui, el) {
     ensureCss();
     el.append(h('div.tabs', TABS.map(([id, nm]) => h(`button.tab${tab === id ? '.on' : ''}`, { onclick: () => { tab = id; ui.renderPanel(); } }, nm))));
@@ -95,9 +95,9 @@ function renderMythic(ui, el) {
   el.append(luckMeters(g));
   el.append(h('div.ik-op', [
     h('h4', 'ミシックの交換（確定ルート）'),
-    meter(`原初の核（太古 1・原初 3）`, info.have.core, MYTHIC_COST.core, MATERIAL.core.color, { right: `${info.have.core} / ${MYTHIC_COST.core}` }),
+    meter(`極致の核（覚醒 1・極致 3）`, info.have.core, MYTHIC_COST.core, MATERIAL.core.color, { right: `${info.have.core} / ${MYTHIC_COST.core}` }),
     meter('伝説の残響（レジェンダリー以上の分解）', info.have.echo, MYTHIC_COST.echo, MATERIAL.echo.color, { right: `${info.have.echo} / ${MYTHIC_COST.echo}` }),
-    h('p', info.ok ? '交換できます。欲しいミシックを選んでください。' : `あと 原初の核 ${Math.max(0, MYTHIC_COST.core - info.have.core)}・伝説の残響 ${Math.max(0, MYTHIC_COST.echo - info.have.echo)}`),
+    h('p', info.ok ? '交換できます。欲しいミシックを選んでください。' : `あと 極致の核 ${Math.max(0, MYTHIC_COST.core - info.have.core)}・伝説の残響 ${Math.max(0, MYTHIC_COST.echo - info.have.echo)}`),
   ]));
   const cards = h('div.ik-cards');
   for (const m of MYTHICS) {
@@ -109,7 +109,7 @@ function renderMythic(ui, el) {
       p ? h('div.ds', p.desc(registry.powerValue(m.power, 0.5))) : null,
       h('div.ik-flavor', `「${m.flavor}」`),
       button('これと交換', async () => {
-        const okk = await ui.confirm(`原初の核 ${MYTHIC_COST.core}・伝説の残響 ${MYTHIC_COST.echo} で「${m.name}」と交換します。`, '交換する');
+        const okk = await ui.confirm(`極致の核 ${MYTHIC_COST.core}・伝説の残響 ${MYTHIC_COST.echo} で「${m.name}」と交換します。`, '交換する');
         if (!okk) return;
         const r = g.sys.merchant.exchangeMythic(m.id);
         ui.toast(r.ok ? `ミシック「${m.name}」を手に入れた！` : r.msg, r.ok ? 'r-mythic' : 'bad');

@@ -114,7 +114,7 @@ def({ id: 'auto_boss', cat: 'auto', name: '再挑戦の誓い', desc: '火力が
 def({ id: 'auto_salvage', cat: 'auto', name: '分別の目', desc: 'レベルに合わせて自動分解の段を上げる（決まった型から選べる）', max: 1, cost: [6, 1], unlock: 'autoSalvage', keep: true });
 def({ id: 'auto_hatch', cat: 'auto', name: '孵化の番人', desc: '卵を空いた孵卵器に自動で入れ、孵ったら自動で孵す', max: 1, cost: [6, 1], unlock: 'autoHatch', keep: true });
 def({ id: 'auto_bounty', cat: 'auto', name: '日課の使い', desc: '終わった日課とログインの贈り物を自動で受け取る', max: 1, cost: [10, 1], unlock: 'autoBounty', keep: true });
-def({ id: 'auto_torment', cat: 'auto', name: '苦行の見極め', desc: '倒す速さを見て、ちょうど良い苦行の段を自動で選ぶ', max: 1, cost: [25, 1], unlock: 'autoTorment', keep: true });
+def({ id: 'auto_torment', cat: 'auto', name: '魔境の見極め', desc: '倒す速さを見て、ちょうど良い魔境の段を自動で選ぶ', max: 1, cost: [25, 1], unlock: 'autoTorment', keep: true });
 def({ id: 'auto_rebirth', cat: 'auto', name: '輪廻の自動', desc: '決めた魂の数に届いたら自動で転生する', max: 1, cost: [30, 1], unlock: 'autoRebirth', keep: true, req: { rebirths: 3 } });
 
 export const ALTAR = A;

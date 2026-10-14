@@ -158,7 +158,7 @@ function renderFilter(ui, el) {
   const chk = (key, label, title = '') => h('label.chk', { title }, [h('input', { type: 'checkbox', checked: f[key] !== false || undefined, onchange: (e) => { f[key] = e.target.checked; } }), ` ${label}`]);
   el.append(h('section.sec', [h('h3.sec-title', '残す規則（分解より優先）'), h('div', { style: { display: 'flex', flexDirection: 'column' } }, [
     chk('keepSpecial', 'ユニーク・セット・ミシックは必ず残す'),
-    chk('keepAncient', '太古・原初は必ず残す（分解すると原初の核）'),
+    chk('keepAncient', '覚醒・極致は必ず残す（分解すると極致の核）'),
     chk('keepSocketWhite', 'ルーン語に使えるソケット数のノーマルは残す'),
     h('label.chk', [h('input', { type: 'checkbox', checked: f.keepUpgrades || undefined, onchange: (e) => { f.keepUpgrades = e.target.checked; } }), ' 今より強くなりそうな物は分解しない']),
     h('label.chk', [h('input', { type: 'checkbox', checked: f.autoEquip || undefined, onchange: (e) => { f.autoEquip = e.target.checked; } }), ' 強くなる物は自動で装備する（放置向け）']),

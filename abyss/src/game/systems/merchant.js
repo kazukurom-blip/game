@@ -162,7 +162,7 @@ export class MerchantSystem {
     const def = MYTHIC[id];
     if (!def) return { ok: false, msg: 'ミシックを選んでください' };
     const info = this.exchangeInfo();
-    if (!info.ok) return { ok: false, msg: `原初の核 ${MYTHIC_COST.core}・伝説の残響 ${MYTHIC_COST.echo} が必要` };
+    if (!info.ok) return { ok: false, msg: `極致の核 ${MYTHIC_COST.core}・伝説の残響 ${MYTHIC_COST.echo} が必要` };
     if (this.game.sys.inv.bagFree() <= 0) return { ok: false, msg: 'バッグがいっぱい' };
     const ilvl = Math.max(def.req || 60, this.gambleIlvl());
     const it = generateItem(this.game.rng, { ilvl, rarity: 'mythic', slot: def.slot, cls: this.st.hero.cls, def: id, anyReq: true, source: 'exchange' });

@@ -1,7 +1,7 @@
 // 図鑑の窓: 魔物図鑑（撃破数の段・種族へのダメージ）・宝物図鑑（ユニーク・セット・ミシック・伝説の力）・落とし物の表（確率の表示）。担当: メタ担当。
 
 import { h, button, spriteImg, injectCss } from '../dom.js';
-import { fmt, fmtPct } from '../../engine/format.js';
+import { fmt, fmtPct, roman } from '../../engine/format.js';
 import { assets } from '../../render/assets.js';
 import { attachTip } from '../tooltip.js';
 import { FAMILIES, MONSTER } from '../../data/monsters.js';
@@ -26,7 +26,7 @@ export const bestiaryPanel = {
   refreshOn: ['meta:bestiary'],
   help: `<p><b>魔物図鑑</b>: 魔物ごとに ${KILL_TIERS.map((n) => n.toLocaleString('en-US')).join(' / ')} 体倒すと段が上がり、1 段ごとにその種族へのダメージ +1%。見つけた種類の割合が 10% / 25% / 50% / 100% になると全ダメージと最大ライフが上がります。</p>
 <p><b>宝物図鑑</b>: ユニーク・セット・ミシック・伝説の力を初めて拾うと登録されます。1 つごとに小さな永続の効果、集めた割合でさらに大きな効果があります。</p>
-<p><b>落とし物の表</b>: いまのレア発見率・苦行で、どのレアリティが何 % で落ちるかを実際の計算で出しています。</p>`,
+<p><b>落とし物の表</b>: いまのレア発見率・魔境で、どのレアリティが何 % で落ちるかを実際の計算で出しています。</p>`,
   badge: (g) => g.state.meta.codexSeen?.unseen || 0,
   render(ui, el) {
     injectCss('meta-best', CSS);
@@ -160,8 +160,8 @@ function renderDrops(ui, el) {
   const qty = H?.quantity || 0;
   el.append(h('div.mt-cards', [
     card('レア発見率', fmtPct(mf), `実効 ${fmtPct(BAL.mfEffective(mf))}（多いほど逓減）`),
-    card('アイテム発見数', `+${fmtPct(qty)}`, `苦行の数 ×${(diff.loot || 1).toFixed(2)}`),
-    card('苦行', torment ? `${torment}` : 'なし', torment ? `太古 ${fmtPct((diff.ancient || 0) * 100)}・原初 ${fmtPct((diff.primal || 0) * 100, 2)}` : `太古 ${fmtPct((diff.ancient ?? 0.08) * 100)}（レジェンダリー以上）`),
+    card('アイテム発見数', `+${fmtPct(qty)}`, `魔境の数 ×${(diff.loot || 1).toFixed(2)}`),
+    card('魔境', torment ? roman(torment) : 'なし', torment ? `覚醒 ${fmtPct((diff.ancient || 0) * 100)}・極致 ${fmtPct((diff.primal || 0) * 100, 2)}` : `覚醒 ${fmtPct((diff.ancient ?? 0.08) * 100)}（レジェンダリー以上）`),
   ]));
   const odds = Object.fromEntries(RANKS.map(([rk]) => [rk, sys.rarityOdds({ mf, rank: rk, torment })]));
   const head = h('tr', [h('th', 'レアリティ'), ...RANKS.map(([, n]) => h('th', n))]);

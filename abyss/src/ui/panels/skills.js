@@ -93,11 +93,10 @@ const CSS = `
 .gl-pick .gl-row.no { opacity:.4; cursor:default; }
 .gl-codex { display:flex; flex-wrap:wrap; gap:4px; } .gl-codex span { font-size:11px; padding:1px 8px; border-radius:10px; border:1px solid #2a2230; color:#5a5062; background:#100d13; } .gl-codex span.on { color:var(--gc); border-color:color-mix(in srgb, var(--gc) 50%, transparent); background:color-mix(in srgb, var(--gc) 10%, #100d13); }
 .gl-sum { display:flex; gap:10px; flex-wrap:wrap; font-size:12px; color:var(--dim); margin:4px 0 8px; }
-@media (max-width: 900px) { #main { grid-template-columns:minmax(0, 1fr); } #main > #battle, #main > #panel { min-width:0; } }
 @media (max-width: 900px) { .sk2-bar { gap:3px; } .sk2-slot { padding:4px 1px 3px; min-height:84px; } .sk2-slot .nm { font-size:9px; min-height:20px; } .sk2-slot .mv button { padding:0 3px; font-size:9px; } .sk2-slot .ic, .sk2-slot .empty { width:36px !important; height:36px !important; } .sk2-runes { grid-template-columns:1fr; } .sk2-top { grid-template-columns:44px minmax(0, 1fr); } .sk2-top > .ic { width:44px !important; height:44px !important; } .sk2-btns { grid-column:1 / 3; flex-direction:row; } .sk2-btns > * { flex:1; } .sk2-sock { min-width:0; flex-basis:100%; } .gl-row { grid-template-columns:32px minmax(0, 1fr) auto; } }
 `;
 
-// 読み込んだときに入れておく（スマホで #main が横に広がらないための 1 行も含む）
+// 読み込んだときに入れておく（画面全体の並びは style.css）
 injectCss('skills', CSS);
 
 function iconOf(id, size) { const c = spriteImg(assets, `icon.skill.${id}`, size); c.classList.add('ic'); return c; }

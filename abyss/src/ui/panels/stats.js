@@ -1,7 +1,7 @@
 // 記録の窓: 一生の記録・この周回の記録・能力の詳しい内訳（どこから来た効果か）・スキル別のダメージ（DPS の内訳）。担当: メタ担当。
 
 import { h, injectCss } from '../dom.js';
-import { fmt, fmtPct, fmtTime } from '../../engine/format.js';
+import { fmt, fmtPct, fmtTime, roman } from '../../engine/format.js';
 import { STATS, statDef, describeMod } from '../../data/stats.js';
 import { RARITIES } from '../../data/rarity.js';
 import { SLOT_NAMES } from '../../data/items.js';
@@ -16,7 +16,7 @@ let showAll = false;
 const CAT_NAMES = { attr: '基本の能力', offense: '攻め', defense: '守り', utility: '便利', minion: '召喚物', other: 'そのほか' };
 export const SOURCE_NAMES = {
   class: 'クラス', level: 'レベル', prestige: '魂の祭壇', achievements: '実績ポイント', title: '称号', bestiary: '魔物図鑑', treasure: '宝物図鑑',
-  pet: '連れているペット', petOwn: 'ペットの所持効果', pets: 'ペット', tree: '星座盤', paragon: 'パラゴン', codex: '力の書庫', items: '伝説の力', set: 'セット効果', sets: 'セット効果',
+  pet: '連れているペット', petOwn: 'ペットの所持効果', pets: 'ペット', tree: '星座盤', paragon: 'アビスLv', codex: '力の書庫', items: '伝説の力', set: 'セット効果', sets: 'セット効果',
   gems: '宝石', buff: '強化・バフ', ring1: '指輪（左）', ring2: '指輪（右）',
 };
 export const srcName = (s) => SOURCE_NAMES[s] || SLOT_NAMES[s] || s || '強化・バフ';
@@ -56,11 +56,11 @@ function renderRecord(ui, el) {
   ])]));
   cols.append(h('div', [h('h3.sec-title', '冒険'), kv([
     ['踏破した地域', `${Object.keys(w.cleared || {}).length}`], ['一番奥の地域', ZONES[p?.bestZone > (w.maxZone || 0) ? p.bestZone : w.maxZone || 0]?.name || '-'], ['クリアしたステージ', fmt(r.stages || 0)],
-    ['苦行の最高', w.maxTorment ? `${w.maxTorment}` : '-'], ['裂け目の最高', w.rift?.best ? `段階 ${w.rift.best}（${w.rift.runs || 0} 回）` : '-'],
+    ['魔境の最高', w.maxTorment ? roman(w.maxTorment) : '-'], ['裂け目の最高', w.rift?.best ? `段階 ${w.rift.best}（${w.rift.runs || 0} 回）` : '-'],
   ])]));
   cols.append(h('div', [h('h3.sec-title', '戦利品'), kv([
     ...RARITIES.map((x) => [h('span', { style: { color: x.color } }, x.name), fmt(s.itemsFound?.[x.id] || 0)]),
-    ['太古 / 原初', `${fmt(r.ancient || 0)} / ${fmt(r.primal || 0)}`], ['分解した数', fmt(s.salvaged)],
+    ['覚醒 / 極致', `${fmt(r.ancient || 0)} / ${fmt(r.primal || 0)}`], ['分解した数', fmt(s.salvaged)],
   ])]));
   cols.append(h('div', [h('h3.sec-title', '暮らし'), kv([
     ['鍛冶', `${fmt(Math.max(s.crafted || 0, r.crafted || 0))} 回（最高 +${r.maxEnh || 0}）`], ['転生 / 超越', `${st.meta.rebirths} 回 / ${p?.transcends || 0} 回`], ['集めた魂', fmt(st.meta.totalSouls)],

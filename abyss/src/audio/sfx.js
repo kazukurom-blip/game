@@ -426,12 +426,12 @@ def('drop_mythic', 'ドロップ（ミシック）', 'loot', { vol: 1, prio: 100
   sparkle(s, { t0: 1.3, dur: 1.6, rate: 45, amp: 0.16 });
   s.reverb({ mix: 0.3, size: 0.88 });
 });
-def('drop_ancient', 'きらめき（太古）', 'loot', { vol: 0.44, prio: 40, min: 0.1, dur: 1 }, (s) => {
+def('drop_ancient', 'きらめき（覚醒）', 'loot', { vol: 0.44, prio: 40, min: 0.1, dur: 1 }, (s) => {
   noteSeq(s, [88, 91, 96, 100], { step: 0.05, fn: glass, amp: 0.35, decay: 0.3 });
   sparkle(s, { dur: 0.7, rate: 50, amp: 0.15, lo: 4000, hi: 9000 });
   s.reverb({ mix: 0.25, size: 0.8 });
 });
-def('drop_primal', 'きらめき（原初）', 'loot', { vol: 0.53, prio: 70, min: 0.1, dur: 1.6 }, (s) => {
+def('drop_primal', 'きらめき（極致）', 'loot', { vol: 0.53, prio: 70, min: 0.1, dur: 1.6 }, (s) => {
   const r = s.layer(0.5); r.noise({ dur: 0.42, env: (t) => (t / 0.42) ** 2 }); r.filter({ type: 'bp', f: sweep(500, 4000, 0.42), q: 2 }); s.add(r, 0, 0.6);
   for (const m of [76, 83, 88]) bell(s, { t0: 0.42, f: M(m), dur: 1.1, amp: 0.25, ratio: 3.5, index: 2.2, decay: 0.55 });
   thump(s, { t0: 0.42, f0: 140, f1: 40, dur: 0.4, k: 9, amp: 0.7 });
@@ -560,7 +560,7 @@ def('level_up', 'レベルアップ', 'event', { vol: 0.74, prio: 75, min: 0.6, 
   sparkle(s, { t0: 0.3, dur: 1, rate: 35, amp: 0.14 });
   s.reverb({ mix: 0.25, size: 0.84 });
 });
-def('paragon', 'パラゴン', 'event', { vol: 0.74, prio: 75, min: 0.6, dur: 2.3 }, (s) => {
+def('paragon', 'アビスLv', 'event', { vol: 0.74, prio: 75, min: 0.6, dur: 2.3 }, (s) => {
   noteSeq(s, [60, 67, 72, 79, 84], { step: 0.09, amp: 0.3, decay: 0.4, ratio: 2, index: 1.6 });
   choir(s, { t0: 0.35, notes: [60, 64, 67, 72], dur: 1.6, amp: 0.38, vowel: 'a', att: 0.1 });
   bell(s, { t0: 0.45, f: M(96), dur: 1.4, amp: 0.22, decay: 0.7 });

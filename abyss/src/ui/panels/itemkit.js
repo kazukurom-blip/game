@@ -24,7 +24,6 @@ import { socketKind } from '../../data/items.js';
 // 見た目
 // ======================================================================
 const CSS = `
-#main > #panel, #main > #battle { min-width: 0; } /* スマホで窓の横幅が上の帯（タブの列）に引っぱられないように */
 .cell.sel { outline: 2px solid var(--gold2); outline-offset: -1px; filter: brightness(1.25); }
 .cell.ik-pick { box-shadow: inset 0 0 0 2px #6ee08a, 0 0 8px #6ee08a88; }
 .cell.ik-pick::before { content: '✔'; position: absolute; left: 50%; bottom: 1px; transform: translateX(-50%); font-size: 12px; color: #6ee08a; text-shadow: 0 0 3px #000; z-index: 2; }

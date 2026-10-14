@@ -85,25 +85,25 @@ export function tormentSelector(ui, opts = {}) {
   const max = w.maxTorment || 0;
   const box = h('div.tm-box');
   if (max < 1) {
-    box.append(h('h3.sec-title', '苦行（難しさ）'), h('p.dim', '第十章の最後で深淵王を倒すと、苦行 I〜XVI が開きます。段を上げるほど敵は強くなり、経験値・ゴールド・ドロップが増えます。'));
+    box.append(h('h3.sec-title', '魔境（難しさ）'), h('p.dim', '第十章の最後で深淵王を倒すと、魔境 I〜XVI が開きます。段を上げるほど敵は強くなり、経験値・ゴールド・ドロップが増えます。'));
     return box;
   }
   const cur = w.torment || 0;
   const info = ws.tormentInfo(cur);
   const grid = h('div.tm-grid');
   for (let t = 0; t <= BAL.MAX_TORMENT; t++) {
-    grid.append(h(`button.tm-btn${t === cur ? '.on' : ''}`, { disabled: t > max || undefined, title: t > max ? `苦行 ${roman(t - 1)} で章のボスを倒すと開く` : ws.tormentInfo(t).name, onclick: () => { ws.setTorment(t); ui.renderPanel(); } }, t === 0 ? 'なし' : roman(t)));
+    grid.append(h(`button.tm-btn${t === cur ? '.on' : ''}`, { disabled: t > max || undefined, title: t > max ? `魔境 ${roman(t - 1)} で章のボスを倒すと開く` : ws.tormentInfo(t).name, onclick: () => { ws.setTorment(t); ui.renderPanel(); } }, t === 0 ? 'なし' : roman(t)));
   }
   const cell = (label, v, cls = '') => h(`div${cls ? `.${cls}` : ''}`, [h('b', v), label]);
   const st = w.tormentStats?.[cur];
   append(box, [
-    h('h3.sec-title', ['苦行（難しさ）', h('span.sec-right', cur ? info.name : 'ふつう')]),
+    h('h3.sec-title', ['魔境（難しさ）', h('span.sec-right', cur ? info.name : 'ふつう')]),
     grid,
     h('div.tm-mult', [
       cell('経験値', `×${info.xp.toFixed(2)}`, 'up'), cell('ゴールド', `×${info.gold.toFixed(2)}`, 'up'), cell('ドロップ数', `×${info.loot.toFixed(2)}`, 'up'), cell('レア発見率', `+${info.mf}%`, 'up'),
-      cell('敵のライフ', `×${fmt(info.life, { dec: 1 })}`, 'down'), cell('敵の攻撃', `×${fmt(info.dmg, { dec: 1 })}`, 'down'), cell('耐性', info.resPenalty ? `-${info.resPenalty}` : 'なし', 'down'), cell('太古 / 原初', `${Math.round((info.ancient || 0) * 100)}% / ${((info.primal || 0) * 100).toFixed(1)}%`, 'up'),
+      cell('敵のライフ', `×${fmt(info.life, { dec: 1 })}`, 'down'), cell('敵の攻撃', `×${fmt(info.dmg, { dec: 1 })}`, 'down'), cell('耐性', info.resPenalty ? `-${info.resPenalty}` : 'なし', 'down'), cell('覚醒 / 極致', `${Math.round((info.ancient || 0) * 100)}% / ${((info.primal || 0) * 100).toFixed(1)}%`, 'up'),
     ]),
-    h('div.hint', `敵のレベル ${cur ? `${info.level}〜` : '地域どおり'}。苦行 ${roman(Math.min(BAL.MAX_TORMENT, max))} まで解放（今の段で章のボスを倒すと次の段が開く）。苦行では地域のボスが門の欠片を落とします。`),
+    h('div.hint', `敵のレベル ${cur ? `${info.level}〜` : '地域どおり'}。魔境 ${roman(Math.min(BAL.MAX_TORMENT, max))} まで解放（今の段で章のボスを倒すと次の段が開く）。魔境では地域のボスが門の欠片を落とします。`),
     h('label.chk', [h('input', { type: 'checkbox', checked: w.tormentAuto || undefined, onchange: (e) => { ws.setTormentAuto(e.target.checked); ui.renderPanel(); } }), ' 自動で最適な段（2 分ごとに、撃破のペースが 0.9 体/秒以上で倒れなければ 1 段上げ、0.35 体/秒未満か 2 回倒れたら 1 段下げる）']),
     st ? h('div.dim.small', `この段の実測: ${st.rate.toFixed(2)} 体/秒・倒れた回数 ${st.deaths}（${Math.round(st.secs / 60)} 分）`) : null,
   ]);
@@ -190,7 +190,7 @@ export const mapPanel = {
       here.append(h('div.wm-row', [button('裂け目の窓を開く', () => ui.openPanel('rift'), { kind: 'primary' })]));
     } else {
       here.append(
-        h('div.wm-title', `${z.name}${w.torment ? `　苦行 ${roman(w.torment)}` : ''}`),
+        h('div.wm-title', `${z.name}${w.torment ? `　魔境 ${roman(w.torment)}` : ''}`),
         h('div.wm-sub', `${act.name}　${ws.isBossStage() ? 'ボス戦' : `ステージ ${w.stage} / ${STAGES_PER_ZONE}`}　敵 Lv ${ws.level()}`),
         powerRow(g, z),
         h('div.wm-row', [
@@ -270,7 +270,7 @@ hudHooks.lines.push((g) => {
   }
   if (w.mode === 'gate' && w.gate?.run) {
     const r = w.gate.run;
-    return { cls: 'wl rift', text: `<b>${GATE_GROUPS[r.gi]?.name}の門番</b>　残り ${Math.max(0, Math.ceil(r.timeLeft))} 秒　苦行 ${roman(r.tier)}` };
+    return { cls: 'wl rift', text: `<b>${GATE_GROUPS[r.gi]?.name}の門番</b>　残り ${Math.max(0, Math.ceil(r.timeLeft))} 秒　魔境 ${roman(r.tier)}` };
   }
   return null;
 });
@@ -286,8 +286,8 @@ hudHooks.build.push((hud) => {
   on('goblinSpawn', (e) => ui.toast(`${MONSTER[e.unit?.defId]?.name || 'ため込み屋'}が現れた！ 逃がすな`, 'gob'));
   on('goblinKill', (e) => ui.toast(`${MONSTER[e.unit?.defId]?.name || 'ため込み屋'}を倒した！ 戦利品 ${e.items || 0} 個`, 'gob'));
   on('goblinEscape', () => ui.toast('ため込み屋に逃げられた…', 'bad'));
-  on('storyClear', () => ui.toast('物語を踏破！ 苦行と深淵の裂け目が開いた', 'level'));
-  on('tormentUnlock', (e) => ui.toast(`苦行 ${roman(e.tier)} が解放された`, 'level'));
+  on('storyClear', () => ui.toast('物語を踏破！ 魔境と深淵の裂け目が開いた', 'level'));
+  on('tormentUnlock', (e) => ui.toast(`魔境 ${roman(e.tier)} が解放された`, 'level'));
   on('autoBossRetry', () => ui.toast('火力が足りたのでボスに再挑戦', 'boss'));
   on('chestOpen', () => ui.toast('呪われた宝箱が開いた！ レア以上が 3 つ', 'good'));
   on('gateFragment', (e) => ui.toast(`${e.name}を手に入れた（${GATE_GROUPS[e.group]?.name}）`, 'gate'));
@@ -296,7 +296,7 @@ hudHooks.build.push((hud) => {
   on('gateResult', (e) => ui.toast(e.ok ? `門番を討った！${e.mythic ? ' ミシック！' : ''}` : `門番に敗れた　欠片を ${(e.refund || []).length} つ取り戻した`, e.ok ? 'gate' : 'bad'));
   on('riftStart', () => ui.markDirty('world'));
   on('gateStart', () => ui.markDirty('world'));
-  on('tormentChanged', (e) => { ui.markDirty('world'); if (e.auto) ui.toast(`苦行を ${e.tier ? roman(e.tier) : 'なし'} に自動で切り替えた`); });
+  on('tormentChanged', (e) => { ui.markDirty('world'); if (e.auto) ui.toast(`魔境を ${e.tier ? roman(e.tier) : 'なし'} に自動で切り替えた`); });
   injectCss('world', WORLD_CSS);
   return null;
 });
