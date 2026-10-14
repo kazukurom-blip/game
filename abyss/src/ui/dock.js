@@ -57,6 +57,9 @@ export class Dock {
     this.strip = h('button.dock-strip', { type: 'button', 'aria-expanded': 'false', onclick: () => this.toggle() }, [h('span.ds-ic', '🎯'), h('span.ds-tx'), h('span.ds-ar', '▾')]);
     this.body = h('div.dock-body');
     this.root.append(this.strip, this.tabsEl, this.body);
+    this.hover = false;
+    this.root.addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse') this.hover = true; });
+    this.root.addEventListener('pointerleave', () => { this.hover = false; });
     this.setTab(this.tab, true);
   }
 
@@ -128,13 +131,18 @@ export class Dock {
 
   update(dt) {
     this.t += dt;
-    if (this.dirtyLoot && this.tab === 'loot') { this.dirtyLoot = false; this.render(); }
-    if (this.dirtyLog && this.tab === 'log') { this.dirtyLog = false; this.render(); }
+    this.listT = (this.listT || 0) + dt;
+    // 一覧の描き直しは 0.4 秒に 1 回まで（×4 速でドロップが続いても重くしない。マウスが乗っている間は待つ）
+    if (this.listT >= 0.4 && !this.hover) {
+      if (this.dirtyLoot && this.tab === 'loot') { this.dirtyLoot = false; this.listT = 0; this.render(); }
+      if (this.dirtyLog && this.tab === 'log') { this.dirtyLog = false; this.listT = 0; this.render(); }
+    }
     if (this.t < 1) return;
     this.t = 0;
     this.updateCounts();
     if (this.strip.offsetParent !== null) this.updateStrip();
-    if ((this.tab === 'goal' || this.tab === 'pace') && this.visible()) this.render();
+    // 次の目標・進み具合は 1 秒ごと（マウスが乗っている間は、押そうとしたボタンが消えないように待つ）
+    if ((this.tab === 'goal' || this.tab === 'pace') && this.visible() && !this.hover) this.render();
   }
 
   updateCounts() {
