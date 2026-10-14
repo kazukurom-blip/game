@@ -2,7 +2,8 @@
 // 終盤のセーブ（Lv100・パラゴン・転生・苦行・裂け目・ペット・宝石・刻印・極意・図鑑）を作ってから、窓ごとに
 // ボタン・タブ・マス・チェック・選択を順に押し（開いた確認の窓は最初の操作を押してから閉じる）、console のエラー・ページのエラーが 0 件かを見る。
 // マウスを乗せる（ツールチップ）、スマホの幅（390px）でも窓を開く。最後に「枠の一覧に無い絵の ID」が使われていないかも見る。
-// 実行: PORT=8213 node tests/clickall.mjs [--only=hero,bag] [--max=120]（窓ごとに押す数の上限）
+// 実行: PORT=8213 node tests/clickall.mjs [--only=hero,bag] [--max=140]（窓ごとに押す数の上限）。CK_DEBUG=1 で窓ごとの内訳
+// 最後に ×4 速・召喚物 30・敵 50 の 1 フレームの重さ（ゲームの進み + 描画が 16ms 未満）も見る。
 import { createRequire } from 'node:module';
 import http from 'node:http';
 import fs from 'node:fs';
@@ -237,6 +238,25 @@ const main = async () => {
   where = 'play';
   const err = await page.evaluate(async () => { const g = window.__game; for (let i = 0; i < 20 * 30; i++) g.tick(0.05); await new Promise((r) => setTimeout(r, 600)); return String(window.__lastError || ''); });
   if (err) errors.push(`[play] loop: ${err}`);
+  // 重さ: 召喚物 30・敵 50 を ×4 速で（1 フレームのゲームの進み + 描画）
+  where = 'perf';
+  const perf = await page.evaluate(async () => {
+    const g = window.__game; const ui = window.__ui; const sc = ui.scene; const c = g.combat; const h = c.hero;
+    c.H.life *= 1e4; c.recalc();
+    const p = c.params('n_skeleton') || c.params(g.state.hero.bar.find(Boolean));
+    for (let i = 0; i < 30; i++) c.spawnMinion('skeleton', p, { x: h.x + (i % 10) * 20 });
+    for (let i = 0; i < 50; i++) c.spawnMonster(['rot_zombie', 'ash_wolf', 'cultist', 'bog_slime'][i % 4], { level: 90, lifeMul: 1e4, x: h.x + 120 + (i % 20) * 30, y: (i % 7) * 10 - 30 });
+    const ou = g.update.bind(g); const of = sc.frame.bind(sc);
+    let tu = 0; let tf = 0; let n = 0; let worst = 0;
+    g.update = (dt) => { const t0 = performance.now(); ou(dt); const d = performance.now() - t0; tu += d; if (d > worst) worst = d; };
+    sc.frame = (dt) => { const t0 = performance.now(); of(dt); tf += performance.now() - t0; n++; };
+    g.state.settings.speed = 4;
+    await new Promise((r) => setTimeout(r, 3000));
+    g.update = ou; sc.frame = of; g.state.settings.speed = 1;
+    return { update: tu / Math.max(1, n), frame: tf / Math.max(1, n), worst, n, units: c.units.length };
+  });
+  const perfOk = perf.update + perf.frame < 16;
+  console.log(`${perfOk ? '✔' : '✘'} ×4 速・召喚物 30・敵 50: 1 フレーム ゲーム ${perf.update.toFixed(2)}ms + 描画 ${perf.frame.toFixed(2)}ms（いちばん重いゲームの進み ${perf.worst.toFixed(1)}ms・${perf.n} フレーム・${perf.units} 体）`);
   // 枠の一覧に無い絵の ID
   const unknown = await page.evaluate(async () => { const { assets } = await import('./src/render/assets.js'); return [...assets.seen.keys()]; });
   console.log(`押した数 ${clicks}（${Object.entries(per).map(([k, v]) => `${k} ${v}`).join('・')}）`);
@@ -245,6 +265,6 @@ const main = async () => {
   console.log(`${okIds ? '✔' : '✘'} 枠の一覧に無い絵の ID ${unknown.length} 個${okIds ? '' : `: ${unknown.slice(0, 20).join(', ')}`}`);
   await browser.close();
   srv.close();
-  process.exit(okErr && okIds && clicks > 200 ? 0 : 1);
+  process.exit(okErr && okIds && perfOk && (ONLY.length || clicks > 200) ? 0 : 1);
 };
 main().catch((e) => { console.error(e); process.exit(1); });

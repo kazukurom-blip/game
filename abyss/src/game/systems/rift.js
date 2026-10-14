@@ -238,7 +238,7 @@ export class RiftSystem {
     if (ws.transition > 0) { ws.transition -= dt; return; }
     if (run.phase === 'run') {
       this.spawnCd -= dt;
-      const alive = c.enemies().length;
+      const alive = c.enemyCount();
       const cap = Math.min(13, RIFT.maxAliveBase + Math.floor(run.level / 15));
       if (this.spawnCd <= 0 && alive < cap) { this.spawnPack(); this.spawnCd = alive < 3 ? 0.3 : 1.2; }
     } else if (run.phase === 'guardian') {

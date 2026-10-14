@@ -281,6 +281,8 @@ export class Combat {
   }
 
   enemies() { return this.units.filter((u) => u.team === ENEMY_TEAM && !u.dead); }
+  /** 生きている敵の数（配列を作らない。毎ティック使う所向け） */
+  enemyCount() { let n = 0; for (const u of this.units) if (u.team === ENEMY_TEAM && !u.dead) n++; return n; }
   allies() { return this.units.filter((u) => u.team === HERO_TEAM && !u.dead); }
   minionsOf(skillId) { return this.units.filter((u) => u.kind === 'minion' && !u.dead && u.skill === skillId); }
   enemiesNear(x, y, r) { const r2 = r * r; return this.units.filter((u) => u.team === ENEMY_TEAM && !u.dead && dist2(u.x, u.y, x, y) <= r2 + (u.size * 30) ** 2); }
@@ -627,7 +629,7 @@ export class Combat {
       if (behaviors[ch.kind]?.move) behaviors[ch.kind].move(this, h, ch.p, ch, dt);
     }
     // 敵がいなくなったら止める
-    if (!this.enemies().length) { h.busy = 0; }
+    if (!this.enemyCount()) { h.busy = 0; }
   }
 
   endChannel(h) {

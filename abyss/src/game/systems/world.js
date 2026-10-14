@@ -235,7 +235,7 @@ export class WorldSystem {
       if (this.bossTimer <= 0) { this.onBossFail('時間切れ'); return; }
       return;
     }
-    const alive = c.enemies().length;
+    const alive = c.enemyCount();
     if (alive === 0) {
       if (this.wave >= (this.isBossStage() ? 1 : WAVES_PER_STAGE)) { this.onStageClear(); return; }
       this.spawnWave();
