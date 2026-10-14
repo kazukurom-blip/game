@@ -38,7 +38,7 @@ export const GOBLIN_SPAWN = { first: [300, 600], every: [600, 900], weights: { g
 // 苦行の自動最適化
 export const TORMENT_AUTO = { window: 120, upRate: 0.9, downRate: 0.35, maxDeaths: 2 };
 // ボスの自動再挑戦
-export const AUTO_BOSS = { minGap: 45, maxGap: 300, margin: 1.0 };
+export const AUTO_BOSS = { minGap: 30, maxGap: 180, margin: 1.0 }; // 強さ担当: 45/300 → 30/180（負けるほどボスが弱る BOSS_FAIL_EASE と合わせて、壁を短く）
 // 見張り: ふつうのステージで、この秒数だれも倒れなければステージをやり直す
 export const STALL_RESTART_SEC = 120;
 

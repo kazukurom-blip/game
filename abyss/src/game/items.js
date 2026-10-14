@@ -101,7 +101,7 @@ export function itemTypeLine(item) {
 /** 必要レベル */
 export function itemReq(item) {
   const b = baseOf(item);
-  return Math.max(1, Math.min(BAL.MAX_LEVEL, Math.max(b?.req || 1, Math.floor((item.ilvl || 1) * 0.9) - 2)));
+  return Math.max(1, Math.min(BAL.MAX_LEVEL, Math.max(b?.req || 1, Math.floor((item.ilvl || 1) * (BAL.ITEM_REQ_PER_ILVL ?? 0.9)) - 2)));
 }
 
 /** ざっくりの強さ（並べ替え用）。本当の比較は character.js の compareItem を使う */

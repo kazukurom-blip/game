@@ -334,7 +334,7 @@ export const SKILLS = [
   {
     id: 's_bolt', cls: 'sorcerer', kind: 'basic', name: '魔弾', desc: '魔力の弾で {dmg} の雷撃ダメージ。',
     tags: ['spell', 'projectile'], element: 'lightning', unlock: 1, basic: true, behavior: 'projectile',
-    cost: 0, cd: 0, castTime: 0.5, dmg: [130, 6], range: 650, speed: 1100, count: 1,
+    cost: 0, cd: 0, castTime: 0.5, dmg: [145, 7], range: 650, speed: 1100, count: 1,
     runes: [
       R('fire', '火の玉', '火炎ダメージになり、当たると半径 80 で小さく爆発する', { element: 'fire', explode: 80 }),
       R('frost', '氷の礫', '冷気ダメージになり、10% の確率で凍結させる', COLD(0.1)),
@@ -389,7 +389,7 @@ export const SKILLS = [
   {
     id: 's_flame', cls: 'sorcerer', kind: 'basic', name: '火の礫', desc: '燃える礫を放ち {dmg} の火炎ダメージ。当たると半径 {explode} で弾ける。20% の確率で炎上。',
     tags: ['spell', 'projectile'], element: 'fire', unlock: 10, basic: true, behavior: 'projectile',
-    cost: 0, cd: 0, castTime: 0.55, dmg: [125, 6], range: 650, speed: 1000, explode: 70, status: { id: 'ignite', chance: 0.2 },
+    cost: 0, cd: 0, castTime: 0.55, dmg: [140, 7], range: 650, speed: 1000, explode: 90, status: { id: 'ignite', chance: 0.2 },
     runes: [
       R('big', '大きな礫', '弾ける範囲 ×2、動作 +20%', { explodeMul: 2, castMul: 1.2 }),
       R('cold', '氷の礫', '冷気ダメージになり、10% の確率で凍結させる', COLD(0.1)),
@@ -411,7 +411,7 @@ export const SKILLS = [
   {
     id: 's_meteor', cls: 'sorcerer', kind: 'active', name: '隕石', desc: '1 秒後に隕石を落とし、半径 {radius} に {dmg} の火炎ダメージ。落ちた所は 3 秒燃える。',
     tags: ['spell', 'area'], element: 'fire', unlock: 17, behavior: 'meteor',
-    cost: 45, cd: 8, castTime: 0.8, dmg: [480, 22], range: 650, radius: 170, delay: 1.0, burn: { dur: 3, tick: 0.5, mult: 0.12 },
+    cost: 45, cd: 8, castTime: 0.8, dmg: [540, 25], range: 650, radius: 170, delay: 1.0, burn: { dur: 3, tick: 0.5, mult: 0.12 },
     runes: [
       R('comet', '彗星', '冷気ダメージになり、50% の確率で凍結させる', { element: 'cold', status: { id: 'freeze', chance: 0.5, dur: 1.2 } }),
       R('swarm', '流星群', '小さな隕石を 3 つ落とす（1 つ ×0.45）', { countAdd: 2, dmgMul: 0.45 }),
@@ -606,7 +606,7 @@ export const SKILLS = [
   {
     id: 'a_stab', cls: 'assassin', kind: 'basic', name: '連刃', desc: '素早く切りつけ {dmg} のダメージ。',
     tags: ['attack', 'melee'], element: 'phys', unlock: 1, basic: true, behavior: 'melee',
-    cost: 0, cd: 0, castTime: 0.38, dmg: [100, 4.5], range: 100, radius: 40,
+    cost: 0, cd: 0, castTime: 0.38, dmg: [92, 4], range: 100, radius: 40,
     runes: [
       R('venom', '毒刃', '毒ダメージになり、40% の確率で毒を与える', POIS(0.4)),
       R('twin', '双刃', '2 回切りつける（1 回 ×0.6）', { dmgMul: 0.6, extra: { hits: 2 } }),
@@ -617,7 +617,7 @@ export const SKILLS = [
   {
     id: 'a_fan', cls: 'assassin', kind: 'active', name: '刃の扇', desc: '周りに刃をばらまき、半径 {radius} に {dmg} のダメージ。35% の確率で出血させる。',
     tags: ['attack', 'area'], element: 'phys', unlock: 1, behavior: 'nova',
-    cost: 22, cd: 0, castTime: 0.5, dmg: [125, 6], radius: 160, status: { id: 'bleed', chance: 0.35 },
+    cost: 22, cd: 0, castTime: 0.5, dmg: [115, 5.5], radius: 160, status: { id: 'bleed', chance: 0.35 },
     runes: [
       R('shadow', '影の扇', '虚無ダメージになり、ダメージ ×1.1', { element: 'void', dmgMul: 1.1 }),
       R('poison', '毒の扇', '毒ダメージになり、50% の確率で毒を与える', POIS(0.5)),

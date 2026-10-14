@@ -45,8 +45,9 @@ export const BAL = {
   heroBaseLife: (lvl) => 40 * P(lvl),
   heroLifePerLevel: 0, // 曲線に含む
   MAX_LEVEL: 100,
+  ITEM_REQ_PER_ILVL: 0.82, // 装備に要るレベル = アイテム Lv × これ − 2（ベースの要求とどちらか高い方）
   // レベル l → l+1 に必要な経験値。「同じレベルの敵を何体倒すか」で決める
-  killsToLevel: (l) => Math.round(30 * l ** 1.45 * Math.min(1, 0.04 + 0.032 * l)),
+  killsToLevel: (l) => Math.round(40 * l ** 1.45 * Math.min(1, 0.03 + 0.024 * l)),
   xpToNext: (l) => Math.round(BAL.killsToLevel(l) * BAL.monsterXp(l)),
   // パラゴン（Lv100 以降、上限なし）
   paragonXpToNext: (p) => Math.round(BAL.xpToNext(100) * 0.12 * (1 + p * 0.015)),
@@ -63,7 +64,7 @@ export const BAL = {
   // 曲線 P(L) より速く強くなるので、その分を敵のライフ・攻撃に足す。Lv 100 で頭打ち（苦行・裂け目はそれぞれの倍率で伸びる）。
   // 倍率 = (1 + a × x) × b^min(x, knee) × (1 + c × (x - knee)₊)、x = L - 1。knee から先はゆるやかに（後半は主人公の伸びが仕組みで決まるため）。
   // tests/sim.mjs の長い計測（node tests/sim.mjs 2400 --pace）で合わせる。
-  WORLD: { lifeA: 0.03, lifeB: 1.05, lifeC: 0.0087, dmgA: 0.012, dmgB: 1.009, dmgC: 0.003, knee: 45, cap: 100 },
+  WORLD: { lifeA: 0.09, lifeB: 1.065, lifeC: 0.03, dmgA: 0.012, dmgB: 1.009, dmgC: 0.003, knee: 45, cap: 100 },
   monsterScale: (L) => {
     const W = BAL.WORLD;
     const x = Math.min(W.cap, Math.max(1, L)) - 1;
@@ -76,8 +77,8 @@ export const BAL = {
     champion: { life: 4, dmg: 1.4, xp: 4, gold: 3, loot: 3 },
     rare: { life: 6, dmg: 1.6, xp: 6, gold: 4, loot: 4 }, // 群れの長（エリート詞つき）
     goblin: { life: 6.4, dmg: 0, xp: 3, gold: 30, loot: 12 },
-    boss: { life: 22, dmg: 1.7, xp: 30, gold: 25, loot: 10 },
-    actboss: { life: 44, dmg: 2.0, xp: 80, gold: 60, loot: 18 },
+    boss: { life: 26, dmg: 1.7, xp: 30, gold: 25, loot: 10 },
+    actboss: { life: 52, dmg: 2.0, xp: 80, gold: 60, loot: 18 },
     guardian: { life: 96, dmg: 2.2, xp: 60, gold: 50, loot: 15 },
   },
   // 経験値の Lv 差の補正（低すぎる敵は少なく、自分より強い敵は多めに。先へ進みすぎて装備を着けられなくなるのを防ぐ追い上げ）
