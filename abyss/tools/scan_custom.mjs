@@ -9,7 +9,8 @@
 // 決まり:
 //   - 画像（png / jpg / jpeg / webp / gif / avif）。フォルダの中にフォルダを作ってもよい（例: monster/act1/monster.ash_wolf.png）
 //   - ファイル名 = 枠 ID（例: hero.warrior.body.png）。横に並べたコマ送りは「@コマ数f」（例: fx.s_bolt.proj@8f.png、@6f12 = 6 コマ 12 コマ/秒）
-//   - 同じ名前の .json（例: hero.warrior.body.json）があれば、その中身を設定（opts）として使う:
+//   - 画像はゲームが読むときに自動で加工する（背景を抜く・外側を切る・足元。ゲーム内で入れたときと同じ。assets.js の autoImport）
+//   - 同じ名前の .json（例: hero.warrior.body.json）があれば、その中身を設定（opts）として使う（書いた項目だけ自動の加工より優先）:
 //       { "ax": 0.5, "ay": 0.98, "scale": 1.1, "ox": 0, "oy": 0, "rot": -45, "frames": 4, "fps": 12, "blend": "lighter",
 //         "anchors": { "hand": [0.7, 0.55] }, "bg": "auto", "tol": 48, "trim": true, "flip": true, "crop": { "t": 0, "b": 10 }, "seam": 8 }
 //     （"bg": "auto" は四隅の色で背景を抜く、"black" は黒を透明に。"chroma": { "tol": 40 } の古い書き方も使える）

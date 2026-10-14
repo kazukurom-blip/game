@@ -32,6 +32,10 @@ export function downloadBlob(blob, name) {
   } catch { return false; }
 }
 
+/** 保存できなかったときの案内（容量がいっぱい等）。保存できない環境（非公開のウィンドウ等）は画像の窓の上にずっと出ている */
+export const UNSAVED_MSG = 'このブラウザに保存できませんでした（容量がいっぱいかもしれません）。今は使えますが、閉じると消えます。「パックを書き出す」で残してください';
+export function warnUnsaved(ui) { if (ui.toastOnce) ui.toastOnce('assets-unsaved', UNSAVED_MSG, 'bad'); else ui.toast(UNSAVED_MSG, 'bad'); }
+
 /** はじめて画像を入れるときに 1 回だけ、権利の案内を出す */
 export function ensureRightsNotice(ui) {
   if (local.get('abyss.assets.rights') === '1') return Promise.resolve(true);

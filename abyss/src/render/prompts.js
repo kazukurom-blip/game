@@ -250,7 +250,7 @@ function isGreenish(hex) {
 /** 生成サイズの目安（縦横比ごと） */
 export function aspectInfo(w, h, kind) {
   const r = w / h;
-  if (kind === 'banner' || r >= 3.2) return { aspect: '3:1', gpt: '1536×512', sdxl: '1536×512', flux: '1536×512', mj: '--ar 3:1', note: '横に長い。作った後で上下を切り抜く' };
+  if (kind === 'banner' || r >= 3.2) return { aspect: '3:1', gpt: '1536×512', sdxl: '1536×512', flux: '1536×512', mj: '--ar 3:1', note: '横に長い。余った上下は画像の窓の「上を切る」「下を切る」で切れる（地面の上の透明な所は自動で切る）' };
   if (r >= 1.6) return { aspect: '16:9', gpt: '1536×1024（または 1792×1008）', sdxl: '1344×768', flux: '1344×768', mj: '--ar 16:9', note: '' };
   if (r >= 1.25) return { aspect: '3:2', gpt: '1536×1024', sdxl: '1216×832', flux: '1248×832', mj: '--ar 3:2', note: '' };
   if (r >= 0.85) return { aspect: '1:1', gpt: '1024×1024', sdxl: '1024×1024', flux: '1024×1024', mj: '--ar 1:1', note: '' };

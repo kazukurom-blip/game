@@ -4,7 +4,8 @@
 //   id      … 枠 ID（ファイル名にもなる。例: hero.warrior.body / monster.ash_wolf / fx.s_bolt.proj）。一度決めた ID は変えない
 //   cat     … 大きな分類（CATEGORIES）。group … 画像の窓の小分類（GROUPS[cat]）
 //   kind    … 指示文の型（prompts.js）
-//   w, h    … ゲームの中で描く大きさ（px。画面は 1280×720 基準）。差し替え画像は高さを h に合わせる（fit:'width' なら幅を w に）
+//   w, h    … ゲームの中で描く大きさ（px。画面は 1280×720 基準）。差し替え画像は高さを h に合わせる（fit:'width' なら幅を w に）。
+//             外側を切った主人公・装備・敵・召喚物・ペットの画像は、コードの絵が枠の中で占める範囲に置き直す（assets.js の artBox・fitBox）
 //   ax, ay  … 基準点（0〜1）。キャラは足元（0.5, 0.97）、武器は握り（0.5, 0.82）、弾・演出は中心
 //   anchors … 体の中の点（hand: 武器を持つ手、offhand: 盾の手、head: 兜、back: 背中、chest: 胸）
 //   facing  … 'right' | 'left' | 'up' | 'front' | 'none'（絵の向き。敵は左向き、主人公は右向き）
@@ -196,7 +197,7 @@ export function buildManifest() {
     const gid = group('bg', a.id, a.name.replace(/　.*$/, ''));
     S.push({ id: `bg.${a.id}`, cat: 'bg', group: gid, kind: 'bg', label: `${a.name}（背景・一番奥）`, w: 1280, h: 720, ax: 0, ay: 0, fit: 'width', facing: 'none', dpr: 1, params: { act: a.id, layer: 'far' }, note: 'ゆっくり横に流れます。下の方は暗めに' });
     S.push({ id: `bg.${a.id}.mid`, cat: 'bg', group: gid, kind: 'bg', label: `${a.name}（背景・中景、横につながる絵）`, w: 1280, h: 720, ax: 0, ay: 0, fit: 'width', facing: 'none', dpr: 1, params: { act: a.id, layer: 'mid' }, noInherit: true, note: '空の部分は透明に。左右の端がつながる絵（「左右をつなげる」でなじませられます）' });
-    S.push({ id: `bg.${a.id}.ground`, cat: 'bg', group: gid, kind: 'bg', label: `${a.name}（地面、横につながる絵）`, w: 1280, h: 220, ax: 0, ay: 0, fit: 'width', facing: 'none', dpr: 1, params: { act: a.id, layer: 'ground' }, noInherit: true, note: '画面の下の帯（高さ 220）。上の端が歩く面。縦長の絵は「切り抜き」で上下を切ります' });
+    S.push({ id: `bg.${a.id}.ground`, cat: 'bg', group: gid, kind: 'bg', label: `${a.name}（地面、横につながる絵）`, w: 1280, h: 220, ax: 0, ay: 0, fit: 'width', facing: 'none', dpr: 1, params: { act: a.id, layer: 'ground' }, noInherit: true, note: '画面の下の帯（高さ 220）。上の端が歩く面（足元の少し上）。上の透明（緑）な所は自動で切ります。下が長すぎるときは「下を切る」で' });
   }
 
   // ---------------- 画面の飾り

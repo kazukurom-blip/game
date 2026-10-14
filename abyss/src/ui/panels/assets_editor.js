@@ -6,15 +6,14 @@
 // 調整中は「下書き」としてゲームに出る（戦闘の画面・試し表示）。保存すると IndexedDB に入る。閉じれば元に戻る。
 
 import { h, button, clear } from '../dom.js';
-import { assets, blobToImage, inspectImage, autoProc, processImage, detectAnchors, canvasToBlob, parseAssetFileName, procFromOpts, makeCanvas, resizeCanvas } from '../../render/assets.js';
+import { assets, blobToImage, inspectImage, autoProc, processImage, detectAnchors, canvasToBlob, parseAssetFileName, procFromOpts, makeCanvas, resizeCanvas, FEET_KINDS, BOX_KINDS } from '../../render/assets.js';
 import { slotPrompt, ANCHOR_NAMES, describeUnknown } from '../../render/manifest.js';
 import { renderTemplate } from '../../render/template.js';
 import { drawPreview, previewKind, showInBattle, zoneForAct } from './assets_preview.js';
-import { copyText, downloadBlob, ensureRightsNotice, checker, FACING_JA, BLEND_JA, SOURCE_JA, installStudioCss } from './assets_util.js';
+import { copyText, downloadBlob, ensureRightsNotice, checker, FACING_JA, BLEND_JA, SOURCE_JA, installStudioCss, warnUnsaved } from './assets_util.js';
 import { ACTS } from '../../data/world.js';
 
 const ANCHOR_COL = { base: '#ff4040', hand: '#3ad06a', offhand: '#3a9cff', head: '#ffd23a', back: '#c06aff', chest: '#ff8a3a' };
-const FEET_KINDS = new Set(['hero.body', 'hero.outfit', 'monster', 'minion', 'pet']);
 let openCount = 0;
 /** 調整の窓が開いているか（パネルの貼り付けと取り合わないように） */
 export const editorOpen = () => openCount > 0;
@@ -29,6 +28,7 @@ export async function openEditor(ui, id, o = {}) {
   const kind = previewKind(spec);
   const prompt = slotPrompt(spec);
   const noAnchor = spec.cat === 'bg' || spec.cat === 'ui' || spec.cat === 'icon' || spec.kind === 'hero.portrait';
+  const ground = spec.params?.layer === 'ground'; // 地面の帯（上の端が歩く面）
   const st = {
     file: null, raw: null, proc: { bg: 'none', trim: false }, opts: {}, processed: null, info: null, ins: null, dirty: false,
     sel: 'base', view: 'out', zoom: 1, pick: false, mode: 'auto', marks: true, existing: null, layout: null, ptab: 'en', timer: 0,
@@ -45,7 +45,7 @@ export async function openEditor(ui, id, o = {}) {
     st.existing = 'folder';
     st.raw = ex.raw ? resizeCanvas(ex.raw, ex.raw.naturalWidth || ex.raw.width, ex.raw.naturalHeight || ex.raw.height) : ex.img;
     const fo = assets.folderList.find((e) => e.id === id)?.opts || {};
-    st.proc = procFromOpts(fo);
+    st.proc = ex.proc ? { ...ex.proc } : procFromOpts(fo); // 読み込んだときの加工（自動の加工＋設定）
     st.opts = { ...(ex.opts || {}) };
   }
   if (st.raw) { st.ins = inspectImage(st.raw); const r = processImage(st.raw, st.proc, spec, { frames: st.opts.frames || 1, scale: st.opts.scale }); st.processed = r.canvas; st.info = r.info; }
@@ -107,6 +107,11 @@ export async function openEditor(ui, id, o = {}) {
     if (!det.feet) return false;
     st.opts.ax = round3(det.feet.ax); st.opts.ay = round3(det.feet.ay);
     return true;
+  };
+  // 左右反転: 置いた基準点・アンカーも一緒に左右を入れ替える（足元・手が同じ所を指したまま）
+  const mirrorPoints = () => {
+    if (st.opts.ax !== undefined) st.opts.ax = round3(1 - st.opts.ax);
+    if (st.opts.anchors) st.opts.anchors = Object.fromEntries(Object.entries(st.opts.anchors).map(([k, a]) => [k, [round3(1 - a[0]), a[1]]]));
   };
   const guessAll = () => {
     if (!st.processed) return;
@@ -230,7 +235,9 @@ export async function openEditor(ui, id, o = {}) {
       if (st.info?.bg && (st.proc.bg === 'auto' || st.proc.bg === 'color')) lines.push(h('span', ['背景の色 ', h('span.ed-swatch', { style: { background: `rgb(${st.info.bg.join(',')})` } }), ` rgb(${st.info.bg.join(', ')})・消した所 ${((st.info.removed / Math.max(1, (st.info.procW || 1) * (st.info.procH || 1))) * 100).toFixed(0)}%`]));
       const w = [];
       if (Math.min(ins.w, ins.h) < 256 && spec.cat !== 'icon') w.push('小さい画像です（短い辺が 256 px 未満）。ぼやけるときは大きく作り直してください。');
-      if (st.proc.bg === 'auto' && st.ins?.bg && !st.ins.bg.agree) w.push('四隅の色がそろっていません。「色を選ぶ（スポイト）」で背景の色を押すと確実です。');
+      // 背景の中景・地面は下の 2 隅が絵（地面）なので、抜く空の上の 2 隅だけ比べる
+      const topAgree = (b) => Math.hypot(...b.corners[0].map((v, i) => v - b.corners[1][i])) < 30;
+      if (st.proc.bg === 'auto' && st.ins?.bg && !(spec.cat === 'bg' ? topAgree(st.ins.bg) : st.ins.bg.agree)) w.push('四隅の色がそろっていません。「スポイト」で背景の色を押すと確実です。');
       if (st.info?.procW && st.info.removed / (st.info.procW * st.info.procH) > 0.97) w.push('ほとんど消えてしまいました。「許容値」を下げてください。');
       const ar = (st.processed?.width || 1) / (st.opts.frames || 1) / (st.processed?.height || 1);
       const want = spec.w / spec.h;
@@ -267,7 +274,8 @@ export async function openEditor(ui, id, o = {}) {
         select('view', [['out', '加工後'], ['orig', '元の画像']], () => st.view, (v) => { st.view = v; drawAdjust(); }),
       ]),
       adjScroll,
-      h('div.ed-note', spec.cat === 'bg' || spec.kind === 'ui.title' ? '背景は画像の左上を画面の左上に合わせ、幅を 1280 にそろえて横に並べます。上下の位置は「形」の「上を切る・下を切る」で合わせます。' : 'この枠の画像は、枠の中心に縦横比を保って収めて表示されます（基準点の調整はいりません）。余白は「透明な外側を切る」で取れます。'),
+      h('div.ed-note', ground ? '地面は幅を 1280 にそろえて横に並べ、帯の上の端を戦闘の地面の少し上（足元の 40 px 上）に置きます。上の透明な所は自動で切るので、歩く面が上の端に来ます。下が長すぎるときは「下を切る」で。'
+        : spec.cat === 'bg' || spec.kind === 'ui.title' ? '背景は画像の左上を画面の左上に合わせ、幅を 1280 にそろえて横に並べます。上下の位置は「形」の「上を切る・下を切る」で合わせます。' : 'この枠の画像は、枠の中心に縦横比を保って収めて表示されます（基準点の調整はいりません）。余白は「透明な外側を切る」で取れます。'),
     ]) : h('div.ed-box', [
       h('h4', ['基準点とアンカー', h('small', '選んでから画像を押す（ドラッグで動かせる）')]),
       h('div.ed-anch', [['base', spec.cat === 'gear' && (spec.kind === 'gear.weapon' || spec.kind === 'gear.offhand' || spec.params?.slot === 'weapon') ? '基準点（握る所）' : FEET_KINDS.has(spec.kind) ? '基準点（足元）' : '基準点（中心）'], ...Object.keys(spec.anchors || {}).map((n) => [n, ANCHOR_NAMES[n] || n])].map(([n, l]) => h(`button.st-chip${st.sel === n ? '.on' : ''}`, { onclick: (e) => { st.sel = n; for (const b of e.currentTarget.parentElement.children) b.classList.remove('on'); e.currentTarget.classList.add('on'); drawAdjust(); } }, [h('i', { style: { background: ANCHOR_COL[n] || '#fff' } }), l]))),
@@ -302,8 +310,10 @@ export async function openEditor(ui, id, o = {}) {
     h('div.ed-box', [
       h('h4', ['形']),
       h('div.ed-row', [
-        check('trim', '透明な外側を切る', () => !!st.proc.trim, (v) => { st.proc.trim = v; reprocess(true); }),
-        check('flip', '左右反転', () => !!st.proc.flip, (v) => { st.proc.flip = v; reprocess(true); }, spec.facing === 'left' ? '敵は左向き。右向きの絵なら反転' : '向きが逆のときに'),
+        ground
+          ? check('trim', '上の透明な所を切る', () => !!st.proc.trim, (v) => { st.proc.trim = v ? 'top' : false; reprocess(true); }, '歩く面が帯の上の端に来るように、上の透明な所（抜いた空）を切る')
+          : check('trim', '透明な外側を切る', () => !!st.proc.trim, (v) => { st.proc.trim = v; reprocess(true); }, BOX_KINDS.has(spec.kind) ? '外側を切って、元の絵（コードの絵）と同じ大きさ・位置に置き直す' : '透明な外側を切る'),
+        check('flip', '左右反転', () => !!st.proc.flip, (v) => { st.proc.flip = v; mirrorPoints(); reprocess(true); }, spec.facing === 'left' ? '敵は左向き。右向きの絵なら反転' : '向きが逆のときに'),
         spec.cat === 'fx' ? check('crush', 'ほぼ黒を真っ黒に', () => st.proc.crush !== false && (st.proc.crush || (st.opts.blend || spec.blend) === 'lighter'), (v) => { st.proc.crush = v; reprocess(true); }, '加算で四角い箱が見えるのを防ぐ') : null,
       ]),
       range('cropT', '上を切る', 0, 60, 1, () => st.proc.crop?.t || 0, (v) => { st.proc.crop = { ...(st.proc.crop || {}), t: v }; reprocess(); }, (v) => `${v}%`),
@@ -369,9 +379,10 @@ export async function openEditor(ui, id, o = {}) {
     if (!st.dirty && st.existing === 'studio') { ui.toast('変更はありません'); md.close(); return; }
     const file = st.file || (await canvasToBlob(st.raw));
     try {
-      await assets.setCustom(id, file, st.opts, st.proc, { processed: st.processed, name: st.file?.name || '' });
+      const saved = await assets.setCustom(id, file, st.opts, st.proc, { processed: st.processed, name: st.file?.name || '' });
       st.dirty = false;
       ui.toast(`「${spec.label}」を差し替えました`, 'good');
+      if (!saved && assets.persistent !== false) warnUnsaved(ui);
       md.close();
       o.onSaved?.(id);
     } catch (e) { console.error(e); ui.toast(`保存できませんでした: ${e.message}`, 'bad'); }

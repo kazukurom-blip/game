@@ -5383,7 +5383,7 @@ A steel-white and pale gold crescent weapon-slash arc, curved like a half moon, 
 ##### `fx.r_chain.chain` — 「稲妻矢」の連鎖の稲妻（横に伸ばす）
 
 - ゲーム内 200×60（比 3:1）・基準点 (0, 0.5)・右向き・背景 真っ黒 #000000（加算）・加算
-- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。作った後で上下を切り抜く）
+- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。余った上下は画像の窓の「上を切る」「下を切る」で切れる（地面の上の透明な所は自動で切る））
 
 ```text
 A horizontal electric yellow and white lightning lightning arc segment running left to right: a visual effect for a 2D game skill "chain". Bright glowing energy, high contrast. Framing: centered. Background: pure black #000000 (the effect is drawn with additive blending, so black becomes invisible). The glow fades smoothly into pure black at its edges and nothing touches the image borders. Style: hand-painted 2D dark fantasy game visual effect, painterly glowing energy with soft bloom, rich saturated core fading to darkness (not neon). Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
@@ -5567,7 +5567,7 @@ A orange and red fire circular explosion burst seen from the front, radial shock
 ##### `fx.s_chain.chain` — 「連鎖雷」の連鎖の稲妻（横に伸ばす）
 
 - ゲーム内 200×60（比 3:1）・基準点 (0, 0.5)・右向き・背景 真っ黒 #000000（加算）・加算
-- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。作った後で上下を切り抜く）
+- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。余った上下は画像の窓の「上を切る」「下を切る」で切れる（地面の上の透明な所は自動で切る））
 
 ```text
 A horizontal electric yellow and white lightning lightning arc segment running left to right: a visual effect for a 2D game skill "chain". Bright glowing energy, high contrast. Framing: centered. Background: pure black #000000 (the effect is drawn with additive blending, so black becomes invisible). The glow fades smoothly into pure black at its edges and nothing touches the image borders. Style: hand-painted 2D dark fantasy game visual effect, painterly glowing energy with soft bloom, rich saturated core fading to darkness (not neon). Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
@@ -5645,7 +5645,7 @@ A orange and red fire circular explosion burst seen from the front, radial shock
 ##### `fx.s_beam.beam` — 「灼光線」の光線（横に伸ばす）
 
 - ゲーム内 300×80（比 3:1）・基準点 (0, 0.5)・右向き・背景 真っ黒 #000000（加算）・加算
-- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。作った後で上下を切り抜く）
+- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。余った上下は画像の窓の「上を切る」「下を切る」で切れる（地面の上の透明な所は自動で切る））
 
 ```text
 A straight horizontal orange and red fire energy beam running from the left edge to the right edge, seamless, glowing core: a visual effect for a 2D game skill "beam". Bright glowing energy, high contrast. Framing: centered. Background: pure black #000000 (the effect is drawn with additive blending, so black becomes invisible). The glow fades smoothly into pure black at its edges and nothing touches the image borders. Style: hand-painted 2D dark fantasy game visual effect, painterly glowing energy with soft bloom, rich saturated core fading to darkness (not neon). Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
@@ -6271,7 +6271,7 @@ A steel-white and pale gold impact spark burst, star-shaped flash with flying sp
 ##### `fx.n_soulrend.chain` — 「魂裂き」の連鎖の稲妻（横に伸ばす）
 
 - ゲーム内 200×60（比 3:1）・基準点 (0, 0.5)・右向き・背景 真っ黒 #000000（加算）・加算
-- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。作った後で上下を切り抜く）
+- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。余った上下は画像の窓の「上を切る」「下を切る」で切れる（地面の上の透明な所は自動で切る））
 
 ```text
 A horizontal deep violet void energy with a dark core lightning arc segment running left to right: a visual effect for a 2D game skill "soulrend". Bright glowing energy, high contrast. Framing: centered. Background: pure black #000000 (the effect is drawn with additive blending, so black becomes invisible). The glow fades smoothly into pure black at its edges and nothing touches the image borders. Style: hand-painted 2D dark fantasy game visual effect, painterly glowing energy with soft bloom, rich saturated core fading to darkness (not neon). Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
@@ -6611,7 +6611,7 @@ A steel-white and pale gold impact spark burst, star-shaped flash with flying sp
 ##### `fx.a_shuriken.chain` — 「鎖刃」の連鎖の稲妻（横に伸ばす）
 
 - ゲーム内 200×60（比 3:1）・基準点 (0, 0.5)・右向き・背景 真っ黒 #000000（加算）・加算
-- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。作った後で上下を切り抜く）
+- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。余った上下は画像の窓の「上を切る」「下を切る」で切れる（地面の上の透明な所は自動で切る））
 
 ```text
 A horizontal steel-white and pale gold lightning arc segment running left to right: a visual effect for a 2D game skill "shuriken". Bright glowing energy, high contrast. Framing: centered. Background: pure black #000000 (the effect is drawn with additive blending, so black becomes invisible). The glow fades smoothly into pure black at its edges and nothing touches the image borders. Style: hand-painted 2D dark fantasy game visual effect, painterly glowing energy with soft bloom, rich saturated core fading to darkness (not neon). Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
@@ -9666,7 +9666,7 @@ An inventory icon of a crafting material: echo, a small pile or single piece, or
 持ち物のアイコン: 素材「伝説の残響」。レジェンダリー以上を分解すると出る。伝説の力の抽出と、ミシックの交換に使う。小さな山か 1 つのかけら、橙でほのかに光る。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
-##### `icon.mat.core` — 素材「原初の核」のアイコン
+##### `icon.mat.core` — 素材「極致の核」のアイコン
 
 - ゲーム内 64×64（比 1:1）・基準点 (0.5, 0.5)・—・背景 透明（無理なら単色の緑 #00FF00）
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
@@ -9676,7 +9676,7 @@ An inventory icon of a crafting material: core, a small pile or single piece, li
 ```
 
 ```text
-持ち物のアイコン: 素材「原初の核」。太古・原初の装備を分解すると出る（太古 1・原初 3）。ミシックの交換に使う。小さな山か 1 つのかけら、明るい赤でほのかに光る。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 素材「極致の核」。覚醒・極致の装備を分解すると出る（覚醒 1・極致 3）。ミシックの交換に使う。小さな山か 1 つのかけら、明るい赤でほのかに光る。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.mat.shard` — 素材「深淵の欠片」のアイコン
@@ -11494,8 +11494,8 @@ A side-scrolling game background, middle layer that tiles seamlessly horizontall
 ##### `bg.act1.ground` — 第一章　灰の村（地面、横につながる絵）
 
 - ゲーム内 1280×220（比 3:1）・基準点 (0, 0)・—・背景 下だけ絵・上は透明
-- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。作った後で上下を切り抜く）
-- メモ: 画面の下の帯（高さ 220）。上の端が歩く面。縦長の絵は「切り抜き」で上下を切ります
+- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。余った上下は画像の窓の「上を切る」「下を切る」で切れる（地面の上の透明な所は自動で切る））
+- メモ: 画面の下の帯（高さ 220）。上の端が歩く面（足元の少し上）。上の透明（緑）な所は自動で切ります。下が長すぎるときは「下を切る」で
 
 ```text
 A side-scrolling game ground strip that tiles seamlessly horizontally (left and right edges match): a side cross-section of the ground surface of an ash-covered desolate village, a rotting forest, a graveyard, a swamp and a ruined chapel; gray and withered brown tones with a distant blood-red moon, the walkable top edge flat and near the top of the image, rocks and roots below. Only the lower part of the image has scenery; everything above it is fully transparent (PNG with alpha) so a farther layer can show through. If transparency is not available, fill the empty sky with flat solid pure green #00FF00. Style: hand-painted 2D dark fantasy game background art, painterly brush texture, atmospheric depth and haze, muted earthy palette with glowing accents, soft diffuse light.
@@ -11538,8 +11538,8 @@ A side-scrolling game background, middle layer that tiles seamlessly horizontall
 ##### `bg.act2.ground` — 第二章　砂塵の墓所（地面、横につながる絵）
 
 - ゲーム内 1280×220（比 3:1）・基準点 (0, 0)・—・背景 下だけ絵・上は透明
-- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。作った後で上下を切り抜く）
-- メモ: 画面の下の帯（高さ 220）。上の端が歩く面。縦長の絵は「切り抜き」で上下を切ります
+- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。余った上下は画像の窓の「上を切る」「下を切る」で切れる（地面の上の透明な所は自動で切る））
+- メモ: 画面の下の帯（高さ 220）。上の端が歩く面（足元の少し上）。上の透明（緑）な所は自動で切ります。下が長すぎるときは「下を切る」で
 
 ```text
 A side-scrolling game ground strip that tiles seamlessly horizontally (left and right edges match): a side cross-section of the ground surface of a desert of dunes, crumbling temples and tombs, tall obelisks; orange and gold sunset sky, sandstorm haze, the walkable top edge flat and near the top of the image, rocks and roots below. Only the lower part of the image has scenery; everything above it is fully transparent (PNG with alpha) so a farther layer can show through. If transparency is not available, fill the empty sky with flat solid pure green #00FF00. Style: hand-painted 2D dark fantasy game background art, painterly brush texture, atmospheric depth and haze, muted earthy palette with glowing accents, soft diffuse light.
@@ -11582,8 +11582,8 @@ A side-scrolling game background, middle layer that tiles seamlessly horizontall
 ##### `bg.act3.ground` — 第三章　凍てつく峰（地面、横につながる絵）
 
 - ゲーム内 1280×220（比 3:1）・基準点 (0, 0)・—・背景 下だけ絵・上は透明
-- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。作った後で上下を切り抜く）
-- メモ: 画面の下の帯（高さ 220）。上の端が歩く面。縦長の絵は「切り抜き」で上下を切ります
+- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。余った上下は画像の窓の「上を切る」「下を切る」で切れる（地面の上の透明な所は自動で切る））
+- メモ: 画面の下の帯（高さ 220）。上の端が歩く面（足元の少し上）。上の透明（緑）な所は自動で切ります。下が長すぎるときは「下を切る」で
 
 ```text
 A side-scrolling game ground strip that tiles seamlessly horizontally (left and right edges match): a side cross-section of the ground surface of snowy mountains, ice caves, frozen waterfalls and a glacier fortress; pale blue light and a faint aurora, the walkable top edge flat and near the top of the image, rocks and roots below. Only the lower part of the image has scenery; everything above it is fully transparent (PNG with alpha) so a farther layer can show through. If transparency is not available, fill the empty sky with flat solid pure green #00FF00. Style: hand-painted 2D dark fantasy game background art, painterly brush texture, atmospheric depth and haze, muted earthy palette with glowing accents, soft diffuse light.
@@ -11626,8 +11626,8 @@ A side-scrolling game background, middle layer that tiles seamlessly horizontall
 ##### `bg.act4.ground` — 第四章　沈んだ都（地面、横につながる絵）
 
 - ゲーム内 1280×220（比 3:1）・基準点 (0, 0)・—・背景 下だけ絵・上は透明
-- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。作った後で上下を切り抜く）
-- メモ: 画面の下の帯（高さ 220）。上の端が歩く面。縦長の絵は「切り抜き」で上下を切ります
+- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。余った上下は画像の窓の「上を切る」「下を切る」で切れる（地面の上の透明な所は自動で切る））
+- メモ: 画面の下の帯（高さ 220）。上の端が歩く面（足元の少し上）。上の透明（緑）な所は自動で切ります。下が長すぎるときは「下を切る」で
 
 ```text
 A side-scrolling game ground strip that tiles seamlessly horizontally (left and right edges match): a side cross-section of the ground surface of a sunken drowned city, coral, broken towers and an undersea temple; teal light rays and rising bubbles, the walkable top edge flat and near the top of the image, rocks and roots below. Only the lower part of the image has scenery; everything above it is fully transparent (PNG with alpha) so a farther layer can show through. If transparency is not available, fill the empty sky with flat solid pure green #00FF00. Style: hand-painted 2D dark fantasy game background art, painterly brush texture, atmospheric depth and haze, muted earthy palette with glowing accents, soft diffuse light.
@@ -11670,8 +11670,8 @@ A side-scrolling game background, middle layer that tiles seamlessly horizontall
 ##### `bg.act5.ground` — 第五章　紅蓮の溶鉱炉（地面、横につながる絵）
 
 - ゲーム内 1280×220（比 3:1）・基準点 (0, 0)・—・背景 下だけ絵・上は透明
-- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。作った後で上下を切り抜く）
-- メモ: 画面の下の帯（高さ 220）。上の端が歩く面。縦長の絵は「切り抜き」で上下を切ります
+- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。余った上下は画像の窓の「上を切る」「下を切る」で切れる（地面の上の透明な所は自動で切る））
+- メモ: 画面の下の帯（高さ 220）。上の端が歩く面（足元の少し上）。上の透明（緑）な所は自動で切ります。下が長すぎるときは「下を切る」で
 
 ```text
 A side-scrolling game ground strip that tiles seamlessly horizontally (left and right edges match): a side cross-section of the ground surface of a volcano, rivers of lava, giant forges hung with chains, black rock; red and orange with flying embers, the walkable top edge flat and near the top of the image, rocks and roots below. Only the lower part of the image has scenery; everything above it is fully transparent (PNG with alpha) so a farther layer can show through. If transparency is not available, fill the empty sky with flat solid pure green #00FF00. Style: hand-painted 2D dark fantasy game background art, painterly brush texture, atmospheric depth and haze, muted earthy palette with glowing accents, soft diffuse light.
@@ -11714,8 +11714,8 @@ A side-scrolling game background, middle layer that tiles seamlessly horizontall
 ##### `bg.act6.ground` — 第六章　毒霧の森沼（地面、横につながる絵）
 
 - ゲーム内 1280×220（比 3:1）・基準点 (0, 0)・—・背景 下だけ絵・上は透明
-- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。作った後で上下を切り抜く）
-- メモ: 画面の下の帯（高さ 220）。上の端が歩く面。縦長の絵は「切り抜き」で上下を切ります
+- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。余った上下は画像の窓の「上を切る」「下を切る」で切れる（地面の上の透明な所は自動で切る））
+- メモ: 画面の下の帯（高さ 220）。上の端が歩く面（足元の少し上）。上の透明（緑）な所は自動で切ります。下が長すぎるときは「下を切る」で
 
 ```text
 A side-scrolling game ground strip that tiles seamlessly horizontally (left and right edges match): a side cross-section of the ground surface of a forest of giant mushrooms, a poison swamp, spider webs and rotting great trees; yellow-green and purple mist with drifting spores, the walkable top edge flat and near the top of the image, rocks and roots below. Only the lower part of the image has scenery; everything above it is fully transparent (PNG with alpha) so a farther layer can show through. If transparency is not available, fill the empty sky with flat solid pure green #00FF00. Style: hand-painted 2D dark fantasy game background art, painterly brush texture, atmospheric depth and haze, muted earthy palette with glowing accents, soft diffuse light.
@@ -11758,8 +11758,8 @@ A side-scrolling game background, middle layer that tiles seamlessly horizontall
 ##### `bg.act7.ground` — 第七章　天穹の廃城（地面、横につながる絵）
 
 - ゲーム内 1280×220（比 3:1）・基準点 (0, 0)・—・背景 下だけ絵・上は透明
-- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。作った後で上下を切り抜く）
-- メモ: 画面の下の帯（高さ 220）。上の端が歩く面。縦長の絵は「切り抜き」で上下を切ります
+- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。余った上下は画像の窓の「上を切る」「下を切る」で切れる（地面の上の透明な所は自動で切る））
+- メモ: 画面の下の帯（高さ 220）。上の端が歩く面（足元の少し上）。上の透明（緑）な所は自動で切ります。下が長すぎるときは「下を切る」で
 
 ```text
 A side-scrolling game ground strip that tiles seamlessly horizontally (left and right edges match): a side cross-section of the ground surface of a white castle above the clouds, broken colonnades, floating islands and thunderclouds; white and gold with storm light, the walkable top edge flat and near the top of the image, rocks and roots below. Only the lower part of the image has scenery; everything above it is fully transparent (PNG with alpha) so a farther layer can show through. If transparency is not available, fill the empty sky with flat solid pure green #00FF00. Style: hand-painted 2D dark fantasy game background art, painterly brush texture, atmospheric depth and haze, muted earthy palette with glowing accents, soft diffuse light.
@@ -11802,8 +11802,8 @@ A side-scrolling game background, middle layer that tiles seamlessly horizontall
 ##### `bg.act8.ground` — 第八章　機巧の迷宮（地面、横につながる絵）
 
 - ゲーム内 1280×220（比 3:1）・基準点 (0, 0)・—・背景 下だけ絵・上は透明
-- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。作った後で上下を切り抜く）
-- メモ: 画面の下の帯（高さ 220）。上の端が歩く面。縦長の絵は「切り抜き」で上下を切ります
+- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。余った上下は画像の窓の「上を切る」「下を切る」で切れる（地面の上の透明な所は自動で切る））
+- メモ: 画面の下の帯（高さ 220）。上の端が歩く面（足元の少し上）。上の透明（緑）な所は自動で切ります。下が長すぎるときは「下を切る」で
 
 ```text
 A side-scrolling game ground strip that tiles seamlessly horizontally (left and right edges match): a side cross-section of the ground surface of a clockwork labyrinth of gears, steam pipes, brass corridors and giant clock mechanisms; copper and gold with steam, the walkable top edge flat and near the top of the image, rocks and roots below. Only the lower part of the image has scenery; everything above it is fully transparent (PNG with alpha) so a farther layer can show through. If transparency is not available, fill the empty sky with flat solid pure green #00FF00. Style: hand-painted 2D dark fantasy game background art, painterly brush texture, atmospheric depth and haze, muted earthy palette with glowing accents, soft diffuse light.
@@ -11846,8 +11846,8 @@ A side-scrolling game background, middle layer that tiles seamlessly horizontall
 ##### `bg.act9.ground` — 第九章　虚無の境界（地面、横につながる絵）
 
 - ゲーム内 1280×220（比 3:1）・基準点 (0, 0)・—・背景 下だけ絵・上は透明
-- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。作った後で上下を切り抜く）
-- メモ: 画面の下の帯（高さ 220）。上の端が歩く面。縦長の絵は「切り抜き」で上下を切ります
+- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。余った上下は画像の窓の「上を切る」「下を切る」で切れる（地面の上の透明な所は自動で切る））
+- メモ: 画面の下の帯（高さ 220）。上の端が歩く面（足元の少し上）。上の透明（緑）な所は自動で切ります。下が長すぎるときは「下を切る」で
 
 ```text
 A side-scrolling game ground strip that tiles seamlessly horizontally (left and right edges match): a side cross-section of the ground surface of floating rock islands under a twisted sky, rifts full of stars, glowing crystals; purple and black with stardust, the walkable top edge flat and near the top of the image, rocks and roots below. Only the lower part of the image has scenery; everything above it is fully transparent (PNG with alpha) so a farther layer can show through. If transparency is not available, fill the empty sky with flat solid pure green #00FF00. Style: hand-painted 2D dark fantasy game background art, painterly brush texture, atmospheric depth and haze, muted earthy palette with glowing accents, soft diffuse light.
@@ -11890,8 +11890,8 @@ A side-scrolling game background, middle layer that tiles seamlessly horizontall
 ##### `bg.act10.ground` — 第十章　深淵の玉座（地面、横につながる絵）
 
 - ゲーム内 1280×220（比 3:1）・基準点 (0, 0)・—・背景 下だけ絵・上は透明
-- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。作った後で上下を切り抜く）
-- メモ: 画面の下の帯（高さ 220）。上の端が歩く面。縦長の絵は「切り抜き」で上下を切ります
+- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。余った上下は画像の窓の「上を切る」「下を切る」で切れる（地面の上の透明な所は自動で切る））
+- メモ: 画面の下の帯（高さ 220）。上の端が歩く面（足元の少し上）。上の透明（緑）な所は自動で切ります。下が長すぎるときは「下を切る」で
 
 ```text
 A side-scrolling game ground strip that tiles seamlessly horizontally (left and right edges match): a side cross-section of the ground surface of a hellish castle, pillars of bone, a river of blood and a colossal throne; crimson and black under a burning sky, the walkable top edge flat and near the top of the image, rocks and roots below. Only the lower part of the image has scenery; everything above it is fully transparent (PNG with alpha) so a farther layer can show through. If transparency is not available, fill the empty sky with flat solid pure green #00FF00. Style: hand-painted 2D dark fantasy game background art, painterly brush texture, atmospheric depth and haze, muted earthy palette with glowing accents, soft diffuse light.
@@ -11911,7 +11911,7 @@ A side-scrolling game ground strip that tiles seamlessly horizontally (left and 
 ##### `ui.logo` — タイトルロゴ
 
 - ゲーム内 720×240（比 3:1）・基準点 (0.5, 0.5)・—・背景 透明（無理なら単色の緑 #00FF00）
-- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。作った後で上下を切り抜く）
+- 作る大きさ: GPT 1536×512／SDXL 1536×512／FLUX 1536×512／Midjourney `--ar 3:1`（横に長い。余った上下は画像の窓の「上を切る」「下を切る」で切れる（地面の上の透明な所は自動で切る））
 - メモ: 背景は透明に
 
 ```text

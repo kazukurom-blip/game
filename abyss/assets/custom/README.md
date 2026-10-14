@@ -5,7 +5,8 @@
 1. 画像の名前を **枠 ID** にして置く: `hero.warrior.body.png`、`monster.ash_wolf.png`、`fx.s_bolt.proj.png` など。
    - フォルダを分けてもよい（`monster/act1/monster.ash_wolf.png`）。png・webp・jpg が使えます。
    - 横 1 列に並べたコマ送りは `@コマ数f`（`fx.s_bolt.proj@8f.png`、1 秒のコマ数も書くなら `@8f12`）。
-   - 同じ名前の `.json`（`hero.warrior.body.json`）に設定を書ける（基準点・アンカー・大きさ・背景の抜き方など）。
+   - 置いた画像は、ゲーム内で入れたときと同じように自動で加工されます（背景を抜く・外側を切って元の絵と同じ大きさに置き直す・足元を合わせる）。
+   - 変えたい所だけ、同じ名前の `.json`（`hero.warrior.body.json`）に書ける（基準点・アンカー・大きさ・背景の抜き方など。抜きたくないときは `"bg": "none"`）。
 2. `abyss/` の中で `node tools/scan_custom.mjs` を実行する → `custom.json` が作り直されます（知らない枠 ID は「もしかして」で案内）。
 3. ゲームを開き直す。
 

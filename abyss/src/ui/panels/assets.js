@@ -6,14 +6,13 @@
 // 保存は IndexedDB（このブラウザの中だけ）。assets/custom/ に置いた画像（custom.json）より優先される。
 
 import { h, button, clear } from '../dom.js';
-import { assets, blobToImage, inspectImage, autoProc, processImage, detectAnchors, parseAssetFileName, suggestIds, validatePack } from '../../render/assets.js';
+import { assets, blobToImage, inspectImage, autoProc, processImage, detectAnchors, parseAssetFileName, suggestIds, validatePack, procOverrides, FEET_KINDS } from '../../render/assets.js';
 import { CATEGORIES, GROUPS, describeUnknown } from '../../render/manifest.js';
 import { openEditor, editorOpen } from './assets_editor.js';
-import { copyText, downloadBlob, ensureRightsNotice, bytesText, FACING_JA, installStudioCss } from './assets_util.js';
+import { copyText, downloadBlob, ensureRightsNotice, bytesText, FACING_JA, installStudioCss, warnUnsaved } from './assets_util.js';
 
 const PAGE = 40;
 const view = { cat: 'hero', group: 'all', q: '', filter: 'all', shown: PAGE, hover: null };
-const FEET = new Set(['hero.body', 'hero.outfit', 'monster', 'minion', 'pet']);
 let pasteBound = false;
 let uiRef = null;
 
@@ -173,7 +172,7 @@ function bindPaste() {
 
 /**
  * 画像をすぐ入れる（自動の加工: 透明でなければ四隅の色で背景を抜く・外側を切る・足元を合わせる）。
- * extra: { frames, fps, opts（サイドカーの設定）, proc }
+ * extra: { frames, fps, opts（サイドカーの設定。加工の項目 bg・tol・trim・flip・crop・seam なども読む）, proc（加工をまるごと指定） }
  */
 export async function quickImport(ui, id, file, rerender = false, extra = {}) {
   if (!(await ensureRightsNotice(ui))) return false;
@@ -187,13 +186,15 @@ export async function quickImport(ui, id, file, rerender = false, extra = {}) {
     if (frames > 1) opts.frames = frames;
     if (extra.fps || pf?.fps) opts.fps = extra.fps || pf.fps;
     if (spec.cat === 'fx' && !opts.blend) opts.blend = spec.blend || 'lighter';
-    const proc = extra.proc || autoProc(spec, ins.transparent, ins.bg);
+    // 自動の加工に、設定（.json）に書いた加工の項目を重ねる（フォルダの画像と同じ決まり）
+    const proc = extra.proc || { ...autoProc(spec, ins.transparent, ins.bg), ...procOverrides(opts) };
     const { canvas } = processImage(raw, proc, spec, { frames, scale: opts.scale });
-    if (FEET.has(spec.kind) && spec.ay >= 0.8 && opts.ay === undefined) {
+    if (FEET_KINDS.has(spec.kind) && spec.ay >= 0.8 && opts.ay === undefined) {
       const det = detectAnchors(canvas, frames);
-      if (det.feet) { opts.ax = Math.round(det.feet.ax * 1000) / 1000; opts.ay = Math.round(det.feet.ay * 1000) / 1000; }
+      if (det.feet) { if (opts.ax === undefined) opts.ax = Math.round(det.feet.ax * 1000) / 1000; opts.ay = Math.round(det.feet.ay * 1000) / 1000; }
     }
-    await assets.setCustom(id, file, opts, proc, { processed: canvas, name: file.name || '' });
+    const saved = await assets.setCustom(id, file, opts, proc, { processed: canvas, name: file.name || '' });
+    if (!saved && assets.persistent !== false) warnUnsaved(ui);
     if (rerender) {
       ui.toast(`「${spec.label || id}」に入れました${proc.bg === 'auto' ? '（背景を自動で抜きました）' : ''}`, 'good');
       if (ui.current?.id === 'assets') ui.renderPanel();
@@ -211,7 +212,9 @@ export async function bulkImport(ui, files) {
   if (!(await ensureRightsNotice(ui))) return;
   const side = new Map();
   for (const f of files.filter((x) => /\.json$/i.test(x.name))) {
-    try { side.set(f.name.replace(/\.json$/i, '').toLowerCase(), JSON.parse(await f.text())); } catch { /* 読めない設定は無視 */ }
+    // 画像と同じ読み方で枠 ID にする（fx.s_bolt.proj@8f.json・Hero.Warrior.Body (1).json も画像に合う）
+    const key = parseAssetFileName(f.name.replace(/\.json$/i, '.png'))?.id || f.name.replace(/\.json$/i, '').toLowerCase();
+    try { side.set(key, JSON.parse(await f.text())); } catch { /* 読めない設定は無視 */ }
   }
   const images = files.filter((x) => /^image\//.test(x.type) || /\.(png|jpe?g|webp|gif|avif)$/i.test(x.name));
   const ok = []; const unknown = []; const failed = [];
@@ -221,7 +224,8 @@ export async function bulkImport(ui, files) {
     const p = parseAssetFileName(f.name);
     if (!p || p.bad || !known(p.id)) { unknown.push({ f, id: p?.id || f.name }); continue; }
     const sc = side.get(p.id) || null;
-    const r = await quickImport(ui, p.id, f, false, sc ? { opts: stripProc(sc), proc: sc.proc || null } : {});
+    // 設定の加工の項目（bg・trim・flip・crop・proc など）は quickImport が自動の加工に重ねる
+    const r = await quickImport(ui, p.id, f, false, sc && typeof sc === 'object' ? { opts: sc } : {});
     (r ? ok : failed).push(p.id);
   }
   const all = [...assets.slots.keys()];
@@ -238,8 +242,6 @@ export async function bulkImport(ui, files) {
   ui.modal('まとめて取り込んだ結果', body, btns);
   ui.renderPanel();
 }
-
-function stripProc(o) { const c = { ...o }; delete c.proc; return c; }
 
 /** パックを書き出す（ダウンロード。できないときは文字でコピー） */
 async function exportPackUi(ui) {
@@ -275,6 +277,7 @@ async function importPackUi(ui) {
     try {
       const n = await assets.importPack(pack);
       ui.toast(`パックから ${n} 枚を読み込みました`, 'good');
+      if (assets.lastImportUnsaved && assets.persistent !== false) warnUnsaved(ui);
       md.close();
       ui.renderPanel();
     } catch (e) { msg.textContent = e.message; msg.className = 'small bad'; }
