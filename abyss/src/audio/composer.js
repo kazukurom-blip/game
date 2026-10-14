@@ -1,5 +1,5 @@
 // 曲の設計図（themes.js）→ 小節ごとの音符。WebAudio を使わない純粋な計算なので Node でも試せる。
-// 同じ曲・同じ小節番号なら必ず同じ音符になる（輪の長さごとにまったく同じ → 継ぎ目なく繰り返す）。
+// 同じ曲・同じ小節番号なら必ず同じ音符になる（伴奏は輪の長さごと、旋律は 2 周ごとにまったく同じ → 継ぎ目なく繰り返す）。
 // どの小節からでも単独で計算できる（前の小節の状態に頼らない）。
 
 import { THEME, SCALES, DRUM_PATTERNS } from './themes.js';
@@ -27,7 +27,7 @@ export function themeInfo(th) {
 export function barPos(th, b) {
   const inf = themeInfo(th);
   const cb = th.chordBars || 1;
-  if (b < inf.intro) return { intro: true, lb: -1, sec: 'A', occ: 0, passIdx: -1, barInPass: 0, chordIdx: 0, degree: th.A[0], chordStart: b === 0, lastOfPass: false, passLen: inf.passBars('A') };
+  if (b < inf.intro) return { intro: true, lb: -1, sec: 'A', occ: 0, passIdx: -1, barInPass: 0, chordIdx: 0, degree: th.A[0], chordStart: b === 0, lastOfPass: false, passLen: inf.passBars('A'), cycle: 0 };
   const lb = (b - inf.intro) % inf.loopBars;
   let acc = 0; const seen = {};
   for (let i = 0; i < inf.sections.length; i++) {
@@ -38,7 +38,7 @@ export function barPos(th, b) {
       const barInPass = lb - acc;
       const prog = th[sec] || th.A;
       const chordIdx = Math.floor(barInPass / cb);
-      return { intro: false, lb, sec, occ: seen[sec] - 1, passIdx: i, barInPass, chordIdx, degree: prog[chordIdx], chordStart: barInPass % cb === 0, lastOfPass: barInPass === len - 1, passLen: len };
+      return { intro: false, lb, sec, occ: seen[sec] - 1, passIdx: i, barInPass, chordIdx, degree: prog[chordIdx], chordStart: barInPass % cb === 0, lastOfPass: barInPass === len - 1, passLen: len, cycle: Math.floor((b - inf.intro) / inf.loopBars) };
     }
     acc += len;
   }
@@ -112,7 +112,8 @@ function phraseNotes(th, pos0, pos1, base) {
   const phrasesInPass = Math.ceil(pos0.passLen / 2);
   const isLast = phraseIdx === phrasesInPass - 1;
   // フレーズ 0 と 2 は同じ動機（くり返し）、1 と 3 は別の動機
-  const motifKey = `${th.id}:${pos0.sec}:${phraseIdx % 2}`;
+  // 輪の 2 周目は別の旋律（伴奏は同じ）→ 2 周ごとにまったく同じになる
+  const motifKey = `${th.id}:${pos0.sec}:${phraseIdx % 2}:${(pos0.cycle || 0) % 2}`;
   const mr = new Rand(hash32(motifKey));
   const pr = new Rand(hash32(`${motifKey}:${phraseIdx}:${pos0.occ}`));
   const dens = L.density ?? 0.5;
@@ -221,7 +222,7 @@ export function composeBar(th, b) {
       const notes = phraseNotes(th, pos0, pos1, baseDeg);
       for (const n of notes) {
         if (n.bar !== (first ? 0 : 1)) continue;
-        ev.push({ step: n.step, kind: 'note', layer: 'lead', inst: th.lead.inst, midi: scaleNote(th, n.deg), vel: (n.step === 0 ? 0.85 : 0.7) * (0.9 + rng.next() * 0.15), len: n.len });
+        ev.push({ step: n.step, kind: 'note', layer: 'lead', inst: th.lead.inst, midi: scaleNote(th, n.deg), vel: (n.step === 0 ? 0.85 : 0.7) * (0.9 + (Math.abs(n.step * 7 + n.deg * 13 + pos.lb) % 10) * 0.015), len: n.len });
       }
     }
   }
@@ -261,7 +262,7 @@ export function composeBar(th, b) {
 export function themeNeeds(th) {
   const inf = themeInfo(th);
   const notes = new Set(); const drums = new Set();
-  for (let b = 0; b < inf.intro + inf.loopBars; b++) {
+  for (let b = 0; b < inf.intro + inf.loopBars * 2; b++) {
     for (const e of composeBar(th, b).events) {
       if (e.kind === 'note') notes.add(`${e.inst}@${rootFor(e.midi)}`);
       else drums.add(e.inst);

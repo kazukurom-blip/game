@@ -134,8 +134,11 @@ export function fm(out, sr, o) {
   if (n <= 0) return;
   const fa = typeof o.f === 'function' ? ctl(o.f, n, sr) : null;
   const ratio = o.ratio ?? 1;
-  const ia = typeof o.index === 'function' ? ctl(o.index, n, sr) : null;
-  const ic = (o.index ?? 1) / TAU;
+  // 折り返し（エイリアス）を防ぐ: 側波帯の広がり fc + (I+1)·fm がナイキストの手前に収まるよう I を抑える（カーソンの法則）
+  const lim = 0.45 * sr;
+  const capOf = (f) => Math.max(0, (lim - f) / Math.max(1, f * ratio) - 1);
+  const ia = typeof o.index === 'function' || fa ? ctl((t) => Math.min(typeof o.index === 'function' ? o.index(t) : (o.index ?? 1), capOf(fa ? (typeof o.f === 'function' ? o.f(t) : o.f) : o.f)), n, sr) : null;
+  const ic = Math.min(o.index ?? 1, capOf(o.f)) / TAU;
   const amp = o.amp ?? 1;
   const ea = o.env ? ctl(o.env, n, sr) : null;
   const fb = (o.fb || 0) / TAU;

@@ -85,11 +85,20 @@ export const audio = {
       e.prewarm();
       this.custom.decodeAll().then(() => this.musicSys.refresh()).catch(() => {});
     }
-    if (document_hidden() && this.prefs.muteHidden) return true;
-    const p = e.resume();
-    if (e.running) this.afterResume();
-    else p?.then?.(() => { if (e.running) this.afterResume(); });
+    this.updateRunState();
     return true;
+  },
+
+  /** 鳴らすか止めるか（消音中・別のタブを見ている間は AudioContext ごと止めて CPU を使わない） */
+  updateRunState() {
+    const e = this.engine;
+    if (!e.ctx) return;
+    const p = this.prefs;
+    const run = !p.mute && !(document_hidden() && p.muteHidden);
+    if (!run) { e.suspend(); return; }
+    const pr = e.resume();
+    if (e.running) this.afterResume();
+    else pr?.then?.(() => { if (e.running) this.afterResume(); });
   },
 
   afterResume() {
@@ -201,6 +210,7 @@ export const audio = {
     this.engine.cats = { ...p.cats };
     this.engine.setVolumes({ master: p.master, sfx: p.sfx, bgm: p.bgm, mute: p.mute });
     writeMirror(p);
+    this.updateRunState(); // AudioContext は画面に触れたときにしか作らないので、ここで再開しても決まりに反しない
   },
 
   /** 互換: setVolumes(sfx, bgm) */
@@ -217,11 +227,8 @@ export const audio = {
   },
 
   onVisibility() {
-    const hidden = document_hidden();
-    this.musicSys.setHidden(hidden);
-    if (!this.engine.ctx) return;
-    if (hidden && this.prefs.muteHidden) this.engine.suspend();
-    else if (!hidden && this.unlocked) this.engine.resume();
+    this.musicSys.setHidden(document_hidden());
+    this.updateRunState();
   },
 
   tick() {

@@ -174,9 +174,12 @@ const main = async () => {
     await page.evaluate(() => { const r = document.querySelectorAll('.snd input.snd-range')[2]; r.value = '35'; r.dispatchEvent(new Event('input', { bubbles: true })); });
     await page.click('.snd label.chk:has-text("すべての音を消す") input');
     await page.waitForTimeout(150);
-    const muted = await page.evaluate(() => ({ m: window.__game.state.settings.audio.mute, g: window.__audio.engine.master.gain.value }));
-    check('音: 消音できる', muted.m === true, JSON.stringify(muted));
+    const muted = await page.evaluate(() => ({ m: window.__game.state.settings.audio.mute, st: window.__audio.engine.ctx.state }));
+    check('音: 消音できる（AudioContext ごと止めて CPU を使わない）', muted.m === true && muted.st === 'suspended', JSON.stringify(muted));
     await page.click('.snd label.chk:has-text("すべての音を消す") input');
+    await page.waitForTimeout(200);
+    const unmuted = await page.evaluate(() => window.__audio.engine.ctx.state);
+    check('音: 消音を戻すと鳴る', unmuted === 'running', unmuted);
     await page.screenshot({ path: path.join(SHOTS, 'audio_settings.png') });
     // 4) 音の差し替え（ボタンからファイルを入れる → 保存される → 戻す）
     await page.click('details.snd-custom > summary');

@@ -96,9 +96,11 @@ export function makeFxHandler(A) {
         if (e.dot) return;
         if (e.team === 'hero') {
           if (!e.hero) return;
-          const mx = scene?.game?.combat?.hero?.maxLife || 0;
+          const hero = scene?.game?.combat?.hero;
+          const mx = hero?.maxLife || 0;
           const k = mx > 0 ? Math.min(1, (e.v || 0) / mx) : 0.1;
           A.play('hero_hurt', { vol: 0.6 + k * 2, pan });
+          if (mx > 0 && hero.life > 0 && hero.life / mx < 0.3) A.play('low_life'); // ライフが 3 割を切ったら心音
           return;
         }
         if (e.crit) A.play('crit', { pan });

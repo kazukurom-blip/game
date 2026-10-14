@@ -126,7 +126,7 @@ def('hit_fire', '打撃（火炎）', 'combat', { vol: 0.41, prio: 12, min: 0.03
   crackle(s, { dur: 0.2, rate: 170, amp: 0.5, hp: 1800 });
   thump(s, { f0: 130 * p, f1: 48, dur: 0.16, k: 22, amp: 0.6 });
 });
-def('hit_cold', '打撃（冷気）', 'combat', { vol: 0.57, prio: 12, min: 0.035, variants: 3, dur: 0.3 }, (s, v) => {
+def('hit_cold', '打撃（冷気）', 'combat', { vol: 0.56, prio: 12, min: 0.035, variants: 3, dur: 0.3 }, (s, v) => {
   const p = pmOf(v);
   noiseHit(s, { type: 'hp', f: 5200, amp: 0.6, d: 0.018 });
   s.fm({ dur: 0.25, f: 1900 * p, ratio: 3.71, index: (t) => 1.6 * Math.exp(-t * 18), env: perc(0.0008, 0.07), amp: 0.55 });
@@ -201,6 +201,13 @@ def('revive', '復活', 'combat', { vol: 0.67, prio: 70, min: 1, dur: 2 }, (s) =
   pad(s, { t0: 0.1, notes: [60, 64, 67, 72], dur: 1.3, amp: 0.35, att: 0.3 });
   sparkle(s, { t0: 0.3, dur: 1, rate: 30 });
   s.reverb({ mix: 0.3, size: 0.85 });
+});
+def('low_life', '心音（ライフが少ない）', 'combat', { vol: 0.4, prio: 45, min: 1.1, dur: 0.6 }, (s) => {
+  for (const [t0, a] of [[0, 1], [0.2, 0.7]]) {
+    s.osc({ t0, dur: 0.22, f: (t) => 48 + 30 * Math.exp(-t * 30), env: perc(0.004, 0.06), amp: a });
+    s.osc({ t0, dur: 0.12, f: 96, type: 'tri', env: perc(0.003, 0.025), amp: a * 0.25 });
+  }
+  s.filter({ type: 'lp', f: 400 });
 });
 def('enemy_attack', '敵の攻撃', 'combat', { vol: 0.21, prio: 8, min: 0.08, variants: 2, dur: 0.22 }, (s, v) => {
   const p = pmOf(v);
@@ -325,7 +332,7 @@ def('curse', '呪い', 'skill', { vol: 0.4, prio: 18, min: 0.2, dur: 1 }, (s) =>
   s.osc({ dur: 0.8, type: 'tri', f: 116.5, env: swell(0.3, 0.2, 0.3), amp: 0.3 });
   s.osc({ dur: 0.8, type: 'sine', f: 138.6, env: swell(0.35, 0.15, 0.3), amp: 0.2 });
 });
-def('shield', '障壁', 'skill', { vol: 0.37, prio: 25, min: 0.3, dur: 0.8 }, (s) => {
+def('shield', '障壁', 'skill', { vol: 0.36, prio: 25, min: 0.3, dur: 0.8 }, (s) => {
   const l = s.layer(0.7); l.osc({ dur: 0.6, type: 'saw', f: 220, env: swell(0.12, 0.2, 0.25), amp: 0.5 }); l.filter({ type: 'bp', f: sweep(400, 2200, 0.5), q: 8 }); s.add(l, 0, 1.6);
   glass(s, { t0: 0.12, f: 1760, amp: 0.3, decay: 0.3 });
   glass(s, { t0: 0.18, f: 2637, amp: 0.2, decay: 0.3 });
@@ -419,7 +426,7 @@ def('drop_mythic', 'ドロップ（ミシック）', 'loot', { vol: 1, prio: 100
   sparkle(s, { t0: 1.3, dur: 1.6, rate: 45, amp: 0.16 });
   s.reverb({ mix: 0.3, size: 0.88 });
 });
-def('drop_ancient', 'きらめき（太古）', 'loot', { vol: 0.46, prio: 40, min: 0.1, dur: 1 }, (s) => {
+def('drop_ancient', 'きらめき（太古）', 'loot', { vol: 0.44, prio: 40, min: 0.1, dur: 1 }, (s) => {
   noteSeq(s, [88, 91, 96, 100], { step: 0.05, fn: glass, amp: 0.35, decay: 0.3 });
   sparkle(s, { dur: 0.7, rate: 50, amp: 0.15, lo: 4000, hi: 9000 });
   s.reverb({ mix: 0.25, size: 0.8 });

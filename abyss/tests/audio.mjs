@@ -194,13 +194,19 @@ await t('BGM: 章ごとに違う曲（音階・調・速さがばらける）', 
   ok(new Set(acts.map((x) => x.arp?.inst)).size >= 7, 'arp instruments');
   ok(THEME.act2.scale === 'hijaz' && THEME.act3.pad.type === 'glass', '砂漠の音階・氷の和音');
 });
-await t('BGM: 小節の音符は決まっていて、輪の長さごとにまったく同じ（継ぎ目なく繰り返す）', () => {
+await t('BGM: 小節の音符は決まっていて、伴奏は輪ごと・旋律は 2 周ごとにまったく同じ（継ぎ目なく繰り返す）', () => {
+  const noLead = (evs) => JSON.stringify(evs.filter((e) => e.layer !== 'lead'));
   for (const th of THEMES) {
     const inf = themeInfo(th);
-    for (let b = inf.intro; b < inf.intro + inf.loopBars; b += 3) {
-      const a = JSON.stringify(composeBar(th, b).events); const c = JSON.stringify(composeBar(th, b + inf.loopBars).events); const d = JSON.stringify(composeBar(th, b + inf.loopBars * 5).events);
+    let leadDiff = 0;
+    for (let b = inf.intro; b < inf.intro + inf.loopBars; b++) {
+      const e0 = composeBar(th, b).events; const e1 = composeBar(th, b + inf.loopBars).events;
+      const a = JSON.stringify(e0); const c = JSON.stringify(composeBar(th, b + inf.loopBars * 2).events); const d = JSON.stringify(composeBar(th, b + inf.loopBars * 10).events);
       ok(a === c && a === d, `${th.id} bar ${b}`);
+      ok(noLead(e0) === noLead(e1), `${th.id} accompaniment bar ${b}`);
+      if (JSON.stringify(e0) !== JSON.stringify(e1)) leadDiff++;
     }
+    if (th.lead) ok(leadDiff >= 2, `${th.id} 2 周目の旋律が同じ`);
     ok(inf.loopSec >= 20 && inf.loopSec <= 200, `${th.id} loop ${inf.loopSec}`);
   }
 });
@@ -534,8 +540,10 @@ await t('audio の入口: 曲の選び方・音量・消音・調べもの', asy
   ok(audio.game.state.settings.sfx === 0.5 && audio.game.state.settings.bgm === 0.2);
   audio.setMuted(true);
   ok(audio.engine.master.gain.value === 0, 'muted');
+  ok(audio.engine.ctx.state === 'suspended', '消音中は AudioContext ごと止める');
+  ok(audio.play('ui_click') === false, 'no sound while muted');
   audio.setMuted(false);
-  ok(audio.engine.master.gain.value > 0, 'unmuted');
+  ok(audio.engine.master.gain.value > 0 && audio.engine.ctx.state === 'running', 'unmuted');
   const d = audio.debug();
   ok(d.sfxCount >= 40 && d.themes >= 14 && d.ctx === 'running', JSON.stringify(d).slice(0, 200));
   ok(audio.preview('sfx.ui_click') !== undefined);
