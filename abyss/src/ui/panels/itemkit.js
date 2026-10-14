@@ -410,10 +410,12 @@ hudHooks.build.push((hud) => {
   const g = hud.game;
   if (g._itemsUiBound === ui) return null;
   g._itemsUiBound = ui;
-  g.events.on('runeword', (e) => ui.toast(`ルーン語「${e.rw.name}」ができた！`, 'r-unique'));
-  g.events.on('lgemFound', (e) => ui.toast(`深淵の宝石「${e.gem.name}」を手に入れた！`, 'r-mythic'));
-  g.events.on('lgemUpgrade', (e) => { if (e.gem && e.to > e.from) ui.toast(`深淵の宝石が育った: Lv ${e.from} → ${e.to}`, 'good'); });
-  g.events.on('loot', (e) => { if (e.item?.luck) ui.toastOnce?.(`luck-${e.item.rarity}`, `幸運ゲージが満ちた！ 必ずドロップ`, `r-${e.item.rarity}`); });
+  // UI を作り直したら（タイトルに戻って始め直す）外す。外さないと前の画面が丸ごとメモリに残る
+  const on = (t, fn) => { const off = g.events.on(t, fn); if (ui.offs) ui.offs.push(off); };
+  on('runeword', (e) => ui.toast(`ルーン語「${e.rw.name}」ができた！`, 'r-unique'));
+  on('lgemFound', (e) => ui.toast(`深淵の宝石「${e.gem.name}」を手に入れた！`, 'r-mythic'));
+  on('lgemUpgrade', (e) => { if (e.gem && e.to > e.from) ui.toast(`深淵の宝石が育った: Lv ${e.from} → ${e.to}`, 'good'); });
+  on('loot', (e) => { if (e.item?.luck) ui.toastOnce?.(`luck-${e.item.rarity}`, `幸運ゲージが満ちた！ 必ずドロップ`, `r-${e.item.rarity}`); });
   return null;
 });
 

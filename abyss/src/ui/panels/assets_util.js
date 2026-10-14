@@ -1,4 +1,4 @@
-// 画像の窓で共通に使う小さな道具（コピー・ダウンロード・権利の案内・CSS）。
+// 画像の窓で共通に使う小さな道具（権利の案内・CSS・コピーとダウンロードの入り口）。
 
 import { h, injectCss } from '../dom.js';
 import { local } from '../../engine/storage.js';
@@ -7,30 +7,8 @@ export const FACING_JA = { right: '右向き', left: '左向き', up: '上向き
 export const BLEND_JA = { 'source-over': '通常', lighter: '加算（光る・黒が消える）', screen: 'スクリーン（やわらかく光る）', multiply: '乗算（暗くする）' };
 export const SOURCE_JA = { studio: 'ゲーム内で入れた画像', folder: 'assets/custom の画像', draft: '調整中' };
 
-/** 文字をクリップボードへ。だめならテキスト欄を選んで「コピー」の操作を案内する。戻り値: 成功したか */
-export async function copyText(text, fallbackEl = null) {
-  try { await navigator.clipboard.writeText(text); return true; } catch { /* 次へ */ }
-  try {
-    const ta = fallbackEl || document.createElement('textarea');
-    if (!fallbackEl) { ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.append(ta); }
-    ta.focus(); ta.select();
-    const ok = document.execCommand('copy');
-    if (!fallbackEl) ta.remove();
-    return ok;
-  } catch { return false; }
-}
-
-/** ダウンロード（iframe の中などで止められることがある。そのときは呼んだ側が別の方法を出す） */
-export function downloadBlob(blob, name) {
-  try {
-    const url = URL.createObjectURL(blob);
-    const a = h('a', { href: url, download: name, style: { display: 'none' } });
-    document.body.append(a);
-    a.click();
-    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 4000);
-    return true;
-  } catch { return false; }
-}
+// コピー・ダウンロードは ui/dom.js（設定の窓のセーブの書き出しと同じ物）
+export { copyText, copyImage, downloadBlob, canDownload } from '../dom.js';
 
 /** はじめて画像を入れるときに 1 回だけ、権利の案内を出す */
 export function ensureRightsNotice(ui) {
@@ -120,7 +98,7 @@ canvas.ed-adj { display: block; width: 100%; height: auto; cursor: crosshair; to
 .ed-anch { display: flex; gap: 4px; flex-wrap: wrap; }
 .ed-anch .st-chip i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; vertical-align: 0; }
 .ed-note { font-size: 11.5px; color: var(--dim); line-height: 1.5; }
-.studio-back { position: fixed; right: 16px; bottom: 16px; z-index: 960; box-shadow: 0 4px 18px rgba(0,0,0,.7); }
+.studio-back { position: fixed; right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 960; box-shadow: 0 4px 18px rgba(0,0,0,.7); }
 #battle.st-look { outline: 2px solid var(--gold); outline-offset: -2px; }
 .st-report li { margin: 2px 0; font-size: 12.5px; }
 .st-report code, .helptext code { background: #0f0d13; padding: 0 4px; border-radius: 3px; font-size: 11.5px; }

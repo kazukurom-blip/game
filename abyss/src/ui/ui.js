@@ -20,6 +20,7 @@ import { checkUnlocks, introFor, unlockAll, tutorialOf, markSeen } from './unloc
 import { Dock } from './dock.js';
 import { Guide } from './guide.js';
 import { bindKeys } from './keys.js';
+import { SAVE_FAIL_TEXT } from '../engine/save.js';
 
 const TOP_MATS = ['scrap', 'dust', 'crystal', 'echo', 'shard'];
 const SHORT_MAT = { scrap: '鉄屑', dust: '魔塵', crystal: '秘晶', echo: '残響', core: '核', shard: '欠片' };
@@ -56,6 +57,8 @@ export class UI {
     for (const f of this.offs) { try { f?.(); } catch { /* 無視 */ } }
     this.offs = [];
     this.guide?.stop();
+    this.scene?.dispose?.();
+    tooltip.hide();
     if (live === this) live = null;
   }
 
@@ -108,10 +111,18 @@ export class UI {
       h('div.tb-wallet', [E.gold, E.souls, E.mats]),
       h('div.tb-actions', [
         E.speedSeg, E.speed,
-        button('保存', () => { this.opts.onSave?.(); this.toast('保存しました', 'good'); }, { kind: 'small', class: 'tb-save', title: '今の進み具合を保存（自動でも保存します）' }),
+        button('保存', () => this.saveNow(), { kind: 'small', class: 'tb-save', title: '今の進み具合を保存（自動でも保存します）' }),
         button('≡', () => this.openPanel('settings'), { kind: 'small', title: '設定', class: 'tb-menu' }),
       ]),
     );
+  }
+
+  /** 今すぐ保存（上の帯・設定の「保存」）。残せなかったら、そう言う */
+  saveNow() {
+    const ok = this.opts.onSave?.();
+    if (ok === false) this.toast(SAVE_FAIL_TEXT, 'bad');
+    else this.toast('保存しました', 'good');
+    return ok !== false;
   }
 
   /** その窓を開けるか（キー操作から。開いていない機能は開かない） */

@@ -1,8 +1,8 @@
 // 設定の窓: 遊び方（案内・キー操作）・数字の表記・演出・音・機能の開き方・セーブの書き出しと読み込み。
 
-import { h, button } from '../dom.js';
+import { h, button, copyText } from '../dom.js';
 import { setNumberMode, fmt, fmtTime } from '../../engine/format.js';
-import { exportString, importString } from '../../engine/save.js';
+import { exportString, importString, canPersist } from '../../engine/save.js';
 import { howtoSection } from '../guide.js';
 import { FEATURES, tutorialOf } from '../unlocks.js';
 
@@ -44,14 +44,12 @@ export const settingsPanel = {
     el.append(h('section.sec', [
       h('h3.sec-title', 'セーブ'),
       h('div.dim', `遊んだ時間 ${fmtTime(g.state.playTime)}　自動セーブ ${s.autoSaveSec} 秒ごと`),
+      canPersist() ? null : h('div.set-warn', '⚠ このブラウザでは保存できません（非公開のウィンドウ・サイトのデータを止めている など）。閉じると進み具合が消えるので、「書き出す」でできた文字列をメモ帳などに残し、次に遊ぶときに「読み込む」に貼り付けてください。'),
       h('div.toolbar', [
-        button('今すぐ保存', () => { ui.opts.onSave?.(); ui.toast('保存しました', 'good'); }, { kind: 'small' }),
+        button('今すぐ保存', () => ui.saveNow(), { kind: 'small' }),
         button('書き出す（文字列）', () => {
           ta.value = exportString(g.snapshot());
-          ta.focus(); ta.select();
-          const p = navigator.clipboard?.writeText?.(ta.value);
-          if (p?.then) p.then(() => ui.toast('コピーしました（下の欄にも出しています）', 'good'), () => ui.toast('下の欄の文字列を選んでコピーしてください'));
-          else ui.toast('下の欄の文字列を選んでコピーしてください');
+          copyText(ta.value, ta).then((ok) => { ta.focus(); ta.select(); ui.toast(ok ? 'コピーしました（下の欄にも出しています）' : '下の欄の文字列を選んでコピーしてください', ok ? 'good' : ''); });
         }),
         button('読み込む', async () => {
           try { const st = importString(ta.value); if (await ui.confirm('今の進み具合を、貼り付けたセーブで上書きします。')) { ui.opts.onImport?.(st); } } catch (e) { ui.toast(e.message, 'bad'); }

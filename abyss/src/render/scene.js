@@ -69,8 +69,16 @@ export class Scene {
     this.vign = null;
     this.reduce = !!globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
     this.resize();
-    game.events.on('gearChanged', () => { this.lookCache = null; });
-    assets.onChange(() => { this.lookCache = null; this.bg = null; });
+    this.offs = [
+      game.events.on('gearChanged', () => { this.lookCache = null; }),
+      assets.onChange(() => { this.lookCache = null; this.bg = null; }),
+    ];
+  }
+
+  /** 後始末（タイトルに戻ったとき）。知らせを外さないと、前の画面の絵（大きなキャンバス）が残り続ける */
+  dispose() {
+    for (const off of this.offs || []) { try { off(); } catch { /* 無視 */ } }
+    this.offs = [];
   }
 
   resize() {

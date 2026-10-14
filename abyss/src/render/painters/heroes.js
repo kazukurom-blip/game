@@ -519,10 +519,13 @@ function skirtFn(o, lk, cls) {
 
 // ---------------- 組み立て（リグ）
 const RIGS = new Map();
+const RIG_MAX = 16; // 部品一式は 1 つ約 2MB（倍率 2）。クラス × 鎧 × 倍率で増え続けないよう、長く使っていない物から捨てる
 /** クラスとスタイル（null = 基本の服）ごとの部品一式。k = 画素の倍率 */
 export function heroRig(cls, style = null, k = 2) {
   const key = `${cls}|${style || 'base'}|${k}`;
-  if (RIGS.has(key)) return RIGS.get(key);
+  const hit = RIGS.get(key);
+  if (hit) { RIGS.delete(key); RIGS.set(key, hit); return hit; }
+  while (RIGS.size >= RIG_MAX) RIGS.delete(RIGS.keys().next().value);
   const lk = LOOKS[cls] || LOOKS.warrior;
   const o = outfit(cls, style);
   const sh = lk.shoulders;

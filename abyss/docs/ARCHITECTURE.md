@@ -92,8 +92,16 @@ abyss/
 - レアリティは色だけで示さない: マスの左下に 1 文字（並・魔・稀・秀・伝・組・唯・神。`RARITY_MARK`）、説明の窓に ●の数。
 - 共通の部品: `ui/dom.js`（h, button, spriteImg）、`ui/panels/common.js`（itemCell, itemMenu, kvTable, itemMenuHooks, rarityMark）、`ui/tooltip.js`（itemCard, attachTip, tooltipHooks）。
 - 埋め込み先（iframe）では window.confirm / alert / prompt が出ない。確認は `ui.confirm()`（ページの中の窓）、書き出しは文字列の欄も必ず出す。
+- 埋め込み先ではダウンロード（a[download]）・window.open・印刷も止められる。ファイルの保存は `ui/dom.js` の `downloadBlob`（埋め込み先では `window.claude.use('downloads')` があればそれを使い、無ければ false → 呼んだ側が文字のコピーや画像の表示にする）、ボタンを出すかは `canDownload()`、コピーは `copyText`。localStorage / IndexedDB は使えないことがある（`local.persistent()` が false なら「保存できない」と知らせる）。
+- 画面を作り直すとき（タイトルへ戻る）は `ui.dispose()` で出来事の聞き手を外す。`game.events.on` / `assets.onChange` で UI・Scene をつかむときは、外す関数を `ui.offs` に入れる（入れないと前の画面が丸ごとメモリに残る）。
+
+## 公開（claude.ai の Artifact）
+- `node tools/build_artifact.mjs` で `dist/artifact/` を作る: 外側（doctype・html・head・body）の無い `index.html`（先頭に `<title>`・`claude:viewport-fit-sides`・style.css を `<style>` で）と、公開する部品の写し・`files.json`（公開の場所 → 元のファイル）・`removed.json`（前回からなくなった場所。公開し直すときは null にする）。
+- 公開: Artifact の file_path = `abyss/dist/artifact/index.html`、files = `files.json` の中身。2 回目からは同じ URL に出し直す。`capabilities: { downloads: true }` を付けると、画像のパック・型紙をファイルで保存できる（無くても文字のコピーで動く）。
+- 確かめ: `node tests/qa_publish.mjs`（別の origin の sandbox iframe・外のサイトを読めない決まり・保存できないブラウザ・srcdoc・始め直してもメモリが残らない）。長く遊んだときの重さは `node tests/qa_publish.mjs --perf=20`（20 分）。
 
 ## テスト
 - `npm run test:unit`（tests/unit.mjs）… データの整合・計算
 - `npm run test:sim`（tests/sim.mjs）… Node で何時間ぶんも回して進み具合・数値を確かめる
 - `npm run test:smoke`（tests/smoke.mjs）… Chromium で通して動かし、写真とエラー 0 件を確かめる
+- `node tests/qa_publish.mjs` … 公開の形（dist/artifact）を作って、埋め込み先の制限の中で通して動かす

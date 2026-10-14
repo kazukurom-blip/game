@@ -3,7 +3,7 @@
 // 枠を消す確認はページの中で出す（埋め込み先では window.confirm が出ないため）。
 
 import { h, clear, button, spriteImg } from './dom.js';
-import { listSlots, loadSlot, deleteSlot, lastSlot } from '../engine/save.js';
+import { listSlots, loadSlot, deleteSlot, lastSlot, canPersist } from '../engine/save.js';
 import { CLASSES, CLASS } from '../data/classes.js';
 import { ZONE } from '../data/world.js';
 import { assets } from '../render/assets.js';
@@ -75,6 +75,7 @@ function renderSlots(box, onStart, confirming = -1) {
   const last = lastSlot();
   const slots = listSlots();
   const cont = last !== null && !slots[last]?.empty ? slots[last] : slots.find((x) => !x.empty);
+  if (!canPersist()) box.append(h('div.title-warn', { role: 'note' }, '⚠ このブラウザでは保存できません（非公開のウィンドウ・サイトのデータを止めている など）。閉じると進み具合が消えます。続きを残すときは、設定の「書き出す」でできた文字列を控えてください。'));
   if (cont) box.append(button(`つづきから（${CLASS[cont.cls]?.name || ''} Lv ${cont.level}${cont.paragon ? `・アビスLv ${cont.paragon}` : ''}）`, () => onStart({ slot: cont.slot }), { kind: 'primary', class: 'big' }));
   else box.append(h('p.dim', { style: { margin: '0 0 8px', fontSize: '13px' } }, '空いている枠の「新しく始める」から、クラスを選んで始めます。'));
   box.append(h('h3.sec-title', 'セーブの枠'));

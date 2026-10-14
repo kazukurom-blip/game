@@ -27,6 +27,9 @@ export function fallbackDpr(spec) {
   if (spec?.dpr > 0) return spec.dpr;
   return (spec?.w || 0) * (spec?.h || 0) >= BIG_SLOT_PX ? 1 : DPR_FALLBACK;
 }
+// コードの絵の使い回し（cache）の上限。全部の枠を描くと約 360MB になり、長く遊ぶ（全部の章・図鑑・装備を見る）と増え続ける。
+// スマホ（iPhone の Safari はページのキャンバス全体で 224〜384MB まで）では超えると絵が出なくなるので、長く使っていない絵から捨てる（要ればまた描く）。
+export const CACHE_BUDGET = 64 * 1024 * 1024;
 const MAX_SIDE = 2048; // 差し替え画像の 1 コマの長い辺の上限（大きすぎると重い）
 const AUDIO_PREFIX = 'audio:';
 
@@ -37,7 +40,9 @@ class AssetRegistry {
     this.folder = new Map(); // id → { img, opts, source:'folder', url, raw? }
     this.drafts = new Map(); // id → { img, opts, source:'draft' }
     this.custom = new Map(); // 実際に使う差し替え（studio が folder より優先）
-    this.cache = new Map(); // id → コードの絵（canvas）
+    this.cache = new Map(); // id → コードの絵（canvas）。CACHE_BUDGET を超えたら長く使っていない物から捨てる
+    this.cacheBytes = 0;
+    this.useTick = 0; // sprite() で使った順（捨てる順を決める）
     this.sprites = new Map(); // id → sprite()（使い回し）
     this.thumbs = new Map(); // `${id}|${w}x${h}` → 小さな絵
     this.painters = []; // { prefix, fn(ctx, spec, w, h) }
@@ -76,6 +81,7 @@ class AssetRegistry {
     this.painters.push({ prefix, fn });
     this.painters.sort((a, b) => b.prefix.length - a.prefix.length);
     this.cache.clear();
+    this.cacheBytes = 0;
     this.sprites.clear();
     this.thumbs.clear();
   }
@@ -88,7 +94,28 @@ class AssetRegistry {
     const c = makeCanvas(Math.ceil(spec.w * d), Math.ceil(spec.h * d));
     if (c) this.paintInto(c.getContext('2d'), id, spec, d);
     this.cache.set(id, c);
+    if (c) { this.cacheBytes += c.width * c.height * 4; if (this.cacheBytes > CACHE_BUDGET) this.trimCache(id); }
     return c;
+  }
+
+  /** 長く使っていないコードの絵から捨てる（上限の 3/4 まで）。keep は今作った絵 */
+  trimCache(keep = null) {
+    const size = (c) => (c ? c.width * c.height * 4 : 0);
+    let total = 0;
+    for (const c of this.cache.values()) total += size(c);
+    this.cacheBytes = total;
+    if (total <= CACHE_BUDGET) return 0;
+    const used = (id) => this.sprites.get(id)?.t || 0;
+    const ids = [...this.cache.keys()].filter((id) => id !== keep).sort((a, b) => used(a) - used(b));
+    let n = 0;
+    for (const id of ids) {
+      if (this.cacheBytes <= CACHE_BUDGET * 0.75) break;
+      this.cacheBytes -= size(this.cache.get(id));
+      this.cache.delete(id);
+      if (this.sprites.get(id)?.custom === false) this.sprites.delete(id);
+      n++;
+    }
+    return n;
   }
 
   /** コードの絵を ctx に描く（scale 倍）。キャッシュしない */
@@ -132,9 +159,10 @@ class AssetRegistry {
   /** 描くための情報。差し替えがあれば画像、無ければコードの絵（同じ ID なら使い回す） */
   sprite(id) {
     const hit = this.sprites.get(id);
-    if (hit) return hit;
+    if (hit) { hit.t = ++this.useTick; return hit; }
     if (typeof id === 'string' && id && !this.slots.has(id)) this.seen.set(id, (this.seen.get(id) || 0) + 1);
     const s = this.buildSprite(id);
+    s.t = ++this.useTick;
     this.sprites.set(id, s);
     return s;
   }
@@ -403,8 +431,8 @@ class AssetRegistry {
     let n = 0;
     for (const [id, v] of Object.entries(pack.assets || {})) {
       try {
-        const blob = await (await fetch(v.data)).blob();
-        const orig = v.orig ? await (await fetch(v.orig)).blob() : null;
+        const blob = dataUrlToBlob(v.data);
+        const orig = v.orig ? dataUrlToBlob(v.orig) : null;
         const processed = await blobToImage(blob);
         // 元の画像が無いパックは、加工済みの画像を元の画像として扱う（もう一度加工しない）
         const proc = orig ? (v.proc || { bg: 'none', trim: false }) : { bg: 'none', trim: false };
@@ -978,6 +1006,21 @@ export function canvasToBlob(c) {
       else resolve(null);
     } catch { resolve(null); }
   });
+}
+
+/** data: の URL を Blob にする（fetch を使わない。埋め込み先の決まり〔CSP の connect-src〕で data: の fetch は止められることがある） */
+export function dataUrlToBlob(url) {
+  const s = String(url || '');
+  const comma = s.indexOf(',');
+  if (!s.startsWith('data:') || comma < 0) throw new Error('data URL ではありません');
+  const head = s.slice(5, comma);
+  const type = head.split(';')[0] || 'application/octet-stream';
+  const body = s.slice(comma + 1);
+  if (!/;base64$/i.test(head)) return new Blob([decodeURIComponent(body)], { type });
+  const bin = atob(body.replace(/\s+/g, ''));
+  const u8 = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+  return new Blob([u8], { type });
 }
 
 export function blobToDataUrl(blob) {

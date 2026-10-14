@@ -9,7 +9,7 @@ import { h, button, clear } from '../dom.js';
 import { assets, blobToImage, inspectImage, autoProc, processImage, detectAnchors, parseAssetFileName, suggestIds, validatePack } from '../../render/assets.js';
 import { CATEGORIES, GROUPS, describeUnknown } from '../../render/manifest.js';
 import { openEditor, editorOpen } from './assets_editor.js';
-import { copyText, downloadBlob, ensureRightsNotice, bytesText, FACING_JA, installStudioCss } from './assets_util.js';
+import { copyText, downloadBlob, canDownload, ensureRightsNotice, bytesText, FACING_JA, installStudioCss } from './assets_util.js';
 
 const PAGE = 40;
 const view = { cat: 'hero', group: 'all', q: '', filter: 'all', shown: PAGE, hover: null };
@@ -241,23 +241,36 @@ export async function bulkImport(ui, files) {
 
 function stripProc(o) { const c = { ...o }; delete c.proc; return c; }
 
-/** パックを書き出す（ダウンロード。できないときは文字でコピー） */
+/** パックを書き出す（ダウンロード。埋め込み先などダウンロードできない所では、文字で出してコピー） */
 async function exportPackUi(ui) {
   if (!assets.studio.size) { ui.toast('ゲーム内で入れた画像がありません'); return; }
+  const dl = canDownload();
   const orig = h('input', { type: 'checkbox' });
-  const ta = h('textarea', { readonly: true, placeholder: '「文字で表示」を押すと、ここにパックの文字が出ます' });
+  const ta = h('textarea', { readonly: true, placeholder: dl ? '「文字で表示」を押すと、ここにパックの文字が出ます' : 'パックの文字を作っています…' });
   const size = h('div.dim.small');
   const make = async () => JSON.stringify(await assets.exportPack({ includeOrig: orig.checked }));
+  let job = 0;
+  const fill = async () => {
+    const my = ++job;
+    ta.value = ''; size.textContent = '作っています…';
+    const txt = await make();
+    if (my !== job) return;
+    ta.value = txt; size.textContent = `大きさ ${bytesText(txt.length)}`;
+  };
+  orig.addEventListener('change', () => { if (!dl || ta.value) fill(); });
+  const copy = { label: 'コピー', kind: dl ? '' : 'primary', onclick: () => { (async () => { if (!ta.value) await fill(); const ok = await copyText(ta.value, ta); ui.toast(ok ? 'パックをコピーしました。メモ帳などに貼って保存してください' : '文字を選んでコピーしてください', ok ? 'good' : ''); })(); return false; } };
   ui.modal('パックを書き出す', h('div.st-pack', [
     h('p', `ゲーム内で入れた画像 ${assets.studio.size} 枚を、1 つのファイル（.json）にまとめます。別のブラウザや PC で「パックを読み込む」と同じ見た目になります。`),
+    dl ? null : h('p.dim.small', 'この画面ではファイルを保存（ダウンロード）できません。下の文字をコピーしてメモ帳などに貼り、名前を「〜.json」にして保存してください。'),
     h('label.chk', [orig, ' 元の画像も入れる（大きくなるが、あとで背景の抜き方などを直せる）']),
     ta, size,
-  ]), [
-    { label: 'ダウンロード', kind: 'primary', onclick: () => { (async () => { const txt = await make(); const ok = downloadBlob(new Blob([txt], { type: 'application/json' }), `abyss-drop-images-${new Date().toISOString().slice(0, 10)}.json`); size.textContent = `大きさ ${bytesText(txt.length)}。ダウンロードが始まらないときは「文字で表示」→「コピー」を使ってください。`; if (!ok) ui.toast('ダウンロードできませんでした。文字で表示してコピーしてください', 'bad'); })(); return false; } },
-    { label: '文字で表示', onclick: () => { (async () => { ta.value = await make(); size.textContent = `大きさ ${bytesText(ta.value.length)}`; ta.focus(); ta.select(); })(); return false; } },
-    { label: 'コピー', onclick: () => { (async () => { if (!ta.value) ta.value = await make(); const ok = await copyText(ta.value, ta); ui.toast(ok ? 'パックをコピーしました。メモ帳などに貼って保存してください' : '文字を選んでコピーしてください', ok ? 'good' : ''); })(); return false; } },
+  ]), dl ? [
+    { label: 'ダウンロード', kind: 'primary', onclick: () => { (async () => { const txt = await make(); const r = await downloadBlob(new Blob([txt], { type: 'application/json' }), `abyss-drop-images-${new Date().toISOString().slice(0, 10)}.json`); size.textContent = `大きさ ${bytesText(txt.length)}。ダウンロードが始まらないときは「文字で表示」→「コピー」を使ってください。`; if (!r) { ui.toast('ダウンロードできませんでした。文字で表示してコピーしてください', 'bad'); fill(); } })(); return false; } },
+    { label: '文字で表示', onclick: () => { (async () => { await fill(); ta.focus(); ta.select(); })(); return false; } },
+    copy,
     { label: '閉じる' },
-  ], { wide: true });
+  ] : [copy, { label: '閉じる' }], { wide: true });
+  if (!dl) fill();
 }
 
 /** パックを読み込む（ファイル・貼り付けた文字） */
