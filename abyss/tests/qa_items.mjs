@@ -17,6 +17,8 @@ import { gemCombineGold, runeCombineGold } from '../src/data/gems.js';
 import { MATERIALS } from '../src/data/materials.js';
 import { LUCK, offlineHook } from '../src/game/content/items/rewards.js';
 import * as ITEMLIB from '../src/game/content/items/itemlib.js';
+import * as ITEMS from '../src/game/items.js';
+import { registry } from '../src/game/registry.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PORT = Number(process.env.PORT) || 8302;
@@ -137,6 +139,37 @@ if (want('node')) {
       near(shown[s], (S[s] || 0) - others, 1e-6, s);
     }
   });
+
+  t('I06b どのアイテムでも、説明に出す行の合計 = 実際に効く数（2000 個・宝石・ルーン・ルーン語・堕落・品質・強化）', () => {
+    const g = richGame('sorcerer', 80);
+    const rng = new RNG(77);
+    const RAR = ['common', 'magic', 'rare', 'epic', 'legendary', 'set', 'unique', 'mythic'];
+    const keys = ['ember_4', 'frost_7', 'star_10', 'blood_2', 'abyss_5', 'r:tetsu', 'r:hai', 'r:owari', 'r:kiri'];
+    for (let i = 0; i < 2000; i++) {
+      const it = generateItem(rng, { ilvl: 1 + (i % 110), rarity: RAR[i % RAR.length], cls: 'sorcerer', anyReq: true });
+      if (!it) continue;
+      it.q = i % 7 === 0 ? 2 : i % 5 === 0 ? 1 : it.q;
+      it.enh = i % 21;
+      if (it.sockets?.length) it.sockets = it.sockets.map((_, k) => keys[(i + k) % keys.length]);
+      if (i % 13 === 0) it.cimp = { s: 'res_all', v: 10 };
+      // 説明の窓に出る行（tooltip.js・itemkit.js と同じ材料）
+      const lines = [...ITEMLIB.socketModsOf(it), ...(it.rw ? ITEMLIB.runewordMods(it) : []), ...(it.cimp ? [it.cimp] : [])];
+      for (const a of it.affixes) lines.push({ s: a.s, v: ITEMLIB.shownValue(it, a.v) });
+      for (const f of it.fixed || []) lines.push({ s: f.s, v: ITEMLIB.shownValue(it, f.v) });
+      const shown = aggregate(lines.filter((m) => !(it.slot === 'weapon' && m.s === 'weapon_dmg')));
+      // 実際: itemMods から固有効果・アーマー・力の数値を引いた物
+      const real = aggregate(itemMods(it));
+      const minus = aggregate([...implicitOf(it), ...armorOf(it), ...powerOf(it)]);
+      for (const s of new Set([...Object.keys(shown), ...Object.keys(real)])) {
+        if (s === 'dr' || s === 'more_dmg') continue; // 掛け算の能力は足し引きできない
+        const want = (real[s] || 0) - (minus[s] || 0);
+        if (Math.abs((shown[s] || 0) - want) > 1e-6 * Math.max(1, Math.abs(want))) throw new Error(`${it.rarity} ${it.base} ${s}: 説明 ${shown[s] || 0} / 実際 ${want}`);
+      }
+    }
+  });
+  function implicitOf(it) { return ITEMS.implicitMods(it); }
+  function armorOf(it) { const a = ITEMS.itemArmor(it); return a ? [{ s: 'armor', v: a }] : []; }
+  function powerOf(it) { return registry.powerMods(it); }
 
   // ---------------- QA-I07 ルーン語の装備の力を極意に抽出できた（説明では「レジェンダリーだけ」）
   t('I07 ルーン語の装備は極意に抽出できない', () => {
@@ -380,6 +413,24 @@ if (want('ui')) {
     const txt = await page.evaluate(() => document.querySelector('#panelbody')?.textContent || '');
     ok(/レア発見率/.test(txt), '落とし物の表が開く');
     ok(!/多いほど逓減/.test(txt), '「多いほど逓減」（実効の方が大きいのに逓減と書く）');
+  });
+
+  await ta('I17 持ち物: 操作の窓に「倉庫へ」（スマホは長押しが出ない）・鍵つきも倉庫へ入れられる', async () => {
+    const uid = await page.evaluate(async () => {
+      const g = window.__game; const { generateItem } = await import('/src/game/loot.js');
+      const it = generateItem(g.rng, { ilvl: 20, rarity: 'rare', slot: 'helm' }); it.locked = true; g.state.inv.bag.unshift(it);
+      window.__ui.openPanel('bag'); return it.uid;
+    });
+    await page.waitForTimeout(200);
+    await page.evaluate(() => { const b = [...document.querySelectorAll('#panelbody .tabs .tab')].find((x) => x.textContent.startsWith('バッグ')); b?.click(); });
+    await page.waitForTimeout(200);
+    await page.click('#panelbody .grid .cell:not(.empty)');
+    await page.waitForSelector('.modal .modal-foot');
+    const has = await page.evaluate(() => { const b = [...document.querySelectorAll('.modal .modal-foot button')].find((x) => x.textContent === '倉庫へ'); b?.click(); return !!b; });
+    ok(has, '「倉庫へ」が無い');
+    await page.waitForTimeout(200);
+    const where = await page.evaluate((u) => window.__game.sys.inv.findItem(u)?.where, uid);
+    ok(where === 'stash', `場所 ${where}`);
   });
 
   ok(true);

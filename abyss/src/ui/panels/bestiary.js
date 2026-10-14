@@ -164,10 +164,11 @@ function renderDrops(ui, el) {
   const torment = st.world.torment || 0;
   const qty = H?.quantity || 0;
   el.append(h('div.mt-cards', [
-    card('レア発見率', fmtPct(mf), mf > 0 ? `実際の効き ${fmtPct(BAL.mfEffective(mf))}（100% 未満は多めに効き、超えると伸びが鈍る）` : 'レア以上が出やすくなる'),
+    card('レア発見率', fmtPct(mf), mf > 0 ? `実際の効き ${fmtPct(BAL.mfEffective(mf))}` : 'レア以上が出やすくなる'),
     card('アイテム発見数', `+${fmtPct(qty)}`, `魔境の倍率 ×${Number((diff.loot || 1).toFixed(2))}`),
     card('魔境', torment ? roman(torment) : 'なし', torment ? `覚醒 ${fmtPct((diff.ancient || 0) * 100)}・極致 ${fmtPct((diff.primal || 0) * 100, 2)}` : `覚醒 ${fmtPct((diff.ancient ?? 0.08) * 100)}（レジェンダリー以上）`),
   ]));
+  el.append(h('p.hint', `レア発見率は 100% 未満では多めに効き（50% → 実際 ${fmtPct(BAL.mfEffective(50))}）、100% を超えると伸びが鈍ります（300% → ${fmtPct(BAL.mfEffective(300))}）。`));
   // アイテム Lv で上のレアリティの重みが変わる（loot.js の legendaryBoost など）ので、今の場所の Lv で出す
   const ilvl = Math.max(1, Math.round(g.sys.world.level() || 1));
   const odds = Object.fromEntries(RANKS.map(([rk]) => [rk, sys.rarityOdds({ mf, rank: rk, torment, ilvl })]));
