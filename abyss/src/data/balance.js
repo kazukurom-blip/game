@@ -51,6 +51,17 @@ export const BAL = {
   monsterDmg: (L) => 2.5 * P(L),
   monsterXp: (L) => 5 * (1 + 0.15 * (L - 1)) * 1.02 ** (L - 1),
   monsterGold: (L) => 1.5 * P(L) ** 0.85,
+  // 敵の強さの上乗せ（ワールド担当）。物語の進み具合（DESIGN §3）に合わせる係数。主人公はレベル・スキル・パッシブで
+  // 曲線 P(L) より速く強くなるので、その分を敵のライフ・攻撃に足す。Lv 100 で頭打ち（苦行・裂け目はそれぞれの倍率で伸びる）。
+  // 倍率 = (1 + a × x) × b^min(x, knee) × (1 + c × (x - knee)₊)、x = L - 1。knee から先はゆるやかに（後半は主人公の伸びが仕組みで決まるため）。
+  // tests/sim.mjs の長い計測（node tests/sim.mjs 2400 --pace）で合わせる。
+  WORLD: { lifeA: 0.03, lifeB: 1.042, lifeC: 0.02, dmgA: 0.012, dmgB: 1.009, dmgC: 0.01, knee: 45, cap: 100 },
+  monsterScale: (L) => {
+    const W = BAL.WORLD;
+    const x = Math.min(W.cap, Math.max(1, L)) - 1;
+    const e = Math.min(x, W.knee); const over = Math.max(0, x - W.knee);
+    return { life: (1 + W.lifeA * x) * W.lifeB ** e * (1 + W.lifeC * over), dmg: (1 + W.dmgA * x) * W.dmgB ** e * (1 + W.dmgC * over) };
+  },
   // エリートやボスの倍率
   RANK: {
     normal: { life: 1, dmg: 1, xp: 1, gold: 1, loot: 1 },

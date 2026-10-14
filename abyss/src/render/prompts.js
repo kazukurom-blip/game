@@ -193,7 +193,7 @@ const MOTIF = [
 // ---------------------------------------------------------------- 小さな道具
 /** 'boss_ash_wolf' → 'ash wolf'（id は英語の単語でできていることが多い） */
 // 指示文に入れると既存の作品名・会社名と紛れる単語は言い換える
-const WORD_SWAP = { blizzard: 'snowstorm' };
+const WORD_SWAP = { blizzard: 'snowstorm', null: 'void', undefined: 'unknown' };
 export function idWords(id) {
   const w = String(id || '').replace(/^(boss|act|zone|u|set|m)_/, '').replace(/^[wrsna]_/, '').replace(/[_\-.]+/g, ' ').trim();
   return w.split(' ').map((x) => WORD_SWAP[x.toLowerCase()] || x).join(' ');

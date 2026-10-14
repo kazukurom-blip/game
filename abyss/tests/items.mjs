@@ -175,7 +175,7 @@ t('数値の力は能力に入る（極意・装備）', () => {
 t('スキルの形を変える力（弾 +2）が効く', () => {
   const g = lvl(newGame('ranger'));
   const p0 = g.combat.params('r_shot').count;
-  const it = give(g, generateItem(g.rng, { ilvl: 5, rarity: 'legendary', slot: 'weapon', cls: 'ranger' }));
+  const it = give(g, generateItem(g.rng, { ilvl: 5, rarity: 'legendary', base: 'bow_1', cls: 'ranger' }));
   it.power = { id: 'pw_sk_r_shot', r: 0.5 };
   ok(g.sys.inv.equip(it.uid).ok, 'equip');
   eq(g.combat.params('r_shot').count, p0 + 2);
