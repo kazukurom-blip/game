@@ -307,6 +307,45 @@ if (want('node')) {
     ok(said > 0, '2・3 の結果が出ない');
   });
 
+  // ---------------- QA-I18 壊れたセーブ: 固定のオプション・堕落の内在・付け替えの候補に NaN があると能力が NaN になる
+  t('I18 壊れたセーブ: 固定のオプション・堕落の内在・付け替えの記録の壊れた値を直して読む', () => {
+    const g = newGame('warrior');
+    const rng = new RNG(6);
+    const u = generateItem(rng, { ilvl: 40, rarity: 'unique', slot: 'chest' });
+    const r = make(rng, { ilvl: 40, rarity: 'rare', slot: 'helm' }, (x) => x.affixes.length >= 3);
+    u.fixed[0].v = null; u.cimp = { s: 'res_all', v: 'x' };
+    r.rrPending = { i: 9, opts: [{ s: 'life', v: NaN }] }; r.rr = { i: 7, n: 2 }; r.fp = 'a';
+    const raw = JSON.parse(JSON.stringify(g.snapshot()));
+    raw.inv.bag.push(JSON.parse(JSON.stringify(u)), JSON.parse(JSON.stringify(r)));
+    raw.hero.equip.chest = JSON.parse(JSON.stringify(u)); raw.hero.equip.chest.uid = 999999;
+    const g2 = new Game({ seed: 2 }); g2.load(raw);
+    const S = aggregate(itemMods(g2.state.hero.equip.chest));
+    ok(Object.values(S).every(Number.isFinite), 'NaN が無い');
+    ok(Object.values(g2.H.S).every(Number.isFinite) && Number.isFinite(g2.H.life), '主人公の能力');
+    const r2 = g2.state.inv.bag.find((x) => x.base === r.base && x.affixes.length === r.affixes.length && x.slot === 'helm');
+    ok(r2 && !r2.rrPending && !r2.rr && r2.fp === undefined, '付け替えの記録・鍛造値');
+    ok(g2.sys.crafting.rerollInfo(r2, 0).ok, '付け替えできる');
+  });
+
+  // ---------------- QA-I19 版 1 のセーブ: ゴールドを 10 倍にしたのに、ゴールドの日課（稼いだ額の差）と報酬・放置の稼ぎの記録は直していない
+  t('I19 版 1 のセーブ: ゴールドの日課がすぐ終わらない・日課の報酬と放置のゴールドの記録も 10 倍', () => {
+    const g = newGame('warrior');
+    for (let i = 0; i < 20 * 120; i++) g.tick(0.05);
+    const raw = JSON.parse(JSON.stringify(g.snapshot()));
+    raw.version = 1;
+    // 版 1 の数: 稼いだ額 5,000・ゴールドの日課（目標 2,000・始めた時 4,000 → いま 1,000 進んだ）・報酬 300 G・放置の稼ぎ 2 G/秒
+    raw.meta.stats.goldEarned = 5000; raw.meta.gold = 800;
+    const b = { uid: 'bq', day: raw.meta.bounties.day || '2026-10-14', type: 'gold', target: 2000, base: 4000, prog: 1000, done: false, claimed: false, reward: { chest: '銅の宝箱', gold: 300 } };
+    raw.meta.bounties.list = [b];
+    raw.meta.rates = { kills: 1, xp: 10, gold: 2, drops: 0.12, elites: 0.05, bosses: 0, level: 3, measured: 600 };
+    const g2 = new Game({ seed: 2 }); g2.load(raw);
+    const b2 = g2.state.meta.bounties.list.find((x) => x.uid === 'bq');
+    ok(b2, '日課が残る');
+    ok(!b2.done, '日課がすぐ終わる');
+    ok(b2.target === 20000 && b2.base === 40000 && b2.reward.gold === 3000, JSON.stringify(b2));
+    ok(g2.state.meta.rates.gold === 20, `放置の稼ぎ ${g2.state.meta.rates.gold}`);
+  });
+
   // ---------------- QA-I13 比べの火力が「基本攻撃だけ」で、召喚・呪文のビルドで装備の良し悪しが出ない
   t('I13 比べの火力はスキルの並び全体（召喚物のダメージ % で死霊術師の火力が上がる）', () => {
     const g = newGame('necromancer', 3);

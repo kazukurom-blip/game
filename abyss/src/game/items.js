@@ -28,7 +28,15 @@ export function sanitizeItem(it) {
   it.ilvl = Math.round(num(it.ilvl, 1, 9999, 1));
   it.q = [0, 1, 2].includes(it.q) ? it.q : 0;
   it.enh = Math.round(num(it.enh, 0, 99, 0));
-  it.affixes = Array.isArray(it.affixes) ? it.affixes.filter((a) => a && typeof a === 'object' && typeof a.s === 'string' && Number.isFinite(a.v)) : [];
+  const line = (a) => a && typeof a === 'object' && typeof a.s === 'string' && Number.isFinite(a.v);
+  it.affixes = Array.isArray(it.affixes) ? it.affixes.filter(line) : [];
+  // ユニーク・セットの固定のオプション・堕落の内在・付け替えの候補も、壊れた行は捨てる（NaN が能力に入らないように）
+  if (it.fixed !== undefined) it.fixed = Array.isArray(it.fixed) ? it.fixed.filter(line) : [];
+  if (it.cimp !== undefined && !line(it.cimp)) delete it.cimp;
+  if (it.rrPending !== undefined && !(it.rrPending && Number.isInteger(it.rrPending.i) && it.rrPending.i >= 0 && it.rrPending.i < it.affixes.length && Array.isArray(it.rrPending.opts))) delete it.rrPending;
+  else if (it.rrPending) it.rrPending.opts = it.rrPending.opts.filter(line);
+  if (it.rr !== undefined && !(it.rr && Number.isInteger(it.rr.i) && it.rr.i >= 0 && it.rr.i < it.affixes.length)) delete it.rr;
+  for (const k of ['fp', 'enhPity']) if (it[k] !== undefined && !Number.isFinite(it[k])) delete it[k];
   if (it.sockets !== undefined) it.sockets = Array.isArray(it.sockets) ? it.sockets.slice(0, 6).map((s) => (typeof s === 'string' ? s : null)) : [];
   if (it.power !== undefined && !(it.power && typeof it.power === 'object' && typeof it.power.id === 'string' && Number.isFinite(it.power.r))) delete it.power;
   for (const k of ['uniqueId', 'setId', 'pieceId', 'rw', 'name']) if (it[k] !== undefined && it[k] !== null && typeof it[k] !== 'string') delete it[k];
