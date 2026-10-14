@@ -7,6 +7,7 @@ import { registry } from '../registry.js';
 import { P } from '../../data/balance.js';
 import { SLOTS } from '../../data/items.js';
 import { weaponStats } from '../items.js';
+import { ensureSkillPowers } from '../content/items/powers.js';
 
 export const CODEX_SLOTS = [
   { cat: 'atk', name: '攻め', desc: '攻撃の力（スキルを変える・発動する・ダメージ）' },
@@ -53,6 +54,8 @@ export class CodexSystem {
   get cx() { return this.game.state.meta.codex; }
 
   ensureState(state) {
+    // 後から足されたスキルの「極め」の力も、読み込みの前に作っておく（セーブにある力が引けるように）
+    ensureSkillPowers();
     const m = state.meta;
     if (!m.codex || typeof m.codex !== 'object') m.codex = { powers: {}, equipped: [null, null, null] };
     m.codex.powers ||= {};
