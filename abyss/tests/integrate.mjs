@@ -420,6 +420,212 @@ await t('実際の鍛冶で音が鳴る（強化の成功・失敗）', async ()
   ok(played.includes('enhance_fail'), `失敗 ${played.slice(0, 8)}`);
 });
 
+// ======================================================================= 10. セーブの丈夫さ
+const { exportString, importString } = await import('../src/engine/save.js');
+const { RNG } = await import('../src/engine/rng.js');
+const { generateItem } = await import('../src/game/loot.js');
+
+/** すべての仕組みを動かした終盤のセーブ（転生・苦行・裂け目の途中・ペット・刻印・宝石・極意・図鑑） */
+function richGame(seed = 31) {
+  const g = fresh('necromancer', seed, 70);
+  const st = g.state;
+  st.inv.filter.autoEquip = true;
+  for (const id of ['auto_skill', 'auto_boss', 'auto_salvage', 'auto_hatch', 'auto_bounty', 'auto_torment']) st.meta.upgrades[id] = 1;
+  g.sys.prestige.applyUnlocks();
+  run(g, 120);
+  storyClear(g);
+  st.meta.prestige.life.maxLevel = 90;
+  ok(g.sys.prestige.rebirth().ok, 'rebirth');
+  run(g, 60);
+  // 宝石・ルーン・深淵の宝石・刻印・ペット・極意
+  g.sys.gems.grantRandom(4); g.sys.gems.grantRandom(2); g.sys.gems.grantLegendaryGem();
+  const ring = generateItem(new RNG(5), { ilvl: 70, minRarity: 'legendary', slot: 'ring' });
+  if (ring) { ring.sockets = [null]; g.sys.inv.receive(ring, { quiet: true }); }
+  for (const id of ['sup_area', 'sup_brutal']) g.sys.skills.addGlyph(g.sys.skills.makeGlyph({ id, level: 10 }), { quiet: true });
+  g.sys.pets.addEgg('egg_ash', 3);
+  run(g, 30);
+  g.state.meta.codex ||= {};
+  // 苦行 I で少し → 裂け目の途中
+  g.sys.world.setTorment(1); run(g, 20);
+  ok(g.sys.rift.begin(1).ok, 'rift');
+  run(g, 15);
+  eq(st.world.mode, 'rift', '裂け目の途中');
+  return g;
+}
+
+/** 2 つの JSON の違う場所（最初のいくつか） */
+function diffPaths(a, b, p = '', out = []) {
+  if (out.length > 8) return out;
+  if (typeof a !== typeof b || Array.isArray(a) !== Array.isArray(b) || (a === null) !== (b === null)) { out.push(p); return out; }
+  if (a && typeof a === 'object') { for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) diffPaths(a[k], b[k], `${p}.${k}`, out); return out; }
+  if (a !== b) out.push(`${p}: ${JSON.stringify(a)} → ${JSON.stringify(b)}`);
+  return out;
+}
+
+let RICH = null;
+await t('終盤のセーブ（転生・裂け目の途中・ペット・刻印・宝石）を保存 → 読み込みで同じ中身になり、続きを遊べる', () => {
+  const g = richGame();
+  RICH = JSON.stringify(g.snapshot());
+  const g2 = new Game({ seed: 99 });
+  g2.load(JSON.parse(RICH));
+  const back = JSON.parse(JSON.stringify(g2.state));
+  const d = diffPaths(JSON.parse(RICH), back);
+  ok(!d.length, `違い: ${d.join(' / ')}`);
+  eq(g2.state.world.mode, 'rift', '裂け目の続き');
+  run(g2, 10);
+  ok(g2.state.meta.stats.kills >= JSON.parse(RICH).meta.stats.kills, '続きを遊べる');
+});
+
+await t('文字列の書き出し → 読み込み（日本語の名前・壊れた文字列は分かりやすく断る）', () => {
+  const st = JSON.parse(RICH);
+  st.hero.name = '灰の旅人・壱';
+  const s = exportString(st);
+  ok(s.startsWith('ABYSS1:'));
+  const back = importString(s);
+  eq(JSON.stringify(back), JSON.stringify(st));
+  const g = new Game({ seed: 1 }); g.load(back); eq(g.state.hero.name, '灰の旅人・壱');
+  let msg = '';
+  try { importString(`${s.slice(0, -12)}AAAA`); } catch (e) { msg = e.message; }
+  ok(/壊れて|形が違い/.test(msg), `壊れた文字列: ${msg}`);
+  try { importString('ほげ'); msg = ''; } catch (e) { msg = e.message; }
+  ok(msg.includes('形が違い'), msg);
+});
+
+await t('壊れたセーブ（値を消す・null・形の違う値・名前空間ごと壊す）でも落ちずに読めて遊べる', () => {
+  const N = Number(process.env.FUZZ_N) || (QUICK ? 120 : 400);
+  const rng = new RNG(Number(process.env.FUZZ_SEED) || 2024);
+  const VALUES = [null, -1, 0, 1e308, 'abc', '', true, false, [], {}, [1, 'x', null], { x: 1 }];
+  const paths = (o, pre = [], out = [], depth = 0) => { if (depth > 7 || o === null || typeof o !== 'object') return out; for (const k of Object.keys(o)) { out.push([...pre, k]); paths(o[k], [...pre, k], out, depth + 1); } return out; };
+  const src = JSON.parse(RICH);
+  const all = paths(src);
+  const bad = [];
+  for (let n = 0; n < N; n++) {
+    const st = JSON.parse(RICH);
+    const did = [];
+    for (let j = 0, k = 1 + rng.int(0, 6); j < k; j++) {
+      const p = rng.pick(all); let o = st;
+      for (let i = 0; i < p.length - 1 && o && typeof o === 'object'; i++) o = o[p[i]];
+      if (!o || typeof o !== 'object') continue;
+      const key = p[p.length - 1]; const r = rng.next();
+      if (r < 0.25) delete o[key]; else if (Array.isArray(o[key]) && r < 0.4) o[key].length = Math.floor(o[key].length / 2); else o[key] = JSON.parse(JSON.stringify(rng.pick(VALUES)));
+      did.push(`${p.join('.')}=${r < 0.25 ? 'del' : JSON.stringify(o[key])?.slice(0, 20)}`);
+    }
+    if (process.env.FUZZ_DEBUG) console.log(n, did.join(' '));
+    if (rng.chance(0.08)) st[rng.pick(['hero', 'inv', 'world', 'meta', 'settings'])] = rng.pick([null, 'x', [], 5]);
+    const before = errors.length;
+    try {
+      const g = new Game({ seed: n });
+      g.load(st);
+      for (let i = 0; i < 20 * 2; i++) g.tick(0.05);
+      JSON.stringify(g.snapshot());
+    } catch (e) { bad.push(`#${n} ${e.message}`); }
+    if (errors.length > before) { bad.push(`#${n} ${errors[before].slice(0, 200)}`); errors.length = before; }
+  }
+  ok(!bad.length, `${bad.length}/${N}: ${bad.slice(0, 3).join(' | ')}`);
+});
+
+await t('半分だけのセーブ・中身の無いセーブ・セーブでない物も新しい冒険として読める', () => {
+  for (const raw of [{ hero: { cls: 'ranger', level: 30, name: '途中' } }, {}, null, 5, 'x', [], { hero: 'x', inv: [], world: 3 }, { hero: { cls: 'nope', level: 'abc', equip: { weapon: { base: 'nope' }, ring1: { base: 'sword_1' } } } }]) {
+    const g = new Game({ seed: 3 });
+    g.load(raw);
+    run(g, 2);
+    ok(g.state.hero && Array.isArray(g.state.inv.bag) && g.state.world.zone, JSON.stringify(raw));
+    if (raw?.hero?.cls === 'ranger') { eq(g.state.hero.cls, 'ranger'); eq(g.state.hero.level, 30); }
+    ok(!g.state.hero.equip.ring1, '指輪の枠に剣は着けない');
+  }
+});
+
+await t('アイテムの uid が重なる・無いセーブは振り直す（同じ uid が 2 つにならない）', () => {
+  const st = JSON.parse(RICH);
+  const items = [...st.inv.bag, ...Object.values(st.hero.equip)];
+  ok(items.length >= 3);
+  items[0].uid = 5; items[1].uid = 5; delete items[2].uid;
+  const g = new Game({ seed: 4 }); g.load(st);
+  const all = [...g.state.inv.bag, ...g.state.inv.stash.flat(), ...Object.values(g.state.hero.equip)].map((x) => x.uid);
+  eq(new Set(all).size, all.length, '重なり');
+  ok(all.every((u) => u > 0));
+});
+
+await t('バッグも倉庫も満杯で自動装備しても、外した装備で倉庫が上限を超えない', () => {
+  const g = fresh('warrior', 41, 40);
+  const inv = g.state.inv;
+  inv.filter.autoEquip = true;
+  const rng = new RNG(8);
+  const junk = () => generateItem(rng, { ilvl: 1, rarity: 'common', slot: 'belt' });
+  while (inv.bag.length < inv.bagSize) inv.bag.push(junk());
+  for (const tab of inv.stash) while (tab.length < inv.stashTabSize) tab.push(junk());
+  for (let i = 0; i < 30; i++) {
+    const it = generateItem(rng, { ilvl: 40 + i, minRarity: 'legendary', slot: 'weapon', cls: 'warrior' });
+    g.sys.inv.receive(it, { quiet: true });
+  }
+  for (const tab of inv.stash) ok(tab.length <= inv.stashTabSize, `倉庫 ${tab.length}/${inv.stashTabSize}`);
+  ok(inv.bag.length <= inv.bagSize, `バッグ ${inv.bag.length}`);
+});
+
+await t('セーブの大きさ: 遊ぶほど増え続ける所が無い（2 時間ぶんの伸びから 50 時間を見積もって 1 MB 未満）', () => {
+  const g = fresh('ranger', 51);
+  const st = g.state;
+  st.inv.filter.autoEquip = true;
+  for (const id of ['auto_skill', 'auto_boss', 'auto_salvage', 'auto_hatch', 'auto_bounty']) st.meta.upgrades[id] = 1;
+  g.sys.prestige.applyUnlocks();
+  const H = QUICK ? 1 : 2;
+  run(g, 1800);
+  const s0 = JSON.stringify(g.snapshot()).length;
+  for (let h = 0; h < H; h++) { run(g, 3600 - (h === 0 ? 1800 : 0)); g.sys.offline.grant(8 * 3600); }
+  const s1 = JSON.stringify(g.snapshot()).length;
+  const perHour = Math.max(0, (s1 - s0) / (H - 0.5));
+  const est50 = s1 + perHour * 50;
+  ok(est50 < 1024 * 1024, `30 分 ${Math.round(s0 / 1024)}KB → ${H} 時間 ${Math.round(s1 / 1024)}KB、50 時間の見積もり ${Math.round(est50 / 1024)}KB`);
+  // 上限のある記録
+  ok((st.world.rift.history || []).length <= 30 && (st.meta.prestige.history || []).length <= 50 && (st.meta.ach?.unseen || []).length <= 300);
+});
+
+// ======================================================================= 11. 重さ
+await t('大勢（敵 80・召喚物 30）でも戦闘の 1 ティックが軽い（×4 速で 1 フレーム 8ms 未満）', () => {
+  const g = fresh('necromancer', 61, 80);
+  const c = g.combat; const h = c.hero;
+  c.H.life *= 1e4;
+  quiet(g);
+  const p = c.params('n_skeleton');
+  for (let i = 0; i < 30; i++) c.spawnMinion('skeleton', p, { x: h.x + (i % 10) * 20 });
+  for (let i = 0; i < 80; i++) { const u = c.spawnMonster(['rot_zombie', 'ash_wolf', 'cultist', 'bog_slime'][i % 4], { level: 80, lifeMul: 1e5, x: h.x + 100 + (i % 20) * 30, y: (i % 7) * 10 - 30 }); u.dmg = 0; }
+  for (let i = 0; i < 40; i++) { c.tick(0.05); c.fx.length = 0; }
+  const N = 300; const t0 = performance.now();
+  for (let i = 0; i < N; i++) { c.tick(0.05); c.fx.length = 0; }
+  const ms = (performance.now() - t0) / N;
+  ok(ms * 4 < 8, `1 ティック ${ms.toFixed(3)}ms（×4 速 ${(ms * 4).toFixed(2)}ms）`);
+});
+
+await t('敵の狙い（主人公側の一覧の使い回し）: 出てきた召喚物を狙い、倒れた召喚物は狙わない', () => {
+  const g = fresh('necromancer', 62, 30);
+  const c = g.combat; const h = c.hero;
+  quiet(g);
+  const u = c.spawnMonster('rot_zombie', { level: 30, lifeMul: 100, x: h.x + 300 });
+  eq(c.targetFor(u), h, 'はじめは主人公');
+  const m = c.spawnMinion('skeleton', c.params('n_skeleton'), { x: h.x + 250 });
+  eq(c.targetFor(u), m, '近い召喚物');
+  m.dead = true;
+  eq(c.targetFor(u), h, '倒れた召喚物は狙わない');
+  c.tick(0.05); c.tick(0.05);
+  eq(c.targetFor(u), h);
+});
+
+await t('終盤の裂け目（すべての仕組みを動かす）で 1 ティックの平均が軽い', () => {
+  const g = fresh('necromancer', 63, 95);
+  const st = g.state;
+  st.inv.filter.autoEquip = true;
+  for (const id of ['auto_skill', 'auto_boss', 'auto_salvage', 'auto_hatch', 'auto_bounty', 'auto_torment']) st.meta.upgrades[id] = 1;
+  g.sys.prestige.applyUnlocks();
+  storyClear(g);
+  st.world.rift.unlocked = 20; st.world.rift.auto = 'same';
+  ok(g.sys.rift.begin(20).ok);
+  run(g, 20);
+  const N = 20 * (QUICK ? 30 : 90); const t0 = performance.now();
+  for (let i = 0; i < N; i++) { g.tick(0.05); g.combat.fx.length = 0; if (g.combat.hero.dead) g.combat.reviveHero(); }
+  const ms = (performance.now() - t0) / N;
+  ok(ms < 1.5, `平均 ${ms.toFixed(3)}ms`);
+});
+
 // ======================================================================= ここまで
 console.error = origErr;
 console.log(`integrate: ${pass} 通過 / ${fail} 失敗`);

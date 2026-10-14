@@ -17,7 +17,9 @@ import { flushWorldPending } from './systems/world.js';
 import { generateItem, dropCount, setUidCounter, peekUid } from './loot.js';
 import { BAL } from '../data/balance.js';
 import { CLASS } from '../data/classes.js';
-import { BASE } from '../data/items.js';
+import { BASE, SLOTS, baseSlotOf } from '../data/items.js';
+import { ZONES, STAGES_PER_ZONE } from '../data/world.js';
+import { sanitizeItem } from './items.js';
 
 export const gameHooks = {
   onKill: [], // (game, unit, reward) => void … 報酬の計算の後
@@ -67,20 +69,57 @@ export class Game {
     return this.state;
   }
 
+  /** 新しく始めた直後の、すべての仕組みの形（壊れたセーブを直す手本。乱数・今の状態は変えない） */
+  referenceState(cls = 'warrior', name) {
+    const keep = this.state; const rng = this.rng;
+    const ref = newState(CLASS[cls] ? cls : 'warrior', name);
+    this.state = ref; this.rng = new RNG(1);
+    try { this.each('ensureState', ref); } finally { this.state = keep; this.rng = rng; }
+    return ref;
+  }
+
   load(raw) {
-    this.state = migrate(raw);
-    // uid の続き番号
-    let maxUid = this.state.inv.nextUid || 1;
-    const scan = (it) => { if (it?.uid >= maxUid) maxUid = it.uid + 1; };
-    this.state.inv.bag.forEach(scan);
-    this.state.inv.stash.flat().forEach(scan);
-    Object.values(this.state.hero.equip).forEach(scan);
-    setUidCounter(maxUid);
+    const cls = CLASS[raw?.hero?.cls] ? raw.hero.cls : 'warrior';
+    this.state = migrate(raw, this.referenceState(cls));
+    this.sanitizeLoaded();
     this.each('ensureState', this.state);
     this.each('onLoad');
     for (const f of gameHooks.afterLoad) f(this);
     this.start();
     return this.state;
+  }
+
+  /** 読み込んだ状態の数・アイテムを使える範囲に直す（壊れたセーブ・手で書きかえたセーブ） */
+  sanitizeLoaded() {
+    const st = this.state; const h = st.hero; const inv = st.inv; const w = st.world; const m = st.meta;
+    const int = (v, lo, hi, d) => (Number.isFinite(v) ? Math.max(lo, Math.min(hi, Math.floor(v))) : d);
+    if (!CLASS[h.cls]) h.cls = 'warrior';
+    h.level = int(h.level, 1, BAL.MAX_LEVEL, 1);
+    h.xp = Math.max(0, h.xp); h.skillPoints = int(h.skillPoints, 0, 1e6, 0);
+    h.bar = h.bar.map((x) => (typeof x === 'string' ? x : null));
+    // 装備・持ち物（ベースの無い物・形の違う物は捨てる）
+    for (const slot of Object.keys(h.equip)) {
+      const it = sanitizeItem(h.equip[slot]);
+      if (it && SLOTS.includes(slot) && baseSlotOf(slot) === it.slot) h.equip[slot] = it; else delete h.equip[slot];
+    }
+    inv.bag = inv.bag.map(sanitizeItem).filter(Boolean);
+    inv.stash = inv.stash.filter(Array.isArray).map((tab) => tab.map(sanitizeItem).filter(Boolean));
+    if (!inv.stash.length) inv.stash.push([]);
+    inv.bagSize = int(inv.bagSize, 10, 2000, 60); inv.stashTabSize = int(inv.stashTabSize, 10, 2000, 60);
+    for (const map of [inv.mats, inv.gems, inv.runes]) for (const k of Object.keys(map)) if (!(Number.isFinite(map[k]) && map[k] > 0)) delete map[k];
+    // 進み具合
+    w.maxZone = int(w.maxZone, 0, ZONES.length - 1, 0); w.stage = int(w.stage, 1, STAGES_PER_ZONE, 1);
+    w.torment = int(w.torment, 0, BAL.MAX_TORMENT, 0); w.maxTorment = int(w.maxTorment, 0, BAL.MAX_TORMENT, 0);
+    m.gold = Math.max(0, m.gold); m.souls = Math.max(0, m.souls);
+    st.playTime = Math.max(0, st.playTime);
+    // uid の続き番号（無い・重なる番号は振り直す）
+    const items = [...inv.bag, ...inv.stash.flat(), ...Object.values(h.equip)];
+    let maxUid = int(inv.nextUid, 1, Number.MAX_SAFE_INTEGER, 1);
+    for (const it of items) if (it.uid >= maxUid) maxUid = it.uid + 1;
+    const seen = new Set();
+    for (const it of items) { if (!(it.uid > 0) || seen.has(it.uid)) it.uid = maxUid++; seen.add(it.uid); }
+    inv.nextUid = maxUid;
+    setUidCounter(maxUid);
   }
 
   start() {

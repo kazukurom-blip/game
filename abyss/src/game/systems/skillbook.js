@@ -67,7 +67,7 @@ export class SkillSystem {
     h.skills ||= {};
     for (const id of Object.keys(h.skills)) {
       const sk = h.skills[id];
-      if (!SKILL[id] || !sk) { delete h.skills[id]; continue; }
+      if (!SKILL[id] || !sk || typeof sk !== 'object' || Array.isArray(sk)) { delete h.skills[id]; continue; }
       sk.lvl = Math.max(0, Math.min(SKILL_MAX_LEVEL, Math.floor(sk.lvl || 0)));
       sk.rune ??= null;
       if (sk.rune && !SKILL[id].runes?.some((r) => r.id === sk.rune)) sk.rune = null;

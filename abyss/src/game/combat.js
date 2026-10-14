@@ -284,10 +284,11 @@ export class Combat {
   allies() { return this.units.filter((u) => u.team === HERO_TEAM && !u.dead); }
   minionsOf(skillId) { return this.units.filter((u) => u.kind === 'minion' && !u.dead && u.skill === skillId); }
   enemiesNear(x, y, r) { const r2 = r * r; return this.units.filter((u) => u.team === ENEMY_TEAM && !u.dead && dist2(u.x, u.y, x, y) <= r2 + (u.size * 30) ** 2); }
-  nearestEnemy(x, y, maxR = Infinity, filter = null) {
+  /** 一番近い敵。xMin / xMax で横の範囲を絞れる（毎ティック関数を作らずに済む） */
+  nearestEnemy(x, y, maxR = Infinity, filter = null, xMin = -Infinity, xMax = Infinity) {
     let best = null; let bd = maxR * maxR;
     for (const u of this.units) {
-      if (u.team !== ENEMY_TEAM || u.dead) continue;
+      if (u.team !== ENEMY_TEAM || u.dead || u.x <= xMin || u.x >= xMax) continue;
       if (filter && !filter(u)) continue;
       const d = dist2(u.x, u.y, x, y);
       if (d < bd) { bd = d; best = u; }
@@ -338,7 +339,9 @@ export class Combat {
     this.tickProjectiles(dt);
     this.tickAreas(dt);
     // 片付け
-    this.units = this.units.filter((u) => !(u.dead && u.deadT > 1.2 && u.kind !== 'hero'));
+    // 片付ける物があるときだけ作り直す（毎ティック配列を作らない）
+    const gone = (u) => u.dead && u.deadT > 1.2 && u.kind !== 'hero';
+    if (this.units.some(gone)) this.units = this.units.filter((u) => !gone(u));
   }
 
   tickStatuses(u, dt) {
@@ -665,7 +668,7 @@ export class Combat {
       return;
     }
     // 主人公の近く（前 650・後ろ 200）の敵だけを狙う
-    const target = this.nearestEnemy(m.x, m.y, 900, (u) => u.x < hx + 650 && u.x > hx - 220);
+    const target = this.nearestEnemy(m.x, m.y, 900, null, hx - 220, hx + 650);
     if (!target) {
       // ついていく（後ろに並ぶ。飛ぶ物は肩の上）
       const slot = m.slot % 4;
@@ -776,11 +779,20 @@ export class Combat {
     } else if (u.anim.s !== 'attack' || u.anim.t > 0.6) u.anim = { s: 'idle', t: u.anim.t };
   }
 
+  /** 主人公側（主人公・召喚物）の一覧。敵の数 × 全員を毎ティック調べないように、units が変わるまで使い回す */
+  heroSide() {
+    if (!this._allies || this._alliesOf !== this.units || this._alliesN !== this.units.length) {
+      this._allies = this.units.filter((a) => a.team === HERO_TEAM);
+      this._alliesOf = this.units; this._alliesN = this.units.length;
+    }
+    return this._allies;
+  }
+
   targetFor(u) {
     // 召喚物が近ければそちらを狙う（盾になる）。引きつける召喚物（巨像・猪）はもっと狙われる
     let best = null; let bd = Infinity;
-    for (const a of this.units) {
-      if (a.team !== HERO_TEAM || a.dead) continue;
+    for (const a of this.heroSide()) {
+      if (a.dead) continue;
       const d = Math.abs(a.x - u.x) + (a.kind === 'hero' ? 40 : 0) - (a.taunt ? 220 : 0) + (a.fly ? 60 : 0);
       if (d < bd) { bd = d; best = a; }
     }
@@ -882,7 +894,7 @@ export class Combat {
       }
       if (pr.dist > pr.range) pr.dead = true;
     }
-    this.projs = this.projs.filter((p) => !p.dead);
+    if (this.projs.some((p) => p.dead)) this.projs = this.projs.filter((p) => !p.dead);
   }
 
   /** from の敵から近くの敵へ n 回跳ねる */

@@ -47,6 +47,12 @@ export function riftDifficulty(g) {
 }
 /** 裂け目の中での耐性の減り（苦行の段に置き換える） */
 export const riftTormentTier = (g) => Math.min(BAL.MAX_TORMENT, Math.floor(g / 5));
+/** セーブの中の裂け目の途中が使える形か */
+function validRun(r) {
+  const fin = Number.isFinite;
+  return !!r && typeof r === 'object' && fin(r.level) && r.level >= 1 && fin(r.seed) && fin(r.limit) && r.limit > 0 && fin(r.timeLeft) && fin(r.progress) && fin(r.need) && r.need > 0
+    && ['run', 'guardian', 'done'].includes(r.phase) && Array.isArray(r.acts) && r.acts.length > 0 && [...r.acts].every((a) => Number.isInteger(a) && !!ACTS[a]); // [...] で穴あきの配列も調べる
+}
 export const guardianFor = (g) => RIFT_GUARDIANS[Math.floor((Math.max(1, g) - 1) / 5) % RIFT_GUARDIANS.length];
 
 export class RiftSystem {
@@ -73,6 +79,13 @@ export class RiftSystem {
       if (run?.returnZone) { w.zone = run.returnZone; w.stage = run.returnStage || 1; w.torment = run.returnTorment ?? w.torment; }
       w.mode = 'campaign';
     }
+    // 壊れた裂け目の途中（数や章の番号がおかしい）は、報酬なしで物語に戻す
+    const run = w.rift?.run;
+    if (run && !validRun(run)) {
+      if (run && typeof run === 'object' && ZONE[run.returnZone]) { w.zone = run.returnZone; w.stage = Math.max(1, Math.min(STAGES_PER_ZONE - 1, Math.floor(run.returnStage) || 1)); }
+      w.rift.run = null;
+      if (w.mode === 'rift') { w.mode = 'campaign'; w.torment = Math.min(w.maxTorment || 0, w.torment || 0); }
+    } else if (run) { for (const k of ['deaths', 'kills', 'pack']) if (!Number.isFinite(run[k])) run[k] = 0; }
     if (w.mode === 'rift' && !w.rift?.run) w.mode = 'campaign';
   }
 

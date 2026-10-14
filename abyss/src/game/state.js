@@ -106,13 +106,46 @@ export function fillDefaults(target, defaults) {
   return target;
 }
 
-export function migrate(state) {
-  const d = newState(state?.hero?.cls || 'warrior', state?.hero?.name);
+/**
+ * 古い・壊れたセーブを読める形に直す。
+ * ref … 「新しく始めた直後のすべての仕組みの形」（Game.load が作る。無ければ newState だけ）。
+ * 1) 名前空間・足りない項目を埋める（fillDefaults） 2) 形の違う値（オブジェクトのはずが文字列など）を ref の値に置きかえる（repairTypes）
+ */
+export function migrate(state, ref = null) {
+  if (!isPlainObject(state)) state = {};
+  for (const ns of NAMESPACES) if (state[ns] !== undefined && !isPlainObject(state[ns])) delete state[ns];
+  const cls = typeof state.hero?.cls === 'string' ? state.hero.cls : 'warrior';
+  const d = newState(cls, typeof state.hero?.name === 'string' ? state.hero.name : undefined);
   fillDefaults(state, d);
+  repairTypes(state, ref || d);
   // 版ごとの変換はここに足す
   // if (state.version < 2) { ...; }
   state.version = SAVE_VERSION;
   return state;
+}
+
+const NAMESPACES = ['hero', 'inv', 'world', 'meta', 'settings'];
+export const isPlainObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
+const kindOf = (v) => (v === null || v === undefined ? 'none' : Array.isArray(v) ? 'array' : typeof v);
+/** 中身を見ない場所（装備はアイテムの検査 sanitizeItem で直す） */
+const REPAIR_SKIP = new Set(['hero/equip', 'inv/bag', 'inv/stash']); // 道は / でつなぐ
+
+/**
+ * target の値の形を ref に合わせる（ref が null の項目は何でもよい）。
+ * 形が違う・数が有限でない → ref の値を入れる。null・無い → ref の値を入れる。オブジェクトどうしは中へ。配列の中身は見ない。
+ */
+export function repairTypes(target, ref, path = '', depth = 0) {
+  if (!isPlainObject(target) || !isPlainObject(ref) || depth > 8) return target;
+  for (const k of Object.keys(ref)) {
+    const p = path ? `${path}/${k}` : k;
+    const rv = ref[k];
+    const tv = target[k];
+    if (rv === null || rv === undefined) continue;
+    const rk = kindOf(rv); const tk = kindOf(tv);
+    if (tk === 'none' || rk !== tk || (tk === 'number' && !Number.isFinite(tv))) { target[k] = structuredCloneSafe(rv); continue; }
+    if (rk === 'object' && !REPAIR_SKIP.has(p)) repairTypes(tv, rv, p, depth + 1);
+  }
+  return target;
 }
 
 export function structuredCloneSafe(v) {
