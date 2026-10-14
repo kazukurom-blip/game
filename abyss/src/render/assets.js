@@ -21,6 +21,12 @@
 import { idb } from '../engine/storage.js';
 
 const DPR_FALLBACK = 2; // コードの絵は 2 倍で描いておく（拡大してもにじまない）
+const BIG_SLOT_PX = 640 * 360; // これより大きな枠（背景・タイトル・カットイン）は 1 倍で描く（1 枚 14MB → 3.5MB）
+/** コードの絵を何倍の細かさで描いておくか。枠の dpr があればそれ、無ければ大きな枠は 1・ほかは 2 */
+export function fallbackDpr(spec) {
+  if (spec?.dpr > 0) return spec.dpr;
+  return (spec?.w || 0) * (spec?.h || 0) >= BIG_SLOT_PX ? 1 : DPR_FALLBACK;
+}
 const MAX_SIDE = 2048; // 差し替え画像の 1 コマの長い辺の上限（大きすぎると重い）
 const AUDIO_PREFIX = 'audio:';
 
@@ -78,8 +84,9 @@ class AssetRegistry {
   fallbackCanvas(id) {
     if (this.cache.has(id)) return this.cache.get(id);
     const spec = this.spec(id) || { id, w: 128, h: 128, ax: 0.5, ay: 0.5 };
-    const c = makeCanvas(Math.ceil(spec.w * DPR_FALLBACK), Math.ceil(spec.h * DPR_FALLBACK));
-    if (c) this.paintInto(c.getContext('2d'), id, spec, DPR_FALLBACK);
+    const d = fallbackDpr(spec);
+    const c = makeCanvas(Math.ceil(spec.w * d), Math.ceil(spec.h * d));
+    if (c) this.paintInto(c.getContext('2d'), id, spec, d);
     this.cache.set(id, c);
     return c;
   }

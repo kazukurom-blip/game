@@ -13,7 +13,7 @@ import { ELEMENT_COLORS } from '../data/stats.js';
 import { RARITY } from '../data/rarity.js';
 import { SKILL } from '../data/skills.js';
 import { CLASS } from '../data/classes.js';
-import { BASE } from '../data/items.js';
+import { itemIconId } from './manifest.js';
 import { fmt } from '../engine/format.js';
 import { itemName } from '../game/items.js';
 
@@ -287,7 +287,7 @@ export class FxSystem {
     let L = r.idx >= 7 ? 5 : r.idx >= 4 ? 4 : r.idx === 3 ? 3 : r.idx === 2 ? 2 : 1;
     if (q === 2) L = 5; else if (q === 1 && L < 4) L = 4;
     if (salv) L = 0;
-    const icon = BASE[it.base]?.icon || 'icon.item.sword';
+    const icon = itemIconId(it); // ユニーク・セット・ミシックは専用の絵があればそれ
     const name = `${q === 2 ? '原初の' : q === 1 ? '太古の' : ''}${itemName(it)}`;
     if (L === 0) { if (r.idx >= 2) this.add(0.9, (ctx, k, f, cam) => { ctx.globalAlpha = 1 - k; label(ctx, e.x - cam, this.wy(e.y, 70 + k * 30), '分解', '#9a9aa0', 12); }); return; }
     this.lootN = (this.lootN || 0) + 1;

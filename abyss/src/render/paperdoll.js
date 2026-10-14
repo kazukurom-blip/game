@@ -51,7 +51,7 @@ const WEAPON_REST = {
   bow: -0.12, crossbow: 1.15, staff: -0.06, wand: 0.25, rod: -0.1, scythe: -0.16, fist: 0,
 };
 // 武器の先（光る所）の位置（枠の中の握りから。立てた向きで）
-const WEAPON_TIP = { staff: -104, wand: -58, rod: -98, scythe: -100, sword: -80, greatsword: -100, axe: -84, mace: -86, dagger: -48, claw: -50, bow: -50, crossbow: -70, fist: 0 };
+const WEAPON_TIP = { staff: -104, wand: -58, rod: -98, scythe: -100, sword: -80, greatsword: -100, axe: -84, mace: -86, dagger: -48, claw: -50, bow: -50, crossbow: -38, fist: 0 }; // 弩は銃床の真ん中を持つので先は近い
 const TWO_HAND = new Set(['greatsword', 'scythe', 'staff', 'crossbow']);
 const CASTER = new Set(['staff', 'wand', 'rod']);
 
@@ -278,18 +278,15 @@ function bowNoString(id) {
 }
 assets.onChange(() => NOSTR.clear());
 
-/** 武器を手に描く（握りを手に合わせる。弓だけは中心で持つ） */
+/** 武器を手に描く（枠の基準点 = 握りを手に合わせる。弓・弩は枠の真ん中が握り: manifest.js の WEAPON_GRIP_AY） */
 function drawHeld(ctx, id, kind, hand, rot, sc = 1, opt = {}) {
   let s = assets.sprite(id);
   if (!s?.img) return null;
-  const center = kind === 'bow';
   if (opt.noString && !s.custom) { const ns = bowNoString(id); if (ns) s = { ...s, img: ns }; }
   ctx.save();
   ctx.translate(hand[0], hand[1]);
   ctx.rotate(rot);
-  const ox = center ? (s.ax - 0.5) * s.sw * sc : 0;
-  const oy = center ? (s.ay - 0.5) * s.sh * sc : 0;
-  assets.draw(ctx, s, ox, oy, { scale: sc });
+  assets.draw(ctx, s, 0, 0, { scale: sc });
   ctx.restore();
   return s;
 }

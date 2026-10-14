@@ -8,7 +8,6 @@ import { hudHooks } from '../hud.js';
 import { fmt } from '../../engine/format.js';
 import { registry } from '../../game/registry.js';
 import { assets } from '../../render/assets.js';
-import { addSlots } from '../../render/manifest.js';
 import { describeMod, statDef } from '../../data/stats.js';
 import { SLOTS, SLOT_NAMES } from '../../data/items.js';
 import { RARITY } from '../../data/rarity.js';
@@ -362,14 +361,9 @@ function setGemsTab(t) { gemsTabSetter?.(t); }
 // ======================================================================
 // ユニークの絵（gear.u.<id>）。差し替えが無ければ、ベースの絵に色の光を重ねて描く
 // ======================================================================
+// 枠（gear.u.<id>）は render/manifest.js がユニーク・ミシック・セットの武器・副手・兜すべてに作る（種類・向き・予備の絵つき）。
+// ここで足し直すと manifest の枠を情報の少ない物で上書きしてしまうので、足さない。
 const ART_SLOTS = new Set(['weapon', 'offhand', 'helm']);
-const extraSlots = [];
-for (const d of [...UNIQUES, ...MYTHICS, ...SETS.flatMap((s) => s.pieces)]) {
-  if (d.slot === 'helm') extraSlots.push({ id: `gear.u.${d.id}`, cat: 'gear', label: `「${d.name}」（兜・着た姿）`, w: 80, h: 70, ax: 0.5, ay: 0.72, params: { unique: d.id }, note: '無ければベースの絵' });
-  else if (d.slot === 'offhand') extraSlots.push({ id: `gear.u.${d.id}`, cat: 'gear', label: `「${d.name}」（副手・着た姿）`, w: 90, h: 110, ax: 0.5, ay: 0.55, params: { unique: d.id }, note: '無ければベースの絵' });
-  else if (d.slot === 'weapon' && SET_PIECE[d.id]) extraSlots.push({ id: `gear.u.${d.id}`, cat: 'gear', label: `「${d.name}」（武器・着た姿）`, w: 110, h: 150, ax: 0.5, ay: 0.82, params: { unique: d.id }, note: '無ければベースの絵' });
-}
-addSlots(extraSlots);
 
 function defOf(id) { return UNIQUE[id] || MYTHIC[id] || SET_PIECE[id]?.piece || null; }
 let painterReady = false;

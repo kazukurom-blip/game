@@ -23,6 +23,7 @@ import { statusDefs } from '../game/combat.js';
 import { SKILL } from '../data/skills.js';
 import { FxSystem, installFx, atlas, whiteOf, tintOf, haloOf, fxLabel } from './fx.js';
 import { monsterParts } from './painters/monsters.js';
+import { unitDrawScale } from './manifest.js';
 import { ACT_ATMOS } from './painters/backgrounds.js';
 import { makeCanvas } from './assets.js';
 import { settingsHooks } from '../ui/panels/settings.js';
@@ -281,7 +282,7 @@ export class Scene {
     }
     const s = assets.sprite(u.art);
     if (!s?.img) return;
-    const size = u.size || 1;
+    const { art: artSc, size } = unitDrawScale(u); // ボスは見た目の大きさを詰める（manifest.js）
     const a = u.anim || { s: 'idle', t: 0 };
     const faceDir = u.team === 'hero' ? 1 : -1; // 絵の向き（敵は左向き）
     const flip = u.team === 'hero' ? (u.face || 1) < 0 : (u.face || -1) > 0;
@@ -310,7 +311,7 @@ export class Scene {
     // 出現（0 → 1.08 → 1.0）
     let pop = 1;
     if (v.spawnT < 0.28) { const k = v.spawnT / 0.28; pop = k < 0.7 ? (k / 0.7) * 1.08 : 1.08 - (k - 0.7) / 0.3 * 0.08; alpha *= Math.min(1, k * 2); }
-    const sc = size * pop;
+    const sc = artSc * pop;
     // 影
     ctx.save(); ctx.globalAlpha = 0.35 * alpha * (u.z > 0 ? 0.6 : 1); ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(x, y, 36 * size, 8 * size, 0, 0, TAU); ctx.fill(); ctx.restore();
     const parts = !s.custom ? monsterParts(u.kind === 'monster' ? u.defId : (u.art || '').replace(/^pet\./, ''), u.kind === 'monster' ? 'monster' : 'pet') : null;
@@ -339,7 +340,7 @@ export class Scene {
       if (v.flash > 0 && this.settings.fxFlash !== false) { ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = alpha * 0.85; this.blit(ctx, whiteOf(body), s, x + dx, y + dy, sc, sx, sy, rot, flip); }
     } else if (v.dieT < 0.12) { ctx.globalAlpha = 0.9; this.blit(ctx, whiteOf(body), s, x + dx, y + dy, sc, sx, sy, rot, flip); }
     ctx.restore();
-    const topH = s.sh * (s.ay ?? 0.97) * size;
+    const topH = s.sh * (s.ay ?? 0.97) * artSc;
     if (!u.dead) this.drawStatusOver(ctx, u, x, y + dy, topH, 28 * size);
     if (!u.dead) this.drawStatusUnder(ctx, u, x, y, size);
     // ライフの棒
@@ -542,7 +543,8 @@ export class Scene {
 }
 
 /** 奥から順（同じ深さなら主人公を手前に、大きなボスを奥に） */
-function depthOrder(a, b) { return (a.y + (a.kind === 'hero' ? 24 : 0) - (a.boss ? 14 : 0)) - (b.y + (b.kind === 'hero' ? 24 : 0) - (b.boss ? 14 : 0)); }
+// 奥から順に描く。ボスはいつも主人公より奥（大きな体で主人公を隠さない）
+function depthOrder(a, b) { return (a.y + (a.kind === 'hero' ? 24 : 0) - (a.boss ? 80 : 0)) - (b.y + (b.kind === 'hero' ? 24 : 0) - (b.boss ? 80 : 0)); }
 function SKILL_EL(id) { return SKILL[id]?.element || 'phys'; }
 
 function vignette() {

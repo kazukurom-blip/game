@@ -269,6 +269,102 @@ await t('祭壇の自動化の旗は全部どこかで読まれる（autoSkill�
   for (const u of ALTAR) if (u.unlock) ok(new RegExp(`unlocks(\\?)?\\.${u.unlock}\\b`).test(code), `unlocks.${u.unlock} を読む所が無い`);
 });
 
+// ======================================================================= 5〜7. 絵の枠（ボスの大きさ・握り・dpr・使われる ID）
+const { assets, fallbackDpr } = await import('../src/render/assets.js');
+const manifest = await import('../src/render/manifest.js');
+await manifest.installManifest();
+const { MONSTERS, MONSTER } = await import('../src/data/monsters.js');
+const { SKILLS, skillsOf } = await import('../src/data/skills.js');
+const { CLASSES } = await import('../src/data/classes.js');
+
+await t('ボスの見た目は詰めた大きさ（枠 1.6 倍 × 1.4〜1.85）・当たりの大きさは変えない', () => {
+  // 画面の上の高さ（枠の 150px 基準）。ボスの絵は枠を約 95%、普通の敵は約 84% 埋めるので、実際の絵の高さの比は約 1.13 倍になる（smoke で実測）
+  const ratios = [];
+  for (const m of MONSTERS) {
+    if (!m.boss) continue;
+    for (const mul of [1, 1.3]) { // 「巨体」の詞で 1.3 倍
+      const u = { kind: 'monster', def: m, size: (m.size || 1) * mul };
+      const s = manifest.unitDrawScale(u);
+      ok(s.size >= 1.4 && s.size <= 1.85, `${m.id} ×${mul} 見た目 ${s.size.toFixed(2)}`);
+      near(assets.spec(`monster.${m.id}`).h * s.art / 150, s.size, 1e-9, `${m.id} 枠と倍率`);
+      if (mul === 1) ratios.push(s.size);
+    }
+  }
+  const avg = ratios.reduce((x, y) => x + y, 0) / ratios.length;
+  ok(avg * 1.13 >= 1.6 && avg * 1.13 <= 1.9, `平均 ${avg.toFixed(2)}（絵の高さの比 ${(avg * 1.13).toFixed(2)}）`);
+  // 普通の敵・召喚物はこれまでどおり（大きさをそのまま掛ける）
+  const z = MONSTER.rot_zombie;
+  eq(manifest.unitDrawScale({ kind: 'monster', def: z, size: 1.15 }).art, 1.15);
+  eq(manifest.unitDrawScale({ kind: 'minion', size: 1.3 }).art, 1.3);
+  // 戦いの当たり（u.size）はデータのまま
+  const g = fresh('warrior', 21, 10);
+  const b = g.combat.spawnMonster('boss_butcher', { level: 10, rank: 'boss' });
+  eq(b.size, MONSTER.boss_butcher.size);
+});
+
+await t('弓・弩の握りは枠の真ん中（ay 0.5）・ほかの武器は 0.82・ユニークの弓も同じ', async () => {
+  const { BASES } = await import('../src/data/items.js');
+  const { UNIQUES } = await import('../src/data/uniques.js');
+  eq(assets.spec('gear.bow').ay, 0.5); eq(assets.spec('gear.crossbow').ay, 0.5); eq(assets.spec('gear.sword').ay, 0.82);
+  const bowU = UNIQUES.find((u) => /^bow|crossbow/.test(u.base || '') || BASES.find((b) => b.id === u.base)?.kind === 'bow');
+  if (bowU) eq(assets.spec(`gear.u.${bowU.id}`).ay, 0.5, bowU.id);
+});
+
+await t('コードの絵の細かさ: 背景・タイトルは 1 倍（記憶を節約）・小さな絵は 2 倍', () => {
+  eq(fallbackDpr(assets.spec('bg.act1')), 1); eq(fallbackDpr(assets.spec('bg.act1.ground')), 1); eq(fallbackDpr(assets.spec('ui.title')), 1);
+  eq(fallbackDpr(assets.spec('monster.rot_zombie')), 2); eq(fallbackDpr(assets.spec('icon.item.sword')), 2); eq(fallbackDpr(assets.spec('ui.logo')), 2);
+  eq(fallbackDpr({ w: 100, h: 100, dpr: 3 }), 3);
+});
+
+await t('戦いで使われる絵の ID はすべて枠がある（全クラスの全スキル・ルーン・ボスの特技・エリートの詞・ペット）', async () => {
+  const { ELITE_AFFIXES } = await import('../src/data/monsters.js');
+  const used = new Map(); // id → どこで
+  const note = (id, where) => { if (id && typeof id === 'string' && !used.has(id)) used.set(id, where); };
+  const PART = { hit: 'hit', swing: 'swing', nova: 'area', pulse: 'area' };
+  const collect = (g, where) => {
+    const c = g.combat;
+    for (const u of c.units) if (u.kind !== 'hero') note(u.art, `${where} unit ${u.kind}`); // 主人公は着せ替え（u.art は使わない）
+    for (const p of c.projs) note(p.art, `${where} proj`);
+    for (const a of c.areas) note(a.art, `${where} area`);
+    for (const e of c.fx) { if (e.skill && PART[e.t]) note(`fx.${e.skill}.${PART[e.t]}`, `${where} fx ${e.t}`); if (e.art) note(e.art, `${where} fx.art ${e.t}`); }
+    c.fx.length = 0;
+  };
+  for (const cl of CLASSES) {
+    const g = fresh(cl.id, 22, 60);
+    const st = g.state; st.hero.autoBar = false;
+    for (const id of Object.keys(st.hero.skills)) st.hero.skills[id].lvl = 10;
+    const basic = skillsOf(cl.id).find((s) => s.basic).id;
+    for (const s of skillsOf(cl.id)) {
+      for (const rune of [null, ...s.runes.map((r) => r.id)]) {
+        st.hero.skills[s.id].rune = rune;
+        st.hero.bar = s.basic ? [s.id] : [basic, s.id];
+        g.combat.recalc(); g.combat.hero.cds = {}; g.combat.hero.resource = g.H.resourceMax;
+        if (s.behavior === 'corpse') g.combat.corpses.push({ x: g.combat.hero.x + 90, y: 0, maxLife: 1000, t: 10, id: -1 });
+        g.combat.spawnMonster(s.kind === 'ult' ? 'boss_butcher' : 'bog_slime', { level: 60, lifeMul: 40, rank: s.kind === 'ult' ? 'boss' : 'normal', x: g.combat.hero.x + 120 });
+        for (let i = 0; i < 20 * (QUICK ? 1.5 : 3); i++) { g.tick(0.05); collect(g, `${s.id}${rune ? `.${rune}` : ''}`); g.combat.hero.resource = g.H.resourceMax; }
+        if (g.combat.hero.dead) g.combat.reviveHero();
+      }
+    }
+  }
+  // ボスの特技・エリートの詞
+  const g = fresh('warrior', 23, 60);
+  g.combat.H.life *= 1e6; // 倒れない
+  for (const m of MONSTERS.filter((x) => x.abilities?.length || x.attack)) {
+    g.combat.clearEnemies();
+    const u = g.combat.spawnMonster(m.id, { level: 60, rank: m.boss ? 'boss' : 'normal', lifeMul: 1e4, x: g.combat.hero.x + 260 });
+    for (const ab in u.abilityT) u.abilityT[ab] = 0.05;
+    for (let i = 0; i < 20 * 4; i++) { g.tick(0.05); collect(g, `monster ${m.id}`); g.combat.hero.life = g.combat.hero.maxLife; if (g.combat.hero.dead) g.combat.reviveHero(); }
+  }
+  for (const a of ELITE_AFFIXES) {
+    g.combat.clearEnemies();
+    g.combat.spawnMonster('rot_zombie', { level: 60, rank: 'rare', elite: [a.id], lifeMul: 1e4, x: g.combat.hero.x + 300 });
+    for (let i = 0; i < 20 * 5; i++) { g.tick(0.05); collect(g, `elite ${a.id}`); g.combat.hero.life = g.combat.hero.maxLife; if (g.combat.hero.dead) g.combat.reviveHero(); }
+  }
+  const missing = [...used].filter(([id]) => !assets.slots.has(id));
+  ok(!missing.length, `${missing.length} 個: ${missing.slice(0, 60).map(([id, w]) => `${id}（${w}）`).join(' / ')}`);
+  ok(used.size > 150, `集めた ID ${used.size}`);
+});
+
 // ======================================================================= ここまで
 console.error = origErr;
 console.log(`integrate: ${pass} 通過 / ${fail} 失敗`);
