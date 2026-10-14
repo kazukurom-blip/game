@@ -115,6 +115,7 @@ export function addAffixes(rng, item, n, { tierBias = 0, greaterChance = 0.02 } 
 let uidCounter = 1;
 export function setUidCounter(n) { uidCounter = Math.max(uidCounter, n); }
 export function nextUid() { return uidCounter++; }
+export function peekUid() { return uidCounter; }
 
 /**
  * アイテムを 1 つ作る。

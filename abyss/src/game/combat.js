@@ -18,6 +18,16 @@ import { registry } from './registry.js';
 
 export const behaviors = {};
 export const monsterAbilities = {};
+/** 敵・味方の出来事に差し込む（エリートの詞・ボスの仕掛けなど）。すべて (c, unit, ...) */
+export const unitHooks = {
+  onSpawn: [], // (c, u) … 出たとき（詞の準備など）
+  onMonsterTick: [], // (c, u, dt) … 敵の毎ティック
+  onMonsterHit: [], // (c, u, hit) … 敵が主人公側から当てられた（hit.dmg を書き換えてよい）
+  onMonsterStrike: [], // (c, u, target) … 敵が攻撃を当てる瞬間
+  onMonsterDeath: [], // (c, u, src) … 敵が倒れた
+  onHeroTick: [], // (c, h, dt)
+};
+function runHooks(list, ...args) { for (const f of list) { try { f(...args); } catch (e) { console.error('[unitHook]', e); } } }
 const ELITE = Object.fromEntries(ELITE_AFFIXES.map((a) => [a.id, a]));
 
 export const GROUND_Y = 0;
@@ -165,6 +175,7 @@ export class Combat {
     };
     if (def.abilities) for (const ab of def.abilities) u.abilityT[ab] = (monsterAbilities[ab]?.cd || 6) * this.rng.range(0.4, 1);
     this.units.push(u);
+    runHooks(unitHooks.onSpawn, this, u);
     if (u.boss) this.emit({ t: 'boss', unit: u });
     return u;
   }
@@ -272,6 +283,7 @@ export class Combat {
   // ---------------- 主人公の動き
   tickHero(h, dt) {
     const H = this.H;
+    if (unitHooks.onHeroTick.length) runHooks(unitHooks.onHeroTick, this, h, dt);
     // リソース
     h.resource = Math.max(0, Math.min(H.resourceMax, h.resource + H.resourceRegen * dt));
     // ライフ再生
@@ -420,6 +432,7 @@ export class Combat {
 
   // ---------------- 敵の動き
   tickMonster(u, dt) {
+    if (unitHooks.onMonsterTick.length) { runHooks(unitHooks.onMonsterTick, this, u, dt); if (u.dead) return; }
     if (u.flags.regen) u.life = Math.min(u.maxLife, u.life + u.maxLife * u.flags.regen * dt);
     if (this.isFrozen(u)) return;
     const spd = this.slowOf(u);
@@ -475,6 +488,7 @@ export class Combat {
   monsterStrike(u) {
     const tgt = u.strikeTarget && !u.strikeTarget.dead ? u.strikeTarget : this.targetFor(u);
     if (!tgt) return;
+    runHooks(unitHooks.onMonsterStrike, this, u, tgt);
     const atk = u.def.attack || 'melee';
     if (atk === 'ranged' || atk === 'caster') {
       this.spawnProj({ src: u, team: ENEMY_TEAM, x: u.x - 20 * u.size, y: u.y, z: 50 * u.size, tx: tgt.x, ty: tgt.y, speed: atk === 'caster' ? 520 : 700, dmg: u.dmg, el: u.element, range: u.range + 250, art: `fx.enemy.${u.def.proj || 'orb'}` });
@@ -596,6 +610,7 @@ export class Combat {
       this.hook('onHit', hit);
       if (crit) this.hook('onCrit', hit);
     }
+    if (unitHooks.onMonsterHit.length) runHooks(unitHooks.onMonsterHit, this, target, hit);
     dmg = hit.dmg;
     target.life -= dmg;
     target.hitFlash = 0.12;
@@ -692,6 +707,7 @@ export class Combat {
       const h = this.hero;
       if (h && !h.dead && this.H.lifeOnKill) h.life = Math.min(h.maxLife, h.life + this.H.lifeOnKill);
       this.hook('onKill', u);
+      runHooks(unitHooks.onMonsterDeath, this, u, src);
       if (u.flags?.deathBlast) this.spawnArea({ team: ENEMY_TEAM, x: u.x, y: u.y, r: 120, delay: 0.8, dmg: u.dmg * 1.5, el: 'fire', src: u, art: 'fx.enemy.blast' });
       if (u.flags?.split && !u.isSplit) {
         for (let i = 0; i < u.flags.split; i++) {

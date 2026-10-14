@@ -19,6 +19,7 @@ const HERO_SCREEN_X = 380;
 
 export const sceneHooks = {
   fx: {}, // type → (scene, e) => void … 演出の追加（アート担当）
+  onFx: [], // (scene, e) => void … すべての出来事を受け取る（音など、何人でも登録できる）
   drawFx: [], // (scene, ctx) => void … 毎フレームの追加描画
   projectile: null, // (scene, ctx, pr, sx, sy) => bool … 弾の描き方（true なら描いた）
   area: null, // (scene, ctx, a, sx, sy) => bool
@@ -232,6 +233,7 @@ export class Scene {
     const s = this.settings;
     let dmgShown = 0;
     for (const e of fx) {
+      for (const f of sceneHooks.onFx) { try { f(this, e); } catch (err) { console.error(err); } }
       const custom = sceneHooks.fx[e.t];
       if (custom) { try { custom(this, e); } catch (err) { console.error(err); } }
       switch (e.t) {

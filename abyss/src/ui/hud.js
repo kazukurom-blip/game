@@ -9,6 +9,9 @@ import { assets } from '../render/assets.js';
 import { attachTip } from './tooltip.js';
 import { skillDesc } from '../game/skills.js';
 
+/** HUD に足す表示。lines: (game) => { text, cls } | null（左上の場所の下に出る）。 panels: (hud) => DOM（一度だけ作る） */
+export const hudHooks = { lines: [], build: [] };
+
 export class Hud {
   constructor(ui) {
     this.ui = ui;
@@ -36,7 +39,9 @@ export class Hud {
     ]);
     this.skillRow = h('div.hud-skills');
     this.buffRow = h('div.hud-buffs');
-    el.append(h('div.hud-tl', [this.loc, this.ctrl]), h('div.hud-tr', [this.dps]), h('div.hud-bottom', [this.buffRow, this.bars, this.skillRow]));
+    this.extra = h('div.hud-extra');
+    el.append(h('div.hud-tl', [this.loc, this.ctrl, this.extra]), h('div.hud-tr', [this.dps]), h('div.hud-bottom', [this.buffRow, this.bars, this.skillRow]));
+    for (const f of hudHooks.build) { try { const x = f(this); if (x) el.append(x); } catch (e) { console.error(e); } }
     this.buildSkills();
   }
 
@@ -79,6 +84,10 @@ export class Hud {
       stageEl.textContent = '';
       wavesEl.innerHTML = '';
     }
+    const lines = [];
+    for (const f of hudHooks.lines) { try { const r = f(g); if (r) lines.push(r); } catch (e) { console.error(e); } }
+    const html = lines.map((l) => `<div class="hud-line ${l.cls || ''}">${l.text}</div>`).join('');
+    if (this.extra.innerHTML !== html) this.extra.innerHTML = html;
     this.autoBtn.textContent = w.autoAdvance ? '自動前進 ON' : '自動前進 OFF';
     this.autoBtn.classList.toggle('on', !!w.autoAdvance);
     const canBoss = w.mode === 'campaign' && !ws.isBossStage() && ((w.maxStage[w.zone] || 1) >= STAGES_PER_ZONE || w.cleared[w.zone]);

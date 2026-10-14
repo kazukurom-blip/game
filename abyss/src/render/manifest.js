@@ -12,6 +12,8 @@ import { MONSTERS } from '../data/monsters.js';
 import { ACTS } from '../data/world.js';
 import { WEAPON_KINDS, OFFHAND_KINDS, ARMOR_STYLES, KIND_NAMES, STYLE_NAMES } from '../data/items.js';
 import { MATERIALS } from '../data/materials.js';
+import { PETS } from '../data/pets.js';
+import { UNIQUES, MYTHICS, SETS } from '../data/uniques.js';
 
 export const CATEGORIES = [
   { id: 'hero', name: '主人公' },
@@ -59,6 +61,9 @@ export function buildManifest() {
     S.push({ id: `monster.${m.id}`, cat: 'monster', label: `${m.boss ? 'ボス' : '敵'}「${m.name}」`, w: Math.round(150 * big), h: Math.round(150 * big), ax: 0.5, ay: m.flying ? 0.6 : 0.97, facing: 'left', params: { mon: m.id } });
   }
   for (const k of ['skeleton', 'skelmage']) S.push({ id: `minion.${k}`, cat: 'minion', label: `召喚物（${k}）`, w: 120, h: 140, ax: 0.5, ay: 0.97, facing: 'right', params: { minion: k } });
+  for (const p of PETS) S.push({ id: `pet.${p.id}`, cat: 'minion', label: `ペット「${p.name}」`, w: 90, h: 90, ax: 0.5, ay: 0.97, facing: 'right', params: { pet: p.id } });
+  for (const u of [...UNIQUES, ...MYTHICS]) S.push({ id: `gear.u.${u.id}`, cat: 'gear', label: `ユニーク「${u.name}」（着た姿）`, w: 110, h: 150, ax: 0.5, ay: 0.82, params: { unique: u.id }, note: '無ければベースの絵' });
+  for (const st of SETS) for (const pc of st.pieces || []) S.push({ id: `gear.u.${pc.id}`, cat: 'gear', label: `セット「${pc.name}」（着た姿）`, w: 110, h: 150, ax: 0.5, ay: 0.82, params: { unique: pc.id } });
   for (const a of ACTS) {
     S.push({ id: `bg.${a.id}`, cat: 'bg', label: `${a.name}（背景・一番奥）`, w: 1280, h: 720, ax: 0, ay: 0, fit: 'width', params: { act: a.id, layer: 'far' } });
     S.push({ id: `bg.${a.id}.mid`, cat: 'bg', label: `${a.name}（背景・中景、横につながる絵）`, w: 1280, h: 720, ax: 0, ay: 0, fit: 'width', params: { act: a.id, layer: 'mid' }, noInherit: true });

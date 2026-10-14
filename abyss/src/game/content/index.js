@@ -1,3 +1,6 @@
 // 中身の登録（伝説の力・ユニーク・セット・宝石・キーストーン・敵の特技・スキルの動きなど）。
-// それぞれのファイルは import されたときに registry / behaviors / lootHooks などへ登録する。
-// 新しいファイルを作ったらここに import を 1 行足す。
+// 担当ごとに 1 ファイル。自分のファイルの中から、さらに細かいファイルを import する。
+import './items.js';
+import './combat.js';
+import './world.js';
+import './meta.js';

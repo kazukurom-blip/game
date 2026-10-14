@@ -14,7 +14,7 @@ import { newState, migrate } from './state.js';
 import { Combat } from './combat.js';
 import { SYSTEMS } from './systems/index.js';
 import { flushWorldPending } from './systems/world.js';
-import { generateItem, dropCount, setUidCounter } from './loot.js';
+import { generateItem, dropCount, setUidCounter, peekUid } from './loot.js';
 import { BAL } from '../data/balance.js';
 import { CLASS } from '../data/classes.js';
 import { BASE } from '../data/items.js';
@@ -60,7 +60,7 @@ export class Game {
       const it = generateItem(this.rng, { ilvl: 1, rarity: 'common', base: b.id });
       if (it) { it.isNew = false; this.state.hero.equip[slot] = it; }
     }
-    this.state.inv.nextUid = 1000;
+    this.each('ensureState', this.state);
     this.each('onNewGame');
     for (const f of gameHooks.onNewGame) f(this);
     this.start();
@@ -76,6 +76,7 @@ export class Game {
     this.state.inv.stash.flat().forEach(scan);
     Object.values(this.state.hero.equip).forEach(scan);
     setUidCounter(maxUid);
+    this.each('ensureState', this.state);
     this.each('onLoad');
     for (const f of gameHooks.afterLoad) f(this);
     this.start();
@@ -231,6 +232,7 @@ export class Game {
   /** セーブ用（そのまま JSON にできる） */
   snapshot() {
     this.state.lastSaved = Date.now();
+    this.state.inv.nextUid = peekUid();
     return this.state;
   }
 }

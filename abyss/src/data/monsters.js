@@ -1,7 +1,14 @@
 // 敵。見た目の差し替え枠は monster.<id>（render/manifest.js）。差し替えが無いときは body の形で絵を描く。
 //
+// 体の形（body。アート担当がこの形ごとに絵を描く。ワールド担当はこの中から選ぶ）:
+//   biped（人型）, brute（大柄な人型）, caster（ローブの術者）, quad（四足の獣）, beast_large（大きな獣）, flyer（翼で飛ぶ）,
+//   blob（粘体）, serpent（蛇・虫）, spider（蜘蛛）, insect（甲虫・蠍）, ghost（霊）, golem（岩・金属の巨人）, dragon（竜）,
+//   plant（植物）, aquatic（魚人・水棲）, demon（悪魔）, elemental（精霊・炎や氷の塊）, construct（機械）
+// 飾り（features。いくつでも）: horns, wings, tail, crown, armor, staff, shield, sword, axe, bow, spikes, tentacles, glow, hood, mask, chains, crystals, gears, flames, ice, bones
+// palette: { main（体の色）, sub（影・服）, eye（目）, accent?（飾り・光） }
+//
 // 形:
-// { id, name, family, body, size, palette: { main, sub, eye },
+// { id, name, family, body, features?, size, palette: { main, sub, eye, accent? },
 //   life: 1, dmg: 1, speed: 80, range: 70, atkCd: 1.6, element: 'phys',
 //   attack: 'melee' | 'ranged' | 'charge' | 'slam' | 'caster' | 'summoner' | 'explode',
 //   proj: 'bone' など（ranged のときの弾の見た目の種類）, res: { fire: 0, ... }, flying: false,

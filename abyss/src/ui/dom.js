@@ -61,3 +61,13 @@ export function spriteImg(assets, id, size = 48, opts = {}) {
   }
   return c;
 }
+
+/** 担当ごとの CSS を足す（style.css を触らずに済む）。同じ id は 1 回だけ */
+export function injectCss(id, css) {
+  if (typeof document === 'undefined') return;
+  if (document.getElementById(`css-${id}`)) return;
+  const el = document.createElement('style');
+  el.id = `css-${id}`;
+  el.textContent = css;
+  document.head.appendChild(el);
+}
