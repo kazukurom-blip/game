@@ -328,7 +328,7 @@ t('苦行: 深淵王で I が開き、章のボスで次が開く。段で敵が
   ok(w.maxTorment === 1 && g.sys.rift.available(), 'torment I');
   const d0 = ws.difficulty().life; const L0 = ws.level();
   ws.setTorment(1);
-  ok(w.torment === 1 && ws.difficulty().life > d0 && ws.level() > L0, 'harder');
+  ok(w.torment === 1 && BAL.monsterLife(ws.level()) * ws.difficulty().life > BAL.monsterLife(L0) * d0 && ws.level() > L0, 'harder'); // 魔境 I の倍率は 1（敵の Lv で重くなる。強さ担当）
   ok(g.H.res.fire <= computeHero(g.state, g, { torment: 0 }).res.fire - 5 + 0.001, 'res penalty');
   w.zone = 'a1z5'; w.stage = STAGES_PER_ZONE; ws.startStage(); run(g, 1);
   g.combat.killUnit(ws.bossUnit, g.combat.hero); run(g, 0.2);

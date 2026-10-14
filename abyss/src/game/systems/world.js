@@ -39,8 +39,9 @@ export const GOBLIN_SPAWN = { first: [300, 600], every: [600, 900], weights: { g
 export const TORMENT_AUTO = { window: 120, upRate: 0.9, downRate: 0.35, maxDeaths: 2 };
 // ボスの自動再挑戦
 export const AUTO_BOSS = { minGap: 30, maxGap: 180, margin: 1.0 }; // 強さ担当: 45/300 → 30/180（負けるほどボスが弱る BOSS_FAIL_EASE と合わせて、壁を短く）
-// 見張り: ふつうのステージで、この秒数だれも倒れなければステージをやり直す
+// 見張り: ふつうのステージで、この秒数だれも倒れないか、STALL_WAVE_SEC 秒ウェーブが進まなければステージをやり直す
 export const STALL_RESTART_SEC = 120;
+export const STALL_WAVE_SEC = 600;
 
 export function isWeekend(date = new Date()) { const d = date.getDay(); return d === 0 || d === 6; }
 
@@ -157,7 +158,7 @@ export class WorldSystem {
     if (def?.kind === 'final') return FINAL_BOSS_LIFE_MUL * ACT_BOSS_LIFE_MUL * ease;
     if (EARLY_BOSS[z.global] && !(this.w.torment > 0)) return EARLY_BOSS[z.global][0] * ease;
     // 第一章のボスは「最初の壁」なので軽くしない
-    return (z.zoneIdx === 4 && z.actIdx > 0 ? ACT_BOSS_LIFE_MUL : 1) * ease;
+    return (z.zoneIdx === 4 && z.actIdx > 0 ? ACT_BOSS_LIFE_MUL : 1) * ease * (this.w.torment > 0 ? BAL.TORMENT.bossLife ?? 1 : 1);
   }
 
   /** 続けて負けるほどボスが少し弱る（BOSS_FAIL_EASE。勝つと戻る）。{ life, dmg, pct } */
@@ -293,10 +294,15 @@ export class WorldSystem {
     const h = c.hero;
     const wd = this.watch;
     if (!h || h.dead || this.transition > 0) { wd.t = 0; wd.dmg = c.stats.dmgDone; return; }
-    // 倒しきれない敵（再生するエリートなど）に当て続けて止まるのを防ぐ: ふつうのステージで 2 分だれも倒れなければやり直す
+    // 倒しきれない敵（再生するエリート・手下を呼び続ける敵など）に当て続けて止まるのを防ぐ: ふつうのステージで
+    // 2 分だれも倒れないか、10 分ウェーブが進まなければやり直す（手下は倒れ続けるので、撃破数だけでは見張れない。
+    // 弱い主人公の遅いウェーブまでやり直すと、ステージが終わらずボスに再挑戦できなくなるので、ウェーブの方は長めに）
     const kills = this.game.state.meta.stats.kills;
-    if (wd.kills !== kills || !c.enemies().length || this.bossUnit || this.w.mode !== 'campaign') { wd.kills = kills; wd.kt = 0; } else if ((wd.kt = (wd.kt || 0) + dt) >= STALL_RESTART_SEC) {
-      wd.kt = 0; this.stuckRestarts = (this.stuckRestarts || 0) + 1; this.startStage(); return;
+    const key = `${this.w.zone}:${this.w.stage}:${this.wave}`;
+    if (wd.key !== key || !c.enemies().length || this.bossUnit || this.w.mode !== 'campaign') { wd.key = key; wd.kills = kills; wd.kt = 0; wd.wt = 0; } else {
+      if (wd.kills !== kills) { wd.kills = kills; wd.kt = 0; } else wd.kt = (wd.kt || 0) + dt;
+      wd.wt = (wd.wt || 0) + dt;
+      if (wd.kt >= STALL_RESTART_SEC || wd.wt >= STALL_WAVE_SEC) { wd.kt = 0; wd.wt = 0; this.stuckRestarts = (this.stuckRestarts || 0) + 1; this.startStage(); return; }
     }
     if (c.stats.dmgDone !== wd.dmg) { wd.dmg = c.stats.dmgDone; wd.t = 0; wd.nudged = false; return; }
     const foes = c.enemies();

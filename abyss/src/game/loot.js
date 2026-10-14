@@ -38,6 +38,7 @@ export function rollRarity(rng, opts = {}) {
   // 深く進むほどレジェンダリー・ユニーク・セットが増える（DESIGN §3: 序盤は 5〜10 分に 1 つ → 終盤は 1〜2 分に 1 つ）。ミシックは増やさない
   const lb = BAL.legendaryBoost ? BAL.legendaryBoost(opts.ilvl || 1) : 1;
   for (const id of ['legendary', 'unique', 'set']) if (w[id]) w[id] *= lb;
+  if (w.epic && BAL.epicBoost) w.epic *= BAL.epicBoost(opts.ilvl || 1);
   if (rank !== 'normal') w.common *= 0.3;
   if (torment > 0) { w.common *= Math.max(0.1, 1 - torment * 0.08); }
   if (minRarity) {

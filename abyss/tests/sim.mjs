@@ -50,6 +50,23 @@ const check = (name, ok, info = '') => { if (!ok) bad++; console.log(`${ok ? '�
   check('今の版のセーブはもう直さない', again.inv.bag.find((x) => x.uid === 999).affixes[0].v === 1234 && again.meta.gold === 12340);
 }
 
+// ---------------- 見張り: 手下だけ倒し続けてウェーブが終わらないときもステージをやり直す（10 分）
+{
+  const g = new Game({ seed: 3 });
+  g.newGame('warrior', 'sim');
+  for (let i = 0; i < 20 * 15; i++) g.tick(0.05);
+  const ws = g.sys.world;
+  const r0 = ws.stuckRestarts || 0;
+  const w0 = ws.wave;
+  // 敵は倒れず攻撃もしない・撃破数だけ 1 秒に 1 増える（呼ばれた手下を倒し続けている形）
+  for (let i = 0; i < 20 * 610; i++) {
+    for (const u of g.combat.enemies()) { u.life = u.maxLife = 1e30; u.dmg = 0; }
+    if (i % 20 === 0) g.state.meta.stats.kills++;
+    g.tick(0.05);
+  }
+  check('見張り: ウェーブが 10 分進まなければステージをやり直す（撃破数が増えていても）', (ws.stuckRestarts || 0) > r0, `ウェーブ ${w0}・やり直し ${(ws.stuckRestarts || 0) - r0} 回`);
+}
+
 // ---------------- 序盤の進み（クラスごと）
 for (const c of CLASSES) {
   const g = new Game({ seed: 7 });

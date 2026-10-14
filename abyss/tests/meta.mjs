@@ -175,7 +175,7 @@ t('実績: 秘密・好奇心（窓を開く）', () => {
 });
 t('実績: 遊んでいるうちに自然に達成する', () => {
   const g = fresh('ranger', 3);
-  run(g, 600);
+  run(g, 900); // ステージ 20 ウェーブで最初のボスが 10 分すぎ（強さ担当）
   ok(Object.keys(g.state.meta.achievements).length >= 5, `${Object.keys(g.state.meta.achievements).length}`);
 });
 

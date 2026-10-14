@@ -222,6 +222,11 @@ export async function runLife(opts = {}) {
         const gs = g.sys.rift.gateStatus().find((x) => x.ready);
         if (gs && w.torment >= 1) g.sys.rift.summonGate(gs.gi);
         else if (em % 120 === 90) { g.sys.rift.setAuto('push'); g.sys.rift.begin(Math.max(1, (w.rift.unlocked || 1))); }
+        // 苦行で物語をもう一度めぐる（地域のボス → 門の欠片、章のボス → 次の段）。最後まで行ったら最初から
+        else if (w.zone === 'a10z5' && w.cleared.a10z5 && !w.bossFailZone) g.sys.world.travel('a1z1', 1);
+        // 踏破済みの地域では autoBoss が再挑戦しないので、5 分ごとに自分で「ボスに挑む」（遊ぶ人がボタンを押す代わり）
+        else if (w.bossFailZone && em % 5 === 0) g.sys.world.challengeBoss();
+        if (w.mode === 'campaign') w.autoAdvance = w.bossFailZone ? w.autoAdvance : true;
       }
       if (w.mode === 'rift' && em % 120 === 0) g.sys.rift.setAuto('off');
       if (em % 60 === 0 && em > 0) {
@@ -239,6 +244,7 @@ export async function runLife(opts = {}) {
   rec.finalZone = ZONES[w.maxZone]?.id;
   rec.playTime = Math.round(st.playTime);
   rec.kills = st.meta.stats.kills;
+  rec.stuckRestarts = g.sys.world.stuckRestarts || 0; // 見張りでステージをやり直した回数
   rec.goldEarned = Math.round(st.meta.stats.goldEarned);
   rec.gold = Math.round(st.meta.gold);
   rec.goblins = st.meta.stats.goblins || 0;

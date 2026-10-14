@@ -57,7 +57,7 @@ const fmtT = (sec) => (sec == null ? '—' : sec < 3600 ? `${Math.round(sec / 60
 const pad = (s, n) => { s = String(s); let w = 0; for (const ch of s) w += ch.charCodeAt(0) > 0xff ? 2 : 1; return s + ' '.repeat(Math.max(0, n - w)); };
 const median = (a) => { const s = [...a].sort((x, y) => x - y); return s.length ? s[Math.floor(s.length / 2)] : null; };
 
-console.log(`\n■ 進み具合（${hours} 時間まで・第${stop}章で止める・seed ${seed}・自動装備/自動スキル/星座盤の自動/autoBoss・クラフトなし）`);
+console.log(`\n■ 進み具合（${hours} 時間まで・第${stop}章で止める・seed ${seed}・自動装備/自動スキル/星座盤の自動/autoBoss・${flag('craft') ? `強化あり（+${arg('enh', 10)} まで）` : 'クラフトなし'}）`);
 console.log('  目安: Lv10 約10分 / 章1 30〜45分 / 章5 6〜10h / 章10 25〜35h / 壁 10〜20分 / クラス差 ±25%\n');
 const head = ['クラス', 'Lv10', ...Array.from({ length: stop }, (_, i) => `章${i + 1}`), '壁 中央/最大', '20分超', '倒れた', '最後'];
 console.log(head.map((h, i) => pad(h, i === 0 ? 10 : i <= stop + 1 ? 9 : 14)).join(''));

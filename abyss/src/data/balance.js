@@ -76,7 +76,7 @@ export const BAL = {
     normal: { life: 1, dmg: 1, xp: 1, gold: 1, loot: 1 },
     champion: { life: 4, dmg: 1.4, xp: 4, gold: 3, loot: 3 },
     rare: { life: 6, dmg: 1.6, xp: 6, gold: 4, loot: 4 }, // 群れの長（エリート詞つき）
-    goblin: { life: 6.4, dmg: 0, xp: 3, gold: 30, loot: 12 },
+    goblin: { life: 3.6, dmg: 0, xp: 3, gold: 30, loot: 12 }, // ため込み屋は逃がしにくい硬さに（6.4 → 3.6。REFERENCE 3.1）
     boss: { life: 26, dmg: 1.7, xp: 30, gold: 25, loot: 10 },
     actboss: { life: 52, dmg: 2.0, xp: 80, gold: 60, loot: 18 },
     guardian: { life: 96, dmg: 2.2, xp: 60, gold: 50, loot: 15 },
@@ -92,12 +92,13 @@ export const BAL = {
 
   // ---- 苦行（物語クリア後の難易度。0 = 通常）
   MAX_TORMENT: 16,
-  // 1 段ごと: 敵の Lv +3（装備の曲線 P で ×1.27）・ライフ ×1.32・攻撃 ×1.18。I は物語の終わりの装備で楽に回れる重さ
-  TORMENT: { lvPer: 3, life: 1.32, dmg: 1.18 },
+  // I は物語の終わり（Lv100・倍率 1）と同じ重さで、報酬だけ増える。そこから 1 段ごとに 敵の Lv +2（装備の曲線で ×1.17）・ライフ ×1.32・攻撃 ×1.18
+  // bossLife: 魔境での地域・章のボスのライフ（物語の終わりは深淵王の長い制限時間で越えるので、地域のボス 30 秒の方が急に重くなるのを和らげる）
+  TORMENT: { lvPer: 2, life: 1.32, dmg: 1.18, bossLife: 0.65 },
   torment: (t) => ({
-    level: t > 0 ? 100 + t * BAL.TORMENT.lvPer : 0, // 敵のエリアレベル（0 なら物語のレベル）
-    life: BAL.TORMENT.life ** t,
-    dmg: BAL.TORMENT.dmg ** t,
+    level: t > 0 ? 100 + (t - 1) * BAL.TORMENT.lvPer : 0, // 敵のエリアレベル（0 なら物語のレベル）
+    life: t > 0 ? BAL.TORMENT.life ** (t - 1) : 1,
+    dmg: t > 0 ? BAL.TORMENT.dmg ** (t - 1) : 1,
     xp: 1 + 0.75 * t,
     gold: 1 + 0.5 * t,
     loot: 1 + 0.15 * t, // アイテム数
@@ -121,9 +122,12 @@ export const BAL = {
   GOLD_DROP_CHANCE: 0.35,
   // レアリティの重み（普通の敵）。MF はレア以上を (1+MF/100) 倍
   // アイテム担当が調整: 1〜1.5 体/秒でレア ≈1 分に 1 個・エピック ≈8〜10 分に 1 個（REFERENCE A09）。旧: rare 10.5・epic 2.0・legendary 0.35
-  RARITY_WEIGHTS: { common: 56, magic: 33, rare: 7.5, epic: 0.8, legendary: 0.45, unique: 0.12, set: 0.08, mythic: 0.003 },
-  // レジェンダリー以上（ミシックを除く）の重みの倍率。アイテム Lv 1 で ×0.65、50 で ×2.9、100 で ×5.1（それ以上は伸びない）
-  legendaryBoost: (ilvl) => 0.6 + 0.045 * Math.min(100, Math.max(1, ilvl)),
+  // ミシック 0.003 → 0.012（強さ担当: 1 体/秒で 15〜25 時間に 1 個。物語 1 周で 1〜2 個）
+  RARITY_WEIGHTS: { common: 56, magic: 33, rare: 7.5, epic: 0.8, legendary: 0.45, unique: 0.12, set: 0.08, mythic: 0.012 },
+  // レジェンダリー以上（ミシックを除く）の重みの倍率。アイテム Lv 1 で ×0.58、50 で ×4.25、100 で ×8（それ以上は伸びない）
+  legendaryBoost: (ilvl) => 0.5 + 0.075 * Math.min(100, Math.max(1, ilvl)),
+  // エピックの重みの倍率（終盤は倒す速さが落ちるので少しだけ増やす）
+  epicBoost: (ilvl) => 0.85 + 0.006 * Math.min(100, Math.max(1, ilvl)),
   mfEffective: (mf) => (mf <= 0 ? mf : mf * 100 / (mf + 100) * 2), // 逓減（MF 100 → 実効 100、300 → 150）
 
   // ---- 経済
