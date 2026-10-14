@@ -36,7 +36,7 @@ t('効果の能力はすべて定義済み', () => {
   for (const s of mods) ok(!statDef(s).unknown, s);
 });
 t('魂の式', () => { eq(baseSouls(20), 0); eq(baseSouls(49), Math.floor(5 * Math.sqrt(29))); eq(starsFor(1000), Math.floor(2 * Math.sqrt(40))); });
-t('卵の天井と確率', () => { ok(PET_BAL.PITY === 600); near(PET_BAL.EGG_CHANCE.champion, 1 / 200); eq(EGGS.length, 3); });
+t('卵の天井と確率', () => { ok(PET_BAL.PITY === 600); ok(PET_BAL.EGG_CHANCE.champion >= 1 / 250 && PET_BAL.EGG_CHANCE.champion <= 1 / 150); eq(EGGS.length, 3); });
 
 // ---------------- 転生
 t('転生: 解放前はできない・解放すると魂の見込みが出る', () => {

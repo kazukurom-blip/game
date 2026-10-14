@@ -69,6 +69,8 @@ export class PetSystem {
       }
     }
     if (!u || !ELIGIBLE.has(u.rank)) return;
+    // 弱すぎる敵（主人公より 10 Lv 以上下）からは落ちない（低い地域での卵集めを防ぐ）
+    if ((this.game.state.hero.level || 1) - (u.level || 1) > PET_BAL.LEVEL_GAP) return;
     ps.pity++;
     const ch = (PET_BAL.EGG_CHANCE[u.rank] || 0) * this.eggMul();
     if (this.game.rng.chance(ch) || ps.pity >= PET_BAL.PITY) {
@@ -402,8 +404,9 @@ export class PetSystem {
 
   onOffline(rep) {
     const ps = this.ps;
-    const elites = Math.max(0, Math.floor(rep.elites || 0));
-    const bosses = Math.max(0, Math.floor(rep.bosses || 0));
+    const tooLow = (this.game.state.hero.level || 1) - (rep.rate?.level || this.game.sys.world.level()) > PET_BAL.LEVEL_GAP;
+    const elites = tooLow ? 0 : Math.max(0, Math.floor(rep.elites || 0));
+    const bosses = tooLow ? 0 : Math.max(0, Math.floor(rep.bosses || 0));
     const eggs = {};
     // 卵（期待値をポアソンで）＋天井
     const lam = (elites * (PET_BAL.EGG_CHANCE.champion || 0) + bosses * (PET_BAL.EGG_CHANCE.boss || 0)) * this.eggMul();

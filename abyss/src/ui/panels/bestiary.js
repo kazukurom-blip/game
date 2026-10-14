@@ -187,6 +187,7 @@ function renderDrops(ui, el) {
   el.append(h('table.kv', [
     ...Object.entries(PET_BAL.EGG_CHANCE).map(([rk, p]) => [{ champion: 'チャンピオン', rare: '群れの長', boss: 'ボス', actboss: '章のボス', guardian: '裂け目の守護者', goblin: 'ため込み屋' }[rk] || rk, `${fmtPct(p * g.sys.pets.eggMul() * 100, 2)}（約 ${Math.round(1 / (p * g.sys.pets.eggMul()))} 体に 1 個）`]),
     ['天井', `エリート・ボスを ${PET_BAL.PITY} 体倒すと必ず落ちる（いま ${pity.cur} / ${pity.max}）`],
+    ['条件', `主人公より ${PET_BAL.LEVEL_GAP} Lv 以上低い敵からは落ちない`],
   ].map(([k, v]) => h('tr', [h('th', k), h('td', v)]))));
   el.append(bar((pity.cur / pity.max) * 100, `卵の天井 ${pity.cur} / ${pity.max}`, 'soul'));
   // 幸運ゲージ（アイテム担当）
