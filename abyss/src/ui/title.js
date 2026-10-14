@@ -14,7 +14,7 @@ export function showTitle(root, game, { onStart }) {
   bg.className = 'title-bg';
   bg.width = 1280; bg.height = 720;
   const s = assets.sprite('ui.title');
-  if (s?.img) bg.getContext('2d').drawImage(s.img, 0, 0, 1280, 720);
+  if (s?.img) assets.drawCover(bg.getContext('2d'), s, 0, 0, 1280, 720); // 差し替え画像の縦横比が違っても伸ばさない
   wrap.append(bg);
   const logo = spriteImg(assets, 'ui.logo', 520, { zoom: 1, class: 'title-logo' });
   logo.style.width = 'min(520px, 86vw)'; logo.style.height = 'auto';

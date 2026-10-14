@@ -6,13 +6,14 @@ import { RARITY } from '../../data/rarity.js';
 import { BASE, SLOT_NAMES } from '../../data/items.js';
 import { MATERIAL } from '../../data/materials.js';
 import { attachTip, itemCard, tooltip } from '../tooltip.js';
+import { itemIconId } from '../../render/manifest.js';
 
 /** アイテム 1 マス。onClick(item, ev) */
 export function itemCell(ui, item, opts = {}) {
   const r = RARITY[item.rarity] || RARITY.common;
   const b = BASE[item.base];
   const cell = h(`div.cell.r-${item.rarity}${item.isNew ? '.new' : ''}${opts.selected ? '.sel' : ''}${item.locked ? '.locked' : ''}`, { style: { '--rc': r.color } }, [
-    spriteImg(assets, b?.icon || 'icon.item.sword', opts.size || 46),
+    spriteImg(assets, itemIconId(item), opts.size || 46),
     item.enh ? h('span.enh', `+${item.enh}`) : null,
     item.q ? h('span.q', item.q === 2 ? '原' : '太') : null,
     opts.upgrade ? h('span.up', '▲') : null,

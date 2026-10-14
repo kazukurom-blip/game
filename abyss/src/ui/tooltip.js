@@ -10,6 +10,7 @@ import { itemName, itemReq, weaponStats, itemArmor, implicitMods, sellValue, bas
 import { registry } from '../game/registry.js';
 import { assets } from '../render/assets.js';
 import { spriteImg } from './dom.js';
+import { itemIconId } from '../render/manifest.js';
 
 export const tooltipHooks = {
   extraLines: [], // (game, item) => [DOM...] … ユニークの説明・セット効果・ソケットなど（アイテム担当）
@@ -32,7 +33,7 @@ export function itemCard(game, item, opts = {}) {
   const b = baseOf(item);
   const q = QUALITY[item.q || 0];
   const card = h(`div.itemcard.r-${item.rarity}`, { style: { '--rc': r.color } });
-  const icon = spriteImg(assets, b?.icon || 'icon.item.sword', 56);
+  const icon = spriteImg(assets, itemIconId(item), 56);
   card.append(h('div.ic-head', [
     h('div.ic-icon', icon),
     h('div.ic-title', [
