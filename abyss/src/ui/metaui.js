@@ -66,8 +66,20 @@ export function bindMetaUi(ui) {
   ensurePetPainter(assets, PET);
   const ev = ui.game.events;
   const on = (t, fn) => offs.push(ev.on(t, (e) => { try { fn(e || {}); } catch (err) { console.error(err); } }));
-  on('achievement', (e) => ui.toast(`🏆 実績「${e.def.name}」を達成　+${e.def.points} pt`, 'good.mtach'));
-  on('titleUnlocked', (e) => ui.toast(`称号「${e.title.name}」を手に入れた（実績の窓で選べる）`, 'level'));
+  // まとめて届いた知らせは 1 つにする（画面を埋めないように）
+  const batch = (fmt1, fmtN, kind, ms = 900) => {
+    let list = []; let timer = null;
+    return (item) => {
+      list.push(item);
+      if (timer) return;
+      timer = setTimeout(() => { const l = list; list = []; timer = null; ui.toast(l.length === 1 ? fmt1(l[0]) : fmtN(l), kind); }, ms);
+    };
+  };
+  const achToast = batch((d) => `🏆 実績「${d.name}」を達成　+${d.points} pt`, (l) => `🏆 実績を ${l.length} 個達成（「${l[0].name}」ほか）　+${l.reduce((sum, d) => sum + d.points, 0)} pt`, 'good.mtach');
+  const monToast = batch((id) => `📖 魔物図鑑に「${MONSTER[id]?.name || '新しい魔物'}」を登録`, (l) => `📖 魔物図鑑に ${l.length} 種類を登録（「${MONSTER[l[0]]?.name || ''}」ほか）`, '', 1500);
+  on('achievement', (e) => achToast(e.def));
+  const titleToast = batch((t) => `称号「${t.name}」を手に入れた（実績の窓で選べる）`, (l) => `称号を ${l.length} つ手に入れた（「${l[0].name}」ほか。実績の窓で選べる）`, 'level');
+  on('titleUnlocked', (e) => titleToast(e.title));
   on('prestigeUnlocked', () => ui.toast('♻ 転生が解放された！ 転生の窓で魂の見込みを確かめよう', 'level.mtbig'));
   on('rebirth', (e) => ui.toast(`♻ 転生した　魂 +${fmt(e.souls)}（${e.count} 回目）`, 'level.mtbig'));
   on('transcend', (e) => ui.toast(`✧ 超越した　星晶 +${e.stars}`, 'level.mtbig'));
@@ -79,7 +91,7 @@ export function bindMetaUi(ui) {
   on('bountyDone', (e) => ui.toast(`📜 ${e.name} を達成！ 日課の窓で受け取れます`, 'good'));
   on('loginClaim', (e) => ui.toast(`🎁 ログインの贈り物（${e.day} 日目）を受け取った`, 'good'));
   on('collectionFind', (e) => ui.toast(`📖 宝物図鑑に「${e.name}」を登録`, 'good.mtcol'));
-  on('bestiaryNew', (e) => ui.toastOnce(`bn-${e.id}`, `📖 魔物図鑑に「${MONSTER[e.id]?.name || '新しい魔物'}」を登録`, ''));
+  on('bestiaryNew', (e) => monToast(e.id));
   on('bestiaryTier', (e) => { if (e.tier >= 3) ui.toast(`📖 魔物図鑑「${MONSTER[e.id]?.name || ''}」が段 ${e.tier} に（${MONSTER[e.id] ? `${FAMILIES[MONSTER[e.id].family] || ''}へのダメージ +1%` : ''}）`, 'good'); });
   on('metaChanged', (e) => { ui.markDirty('meta'); if (e.kind) ui.markDirty(`meta:${e.kind}`); });
   on('unlocksChanged', () => ui.markDirty('meta'));
@@ -87,6 +99,17 @@ export function bindMetaUi(ui) {
 }
 
 hudHooks.build.push((hud) => { bindMetaUi(hud.ui); return null; });
+// HUD の左上に出す一行: 転生できるとき・卵が孵るとき（0.1 秒ごとに呼ばれるので軽く）
+hudHooks.lines.push((g) => {
+  const ps = g.sys.prestige;
+  if (ps?.isUnlocked() && g.state.world.mode === 'campaign') {
+    const n = ps.previewSouls();
+    if (n > 0 && ps.canRebirth().ok) return { text: `♻ 転生できます（魂 +${fmt(n)}）`, cls: 'mt-hud-soul' };
+  }
+  const pets = g.sys.pets;
+  if (pets && !g.state.meta.unlocks.autoHatch && pets.hatchReady() > 0) return { text: '🥚 卵が孵ります（ペットの窓）', cls: 'mt-hud-egg' };
+  return null;
+});
 // 連れているペット（combat.units の外にいるので、ここで描く）
 sceneHooks.drawFx.push((scene, ctx) => { try { drawPetUnit(scene, ctx, assets, PET); } catch (e) { console.error(e); } });
 
@@ -121,7 +144,9 @@ injectCss('meta-ui', `
 .mt-list { display: flex; flex-direction: column; gap: 6px; }
 .toast.mtach { border-color: var(--gold); color: var(--gold2); }
 .toast.mtbig { font-size: 15px; font-weight: 800; box-shadow: 0 0 22px rgba(154,208,255,.35); border-color: #6aa0ff; color: #cfe6ff; }
-.toast.mtegg { border-color: #c77dff; } .toast.mtcol { border-color: var(--r-unique); }
+.toast.mtegg { border-color: #c77dff; }
+.hud-line.mt-hud-soul { color: #9ad0ff; background: rgba(10,16,30,.75); border: 1px solid #3a5a8a; border-radius: 6px; padding: 2px 8px; font-size: 12px; }
+.hud-line.mt-hud-egg { color: #e0b0ff; background: rgba(20,10,30,.75); border: 1px solid #5a3a8a; border-radius: 6px; padding: 2px 8px; font-size: 12px; } .toast.mtcol { border-color: var(--r-unique); }
 .mt-medal { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 900; color: #1a1208; flex: none;
   background: radial-gradient(circle at 35% 30%, #fff8, transparent 45%), var(--mc, #6a5a4a); box-shadow: inset 0 -2px 0 #0005, 0 0 0 1px #0008; }
 .mt-medal.off { filter: grayscale(1) brightness(.45); }
