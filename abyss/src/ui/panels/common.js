@@ -5,22 +5,37 @@ import { assets } from '../../render/assets.js';
 import { RARITY } from '../../data/rarity.js';
 import { BASE, SLOT_NAMES } from '../../data/items.js';
 import { MATERIAL } from '../../data/materials.js';
-import { attachTip, itemCard, tooltip } from '../tooltip.js';
+import { attachTip, itemCard, tooltip, RARITY_MARK, RARITY_DOTS } from '../tooltip.js';
 import { itemIconId } from '../../render/manifest.js';
+
+/** レアリティの 1 文字（色だけに頼らない印。REFERENCE U07）と ●の数（ノーマル 1 〜 ミシック 6）。中身は tooltip.js */
+export { RARITY_MARK, RARITY_DOTS };
+/** 品質の印（進化 ★・極致 ✦） */
+export const QUALITY_MARK = { 1: '★', 2: '✦' };
+
+const qualityName = (q) => (q === 2 ? '・極致' : q === 1 ? '・覚醒' : '');
+
+/** レアリティの小さな札（文字 ＋ 品質） */
+export function rarityMark(item, opts = {}) {
+  const r = RARITY[item.rarity] || RARITY.common;
+  return h(`span.rmark${item.q ? `.q${item.q}` : ''}${opts.cls ? `.${opts.cls}` : ''}`, { style: { '--rc': r.color }, title: `${r.name}${qualityName(item.q)}`, 'aria-hidden': 'true' }, `${RARITY_MARK[item.rarity] || ''}${QUALITY_MARK[item.q] || ''}`);
+}
 
 /** アイテム 1 マス。onClick(item, ev) */
 export function itemCell(ui, item, opts = {}) {
   const r = RARITY[item.rarity] || RARITY.common;
   const b = BASE[item.base];
-  const cell = h(`div.cell.r-${item.rarity}${item.isNew ? '.new' : ''}${opts.selected ? '.sel' : ''}${item.locked ? '.locked' : ''}`, { style: { '--rc': r.color } }, [
+  const label = `${r.name}${qualityName(item.q)} ${item.enh ? `+${item.enh} ` : ''}${b?.name || SLOT_NAMES[item.slot] || ''}${opts.upgrade ? '（今より強い）' : ''}`;
+  const cell = h(`div.cell.r-${item.rarity}${item.q ? `.q${item.q}` : ''}${item.isNew ? '.new' : ''}${opts.selected ? '.sel' : ''}${item.locked ? '.locked' : ''}`, { style: { '--rc': r.color }, tabindex: '0', role: 'button', 'aria-label': label }, [
     spriteImg(assets, itemIconId(item), opts.size || 46),
     item.enh ? h('span.enh', `+${item.enh}`) : null,
-    item.q ? h('span.q', item.q === 2 ? '原' : '太') : null,
-    opts.upgrade ? h('span.up', '▲') : null,
+    rarityMark(item, { cls: 'cm' }),
+    opts.upgrade ? h('span.up', { title: '今の装備より強くなりそう' }, '▲') : null,
     item.locked ? h('span.lk', '🔒') : null,
   ]);
   attachTip(cell, () => itemCard(ui.game, item, { compare: !opts.equipped, equipped: opts.equipped }));
   cell.addEventListener('click', (ev) => { tooltip.hide(); opts.onClick?.(item, ev); });
+  cell.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); tooltip.hide(); opts.onClick?.(item, ev); } });
   cell.addEventListener('contextmenu', (ev) => { ev.preventDefault(); tooltip.hide(); opts.onRight?.(item, ev); });
   return cell;
 }
@@ -54,7 +69,7 @@ export function itemMenu(ui, item, equipped = false) {
   for (const f of itemMenuHooks) { try { btns.push(...(f(ui, item, equipped) || [])); } catch (e) { console.error(e); } }
   btns.push({ label: '閉じる' });
   item.isNew = false;
-  ui.modal('アイテム', itemCard(g, item, { compare: !equipped, equipped }), btns);
+  ui.modal('アイテム', itemCard(g, item, { compare: !equipped, equipped }), btns, { onClose: () => ui.afterAction?.() });
 }
 
 /** ほかの担当がアイテムの操作を足す: (ui, item, equipped) => [{ label, onclick }] */
@@ -66,7 +81,7 @@ function findSlot(g, item) {
 }
 
 export function matText(got) {
-  const N = { scrap: '鉄屑', dust: '魔塵', crystal: '秘晶', echo: '残響', core: '原初の核', shard: '欠片' };
+  const N = { scrap: '鉄屑', dust: '魔塵', crystal: '秘晶', echo: '残響', core: '極致の核', shard: '欠片' };
   const s = Object.entries(got || {}).map(([k, v]) => `${N[k] || MATERIAL[k]?.name || k} ×${v}`).join('　');
   return s || 'なし';
 }

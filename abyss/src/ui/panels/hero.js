@@ -11,6 +11,8 @@ import { effectiveLife, armorReduction } from '../../game/character.js';
 export const heroPanel = {
   id: 'hero', name: '装備', icon: '🛡',
   refreshOn: ['gear', 'inv', 'level', 'stats', 'skills'],
+  key: 'I',
+  help: '<p>着ている装備と、おもな能力です。装備の枠を押すと外せます（マウスを乗せると詳しい説明）。</p><p>持ち物の窓でアイテムを押すと、今の装備と比べて「火力 ▲12% ／ 耐久 ▼3%」のように出ます。▲ の付いた物は今より強くなりそうな物です。</p><p>レアリティは色のほかに、マスの左下の 1 文字（並・魔・稀・秀・伝・組・唯・神）でも分かります。★ は覚醒、✦ は極致（オプションの数値が高い品質）。</p>',
   render(ui, el) {
     const g = ui.game;
     const st = g.state;
@@ -35,7 +37,7 @@ export const heroPanel = {
     const R = ['weapon', 'offhand', 'ring1', 'ring2', 'legs', 'boots'];
     el.append(h('div.equip-grid', [
       h('div.eqcol', L.map((s) => equipSlot(ui, s))),
-      h('div.dollwrap', [cv, h('div.dollname', [h('b', st.hero.name), ` ${cls.name}　Lv ${st.hero.level}`])]),
+      h('div.dollwrap', [cv, h('div.dollname', [h('b', st.hero.name), `${st.hero.name === cls.name ? '' : ` ${cls.name}`}　Lv ${st.hero.level}${st.hero.level >= 100 ? `　アビスLv ${st.hero.paragon.level}` : ''}`])]),
       h('div.eqcol', R.map((s) => equipSlot(ui, s))),
     ]));
     const basic = st.hero.bar.find(Boolean);

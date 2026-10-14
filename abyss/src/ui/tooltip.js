@@ -12,6 +12,10 @@ import { assets } from '../render/assets.js';
 import { spriteImg } from './dom.js';
 import { itemIconId } from '../render/manifest.js';
 
+// レアリティの文字・●の数（common.js と同じ。common.js が tooltip.js を読むので、ここに置いて循環を避ける）
+export const RARITY_MARK = { common: '並', magic: '魔', rare: '稀', epic: '秀', legendary: '伝', set: '組', unique: '唯', mythic: '神' };
+export const RARITY_DOTS = { common: 1, magic: 2, rare: 3, epic: 4, legendary: 5, set: 5, unique: 5, mythic: 6 };
+
 export const tooltipHooks = {
   extraLines: [], // (game, item) => [DOM...] … ユニークの説明・セット効果・ソケットなど（アイテム担当）
   afterAffixes: [], // (game, item) => [DOM...] … オプションのすぐ下（ユニークの固定オプションなど）
@@ -38,7 +42,7 @@ export function itemCard(game, item, opts = {}) {
     h('div.ic-icon', icon),
     h('div.ic-title', [
       h('div.ic-name', { style: { color: r.color } }, `${item.enh ? `+${item.enh} ` : ''}${itemName(item)}`),
-      h('div.ic-type', [q?.badge ? h('span.badge', { style: { background: q.color } }, q.badge) : null, `${r.name}　${b ? (b.style ? `${STYLE_NAMES[b.style]}の` : '') + (KIND_NAMES[b.kind] || SLOT_NAMES[item.slot]) : ''}`]),
+      h('div.ic-type', [q?.badge ? h('span.badge', { style: { background: q.color } }, q.badge) : null, h('span.ic-rar', { style: { color: r.color } }, [h('span.rmark', { style: { '--rc': r.color }, 'aria-hidden': 'true' }, RARITY_MARK[item.rarity] || ''), ` ${r.name} `, h('span.ic-dots', { title: `希少さ ${RARITY_DOTS[item.rarity] || 1} / 6` }, '●'.repeat(RARITY_DOTS[item.rarity] || 1))]), `　${b ? (b.style ? `${STYLE_NAMES[b.style]}の` : '') + (KIND_NAMES[b.kind] || SLOT_NAMES[item.slot]) : ''}`]),
     ]),
   ]));
   const body = h('div.ic-body');
@@ -133,8 +137,12 @@ export const tooltip = new Tooltip();
 
 /** el にマウスを乗せたら make() の中身を出す */
 export function attachTip(el, make) {
-  el.addEventListener('mouseenter', () => { const c = make(); if (c) tooltip.show(c, el.getBoundingClientRect()); });
+  const show = () => { const c = make(); if (c) tooltip.show(c, el.getBoundingClientRect()); };
+  el.addEventListener('mouseenter', show);
   el.addEventListener('mouseleave', () => tooltip.hide());
+  // キーボードで移ってきたときも出す（マウスのクリックで付いたフォーカスでは出さない）
+  el.addEventListener('focus', () => { if (el.matches(':focus-visible')) show(); });
+  el.addEventListener('blur', () => tooltip.hide());
   return el;
 }
 
