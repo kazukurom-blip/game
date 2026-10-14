@@ -4,6 +4,7 @@ import { h, spriteImg } from '../dom.js';
 import { assets } from '../../render/assets.js';
 import { RARITY } from '../../data/rarity.js';
 import { BASE, SLOT_NAMES } from '../../data/items.js';
+import { MATERIAL } from '../../data/materials.js';
 import { attachTip, itemCard, tooltip } from '../tooltip.js';
 
 /** アイテム 1 マス。onClick(item, ev) */
@@ -65,7 +66,7 @@ function findSlot(g, item) {
 
 export function matText(got) {
   const N = { scrap: '鉄屑', dust: '魔塵', crystal: '秘晶', echo: '残響', core: '原初の核', shard: '欠片' };
-  const s = Object.entries(got || {}).map(([k, v]) => `${N[k] || k} ×${v}`).join('　');
+  const s = Object.entries(got || {}).map(([k, v]) => `${N[k] || MATERIAL[k]?.name || k} ×${v}`).join('　');
   return s || 'なし';
 }
 

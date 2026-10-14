@@ -118,6 +118,102 @@ const main = async () => {
     check('スマホで横にはみ出さない', !overflow);
     await m.close();
   }
+  // ===================== アイテム担当（鍛冶・宝石・極意・商人・持ち物）ここから =====================
+  if (want('items')) {
+    const shot = (n) => page.screenshot({ path: path.join(SHOTS, `items_${n}.png`) });
+    const openP = async (id) => { await page.click(`.navbtn[data-id="${id}"]`); await page.waitForTimeout(200); };
+    const clickTab = async (name) => { await page.evaluate((nm) => { const b = [...document.querySelectorAll('#panelbody .tabs .tab')].find((x) => x.textContent.startsWith(nm)); b?.click(); }, name); await page.waitForTimeout(150); };
+    const clickBtn = async (txt) => page.evaluate((t) => { const b = [...document.querySelectorAll('#panelbody button.btn')].find((x) => x.textContent.startsWith(t) && !x.disabled); if (b) { b.click(); return true; } return false; }, txt);
+    // 豊かな状態を作る（装備・素材・宝石・ルーン・深淵の宝石・極意）
+    const setup = await page.evaluate(async () => {
+      const g = window.__game;
+      const { generateItem } = await import('/src/game/loot.js');
+      const kit = await import('/src/ui/panels/itemkit.js');
+      g.newGame('sorcerer', '検証');
+      g.state.hero.level = 70; g.combat.recalc();
+      g.state.meta.gold = 5e9;
+      for (const id of ['scrap', 'dust', 'crystal', 'echo', 'core', 'shard', 'chaos', 'ascend', 'bless', 'drill', 'abyssdrop']) g.state.inv.mats[id] = 500;
+      const mk = (o) => { const it = generateItem(g.rng, { ilvl: 70, cls: 'sorcerer', ...o }); g.state.inv.bag.push(it); return it; };
+      const w = mk({ rarity: 'rare', slot: 'weapon' });
+      mk({ rarity: 'unique', def: 'u_frostheart', slot: 'weapon' });
+      mk({ rarity: 'set', piece: 'set_sevenstar_chest' });
+      mk({ rarity: 'mythic', def: 'm_genesis', anyReq: true });
+      for (let i = 0; i < 4; i++) mk({ rarity: 'legendary' });
+      const ring = mk({ rarity: 'rare', slot: 'ring', noSockets: true }); ring.sockets = [null];
+      const white = mk({ rarity: 'common', slot: 'helm', noSockets: true }); white.sockets = [null, null];
+      for (let i = 0; i < 12; i++) mk({});
+      g.state.inv.gems = { ember_1: 7, frost_3: 4, star_5: 3, abyss_2: 2, blood_6: 1 };
+      g.state.inv.runes = { kiri: 1, hikari: 1, hai: 5, rin: 2, kaze: 1 };
+      g.sys.gems.onRiftComplete(25, 0.8); g.sys.gems.grantLegendaryGem('bane');
+      g.state.meta.codex.powers = { pw_crowdbreak: 0.6, pw_d_barrier: 0.9, pw_u_treasure: 0.4, pw_s_orb: 1 };
+      g.sys.codex.equip(0, 'pw_s_orb'); g.sys.codex.equip(1, 'pw_d_barrier');
+      g.state.inv.luck.leg = 310; g.state.inv.luck.myth = 4200;
+      kit.selectItem('craft', w.uid); kit.selectItem('gems', white.uid);
+      g.events.emit('invChanged', {});
+      return { w: w.uid, white: white.uid, ring: ring.uid, bag: g.state.inv.bag.length };
+    });
+    check('アイテム: 検証用の状態を作れる', setup.bag > 20, `bag=${setup.bag}`);
+    // 鍛冶
+    await openP('craft');
+    await shot('craft_enhance');
+    for (let i = 0; i < 6; i++) await clickBtn('強化する');
+    const enh = await page.evaluate((uid) => window.__game.sys.inv.findItem(uid).item.enh || 0, setup.w);
+    check('鍛冶: 強化のボタンで +値が上がる', enh >= 5, `+${enh}`);
+    await clickTab('段上げ'); await shot('craft_tier');
+    await clickTab('付け替え'); await clickBtn('候補を出す'); await page.waitForTimeout(150); await shot('craft_reroll');
+    const pend = await page.evaluate((uid) => !!window.__game.sys.inv.findItem(uid).item.rrPending, setup.w);
+    check('鍛冶: 付け替えの候補が出る', pend);
+    await clickBtn('これにする');
+    await clickTab('昇格'); await shot('craft_ascend');
+    await clickTab('堕落'); await shot('craft_corrupt');
+    // 宝石
+    await openP('gems');
+    await clickTab('宝石'); await shot('gems_table');
+    await clickTab('ソケット');
+    await page.evaluate(() => { const c = [...document.querySelectorAll('#panelbody .ik-chip')].find((x) => x.textContent.includes('霧')); c?.click(); });
+    await page.waitForTimeout(100);
+    await page.evaluate(() => { const c = [...document.querySelectorAll('#panelbody .ik-chip')].find((x) => x.textContent.includes('光')); c?.click(); });
+    await page.waitForTimeout(200);
+    const rw = await page.evaluate((uid) => window.__game.sys.inv.findItem(uid).item.rw || '', setup.white);
+    check('宝石: ルーンを順にはめるとルーン語になる', rw === 'rw_insight', rw);
+    await shot('gems_socket');
+    await clickTab('ルーン語'); await shot('gems_words');
+    await clickTab('深淵の宝石'); await shot('gems_lgems');
+    // 極意
+    await openP('codex'); await shot('codex');
+    // 商人
+    await openP('merchant');
+    const b0 = await page.evaluate(() => window.__game.state.inv.bag.length);
+    await clickBtn('指輪');
+    const b1 = await page.evaluate(() => window.__game.state.inv.bag.length);
+    check('商人: 目利きで品物が増える', b1 === b0 + 1, `${b0}→${b1}`);
+    await shot('merchant_gamble');
+    await clickTab('ミシック交換'); await shot('merchant_mythic');
+    await clickTab('素材'); await shot('merchant_mats');
+    // 持ち物
+    await openP('bag');
+    await clickTab('バッグ');
+    await clickBtn('選んで分解');
+    await page.evaluate(() => { [...document.querySelectorAll('#panelbody .grid .cell:not(.empty)')].slice(0, 3).forEach((c) => c.click()); });
+    await page.waitForTimeout(150);
+    await shot('bag_multi');
+    const picked = await page.evaluate(() => document.querySelectorAll('#panelbody .cell.ik-pick').length);
+    check('持ち物: まとめて選べる', picked >= 1, `${picked}`);
+    await clickBtn('やめる');
+    await clickTab('自動の振り分け'); await clickBtn('L3'); await shot('bag_filter');
+    const preset = await page.evaluate(() => window.__game.state.inv.filter.autoSalvage.rare === true);
+    check('持ち物: プリセットで振り分けが変わる', preset);
+    // ツールチップ（ユニーク・セット）
+    await clickTab('バッグ');
+    for (const r of ['unique', 'set', 'mythic']) {
+      const cell = await page.$(`#panelbody .grid .cell.r-${r}`);
+      if (cell) { await cell.hover(); await page.waitForTimeout(200); await shot(`tooltip_${r}`); }
+    }
+    const tipOk = await page.$('#tooltip .ik-flavor, #tooltip .ik-setbox');
+    check('ツールチップ: 言い伝え・セット効果が出る', !!tipOk);
+    await page.mouse.move(5, 5);
+  }
+  // ===================== アイテム担当ここまで =====================
   check('エラーが 0 件', errors.length === 0, errors.slice(0, 5).join(' | '));
   await browser.close();
   srv.close();

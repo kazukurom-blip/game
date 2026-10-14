@@ -13,6 +13,8 @@ import { spriteImg } from './dom.js';
 
 export const tooltipHooks = {
   extraLines: [], // (game, item) => [DOM...] … ユニークの説明・セット効果・ソケットなど（アイテム担当）
+  afterAffixes: [], // (game, item) => [DOM...] … オプションのすぐ下（ユニークの固定オプションなど）
+  sockets: null, // (game, item) => DOM … ソケットの行を描き直す（無ければ ◆◇ だけ）
 };
 
 function tierLabel(a) {
@@ -51,13 +53,18 @@ export function itemCard(game, item, opts = {}) {
   if (item.affixes?.length) {
     body.append(h('div.ic-affixes', item.affixes.map((a) => modLine({ s: a.s, v: a.v * (q?.mult || 1) }, { star: a.g, tier: opts.tiers !== false ? tierLabel(a) : null, cls: a.g ? 'greater' : null }))));
   }
+  for (const f of tooltipHooks.afterAffixes) { try { const els = f(game, item); if (els) body.append(...[].concat(els)); } catch (e) { console.error(e); } }
   // 伝説の力
   if (item.power) {
     const p = registry.power(item.power.id);
     if (p) body.append(h('div.ic-power', [h('div.pw-name', `◆ ${p.name}`), h('div.pw-desc', typeof p.desc === 'function' ? p.desc(registry.powerValue(p.id, item.power.r)) : p.desc)]));
   }
   for (const f of tooltipHooks.extraLines) { try { const els = f(game, item); if (els) body.append(...[].concat(els)); } catch (e) { console.error(e); } }
-  if (item.sockets?.length) body.append(h('div.ic-sockets', item.sockets.map((s) => h(`span.socket${s ? '.filled' : ''}`, s ? '◆' : '◇'))));
+  if (item.sockets?.length) {
+    let el = null;
+    if (tooltipHooks.sockets) { try { el = tooltipHooks.sockets(game, item); } catch (e) { console.error(e); } }
+    body.append(el || h('div.ic-sockets', item.sockets.map((s) => h(`span.socket${s ? '.filled' : ''}`, s ? '◆' : '◇'))));
+  }
   card.append(body);
   // 下の欄
   const req = itemReq(item);

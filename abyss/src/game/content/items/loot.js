@@ -104,8 +104,19 @@ lootHooks.makeSpecial = (item, ctx) => makeSpecialItem(ctx.rng, item, item.rarit
 
 lootHooks.addPower = (item, ctx) => {
   const d = pickPower(ctx.rng, item.slot, ctx.opts?.cls);
-  if (d) item.power = { id: d.id, r: item.q === 2 ? 1 : Math.round(ctx.rng.next() * 1000) / 1000 };
+  if (!d) return;
+  item.power = { id: d.id, r: item.q === 2 ? 1 : Math.round(ctx.rng.next() * 1000) / 1000 };
+  item.name = legendaryName(item, d);
 };
+
+/** レジェンダリーの名前: 「力の名前」の「ベースの呼び名」（例: 群れ崩しの指輪） */
+export function legendaryName(item, def) {
+  const b = BASE[item.base];
+  if (!b || !def) return null;
+  const i = b.name.lastIndexOf('の');
+  const noun = i >= 0 && i < b.name.length - 1 ? b.name.slice(i + 1) : b.name;
+  return `${def.name}の${noun}`;
+}
 
 lootHooks.rareName = (rng, item) => rareName(rng, item);
 
