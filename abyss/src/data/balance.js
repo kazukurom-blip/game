@@ -39,22 +39,23 @@ export const BAL = {
   STR_ARMOR_PER_POINT: 0.1,
   DEX_DODGE_PER_POINT: 0.02,
   INT_RES_PER_POINT: 0.02,
+  VOID_RES_SHARE: 0.5, // 全耐性・知力の耐性は虚無に半分だけ効く
 
   // ---- 主人公
   heroBaseLife: (lvl) => 40 * P(lvl),
   heroLifePerLevel: 0, // 曲線に含む
   MAX_LEVEL: 100,
   // レベル l → l+1 に必要な経験値。「同じレベルの敵を何体倒すか」で決める
-  killsToLevel: (l) => Math.round(8 * l ** 1.3),
+  killsToLevel: (l) => Math.round(24 * l ** 1.45 * Math.min(1, 0.05 + 0.04 * l)),
   xpToNext: (l) => Math.round(BAL.killsToLevel(l) * BAL.monsterXp(l)),
   // パラゴン（Lv100 以降、上限なし）
-  paragonXpToNext: (p) => Math.round(BAL.xpToNext(100) * (1 + p * 0.02)),
+  paragonXpToNext: (p) => Math.round(BAL.xpToNext(100) * 0.12 * (1 + p * 0.015)),
   PARAGON_POINTS_PER_LEVEL: 1,
   SKILL_POINTS_PER_LEVEL: 1,
   TREE_POINTS_PER_LEVEL: 1,
 
   // ---- 敵
-  monsterLife: (L) => 12 * P(L),
+  monsterLife: (L) => 15 * P(L),
   monsterDmg: (L) => 2.5 * P(L),
   monsterXp: (L) => 5 * (1 + 0.15 * (L - 1)) * 1.02 ** (L - 1),
   monsterGold: (L) => 1.5 * PG(L),
@@ -62,7 +63,7 @@ export const BAL = {
   // 曲線 P(L) より速く強くなるので、その分を敵のライフ・攻撃に足す。Lv 100 で頭打ち（苦行・裂け目はそれぞれの倍率で伸びる）。
   // 倍率 = (1 + a × x) × b^min(x, knee) × (1 + c × (x - knee)₊)、x = L - 1。knee から先はゆるやかに（後半は主人公の伸びが仕組みで決まるため）。
   // tests/sim.mjs の長い計測（node tests/sim.mjs 2400 --pace）で合わせる。
-  WORLD: { lifeA: 0.03, lifeB: 1.042, lifeC: 0.02, dmgA: 0.012, dmgB: 1.009, dmgC: 0.01, knee: 45, cap: 100 },
+  WORLD: { lifeA: 0.03, lifeB: 1.05, lifeC: 0.0087, dmgA: 0.012, dmgB: 1.009, dmgC: 0.003, knee: 45, cap: 100 },
   monsterScale: (L) => {
     const W = BAL.WORLD;
     const x = Math.min(W.cap, Math.max(1, L)) - 1;
@@ -74,24 +75,28 @@ export const BAL = {
     normal: { life: 1, dmg: 1, xp: 1, gold: 1, loot: 1 },
     champion: { life: 4, dmg: 1.4, xp: 4, gold: 3, loot: 3 },
     rare: { life: 6, dmg: 1.6, xp: 6, gold: 4, loot: 4 }, // 群れの長（エリート詞つき）
-    goblin: { life: 8, dmg: 0, xp: 3, gold: 30, loot: 12 },
-    boss: { life: 45, dmg: 2.2, xp: 30, gold: 25, loot: 10 },
-    actboss: { life: 90, dmg: 2.6, xp: 80, gold: 60, loot: 18 },
-    guardian: { life: 120, dmg: 2.8, xp: 60, gold: 50, loot: 15 },
+    goblin: { life: 6.4, dmg: 0, xp: 3, gold: 30, loot: 12 },
+    boss: { life: 27, dmg: 1.7, xp: 30, gold: 25, loot: 10 },
+    actboss: { life: 54, dmg: 2.0, xp: 80, gold: 60, loot: 18 },
+    guardian: { life: 96, dmg: 2.2, xp: 60, gold: 50, loot: 15 },
   },
-  // 経験値の Lv 差の補正（低すぎる敵は少なく）
+  // 経験値の Lv 差の補正（低すぎる敵は少なく、自分より強い敵は多めに。先へ進みすぎて装備を着けられなくなるのを防ぐ追い上げ）
+  XP_CATCHUP: { per: 0.08, max: 1.5 }, // 敵が 1 Lv 上につき +8%（最大 +150%）
   xpLevelPenalty: (heroLvl, L) => {
     const d = heroLvl - L;
+    if (d < 0) return 1 + Math.min(BAL.XP_CATCHUP.max, -d * BAL.XP_CATCHUP.per);
     if (d <= 5) return 1;
     return Math.max(0.05, 1 - (d - 5) * 0.08);
   },
 
   // ---- 苦行（物語クリア後の難易度。0 = 通常）
   MAX_TORMENT: 16,
+  // 1 段ごと: 敵の Lv +3（装備の曲線 P で ×1.27）・ライフ ×1.32・攻撃 ×1.18。I は物語の終わりの装備で楽に回れる重さ
+  TORMENT: { lvPer: 3, life: 1.32, dmg: 1.18 },
   torment: (t) => ({
-    level: t > 0 ? 100 + t * 5 : 0, // 敵のエリアレベル（0 なら物語のレベル）
-    life: 1.6 ** t,
-    dmg: 1.3 ** t,
+    level: t > 0 ? 100 + t * BAL.TORMENT.lvPer : 0, // 敵のエリアレベル（0 なら物語のレベル）
+    life: BAL.TORMENT.life ** t,
+    dmg: BAL.TORMENT.dmg ** t,
     xp: 1 + 0.75 * t,
     gold: 1 + 0.5 * t,
     loot: 1 + 0.15 * t, // アイテム数
@@ -102,10 +107,11 @@ export const BAL = {
   }),
 
   // ---- 深淵の裂け目（上限なし）
+  RIFT_GROWTH: { lvPer: 0.5, life: 1.07, dmg: 1.03 },
   rift: (g) => ({
-    level: 100 + g, // エリアレベル
-    life: 1.11 ** g,
-    dmg: 1.045 ** g,
+    level: 100 + Math.floor(g * BAL.RIFT_GROWTH.lvPer), // エリアレベル（2 段ごとに +1）
+    life: BAL.RIFT_GROWTH.life ** g,
+    dmg: BAL.RIFT_GROWTH.dmg ** g,
     timeLimit: 15 * 60,
   }),
 
@@ -115,6 +121,8 @@ export const BAL = {
   // レアリティの重み（普通の敵）。MF はレア以上を (1+MF/100) 倍
   // アイテム担当が調整: 1〜1.5 体/秒でレア ≈1 分に 1 個・エピック ≈8〜10 分に 1 個（REFERENCE A09）。旧: rare 10.5・epic 2.0・legendary 0.35
   RARITY_WEIGHTS: { common: 56, magic: 33, rare: 7.5, epic: 0.8, legendary: 0.45, unique: 0.12, set: 0.08, mythic: 0.003 },
+  // レジェンダリー以上（ミシックを除く）の重みの倍率。アイテム Lv 1 で ×0.65、50 で ×2.9、100 で ×5.1（それ以上は伸びない）
+  legendaryBoost: (ilvl) => 0.6 + 0.045 * Math.min(100, Math.max(1, ilvl)),
   mfEffective: (mf) => (mf <= 0 ? mf : mf * 100 / (mf + 100) * 2), // 逓減（MF 100 → 実効 100、300 → 150）
 
   // ---- 経済

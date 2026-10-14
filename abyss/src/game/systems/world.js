@@ -13,7 +13,7 @@
 // 出来事（game.events）: stageStart, stageClear, bossSpawn, bossFail, zoneClear, storyClear, tormentUnlock, tormentChanged,
 //                         goblinSpawn, goblinKill, goblinEscape, miniEvent, autoBossRetry
 
-import { ZONES, ZONE, ACT, STAGES_PER_ZONE, WAVES_PER_STAGE, BOSS_TIME, ACT_BOSS_TIME_MUL, FINAL_BOSS_TIME_MUL, ACT_BOSS_LIFE_MUL, EARLY_BOSS, stageLevel, FINAL_ZONE } from '../../data/world.js';
+import { ZONES, ZONE, ACT, STAGES_PER_ZONE, WAVES_PER_STAGE, BOSS_TIME, ACT_BOSS_TIME_MUL, FINAL_BOSS_TIME_MUL, ACT_BOSS_LIFE_MUL, FINAL_BOSS_LIFE_MUL, EARLY_BOSS, stageLevel, FINAL_ZONE } from '../../data/world.js';
 import { MONSTER, ELITE_AFFIXES } from '../../data/monsters.js';
 import { BAL } from '../../data/balance.js';
 import { runSched, clearSched } from '../content/world/util.js';
@@ -38,6 +38,8 @@ export const GOBLIN_SPAWN = { first: [300, 600], every: [600, 900], weights: { g
 export const TORMENT_AUTO = { window: 120, upRate: 0.9, downRate: 0.35, maxDeaths: 2 };
 // ボスの自動再挑戦
 export const AUTO_BOSS = { minGap: 45, maxGap: 300, margin: 1.0 };
+// 見張り: ふつうのステージで、この秒数だれも倒れなければステージをやり直す
+export const STALL_RESTART_SEC = 120;
 
 export function isWeekend(date = new Date()) { const d = date.getDay(); return d === 0 || d === 6; }
 
@@ -150,7 +152,7 @@ export class WorldSystem {
   /** 地域のボスのライフの追加の倍率（章のボスは少し軽く、深淵王は重く） */
   bossLifeMul(z) {
     const def = MONSTER[z.boss];
-    if (def?.kind === 'final') return 1.5 * ACT_BOSS_LIFE_MUL;
+    if (def?.kind === 'final') return FINAL_BOSS_LIFE_MUL * ACT_BOSS_LIFE_MUL;
     if (EARLY_BOSS[z.global] && !(this.w.torment > 0)) return EARLY_BOSS[z.global][0];
     // 第一章のボスは「最初の壁」なので軽くしない
     return z.zoneIdx === 4 && z.actIdx > 0 ? ACT_BOSS_LIFE_MUL : 1;
@@ -280,6 +282,11 @@ export class WorldSystem {
     const h = c.hero;
     const wd = this.watch;
     if (!h || h.dead || this.transition > 0) { wd.t = 0; wd.dmg = c.stats.dmgDone; return; }
+    // 倒しきれない敵（再生するエリートなど）に当て続けて止まるのを防ぐ: ふつうのステージで 2 分だれも倒れなければやり直す
+    const kills = this.game.state.meta.stats.kills;
+    if (wd.kills !== kills || !c.enemies().length || this.bossUnit || this.w.mode !== 'campaign') { wd.kills = kills; wd.kt = 0; } else if ((wd.kt = (wd.kt || 0) + dt) >= STALL_RESTART_SEC) {
+      wd.kt = 0; this.stuckRestarts = (this.stuckRestarts || 0) + 1; this.startStage(); return;
+    }
     if (c.stats.dmgDone !== wd.dmg) { wd.dmg = c.stats.dmgDone; wd.t = 0; wd.nudged = false; return; }
     const foes = c.enemies();
     if (!foes.length) { wd.t = 0; return; }
@@ -339,7 +346,7 @@ export class WorldSystem {
     const L = this.campaignLevel(z, STAGES_PER_ZONE, torment) + 1;
     const rk = BAL.RANK[z.zoneIdx === 4 ? 'actboss' : 'boss'];
     const dl = (torment > 0 ? BAL.torment(torment).life : 1) * BAL.monsterScale(L - 1).life;
-    const life = BAL.monsterLife(L) * (def.life || 1) * rk.life * dl * this.bossLifeMul(z);
+    const life = BAL.monsterLife(L) * (def.life || 1) * (1 + (def.tax || 0)) * rk.life * dl * this.bossLifeMul(z); // tax: 特技の重さ（data/monsters.js）
     const time = this.bossTimeFor(z) + (def.phases ? def.phases.length * 20 : 0);
     return { life, need: life / (time * 0.85), time, def, level: L };
   }

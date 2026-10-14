@@ -11,7 +11,7 @@ import { pickAffixes, affixCount } from '../src/game/content/world/elites.js';
 import { composeWave } from '../src/game/content/world/composer.js';
 import { GOBLIN } from '../src/game/content/world/goblins.js';
 import { isWeekend, worldHooks } from '../src/game/systems/world.js';
-import { RIFT, GATE, riftDifficulty, guardianFor } from '../src/game/systems/rift.js';
+import { RIFT, GATE, riftDifficulty, guardianFor, riftTormentTier } from '../src/game/systems/rift.js';
 const GATE_REFUND = GATE.refund;
 import { computeHero } from '../src/game/character.js';
 
@@ -351,7 +351,7 @@ t('苦行の自動最適化: ペースが良ければ上げ、倒れたら下げ
 // ---------------- 深淵の裂け目
 t('裂け目: 段階の数値・守護者は 5 段ごとに入れ替わる', () => {
   const d1 = riftDifficulty(1); const d20 = riftDifficulty(20);
-  ok(d20.life > d1.life * 7 && d20.level === 120, 'scale');
+  ok(d20.life > d1.life * 2.5 && d20.level === BAL.rift(20).level && d20.level > d1.level, 'scale'); // 伸び方は BAL.RIFT_GROWTH（強さ担当）
   ok(guardianFor(1) === guardianFor(5) && guardianFor(5) !== guardianFor(6) && guardianFor(51) === guardianFor(1), 'rotation');
 });
 t('裂け目: 開く前は始められない', () => {
@@ -409,7 +409,7 @@ t('裂け目: 時間切れ・倒れると時間が減る・自動で続ける', 
   g.sys.rift.abandon();
   ok(w.mode === 'campaign' && w.torment === 2, `restored torment ${w.torment}`);
 });
-function riftTormentTierFor(gl) { return Math.min(BAL.MAX_TORMENT, Math.floor(gl / 5)); }
+function riftTormentTierFor(gl) { return riftTormentTier(gl); }
 t('裂け目: 途中で保存して読み直すと続きから', () => {
   const g = newGame('assassin', 24);
   g.state.world.maxTorment = 1;

@@ -96,12 +96,33 @@ export function spendSouls(g) {
   return n;
 }
 
+/** 強化だけする鍛冶（--craft）: 装備を低い物から 1 段ずつ +cap まで。お金と鉄屑が足りる分だけ。戻り値: 強化した回数 */
+const ENH_ORDER = ['weapon', 'chest', 'offhand', 'helm', 'legs', 'gloves', 'boots', 'belt', 'amulet', 'ring1', 'ring2'];
+export function enhancePolicy(g, cap = 10, keepGold = 0) {
+  const cr = g.sys.crafting;
+  if (!cr) return 0;
+  let n = 0;
+  for (let guard = 0; guard < 200; guard++) {
+    let did = false;
+    const list = ENH_ORDER.map((s) => g.state.hero.equip[s]).filter((it) => it && (it.enh || 0) < cap).sort((a, b) => (a.enh || 0) - (b.enh || 0));
+    for (const it of list) {
+      const info = cr.enhanceInfo(it);
+      if (!info.ok || info.missing.length || g.state.meta.gold - (info.cost.gold || 0) < keepGold) continue;
+      const r = cr.enhance(it.uid);
+      if (r.ok) { n++; did = true; break; }
+    }
+    if (!did) break;
+  }
+  return n;
+}
+
 /**
  * 1 人を回す。opts: { cls, hours, seed, rebirth（転生の計測）, stopAtAct（その章を倒したら止める）, onMinute }
  * 戻り値は JSON にできる記録。
  */
 export async function runLife(opts = {}) {
-  const { cls = 'warrior', hours = 35, seed = 7, rebirth = false, stopAct = 10, maxRebirths = 1, life2Hours = 12 } = opts;
+  const { cls = 'warrior', hours = 35, seed = 7, rebirth = false, stopAct = 10, maxRebirths = 1, life2Hours = 12, craft = false, endgame = 0 } = opts;
+  const eg = { start: null, hourly: [], rifts: [], gates: [] };
   if (!PETDEF) { try { PETDEF = (await import('../src/data/pets.js')).PET; } catch { PETDEF = {}; } }
   const g = new Game({ seed });
   g.newGame(cls, 'sim');
@@ -122,6 +143,8 @@ export async function runLife(opts = {}) {
     const a = actOf(); const ra = (rec.rarityByAct[a] ||= {}); ra[r] = (ra[r] || 0) + 1;
   });
   g.events.on('eggFound', () => rec.eggs++);
+  rec.fails = {};
+  g.events.on('bossFail', (e) => { const f = (rec.fails[e.zone.id] ||= { time: 0, died: 0, short: [] }); if (e.reason === '力尽きた') f.died++; else f.time++; if (f.short.length < 40) f.short.push(e.short); });
   g.events.on('petHatched', () => rec.hatched++);
   const lastAct = { t: 0, kills: 0, gold: 0, xpLv: 1 };
   g.events.on('zoneClear', (e) => {
@@ -139,6 +162,9 @@ export async function runLife(opts = {}) {
       enh: Math.max(0, ...Object.values(st.hero.equip).map((it) => it?.enh || 0)),
       ilvl: Math.round(Object.values(st.hero.equip).reduce((s, it) => s + (it?.ilvl || 0), 0) / Math.max(1, Object.values(st.hero.equip).filter(Boolean).length)),
       souls: g.sys.prestige?.previewSouls?.() || 0,
+      enhAvg: +(Object.values(st.hero.equip).reduce((s, it) => s + (it?.enh || 0), 0) / Math.max(1, Object.values(st.hero.equip).filter(Boolean).length)).toFixed(1),
+      mats: { scrap: st.inv.mats.scrap || 0, dust: st.inv.mats.dust || 0, crystal: st.inv.mats.crystal || 0, shard: st.inv.mats.shard || 0, echo: st.inv.mats.echo || 0 },
+      goldSpent: Math.round(st.meta.stats.goldEarned - st.meta.gold),
     };
     lastAct.t = t; lastAct.kills = st.meta.stats.kills; lastAct.gold = st.meta.stats.goldEarned;
   });
@@ -151,6 +177,7 @@ export async function runLife(opts = {}) {
     autoTree(g);
     if (st.hero.level >= 100) g.sys.tree.autoParagon();
     petPolicy(g);
+    if (craft && m % 5 === 0) rec.enhanced = (rec.enhanced || 0) + enhancePolicy(g, craft === true ? 10 : craft);
     if (rec.lv10 == null && st.hero.level >= 10) rec.lv10 = m;
     if (m % 60 === 0) {
       rec.hourly.push({ h: m / 60, lv: st.hero.level, par: st.hero.paragon.level, zone: ZONES[st.world.maxZone]?.id, power: heroPower(g.H, st), kills: st.meta.stats.kills, gold: Math.round(st.meta.stats.goldEarned), deaths: rec.deaths, ach: g.sys.achievements?.points?.() || 0 });
@@ -171,8 +198,32 @@ export async function runLife(opts = {}) {
       }
       if (life2Start != null && rec.acts[`${stopAct}@${maxRebirths + 1}`]) { rec.life2 = { sec: Math.round(st.playTime - life2Start), souls: g.sys.prestige.previewSouls() }; break; }
       if (life2Start != null && st.playTime - life2Start > life2Hours * 3600) break;
-    } else if (rec.acts[String(stopAct)]) break;
+    } else if (rec.acts[String(stopAct)] && !endgame) break;
+    // 物語のあと（--endgame=時間）: 苦行は自動で段を選ぶ・2 時間ごとに 30 分だけ裂け目を「上へ」で回す・門番は欠片がそろったら呼ぶ
+    if (endgame && st.world.cleared.a10z5) {
+      if (eg.start == null) {
+        eg.start = m; g.sys.world.setTormentAuto(true);
+        g.events.on('riftComplete', (e) => { eg.rifts.push({ m: m - eg.start, lv: e.level, ok: true }); });
+        g.events.on('riftFail', (e) => { if (!e.abandoned) eg.rifts.push({ m: m - eg.start, lv: e.level, ok: false, p: +e.progress.toFixed(2) }); });
+        g.events.on('gateResult', (e) => { eg.gates.push({ m: m - eg.start, gi: e.gi, tier: e.tier, ok: e.ok }); });
+        eg.k0 = st.meta.stats.kills; eg.d0 = rec.deaths;
+      }
+      const em = m - eg.start;
+      const w = st.world;
+      if (w.mode === 'campaign') {
+        const gs = g.sys.rift.gateStatus().find((x) => x.ready);
+        if (gs && w.torment >= 1) g.sys.rift.summonGate(gs.gi);
+        else if (em % 120 === 90) { g.sys.rift.setAuto('push'); g.sys.rift.begin(Math.max(1, (w.rift.unlocked || 1))); }
+      }
+      if (w.mode === 'rift' && em % 120 === 0) g.sys.rift.setAuto('off');
+      if (em % 60 === 0 && em > 0) {
+        eg.hourly.push({ h: em / 60, lv: st.hero.level, par: st.hero.paragon.level, tMax: w.maxTorment || 0, t: w.torment || 0, rift: w.rift.best || 0, kps: +((st.meta.stats.kills - eg.k0) / 3600).toFixed(2), deaths: rec.deaths - eg.d0, power: heroPower(g.H, st) });
+        eg.k0 = st.meta.stats.kills; eg.d0 = rec.deaths;
+      }
+      if (em >= endgame * 60) break;
+    }
   }
+  if (endgame) rec.endgame = eg;
   const w = st.world;
   rec.wall = Object.entries(w.bossLog).filter(([, l]) => l.wall != null).map(([z, l]) => ({ z, wall: l.wall, tries: l.tries }));
   rec.stuck = Object.entries(w.bossLog).filter(([z, l]) => l.wall == null && l.fails > 0 && !w.cleared[z]).map(([z, l]) => ({ z, since: Math.round(st.playTime - (l.firstFail || 0)), tries: l.tries }));

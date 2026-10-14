@@ -336,7 +336,8 @@ t('星座盤: 最短の道で振る・外す・振り直し・構成', () => {
 t('星座盤: 10 レベルごとに追加の点', () => {
   const g = new Game({ seed: 1 }); g.newGame('warrior', 'x');
   const p0 = g.state.hero.tree.points;
-  g.addXp(BAL.xpToNext(1) * 400);
+  let need = 0; for (let l = 1; l < 12; l++) need += BAL.xpToNext(l); // Lv12 まで（経験値の曲線が変わっても通るように）
+  g.addXp(need);
   const L = g.state.hero.level;
   ok(L >= 10, `lvl ${L}`);
   eq(g.state.hero.tree.points - p0, (L - 1) + Math.floor(L / 10), 'points');

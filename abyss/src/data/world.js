@@ -9,13 +9,14 @@
 // 苦行（物語クリア後）では地域のボスが「門の欠片」を落とす（GATE_GROUPS）。
 
 export const STAGES_PER_ZONE = 10;
-export const WAVES_PER_STAGE = 3;
+export const WAVES_PER_STAGE = 20;
 export const BOSS_TIME = 30; // ボスの制限時間（秒）。章のボスは ×1.8、深淵王は ×2.5
 export const ACT_BOSS_TIME_MUL = 1.8;
 export const FINAL_BOSS_TIME_MUL = 2.5;
 // 最初の 2 地域のボスはやさしく（はじめての 5 分で負けないように）。[ライフ, 攻撃] の倍率
 export const EARLY_BOSS = { 0: [0.6, 0.6], 1: [0.85, 0.85] };
-export const ACT_BOSS_LIFE_MUL = 0.75; // 第二章からの章のボスのライフ（BAL.RANK.actboss に掛ける。章の終わりの壁を「少し稼げば越えられる」に）
+export const ACT_BOSS_LIFE_MUL = 0.75;
+export const FINAL_BOSS_LIFE_MUL = 1.25; // 深淵王のライフ（章のボスの倍率にさらに掛ける。段階の変化が 2 回あるので重め） // 第二章からの章のボスのライフ（BAL.RANK.actboss に掛ける。章の終わりの壁を「少し稼げば越えられる」に）
 
 export const ACTS = [
   {

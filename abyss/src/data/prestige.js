@@ -1,7 +1,7 @@
 // 転生（魂の祭壇）と超越（星晶）の数値。ロジックは game/systems/prestige.js。
 //
 // ■ 転生
-//   魂 = floor( floor(k × √(この周回で着いた最高のエリア Lv − 20)) × 倍率 )
+//   魂 = floor( floor(k × ((この周回で着いた最高のエリア Lv − 20) ÷ 10)²) × 倍率 )   … L49 で 25・L70 で 75・L100 で 192
 //   解放: 第五章のボス（通し番号 24 の地域）を初めて倒したとき。
 //   消える: 物語の進み（章・地域・ステージ）・お金・この周回の数え上げ
 //   残る:   レベル・パラゴン・装備・素材・宝石・力の書庫・ペット・実績・図鑑・星座盤
@@ -21,7 +21,9 @@
 export const PRESTIGE = {
   UNLOCK_ZONE: 24, // 第五章のボスの地域（ZONES の通し番号）
   UNLOCK_LEVEL: 50, // 地域のデータが無いときの目安（第五章のボスのエリア Lv）
-  SOUL_K: 5,
+  SOUL_K: 3,
+  SOUL_DIV: 10,
+  SOUL_POW: 2,
   SOUL_BASE_LEVEL: 20,
   MIN_LIFE_SEC: 20 * 60, // 2 回目以降は、この周回を 20 分以上遊ぶと転生できる（すぐ転生をくり返すのを防ぐ）
   WARP_BASE: 0.5,
@@ -33,16 +35,16 @@ export const PRESTIGE = {
   HISTORY: 20, // 転生の記録を残す数
 };
 
-/** 魂の基本の量（倍率の前） */
+/** 魂の基本の量（倍率の前）= floor(K × ((L − 20) ÷ 10)^2) */
 export function baseSouls(level) {
   if (!(level > PRESTIGE.SOUL_BASE_LEVEL)) return 0;
-  return Math.floor(PRESTIGE.SOUL_K * Math.sqrt(level - PRESTIGE.SOUL_BASE_LEVEL));
+  return Math.floor(PRESTIGE.SOUL_K * ((level - PRESTIGE.SOUL_BASE_LEVEL) / PRESTIGE.SOUL_DIV) ** PRESTIGE.SOUL_POW);
 }
 
 /** 次の 1 点に必要なエリア Lv（倍率 mult 込み） */
 export function levelForSouls(n, mult = 1) {
   const need = n / Math.max(0.01, mult);
-  return Math.ceil(PRESTIGE.SOUL_BASE_LEVEL + (Math.ceil(need) / PRESTIGE.SOUL_K) ** 2);
+  return Math.ceil(PRESTIGE.SOUL_BASE_LEVEL + PRESTIGE.SOUL_DIV * (need / PRESTIGE.SOUL_K) ** (1 / PRESTIGE.SOUL_POW));
 }
 
 /** 星晶の量 */
@@ -98,7 +100,7 @@ def({ id: 'soul_wind', cat: 'economy', name: '疾風の魂', desc: '移動速度
 def({ id: 'soul_nest', cat: 'economy', name: '卵を嗅ぐ魂', desc: 'ペットの卵が落ちる確率 +{v}%', max: 10, cost: [5, 1.3], effect: { key: 'eggMul', per: 10 } });
 def({ id: 'soul_bounty', cat: 'economy', name: '恵みの魂', desc: '日課・ログインの報酬 +{v}%', max: 10, cost: [3, 1.25], effect: { key: 'bountyMul', per: 10 } });
 def({ id: 'soul_purse', cat: 'economy', name: '蓄えの魂', desc: '転生してもゴールドの {v}% が残る', max: 10, cost: [4, 1.3], effect: { key: 'keepGold', per: 5 } });
-def({ id: 'soul_honor', cat: 'economy', name: '誉れの魂', desc: '実績ポイントの効果 +{v}%', max: 20, cost: [3, 1.2], effect: { key: 'achMul', per: 5 } });
+def({ id: 'soul_honor', cat: 'economy', name: '誉れの魂', desc: '実績ポイントの効果 +{v}%', max: 10, cost: [3, 1.2], effect: { key: 'achMul', per: 5 } });
 
 // ---------------- 放置
 def({ id: 'idle_cap', cat: 'idle', name: '長き眠り', desc: '放置の上限 +{v} 時間（8 時間 → 最大 48 時間）', max: 20, cost: [3, 1.22], effect: { key: 'offlineHours', per: 2 }, unit: '' });
@@ -139,7 +141,7 @@ star({ id: 'star_altar', name: '祭壇の星', desc: '魂の祭壇の費用 -{v}
 star({ id: 'star_road', name: '星の道', desc: '転生の直後に飛ぶ先 +{v}%（祭壇の上限 80% を越えて最大 90%）', max: 5, cost: [3, 2], effect: { key: 'warp', per: 2 } });
 star({ id: 'star_dream', name: '夢の星', desc: '放置の稼ぎ +{v}%', max: 5, cost: [2, 2], mods: [{ s: 'offline_gain', per: 10 }] });
 star({ id: 'star_beast', name: '星の獣', desc: 'ペットの効果 +{v}%', max: 5, cost: [2, 2], effect: { key: 'petMul', per: 20 } });
-star({ id: 'star_honor', name: '星の誉れ', desc: '実績ポイントの効果 +{v}%', max: 10, cost: [1, 1], effect: { key: 'achMul', per: 10 } });
+star({ id: 'star_honor', name: '星の誉れ', desc: '実績ポイントの効果 +{v}%', max: 10, cost: [1, 1], effect: { key: 'achMul', per: 5 } });
 
 export const STAR_UPGRADES = S;
 export const STAR_BY_ID = Object.fromEntries(S.map((u) => [u.id, u]));

@@ -35,7 +35,7 @@ export const BOSS_ABILITIES = {
   frost_nova: { name: '凍気の環', cd: 10, range: 300, mult: 1.3, delay: 0.9, r: 230, desc: '0.9 秒後に半径 230 の冷気の爆発（130%）。当たると 2 秒冷える' },
   poison_pool: { name: '毒の沼', cd: 9, range: 800, mult: 0.12, delay: 0.6, dur: 6, r: 120, desc: '主人公の足元に 6 秒残る毒の沼（0.5 秒ごとに 12%）' },
   enrage: { name: '激昂', passive: true, at: 0.3, desc: 'ライフが 30% を切ると、攻撃力 +50%・攻撃の速さ +40%・移動 +30%' },
-  shield: { name: '障壁', passive: true, at: [0.6, 0.25], pct: 0.12, dur: 8, desc: 'ライフ 60% と 25% で、最大ライフ 12% ぶんの障壁を張る（8 秒。張っている間は受けるダメージ -50%）' },
+  shield: { name: '障壁', passive: true, at: [0.6, 0.25], pct: 0.06, dur: 8, desc: 'ライフ 60% と 25% で、最大ライフ 6% ぶんの障壁を張る（8 秒。張っている間は受けるダメージ -50%）' },
   teleport: { name: '瞬身', cd: 8, range: 900, desc: '主人公の背中側（95 先）へ瞬間移動し、0.2 秒後に攻撃する' },
   beam: { name: '光線', cd: 10, range: 700, mult: 1.6, delay: 1.0, desc: '1.0 秒の予告のあと、主人公へ一直線の光線（160%）' },
   totems: { name: '呪いの柱', cd: 18, range: 900, count: 2, desc: '柱を 2 本立てる。柱が残っている間、ボスの受けるダメージ -40%' },
@@ -72,7 +72,7 @@ export const ELITE_AFFIXES = [
   { id: 'arcane', name: '雷鳴', cat: 'atk', desc: '雷撃の攻撃。攻撃の 30% で雷を落とす（80%）', mods: { element: 'lightning', zap: true } },
   { id: 'huge', name: '巨体', cat: 'def', desc: 'ライフ +80%・大きさ +30%', mods: { life: 1.8, size: 1.3 } },
   { id: 'berserk', name: '狂乱', cat: 'atk', desc: 'ダメージ +50%', mods: { dmg: 1.5 } },
-  { id: 'regen', name: '再生', cat: 'def', desc: '1 秒に最大ライフの 3% 回復', mods: { regen: 0.03 } },
+  { id: 'regen', name: '再生', cat: 'def', desc: '1 秒に最大ライフの 2% 回復', mods: { regen: 0.02 } },
   { id: 'splitter', name: '分裂', cat: 'def', desc: '倒すとライフ 50% の小さな 2 体に分かれる', mods: { split: 2 } },
   { id: 'teleporter', name: '瞬身', cat: 'ctl', desc: '5 秒ごとに主人公のそばへ瞬間移動する', mods: { teleporter: 5 } },
   { id: 'shielding', name: '結界', cat: 'def', desc: '8 秒ごとに 2 秒間、受けるダメージ -85%', mods: { shielding: 8 }, ex: ['armored'] },
@@ -85,7 +85,16 @@ export const ELITE_AFFIXES = [
 ];
 
 const M = (o) => ({ size: 1, life: 1, dmg: 1, speed: 70, range: 70, atkCd: 1.6, attack: 'melee', element: 'phys', ...o });
-const B = (o) => ({ size: 1.6, life: 1, dmg: 1, speed: 60, range: 100, atkCd: 1.8, attack: 'melee', element: 'phys', boss: true, kind: 'zone', ...o });
+// 特技の「重さ」= 実質のライフがどれだけ増えるか（tools/balance_bosses.mjs で、同じボスの特技あり・なしを比べて測った値）。
+// ボスのライフはこの分だけ軽くして（life ÷ (1 + 重さの合計)）、どのボスも同じくらいの手強さにする。tax は world.bossNeed が見積もりに足し戻す。
+export const ABILITY_TAX = { shield: 0.3, totems: 0.15, heal: 0.06, drain: 0.05, timewarp: 0.05, curse: 0.05, blood_nova: 0.04, jail: 0.03, clones: 0.03 };
+export const abilityTax = (abs = []) => abs.reduce((s, a) => s + (ABILITY_TAX[a] || 0), 0);
+const B = (o) => {
+  const b = { size: 1.6, life: 1, dmg: 1, speed: 60, range: 100, atkCd: 1.8, attack: 'melee', element: 'phys', boss: true, kind: 'zone', ...o };
+  b.tax = abilityTax(b.abilities);
+  b.life = Math.round((b.life / (1 + b.tax)) * 100) / 100;
+  return b;
+};
 
 export const MONSTERS = [
   // ======== 第 1 章　灰の村（灰色と枯れた茶・赤い月） ========

@@ -92,7 +92,8 @@ export function computeHero(state, game = null, opts = {}) {
   for (const e of ['fire', 'cold', 'lightning', 'poison']) res[e] = g(`res_${e}`) + g('res_all') + attrs.int * BAL.INT_RES_PER_POINT - resPenalty;
   if (ks.balance) { const top = Math.max(res.fire, res.cold, res.lightning, res.poison); for (const e of ['fire', 'cold', 'lightning', 'poison']) res[e] = top; }
   for (const e of ['fire', 'cold', 'lightning', 'poison']) res[e] = Math.min(BAL.RES_CAP, res[e]);
-  res.void = Math.min(BAL.RES_CAP, g('res_void') - resPenalty);
+  // 虚無の耐性: 専用のオプション＋全耐性と知力の半分（BAL.VOID_RES_SHARE）。第九章は虚無の敵ばかりなので、0% のままだと倒れ続ける
+  res.void = Math.min(BAL.RES_CAP, g('res_void') + (g('res_all') + attrs.int * BAL.INT_RES_PER_POINT) * BAL.VOID_RES_SHARE - resPenalty);
   res.phys = 0;
 
   const life = (BAL.heroBaseLife(hero.level) + g('life')) * Math.max(0.1, 1 + (g('inc_life') + attrs.vit * BAL.VIT_LIFE_PER_POINT) / 100);
@@ -196,7 +197,7 @@ export function armorReduction(armor, L) {
 /** ざっくりの耐久力（同じレベルの敵の攻撃に対して何回耐えるか × ライフ） */
 export function effectiveLife(H, L = H.level) {
   const ar = armorReduction(H.armor, L);
-  const avgRes = (H.res.fire + H.res.cold + H.res.lightning + H.res.poison) / 4 / 100;
+  const avgRes = (H.res.fire + H.res.cold + H.res.lightning + H.res.poison + H.res.void) / 5 / 100;
   const physShare = 0.6;
   let taken = (physShare * (1 - ar) + (1 - physShare) * (1 - Math.max(-1, avgRes))) * (1 - H.dr) * (1 - H.dodge) * (1 - H.block * BAL.BLOCK_REDUCE);
   if (H.trait?.id === 'fury') taken *= 1 - H.trait.guard * 0.5; // 怒り 50 以上の時間をおよそ半分とみる

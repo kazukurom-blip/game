@@ -149,7 +149,7 @@ export class OfflineSystem {
     const lowExtra = {};
     for (let i = 0; i < rest; i++) {
       const rank = g.rng.chance(0.08) ? 'champion' : 'normal';
-      const rar = rollRarity(g.rng, { mf, rank, torment: st.world.torment });
+      const rar = rollRarity(g.rng, { mf, rank, torment: st.world.torment, ilvl });
       if ((RARITY[rar]?.idx || 0) >= 3) {
         const it = generateItem(g.rng, { ...baseOpts, rank, rarity: rar });
         if (it) take(it);

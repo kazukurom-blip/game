@@ -32,7 +32,7 @@ export const CLASSES = [
     en: 'Ranger',
     desc: '弓で遠くから射抜く。矢の雨・罠・砲台、そして相棒の獣とともに群れを一掃する。集中は時間で回復する。',
     primary: 'dex',
-    resource: { id: 'focus', name: '集中', max: 100, regen: 10, onHit: 0, start: 100, color: '#7cff5a' },
+    resource: { id: 'focus', name: '集中', max: 100, regen: 14, onHit: 0, start: 100, color: '#7cff5a' },
     weapons: ['bow', 'crossbow'],
     offhands: ['quiver'],
     armorPref: ['leather', 'mail'],
@@ -57,7 +57,7 @@ export const CLASSES = [
     weapons: ['staff', 'wand'],
     offhands: ['orb'],
     armorPref: ['cloth'],
-    baseMods: [{ s: 'inc_elemental', v: 10 }, { s: 'res_all', v: 12 }, { s: 'inc_life', v: 10 }],
+    baseMods: [{ s: 'inc_elemental', v: 10 }, { s: 'res_all', v: 12 }, { s: 'inc_life', v: 20 }],
     trait: {
       id: 'surge', name: '魔力の奔流',
       desc: '呪文を 5 回唱えるごとに 4 秒間「奔流」になり、呪文のダメージ +30%・詠唱の速さ +20%。',
@@ -99,7 +99,7 @@ export const CLASSES = [
     weapons: ['dagger', 'claw'],
     offhands: ['offblade'],
     armorPref: ['leather'],
-    baseMods: [{ s: 'crit_chance', v: 5 }, { s: 'attack_speed', v: 10 }],
+    baseMods: [{ s: 'crit_chance', v: 5 }, { s: 'attack_speed', v: 10 }, { s: 'dodge', v: 6 }, { s: 'inc_life', v: 10 }],
     trait: {
       id: 'vital', name: '急所狙い',
       desc: 'クリティカルのたびに気力 +3。毒・出血を受けている敵へのクリティカル率 +10%。',

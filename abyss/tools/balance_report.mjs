@@ -19,7 +19,7 @@ const NAMES = { warrior: '剣闘士', ranger: '狩人', sorcerer: '魔導士', n
 
 if (flag('worker')) {
   const { runLife, plain } = await import('./balance_lib.mjs');
-  const rec = await runLife({ cls: arg('cls'), hours: Number(arg('hours', 35)), seed: Number(arg('seed', 7)), rebirth: flag('rebirth'), stopAct: Number(arg('stop', flag('rebirth') ? 5 : 10)) });
+  const rec = await runLife({ cls: arg('cls'), hours: Number(arg('hours', 35)), seed: Number(arg('seed', 7)), rebirth: flag('rebirth'), stopAct: Number(arg('stop', flag('rebirth') ? 5 : 10)), craft: flag('craft') ? Number(arg('enh', 10)) : false, endgame: Number(arg('endgame', 0)) });
   process.send?.(plain(rec));
   process.exit(0);
 }
@@ -36,6 +36,8 @@ function runOne(cls) {
   return new Promise((resolve) => {
     const args = ['--worker', `--cls=${cls}`, `--hours=${hours}`, `--seed=${seed}`, `--stop=${stop}`];
     if (flag('rebirth')) args.push('--rebirth');
+    if (flag('craft')) args.push('--craft', `--enh=${arg('enh', 10)}`);
+    if (arg('endgame', '')) args.push(`--endgame=${arg('endgame')}`);
     const p = fork(self, args, { stdio: ['ignore', 'inherit', 'inherit', 'ipc'] });
     let got = null;
     p.on('message', (m) => { got = m; });
@@ -78,6 +80,15 @@ for (const r of results) {
   console.log(`${pad(NAMES[r.cls], 10)}${parts.join(' | ')}`);
 }
 
+// 経済（章ごと: 持っているゴールド・使ったゴールド・素材・強化の平均）
+console.log('\n■ 経済（章を倒したとき: 所持金 / 使った金 / 鉄屑・魔塵・秘晶・欠片 / 装備の強化の平均）');
+for (const r of results) {
+  if (r.error) continue;
+  const parts = [];
+  for (const a of [1, 3, 5, 7, 10]) { const x = r.acts[a]; if (x?.mats) parts.push(`章${a} ${short(x.gold)}/${short(x.goldSpent)}G 屑${x.mats.scrap}・塵${x.mats.dust}・晶${x.mats.crystal}・欠${x.mats.shard} +${x.enhAvg}`); }
+  console.log(`${pad(NAMES[r.cls], 10)}${parts.join(' | ')}`);
+}
+
 // 壁（20 分を超えた物）
 console.log('\n■ 20 分を超えた壁・越えられなかった壁');
 for (const r of results) {
@@ -104,6 +115,17 @@ if (flag('rebirth')) {
     const first = r.acts['5']?.t;
     const second = r.life2?.sec;
     console.log(`${pad(NAMES[r.cls], 10)}1 周目 ${fmtT(first)}　魂 ${r.rebirths[0]?.souls ?? '—'}（祭壇 ${r.rebirths[0]?.bought ?? 0} 回）→ ${r.rebirths[0]?.warp ?? '—'} へ　2 周目 ${fmtT(second)}　速さ ×${first && second ? (first / second).toFixed(1) : '—'}`);
+  }
+}
+
+if (arg('endgame', '')) {
+  console.log(`\n■ 物語のあと（${arg('endgame')} 時間・苦行は自動・2 時間ごとに裂け目 30 分・門番は欠片がそろったら）`);
+  for (const r of results) {
+    const e = r.endgame;
+    if (!e || e.start == null) { console.log(`${pad(NAMES[r.cls], 10)}物語を終えていない`); continue; }
+    const hs = e.hourly.filter((x, i) => [0, 1, 3, 5, 9, 14, 19, 29, 39, 49, 59, 79, 99].includes(i)).map((x) => `${x.h}h: Lv${x.lv}+${x.par} 苦行${x.t}/${x.tMax} 裂${x.rift} ${x.kps}/秒 倒${x.deaths}`);
+    const gw = e.gates.filter((x) => x.ok).length;
+    console.log(`${pad(NAMES[r.cls], 10)}${hs.join(' | ')}\n          門番 ${gw}/${e.gates.length} 勝（${e.gates.map((x) => `${x.gi}:${x.tier}${x.ok ? '○' : '×'}`).slice(0, 12).join(' ')}）　裂け目の記録: ${e.rifts.filter((x) => x.ok).map((x) => x.lv).reduce((a, b) => Math.max(a, b), 0) || '—'}（失敗 ${e.rifts.filter((x) => !x.ok).length}）`);
   }
 }
 

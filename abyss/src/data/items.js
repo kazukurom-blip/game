@@ -226,7 +226,7 @@ A('res_fire', 'res_fire', 'S', RES_ON, 60, [4, 8], [36, 42], { group: 'res_fire'
 A('res_cold', 'res_cold', 'S', RES_ON, 60, [4, 8], [36, 42], { group: 'res_cold' });
 A('res_lightning', 'res_lightning', 'S', RES_ON, 60, [4, 8], [36, 42], { group: 'res_lightning' });
 A('res_poison', 'res_poison', 'S', RES_ON, 50, [4, 8], [36, 42], { group: 'res_poison' });
-A('res_void', 'res_void', 'S', on('chest'), 15, [3, 6], [17, 21], { n: 6, group: 'res_void' });
+A('res_void', 'res_void', 'S', on('chest', 'boots'), 30, [4, 7], [26, 32], { n: 8, group: 'res_void' });
 A('res_all', 'res_all', 'S', on('helm', 'chest', 'boots', 'amulet', 'ring', OFF_ALL), 30, [2, 4], [17, 21], { n: 8 });
 A('dodge', 'dodge', 'S', on('chest', 'legs', 'boots'), 30, [1, 1.5], [6.2, 7.6], { n: 8 });
 A('block', 'block', 'S', on(['offhand', ['shield']]), 30, [2, 3], [10, 12.5], { n: 8 });
