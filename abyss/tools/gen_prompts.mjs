@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const FACING = { right: '右向き', left: '左向き', up: '上向き（柄が下）', front: '正面', none: '—' };
-const BG = { transparent: '透明（無理なら単色の緑 #00FF00）', magenta: '透明（無理なら単色のマゼンタ #FF00FF）', black: '真っ黒 #000000（加算）', icon: '暗いぼかし（正方形いっぱい）', scene: '画面いっぱいの風景', layer: '下だけ絵・上は透明' };
+const BG = { transparent: '透明（無理なら単色の緑 #00FF00）', magenta: '透明（無理なら単色のマゼンタ #FF00FF）', black: '真っ黒 #000000（加算）', icon: '暗いぼかし（正方形いっぱい）', scene: '画面いっぱいの風景', portrait: '暗い雰囲気の背景つき', keyart: '画面いっぱいの絵（文字なし）', layer: '下だけ絵・上は透明' };
 
 export async function genPrompts({ outDir = path.join(ROOT, 'docs'), quiet = false } = {}) {
   const { buildManifest, loadOptionalSlots, slotPrompt, CATEGORIES, GROUPS } = await import('../src/render/manifest.js');

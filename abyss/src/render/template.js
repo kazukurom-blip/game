@@ -6,7 +6,7 @@ import { assets, makeCanvas } from './assets.js';
 import { slotPrompt, ANCHOR_NAMES } from './manifest.js';
 
 const FACING_TEXT = { right: '→ 右向き', left: '← 左向き（主人公の方を向く）', up: '↑ 先が上・柄が下', front: '正面', none: '' };
-const BG_TEXT = { transparent: '背景は透明（無理なら単色の緑 #00FF00）', magenta: '背景は透明（無理なら単色のマゼンタ #FF00FF）', black: '背景は真っ黒 #000000（加算で黒が消える）', icon: '正方形いっぱいの暗い背景（枠なし）', scene: '画面いっぱいの風景', layer: '下だけ絵・上は透明（無理なら単色の緑）' };
+const BG_TEXT = { transparent: '背景は透明（無理なら単色の緑 #00FF00）', magenta: '背景は透明（無理なら単色のマゼンタ #FF00FF）', black: '背景は真っ黒 #000000（加算で黒が消える）', icon: '正方形いっぱいの暗い背景（枠なし）', scene: '画面いっぱいの風景', portrait: '背景つきでよい（暗い雰囲気）', keyart: '画面いっぱいの絵（文字なし）', layer: '下だけ絵・上は透明（無理なら単色の緑）' };
 const ANCHOR_COL = { hand: '#3ad06a', offhand: '#3a9cff', head: '#ffd23a', back: '#c06aff', chest: '#ff8a3a' };
 
 /**
@@ -25,14 +25,14 @@ export function renderTemplate(id, opts = {}) {
   ctx.fillStyle = '#16131b'; ctx.fillRect(0, 0, c.width, c.height);
   // 背景
   ctx.save(); ctx.translate(ox, 0);
-  if (pr.bg === 'black') { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); } else if (pr.bg === 'scene' || pr.bg === 'icon') { ctx.fillStyle = '#2a2630'; ctx.fillRect(0, 0, W, H); } else checker(ctx, W, H, Math.max(12, Math.round(maxSide / 20)));
+  if (pr.bg === 'black') { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); } else if (['scene', 'icon', 'portrait', 'keyart'].includes(pr.bg)) { ctx.fillStyle = '#2a2630'; ctx.fillRect(0, 0, W, H); } else checker(ctx, W, H, Math.max(12, Math.round(maxSide / 20)));
   if (pr.bg === 'layer') { ctx.fillStyle = 'rgba(60,200,90,0.12)'; ctx.fillRect(0, 0, W, H * 0.5); }
   // コードの絵のシルエット
   const art = makeCanvas(W, H);
   if (art) {
     const ac = art.getContext('2d');
     assets.paintInto(ac, id, spec, k);
-    if (pr.bg !== 'scene' && pr.bg !== 'layer') {
+    if (!['scene', 'layer', 'portrait', 'keyart'].includes(pr.bg)) {
       // くっきりしたシルエットにする（ぼかしの光も形として見えるように、透明度で 2 値に）
       try {
         const id2 = ac.getImageData(0, 0, W, H); const d = id2.data;
@@ -41,7 +41,7 @@ export function renderTemplate(id, opts = {}) {
       } catch { /* 読めない canvas はそのまま */ }
       ac.globalCompositeOperation = 'source-in'; ac.fillStyle = pr.bg === 'black' ? '#5a5a6a' : '#3a3550'; ac.fillRect(0, 0, W, H);
     }
-    ctx.globalAlpha = pr.bg === 'scene' || pr.bg === 'layer' ? 0.55 : 0.42;
+    ctx.globalAlpha = ['scene', 'layer', 'portrait', 'keyart'].includes(pr.bg) ? 0.55 : 0.42;
     ctx.drawImage(art, 0, 0);
     ctx.globalAlpha = 1;
   }

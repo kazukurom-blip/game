@@ -70,6 +70,18 @@ const BG = {
     mj: 'wide landscape, no characters',
     sd: 'scenery, no humans, landscape',
   },
+  portrait: {
+    en: 'Background: a dark atmospheric backdrop with drifting ash and a soft colored glow behind the character, filling the whole image; no other characters.',
+    ja: '背景は画像いっぱいの暗い雰囲気の背景（舞う灰と、キャラの後ろの柔らかい色の光）。ほかの人物は入れない。',
+    mj: 'dark atmospheric backdrop with drifting ash',
+    sd: 'dark background, ash particles',
+  },
+  keyart: {
+    en: 'The scene fills the whole image edge to edge. No text, no logo, no UI.',
+    ja: '画像の端から端まで絵で埋める。文字・ロゴ・UI は入れない。',
+    mj: 'wide key art',
+    sd: 'scenery',
+  },
   layer: {
     en: 'Only the lower part of the image has scenery; everything above it is fully transparent (PNG with alpha) so a farther layer can show through. If transparency is not available, fill the empty sky with flat solid pure green #00FF00.',
     ja: '絵があるのは下の部分だけで、その上は完全な透明（透過PNG）にする（奥の背景が透けて見えるように）。透明にできない場合は、空の部分をムラのない単色の緑（#00FF00）で塗る。',
@@ -256,13 +268,14 @@ export function buildPrompt(spec) {
   const bg = BG[bgKey] || BG.transparent;
   const ai = aspectInfo(spec.w || 1, spec.h || 1, S.aspect);
   const style = S.style === 'fx' ? STYLE_FX : S.style === 'bg' ? STYLE_BG : STYLE_BIBLE;
-  const rulesEn = S.noRules ? '' : ` ${S.allowText ? RULES.en.replace('No text, no letters, no logo, no watermark', 'No watermark') : RULES.en}`;
-  const rulesJa = S.noRules ? '' : S.allowText ? RULES.ja.replace('文字・ロゴ・', '') : RULES.ja;
+  const rulesEn = S.rules ? ` ${S.rules.en}` : S.noRules ? '' : ` ${S.allowText ? RULES.en.replace('No text, no letters, no logo, no watermark', 'No watermark') : RULES.en}`;
+  const rulesJa = S.rules ? S.rules.ja : S.noRules ? '' : S.allowText ? RULES.ja.replace('文字・ロゴ・', '') : RULES.ja;
   const en = `${S.en.trim()} ${S.pose ? `${S.pose.en} ` : ''}${S.frame ? `${S.frame.en} ` : ''}${bg.en} Style: ${style.en}.${rulesEn}`.replace(/\s+/g, ' ').trim();
   const ja = `${S.ja.trim()}${S.pose ? S.pose.ja : ''}${S.frame ? S.frame.ja : ''}${bg.ja}画風: ${style.ja}。${rulesJa}`.replace(/\s+/g, ' ').trim();
   const mjCore = S.mj || S.en.split('.')[0];
-  const mj = `${mjCore}, ${S.pose?.mj ? `${S.pose.mj}, ` : ''}${bg.mj}, ${S.style === 'fx' ? 'painterly glowing game effect, soft bloom' : S.style === 'bg' ? 'hand-painted 2D dark fantasy game background, painterly, atmospheric' : 'hand-painted 2D dark fantasy game art, painterly, clean outlines'} ${ai.mj} --style raw --no ${S.allowText ? '' : 'text, letters, '}watermark, frame, border${bgKey === 'scene' ? '' : ', ground, shadow, scenery'}`;
-  const neg = bgKey === 'scene' ? NEGATIVE.replace(', scenery', '').replace(', ground, floor', '') + ', characters, people' : NEGATIVE;
+  const sceneLike = ['scene', 'keyart', 'portrait', 'layer'].includes(bgKey);
+  const mj = `${mjCore}, ${S.pose?.mj ? `${S.pose.mj}, ` : ''}${bg.mj}, ${S.style === 'fx' ? 'painterly glowing game effect, soft bloom' : S.style === 'bg' ? 'hand-painted 2D dark fantasy game background, painterly, atmospheric' : 'hand-painted 2D dark fantasy game art, painterly, clean outlines'} ${ai.mj} --style raw --no ${S.allowText ? '' : 'text, letters, '}watermark, frame, border${sceneLike ? '' : ', ground, shadow, scenery'}`;
+  const neg = sceneLike ? NEGATIVE.replace(', gradient background, scenery', '').replace(', ground, floor', '') + (bgKey === 'scene' || bgKey === 'layer' ? ', characters, people' : '') : NEGATIVE;
   return { en, ja, neg: S.allowText ? neg.replace('text, letters, ', '') : neg, mj, bg: bgKey, aspect: ai.aspect, sizes: { gpt: ai.gpt, sdxl: ai.sdxl, flux: ai.flux, mj: ai.mj }, kind, sizeNote: ai.note };
 }
 
@@ -274,11 +287,15 @@ const FACE = {
   icon: { en: 'Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items.', ja: '向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。', mj: 'item icon, 3/4 view' },
   front: { en: 'Orientation: seen from the front.', ja: '向き: 正面から。', mj: 'front view' },
 };
+// 斜め 45 度で描く長い物（アイコン）
+const LONG = new Set(['sword', 'axe', 'mace', 'greatsword', 'bow', 'crossbow', 'staff', 'wand', 'scythe', 'rod', 'dagger', 'claw', 'offblade']);
 const FRAME = {
   body: { en: 'Framing: the entire body from the top of the head to the toes is visible, horizontally centered, feet at 92% of the image height, at least 6% empty margin on every side, nothing cropped.', ja: '構図: 頭のてっぺんからつま先まで全身が入り、左右の中央に置く。足元は画像の上から 92% の高さ。上下左右に 6% 以上の余白、見切れなし。' },
   item: { en: 'Framing: the whole item is visible and centered with an 8% margin.', ja: '構図: 全体が入るよう中央に置き、余白は 8%。' },
   icon: { en: 'Framing: centered in a square with a 10% margin, large and readable at small size.', ja: '構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。' },
   fx: { en: 'Framing: centered.', ja: '構図: 中央に置く。' },
+  part: { en: 'Framing: exactly the same canvas as the base character image (character centered, feet at 92% of the image height); draw only the armor piece in its place.', ja: '構図: 基本のキャラ画像とまったく同じキャンバス（キャラは中央、足元は上から 92%）。その位置に鎧の部品だけを描く。' },
+  iconRound: { en: 'Orientation: a slightly angled 3/4 view.', ja: '向き: 少し斜めの 3/4 の角度。', mj: 'item icon, 3/4 view' },
 };
 
 function subjectFor(kind, spec, p) {
@@ -296,9 +313,10 @@ function subjectFor(kind, spec, p) {
       mj: `${look.en} wearing ${STYLE_EN[p.style] || 'armor'}, 2D game character sprite, full body`, pose: FACE.right, frame: FRAME.body,
     };
     case 'hero.portrait': return {
-      en: `A dramatic character select portrait illustration of ${look.en}, knees-up three-quarter view, heroic pose, rim light, dark atmospheric background with drifting ash.`,
-      ja: `クラス選択画面の立ち絵。「${cls?.name || ''}」${look.ja}。膝から上、3/4 の角度、勇ましいポーズ、縁の光、灰が舞う暗い背景。`,
-      mj: `${look.en}, character select portrait, knees-up, three-quarter view, heroic pose, dark atmospheric background`, bg: 'scene', noRules: false,
+      en: `A dramatic character select portrait illustration of ${look.en}, knees-up three-quarter view, heroic pose, rim light.`,
+      ja: `クラス選択画面の立ち絵。「${cls?.name || ''}」${look.ja}。膝から上、3/4 の角度、勇ましいポーズ、縁の光。`,
+      mj: `${look.en}, character select portrait, knees-up, three-quarter view, heroic pose`, bg: 'portrait',
+      rules: { en: 'Exactly one character. No text, no letters, no logo, no watermark, no signature, no frame, no border. Original design that does not imitate any existing game, anime, character or artist.', ja: 'キャラは1人だけ。文字・ロゴ・透かし・署名・枠は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。' },
     };
     case 'gear.weapon': {
       const k = p.kind;
@@ -321,7 +339,7 @@ function subjectFor(kind, spec, p) {
     case 'gear.part': return {
       en: `The ${KIND_EN[p.slot] || p.slot} piece only of ${STYLE_EN[p.style] || 'armor'}, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent.`,
       ja: `${STYLE_NAMES[p.style] || ''}の${KIND_NAMES[p.slot] || p.slot}の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。`,
-      mj: `${p.style} ${KIND_EN[p.slot] || p.slot}, armor overlay piece, side view facing right`, frame: FRAME.item,
+      mj: `${p.style} ${KIND_EN[p.slot] || p.slot}, armor overlay piece, side view facing right`, frame: FRAME.part,
     };
     case 'gear.unique': {
       const m = motifsOf(p.name);
@@ -340,7 +358,7 @@ function subjectFor(kind, spec, p) {
       return {
         en: `An inventory icon of one ${p.style ? `${p.style} ` : ''}${KIND_EN[k] || idWords(k)}${st ? ` (${st.trim()})` : ''}.`,
         ja: `持ち物のアイコン: ${p.style ? `${STYLE_NAMES[p.style]}の` : ''}${KIND_NAMES[k] || k}を1つ。`,
-        mj: `${p.style || ''} ${KIND_EN[k] || idWords(k)}, game inventory icon`, pose: FACE.icon, frame: FRAME.icon,
+        mj: `${p.style ? `${p.style} ` : ''}${KIND_EN[k] || idWords(k)}, game inventory icon`, pose: LONG.has(k) ? FACE.icon : FRAME.iconRound, frame: FRAME.icon,
       };
     }
     case 'icon.unique': {
@@ -348,7 +366,7 @@ function subjectFor(kind, spec, p) {
       return {
         en: `An inventory icon of a legendary one-of-a-kind ${KIND_EN[p.kind] || idWords(p.kind)}${m.en.length ? `, ${m.en.join(', ')}` : ''}, ornate with a faint magical glow.`,
         ja: `持ち物のアイコン: 伝説の一品「${p.name}」（${KIND_NAMES[p.kind] || p.kind}）。${m.ja.join('・')}${m.ja.length ? '、' : ''}豪華でかすかに光る。`,
-        mj: `legendary ${KIND_EN[p.kind] || idWords(p.kind)}, game inventory icon`, pose: FACE.icon, frame: FRAME.icon,
+        mj: `legendary ${KIND_EN[p.kind] || idWords(p.kind)}, game inventory icon`, pose: LONG.has(p.kind) ? FACE.icon : FRAME.iconRound, frame: FRAME.icon,
       };
     }
     case 'icon.mat': {
@@ -357,7 +375,7 @@ function subjectFor(kind, spec, p) {
       return {
         en: `An inventory icon of a crafting material: ${idWords(p.mat)}, a small pile or single piece, ${c.en} colored with a soft glow.`,
         ja: `持ち物のアイコン: 素材「${mat.name}」。${mat.desc || ''}小さな山か 1 つのかけら、${c.ja}でほのかに光る。`,
-        mj: `${idWords(p.mat)} crafting material, ${c.en}, game inventory icon`, pose: FACE.icon, frame: FRAME.icon,
+        mj: `${idWords(p.mat)} crafting material, ${c.en}, game inventory icon`, pose: FRAME.iconRound, frame: FRAME.icon,
       };
     }
     case 'icon.gem': {
@@ -365,13 +383,13 @@ function subjectFor(kind, spec, p) {
       return {
         en: `An inventory icon of one faceted ${c.en || ''} gemstone (${idWords(p.gem)}), brilliant cut, inner light.`,
         ja: `持ち物のアイコン: 宝石「${p.name || p.gem}」を1つ。${c.ja ? `${c.ja}の` : ''}カットされた宝石、内側から光る。`,
-        mj: `faceted ${c.en} gemstone, game inventory icon`, pose: FACE.icon, frame: FRAME.icon,
+        mj: `faceted ${c.en} gemstone, game inventory icon`, pose: FRAME.iconRound, frame: FRAME.icon,
       };
     }
     case 'icon.rune': return {
       en: `An inventory icon of one small carved stone rune tablet with a glowing engraved symbol (an abstract glyph, not a letter of any real alphabet) (${idWords(p.rune)}).`,
       ja: `持ち物のアイコン: ルーン「${p.name || p.rune}」。光る模様（実在の文字ではない抽象的な紋）を彫った小さな石の札。`,
-      mj: 'carved stone rune tablet with a glowing abstract glyph, game inventory icon', pose: FACE.icon, frame: FRAME.icon,
+      mj: 'carved stone rune tablet with a glowing abstract glyph, game inventory icon', pose: FRAME.iconRound, frame: FRAME.icon,
     };
     case 'icon.support': return {
       en: `A skill support glyph icon: a glowing engraved seal sigil (${idWords(p.support)}), abstract geometric runes, no letters.`,
@@ -443,7 +461,7 @@ function subjectFor(kind, spec, p) {
       return { en: `A side-scrolling game ground strip that tiles seamlessly horizontally (left and right edges match): a side cross-section of the ground surface of ${th}, the walkable top edge flat and near the top of the image, rocks and roots below.`, ja: `横スクロールのゲームの地面の帯（左右の端がつながり、横に並べても継ぎ目が出ない）: ${act.name || ''}。${act.theme || ''}。地面を真横から切った断面。歩く面は平らで画像の上の方、その下に岩や根。`, mj: `side-scrolling game ground strip, seamless tileable horizontally, side cross-section of the ground, ${th}`, bg: 'layer', noRules: true, aspect: 'banner', style: 'bg' };
     }
     case 'ui.logo': return { en: 'A game title logo with the words "ABYSS DROP" in ornate gothic metal letters, cracked dark iron with glowing ember-red edges, a small abyss chasm motif.', ja: 'ゲームのタイトルロゴ。「ABYSS DROP」の文字を、ひびの入った黒鉄と赤く光る縁の装飾的なゴシック体の金属文字で。小さな深淵の裂け目の意匠。', mj: 'game title logo "ABYSS DROP", ornate gothic metal letters, glowing ember edges', allowText: true, aspect: 'banner' };
-    case 'ui.title': return { en: 'Title screen key art for a dark fantasy hack-and-slash game: a vast glowing abyss chasm under an ash-filled blood-red sky, ruins at its rim, a lone hero silhouette standing at the edge. Leave the center top area calm for the logo.', ja: 'ダークファンタジーのハクスラのタイトル画面の絵: 灰の舞う血のように赤い空の下に口を開けた巨大な光る深淵の裂け目、縁の廃墟、端に立つ主人公の小さなシルエット。中央の上はロゴが乗るので落ち着いた絵に。', mj: 'dark fantasy title key art, vast glowing abyss chasm, ash-filled blood red sky, lone hero silhouette at the edge', bg: 'scene', noRules: true, aspect: 'wide', style: 'bg' };
+    case 'ui.title': return { en: 'Title screen key art for a dark fantasy hack-and-slash game: a vast glowing abyss chasm under an ash-filled blood-red sky, ruins at its rim, a lone hero silhouette standing at the edge. Leave the center top area calm for the logo.', ja: 'ダークファンタジーのハクスラのタイトル画面の絵: 灰の舞う血のように赤い空の下に口を開けた巨大な光る深淵の裂け目、縁の廃墟、端に立つ主人公の小さなシルエット。中央の上はロゴが乗るので落ち着いた絵に。', mj: 'dark fantasy title key art, vast glowing abyss chasm, ash-filled blood red sky, lone hero silhouette at the edge', bg: 'keyart', noRules: true, aspect: 'wide', style: 'bg' };
     default: return { en: `One ${idWords(spec.id)} game sprite.`, ja: `${spec.label || spec.id} の画像。`, mj: `${idWords(spec.id)}, game sprite` };
   }
 }

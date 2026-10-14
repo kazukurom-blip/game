@@ -82,7 +82,7 @@ export function installStudioCss() {
 .as-thumb canvas { width: 64px; height: 64px; display: block; }
 .as-info { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .as-label { font-size: 12.5px; line-height: 1.3; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.as-id { font-size: 10.5px; color: #7a7080; font-family: ui-monospace, monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.as-id { font-size: 10.5px; line-height: 1.5; color: #7a7080; font-family: ui-monospace, monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .as-meta { font-size: 10.5px; color: var(--dim); }
 .as-badge { display: inline-block; font-size: 10px; padding: 0 5px; border-radius: 3px; margin-right: 3px; }
 .as-badge.studio { background: #2a5a3a; color: #c8ffd8; }

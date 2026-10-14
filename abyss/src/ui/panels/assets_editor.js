@@ -28,6 +28,7 @@ export async function openEditor(ui, id, o = {}) {
   if (!assets.slots.has(id) && assets.spec(id)) spec.label = describeUnknown(id);
   const kind = previewKind(spec);
   const prompt = slotPrompt(spec);
+  const noAnchor = spec.cat === 'bg' || spec.cat === 'ui' || spec.cat === 'icon' || spec.kind === 'hero.portrait';
   const st = {
     file: null, raw: null, proc: { bg: 'none', trim: false }, opts: {}, processed: null, info: null, ins: null, dirty: false,
     sel: 'base', view: 'out', zoom: 1, pick: false, mode: 'auto', marks: true, existing: null, layout: null, ptab: 'en', timer: 0,
@@ -170,7 +171,7 @@ export async function openEditor(ui, id, o = {}) {
       ctx.fillText('いまはコードの絵です。画像を入れると、ここで基準点を合わせられます', W / 2, Hh - 12 * dpr);
       ctx.textAlign = 'left';
     }
-    if (st.view === 'out') {
+    if (st.view === 'out' && !noAnchor) {
       const b = effAnchor('base');
       ctx.strokeStyle = 'rgba(255,210,90,0.7)'; ctx.lineWidth = 1.5 * dpr;
       if (b[1] > 0.75) { ctx.beginPath(); ctx.moveTo(0, oy + b[1] * dh); ctx.lineTo(W, oy + b[1] * dh); ctx.stroke(); }
@@ -259,7 +260,15 @@ export async function openEditor(ui, id, o = {}) {
       prev,
       h('div.ed-row', [modeSel, ['hero', 'gear', 'monster', 'ally'].includes(kind) ? check('marks', '基準点・アンカーの印', () => st.marks, (v) => { st.marks = v; }) : null, button('戦闘画面で見る', () => lookInBattle(), { kind: 'small', title: '窓を一時的に隠して、戦闘の画面で見ます（下書きのまま）' })]),
     ]),
-    h('div.ed-box', [
+    noAnchor ? h('div.ed-box', [
+      h('h4', ['画像の確かめ', h('small', 'スポイトで背景の色を選ぶときもここ')]),
+      h('div.ed-row', [
+        select('zoom', [['1', '等倍'], ['2', '2 倍'], ['3', '3 倍']], () => String(st.zoom), (v) => { st.zoom = Number(v); drawAdjust(); }),
+        select('view', [['out', '加工後'], ['orig', '元の画像']], () => st.view, (v) => { st.view = v; drawAdjust(); }),
+      ]),
+      adjScroll,
+      h('div.ed-note', spec.cat === 'bg' || spec.kind === 'ui.title' ? '背景は画像の左上を画面の左上に合わせ、幅を 1280 にそろえて横に並べます。上下の位置は「形」の「上を切る・下を切る」で合わせます。' : 'この枠の画像は、枠の中心に縦横比を保って収めて表示されます（基準点の調整はいりません）。余白は「透明な外側を切る」で取れます。'),
+    ]) : h('div.ed-box', [
       h('h4', ['基準点とアンカー', h('small', '選んでから画像を押す（ドラッグで動かせる）')]),
       h('div.ed-anch', [['base', spec.cat === 'gear' && (spec.kind === 'gear.weapon' || spec.kind === 'gear.offhand' || spec.params?.slot === 'weapon') ? '基準点（握る所）' : FEET_KINDS.has(spec.kind) ? '基準点（足元）' : '基準点（中心）'], ...Object.keys(spec.anchors || {}).map((n) => [n, ANCHOR_NAMES[n] || n])].map(([n, l]) => h(`button.st-chip${st.sel === n ? '.on' : ''}`, { onclick: (e) => { st.sel = n; for (const b of e.currentTarget.parentElement.children) b.classList.remove('on'); e.currentTarget.classList.add('on'); drawAdjust(); } }, [h('i', { style: { background: ANCHOR_COL[n] || '#fff' } }), l]))),
       h('div.ed-row', [
@@ -271,6 +280,7 @@ export async function openEditor(ui, id, o = {}) {
       ]),
       adjScroll,
       coords,
+      spec.kind === 'gear.helm' ? h('div.ed-note', '兜は主人公の「頭」のアンカーに重なります。体の画像を差し替えているときは兜は描かれません（体の画像に兜も描くか、鎧の姿の画像で表してください）。') : null,
       h('div.ed-note', spec.anchors ? '手（緑）に武器の握り、副手（青）に盾、頭（黄）に兜、背中（紫）に矢筒が付きます。試し表示を見ながら合わせてください。' : FEET_KINDS.has(spec.kind) ? '基準点は足の裏（地面に着く所）。ここが戦闘の地面の線に乗ります。' : spec.kind === 'gear.weapon' ? '基準点は握る所。手のアンカーにこの点が重なり、ここを中心に振ります。' : '基準点がゲームで置く位置になります。'),
     ]),
   ]);

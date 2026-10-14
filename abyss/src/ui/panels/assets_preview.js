@@ -270,7 +270,7 @@ function drawIconPreview(ctx, W, H, spec, t) {
     assets.drawFit(ctx, spec.id, x + cs / 2, y + cs / 2, cs * 0.86, cs * 0.86, { t });
   });
   // 大きく
-  const big = Math.min(H - cs - 40, W * 0.4);
+  const big = Math.min(H - cs - 64, W * 0.4);
   cell(ctx, 12, cs + 30, big, RARITY.legendary.color);
   assets.drawFit(ctx, spec.id, 12 + big / 2, cs + 30 + big / 2, big * 0.9, big * 0.9, { t });
   // 地面に落ちた姿（ドロップ）

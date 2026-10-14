@@ -38,9 +38,10 @@ export const assetsPanel = {
     assets.storageInfo().then((s) => { if (stat.isConnected && s.images) stat.append(`・保存 ${bytesText(s.images)}`); });
     const bulk = h('input', { type: 'file', multiple: true, accept: 'image/png,image/webp,image/jpeg,image/gif,application/json,.json', style: { display: 'none' } });
     bulk.addEventListener('change', () => { const fs = [...(bulk.files || [])]; bulk.value = ''; if (fs.length) bulkImport(ui, fs); });
-    el.append(
+    el.append(...[
       h('p.dim', 'ほかの AI で作った画像を、ゲームの絵として使えます。カードを押すと調整の窓が開き、AI 用の指示文と型紙もあります。'),
       h('div.st-head', [stat]),
+      assets.persistent === false ? h('div.ed-warn', '⚠ このブラウザでは画像を保存できません（非公開のウィンドウなど）。入れた画像は閉じると消えるので、「パックを書き出す」で残してください。') : null,
       h('div.toolbar', [
         button('まとめて取り込む', () => bulk.click(), { kind: 'primary', title: 'ファイル名が枠 ID の画像（例: monster.ash_wolf.png）をまとめて入れる' }),
         button('パックを書き出す', () => exportPackUi(ui), { kind: 'small' }),
@@ -48,7 +49,7 @@ export const assetsPanel = {
         nCustom ? button('すべて元に戻す', async () => { if (await ui.confirm(`ゲーム内で入れた画像 ${nCustom} 枚をすべて消して、元の絵に戻します。`, 'すべて戻す')) { await assets.clearAllCustom(); ui.toast('すべて元に戻しました', 'good'); ui.renderPanel(); } }, { kind: 'small', class: 'btn-danger' }) : null,
         bulk,
       ]),
-    );
+    ].filter(Boolean));
     const dz = h('div.st-drop', 'ここに画像をまとめて落とすと、ファイル名の枠に入ります（例: hero.warrior.body.png）');
     for (const t of [el, dz]) {
       t.addEventListener('dragover', (e) => { if (e.target.closest?.('.as-card')) return; e.preventDefault(); dz.classList.add('over'); });
@@ -125,7 +126,8 @@ function card(ui, s) {
     : src.source === 'folder' && !src.from ? h('span.as-badge.folder', 'フォルダの画像')
       : src.source ? h('span.as-badge.from', { title: `予備の枠 ${src.from} の画像を使っています` }, '予備の枠の画像') : null;
   const el = h(`div.as-card${src.source && !src.from ? '.on' : ''}${src.from ? '.from' : ''}`, {
-    dataset: { id: s.id }, title: `${s.label}\n${s.id}${s.note ? `\n${s.note}` : ''}`,
+    dataset: { id: s.id }, title: `${s.label}\n${s.id}${s.note ? `\n${s.note}` : ''}`, tabindex: 0,
+    onkeydown: (e) => { if (e.key === 'Enter' && e.target === e.currentTarget) openEditor(ui, s.id, { onSaved: () => ui.renderPanel() }); },
     onclick: () => openEditor(ui, s.id, { onSaved: () => ui.renderPanel() }),
     onmouseenter: () => { view.hover = s.id; }, onmouseleave: () => { if (view.hover === s.id) view.hover = null; },
   }, [

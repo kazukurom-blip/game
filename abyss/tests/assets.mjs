@@ -99,7 +99,7 @@ await t('すべての枠に指示文（英語・日本語・Midjourney・否定�
     ok(p.sizes.gpt && p.sizes.sdxl && p.sizes.mj.startsWith('--ar'), `sizes ${s.id}`);
     ok(!/undefined|null|NaN|\[object/.test(p.en + p.ja + p.mj), `bad text ${s.id}: ${p.en.slice(0, 80)}`);
     ok(p.en.includes('Style:') && p.ja.includes('画風'), `style ${s.id}`);
-    if (s.id !== 'ui.logo') ok(/no text/i.test(p.en) || ['scene', 'layer'].includes(p.bg), `no text ${s.id}`);
+    if (s.id !== 'ui.logo') ok(/no text/i.test(p.en) || ['scene', 'layer', 'keyart'].includes(p.bg), `no text ${s.id}`);
   }
 });
 await t('指示文: 主人公は右向き・敵は左向き・演出は黒い背景・アイコンは正方形', () => {

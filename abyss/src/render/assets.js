@@ -41,6 +41,7 @@ class AssetRegistry {
     this.baseUrl = '';
     this.version = 0;
     this.folderList = []; // custom.json の中身（normalizeCustomList）
+    this.persistent = null; // IndexedDB に保存できるか（init で調べる。false なら閉じると消える）
   }
 
   // ---------- 枠
@@ -256,6 +257,7 @@ class AssetRegistry {
   // ---------- 読み込み
   async init({ baseUrl = '' } = {}) {
     this.baseUrl = baseUrl;
+    try { this.persistent = await idb.available(); } catch { this.persistent = false; }
     await Promise.all([this.loadCustomFolder(), this.loadIdb()]);
     this.ready = true;
     this.changed();
@@ -572,7 +574,7 @@ export function transparencyRatio(d) {
 /**
  * 背景を透明にする（d を書き換える）。
  * opt: { tol: 色の近さ（RGB の距離。既定 48）, color: [r,g,b]（無ければ四隅から）, contiguous: true（外周からつながった所だけ）,
- *        holes: false（閉じた穴の同じ色も消す。64 画素以上の島だけ）, feather: 2（縁のなじませ幅 px）, despill: true }
+ *        holes: false（閉じた穴の同じ色も消す。64 画素以上の島だけ）, erode: 1（外側の縁を削る px）, feather: 2（その内側のなじませ幅 px）, despill: true }
  * 戻り値 { removed: 消した画素数, bg: [r,g,b] }
  */
 export function keyOut(d, w, h, opt = {}) {
@@ -617,7 +619,9 @@ export function keyOut(d, w, h, opt = {}) {
     }
   }
   // 縁: 消した所のとなり（feather px まで）を背景との近さで半透明にし、背景色のにじみを取る
-  const band = Math.max(0, Math.min(4, opt.feather ?? 2));
+  // erode: いちばん外の 1 px は背景と混ざっているので薄くする（縁を削る）。feather: その内側のなじませ幅
+  const erode = Math.max(0, Math.min(2, opt.erode ?? (opt.feather === 0 ? 0 : 1)));
+  const band = erode + Math.max(0, Math.min(4, opt.feather ?? 2));
   const level = new Uint8Array(N); // 1..band = 消した所からの距離
   let front = [];
   for (let p = 0; p < N; p++) {
@@ -634,18 +638,26 @@ export function keyOut(d, w, h, opt = {}) {
     front = next;
   }
   const greenBg = bg[1] > bg[0] + 40 && bg[1] > bg[2] + 40;
-  const soft = tol * 1.5;
+  const magentaBg = bg[0] > bg[1] + 40 && bg[2] > bg[1] + 40;
+  const soft = tol * 2;
   let removed = 0;
   for (let p = 0, i = 0; p < N; p++, i += 4) {
     if (mask[p]) { d[i + 3] = 0; removed++; continue; }
-    if (!level[p] || band === 0) continue;
+    const lv = level[p];
+    if (!lv || band === 0) continue;
+    // 背景との近さで透明度を決め、背景の色を引いて元の色に戻す
     const a = Math.max(0, Math.min(1, (dist[p] - tol) / soft));
     if (a < 1) {
       const inv = 1 - a; const aa = Math.max(a, 0.02);
       for (let c = 0; c < 3; c++) d[i + c] = Math.max(0, Math.min(255, (d[i + c] - inv * bg[c]) / aa));
       d[i + 3] = Math.round(d[i + 3] * a);
     }
-    if (opt.despill !== false && greenBg) d[i + 1] = Math.min(d[i + 1], Math.max(d[i], d[i + 2]));
+    if (lv <= erode) d[i + 3] = Math.round(d[i + 3] * (lv === 1 ? 0.3 : 0.65));
+    // 色のにじみ取り（緑・マゼンタの背景）
+    if (opt.despill !== false) {
+      if (greenBg) d[i + 1] = Math.min(d[i + 1], Math.max(d[i], d[i + 2]));
+      else if (magentaBg) { const sp = Math.min(d[i], d[i + 2]) - d[i + 1]; if (sp > 0) { d[i] -= sp * 0.8; d[i + 2] -= sp * 0.8; } }
+    }
   }
   return { removed, bg };
 }

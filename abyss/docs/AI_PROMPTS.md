@@ -120,16 +120,16 @@ Use the approved base character image of this hero as the exact base (same chara
 
 ##### `hero.warrior.portrait` — 剣闘士（立ち絵・クラス選択の画面）
 
-- ゲーム内 300×420（比 3:4）・基準点 (0.5, 1)・右向き・背景 画面いっぱいの風景
+- ゲーム内 300×420（比 3:4）・基準点 (0.5, 1)・右向き・背景 暗い雰囲気の背景つき
 - 作る大きさ: GPT 1024×1536／SDXL 896×1152／FLUX 896×1184／Midjourney `--ar 3:4`
 - メモ: 背景つきの 1 枚絵でかまいません
 
 ```text
-A dramatic character select portrait illustration of a battle-scarred gladiator warrior, broad muscular build, short dark hair, stern face, crimson cloth accents, knees-up three-quarter view, heroic pose, rim light, dark atmospheric background with drifting ash. The scene fills the whole image edge to edge. No characters, no creatures, no text, no UI. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+A dramatic character select portrait illustration of a battle-scarred gladiator warrior, broad muscular build, short dark hair, stern face, crimson cloth accents, knees-up three-quarter view, heroic pose, rim light. Background: a dark atmospheric backdrop with drifting ash and a soft colored glow behind the character, filling the whole image; no other characters. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one character. No text, no letters, no logo, no watermark, no signature, no frame, no border. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-クラス選択画面の立ち絵。「剣闘士」歴戦の剣闘士。がっしりした体格、短い黒髪、険しい顔、深紅の布の差し色。膝から上、3/4 の角度、勇ましいポーズ、縁の光、灰が舞う暗い背景。画像の端から端まで風景で埋める。人物・生き物・文字・UI は入れない。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+クラス選択画面の立ち絵。「剣闘士」歴戦の剣闘士。がっしりした体格、短い黒髪、険しい顔、深紅の布の差し色。膝から上、3/4 の角度、勇ましいポーズ、縁の光。背景は画像いっぱいの暗い雰囲気の背景（舞う灰と、キャラの後ろの柔らかい色の光）。ほかの人物は入れない。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。キャラは1人だけ。文字・ロゴ・透かし・署名・枠は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 #### 狩人
@@ -206,16 +206,16 @@ Use the approved base character image of this hero as the exact base (same chara
 
 ##### `hero.ranger.portrait` — 狩人（立ち絵・クラス選択の画面）
 
-- ゲーム内 300×420（比 3:4）・基準点 (0.5, 1)・右向き・背景 画面いっぱいの風景
+- ゲーム内 300×420（比 3:4）・基準点 (0.5, 1)・右向き・背景 暗い雰囲気の背景つき
 - 作る大きさ: GPT 1024×1536／SDXL 896×1152／FLUX 896×1184／Midjourney `--ar 3:4`
 - メモ: 背景つきの 1 枚絵でかまいません
 
 ```text
-A dramatic character select portrait illustration of a lean hooded ranger hunter, sharp eyes, green and brown hunting leathers, a quiver strap across the chest, knees-up three-quarter view, heroic pose, rim light, dark atmospheric background with drifting ash. The scene fills the whole image edge to edge. No characters, no creatures, no text, no UI. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+A dramatic character select portrait illustration of a lean hooded ranger hunter, sharp eyes, green and brown hunting leathers, a quiver strap across the chest, knees-up three-quarter view, heroic pose, rim light. Background: a dark atmospheric backdrop with drifting ash and a soft colored glow behind the character, filling the whole image; no other characters. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one character. No text, no letters, no logo, no watermark, no signature, no frame, no border. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-クラス選択画面の立ち絵。「狩人」フードをかぶった細身の狩人。鋭い目、緑と茶の狩り装束、胸に矢筒のベルト。膝から上、3/4 の角度、勇ましいポーズ、縁の光、灰が舞う暗い背景。画像の端から端まで風景で埋める。人物・生き物・文字・UI は入れない。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+クラス選択画面の立ち絵。「狩人」フードをかぶった細身の狩人。鋭い目、緑と茶の狩り装束、胸に矢筒のベルト。膝から上、3/4 の角度、勇ましいポーズ、縁の光。背景は画像いっぱいの暗い雰囲気の背景（舞う灰と、キャラの後ろの柔らかい色の光）。ほかの人物は入れない。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。キャラは1人だけ。文字・ロゴ・透かし・署名・枠は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 #### 魔導士
@@ -292,16 +292,16 @@ Use the approved base character image of this hero as the exact base (same chara
 
 ##### `hero.sorcerer.portrait` — 魔導士（立ち絵・クラス選択の画面）
 
-- ゲーム内 300×420（比 3:4）・基準点 (0.5, 1)・右向き・背景 画面いっぱいの風景
+- ゲーム内 300×420（比 3:4）・基準点 (0.5, 1)・右向き・背景 暗い雰囲気の背景つき
 - 作る大きさ: GPT 1024×1536／SDXL 896×1152／FLUX 896×1184／Midjourney `--ar 3:4`
 - メモ: 背景つきの 1 枚絵でかまいません
 
 ```text
-A dramatic character select portrait illustration of a young sorcerer mage with flowing robes, long silver hair, glowing blue arcane runes on the sleeves, knees-up three-quarter view, heroic pose, rim light, dark atmospheric background with drifting ash. The scene fills the whole image edge to edge. No characters, no creatures, no text, no UI. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+A dramatic character select portrait illustration of a young sorcerer mage with flowing robes, long silver hair, glowing blue arcane runes on the sleeves, knees-up three-quarter view, heroic pose, rim light. Background: a dark atmospheric backdrop with drifting ash and a soft colored glow behind the character, filling the whole image; no other characters. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one character. No text, no letters, no logo, no watermark, no signature, no frame, no border. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-クラス選択画面の立ち絵。「魔導士」流れるような衣の若い魔導士。長い銀髪、袖に青く光る魔法の紋。膝から上、3/4 の角度、勇ましいポーズ、縁の光、灰が舞う暗い背景。画像の端から端まで風景で埋める。人物・生き物・文字・UI は入れない。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+クラス選択画面の立ち絵。「魔導士」流れるような衣の若い魔導士。長い銀髪、袖に青く光る魔法の紋。膝から上、3/4 の角度、勇ましいポーズ、縁の光。背景は画像いっぱいの暗い雰囲気の背景（舞う灰と、キャラの後ろの柔らかい色の光）。ほかの人物は入れない。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。キャラは1人だけ。文字・ロゴ・透かし・署名・枠は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 #### 死霊術師
@@ -378,16 +378,16 @@ Use the approved base character image of this hero as the exact base (same chara
 
 ##### `hero.necromancer.portrait` — 死霊術師（立ち絵・クラス選択の画面）
 
-- ゲーム内 300×420（比 3:4）・基準点 (0.5, 1)・右向き・背景 画面いっぱいの風景
+- ゲーム内 300×420（比 3:4）・基準点 (0.5, 1)・右向き・背景 暗い雰囲気の背景つき
 - 作る大きさ: GPT 1024×1536／SDXL 896×1152／FLUX 896×1184／Midjourney `--ar 3:4`
 - メモ: 背景つきの 1 枚絵でかまいません
 
 ```text
-A dramatic character select portrait illustration of a gaunt pale necromancer in tattered violet and black robes, bone ornaments, faint green-violet glow in the eyes, knees-up three-quarter view, heroic pose, rim light, dark atmospheric background with drifting ash. The scene fills the whole image edge to edge. No characters, no creatures, no text, no UI. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+A dramatic character select portrait illustration of a gaunt pale necromancer in tattered violet and black robes, bone ornaments, faint green-violet glow in the eyes, knees-up three-quarter view, heroic pose, rim light. Background: a dark atmospheric backdrop with drifting ash and a soft colored glow behind the character, filling the whole image; no other characters. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one character. No text, no letters, no logo, no watermark, no signature, no frame, no border. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-クラス選択画面の立ち絵。「死霊術師」やせて青白い死霊術師。ぼろぼろの紫と黒の衣、骨の飾り、目にかすかな紫緑の光。膝から上、3/4 の角度、勇ましいポーズ、縁の光、灰が舞う暗い背景。画像の端から端まで風景で埋める。人物・生き物・文字・UI は入れない。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+クラス選択画面の立ち絵。「死霊術師」やせて青白い死霊術師。ぼろぼろの紫と黒の衣、骨の飾り、目にかすかな紫緑の光。膝から上、3/4 の角度、勇ましいポーズ、縁の光。背景は画像いっぱいの暗い雰囲気の背景（舞う灰と、キャラの後ろの柔らかい色の光）。ほかの人物は入れない。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。キャラは1人だけ。文字・ロゴ・透かし・署名・枠は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 #### 影刃
@@ -464,16 +464,16 @@ Use the approved base character image of this hero as the exact base (same chara
 
 ##### `hero.assassin.portrait` — 影刃（立ち絵・クラス選択の画面）
 
-- ゲーム内 300×420（比 3:4）・基準点 (0.5, 1)・右向き・背景 画面いっぱいの風景
+- ゲーム内 300×420（比 3:4）・基準点 (0.5, 1)・右向き・背景 暗い雰囲気の背景つき
 - 作る大きさ: GPT 1024×1536／SDXL 896×1152／FLUX 896×1184／Midjourney `--ar 3:4`
 - メモ: 背景つきの 1 枚絵でかまいません
 
 ```text
-A dramatic character select portrait illustration of an agile shadowblade assassin, half-masked face, dark leather wrappings, golden yellow accents, light crouching posture, knees-up three-quarter view, heroic pose, rim light, dark atmospheric background with drifting ash. The scene fills the whole image edge to edge. No characters, no creatures, no text, no UI. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+A dramatic character select portrait illustration of an agile shadowblade assassin, half-masked face, dark leather wrappings, golden yellow accents, light crouching posture, knees-up three-quarter view, heroic pose, rim light. Background: a dark atmospheric backdrop with drifting ash and a soft colored glow behind the character, filling the whole image; no other characters. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one character. No text, no letters, no logo, no watermark, no signature, no frame, no border. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-クラス選択画面の立ち絵。「影刃」身軽な影刃の暗殺者。顔の下半分を覆う仮面、黒い革の巻き布、金色の差し色、低く構えた姿勢。膝から上、3/4 の角度、勇ましいポーズ、縁の光、灰が舞う暗い背景。画像の端から端まで風景で埋める。人物・生き物・文字・UI は入れない。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+クラス選択画面の立ち絵。「影刃」身軽な影刃の暗殺者。顔の下半分を覆う仮面、黒い革の巻き布、金色の差し色、低く構えた姿勢。膝から上、3/4 の角度、勇ましいポーズ、縁の光。背景は画像いっぱいの暗い雰囲気の背景（舞う灰と、キャラの後ろの柔らかい色の光）。ほかの人物は入れない。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。キャラは1人だけ。文字・ロゴ・透かし・署名・枠は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 <a id="cat-gear"></a>
@@ -790,11 +790,11 @@ One plate helmet (full steel plate armor with engraved edges) as a standalone 2D
 - メモ: 体の画像の上に重ねる部品（任意）。全身を差し替えるなら hero.<クラス>.outfit.<スタイル> を使う
 
 ```text
-The chest armor piece only of layered cloth robes and wraps, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: the whole item is visible and centered with an 8% margin. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+The chest armor piece only of layered cloth robes and wraps, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: exactly the same canvas as the base character image (character centered, feet at 92% of the image height); draw only the armor piece in its place. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-布の鎧の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 全体が入るよう中央に置き、余白は 8%。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+布の鎧の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 基本のキャラ画像とまったく同じキャンバス（キャラは中央、足元は上から 92%）。その位置に鎧の部品だけを描く。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `gear.chest.leather` — 革の鎧（重ね着の部品）
@@ -804,11 +804,11 @@ The chest armor piece only of layered cloth robes and wraps, drawn as an overlay
 - メモ: 体の画像の上に重ねる部品（任意）。全身を差し替えるなら hero.<クラス>.outfit.<スタイル> を使う
 
 ```text
-The chest armor piece only of fitted leather armor with straps and buckles, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: the whole item is visible and centered with an 8% margin. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+The chest armor piece only of fitted leather armor with straps and buckles, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: exactly the same canvas as the base character image (character centered, feet at 92% of the image height); draw only the armor piece in its place. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-革の鎧の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 全体が入るよう中央に置き、余白は 8%。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+革の鎧の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 基本のキャラ画像とまったく同じキャンバス（キャラは中央、足元は上から 92%）。その位置に鎧の部品だけを描く。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `gear.chest.mail` — 鎖の鎧（重ね着の部品）
@@ -818,11 +818,11 @@ The chest armor piece only of fitted leather armor with straps and buckles, draw
 - メモ: 体の画像の上に重ねる部品（任意）。全身を差し替えるなら hero.<クラス>.outfit.<スタイル> を使う
 
 ```text
-The chest armor piece only of a chainmail hauberk with leather pauldrons, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: the whole item is visible and centered with an 8% margin. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+The chest armor piece only of a chainmail hauberk with leather pauldrons, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: exactly the same canvas as the base character image (character centered, feet at 92% of the image height); draw only the armor piece in its place. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-鎖の鎧の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 全体が入るよう中央に置き、余白は 8%。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+鎖の鎧の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 基本のキャラ画像とまったく同じキャンバス（キャラは中央、足元は上から 92%）。その位置に鎧の部品だけを描く。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `gear.chest.plate` — 板金の鎧（重ね着の部品）
@@ -832,11 +832,11 @@ The chest armor piece only of a chainmail hauberk with leather pauldrons, drawn 
 - メモ: 体の画像の上に重ねる部品（任意）。全身を差し替えるなら hero.<クラス>.outfit.<スタイル> を使う
 
 ```text
-The chest armor piece only of full steel plate armor with engraved edges, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: the whole item is visible and centered with an 8% margin. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+The chest armor piece only of full steel plate armor with engraved edges, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: exactly the same canvas as the base character image (character centered, feet at 92% of the image height); draw only the armor piece in its place. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-板金の鎧の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 全体が入るよう中央に置き、余白は 8%。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+板金の鎧の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 基本のキャラ画像とまったく同じキャンバス（キャラは中央、足元は上から 92%）。その位置に鎧の部品だけを描く。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `gear.gloves.cloth` — 布の手甲（重ね着の部品）
@@ -846,11 +846,11 @@ The chest armor piece only of full steel plate armor with engraved edges, drawn 
 - メモ: 体の画像の上に重ねる部品（任意）。全身を差し替えるなら hero.<クラス>.outfit.<スタイル> を使う
 
 ```text
-The gauntlets piece only of layered cloth robes and wraps, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: the whole item is visible and centered with an 8% margin. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+The gauntlets piece only of layered cloth robes and wraps, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: exactly the same canvas as the base character image (character centered, feet at 92% of the image height); draw only the armor piece in its place. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-布の手甲の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 全体が入るよう中央に置き、余白は 8%。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+布の手甲の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 基本のキャラ画像とまったく同じキャンバス（キャラは中央、足元は上から 92%）。その位置に鎧の部品だけを描く。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `gear.gloves.leather` — 革の手甲（重ね着の部品）
@@ -860,11 +860,11 @@ The gauntlets piece only of layered cloth robes and wraps, drawn as an overlay l
 - メモ: 体の画像の上に重ねる部品（任意）。全身を差し替えるなら hero.<クラス>.outfit.<スタイル> を使う
 
 ```text
-The gauntlets piece only of fitted leather armor with straps and buckles, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: the whole item is visible and centered with an 8% margin. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+The gauntlets piece only of fitted leather armor with straps and buckles, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: exactly the same canvas as the base character image (character centered, feet at 92% of the image height); draw only the armor piece in its place. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-革の手甲の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 全体が入るよう中央に置き、余白は 8%。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+革の手甲の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 基本のキャラ画像とまったく同じキャンバス（キャラは中央、足元は上から 92%）。その位置に鎧の部品だけを描く。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `gear.gloves.mail` — 鎖の手甲（重ね着の部品）
@@ -874,11 +874,11 @@ The gauntlets piece only of fitted leather armor with straps and buckles, drawn 
 - メモ: 体の画像の上に重ねる部品（任意）。全身を差し替えるなら hero.<クラス>.outfit.<スタイル> を使う
 
 ```text
-The gauntlets piece only of a chainmail hauberk with leather pauldrons, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: the whole item is visible and centered with an 8% margin. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+The gauntlets piece only of a chainmail hauberk with leather pauldrons, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: exactly the same canvas as the base character image (character centered, feet at 92% of the image height); draw only the armor piece in its place. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-鎖の手甲の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 全体が入るよう中央に置き、余白は 8%。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+鎖の手甲の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 基本のキャラ画像とまったく同じキャンバス（キャラは中央、足元は上から 92%）。その位置に鎧の部品だけを描く。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `gear.gloves.plate` — 板金の手甲（重ね着の部品）
@@ -888,11 +888,11 @@ The gauntlets piece only of a chainmail hauberk with leather pauldrons, drawn as
 - メモ: 体の画像の上に重ねる部品（任意）。全身を差し替えるなら hero.<クラス>.outfit.<スタイル> を使う
 
 ```text
-The gauntlets piece only of full steel plate armor with engraved edges, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: the whole item is visible and centered with an 8% margin. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+The gauntlets piece only of full steel plate armor with engraved edges, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: exactly the same canvas as the base character image (character centered, feet at 92% of the image height); draw only the armor piece in its place. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-板金の手甲の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 全体が入るよう中央に置き、余白は 8%。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+板金の手甲の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 基本のキャラ画像とまったく同じキャンバス（キャラは中央、足元は上から 92%）。その位置に鎧の部品だけを描く。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `gear.belt.cloth` — 布の帯（重ね着の部品）
@@ -902,11 +902,11 @@ The gauntlets piece only of full steel plate armor with engraved edges, drawn as
 - メモ: 体の画像の上に重ねる部品（任意）。全身を差し替えるなら hero.<クラス>.outfit.<スタイル> を使う
 
 ```text
-The armored belt piece only of layered cloth robes and wraps, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: the whole item is visible and centered with an 8% margin. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+The armored belt piece only of layered cloth robes and wraps, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: exactly the same canvas as the base character image (character centered, feet at 92% of the image height); draw only the armor piece in its place. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-布の帯の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 全体が入るよう中央に置き、余白は 8%。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+布の帯の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 基本のキャラ画像とまったく同じキャンバス（キャラは中央、足元は上から 92%）。その位置に鎧の部品だけを描く。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `gear.belt.leather` — 革の帯（重ね着の部品）
@@ -916,11 +916,11 @@ The armored belt piece only of layered cloth robes and wraps, drawn as an overla
 - メモ: 体の画像の上に重ねる部品（任意）。全身を差し替えるなら hero.<クラス>.outfit.<スタイル> を使う
 
 ```text
-The armored belt piece only of fitted leather armor with straps and buckles, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: the whole item is visible and centered with an 8% margin. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+The armored belt piece only of fitted leather armor with straps and buckles, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: exactly the same canvas as the base character image (character centered, feet at 92% of the image height); draw only the armor piece in its place. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-革の帯の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 全体が入るよう中央に置き、余白は 8%。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+革の帯の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 基本のキャラ画像とまったく同じキャンバス（キャラは中央、足元は上から 92%）。その位置に鎧の部品だけを描く。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `gear.belt.mail` — 鎖の帯（重ね着の部品）
@@ -930,11 +930,11 @@ The armored belt piece only of fitted leather armor with straps and buckles, dra
 - メモ: 体の画像の上に重ねる部品（任意）。全身を差し替えるなら hero.<クラス>.outfit.<スタイル> を使う
 
 ```text
-The armored belt piece only of a chainmail hauberk with leather pauldrons, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: the whole item is visible and centered with an 8% margin. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+The armored belt piece only of a chainmail hauberk with leather pauldrons, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: exactly the same canvas as the base character image (character centered, feet at 92% of the image height); draw only the armor piece in its place. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-鎖の帯の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 全体が入るよう中央に置き、余白は 8%。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+鎖の帯の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 基本のキャラ画像とまったく同じキャンバス（キャラは中央、足元は上から 92%）。その位置に鎧の部品だけを描く。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `gear.belt.plate` — 板金の帯（重ね着の部品）
@@ -944,11 +944,11 @@ The armored belt piece only of a chainmail hauberk with leather pauldrons, drawn
 - メモ: 体の画像の上に重ねる部品（任意）。全身を差し替えるなら hero.<クラス>.outfit.<スタイル> を使う
 
 ```text
-The armored belt piece only of full steel plate armor with engraved edges, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: the whole item is visible and centered with an 8% margin. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+The armored belt piece only of full steel plate armor with engraved edges, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: exactly the same canvas as the base character image (character centered, feet at 92% of the image height); draw only the armor piece in its place. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-板金の帯の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 全体が入るよう中央に置き、余白は 8%。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+板金の帯の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 基本のキャラ画像とまったく同じキャンバス（キャラは中央、足元は上から 92%）。その位置に鎧の部品だけを描く。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `gear.legs.cloth` — 布の脚甲（重ね着の部品）
@@ -958,11 +958,11 @@ The armored belt piece only of full steel plate armor with engraved edges, drawn
 - メモ: 体の画像の上に重ねる部品（任意）。全身を差し替えるなら hero.<クラス>.outfit.<スタイル> を使う
 
 ```text
-The leg armor piece only of layered cloth robes and wraps, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: the whole item is visible and centered with an 8% margin. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+The leg armor piece only of layered cloth robes and wraps, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: exactly the same canvas as the base character image (character centered, feet at 92% of the image height); draw only the armor piece in its place. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-布の脚甲の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 全体が入るよう中央に置き、余白は 8%。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+布の脚甲の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 基本のキャラ画像とまったく同じキャンバス（キャラは中央、足元は上から 92%）。その位置に鎧の部品だけを描く。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `gear.legs.leather` — 革の脚甲（重ね着の部品）
@@ -972,11 +972,11 @@ The leg armor piece only of layered cloth robes and wraps, drawn as an overlay l
 - メモ: 体の画像の上に重ねる部品（任意）。全身を差し替えるなら hero.<クラス>.outfit.<スタイル> を使う
 
 ```text
-The leg armor piece only of fitted leather armor with straps and buckles, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: the whole item is visible and centered with an 8% margin. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+The leg armor piece only of fitted leather armor with straps and buckles, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: exactly the same canvas as the base character image (character centered, feet at 92% of the image height); draw only the armor piece in its place. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-革の脚甲の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 全体が入るよう中央に置き、余白は 8%。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+革の脚甲の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 基本のキャラ画像とまったく同じキャンバス（キャラは中央、足元は上から 92%）。その位置に鎧の部品だけを描く。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `gear.legs.mail` — 鎖の脚甲（重ね着の部品）
@@ -986,11 +986,11 @@ The leg armor piece only of fitted leather armor with straps and buckles, drawn 
 - メモ: 体の画像の上に重ねる部品（任意）。全身を差し替えるなら hero.<クラス>.outfit.<スタイル> を使う
 
 ```text
-The leg armor piece only of a chainmail hauberk with leather pauldrons, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: the whole item is visible and centered with an 8% margin. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+The leg armor piece only of a chainmail hauberk with leather pauldrons, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: exactly the same canvas as the base character image (character centered, feet at 92% of the image height); draw only the armor piece in its place. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-鎖の脚甲の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 全体が入るよう中央に置き、余白は 8%。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+鎖の脚甲の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 基本のキャラ画像とまったく同じキャンバス（キャラは中央、足元は上から 92%）。その位置に鎧の部品だけを描く。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `gear.legs.plate` — 板金の脚甲（重ね着の部品）
@@ -1000,11 +1000,11 @@ The leg armor piece only of a chainmail hauberk with leather pauldrons, drawn as
 - メモ: 体の画像の上に重ねる部品（任意）。全身を差し替えるなら hero.<クラス>.outfit.<スタイル> を使う
 
 ```text
-The leg armor piece only of full steel plate armor with engraved edges, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: the whole item is visible and centered with an 8% margin. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+The leg armor piece only of full steel plate armor with engraved edges, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: exactly the same canvas as the base character image (character centered, feet at 92% of the image height); draw only the armor piece in its place. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-板金の脚甲の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 全体が入るよう中央に置き、余白は 8%。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+板金の脚甲の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 基本のキャラ画像とまったく同じキャンバス（キャラは中央、足元は上から 92%）。その位置に鎧の部品だけを描く。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `gear.boots.cloth` — 布の靴（重ね着の部品）
@@ -1014,11 +1014,11 @@ The leg armor piece only of full steel plate armor with engraved edges, drawn as
 - メモ: 体の画像の上に重ねる部品（任意）。全身を差し替えるなら hero.<クラス>.outfit.<スタイル> を使う
 
 ```text
-The armored boots piece only of layered cloth robes and wraps, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: the whole item is visible and centered with an 8% margin. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+The armored boots piece only of layered cloth robes and wraps, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: exactly the same canvas as the base character image (character centered, feet at 92% of the image height); draw only the armor piece in its place. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-布の靴の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 全体が入るよう中央に置き、余白は 8%。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+布の靴の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 基本のキャラ画像とまったく同じキャンバス（キャラは中央、足元は上から 92%）。その位置に鎧の部品だけを描く。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `gear.boots.leather` — 革の靴（重ね着の部品）
@@ -1028,11 +1028,11 @@ The armored boots piece only of layered cloth robes and wraps, drawn as an overl
 - メモ: 体の画像の上に重ねる部品（任意）。全身を差し替えるなら hero.<クラス>.outfit.<スタイル> を使う
 
 ```text
-The armored boots piece only of fitted leather armor with straps and buckles, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: the whole item is visible and centered with an 8% margin. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+The armored boots piece only of fitted leather armor with straps and buckles, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: exactly the same canvas as the base character image (character centered, feet at 92% of the image height); draw only the armor piece in its place. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-革の靴の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 全体が入るよう中央に置き、余白は 8%。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+革の靴の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 基本のキャラ画像とまったく同じキャンバス（キャラは中央、足元は上から 92%）。その位置に鎧の部品だけを描く。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `gear.boots.mail` — 鎖の靴（重ね着の部品）
@@ -1042,11 +1042,11 @@ The armored boots piece only of fitted leather armor with straps and buckles, dr
 - メモ: 体の画像の上に重ねる部品（任意）。全身を差し替えるなら hero.<クラス>.outfit.<スタイル> を使う
 
 ```text
-The armored boots piece only of a chainmail hauberk with leather pauldrons, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: the whole item is visible and centered with an 8% margin. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+The armored boots piece only of a chainmail hauberk with leather pauldrons, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: exactly the same canvas as the base character image (character centered, feet at 92% of the image height); draw only the armor piece in its place. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-鎖の靴の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 全体が入るよう中央に置き、余白は 8%。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+鎖の靴の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 基本のキャラ画像とまったく同じキャンバス（キャラは中央、足元は上から 92%）。その位置に鎧の部品だけを描く。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `gear.boots.plate` — 板金の靴（重ね着の部品）
@@ -1056,11 +1056,11 @@ The armored boots piece only of a chainmail hauberk with leather pauldrons, draw
 - メモ: 体の画像の上に重ねる部品（任意）。全身を差し替えるなら hero.<クラス>.outfit.<スタイル> を使う
 
 ```text
-The armored boots piece only of full steel plate armor with engraved edges, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: the whole item is visible and centered with an 8% margin. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+The armored boots piece only of full steel plate armor with engraved edges, drawn as an overlay layer that fits over a standing hero facing RIGHT. Same canvas size and position as the base character image; everything else transparent. Framing: exactly the same canvas as the base character image (character centered, feet at 92% of the image height); draw only the armor piece in its place. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-板金の靴の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 全体が入るよう中央に置き、余白は 8%。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+板金の靴の部分だけ。右向きに立つ主人公の上に重ねる部品として、基本のキャラ画像と同じ大きさ・位置で描き、ほかは透明にする。構図: 基本のキャラ画像とまったく同じキャンバス（キャラは中央、足元は上から 92%）。その位置に鎧の部品だけを描く。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 <a id="cat-monster"></a>
@@ -1847,11 +1847,11 @@ An inventory icon of one katar-style punching claw blade. Orientation: shown at 
 - メモ: 無ければ「手に持った姿」の画像を使います
 
 ```text
-An inventory icon of one heater shield with metal rim. Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one heater shield with metal rim. Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 盾を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 盾を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.quiver` — 矢筒のアイコン
@@ -1861,11 +1861,11 @@ An inventory icon of one heater shield with metal rim. Orientation: shown at a 3
 - メモ: 無ければ「手に持った姿」の画像を使います
 
 ```text
-An inventory icon of one leather quiver full of arrows. Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one leather quiver full of arrows. Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 矢筒を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 矢筒を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.orb` — 宝珠のアイコン
@@ -1875,11 +1875,11 @@ An inventory icon of one leather quiver full of arrows. Orientation: shown at a 
 - メモ: 無ければ「手に持った姿」の画像を使います
 
 ```text
-An inventory icon of one floating arcane orb in a metal cradle. Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one floating arcane orb in a metal cradle. Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 宝珠を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 宝珠を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.grimoire` — 魔導書のアイコン
@@ -1889,11 +1889,11 @@ An inventory icon of one floating arcane orb in a metal cradle. Orientation: sho
 - メモ: 無ければ「手に持った姿」の画像を使います
 
 ```text
-An inventory icon of one leather-bound grimoire with metal corners. Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one leather-bound grimoire with metal corners. Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 魔導書を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 魔導書を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.offblade` — 副刀のアイコン
@@ -1918,11 +1918,11 @@ An inventory icon of one short offhand parrying blade. Orientation: shown at a 3
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one cloth helmet (layered cloth robes and wraps). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one cloth helmet (layered cloth robes and wraps). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 布の兜を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 布の兜を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.helm.leather` — 革の兜のアイコン
@@ -1931,11 +1931,11 @@ An inventory icon of one cloth helmet (layered cloth robes and wraps). Orientati
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one leather helmet (fitted leather armor with straps and buckles). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one leather helmet (fitted leather armor with straps and buckles). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 革の兜を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 革の兜を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.helm.mail` — 鎖の兜のアイコン
@@ -1944,11 +1944,11 @@ An inventory icon of one leather helmet (fitted leather armor with straps and bu
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one mail helmet (a chainmail hauberk with leather pauldrons). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one mail helmet (a chainmail hauberk with leather pauldrons). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 鎖の兜を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 鎖の兜を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.helm.plate` — 板金の兜のアイコン
@@ -1957,11 +1957,11 @@ An inventory icon of one mail helmet (a chainmail hauberk with leather pauldrons
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one plate helmet (full steel plate armor with engraved edges). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one plate helmet (full steel plate armor with engraved edges). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 板金の兜を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 板金の兜を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.chest.cloth` — 布の鎧のアイコン
@@ -1970,11 +1970,11 @@ An inventory icon of one plate helmet (full steel plate armor with engraved edge
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one cloth chest armor (layered cloth robes and wraps). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one cloth chest armor (layered cloth robes and wraps). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 布の鎧を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 布の鎧を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.chest.leather` — 革の鎧のアイコン
@@ -1983,11 +1983,11 @@ An inventory icon of one cloth chest armor (layered cloth robes and wraps). Orie
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one leather chest armor (fitted leather armor with straps and buckles). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one leather chest armor (fitted leather armor with straps and buckles). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 革の鎧を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 革の鎧を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.chest.mail` — 鎖の鎧のアイコン
@@ -1996,11 +1996,11 @@ An inventory icon of one leather chest armor (fitted leather armor with straps a
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one mail chest armor (a chainmail hauberk with leather pauldrons). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one mail chest armor (a chainmail hauberk with leather pauldrons). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 鎖の鎧を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 鎖の鎧を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.chest.plate` — 板金の鎧のアイコン
@@ -2009,11 +2009,11 @@ An inventory icon of one mail chest armor (a chainmail hauberk with leather paul
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one plate chest armor (full steel plate armor with engraved edges). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one plate chest armor (full steel plate armor with engraved edges). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 板金の鎧を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 板金の鎧を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.gloves.cloth` — 布の手甲のアイコン
@@ -2022,11 +2022,11 @@ An inventory icon of one plate chest armor (full steel plate armor with engraved
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one cloth gauntlets (layered cloth robes and wraps). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one cloth gauntlets (layered cloth robes and wraps). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 布の手甲を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 布の手甲を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.gloves.leather` — 革の手甲のアイコン
@@ -2035,11 +2035,11 @@ An inventory icon of one cloth gauntlets (layered cloth robes and wraps). Orient
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one leather gauntlets (fitted leather armor with straps and buckles). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one leather gauntlets (fitted leather armor with straps and buckles). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 革の手甲を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 革の手甲を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.gloves.mail` — 鎖の手甲のアイコン
@@ -2048,11 +2048,11 @@ An inventory icon of one leather gauntlets (fitted leather armor with straps and
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one mail gauntlets (a chainmail hauberk with leather pauldrons). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one mail gauntlets (a chainmail hauberk with leather pauldrons). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 鎖の手甲を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 鎖の手甲を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.gloves.plate` — 板金の手甲のアイコン
@@ -2061,11 +2061,11 @@ An inventory icon of one mail gauntlets (a chainmail hauberk with leather pauldr
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one plate gauntlets (full steel plate armor with engraved edges). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one plate gauntlets (full steel plate armor with engraved edges). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 板金の手甲を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 板金の手甲を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.belt.cloth` — 布の帯のアイコン
@@ -2074,11 +2074,11 @@ An inventory icon of one plate gauntlets (full steel plate armor with engraved e
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one cloth armored belt (layered cloth robes and wraps). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one cloth armored belt (layered cloth robes and wraps). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 布の帯を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 布の帯を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.belt.leather` — 革の帯のアイコン
@@ -2087,11 +2087,11 @@ An inventory icon of one cloth armored belt (layered cloth robes and wraps). Ori
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one leather armored belt (fitted leather armor with straps and buckles). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one leather armored belt (fitted leather armor with straps and buckles). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 革の帯を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 革の帯を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.belt.mail` — 鎖の帯のアイコン
@@ -2100,11 +2100,11 @@ An inventory icon of one leather armored belt (fitted leather armor with straps 
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one mail armored belt (a chainmail hauberk with leather pauldrons). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one mail armored belt (a chainmail hauberk with leather pauldrons). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 鎖の帯を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 鎖の帯を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.belt.plate` — 板金の帯のアイコン
@@ -2113,11 +2113,11 @@ An inventory icon of one mail armored belt (a chainmail hauberk with leather pau
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one plate armored belt (full steel plate armor with engraved edges). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one plate armored belt (full steel plate armor with engraved edges). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 板金の帯を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 板金の帯を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.legs.cloth` — 布の脚甲のアイコン
@@ -2126,11 +2126,11 @@ An inventory icon of one plate armored belt (full steel plate armor with engrave
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one cloth leg armor (layered cloth robes and wraps). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one cloth leg armor (layered cloth robes and wraps). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 布の脚甲を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 布の脚甲を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.legs.leather` — 革の脚甲のアイコン
@@ -2139,11 +2139,11 @@ An inventory icon of one cloth leg armor (layered cloth robes and wraps). Orient
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one leather leg armor (fitted leather armor with straps and buckles). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one leather leg armor (fitted leather armor with straps and buckles). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 革の脚甲を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 革の脚甲を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.legs.mail` — 鎖の脚甲のアイコン
@@ -2152,11 +2152,11 @@ An inventory icon of one leather leg armor (fitted leather armor with straps and
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one mail leg armor (a chainmail hauberk with leather pauldrons). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one mail leg armor (a chainmail hauberk with leather pauldrons). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 鎖の脚甲を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 鎖の脚甲を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.legs.plate` — 板金の脚甲のアイコン
@@ -2165,11 +2165,11 @@ An inventory icon of one mail leg armor (a chainmail hauberk with leather pauldr
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one plate leg armor (full steel plate armor with engraved edges). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one plate leg armor (full steel plate armor with engraved edges). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 板金の脚甲を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 板金の脚甲を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.boots.cloth` — 布の靴のアイコン
@@ -2178,11 +2178,11 @@ An inventory icon of one plate leg armor (full steel plate armor with engraved e
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one cloth armored boots (layered cloth robes and wraps). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one cloth armored boots (layered cloth robes and wraps). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 布の靴を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 布の靴を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.boots.leather` — 革の靴のアイコン
@@ -2191,11 +2191,11 @@ An inventory icon of one cloth armored boots (layered cloth robes and wraps). Or
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one leather armored boots (fitted leather armor with straps and buckles). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one leather armored boots (fitted leather armor with straps and buckles). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 革の靴を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 革の靴を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.boots.mail` — 鎖の靴のアイコン
@@ -2204,11 +2204,11 @@ An inventory icon of one leather armored boots (fitted leather armor with straps
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one mail armored boots (a chainmail hauberk with leather pauldrons). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one mail armored boots (a chainmail hauberk with leather pauldrons). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 鎖の靴を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 鎖の靴を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.boots.plate` — 板金の靴のアイコン
@@ -2217,11 +2217,11 @@ An inventory icon of one mail armored boots (a chainmail hauberk with leather pa
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one plate armored boots (full steel plate armor with engraved edges). Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one plate armored boots (full steel plate armor with engraved edges). Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 板金の靴を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 板金の靴を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 #### 装飾品
@@ -2232,11 +2232,11 @@ An inventory icon of one plate armored boots (full steel plate armor with engrav
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one amulet pendant on a chain. Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one amulet pendant on a chain. Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 首飾りを1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 首飾りを1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.item.ring` — 指輪のアイコン
@@ -2245,11 +2245,11 @@ An inventory icon of one amulet pendant on a chain. Orientation: shown at a 3/4 
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of one ornate ring. Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of one ornate ring. Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 指輪を1つ。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 指輪を1つ。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 #### 素材
@@ -2260,11 +2260,11 @@ An inventory icon of one ornate ring. Orientation: shown at a 3/4 angle, diagona
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of a crafting material: scrap, a small pile or single piece, gray colored with a soft glow. Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of a crafting material: scrap, a small pile or single piece, gray colored with a soft glow. Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 素材「鉄屑」。ノーマル装備を分解すると出る。強化に使う。小さな山か 1 つのかけら、灰色でほのかに光る。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 素材「鉄屑」。ノーマル装備を分解すると出る。強化に使う。小さな山か 1 つのかけら、灰色でほのかに光る。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.mat.dust` — 素材「魔塵」のアイコン
@@ -2273,11 +2273,11 @@ An inventory icon of a crafting material: scrap, a small pile or single piece, g
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of a crafting material: dust, a small pile or single piece, light blue colored with a soft glow. Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of a crafting material: dust, a small pile or single piece, light blue colored with a soft glow. Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 素材「魔塵」。マジック装備を分解すると出る。オプションの付け替えに使う。小さな山か 1 つのかけら、明るい青でほのかに光る。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 素材「魔塵」。マジック装備を分解すると出る。オプションの付け替えに使う。小さな山か 1 つのかけら、明るい青でほのかに光る。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.mat.crystal` — 素材「秘晶」のアイコン
@@ -2286,11 +2286,11 @@ An inventory icon of a crafting material: dust, a small pile or single piece, li
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of a crafting material: crystal, a small pile or single piece, light yellow colored with a soft glow. Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of a crafting material: crystal, a small pile or single piece, light yellow colored with a soft glow. Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 素材「秘晶」。レア・エピック装備を分解すると出る。上位のクラフトに使う。小さな山か 1 つのかけら、明るい黄色でほのかに光る。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 素材「秘晶」。レア・エピック装備を分解すると出る。上位のクラフトに使う。小さな山か 1 つのかけら、明るい黄色でほのかに光る。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.mat.echo` — 素材「伝説の残響」のアイコン
@@ -2299,11 +2299,11 @@ An inventory icon of a crafting material: crystal, a small pile or single piece,
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of a crafting material: echo, a small pile or single piece, orange colored with a soft glow. Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of a crafting material: echo, a small pile or single piece, orange colored with a soft glow. Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 素材「伝説の残響」。レジェンダリー以上を分解すると出る。伝説の力の抽出に使う。小さな山か 1 つのかけら、橙でほのかに光る。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 素材「伝説の残響」。レジェンダリー以上を分解すると出る。伝説の力の抽出に使う。小さな山か 1 つのかけら、橙でほのかに光る。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.mat.core` — 素材「原初の核」のアイコン
@@ -2312,11 +2312,11 @@ An inventory icon of a crafting material: echo, a small pile or single piece, or
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of a crafting material: core, a small pile or single piece, light red colored with a soft glow. Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of a crafting material: core, a small pile or single piece, light red colored with a soft glow. Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 素材「原初の核」。太古・原初の装備を分解すると出る。最上位のクラフトに使う。小さな山か 1 つのかけら、明るい赤でほのかに光る。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 素材「原初の核」。太古・原初の装備を分解すると出る。最上位のクラフトに使う。小さな山か 1 つのかけら、明るい赤でほのかに光る。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 ##### `icon.mat.shard` — 素材「深淵の欠片」のアイコン
@@ -2325,11 +2325,11 @@ An inventory icon of a crafting material: core, a small pile or single piece, li
 - 作る大きさ: GPT 1024×1024／SDXL 1024×1024／FLUX 1024×1024／Midjourney `--ar 1:1`
 
 ```text
-An inventory icon of a crafting material: shard, a small pile or single piece, light indigo colored with a soft glow. Orientation: shown at a 3/4 angle, diagonal at 45 degrees (handle at the bottom-left, tip to the top-right) for long items. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
+An inventory icon of a crafting material: shard, a small pile or single piece, light indigo colored with a soft glow. Orientation: a slightly angled 3/4 view. Framing: centered in a square with a 10% margin, large and readable at small size. Background: fully transparent (PNG with alpha). If transparency is not available, use a perfectly flat solid pure green #00FF00 background with no gradient. Style: hand-painted 2D dark fantasy game art, painterly brush texture with clean dark-brown outlines, two-tone cel shading with a soft highlight, muted earthy palette with rich glowing accents (not neon), soft even front lighting from slightly above. Exactly one subject. No text, no letters, no logo, no watermark, no signature, no frame, no border, no ground, no floor, no cast shadow, no reflection. Original design that does not imitate any existing game, anime, character or artist.
 ```
 
 ```text
-持ち物のアイコン: 素材「深淵の欠片」。裂け目やボスから。商人のガチャ（目利き）に使う。小さな山か 1 つのかけら、明るい藍色でほのかに光る。向き: 3/4 の角度。長い物は斜め 45 度（柄が左下、先が右上）。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
+持ち物のアイコン: 素材「深淵の欠片」。裂け目やボスから。商人のガチャ（目利き）に使う。小さな山か 1 つのかけら、明るい藍色でほのかに光る。向き: 少し斜めの 3/4 の角度。構図: 正方形の中央に大きく置き、余白は 10%。小さく表示しても形が分かるように。背景は完全な透明（透過PNG）。透明にできない場合は、ムラのない単色の緑（#00FF00）にする。画風: 手描き風の2Dダークファンタジーのゲーム絵、筆のあとが残る絵画調の塗りとくっきりした濃い茶色の輪郭線、2段階の塗りと柔らかいハイライト、落ち着いた土色の配色に光る差し色（ネオン色にしない）、正面やや上からの均一で柔らかい光。描くのは1つだけ。文字・ロゴ・透かし・署名・枠・地面・床・落ち影・反射は入れない。既存のゲーム・アニメ・キャラクター・作家に似せないオリジナルのデザイン。
 ```
 
 #### スキル
@@ -2932,15 +2932,15 @@ A game title logo with the words "ABYSS DROP" in ornate gothic metal letters, cr
 
 ##### `ui.title` — タイトル画面の背景
 
-- ゲーム内 1280×720（比 16:9）・基準点 (0, 0)・—・背景 画面いっぱいの風景
+- ゲーム内 1280×720（比 16:9）・基準点 (0, 0)・—・背景 画面いっぱいの絵（文字なし）
 - 作る大きさ: GPT 1536×1024（または 1792×1008）／SDXL 1344×768／FLUX 1344×768／Midjourney `--ar 16:9`
 - メモ: 画面いっぱいに広げて表示（はみ出た所は切れる）
 
 ```text
-Title screen key art for a dark fantasy hack-and-slash game: a vast glowing abyss chasm under an ash-filled blood-red sky, ruins at its rim, a lone hero silhouette standing at the edge. Leave the center top area calm for the logo. The scene fills the whole image edge to edge. No characters, no creatures, no text, no UI. Style: hand-painted 2D dark fantasy game background art, painterly brush texture, atmospheric depth and haze, muted earthy palette with glowing accents, soft diffuse light.
+Title screen key art for a dark fantasy hack-and-slash game: a vast glowing abyss chasm under an ash-filled blood-red sky, ruins at its rim, a lone hero silhouette standing at the edge. Leave the center top area calm for the logo. The scene fills the whole image edge to edge. No text, no logo, no UI. Style: hand-painted 2D dark fantasy game background art, painterly brush texture, atmospheric depth and haze, muted earthy palette with glowing accents, soft diffuse light.
 ```
 
 ```text
-ダークファンタジーのハクスラのタイトル画面の絵: 灰の舞う血のように赤い空の下に口を開けた巨大な光る深淵の裂け目、縁の廃墟、端に立つ主人公の小さなシルエット。中央の上はロゴが乗るので落ち着いた絵に。画像の端から端まで風景で埋める。人物・生き物・文字・UI は入れない。画風: 手描き風の2Dダークファンタジーのゲームの背景画、筆のあとが残る絵画調の塗り、奥行きのあるかすみ、落ち着いた土色の配色に光る差し色、柔らかく広がる光。
+ダークファンタジーのハクスラのタイトル画面の絵: 灰の舞う血のように赤い空の下に口を開けた巨大な光る深淵の裂け目、縁の廃墟、端に立つ主人公の小さなシルエット。中央の上はロゴが乗るので落ち着いた絵に。画像の端から端まで絵で埋める。文字・ロゴ・UI は入れない。画風: 手描き風の2Dダークファンタジーのゲームの背景画、筆のあとが残る絵画調の塗り、奥行きのあるかすみ、落ち着いた土色の配色に光る差し色、柔らかく広がる光。
 ```
 
