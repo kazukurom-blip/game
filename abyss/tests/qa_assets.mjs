@@ -47,6 +47,13 @@ await t('地面の帯は上の透明な所だけ切る（キャラが宙に浮�
   eq(autoProc(S.find((s) => s.id === 'bg.act1.mid'), false, { color: [0, 255, 0] }).trim, false);
   eq(autoProc(S.find((s) => s.id === 'bg.act1'), false).trim, false);
 });
+await t('緑・マゼンタの背景なら囲まれた所（足の間・腕と体のすきま）も抜く。白い背景では抜かない（白い目・服が消えないように）', () => {
+  const hero = S.find((s) => s.id === 'hero.warrior.body');
+  eq(autoProc(hero, false, { color: [0, 255, 0] }).holes, true, '緑');
+  eq(autoProc(hero, false, { color: [255, 0, 255] }).holes, true, 'マゼンタ');
+  ok(!autoProc(hero, false, { color: [255, 255, 255] }).holes, '白');
+  ok(!autoProc(hero, true).holes, '透明な画像');
+});
 await t('設定の .json の加工の項目は書いた物だけ（書いていない項目は自動のまま）', () => {
   eq(JSON.stringify(procOverrides({ ax: 0.5, frames: 4 })), '{}');
   const p = procOverrides({ bg: 'none', trim: false, flip: true, crop: { b: 10 }, tol: 30 });
@@ -149,6 +156,7 @@ if (pw) {
           x.fillStyle = '#d9a83a'; x.fillRect(W * 0.35, H * 0.6, W * 0.3, H * 0.04); x.fillStyle = '#5a3820'; x.fillRect(W * 0.47, H * 0.64, W * 0.06, H * 0.26);
         } else if (o.shape === 'hero') { // 右向きの人（前の腕を少し前へ）
           x.fillStyle = '#3a2a22'; x.fillRect(W * 0.42, H * 0.6, W * 0.07, H * 0.3); x.fillRect(W * 0.52, H * 0.6, W * 0.07, H * 0.3);
+          if (o.feetBar) x.fillRect(W * 0.4, H * 0.88, W * 0.22, H * 0.03); // 足元の板（足の間が囲まれる）
           x.fillStyle = '#3060c0'; x.beginPath(); x.ellipse(W * 0.5, H * 0.43, W * 0.13, H * 0.19, 0, 0, 7); x.fill();
           x.fillStyle = '#e8b890'; x.beginPath(); x.arc(W * 0.52, H * 0.17, W * 0.08, 0, 7); x.fill();
           x.fillStyle = '#3060c0'; x.fillRect(W * 0.55, H * 0.42, W * 0.12, W * 0.05); x.fillStyle = '#e8b890'; x.beginPath(); x.arc(W * 0.68, H * 0.45, W * 0.03, 0, 7); x.fill();
@@ -236,6 +244,15 @@ if (pw) {
     const rel = (r.hand[0] - r.x0) / (r.x1 - r.x0);
     ok(rel > 0.55 && rel < 1.05, `手は体の横幅の ${(rel * 100).toFixed(0)}% の所（体 ${r.x0.toFixed(2)}〜${r.x1.toFixed(2)}・手 ${r.hand[0]}）`);
     near(r.ay, r.y1, 0.02, '足元');
+  });
+  await t('緑の背景の主人公: 足の間の緑（囲まれた背景）も抜ける', async () => {
+    await ev(() => window.__qaPut('hero.ranger.body', { name: 'hero.ranger.body.png', w: 1024, h: 1536, bg: '#00ff00', shape: 'hero', feetBar: true }));
+    const r = await ev(() => {
+      const s = window.__assets.sprite('hero.ranger.body'); const c = s.img.getContext('2d'); const d = c.getImageData(0, 0, s.img.width, s.img.height).data;
+      let green = 0; for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 128 && d[i + 1] > 180 && d[i] < 90 && d[i + 2] < 90) green++;
+      return { green };
+    });
+    eq(r.green, 0, '残った緑の画素');
   });
   await t('地面の帯: 上の緑（空）を抜いて切り、歩く面が帯の上の端に来る', async () => {
     await ev(() => window.__qaPut('bg.act1.ground', { name: 'bg.act1.ground.png', w: 1536, h: 512, bg: '#00ff00', shape: 'ground' }));

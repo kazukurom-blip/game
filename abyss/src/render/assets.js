@@ -831,18 +831,24 @@ export function autoProc(spec = {}, transparent = false, bgInfo = null) {
   const isFx = spec.cat === 'fx' && (spec.blend || 'lighter') === 'lighter';
   if (isFx) return { bg: 'none', trim: false, crush: true };
   if (kind === 'icon.skill' || kind === 'icon.support' || kind === 'hero.portrait' || kind === 'ui.title' || (kind === 'bg' && spec.params?.layer === 'far')) return { bg: 'none', trim: false };
+  // 背景が緑・マゼンタの単色（AI に頼んだ抜くための色）なら、腕と体・足の間などの囲まれた所も抜く（白・黒の背景は白い目や服が消えるので抜かない）
+  const chroma = isChroma(bgInfo?.color);
+  const holes = chroma ? { holes: true } : {};
   // 重ね着の部品は体の画像と同じ位置に重ねるので、外側を切らない
-  if (kind === 'gear.part') return { bg: transparent ? 'none' : 'auto', tol: 48, trim: false, feather: 2 };
+  if (kind === 'gear.part') return { bg: transparent ? 'none' : 'auto', tol: 48, trim: false, feather: 2, ...holes };
   if (kind === 'bg') {
     // 中景・地面: 空が緑やマゼンタの単色なら抜く
-    const c = bgInfo?.color;
-    const chroma = c && ((c[1] > 180 && c[0] < 120 && c[2] < 120) || (c[0] > 180 && c[2] > 180 && c[1] < 100));
     // 地面: 帯の上の端が歩く面。上の透明な所（抜いた空）を残すと、キャラが宙に浮いて見えるので切る（横幅はそのまま）
     const trim = spec.params?.layer === 'ground' ? 'top' : false;
-    return transparent || !chroma ? { bg: 'none', trim } : { bg: 'auto', tol: 60, trim, feather: 2 };
+    return transparent || !chroma ? { bg: 'none', trim } : { bg: 'auto', tol: 60, trim, feather: 2, ...holes };
   }
   if (transparent) return { bg: 'none', trim: true };
-  return { bg: 'auto', tol: 48, trim: true, feather: 2, contiguous: true };
+  return { bg: 'auto', tol: 48, trim: true, feather: 2, contiguous: true, ...holes };
+}
+
+/** 抜くための単色（緑 #00FF00・マゼンタ #FF00FF に近い色）か */
+export function isChroma(c) {
+  return !!c && ((c[1] > 180 && c[0] < 120 && c[2] < 120) || (c[0] > 180 && c[2] > 180 && c[1] < 100));
 }
 
 /** ゲームで使う大きさ（縮めるだけ。広げない）。1 コマの { w?, h? } */
