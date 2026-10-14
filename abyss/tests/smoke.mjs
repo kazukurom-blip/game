@@ -118,6 +118,97 @@ const main = async () => {
     check('スマホで横にはみ出さない', !overflow);
     await m.close();
   }
+  // ==================== audio（サウンド担当）: 音の確かめ ====================
+  if (want('audio')) {
+    const wav = (sec = 0.25, f = 660) => {
+      const sr = 22050; const n = Math.floor(sr * sec); const b = Buffer.alloc(44 + n * 2);
+      b.write('RIFF', 0); b.writeUInt32LE(36 + n * 2, 4); b.write('WAVE', 8); b.write('fmt ', 12); b.writeUInt32LE(16, 16); b.writeUInt16LE(1, 20); b.writeUInt16LE(1, 22);
+      b.writeUInt32LE(sr, 24); b.writeUInt32LE(sr * 2, 28); b.writeUInt16LE(2, 32); b.writeUInt16LE(16, 34); b.write('data', 36); b.writeUInt32LE(n * 2, 40);
+      for (let i = 0; i < n; i++) b.writeInt16LE(Math.round(Math.sin((2 * Math.PI * f * i) / sr) * 12000 * Math.min(1, (n - i) / 400)), 44 + i * 2);
+      return b;
+    };
+    // 1) クリックする前は AudioContext を作らない → クリックで作られる
+    const ap = await ctx.newPage();
+    ap.on('pageerror', (e) => errors.push(`audio pageerror: ${e.message}`));
+    ap.on('console', (m) => { if (m.type() === 'error') errors.push(`audio console: ${m.text()}`); });
+    // custom.json の "audio" に書いた音（フォルダの差し替え）も読めるか: 偽の custom.json を返す
+    await ap.route('**/assets/custom/custom.json', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ audio: { 'sfx.gold': 'audio/test_gold.wav' } }) }));
+    await ap.route('**/assets/custom/audio/test_gold.wav', (r) => r.fulfill({ contentType: 'audio/wav', body: wav(0.2, 1320) }));
+    await ap.goto(`http://127.0.0.1:${PORT}/index.html`);
+    await ap.waitForSelector('#title');
+    const before = await ap.evaluate(() => window.__audio?.debug());
+    check('音: クリックする前は AudioContext を作らない', before && before.ctx === 'none', JSON.stringify(before)?.slice(0, 80));
+    await ap.mouse.click(5, 5);
+    await ap.waitForTimeout(1500);
+    const after = await ap.evaluate(() => window.__audio.debug());
+    check('音: クリックで AudioContext が動き出す', after.ctx === 'running' && after.voices === 24, `${after.ctx} voices=${after.voices}`);
+    check('音: タイトルの曲が流れる', after.music === 'title', after.music);
+    check('音: 効果音を裏（Worker）で作っている', after.rendered > 20, `worker=${after.worker} rendered=${after.rendered}`);
+    check('音: custom.json の "audio" の差し替えを読む', after.custom.includes('sfx.gold'), after.custom.join(','));
+    await ap.close();
+    // 2) 遊んでいる画面で: 戦闘の音・章の曲・ボスの曲
+    await page.mouse.click(300, 300);
+    await page.evaluate(() => { const g = window.__game; g.newGame('warrior', 'おと'); });
+    await page.waitForTimeout(4000);
+    let d = await page.evaluate(() => window.__audio.debug());
+    check('音: 戦闘の効果音が鳴っている', d.stats.played > 5 && (d.stats.byCat.combat || 0) > 0, JSON.stringify(d.stats.byCat));
+    check('音: 第一章の曲が流れる', d.music === 'act1', d.music);
+    check('音: BGM の音符を予約している', d.music_stats.notes > 5, `notes=${d.music_stats.notes}`);
+    await page.evaluate(() => { const g = window.__game; const w = g.state.world; w.maxStage[w.zone] = 10; w.stage = 10; g.sys.world.startStage(); });
+    await page.waitForTimeout(2500);
+    d = await page.evaluate(() => window.__audio.debug());
+    check('音: ボスの面でボスの曲に変わる', /^boss/.test(d.music), d.music);
+    await page.evaluate(() => { window.__audio.setMusic('act3'); });
+    await page.waitForTimeout(1500);
+    d = await page.evaluate(() => window.__audio.debug());
+    check('音: 曲を選んで試聴できる（凍てつく峰）', d.music === 'act3', d.music);
+    await page.evaluate(() => { window.__audio.setMusic('auto'); const g = window.__game; g.state.world.stage = 1; g.sys.world.startStage(); });
+    // 3) 設定の「音」
+    await page.click('.navbtn[data-id="settings"]');
+    await page.waitForSelector('.snd');
+    const ranges = await page.$$eval('.snd input.snd-range', (els) => els.length);
+    check('音: 設定に音の区切り（音量 3 本）がある', ranges === 3, `ranges=${ranges}`);
+    await page.evaluate(() => { const r = document.querySelectorAll('.snd input.snd-range')[2]; r.value = '10'; r.dispatchEvent(new Event('input', { bubbles: true })); });
+    const bgm = await page.evaluate(() => ({ s: window.__game.state.settings.bgm, g: window.__audio.engine.musicBus.gain.value }));
+    check('音: BGM の音量を変えられる', Math.abs(bgm.s - 0.1) < 1e-6, JSON.stringify(bgm));
+    await page.evaluate(() => { const r = document.querySelectorAll('.snd input.snd-range')[2]; r.value = '35'; r.dispatchEvent(new Event('input', { bubbles: true })); });
+    await page.click('.snd label.chk:has-text("すべての音を消す") input');
+    await page.waitForTimeout(150);
+    const muted = await page.evaluate(() => ({ m: window.__game.state.settings.audio.mute, g: window.__audio.engine.master.gain.value }));
+    check('音: 消音できる', muted.m === true, JSON.stringify(muted));
+    await page.click('.snd label.chk:has-text("すべての音を消す") input');
+    await page.screenshot({ path: path.join(SHOTS, 'audio_settings.png') });
+    // 4) 音の差し替え（ボタンからファイルを入れる → 保存される → 戻す）
+    await page.click('details.snd-custom > summary');
+    await page.click('details.snd-custom .tab:has-text("画面の操作")');
+    const row = page.locator('.snd-slot', { hasText: 'sfx.ui_click' });
+    await row.locator('input[type=file]').setInputFiles({ name: 'sfx.ui_click.wav', mimeType: 'audio/wav', buffer: wav(0.15, 880) });
+    await page.waitForFunction(() => window.__audio.engine.custom.has('sfx.ui_click'), null, { timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(300);
+    const has = await page.evaluate(() => window.__audio.engine.custom.has('sfx.ui_click'));
+    check('音: 差し替えの音を入れられる', has);
+    await page.screenshot({ path: path.join(SHOTS, 'audio_custom.png') });
+    const saved = await page.evaluate(async () => { const { idb } = await import('/src/engine/storage.js'); const r = await idb.get('kv', 'audio:sfx.ui_click'); return !!(r && r.bytes && r.bytes.byteLength > 100); });
+    check('音: 差し替えはブラウザに保存される（IndexedDB）', saved);
+    await page.locator('.snd-slot', { hasText: 'sfx.ui_click' }).locator('button:has-text("戻す")').click();
+    await page.waitForTimeout(300);
+    const gone = await page.evaluate(() => !window.__audio.engine.custom.has('sfx.ui_click'));
+    check('音: 差し替えを元に戻せる', gone);
+    // 5) 別のタブを見ている間は止める
+    await page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => true }); document.dispatchEvent(new Event('visibilitychange')); });
+    await page.waitForTimeout(300);
+    const hid = await page.evaluate(() => window.__audio.engine.ctx.state);
+    await page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => false }); document.dispatchEvent(new Event('visibilitychange')); });
+    await page.waitForTimeout(300);
+    const back = await page.evaluate(() => window.__audio.engine.ctx.state);
+    check('音: タブを離れると止まり、戻ると鳴る', hid === 'suspended' && back === 'running', `${hid} → ${back}`);
+    // 6) すべての効果音を一度ずつ鳴らしてもエラーが出ない
+    const n = await page.evaluate(async () => { const a = window.__audio; let k = 0; for (const s of a.custom ? Object.keys((await import('/src/audio/sfx.js')).SFX) : []) { a.preview(`sfx.${s}`); k++; await new Promise((r) => setTimeout(r, 15)); } return k; });
+    await page.waitForTimeout(800);
+    const fin = await page.evaluate(() => window.__audio.debug());
+    check('音: すべての効果音が鳴らせる', n >= 40 && fin.stats.sources > n * 0.8, `n=${n} sources=${fin.stats.sources}`);
+  }
+  // ==================== /audio ====================
   check('エラーが 0 件', errors.length === 0, errors.slice(0, 5).join(' | '));
   await browser.close();
   srv.close();
