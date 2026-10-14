@@ -13,7 +13,7 @@
 
 import { TREE_NODE, TREE_NODES, TREE_START, treeRespecCost, treeBonusPoints, PARAGON_LINE, PARAGON_AUTO_WEIGHT, KEYSTONE } from '../../data/tree.js';
 import { CLASS } from '../../data/classes.js';
-import { P, BAL } from '../../data/balance.js';
+import { PG, BAL } from '../../data/balance.js';
 import { registry } from '../registry.js';
 import { computeHero, effectiveLife, heroPower } from '../character.js';
 import { estimateBuildDps } from '../skills.js';
@@ -159,7 +159,7 @@ export class TreeSystem {
     return this.t.alloc.filter((x) => !keep.has(x));
   }
 
-  deallocCost(n) { return treeRespecCost(this.hero.level, n, P); }
+  deallocCost(n) { return treeRespecCost(this.hero.level, n, PG); }
 
   deallocate(id) {
     const rm = this.removalSet(id);

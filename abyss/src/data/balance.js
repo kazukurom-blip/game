@@ -4,10 +4,17 @@
 // P(L) … 「強さの曲線」。装備の数値（武器ダメージ・アーマー・ライフなど scale:true の能力）と
 //         敵のライフ・攻撃力が同じ曲線で伸びるので、同じレベルの装備なら手応えが一定になる。
 
-export const P = (L) => {
+// NUM … 数字の大きさ。Lv1 の P が 10 になるように全体を 10 倍にしている（序盤から 2〜3 桁の整数が出るように）。
+//        装備の数値・敵のライフと攻撃・主人公のライフ・ゴールドがすべて同じ倍率なので、手応えは変わらない。
+// curve(L) … 伸び方だけ（Lv1 で 1）。個数（素材の数など）を決めるときは P ではなくこちらを使う。
+// PG(L)    … ゴールドの曲線（稼ぎと費用の両方に使う）。NUM × curve^0.85
+export const NUM = 10;
+export const curve = (L) => {
   L = Math.max(1, L);
   return 1.075 ** (L - 1) * (1 + 0.04 * (L - 1));
 };
+export const P = (L) => NUM * curve(L);
+export const PG = (L) => NUM * curve(L) ** 0.85;
 
 export const BAL = {
   // ---- 戦闘の基本
@@ -50,7 +57,7 @@ export const BAL = {
   monsterLife: (L) => 12 * P(L),
   monsterDmg: (L) => 2.5 * P(L),
   monsterXp: (L) => 5 * (1 + 0.15 * (L - 1)) * 1.02 ** (L - 1),
-  monsterGold: (L) => 1.5 * P(L) ** 0.85,
+  monsterGold: (L) => 1.5 * PG(L),
   // 敵の強さの上乗せ（ワールド担当）。物語の進み具合（DESIGN §3）に合わせる係数。主人公はレベル・スキル・パッシブで
   // 曲線 P(L) より速く強くなるので、その分を敵のライフ・攻撃に足す。Lv 100 で頭打ち（苦行・裂け目はそれぞれの倍率で伸びる）。
   // 倍率 = (1 + a × x) × b^min(x, knee) × (1 + c × (x - knee)₊)、x = L - 1。knee から先はゆるやかに（後半は主人公の伸びが仕組みで決まるため）。
@@ -111,7 +118,7 @@ export const BAL = {
   mfEffective: (mf) => (mf <= 0 ? mf : mf * 100 / (mf + 100) * 2), // 逓減（MF 100 → 実効 100、300 → 150）
 
   // ---- 経済
-  sellValue: (ilvl, rarityIdx) => Math.round(2 * P(ilvl) ** 0.85 * (1 + rarityIdx * 1.5)),
+  sellValue: (ilvl, rarityIdx) => Math.round(2 * PG(ilvl) * (1 + rarityIdx * 1.5)),
 
   // ---- 放置
   OFFLINE_CAP_HOURS: 8,

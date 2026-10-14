@@ -4,7 +4,7 @@
 // state: meta.codex = { powers: { id: r }, equipped: [攻め, 守り, 補助] }
 
 import { registry } from '../registry.js';
-import { P } from '../../data/balance.js';
+import { PG } from '../../data/balance.js';
 import { SLOTS } from '../../data/items.js';
 import { weaponStats } from '../items.js';
 import { ensureSkillPowers } from '../content/items/powers.js';
@@ -73,7 +73,7 @@ export class CodexSystem {
     if (f.where === 'equip') return { ok: false, msg: '装備中の物は抽出できない（外してから）' };
     if (item.locked) return { ok: false, msg: '鍵つき（鍵を外してから）' };
     const prev = this.cx.powers[def.id];
-    const cost = { gold: Math.round(50 * P(item.ilvl || 1) ** 0.85), echo: 3 };
+    const cost = { gold: Math.round(50 * PG(item.ilvl || 1)), echo: 3 };
     const miss = [];
     if (this.game.state.meta.gold < cost.gold) miss.push('ゴールド');
     if ((this.game.state.inv.mats.echo || 0) < cost.echo) miss.push('伝説の残響');

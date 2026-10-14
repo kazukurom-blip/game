@@ -15,7 +15,7 @@ export const CLASSES = [
     weapons: ['sword', 'axe', 'mace', 'greatsword'],
     offhands: ['shield'],
     armorPref: ['plate', 'mail'],
-    baseMods: [{ s: 'inc_life', v: 20 }, { s: 'armor', v: 4 }, { s: 'block', v: 0 }],
+    baseMods: [{ s: 'inc_life', v: 20 }, { s: 'armor', v: 40 }, { s: 'block', v: 0 }],
     trait: {
       id: 'fury', name: '闘志',
       desc: '怒り 1 につき与えるダメージ +0.3%（最大 +30%）。怒りが 50 以上のあいだ、受けるダメージ -10%。',

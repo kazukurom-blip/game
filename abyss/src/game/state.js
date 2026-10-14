@@ -6,7 +6,11 @@
 //   settings … 設定（UI 担当）
 // 新しい項目を足すときは defaults を増やすだけで、古いセーブは migrate() で自動的に埋まる。
 
-export const SAVE_VERSION = 1;
+import { statDef } from '../data/stats.js';
+import { NUM } from '../data/balance.js';
+
+// 版 2: 数字の大きさを 10 倍にした（balance.js の NUM）。古い装備の「大きくなる値」とゴールドを直す。
+export const SAVE_VERSION = 2;
 
 export function newState(cls = 'warrior', name = '名もなき者') {
   const now = Date.now();
@@ -107,11 +111,34 @@ export function fillDefaults(target, defaults) {
 }
 
 export function migrate(state) {
+  const v0 = Number(state?.version) || 1;
   const d = newState(state?.hero?.cls || 'warrior', state?.hero?.name);
   fillDefaults(state, d);
   // 版ごとの変換はここに足す
-  // if (state.version < 2) { ...; }
+  if (v0 < 2) rescaleNumbers(state, NUM);
   state.version = SAVE_VERSION;
+  return state;
+}
+
+/** 版 1 → 2: 装備に保存された scale の能力（武器ダメージの追加・ライフ・アーマーなど）とゴールドを k 倍にする */
+export function rescaleNumbers(state, k) {
+  if (!(k > 0) || k === 1) return state;
+  const line = (a) => { if (a && typeof a.v === 'number' && statDef(a.s)?.scale) a.v = Math.round(a.v * k * 10) / 10; };
+  const item = (it) => {
+    if (!it || typeof it !== 'object') return;
+    (it.affixes || []).forEach(line);
+    (it.fixed || []).forEach(line);
+    (it.rrPending?.opts || []).forEach(line);
+    if (it.cimp) line(it.cimp);
+  };
+  const inv = state.inv || {};
+  (inv.bag || []).forEach(item);
+  for (const tab of inv.stash || []) (Array.isArray(tab) ? tab : []).forEach(item);
+  Object.values(state.hero?.equip || {}).forEach(item);
+  const m = state.meta || {};
+  if (typeof m.gold === 'number') m.gold *= k;
+  if (m.stats && typeof m.stats.goldEarned === 'number') m.stats.goldEarned *= k;
+  if (m.stats && typeof m.stats.highestHit === 'number') m.stats.highestHit *= k;
   return state;
 }
 
