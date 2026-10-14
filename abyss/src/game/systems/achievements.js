@@ -16,6 +16,9 @@ import { SLOTS } from '../../data/items.js';
 
 const WINDOW = 60; // スキル別ダメージを覚えておく秒数
 
+/** 数えるのが重い物（10 秒に 1 回だけ見る） */
+const SLOW_METRICS = new Set(['species', 'bestiaryTier4', 'treasures', 'altarLv', 'codex', 'runewords', 'gemTier', 'petLevel', 'pets', 'panels', 'zones', 'skillMax', 'maxEnh', 'act']);
+
 /** 数える物ごとのまとまり（段の低い順） */
 const GROUPS = (() => {
   const m = new Map();
@@ -24,14 +27,14 @@ const GROUPS = (() => {
     if (!m.has(key)) m.set(key, { key, defs: [] });
     m.get(key).defs.push(d);
   }
-  for (const g of m.values()) { g.defs.sort((a, b) => a.n - b.n); g.arg = g.defs[0].arg; g.metricName = g.defs[0].metric.split(':')[0]; }
+  for (const g of m.values()) { g.defs.sort((a, b) => a.n - b.n); g.arg = g.defs[0].arg; g.metricName = g.defs[0].metric.split(':')[0]; g.slow = SLOW_METRICS.has(g.metricName); }
   return [...m.values()];
 })();
 
 export function blankRecord() {
   return {
     goblins: 0, ancient: 0, primal: 0, crafted: 0, maxEnh: 0, runewords: 0, lgemUp: 0, gemTierMax: 0,
-    hatched: 0, bountiesDone: 0, logins: 0, stages: 0, actKills: {}, skillDmg: {}, panels: {},
+    hatched: 0, bountiesDone: 0, enhanced: 0, logins: 0, stages: 0, actKills: {}, skillDmg: {}, panels: {},
     nightOwl: 0, speed4: 0, mythicSalvaged: 0, bagFull: 0, oneShotBoss: 0, longOffline: 0, fastRebirth: 0, legendPet: 0, lowLifeBoss: 0, nakedBoss: 0,
     bestOffline: 0, chests: 0,
   };
@@ -166,6 +169,7 @@ export class AchievementSystem {
     const r = this.rec;
     if (!r) return;
     r.crafted++;
+    if (/enh|強化/i.test(String(e?.kind || e?.op || e?.type || e?.action || ''))) r.enhanced = (r.enhanced || 0) + 1;
     const it = e?.item;
     if (it?.enh > r.maxEnh) r.maxEnh = it.enh;
   }
@@ -212,26 +216,26 @@ export class AchievementSystem {
   }
 
   tick(dt) {
+    // 毎ティックは足すだけ。まとめた仕事は 1 秒に 1 回（軽くするため）
+    this.curT += dt;
+    if (this.curT < 1) return;
     if (!this.game.state) return;
     // スキル別ダメージ（1 秒ごとにまとめる）
-    this.curT += dt;
-    if (this.curT >= 1) {
-      const done = this.game.combat.stats.dmgDone;
-      let total = done - this.lastDone;
-      if (total < 0) total = this.curTracked;
-      this.lastDone = done;
-      const by = this.cur;
-      const other = total - this.curTracked;
-      if (other > total * 0.001 && other > 0) by.dot = (by.dot || 0) + other;
-      this.win.push({ t: this.curT, by, total: Math.max(total, this.curTracked) });
-      if (this.win.length > WINDOW) this.win.shift();
-      const life = this.rec?.skillDmg;
-      if (life) for (const k in by) life[k] = (life[k] || 0) + by[k];
-      this.cur = {}; this.curTracked = 0; this.curT = 0;
-    }
-    this.t += dt;
-    if (this.t >= 2.5) { this.t = 0; this.check(); }
-    this.tMin += dt;
+    const done = this.game.combat.stats.dmgDone;
+    let total = done - this.lastDone;
+    if (total < 0) total = this.curTracked;
+    this.lastDone = done;
+    const by = this.cur;
+    const other = total - this.curTracked;
+    if (other > total * 0.001 && other > 0) by.dot = (by.dot || 0) + other;
+    this.win.push({ t: this.curT, by, total: Math.max(total, this.curTracked) });
+    if (this.win.length > WINDOW) this.win.shift();
+    const life = this.rec?.skillDmg;
+    if (life) for (const k in by) life[k] = (life[k] || 0) + by[k];
+    this.cur = {}; this.curTracked = 0;
+    this.t += this.curT; this.tMin += this.curT;
+    this.curT = 0;
+    if (this.t >= 2.5) { this.t = 0; this.nCheck = (this.nCheck || 0) + 1; this.check({ slow: this.nCheck % 4 === 0 }); }
     if (this.tMin >= 30) {
       this.tMin = 0;
       const hr = new Date().getHours();
@@ -247,12 +251,13 @@ export class AchievementSystem {
   }
 
   /** 達成を確かめる。数える物ごとにまとめ、まだの一番下の段だけ比べる（軽くするため） */
-  check({ silent = false } = {}) {
+  check({ silent = false, slow = true } = {}) {
     const st = this.game.state;
     if (!st) return [];
     const got = st.meta.achievements;
     const fresh = [];
     for (const grp of GROUPS) {
+      if (grp.slow && !slow) continue;
       let i = this.ptr[grp.key] || 0;
       while (i < grp.defs.length && got[grp.defs[i].id]) i++;
       this.ptr[grp.key] = i;

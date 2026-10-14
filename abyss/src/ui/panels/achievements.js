@@ -47,7 +47,7 @@ export const achievementsPanel = {
       const pr = sys.progress(d);
       const col = MEDAL[Math.min(MEDAL.length - 1, (d.tier || 1) - 1)];
       list.append(h(`div.ac-row${done ? '.done' : ''}${unseen.has(d.id) ? '.new' : ''}`, [
-        h(`div.mt-medal${done ? '' : '.off'}`, { style: { '--mc': d.secret ? '#c77dff' : col } }, hidden ? '？' : String(d.tier || 1)),
+        h(`div.mt-medal${done ? '' : '.off'}`, { style: `--mc:${d.secret ? '#c77dff' : col}` }, hidden ? '？' : String(d.tier || 1)),
         h('div.ac-main', [
           h('div.ac-name', [hidden ? '？？？' : d.name, d.title && TITLE[d.title] ? h('span.ac-title', `称号「${TITLE[d.title].name}」`) : null]),
           h('div.ac-desc', hidden ? '秘密の実績。条件は達成するまで分かりません。' : d.desc),

@@ -27,7 +27,8 @@ export const prestigePanel = {
   badge: (g) => {
     const p = g.sys.prestige;
     if (!p?.isUnlocked()) return 0;
-    return (p.canRebirth().ok && g.state.meta.rebirths === 0 ? 1 : 0) + Math.min(9, p.affordableCount());
+    const m = g.state.meta;
+    return (p.canRebirth().ok && m.rebirths === 0 ? 1 : 0) + (m.souls > (m.prestige.seenSouls || 0) ? Math.min(9, p.affordableCount()) : 0);
   },
   render(ui, el) {
     const g = ui.game;
@@ -133,7 +134,7 @@ function upgradeCard(ui, u, opts) {
       btns.push(button('最大', () => { opts.buy(u.id, Infinity); ui.renderPanel(); }, { kind: 'small', disabled: !can }));
     }
   }
-  return h(`div.pr-upg${max ? '.max' : ''}${can ? '.can' : ''}${req ? '.req' : ''}`, { style: { '--cc': cat?.color || '#d9b45a' } }, [
+  return h(`div.pr-upg${max ? '.max' : ''}${can ? '.can' : ''}${req ? '.req' : ''}`, { style: `--cc:${cat?.color || '#d9b45a'}` }, [
     h('div.nm', [h('span', u.name), h('span.lv', max ? `Lv ${lvl}（最大）` : `Lv ${lvl}${u.max ? ` / ${u.max}` : ''}`)]),
     h('div.ds', lvl > 0 ? upgradeDesc(u, lvl) : (u.unlock ? u.desc : `いま: なし`)),
     !max && !u.unlock ? h('div.nx', `次: ${upgradeDesc(u, lvl + 1)}`) : null,
@@ -146,6 +147,7 @@ function upgradeCard(ui, u, opts) {
 
 function renderAltar(ui, el) {
   const g = ui.game; const ps = g.sys.prestige;
+  g.state.meta.prestige.seenSouls = g.state.meta.souls;
   if (!ps.isUnlocked() && !g.state.meta.souls) el.append(h('div.hint', '転生すると魂が手に入り、ここで強化を買えます。いまは中身だけ見られます。'));
   el.append(h('div.tabs.small', ALTAR_CATS.map((c) => h(`button.tab${altarCat === c.id ? '.on' : ''}`, { style: { color: c.color }, onclick: () => { altarCat = c.id; ui.renderPanel(); } }, `${c.name}（${ALTAR.filter((u) => u.cat === c.id).length}）`))));
   const grid = h('div.pr-upgs');

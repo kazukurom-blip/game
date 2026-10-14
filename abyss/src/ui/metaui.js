@@ -120,5 +120,8 @@ injectCss('meta-ui', `
 .mt-medal { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 900; color: #1a1208; flex: none;
   background: radial-gradient(circle at 35% 30%, #fff8, transparent 45%), var(--mc, #6a5a4a); box-shadow: inset 0 -2px 0 #0005, 0 0 0 1px #0008; }
 .mt-medal.off { filter: grayscale(1) brightness(.45); }
-@media (max-width: 900px) { .mt-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.mt-cards.w { grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); }
+/* スマホ: 窓のタブ（横に長い）に引っぱられて右の窓が画面より広がるのを防ぐ（全体の並びの直し。style.css に移してよい） */
+@media (max-width: 900px) { #main > * { min-width: 0; } }
+@media (max-width: 900px) { .mt-cards, .mt-cards.w { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 `);

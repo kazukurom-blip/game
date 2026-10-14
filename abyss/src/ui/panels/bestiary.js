@@ -48,8 +48,8 @@ function renderMonsters(ui, el) {
   const next = SPECIES_MILESTONES[ms.speciesStep];
   el.append(h('div.mt-cards', [
     card('見つけた魔物', `${sys.speciesCount()} / ${ents.length}`, `${Math.round(ms.species * 100)}%`),
-    card('段の合計', String(ents.reduce((s, e) => s + e.tier, 0)), `天敵（1万体）${sys.tierCount(4)} 種`),
-    card('見つけた割合の効果', SPECIES_MILESTONES[ms.speciesStep - 1] ? `+${SPECIES_MILESTONES[ms.speciesStep - 1].mods[0].v}%` : 'なし', 'ダメージ・最大ライフ'),
+    card('段の合計', String(ents.reduce((s, e) => s + e.tier, 0)), `天敵 ${sys.tierCount(4)} 種`),
+    card('割合の効果', SPECIES_MILESTONES[ms.speciesStep - 1] ? `+${SPECIES_MILESTONES[ms.speciesStep - 1].mods[0].v}%` : 'なし', 'ダメージ・最大ライフ'),
   ]));
   if (next) el.append(h('div.bs-next', [bar((ms.species / next.pct) * 100, `${Math.round(ms.species * 100)}% / ${Math.round(next.pct * 100)}%`, 'good'), h('span.small', `${Math.round(next.pct * 100)}% で ${next.mods.map((m) => describeMod(m)).join('・')}`)]));
   const fams = Object.keys(FAMILIES).filter((f) => ents.some((e) => e.def.family === f));
@@ -100,7 +100,7 @@ function itemIconId(u) {
 
 function treasureCell(ui, u, kind, known) {
   const r = RARITY[kind === 'sets' ? 'set' : kind === 'mythics' ? 'mythic' : 'unique'];
-  const cell = h(`div.bs-tr${known ? '' : '.unknown'}`, { style: { '--rc': r.color } }, [spriteImg(assets, itemIconId(u), 42), h('div.bs-trn', known ? u.name : '？？？')]);
+  const cell = h(`div.bs-tr${known ? '' : '.unknown'}`, { style: `--rc:${r.color}` }, [spriteImg(assets, itemIconId(u), 42), h('div.bs-trn', known ? u.name : '？？？')]);
   attachTip(cell, () => h('div.tipbox', known ? [
     h('b', { style: { color: r.color } }, u.name),
     h('div.dim', `${r.name}　${SLOT_NAMES[u.slot] || KIND_NAMES[u.base] || ''}${u.setName ? `　セット「${u.setName}」` : ''}`),
@@ -124,7 +124,7 @@ function renderTreasure(ui, el) {
     card('伝説の力', `${tc.powers} / ${tc.powersTotal}`, `1 つごとに ${describeMod(TREASURE_EACH.powers)}`),
   ]));
   if (total) {
-    el.append(bar(next ? (ms.treasure / next.pct) * 100 : 100, next ? `次の節目 ${Math.round(next.pct * 100)}%: ${next.mods.map((m) => describeMod(m)).join('・')}` : 'すべての節目を達成', 'gold'));
+    el.append(h('div.bs-next', [bar(next ? (ms.treasure / next.pct) * 100 : 100, next ? `${Math.round(ms.treasure * 100)}% / ${Math.round(next.pct * 100)}%` : 'すべての節目を達成', 'gold'), next ? h('span.small', `${Math.round(next.pct * 100)}% で ${next.mods.map((m) => describeMod(m)).join('・')}`) : null]));
   }
   const sec = (title, list, kind) => {
     el.append(h('h3.sec-title', [title, h('span.sec-right', `${list.filter((u) => c[kind][u.id]).length} / ${list.length}`)]));
@@ -256,6 +256,6 @@ table.bs-odds th:first-child, table.bs-odds td:first-child { text-align: left; }
 table.bs-odds td { padding: 3px 5px; text-align: right; border-bottom: 1px solid #221d28; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .bs-luck { display: grid; grid-template-columns: 110px 1fr; gap: 8px; align-items: center; font-size: 12px; margin: 3px 0; }
 .bs-zone { display: flex; flex-wrap: wrap; gap: 4px; }
-.bs-next { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; margin-bottom: 4px; }
+.bs-next { display: flex; flex-wrap: wrap; gap: 3px 8px; align-items: center; margin-bottom: 6px; } .bs-next .mt-bar { flex: 1 1 140px; }
 .bs-next .small { color: var(--good); }
 `;

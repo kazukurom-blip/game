@@ -22,9 +22,9 @@ export const petsPanel = {
     const g = ui.game; const sys = g.sys.pets; const ps = g.state.meta.pets;
     const owned = sys.ownedList().length;
     el.append(h('div.mt-cards', [
-      card('持っているペット', `${owned} / ${PETS.length}`),
+      card('ペット', `${owned} / ${PETS.length}`, '持っている種類'),
       card('卵', `${sys.eggCount()} 個`, `孵卵器 ${ps.incubator.length} / ${PET_BAL.INCUBATORS}`),
-      card('卵の天井', `${ps.pity} / ${PET_BAL.PITY}`, 'エリート・ボスの撃破'),
+      card('卵の天井', `${ps.pity} / ${PET_BAL.PITY}`, 'エリート・ボス'),
     ]));
     el.append(tabs([['active', '連れている'], ['list', `一覧 ${owned}/${PETS.length}`], ['eggs', '卵と孵卵器', sys.hatchReady()]], view, (id) => { view = id; ui.renderPanel(); }));
     if (view === 'list') renderList(ui, el);
@@ -68,7 +68,7 @@ function renderActive(ui, el) {
     el.append(h('div.mt-box.mt-lock', [h('div', { style: { fontSize: '32px' } }, '🥚'), h('div', 'まだペットを連れていません。'), h('div.mt-note', 'エリートやボスが落とす卵を、孵卵器に入れて孵しましょう。'), button('卵と孵卵器を見る', () => { view = 'eggs'; ui.renderPanel(); }, { kind: 'primary' })]));
     return;
   }
-  el.append(h('div.mt-box.pt-hero', { style: { '--pc': def.palette.main } }, [petPortrait(def.id, 150), petInfo(ui, def, { feed: true })]));
+  el.append(h('div.mt-box.pt-hero', { style: `--pc:${def.palette.main}` }, [petPortrait(def.id, 150), petInfo(ui, def, { feed: true })]));
   // 所持効果の合計
   const acc = {};
   for (const p of sys.ownedList()) for (const m of sys.ownMods(p.id)) acc[m.s] = (acc[m.s] || 0) + m.v;
@@ -83,7 +83,7 @@ function renderList(ui, el) {
   for (const def of PETS) {
     const o = ps.owned[def.id];
     const rr = PET_RARITIES[def.rarity];
-    grid.append(h(`div.pt-card${o ? '' : '.unknown'}${ps.active === def.id ? '.on' : ''}`, { style: { '--rc': rr.color }, onclick: () => petModal(ui, def) }, [
+    grid.append(h(`div.pt-card${o ? '' : '.unknown'}${ps.active === def.id ? '.on' : ''}`, { style: `--rc:${rr.color}`, onclick: () => petModal(ui, def) }, [
       petPortrait(def.id, 70, !!o),
       h('div.pt-cn', o ? def.name : '？？？'),
       o ? h('div.pt-cl', [`Lv ${o.lvl}`, o.stars ? h('span.gold', ` ★${o.stars}`) : null]) : h('div.pt-cl.dim', rr.name),
@@ -112,13 +112,13 @@ function renderEggs(ui, el) {
   const ups = [];
   for (let i = 0; i < PET_BAL.INCUBATORS; i++) {
     const inc = ps.incubator[i];
-    if (!inc) { incs.append(h('div.pt-inc.empty', [h('div.pt-egg', { style: { '--ec': '#3a3142' } }), h('div.dim.small', '空き。下の卵を入れよう')])); continue; }
+    if (!inc) { incs.append(h('div.pt-inc.empty', [h('div.pt-egg', { style: `--ec:${'#3a3142'}` }), h('div.dim.small', '空き。下の卵を入れよう')])); continue; }
     const e = EGG[inc.kind];
     const ready = inc.prog >= inc.need;
     const b = bar((inc.prog / inc.need) * 100, ready ? '孵る！' : `あと ${fmt(inc.need - inc.prog)} 体`, ready ? 'good' : 'soul');
     ups.push(() => setBar(b, (inc.prog / inc.need) * 100, inc.prog >= inc.need ? '孵る！' : `あと ${fmt(inc.need - inc.prog)} 体`));
     incs.append(h(`div.pt-inc${ready ? '.ready' : ''}`, [
-      h('div.pt-egg', { style: { '--ec': e.color } }),
+      h('div.pt-egg', { style: `--ec:${e.color}` }),
       h('div.mt-grow', [h('b', e.name), b]),
       button(ready ? '孵す' : '待つ', () => { const r = sys.hatch(i); if (r) hatchModal(ui, r); ui.renderPanel(); }, { kind: ready ? 'primary' : 'small', disabled: !ready }),
     ]));
@@ -130,7 +130,7 @@ function renderEggs(ui, el) {
   for (const e of EGGS) {
     const n = ps.eggs[e.id] || 0;
     eggs.append(h(`div.pt-eggrow${n ? '' : '.none'}`, [
-      h('div.pt-egg', { style: { '--ec': e.color } }),
+      h('div.pt-egg', { style: `--ec:${e.color}` }),
       h('div.mt-grow', [h('b', [e.name, h('span.dim', `　×${n}`)]), h('div.small', e.desc), h('div.dim.small', `孵るまで ${fmt(e.hatchKills)} 体　${Object.entries(e.odds).filter(([, w]) => w > 0).map(([r, w]) => `${PET_RARITIES[r].name} ${w}%`).join('・')}`)]),
       button('孵卵器へ', () => { if (!sys.incubate(e.id)) ui.toast('空いた孵卵器がない', 'bad'); ui.renderPanel(); }, { kind: 'small', disabled: !n || sys.freeIncubators() <= 0 }),
     ]));
@@ -146,7 +146,7 @@ function hatchModal(ui, r) {
   const def = PET[r.id];
   const rr = PET_RARITIES[def.rarity];
   ui.modal('卵が孵った！', h('div.pt-hatch', [
-    h('div.pt-burst', { style: { '--rc': rr.color } }, petPortrait(def.id, 150)),
+    h('div.pt-burst', { style: `--rc:${rr.color}` }, petPortrait(def.id, 150)),
     h('div.pt-hn', { style: { color: rr.color } }, def.name),
     h('div', rr.name),
     r.dup ? h('div.gold', r.stars ? `重なった！ 覚醒 ★${r.stars}（効果 +${Math.round(r.stars * 20)}%）` : '重なった！ 経験値 +200') : h('div.good', '新しいペット！'),

@@ -73,7 +73,7 @@ function renderRecord(ui, el) {
 function renderSheet(ui, el) {
   const g = ui.game; const H = g.H;
   if (!H) return;
-  el.append(h('div.mt-cards', [
+  el.append(h('div.mt-cards.w', [
     card('最大ライフ', fmt(H.life)), card('アーマー', fmt(H.armor)), card('クリティカル', `${fmtPct(H.critChance * 100)} ×${H.critMult.toFixed(2)}`),
     card('攻撃速度', `${H.aps.toFixed(2)}/秒`), card('ダメージ増加', fmtPct(H.incBase)), card('最終倍率', `×${H.more.toFixed(2)}`),
     card('耐性 火/冷/雷/毒', `${Math.round(H.res.fire)}/${Math.round(H.res.cold)}/${Math.round(H.res.lightning)}/${Math.round(H.res.poison)}`), card('回避 / ブロック', `${fmtPct(H.dodge * 100)} / ${fmtPct(H.block * 100)}`),

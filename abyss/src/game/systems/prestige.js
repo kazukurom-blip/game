@@ -238,7 +238,7 @@ export class PrestigeSystem {
     return n;
   }
 
-  altarTotalLevel() { let s = 0; for (const u of ALTAR) s += this.level(u.id); return s; }
+  altarTotalLevel() { let s = 0; const up = this.game.state.meta.upgrades; for (const id in up) if (ALTAR_BY_ID[id]) s += Math.floor(up[id] || 0); return s; }
 
   // ---------------- 超越
   transcendUnlocked() { return this.meta.rebirths >= PRESTIGE.TRANSCEND_REBIRTHS || this.p.transcends > 0; }

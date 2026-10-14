@@ -20,6 +20,7 @@ export const BOUNTY_TYPES = {
   gold: { name: '稼ぎ', desc: (b) => `ゴールドを ${fmtShort(b.target)} 稼ぐ` },
   stages: { name: '進軍', desc: (b) => `ステージを ${b.target} 回クリアする` },
   craft: { name: '鍛冶', desc: (b) => `鍛冶（強化・付け替えなど）を ${b.target} 回行う` },
+  enhance: { name: '強化', desc: (b) => `装備の強化を ${b.target} 回行う（失敗も数える）` },
   rift: { name: '裂け目', desc: (b) => `深淵の裂け目を ${b.target} 回クリアする` },
 };
 
@@ -101,7 +102,7 @@ export class BountySystem {
     const s = st.meta.stats; const r = st.meta.record || {};
     return {
       kills: s.kills || 0, elites: s.elites || 0, bosses: s.bosses || 0, salvage: s.salvaged || 0, gold: s.goldEarned || 0,
-      stages: r.stages || 0, craft: Math.max(s.crafted || 0, r.crafted || 0), rift: st.world.rift?.runs || 0, actKills: r.actKills || {},
+      stages: r.stages || 0, craft: Math.max(s.crafted || 0, r.crafted || 0), enhance: r.enhanced || 0, rift: st.world.rift?.runs || 0, actKills: r.actKills || {},
     };
   }
   counterOf(type, arg, c = this.counters()) { return type === 'actKills' ? (c.actKills[arg] || 0) : (c[type] || 0); }
@@ -145,6 +146,7 @@ export class BountySystem {
       return !!sys && Object.getOwnPropertyNames(Object.getPrototypeOf(sys)).length > 2 && st.hero.level >= 8;
     }
     if (type === 'rift') return (st.world.rift?.runs || 0) > 0;
+    if (type === 'enhance') return (st.meta.record?.enhanced || 0) > 0;
     if (type === 'actKills') return true;
     return true;
   }
@@ -170,6 +172,7 @@ export class BountySystem {
       case 'gold': target = nice(p.gps * sec * 0.9); break;
       case 'stages': target = Math.max(5, Math.round(12 * scale)); break;
       case 'craft': target = Math.max(3, Math.round(5 * scale)); break;
+      case 'enhance': target = Math.max(3, Math.round(5 * scale)); break;
       case 'rift': target = Math.max(1, Math.round(1 * scale)); break;
       default: break;
     }
@@ -179,8 +182,8 @@ export class BountySystem {
 
   generate(day) {
     const rng = new RNG(hashStr(`abyss-daily:${day}`));
-    const pool = ['kills', 'actKills', 'elites', 'bosses', 'salvage', 'gold', 'stages', 'craft', 'rift'].filter((t) => this.available(t));
-    const picks = rng.weightedN(pool.map((t) => ({ t, weight: t === 'kills' || t === 'elites' ? 3 : t === 'rift' || t === 'craft' ? 1.5 : 2 })), 3, (x) => x.weight).map((x) => x.t);
+    const pool = ['kills', 'actKills', 'elites', 'bosses', 'salvage', 'gold', 'stages', 'craft', 'enhance', 'rift'].filter((t) => this.available(t));
+    const picks = rng.weightedN(pool.map((t) => ({ t, weight: t === 'kills' || t === 'elites' ? 3 : t === 'rift' || t === 'craft' || t === 'enhance' ? 1.5 : 2 })), 3, (x) => x.weight).map((x) => x.t);
     return picks.map((t, i) => this.makeBounty(t, day, rng, 1 + i * 0.25));
   }
 

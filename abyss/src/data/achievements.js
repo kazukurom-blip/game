@@ -82,7 +82,7 @@ tiered('progress', 'zones', [
 const ACT_NAMES = ['灰の村の救い手', '砂の墓所を越えて', '吹雪を抜けて', '沈んだ都の解放', '溶鉱炉を越えて', '毒霧を晴らす', '天の城を落とす', '機巧の迷宮を出る', '虚無を渡る', '深淵の王を討つ'];
 const ACT_JP = ['第一章', '第二章', '第三章', '第四章', '第五章', '第六章', '第七章', '第八章', '第九章', '第十章'];
 const ACT_TITLES = { 0: 'title_village', 4: 'title_forge', 9: 'title_abyss' };
-ACT_NAMES.forEach((name, i) => single('progress', `act_${i + 1}`, 'act', 1, name, `${ACT_JP[i]}の章のボスを倒す`, { arg: i, tier: Math.min(8, 1 + Math.floor(i / 2)), title: ACT_TITLES[i] }));
+ACT_NAMES.forEach((name, i) => single('progress', `act_${i + 1}`, 'act', 1, name, `${ACT_JP[i]}の最後のボスを倒す`, { arg: i, tier: Math.min(8, 1 + Math.floor(i / 2)), title: ACT_TITLES[i] }));
 tiered('progress', 'stages', [
   [10, '一歩ずつ'], [100, '百の戦場'], [1000, '千の戦場'], [10000, '終わらない行軍'],
 ], (n, s) => `ステージを ${s} 回クリアする`);

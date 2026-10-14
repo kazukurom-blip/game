@@ -52,7 +52,7 @@ export function showOfflineReport(ui, rep) {
     const box = h('div.ofr-rar');
     for (const r of rows) {
       const n = found[r.id];
-      box.append(S(h(`div.ofr-r${r.idx >= 4 ? '.hi' : ''}`, { style: { '--rc': r.color } }, [
+      box.append(S(h(`div.ofr-r${r.idx >= 4 ? '.hi' : ''}`, { style: `--rc:${r.color}` }, [
         h('span.ofr-rn', r.name),
         h('div.ofr-rb', h('i', { style: { width: `${Math.max(3, (Math.log10(n + 1) / Math.log10(maxN + 1)) * 100)}%` } })),
         h('b', fmt(n)),
@@ -61,7 +61,9 @@ export function showOfflineReport(ui, rep) {
     root.append(box);
   }
   // 良い品
-  const best = rep.best || (rep.kept || []).slice(0, 8);
+  // 着けられる物を先に（同じなら良いレアリティの順）
+  const best = (rep.best || (rep.kept || []).slice(0, 8)).map((it, i) => ({ it, i, bad: !!g.sys.inv.equipProblem(it, it.slot === 'ring' ? 'ring1' : it.slot) }))
+    .sort((a, b) => (a.bad - b.bad) || (a.i - b.i)).map((x) => x.it);
   if (best.length) {
     root.append(S(h('h4.ofr-h', 'いちばん良い品')));
     const list = h('div.ofr-best');
@@ -115,7 +117,7 @@ function bestRow(ui, it, rep) {
     else act.append(h('span.bad.small', prob));
   };
   fill();
-  return h(`div.ofr-b${r.idx >= 4 ? '.hi' : ''}`, { style: { '--rc': r.color } }, [itemCell(ui, it, { size: 40 }), info, act]);
+  return h(`div.ofr-b${r.idx >= 4 ? '.hi' : ''}`, { style: `--rc:${r.color}` }, [itemCell(ui, it, { size: 40 }), info, act]);
 }
 
 function dspan(label, pct) {
