@@ -99,6 +99,7 @@ export class CraftingSystem {
     if (!success) {
       item.enhPity = (item.enhPity || 0) + 1;
       this.game.events.emit('invChanged', {});
+      this.game.events.emit('enhance', { item, ok: false, success: false, pity: item.enhPity }); // 失敗の音（鍛冶の回数には数えない）
       return { ok: true, success: false, item, pity: item.enhPity, need: info.need };
     }
     item.enh = info.next;
@@ -118,7 +119,7 @@ export class CraftingSystem {
       if (cand.length) { const a = this.game.rng.pick(cand); const r = affixRoll(item, a); a.g = 1; setAffixValue(item, a, r); bonus = 'オプション 1 行が大いなる★になった'; } else bonus = 'オプションの数値 +5%';
     }
     if (item.enh === 10) bonus = 'オプションの数値 +5%';
-    return this.done(f, { success: true, enh: item.enh, bonus });
+    return this.done(f, { kind: 'enhance', success: true, great: !!bonus, enh: item.enh, bonus });
   }
 
   // ---------------- 段上げ（鍛造値）
@@ -154,7 +155,7 @@ export class CraftingSystem {
     item.fp = Math.max(0, item.fp - used);
     a.t = Math.min(info.top, a.t + (crit ? 2 : 1));
     setAffixValue(item, a, r);
-    return this.done(f, { crit, used, tier: AFFIX[a.id].tiers.length - a.t });
+    return this.done(f, { kind: 'tierUp', crit, used, tier: AFFIX[a.id].tiers.length - a.t });
   }
 
   // ---------------- 付け替え（1 行だけ）
@@ -218,7 +219,7 @@ export class CraftingSystem {
     if (!pend) return { ok: false, msg: '候補がない' };
     if (k >= 0 && k < pend.opts.length) item.affixes[pend.i] = pend.opts[k];
     delete item.rrPending;
-    return this.done(f, { chose: k });
+    return this.done(f, { kind: 'reroll', chose: k });
   }
 
   // ---------------- 混沌（すべて振り直し）
@@ -245,7 +246,7 @@ export class CraftingSystem {
     addAffixes(rng, item, n, { tierBias: rr.idx >= 3 ? 1.5 : 0.5, greaterChance: rr.idx >= 3 ? 0.06 : 0.015, ctx: this.ctx() });
     delete item.rr;
     if (lootHooks.rareName) item.name = lootHooks.rareName(rng, item);
-    return this.done(f);
+    return this.done(f, { kind: 'chaos' });
   }
 
   // ---------------- 昇格
@@ -272,7 +273,7 @@ export class CraftingSystem {
     addAffixes(rng, item, rng.int(info.add[0], info.add[1]), { tierBias: info.next === 'epic' ? 1.5 : 0.5, greaterChance: info.next === 'epic' ? 0.06 : 0.015, ctx: this.ctx() });
     if (item.fp === undefined) item.fp = rng.int(20, 50);
     if (lootHooks.rareName) item.name = lootHooks.rareName(rng, item);
-    return this.done(f, { rarity: info.next });
+    return this.done(f, { kind: 'ascend', rarity: info.next });
   }
 
   // ---------------- 祝福（数値だけ）
@@ -295,7 +296,7 @@ export class CraftingSystem {
     for (const a of item.affixes || []) setAffixValue(item, a, rng.next());
     const def = specialDef(item);
     if (def && item.fixed) for (const fx of item.fixed) { const m = def.mods?.[fx.i]; if (m) { fx.r = Math.round(rng.next() * 1000) / 1000; fx.v = fixedValue(m, fx.r, item.ilvl, !!fx.g); } }
-    return this.done(f);
+    return this.done(f, { kind: 'bless' });
   }
 
   // ---------------- 穿孔
@@ -319,7 +320,7 @@ export class CraftingSystem {
     if (err) return { ok: false, msg: err };
     item.sockets ||= [];
     item.sockets.push(null);
-    return this.done(f, { sockets: item.sockets.length });
+    return this.done(f, { kind: 'drill', sockets: item.sockets.length });
   }
 
   // ---------------- 堕落（最後の賭け）
@@ -366,6 +367,6 @@ export class CraftingSystem {
     item.corrupted = 1;
     delete item.rr;
     this.game.state.meta.crafting.corrupted++;
-    return this.done(f, { outcome, outcomeText: CORRUPT_OUTCOMES[outcome], detail });
+    return this.done(f, { kind: 'corrupt', outcome, outcomeText: CORRUPT_OUTCOMES[outcome], detail });
   }
 }

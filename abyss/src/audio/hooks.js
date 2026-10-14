@@ -59,9 +59,21 @@ export const EVENT_SFX = {
   gatekeeperSpawn: 'boss_horn', tormentUnlock: 'unlock',
   // 戦闘/スキル
   masteryUp: 'notify', mastery: 'notify', glyphDrop: 'drop_rare', supportDrop: 'drop_rare', skillUnlock: 'unlock', treeAllocate: 'socket',
+  // ---- 実際に出ている出来事の名前（統合担当が grep で合わせた。上の表は別名として残す）
+  // アイテム: crafted { kind: enhance|tierUp|reroll|chaos|ascend|bless|drill|corrupt } は craftSfx、強化の失敗は 'enhance' { ok: false }
+  lgemFound: 'drop_legendary', lgemUpgrade: (p) => (p?.to > p?.from ? 'gem_combine' : null),
+  // メタ
+  petHatched: 'pet_hatch', eggFound: 'drop_epic', eggReady: 'notify', loginClaim: 'chest', altarBuy: 'buy',
+  automationUnlocked: 'unlock', prestigeUnlocked: 'unlock', bestiaryTier: 'notify',
+  // ワールド
+  // storyClear は同じ瞬間に zoneClear（zone_clear）と tormentUnlock（unlock）が鳴るので、音は足さない
+  gateResult: (p) => (p?.ok ? 'rift_complete' : 'boss_fail'), gateFragment: 'drop_epic',
+  miniEvent: (p) => (p?.kind === 'shrine' ? 'buff' : p?.kind ? 'notify' : null),
+  // 戦闘/スキル
+  glyphFound: (p) => (p?.quiet ? null : 'drop_rare'), skillLearned: (p) => (p?.quiet ? null : 'unlock'),
 };
-const DUCK_EVENTS = { rebirth: [0.3, 2.6], prestige: [0.3, 2.6], transcend: [0.3, 2.6], riftComplete: [0.4, 1.6], riftStart: [0.4, 1.4], achievement: [0.6, 0.8], zoneClear: [0.5, 1.2] };
-const MUSIC_EVENTS = { stageStart: 1, bossSpawn: 1, zoneClear: 1, bossFail: 1, started: 1, riftStart: 1, riftComplete: 1, riftEnd: 1, riftFail: 1, gatekeeperSpawn: 1, modeChange: 1, travel: 1 };
+const DUCK_EVENTS = { rebirth: [0.3, 2.6], prestige: [0.3, 2.6], transcend: [0.3, 2.6], riftComplete: [0.4, 1.6], riftStart: [0.4, 1.4], achievement: [0.6, 0.8], zoneClear: [0.5, 1.2], gateResult: [0.4, 1.4] };
+const MUSIC_EVENTS = { stageStart: 1, bossSpawn: 1, zoneClear: 1, bossFail: 1, started: 1, riftStart: 1, riftComplete: 1, riftEnd: 1, riftFail: 1, riftGuardian: 1, gateStart: 1, gateResult: 1, gatekeeperSpawn: 1, tormentChanged: 1, modeChange: 1, travel: 1 };
 
 function enhanceSfx(p) {
   if (p?.great || p?.crit || p?.critical || p?.result === 'great') return 'enhance_great';
@@ -71,6 +83,7 @@ function enhanceSfx(p) {
 function craftSfx(p) {
   const k = p?.kind || p?.op || p?.type || '';
   if (k === 'enhance') return enhanceSfx(p);
+  if (p?.crit && p?.ok !== false) return 'enhance_great'; // 段上げの会心
   if (/reroll|chaos|bless|replace|enchant/.test(k)) return 'reroll';
   if (/corrupt/.test(k)) return 'corrupt';
   if (/socket|pierce|drill/.test(k)) return 'socket';

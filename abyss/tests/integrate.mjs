@@ -365,6 +365,61 @@ await t('戦いで使われる絵の ID はすべて枠がある（全クラス�
   ok(used.size > 150, `集めた ID ${used.size}`);
 });
 
+// ======================================================================= 9. 出来事の名前と音
+const { EVENT_SFX, makeEventHandler } = await import('../src/audio/hooks.js');
+const { SFX } = await import('../src/audio/sfx.js');
+
+/** src の中で実際に emit されている game.events の名前 */
+async function emittedEvents() {
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', 'src');
+  const out = new Set();
+  const walk = (d) => { for (const f of fs.readdirSync(d, { withFileTypes: true })) { const p = path.join(d, f.name); if (f.isDirectory()) walk(p); else if (p.endsWith('.js')) for (const m of fs.readFileSync(p, 'utf8').matchAll(/events\.emit\('([A-Za-z]+)'/g)) out.add(m[1]); } };
+  walk(root);
+  return out;
+}
+
+await t('大事な出来事は実際に出ている名前で音に結びつく（鍛冶・裂け目・ため込み屋・実績・転生・ペット・卵・刻印・熟練・門番・苦行…）', async () => {
+  const names = await emittedEvents();
+  const cases = [
+    ['crafted', { kind: 'enhance', success: true }, 'enhance_ok'], ['crafted', { kind: 'enhance', success: true, great: true }, 'enhance_great'], ['enhance', { ok: false }, 'enhance_fail'],
+    ['crafted', { kind: 'reroll' }, 'reroll'], ['crafted', { kind: 'chaos' }, 'reroll'], ['crafted', { kind: 'corrupt' }, 'corrupt'], ['crafted', { kind: 'drill' }, 'socket'], ['crafted', { kind: 'tierUp', crit: true }, 'enhance_great'], ['crafted', { kind: 'ascend' }, 'craft'],
+    ['riftStart', {}, 'rift_start'], ['riftComplete', {}, 'rift_complete'], ['riftFail', {}, 'boss_fail'], ['goblinSpawn', {}, 'goblin'], ['goblinKill', {}, 'chest'], ['goblinEscape', {}, 'boss_fail'],
+    ['achievement', { def: {} }, 'achievement'], ['titleUnlocked', {}, 'achievement'], ['rebirth', {}, 'prestige'], ['transcend', {}, 'prestige'],
+    ['petHatched', { id: 'x' }, 'pet_hatch'], ['eggFound', {}, 'drop_epic'], ['glyphFound', { glyph: {} }, 'drop_rare'], ['masteryUp', {}, 'notify'],
+    ['gateResult', { ok: true }, 'rift_complete'], ['gateResult', { ok: false }, 'boss_fail'], ['tormentUnlock', { tier: 2 }, 'unlock'],
+    ['lgemFound', {}, 'drop_legendary'], ['lgemUpgrade', { from: 3, to: 4 }, 'gem_combine'], ['runeword', {}, 'set_bonus'], ['loginClaim', {}, 'chest'], ['bountyClaim', {}, 'chest'], ['bountyDone', {}, 'notify'],
+    ['automationUnlocked', {}, 'unlock'], ['prestigeUnlocked', {}, 'unlock'], ['zoneClear', { first: true }, 'zone_clear'], ['bossFail', {}, 'boss_fail'], ['bagFull', {}, 'bag_full'],
+    ['chestOpen', {}, 'chest'], ['autoEquip', {}, 'equip'], ['offlineReport', {}, 'offline'], ['skillLearned', { id: 'x' }, 'unlock'], ['altarBuy', {}, 'buy'],
+  ];
+  for (const [name, p, want] of cases) {
+    ok(names.has(name), `「${name}」はどこからも emit されていない（名前のずれ）`);
+    const m = EVENT_SFX[name];
+    ok(m, `${name} に音が無い`);
+    const id = typeof m === 'function' ? m(p) : m;
+    eq(id, want, name);
+    ok(SFX[id], `${name} → ${id} は無い効果音`);
+  }
+  // 静かな出来事（大量に出る・ほかの音と重なる）は鳴らさない
+  for (const [name, p] of [['skillLearned', { quiet: true }], ['glyphFound', { quiet: true }], ['lgemUpgrade', { from: 3, to: 3 }], ['zoneClear', { first: false }]]) { const m = EVENT_SFX[name]; eq(typeof m === 'function' ? m(p) : m, null, name); }
+});
+
+await t('実際の鍛冶で音が鳴る（強化の成功・失敗）', async () => {
+  const g = fresh('warrior', 24, 30);
+  const played = [];
+  const A = { engine: { running: true }, play: (id) => { played.push(id); return true; }, duck() {}, music() {}, onWorldEvent() {}, uiSound() {}, sinceStart: () => 99 };
+  g.events.on('*', makeEventHandler(A));
+  const item = g.state.hero.equip.weapon;
+  g.state.meta.gold = 1e12;
+  for (const k of Object.keys(g.state.inv.mats)) g.state.inv.mats[k] = 1e6;
+  const { MATERIALS } = await import('../src/data/materials.js');
+  for (const m of MATERIALS) g.state.inv.mats[m.id] = 1e6;
+  for (let i = 0; i < 80 && !(played.includes('enhance_ok') && played.includes('enhance_fail')); i++) g.sys.crafting.enhance(item.uid);
+  ok(played.includes('enhance_ok'), `成功 ${played.slice(0, 8)}`);
+  ok(played.includes('enhance_fail'), `失敗 ${played.slice(0, 8)}`);
+});
+
 // ======================================================================= ここまで
 console.error = origErr;
 console.log(`integrate: ${pass} 通過 / ${fail} 失敗`);
