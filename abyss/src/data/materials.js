@@ -20,7 +20,7 @@ export const MATERIAL = Object.fromEntries(MATERIALS.map((m) => [m.id, m]));
 /** 分解したときに出る素材（レアリティごと）。[素材, 最小, 最大] */
 export const SALVAGE = {
   common: [['scrap', 1, 2]],
-  magic: [['dust', 1, 2], ['scrap', 0, 1]],
+  magic: [['dust', 1, 2], ['scrap', 1, 2]],
   rare: [['crystal', 1, 1], ['dust', 1, 2]],
   epic: [['crystal', 2, 3], ['dust', 2, 3]],
   legendary: [['echo', 1, 1], ['crystal', 1, 2]],

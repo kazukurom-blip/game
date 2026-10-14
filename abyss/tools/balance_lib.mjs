@@ -97,6 +97,7 @@ export function spendSouls(g) {
 }
 
 /** 強化だけする鍛冶（--craft）: 装備を低い物から 1 段ずつ +cap まで。お金と鉄屑が足りる分だけ。戻り値: 強化した回数 */
+export const rec_bought = { n: 0 };
 const ENH_ORDER = ['weapon', 'chest', 'offhand', 'helm', 'legs', 'gloves', 'boots', 'belt', 'amulet', 'ring1', 'ring2'];
 export function enhancePolicy(g, cap = 10, keepGold = 0) {
   const cr = g.sys.crafting;
@@ -106,7 +107,14 @@ export function enhancePolicy(g, cap = 10, keepGold = 0) {
     let did = false;
     const list = ENH_ORDER.map((s) => g.state.hero.equip[s]).filter((it) => it && (it.enh || 0) < cap).sort((a, b) => (a.enh || 0) - (b.enh || 0));
     for (const it of list) {
-      const info = cr.enhanceInfo(it);
+      let info = cr.enhanceInfo(it);
+      // 鉄屑が足りなければ、ゴールドに余裕がある分だけ商人から買う（お金の使い道）
+      if (info.ok && info.missing.length === 1 && info.missing[0] === '鉄屑' && g.sys.merchant) {
+        const pr = g.sys.merchant.matPrice('scrap');
+        const need = (info.cost.mats.scrap || 0) - (g.state.inv.mats.scrap || 0);
+        const packs = Math.ceil(need / (pr?.pack || 20));
+        if (pr?.buy && g.state.meta.gold > packs * pr.buy + (info.cost.gold || 0) * 3 + keepGold) { g.sys.merchant.buyMat('scrap', packs); rec_bought.n += packs; info = cr.enhanceInfo(it); }
+      }
       if (!info.ok || info.missing.length || g.state.meta.gold - (info.cost.gold || 0) < keepGold) continue;
       const r = cr.enhance(it.uid);
       if (r.ok) { n++; did = true; break; }

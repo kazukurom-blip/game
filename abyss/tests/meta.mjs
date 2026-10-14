@@ -35,7 +35,7 @@ t('効果の能力はすべて定義済み', () => {
   const mods = [...ALTAR.flatMap((u) => u.mods.map((m) => m.s)), ...STAR_UPGRADES.flatMap((u) => u.mods.map((m) => m.s)), ...POINT_BONUS.map((b) => b.s), ...TITLES.flatMap((x) => x.mods.map((m) => m.s)), ...PETS.flatMap((p) => [...p.bonus, ...p.perLevel, ...p.own].map((m) => m.s))];
   for (const s of mods) ok(!statDef(s).unknown, s);
 });
-t('魂の式', () => { eq(baseSouls(20), 0); eq(baseSouls(49), Math.floor(3 * (29 / 10) ** 2)); eq(starsFor(1000), Math.floor(2 * Math.sqrt(40))); });
+t('魂の式', () => { eq(baseSouls(20), 0); eq(baseSouls(49), Math.floor(PRESTIGE.SOUL_K * (29 / PRESTIGE.SOUL_DIV) ** PRESTIGE.SOUL_POW)); eq(starsFor(1000), Math.floor(2 * Math.sqrt(40))); });
 t('卵の天井と確率', () => { ok(PET_BAL.PITY >= 600 && PET_BAL.PITY <= 1200); ok(PET_BAL.EGG_CHANCE.champion >= 1 / 450 && PET_BAL.EGG_CHANCE.champion <= 1 / 150); eq(EGGS.length, 3); });
 
 // ---------------- 転生
