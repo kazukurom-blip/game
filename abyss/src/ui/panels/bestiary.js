@@ -165,7 +165,7 @@ function renderDrops(ui, el) {
   const qty = H?.quantity || 0;
   el.append(h('div.mt-cards', [
     card('レア発見率', fmtPct(mf), `実効 ${fmtPct(BAL.mfEffective(mf))}（多いほど逓減）`),
-    card('アイテム発見数', `+${fmtPct(qty)}`, `魔境の数 ×${(diff.loot || 1).toFixed(2)}`),
+    card('アイテム発見数', `+${fmtPct(qty)}`, `魔境の倍率 ×${Number((diff.loot || 1).toFixed(2))}`),
     card('魔境', torment ? roman(torment) : 'なし', torment ? `覚醒 ${fmtPct((diff.ancient || 0) * 100)}・極致 ${fmtPct((diff.primal || 0) * 100, 2)}` : `覚醒 ${fmtPct((diff.ancient ?? 0.08) * 100)}（レジェンダリー以上）`),
   ]));
   const odds = Object.fromEntries(RANKS.map(([rk]) => [rk, sys.rarityOdds({ mf, rank: rk, torment })]));

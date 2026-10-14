@@ -173,7 +173,7 @@ function renderAuto(ui, el) {
     ]);
     if (owned && u.unlock === 'autoSalvage') {
       row.append(h('div.pr-sub', ['自動分解の型: ', h('select', { onchange: (e) => ps.setSalvagePreset(e.target.value) }, Object.entries(SALVAGE_PRESET_NAMES).map(([id, name]) => h('option', { value: id, selected: p.salvagePreset === id || undefined }, name))),
-        h('span.dim.small', '　「レベルに合わせる」: Lv15 未満はノーマル、Lv35 未満はマジックまで、Lv70 未満はレアまで、それ以上はエピックまで分解')]));
+        h('span.dim.small', '　「レベルに合わせる」: Lv 15 未満はノーマル、Lv 35 未満はマジックまで、Lv 70 未満はレアまで、それ以上はエピックまで分解')]));
     }
     if (owned && u.unlock === 'autoRebirth') {
       const inp = h('input', { type: 'number', min: 1, value: p.autoAt, style: { width: '90px' }, onchange: (e) => ps.setAutoRebirth(undefined, e.target.value) });

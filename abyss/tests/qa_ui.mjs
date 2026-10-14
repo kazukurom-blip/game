@@ -191,6 +191,12 @@ const main = async () => {
     const nm = await p.evaluate(() => { const e = document.querySelector('.tb-name'); const l = document.querySelector('.tb-level'); return { sw: e.scrollWidth, cw: e.clientWidth, txt: e.textContent, lsw: l.scrollWidth, lcw: l.clientWidth }; });
     check('スマホ: 上の帯の名前が切れない（Lv100・アビスLv のとき）', nm.sw <= nm.cw + 1 && nm.cw >= 50, JSON.stringify(nm));
     check('スマホ: 上の帯のレベルの文字が切れない', nm.lsw <= nm.lcw + 1, JSON.stringify(nm));
+    await p.setViewportSize({ width: 320, height: 568 });
+    await p.waitForTimeout(200);
+    const nm2 = await p.evaluate(() => { const e = document.querySelector('.tb-name'); const l = document.querySelector('.tb-level'); return { sw: e.scrollWidth, cw: e.clientWidth, lsw: l.scrollWidth, lcw: l.clientWidth, lt: l.innerText }; });
+    check('とても狭いスマホ（320px）: 名前とアビスLv が切れない', nm2.sw <= nm2.cw + 1 && nm2.lsw <= nm2.lcw + 1 && nm2.lt.includes('アビスLv 120'), JSON.stringify(nm2));
+    await p.setViewportSize({ width: 390, height: 844 });
+    await p.waitForTimeout(150);
     const res = await p.evaluate(() => parseFloat(getComputedStyle(document.querySelector('.bar.res .txt')).fontSize));
     check('スマホ: リソースの文字が小さすぎない（10px 以上）', res >= 10, String(res));
     await ctx.close();
@@ -318,6 +324,25 @@ const main = async () => {
       return { asked: asked.includes('元に戻せません'), still1, still2, comGone: !inv.bag.includes(com), left: document.querySelectorAll('#modals .modal-wrap').length };
     });
     check('アイテム: レジェンダリー以上の分解は確かめてから（やめると残る）・ノーマルはすぐ', sal.asked && sal.still1 && sal.still2 && sal.comGone && sal.left === 0, JSON.stringify(sal));
+    // 裂け目: 挑戦中に「段階 N に挑む」を押しても、黙って今の挑戦を捨てない
+    const rf = await p.evaluate(async () => {
+      const g = window.__game; const R = g.state.world.rift;
+      const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+      R.unlocked = Math.max(R.unlocked || 1, 5);
+      g.sys.rift.begin(1);
+      for (let i = 0; i < 20 * 3; i++) g.tick(0.05);
+      const run0 = R.run; run0.qaMark = 1;
+      window.__ui.openPanel('rift'); await wait(80);
+      [...document.querySelectorAll('#panelbody .tab')].find((t) => t.textContent.startsWith('深淵の裂け目'))?.click(); await wait(80);
+      [...document.querySelectorAll('#panelbody .btn')].find((b) => /^段階 \d+ に挑む$/.test(b.textContent))?.click(); await wait(80);
+      const asked = [...document.querySelectorAll('#modals .modal-body')].map((x) => x.textContent).join('');
+      const same = R.run === run0 && R.run.qaMark === 1;
+      [...document.querySelectorAll('#modals .modal-foot .btn')].find((b) => b.textContent === 'やめる')?.click(); await wait(80);
+      const kept = R.run === run0 && R.run.qaMark === 1;
+      g.sys.rift.abandon();
+      return { asked: asked.includes('報酬はもらえません'), same, kept };
+    });
+    check('裂け目: 挑戦中に別の段階へ挑むときは確かめる（やめると今の挑戦が残る）', rf.asked && rf.same && rf.kept, JSON.stringify(rf));
     await ctx.close();
   }
 

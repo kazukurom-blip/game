@@ -341,7 +341,11 @@ export class UI {
     if (e.name.textContent !== hr.name) e.name.textContent = hr.name;
     const isPar = hr.level >= BAL.MAX_LEVEL;
     const lv = isPar ? `Lv ${hr.level}　アビスLv ${hr.paragon.level}` : `Lv ${hr.level}`;
-    if (e.level.textContent !== lv) e.level.textContent = lv;
+    if (e.level.dataset.k !== lv) {
+      e.level.dataset.k = lv;
+      // とても狭い画面では「Lv 100」（上限）を省いて「アビスLv」だけにできるよう、分けておく（style.css）
+      e.level.replaceChildren(...(isPar ? [h('span.tbl-lv', `Lv ${hr.level}`), h('span.tbl-par', `アビスLv ${hr.paragon.level}`)] : [`Lv ${hr.level}`]));
+    }
     const need = isPar ? BAL.paragonXpToNext(hr.paragon.level) : BAL.xpToNext(hr.level);
     const cur = isPar ? hr.paragon.xp : hr.xp;
     const pct = Math.min(100, (cur / need) * 100);

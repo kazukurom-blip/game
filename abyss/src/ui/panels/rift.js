@@ -119,7 +119,12 @@ function riftTab(ui, el) {
     ]),
     h('div.rf-guard', [h('b', `守護者「${info.guardian.name}」`), `　${info.guardian.desc || ''}`, h('div.dim', `特技: ${(info.guardian.abilities || []).map((a) => BOSS_ABILITIES[a]?.name).filter(Boolean).join('・')}　（5 段ごとに入れ替わる）`)]),
     h('div.toolbar', [
-      button(`段階 ${sel} に挑む`, () => { const r = sys.begin(sel); if (!r.ok) ui.toast(r.msg, 'bad'); else ui.toast(`深淵の裂け目 段階 ${sel}`, 'rift'); ui.renderPanel(); }, { kind: 'primary' }),
+      button(`段階 ${sel} に挑む`, async () => {
+        // 挑戦中（裂け目・門番）に押すと、今の挑戦は報酬なしで終わる。黙って消えないように確かめる
+        const busy = g.state.world.mode === 'gate' ? '門番との戦い' : g.state.world.mode === 'rift' && R.run ? `今の挑戦（段階 ${R.run.level}）` : '';
+        if (busy && !(await ui.confirm(`${busy}をやめて、段階 ${sel} に挑みます。${busy}の報酬はもらえません。`, '挑み直す'))) return;
+        const r = sys.begin(sel); if (!r.ok) ui.toast(r.msg, 'bad'); else ui.toast(`深淵の裂け目 段階 ${sel}`, 'rift'); ui.renderPanel();
+      }, { kind: 'primary' }),
       h('label', ['終わったら ', h('select', { onchange: (e) => { sys.setAuto(e.target.value); } }, [
         ['off', '物語に戻る'], ['same', '同じ段階にもう一度'], ['push', '記録を目指して続ける（失敗したら 1 段下げる）'],
       ].map(([v, l]) => h('option', { value: v, selected: (R.auto || 'off') === v || undefined }, l)))]),
@@ -152,7 +157,7 @@ function gateTab(ui, el) {
         h('span.dim.small', `（Lv ${spec.level}・ライフ ${fmt(spec.life)}・必要 DPS ${fmt(odds.need)} ／ 今 ${fmt(odds.dps)}）`),
         s.kills ? h('span.ok.small', `撃破 ${s.kills}`) : null,
       ]),
-      h('div.toolbar', [button(s.ready ? '門番を呼ぶ' : '欠片が足りない', () => { const r = sys.summonGate(s.gi); if (!r.ok) ui.toast(r.msg, 'bad'); ui.renderPanel(); }, { kind: s.ready ? 'primary' : null, disabled: !s.ready || w.mode === 'gate' })]),
+      h('div.toolbar', [button(s.ready ? '門番を呼ぶ' : '欠片が足りない', async () => { if (w.mode === 'rift' && g.state.world.rift.run && !(await ui.confirm(`裂け目の挑戦（段階 ${g.state.world.rift.run.level}）をやめて門番を呼びます。裂け目の報酬はもらえません。`, '門番を呼ぶ'))) return; const r = sys.summonGate(s.gi); if (!r.ok) ui.toast(r.msg, 'bad'); ui.renderPanel(); }, { kind: s.ready ? 'primary' : null, disabled: !s.ready || w.mode === 'gate' })]),
     ]);
     el.append(card);
   }
