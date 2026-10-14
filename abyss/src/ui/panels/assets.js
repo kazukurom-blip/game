@@ -83,7 +83,7 @@ export const assetsPanel = {
 /** 枠の一覧に無い ID（ゲームの中で使われた ID・名前のまま入れた画像） */
 function otherIds() {
   const set = new Set([...assets.seen.keys(), ...assets.studio.keys(), ...assets.folder.keys()]);
-  return [...set].filter((id) => !assets.slots.has(id)).sort();
+  return [...set].filter((id) => typeof id === 'string' && id && !assets.slots.has(id)).sort();
 }
 
 function currentSlots() {
@@ -123,7 +123,7 @@ function card(ui, s) {
   file.addEventListener('change', () => { const f = file.files?.[0]; file.value = ''; if (f) quickImport(ui, s.id, f, true); });
   const badge = src.source === 'studio' && !src.from ? h('span.as-badge.studio', '差し替え中')
     : src.source === 'folder' && !src.from ? h('span.as-badge.folder', 'フォルダの画像')
-      : src.source ? h('span.as-badge.from', `${src.from} の画像を使用`) : null;
+      : src.source ? h('span.as-badge.from', { title: `予備の枠 ${src.from} の画像を使っています` }, '予備の枠の画像') : null;
   const el = h(`div.as-card${src.source && !src.from ? '.on' : ''}${src.from ? '.from' : ''}`, {
     dataset: { id: s.id }, title: `${s.label}\n${s.id}${s.note ? `\n${s.note}` : ''}`,
     onclick: () => openEditor(ui, s.id, { onSaved: () => ui.renderPanel() }),

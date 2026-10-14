@@ -1,6 +1,6 @@
 {
   "_note": "型紙の一覧（node tools/export_templates.mjs で作る）",
-  "size": 560,
+  "size": 512,
   "templates": [
     {
       "id": "hero.warrior.body",

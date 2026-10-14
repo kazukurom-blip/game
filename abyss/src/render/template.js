@@ -25,7 +25,7 @@ export function renderTemplate(id, opts = {}) {
   ctx.fillStyle = '#16131b'; ctx.fillRect(0, 0, c.width, c.height);
   // 背景
   ctx.save(); ctx.translate(ox, 0);
-  if (pr.bg === 'black') { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); } else if (pr.bg === 'scene' || pr.bg === 'icon') { ctx.fillStyle = '#2a2630'; ctx.fillRect(0, 0, W, H); } else checker(ctx, W, H, Math.max(8, Math.round(maxSide / 48)));
+  if (pr.bg === 'black') { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); } else if (pr.bg === 'scene' || pr.bg === 'icon') { ctx.fillStyle = '#2a2630'; ctx.fillRect(0, 0, W, H); } else checker(ctx, W, H, Math.max(12, Math.round(maxSide / 20)));
   if (pr.bg === 'layer') { ctx.fillStyle = 'rgba(60,200,90,0.12)'; ctx.fillRect(0, 0, W, H * 0.5); }
   // コードの絵のシルエット
   const art = makeCanvas(W, H);

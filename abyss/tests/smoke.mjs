@@ -177,6 +177,14 @@ const main = async () => {
           const r = x.createRadialGradient(W / 2, H * 0.75, 10, W / 2, H * 0.75, W * 0.3); r.addColorStop(0, '#ffb060'); r.addColorStop(0.4, '#5a1a40'); r.addColorStop(1, 'rgba(0,0,0,0)');
           x.fillStyle = r; x.fillRect(0, 0, W, H);
           x.fillStyle = '#0a0406'; x.fillRect(W * 0.62, H * 0.55, W * 0.02, H * 0.14);
+        } else if (o.shape === 'logo') {
+          x.font = `900 ${Math.round(H * 0.5)}px serif`; x.textAlign = 'center'; x.textBaseline = 'middle';
+          const g = x.createLinearGradient(0, H * 0.2, 0, H * 0.8); g.addColorStop(0, '#fff0b0'); g.addColorStop(1, '#b04a1a');
+          x.lineWidth = H * 0.05; x.strokeStyle = '#2a0a06'; x.strokeText('ABYSS', W / 2, H / 2); x.fillStyle = g; x.fillText('ABYSS', W / 2, H / 2);
+        } else if (o.shape === 'portrait') {
+          const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#5a1a14'); g.addColorStop(1, '#0a0606'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+          x.fillStyle = '#c0392b'; x.beginPath(); x.ellipse(W * 0.5, H * 0.7, W * 0.3, H * 0.32, 0, 0, 7); x.fill();
+          x.fillStyle = '#e8b890'; x.beginPath(); x.arc(W * 0.5, H * 0.3, W * 0.16, 0, 7); x.fill();
         } else if (o.shape === 'icon') {
           const g = x.createRadialGradient(W / 2, H / 2, 4, W / 2, H / 2, W * 0.45); g.addColorStop(0, '#fff4c0'); g.addColorStop(0.5, '#e07a2a'); g.addColorStop(1, '#2a1008');
           x.fillStyle = g; x.beginPath(); x.arc(W / 2, H / 2, W * 0.42, 0, 7); x.fill();
@@ -194,6 +202,8 @@ const main = async () => {
       swing: await png('fx.w_slash.swing@4f12.png', { w: 1600, h: 400, bg: '#000000', shape: 'swing', frames: 4 }),
       mid: await png('bg.act1.mid.png', { w: 1536, h: 864, bg: '#00ff00', shape: 'mid' }),
       icon: await png('icon.skill.w_slash.png', { w: 256, h: 256, bg: '#1a1014', shape: 'icon' }),
+      logo: await png('ui.logo.png', { w: 1536, h: 512, shape: 'logo' }),
+      portrait: await png('hero.warrior.portrait.png', { w: 600, h: 840, shape: 'portrait' }),
       typo: await png('monstr.ash_wolf.png', { w: 200, h: 200, bg: '#ffffff', shape: 'wolf' }),
       zombie: await mk({ w: 500, h: 700, bg: '#ffffff', shape: 'zombie', color: '#6b8f5a' }),
       title: await mk({ w: 1536, h: 1024, shape: 'title' }),
@@ -240,7 +250,7 @@ const main = async () => {
     const sw = await ev(() => ({ icon: window.__assets.sourceOf('icon.item.sword'), corner: window.__assets.custom.get('gear.sword').img.getContext('2d').getImageData(0, 0, 1, 1).data[3] }));
     check('assets: カードから入れる・アイコンは装備の絵を使う', sw.icon.source === 'studio' && sw.icon.from === 'gear.sword' && sw.corner === 0, JSON.stringify(sw));
     // 3) まとめて取り込む（ファイル名 = 枠 ID。@4f12 はコマ送り。間違った名前は案内）
-    await ap.setInputFiles('.panel-assets .toolbar input[type=file]', [imgs.wolf, imgs.swing, imgs.mid, imgs.icon, imgs.typo]);
+    await ap.setInputFiles('.panel-assets .toolbar input[type=file]', [imgs.wolf, imgs.swing, imgs.mid, imgs.icon, imgs.logo, imgs.portrait, imgs.typo]);
     await ap.waitForSelector('text=まとめて取り込んだ結果');
     const rep = await ev(() => ({ text: document.querySelector('.st-report')?.textContent || '', wolf: window.__assets.studio.has('monster.ash_wolf'), swing: window.__assets.studio.get('fx.w_slash.swing')?.opts, mid: window.__assets.studio.has('bg.act1.mid') }));
     check('assets: まとめて取り込む（コマ送り・加算・背景）', rep.wolf && rep.mid && rep.swing?.frames === 4 && rep.swing?.fps === 12 && rep.swing?.blend === 'lighter', JSON.stringify(rep.swing));
@@ -265,8 +275,14 @@ const main = async () => {
     await ap.reload();
     await ap.waitForSelector('#title');
     await ap.waitForTimeout(400);
-    const kept = await ev(() => ['hero.warrior.body', 'gear.sword', 'monster.ash_wolf', 'fx.w_slash.swing', 'bg.act1.mid', 'icon.skill.w_slash'].filter((id) => window.__assets.studio.has(id)).length);
-    check('assets: 再読み込みしても残る', kept === 6, `${kept}/6`);
+    const kept = await ev(() => ['hero.warrior.body', 'gear.sword', 'monster.ash_wolf', 'fx.w_slash.swing', 'bg.act1.mid', 'icon.skill.w_slash', 'ui.logo', 'hero.warrior.portrait'].filter((id) => window.__assets.studio.has(id)).length);
+    check('assets: 再読み込みしても残る', kept === 8, `${kept}/8`);
+    await shot('title_logo');
+    await ap.click('.slot.empty .btn');
+    await ap.waitForSelector('.classcards');
+    await ap.waitForTimeout(200);
+    await shot('class_select');
+    await ap.click('.title-box .btn >> text=もどる');
     await ap.click('.title-box .btn-primary');
     await ap.waitForSelector('#scene');
     await ap.waitForTimeout(600);
@@ -295,13 +311,19 @@ const main = async () => {
     await ap.waitForTimeout(700);
     await shot('editor_fx');
     await ap.click('.modal.studio .modal-foot .btn >> text=閉じる');
+    await ap.click('.st-tabs .tab >> text=主人公');
+    await ap.click('.as-card[data-id="hero.warrior.body"]');
+    await ap.waitForSelector('.modal.studio');
+    const origInfo = await ev(() => document.querySelector('.modal.studio .ed-info')?.textContent || '');
+    check('assets: 開き直すと元の画像から直せる', origInfo.includes('600×900'), origInfo.slice(0, 60));
+    await ap.click('.modal.studio .modal-foot .btn >> text=閉じる');
     // 8) パックの書き出し（文字）→ すべて戻す → 読み込み
     await ap.click('.panel-assets .toolbar .btn >> text=パックを書き出す');
     await ap.click('.modal-foot .btn >> text=文字で表示');
     await ap.waitForFunction(() => (document.querySelector('.st-pack textarea')?.value || '').length > 1000);
     const packText = await ev(() => document.querySelector('.st-pack textarea').value);
     const pack = JSON.parse(packText);
-    check('assets: パックを書き出せる', pack.format === 'abyss-drop-assetpack' && Object.keys(pack.assets).length === 6, `${Object.keys(pack.assets).length} 枚 ${Math.round(packText.length / 1024)}KB`);
+    check('assets: パックを書き出せる', pack.format === 'abyss-drop-assetpack' && Object.keys(pack.assets).length === 8, `${Object.keys(pack.assets).length} 枚 ${Math.round(packText.length / 1024)}KB`);
     await ap.click('.modal-foot .btn >> text=閉じる');
     await ap.click('.panel-assets .toolbar .btn >> text=すべて元に戻す');
     await ap.click('.modal-foot .btn-primary >> text=すべて戻す');
@@ -311,7 +333,7 @@ const main = async () => {
     await ap.click('.panel-assets .toolbar .btn >> text=パックを読み込む');
     await ap.fill('.st-pack textarea', packText);
     await ap.click('.modal-foot .btn-primary >> text=読み込む');
-    await ap.waitForFunction(() => window.__assets.studio.size === 6, null, { timeout: 15000 });
+    await ap.waitForFunction(() => window.__assets.studio.size === 8, null, { timeout: 15000 });
     const reimp = await ev(() => window.__assets.studio.get('fx.w_slash.swing')?.opts?.frames);
     check('assets: パックを読み込める', reimp === 4, `frames=${reimp}`);
     // 9) 1 つだけ戻す（フォルダの画像に戻る）

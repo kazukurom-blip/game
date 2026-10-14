@@ -52,6 +52,7 @@ class AssetRegistry {
   }
   defineMany(list) { for (const s of list) this.define(s); }
   spec(id) {
+    if (typeof id !== 'string') return null;
     if (this.slots.has(id)) return this.slots.get(id);
     // 末尾を削って探す
     let cur = id;
@@ -98,6 +99,7 @@ class AssetRegistry {
   isCustom(id) { return this.findCustom(id) !== null; }
   /** 自分か予備の ID の差し替え（下書き → 差し替え → 予備 → 親の ID） */
   findCustom(id, depth = 0) {
+    if (typeof id !== 'string') return null;
     if (this.drafts.has(id) || this.custom.has(id)) return id;
     if (depth > 4) return null;
     const spec = this.slots.get(id);
@@ -123,7 +125,7 @@ class AssetRegistry {
   sprite(id) {
     const hit = this.sprites.get(id);
     if (hit) return hit;
-    if (!this.slots.has(id)) this.seen.set(id, (this.seen.get(id) || 0) + 1);
+    if (typeof id === 'string' && id && !this.slots.has(id)) this.seen.set(id, (this.seen.get(id) || 0) + 1);
     const s = this.buildSprite(id);
     this.sprites.set(id, s);
     return s;
@@ -136,12 +138,19 @@ class AssetRegistry {
       const c = this.customEntry(cid);
       const o = c.opts || {};
       const frames = Math.max(1, o.frames || 1);
-      const fw = c.img.width / frames;
-      const fh = c.img.height;
+      let img = c.img;
+      // アイコンの枠: 縦横比の違う画像（装備の絵を使うときなど）は余白をつけて枠の形にそろえる → 正方形に引き伸ばして描かれてもゆがまない
+      if (spec.cat === 'icon' && spec.w && spec.h) {
+        const want = spec.w / spec.h; const have = img.width / frames / img.height;
+        if (Math.abs(have / want - 1) > 0.08) img = padToAspect(img, frames, want) || img;
+      }
+      const fw = img.width / frames;
+      const fh = img.height;
       // 枠の大きさに合わせる（高さ基準。o.scale で調整）
       const fit = (spec.fit === 'width' ? spec.w / fw : spec.h / fh) * (o.scale || 1);
+      const padded = img !== c.img;
       return {
-        img: c.img, w: fw, h: fh, sw: fw * fit, sh: fh * fit, ax: o.ax ?? spec.ax, ay: o.ay ?? spec.ay, frames, fps: o.fps || spec.fps || 10,
+        img, w: fw, h: fh, sw: fw * fit, sh: fh * fit, ax: padded ? spec.ax : o.ax ?? spec.ax, ay: padded ? spec.ay : o.ay ?? spec.ay, frames, fps: o.fps || spec.fps || 10,
         blend: o.blend || spec.blend, custom: true, flip: !!o.flip, ox: o.ox || 0, oy: o.oy || 0, rot: ((o.rot || 0) * Math.PI) / 180, // flip は古い形だけ（今は加工で反転済み）
         anchors: { ...(spec.anchors || {}), ...(o.anchors || {}) }, id: cid, source: c.source,
       };
@@ -388,7 +397,9 @@ class AssetRegistry {
         const blob = await (await fetch(v.data)).blob();
         const orig = v.orig ? await (await fetch(v.orig)).blob() : null;
         const processed = await blobToImage(blob);
-        await this.setCustom(id, orig || blob, v.opts || {}, v.proc || { bg: 'none', trim: false }, { processed, name: v.name || '' });
+        // 元の画像が無いパックは、加工済みの画像を元の画像として扱う（もう一度加工しない）
+        const proc = orig ? (v.proc || { bg: 'none', trim: false }) : { bg: 'none', trim: false };
+        await this.setCustom(id, orig || blob, v.opts || {}, proc, { processed, name: v.name || '' });
         n++;
       } catch (e) { console.warn('[assets] 取り込めない', id, e); }
     }
@@ -730,6 +741,8 @@ export function autoProc(spec = {}, transparent = false, bgInfo = null) {
   const isFx = spec.cat === 'fx' && (spec.blend || 'lighter') === 'lighter';
   if (isFx) return { bg: 'none', trim: false, crush: true };
   if (kind === 'icon.skill' || kind === 'icon.support' || kind === 'hero.portrait' || kind === 'ui.title' || (kind === 'bg' && spec.params?.layer === 'far')) return { bg: 'none', trim: false };
+  // 重ね着の部品は体の画像と同じ位置に重ねるので、外側を切らない
+  if (kind === 'gear.part') return { bg: transparent ? 'none' : 'auto', tol: 48, trim: false, feather: 2 };
   if (kind === 'bg') {
     // 中景・地面: 空が緑やマゼンタの単色なら抜く
     const c = bgInfo?.color;
@@ -803,6 +816,18 @@ export function processImage(src, proc = {}, spec = {}, o = {}) {
     if (k < 0.999) c = resizeCanvas(c, Math.max(frames, Math.round((fw * k)) * frames), Math.max(1, Math.round(fh * k)));
   }
   return { canvas: c, info };
+}
+
+/** 余白をつけて縦横比 aspect（幅/高さ）にそろえる（中央に置く）。コマ送りはコマごと */
+export function padToAspect(img, frames = 1, aspect = 1) {
+  const fw = img.width / frames; const fh = img.height;
+  if (!fw || !fh) return null;
+  const W = Math.round(Math.max(fw, fh * aspect)); const H = Math.round(Math.max(fh, fw / aspect));
+  const out = makeCanvas(W * frames, H);
+  if (!out) return null;
+  const ctx = out.getContext('2d');
+  for (let i = 0; i < frames; i++) ctx.drawImage(img, i * fw, 0, fw, fh, i * W + (W - fw) / 2, (H - fh) / 2, fw, fh);
+  return out;
 }
 
 /** 左右反転（コマ送りはコマごとに） */

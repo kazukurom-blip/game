@@ -14,7 +14,7 @@ import { copyText, downloadBlob, ensureRightsNotice, checker, FACING_JA, BLEND_J
 import { ACTS } from '../../data/world.js';
 
 const ANCHOR_COL = { base: '#ff4040', hand: '#3ad06a', offhand: '#3a9cff', head: '#ffd23a', back: '#c06aff', chest: '#ff8a3a' };
-const FEET_KINDS = new Set(['hero.body', 'hero.outfit', 'monster', 'minion', 'pet', 'gear.part']);
+const FEET_KINDS = new Set(['hero.body', 'hero.outfit', 'monster', 'minion', 'pet']);
 let openCount = 0;
 /** 調整の窓が開いているか（パネルの貼り付けと取り合わないように） */
 export const editorOpen = () => openCount > 0;
@@ -131,7 +131,7 @@ export async function openEditor(ui, id, o = {}) {
     reprocess(true);
     if (autoFeet()) updateOpts();
     syncAll();
-    ui.toast(st.ins.transparent ? '透明な画像です。透明な外側を切りました' : st.proc.bg === 'auto' ? '背景を自動で抜きました。残りがあれば「許容値」を上げてください' : '画像を入れました');
+    ui.toast(st.proc.bg === 'auto' ? '背景を自動で抜きました。残りがあれば「許容値」を上げてください' : st.ins.transparent && st.proc.trim ? '透明な画像です。透明な外側を切りました' : '画像を入れました。「保存して使う」で使えます');
   };
   fileIn.addEventListener('change', () => { const f = fileIn.files?.[0]; fileIn.value = ''; if (f) loadFile(f); });
 
