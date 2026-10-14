@@ -23,14 +23,14 @@ function sci(n) {
   return `${m.toFixed(2)}e${e}`;
 }
 
-/** 大きな数を短く。整数で 1 万未満はカンマ区切り */
+/** 大きな数を短く。1 万未満はカンマ区切りの整数（10 未満の小数だけは 3 桁まで出す: 1.25 / 7.5） */
 export function fmt(n, opts = {}) {
   if (n === undefined || n === null || Number.isNaN(n)) return '0';
   if (!Number.isFinite(n)) return n > 0 ? '∞' : '-∞';
   const neg = n < 0; const a = Math.abs(n);
   let s;
   if (a < 10000) {
-    s = opts.dec !== undefined ? a.toFixed(opts.dec).replace(/\.0+$/, '') : (a < 100 && !Number.isInteger(a) && !opts.int ? trimNum(a, 3) : Math.floor(a).toLocaleString('en-US'));
+    s = opts.dec !== undefined ? a.toFixed(opts.dec).replace(/\.0+$/, '') : (a < 10 && !Number.isInteger(a) && !opts.int ? trimNum(a, 3) : Math.floor(a).toLocaleString('en-US'));
   } else if (mode === 'sci') {
     s = sci(a);
   } else if (mode === 'en') {

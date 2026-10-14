@@ -35,8 +35,8 @@ t('効果の能力はすべて定義済み', () => {
   const mods = [...ALTAR.flatMap((u) => u.mods.map((m) => m.s)), ...STAR_UPGRADES.flatMap((u) => u.mods.map((m) => m.s)), ...POINT_BONUS.map((b) => b.s), ...TITLES.flatMap((x) => x.mods.map((m) => m.s)), ...PETS.flatMap((p) => [...p.bonus, ...p.perLevel, ...p.own].map((m) => m.s))];
   for (const s of mods) ok(!statDef(s).unknown, s);
 });
-t('魂の式', () => { eq(baseSouls(20), 0); eq(baseSouls(49), Math.floor(5 * Math.sqrt(29))); eq(starsFor(1000), Math.floor(2 * Math.sqrt(40))); });
-t('卵の天井と確率', () => { ok(PET_BAL.PITY === 600); ok(PET_BAL.EGG_CHANCE.champion >= 1 / 250 && PET_BAL.EGG_CHANCE.champion <= 1 / 150); eq(EGGS.length, 3); });
+t('魂の式', () => { eq(baseSouls(20), 0); eq(baseSouls(49), Math.floor(PRESTIGE.SOUL_K * (29 / PRESTIGE.SOUL_DIV) ** PRESTIGE.SOUL_POW)); eq(starsFor(1000), Math.floor(2 * Math.sqrt(40))); });
+t('卵の天井と確率', () => { ok(PET_BAL.PITY >= 600 && PET_BAL.PITY <= 1200); ok(PET_BAL.EGG_CHANCE.champion >= 1 / 450 && PET_BAL.EGG_CHANCE.champion <= 1 / 150); eq(EGGS.length, 3); });
 
 // ---------------- 転生
 t('転生: 解放前はできない・解放すると魂の見込みが出る', () => {
@@ -175,7 +175,7 @@ t('実績: 秘密・好奇心（窓を開く）', () => {
 });
 t('実績: 遊んでいるうちに自然に達成する', () => {
   const g = fresh('ranger', 3);
-  run(g, 600);
+  run(g, 900); // ステージ 20 ウェーブで最初のボスが 10 分すぎ（強さ担当）
   ok(Object.keys(g.state.meta.achievements).length >= 5, `${Object.keys(g.state.meta.achievements).length}`);
 });
 

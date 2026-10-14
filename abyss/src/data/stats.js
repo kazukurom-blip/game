@@ -74,7 +74,7 @@ def('life_regen_pct', '最大ライフの再生', { cat: 'defense', desc: '1 秒
 def('armor', 'アーマー', { kind: 'flat', scale: true, cat: 'defense', desc: '受けるダメージを減らす（上限 85%）' });
 def('inc_armor', 'アーマー', { cat: 'defense' });
 for (const e of ['fire', 'cold', 'lightning', 'poison', 'void']) def(`res_${e}`, `${ELEMENT_NAMES[e]}耐性`, { cat: 'defense', el: e, desc: '上限 75%' });
-def('res_all', '全耐性', { cat: 'defense', desc: '虚無以外の耐性すべて' });
+def('res_all', '全耐性', { cat: 'defense', desc: '火炎・冷気・雷撃・毒の耐性（虚無には半分）' });
 def('dodge', '回避率', { cat: 'defense', desc: '攻撃をよける。上限 60%' });
 def('block', 'ブロック率', { cat: 'defense', desc: '盾で攻撃を防ぐ（受けるダメージ 70% 減）。上限 75%' });
 def('dr', '被ダメージ軽減', { agg: 'mul', cat: 'defense', desc: '最後にかかる軽減（掛け算）' });

@@ -9,13 +9,20 @@
 // 苦行（物語クリア後）では地域のボスが「門の欠片」を落とす（GATE_GROUPS）。
 
 export const STAGES_PER_ZONE = 10;
-export const WAVES_PER_STAGE = 3;
+export const WAVES_PER_STAGE = 20;
 export const BOSS_TIME = 30; // ボスの制限時間（秒）。章のボスは ×1.8、深淵王は ×2.5
 export const ACT_BOSS_TIME_MUL = 1.8;
 export const FINAL_BOSS_TIME_MUL = 2.5;
 // 最初の 2 地域のボスはやさしく（はじめての 5 分で負けないように）。[ライフ, 攻撃] の倍率
 export const EARLY_BOSS = { 0: [0.6, 0.6], 1: [0.85, 0.85] };
 export const ACT_BOSS_LIFE_MUL = 0.75; // 第二章からの章のボスのライフ（BAL.RANK.actboss に掛ける。章の終わりの壁を「少し稼げば越えられる」に）
+export const FINAL_BOSS_LIFE_MUL = 1.25; // 深淵王のライフ（章のボスの倍率にさらに掛ける。段階の変化が 2 回あるので重め）
+export const FINAL_BOSS_DMG_MUL = 0.8; // 深淵王の攻撃（段階の変化で ×1.15 ずつ強くなるぶんを先に軽く）
+// ボスに続けて負けるほど、そのボスが少し弱る（勝つと元に戻る）。壁を「少し稼げば越えられる」長さ（10〜20 分）に収めるため（強さ担当）
+// 負け 1 回ごとにライフ -7%（最大 -45%）・攻撃 -4%（最大 -30%）。深くすると、弱いまま先の地域へ進んで次の壁がもっと長くなる（-65% で測って、物語全体は 2 割遅くなった）
+export const BOSS_FAIL_EASE = { life: 0.07, lifeMax: 0.45, dmg: 0.04, dmgMax: 0.3 };
+// ボスが出たとき、奥義の残りの待ち時間をこの秒数までにする（ボス戦の手応えを毎回そろえる）
+export const BOSS_ULT_READY = 2;
 
 export const ACTS = [
   {

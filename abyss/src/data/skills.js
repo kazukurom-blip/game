@@ -60,20 +60,20 @@ export const SKILLS = [
   // 剣闘士（怒り）: 近接の範囲・跳躍・雄叫び
   // =====================================================================
   {
-    id: 'w_slash', cls: 'warrior', kind: 'basic', name: '強打', desc: '目の前の敵を武器で叩き、半径 {radius} の範囲に {dmg} のダメージ。怒り +9。',
+    id: 'w_slash', cls: 'warrior', kind: 'basic', name: '強打', desc: '目の前の敵を武器で叩き、半径 {radius} の範囲に {dmg} のダメージ。怒り +12。',
     tags: ['attack', 'melee'], element: 'phys', unlock: 1, basic: true, behavior: 'melee',
-    cost: -9, cd: 0, castTime: 0.55, dmg: [150, 7], range: 110, radius: 70,
+    cost: -12, cd: 0, castTime: 0.55, dmg: [240, 11], range: 110, radius: 70,
     runes: [
       R('fire', '燃える刃', '火炎ダメージになり、25% の確率で炎上させる', FIRE(0.25)),
       R('wide', '薙ぎ払い', '当たる範囲が 2 倍、ダメージ ×0.85', { radius: 2, dmgMul: 0.85 }),
-      R('rage', '怒りの一撃', '怒りの回復が 2 倍（+18）', { costAdd: -9 }),
+      R('rage', '怒りの一撃', '怒りの回復が 2 倍（+24）', { costAdd: -12 }),
       R('quake', '地鳴り', '20% の確率で敵を 0.8 秒気絶させる', { status: { id: 'stun', chance: 0.2, dur: 0.8 } }),
     ],
   },
   {
     id: 'w_cleave', cls: 'warrior', kind: 'active', name: '大旋斬', desc: '武器を振り回し、半径 {radius} の敵すべてに {dmg} のダメージ。',
     tags: ['attack', 'melee', 'area'], element: 'phys', unlock: 1, behavior: 'nova',
-    cost: 16, cd: 0, castTime: 0.7, dmg: [245, 12], radius: 170,
+    cost: 14, cd: 0, castTime: 0.7, dmg: [245, 12], radius: 170,
     runes: [
       R('quake', '地割れ', '範囲 +40%', { radius: 1.4 }),
       R('bleed', '血の旋風', '50% の確率で出血させる（4 秒の継続ダメージ）', { status: { id: 'bleed', chance: 0.5 } }),
@@ -84,7 +84,7 @@ export const SKILLS = [
   {
     id: 'w_leap', cls: 'warrior', kind: 'active', name: '跳躍斬', desc: '最大 {range} 先の敵へ跳びかかり、着地点の半径 {radius} に {dmg} のダメージ。30% の確率で 0.8 秒気絶。',
     tags: ['attack', 'melee', 'area', 'movement'], element: 'phys', unlock: 3, behavior: 'leap',
-    cost: 15, cd: 5, castTime: 0.7, dmg: [220, 10], range: 480, radius: 140, status: { id: 'stun', chance: 0.3, dur: 0.8 },
+    cost: 15, cd: 5, castTime: 0.7, dmg: [270, 12], range: 480, radius: 140, status: { id: 'stun', chance: 0.3, dur: 0.8 },
     runes: [
       R('quake', '大地割り', '着地の範囲 +60%', { radius: 1.6 }),
       R('fire', '炎の着地', '火炎ダメージになり、着地点が 3 秒燃える（0.5 秒ごとに 20%）', { element: 'fire', burn: { dur: 3, tick: 0.5, mult: 0.2 } }),
@@ -104,9 +104,9 @@ export const SKILLS = [
     ],
   },
   {
-    id: 'w_bash', cls: 'warrior', kind: 'basic', name: '盾打ち', desc: '重い一撃で {dmg} のダメージ。15% の確率で 1 秒気絶。怒り +9。',
+    id: 'w_bash', cls: 'warrior', kind: 'basic', name: '盾打ち', desc: '重い一撃で {dmg} のダメージ。15% の確率で 1 秒気絶。怒り +12。',
     tags: ['attack', 'melee'], element: 'phys', unlock: 11, basic: true, behavior: 'melee',
-    cost: -9, cd: 0, castTime: 0.7, dmg: [150, 6], range: 110, radius: 60, status: { id: 'stun', chance: 0.15, dur: 1 },
+    cost: -12, cd: 0, castTime: 0.7, dmg: [255, 10.5], range: 110, radius: 60, status: { id: 'stun', chance: 0.15, dur: 1 },
     runes: [
       R('shock', '雷の盾', '雷撃ダメージになり、30% の確率で感電させる', LIGHT(0.3)),
       R('heavy', '重い一撃', 'ダメージ ×1.35、動作 +25%', { dmgMul: 1.35, castMul: 1.25 }),
@@ -139,7 +139,7 @@ export const SKILLS = [
   {
     id: 'w_charge', cls: 'warrior', kind: 'active', name: '猛進', desc: '{range} 先まで突進し、通り抜けた敵すべてに {dmg} のダメージ。',
     tags: ['attack', 'melee', 'movement'], element: 'phys', unlock: 23, behavior: 'dash',
-    cost: 20, cd: 5, castTime: 0.45, dmg: [270, 13], range: 420, radius: 70,
+    cost: 20, cd: 5, castTime: 0.45, dmg: [320, 15], range: 420, radius: 70,
     runes: [
       R('stun', '突き飛ばし', '当たった敵を 1 秒気絶させる', { status: { id: 'stun', chance: 1, dur: 1 } }),
       R('fire', '炎の突進', '火炎ダメージになり、50% の確率で炎上させる', FIRE(0.5)),
@@ -161,7 +161,7 @@ export const SKILLS = [
   {
     id: 'w_rend', cls: 'warrior', kind: 'active', name: '引き裂き', desc: '半径 {radius} を切り裂き {dmg} のダメージ。必ず強い出血（通常の 2.5 倍）を与える。',
     tags: ['attack', 'melee', 'area', 'dot'], element: 'phys', unlock: 30, behavior: 'melee',
-    cost: 15, cd: 0, castTime: 0.6, dmg: [160, 7], range: 120, radius: 110, status: { id: 'bleed', chance: 1 }, extra: { bleedMul: 2.5 },
+    cost: 15, cd: 0, castTime: 0.6, dmg: [190, 8.5], range: 120, radius: 110, status: { id: 'bleed', chance: 1 }, extra: { bleedMul: 2.5 },
     runes: [
       R('deep', '深い傷', '出血のダメージ ×1.6', { bleedMul: 1.6 }),
       R('wide', '広い薙ぎ', '範囲 +60%', { radius: 1.6 }),
@@ -183,7 +183,7 @@ export const SKILLS = [
   {
     id: 'w_ult', cls: 'warrior', kind: 'ult', name: '天崩し', desc: '【奥義】天高く跳び、着地の衝撃で半径 {radius} に {dmg} のダメージと 2 秒の気絶。続けて余震が 3 回（各 30%）。',
     tags: ['attack', 'melee', 'area', 'ult'], element: 'phys', unlock: 50, behavior: 'ult_cataclysm', auto: 'elite',
-    cost: 0, cd: 90, castTime: 1.2, dmg: [1800, 90], range: 600, radius: 360, status: { id: 'stun', chance: 1, dur: 2 },
+    cost: 0, cd: 90, castTime: 1.2, dmg: [2200, 110], range: 600, radius: 360, status: { id: 'stun', chance: 1, dur: 2 },
     runes: [
       R('fire', '灼熱の天崩し', '火炎ダメージになり、着地点が 5 秒燃える', { element: 'fire', burn: { dur: 5, tick: 0.5, mult: 0.06 } }),
       R('quick', '即座の天崩し', '待ち時間 -30%', { cdMul: 0.7 }),
@@ -209,7 +209,7 @@ export const SKILLS = [
   {
     id: 'r_multishot', cls: 'ranger', kind: 'active', name: '扇射ち', desc: '{count} 本の矢を扇状に放ち、それぞれ {dmg} のダメージ。貫通 {pierce}。',
     tags: ['attack', 'projectile', 'area'], element: 'phys', unlock: 1, behavior: 'projectile',
-    cost: 25, cd: 0, castTime: 0.65, dmg: [80, 4], range: 650, speed: 1200, count: 5, pierce: 1, spread: 0.5,
+    cost: 25, cd: 0, castTime: 0.65, dmg: [140, 7], range: 650, speed: 1200, count: 5, pierce: 1, spread: 0.5,
     runes: [
       R('frost', '凍て矢', '冷気ダメージになり、15% の確率で凍結させる', COLD(0.15)),
       R('more', '矢の扇', '矢 +3、1 本あたり ×0.85', { countAdd: 3, dmgMul: 0.85 }),
@@ -220,7 +220,7 @@ export const SKILLS = [
   {
     id: 'r_trap', cls: 'ranger', kind: 'active', name: '炸裂罠', desc: '罠を投げて仕掛ける（同時に {count} 個まで、{dur} 秒）。敵が踏むと半径 {radius} に {dmg} のダメージ。',
     tags: ['attack', 'area', 'trap'], element: 'phys', unlock: 3, behavior: 'trap',
-    cost: 15, cd: 3, castTime: 0.4, dmg: [260, 12], range: 380, radius: 130, count: 3, duration: 12, delay: 0.4,
+    cost: 15, cd: 3, castTime: 0.4, dmg: [320, 15], range: 380, radius: 150, count: 3, duration: 12, delay: 0.4,
     runes: [
       R('frost', '氷の罠', '冷気ダメージになり、40% の確率で凍結させる', COLD(0.4)),
       R('poison', '毒の罠', '毒ダメージになり、爆発の後に毒の霧が 4 秒残る', { element: 'poison', status: { id: 'poison', chance: 0.5 }, extra: { leaveCloud: { dur: 4, tick: 0.5, mult: 0.12 } } }),
@@ -231,7 +231,7 @@ export const SKILLS = [
   {
     id: 'r_volley', cls: 'ranger', kind: 'active', name: '矢の雨', desc: '{count} 本の矢を空から降らせ、それぞれ半径 {radius} に {dmg} のダメージ。',
     tags: ['attack', 'area', 'projectile'], element: 'phys', unlock: 6, behavior: 'rain',
-    cost: 30, cd: 4, castTime: 0.6, dmg: [125, 6], range: 600, radius: 90, count: 6, delay: 0.45,
+    cost: 30, cd: 4, castTime: 0.6, dmg: [190, 9], range: 600, radius: 110, count: 6, delay: 0.45,
     runes: [
       R('fire', '火の雨', '火炎ダメージになり、25% の確率で炎上させる', FIRE(0.25)),
       R('frost', '氷の雨', '冷気ダメージになり、15% の確率で凍結させる', COLD(0.15)),
@@ -242,7 +242,7 @@ export const SKILLS = [
   {
     id: 'r_beast', cls: 'ranger', kind: 'summon', name: '狩りの相棒', desc: '狼の相棒を {summons} 体呼ぶ。狼は素早く噛みつき、武器ダメージの {dmgp} のダメージ。',
     tags: ['minion', 'summon'], element: 'phys', unlock: 9, behavior: 'summon',
-    cost: 30, cd: 6, castTime: 0.6, dmg: [140, 7], maxSummons: 1, summon: { unit: 'wolf', life: 3, aps: 1.4, range: 80, status: { id: 'bleed', chance: 0.2 } },
+    cost: 30, cd: 6, castTime: 0.6, dmg: [105, 5], maxSummons: 1, summon: { unit: 'wolf', life: 3, aps: 1.4, range: 80, status: { id: 'bleed', chance: 0.2 } },
     runes: [
       R('hawk', '鷹', '空を飛ぶ鷹になり、380 離れた所から急降下で攻撃する（ライフ -33%）', { summon: { unit: 'hawk', range: 380, fly: true, life: 2 } }),
       R('boar', '猪', 'ライフ ×2 の猪になり、敵の攻撃を引きつける', { summon: { unit: 'boar', life: 6, aps: 0.9, taunt: true } }),
@@ -251,9 +251,9 @@ export const SKILLS = [
     ],
   },
   {
-    id: 'r_snipe', cls: 'ranger', kind: 'basic', name: '狙い撃ち', desc: 'じっくり狙い、{dmg} のダメージ。貫通 {pierce}、クリティカル率 +15%。',
+    id: 'r_snipe', cls: 'ranger', kind: 'basic', name: '狙い撃ち', desc: 'じっくり狙い、{dmg} のダメージ。貫通 {pierce}、当たると半径 {explode} で弾ける。クリティカル率 +15%。',
     tags: ['attack', 'projectile'], element: 'phys', unlock: 11, basic: true, behavior: 'projectile',
-    cost: 0, cd: 0, castTime: 0.85, dmg: [205, 9], range: 700, speed: 1900, count: 1, pierce: 2, extra: { critBonus: 0.15 },
+    cost: 0, cd: 0, castTime: 0.85, dmg: [255, 12], range: 700, speed: 1900, count: 1, pierce: 3, explode: 160, extra: { critBonus: 0.15 },
     runes: [
       R('heavy', '重い矢', 'ダメージ ×1.3、動作 +20%', { dmgMul: 1.3, castMul: 1.2 }),
       R('frost', '凍てる狙撃', '冷気ダメージになり、15% の確率で凍結させる', COLD(0.15)),
@@ -275,7 +275,7 @@ export const SKILLS = [
   {
     id: 'r_frost', cls: 'ranger', kind: 'active', name: '氷晶の矢', desc: '氷の矢を放ち {dmg} の冷気ダメージ。当たると半径 {explode} で砕け散る。20% の確率で凍結。',
     tags: ['attack', 'projectile', 'area'], element: 'cold', unlock: 18, behavior: 'projectile',
-    cost: 20, cd: 0, castTime: 0.6, dmg: [175, 8], range: 650, speed: 1200, explode: 100, status: { id: 'freeze', chance: 0.2, dur: 1 },
+    cost: 20, cd: 0, castTime: 0.6, dmg: [185, 8.5], range: 650, speed: 1200, explode: 130, status: { id: 'freeze', chance: 0.2, dur: 1 },
     runes: [
       R('shatter', '砕ける氷', '凍結・冷却中の敵へのダメージ ×1.5', { extra: { shatter: 1.5 } }),
       R('nova', '冷気の爆散', '砕ける範囲 +80%', { explodeMul: 1.8 }),
@@ -286,7 +286,7 @@ export const SKILLS = [
   {
     id: 'r_turret', cls: 'ranger', kind: 'active', name: '弩の砲台', desc: '弩の砲台を {summons} 台まで置く（{ttl} 秒）。砲台は {range} 先まで撃ち、1 発で {dmg} のダメージ。',
     tags: ['attack', 'minion', 'projectile', 'trap'], element: 'phys', unlock: 23, behavior: 'turret',
-    cost: 35, cd: 10, castTime: 0.6, dmg: [95, 4.5], range: 600, maxSummons: 2, summon: { unit: 'turret', life: 4, aps: 1.5, range: 600, ttl: 15, stationary: true },
+    cost: 35, cd: 10, castTime: 0.6, dmg: [85, 4], range: 600, maxSummons: 2, summon: { unit: 'turret', life: 4, aps: 1.5, range: 600, ttl: 15, stationary: true },
     runes: [
       R('fire', '火の砲台', '火炎ダメージになり、20% の確率で炎上させる', FIRE(0.2)),
       R('multi', '連弩', '一度に 3 本撃つ（1 本 ×0.6）', { dmgMul: 0.6, summon: { multi: 3 } }),
@@ -308,7 +308,7 @@ export const SKILLS = [
   {
     id: 'r_chain', cls: 'ranger', kind: 'active', name: '稲妻矢', desc: '雷の矢が {chain} 回跳ね、当たるたびに {dmg} の雷撃ダメージ（跳ねるたびに -15%）。',
     tags: ['attack', 'projectile'], element: 'lightning', unlock: 36, behavior: 'chain',
-    cost: 25, cd: 0, castTime: 0.6, dmg: [155, 7], range: 600, chain: 4, status: { id: 'shock', chance: 0.2 },
+    cost: 25, cd: 0, castTime: 0.6, dmg: [160, 7.5], range: 600, chain: 5, status: { id: 'shock', chance: 0.2 },
     runes: [
       R('fork', '枝分かれ', '跳ねる回数 +3、1 回あたり ×0.85', { chain: 3, dmgMul: 0.85 }),
       R('fire', '炎の連鎖', '火炎ダメージになり、25% の確率で炎上させる', FIRE(0.25)),
@@ -334,7 +334,7 @@ export const SKILLS = [
   {
     id: 's_bolt', cls: 'sorcerer', kind: 'basic', name: '魔弾', desc: '魔力の弾で {dmg} の雷撃ダメージ。',
     tags: ['spell', 'projectile'], element: 'lightning', unlock: 1, basic: true, behavior: 'projectile',
-    cost: 0, cd: 0, castTime: 0.5, dmg: [130, 6], range: 650, speed: 1100, count: 1,
+    cost: 0, cd: 0, castTime: 0.5, dmg: [145, 7], range: 650, speed: 1100, count: 1,
     runes: [
       R('fire', '火の玉', '火炎ダメージになり、当たると半径 80 で小さく爆発する', { element: 'fire', explode: 80 }),
       R('frost', '氷の礫', '冷気ダメージになり、10% の確率で凍結させる', COLD(0.1)),
@@ -389,7 +389,7 @@ export const SKILLS = [
   {
     id: 's_flame', cls: 'sorcerer', kind: 'basic', name: '火の礫', desc: '燃える礫を放ち {dmg} の火炎ダメージ。当たると半径 {explode} で弾ける。20% の確率で炎上。',
     tags: ['spell', 'projectile'], element: 'fire', unlock: 10, basic: true, behavior: 'projectile',
-    cost: 0, cd: 0, castTime: 0.55, dmg: [125, 6], range: 650, speed: 1000, explode: 70, status: { id: 'ignite', chance: 0.2 },
+    cost: 0, cd: 0, castTime: 0.55, dmg: [140, 7], range: 650, speed: 1000, explode: 90, status: { id: 'ignite', chance: 0.2 },
     runes: [
       R('big', '大きな礫', '弾ける範囲 ×2、動作 +20%', { explodeMul: 2, castMul: 1.2 }),
       R('cold', '氷の礫', '冷気ダメージになり、10% の確率で凍結させる', COLD(0.1)),
@@ -411,7 +411,7 @@ export const SKILLS = [
   {
     id: 's_meteor', cls: 'sorcerer', kind: 'active', name: '隕石', desc: '1 秒後に隕石を落とし、半径 {radius} に {dmg} の火炎ダメージ。落ちた所は 3 秒燃える。',
     tags: ['spell', 'area'], element: 'fire', unlock: 17, behavior: 'meteor',
-    cost: 45, cd: 8, castTime: 0.8, dmg: [480, 22], range: 650, radius: 170, delay: 1.0, burn: { dur: 3, tick: 0.5, mult: 0.12 },
+    cost: 45, cd: 8, castTime: 0.8, dmg: [540, 25], range: 650, radius: 170, delay: 1.0, burn: { dur: 3, tick: 0.5, mult: 0.12 },
     runes: [
       R('comet', '彗星', '冷気ダメージになり、50% の確率で凍結させる', { element: 'cold', status: { id: 'freeze', chance: 0.5, dur: 1.2 } }),
       R('swarm', '流星群', '小さな隕石を 3 つ落とす（1 つ ×0.45）', { countAdd: 2, dmgMul: 0.45 }),
@@ -606,7 +606,7 @@ export const SKILLS = [
   {
     id: 'a_stab', cls: 'assassin', kind: 'basic', name: '連刃', desc: '素早く切りつけ {dmg} のダメージ。',
     tags: ['attack', 'melee'], element: 'phys', unlock: 1, basic: true, behavior: 'melee',
-    cost: 0, cd: 0, castTime: 0.38, dmg: [115, 5], range: 100, radius: 40,
+    cost: 0, cd: 0, castTime: 0.38, dmg: [92, 4], range: 100, radius: 40,
     runes: [
       R('venom', '毒刃', '毒ダメージになり、40% の確率で毒を与える', POIS(0.4)),
       R('twin', '双刃', '2 回切りつける（1 回 ×0.6）', { dmgMul: 0.6, extra: { hits: 2 } }),
@@ -617,7 +617,7 @@ export const SKILLS = [
   {
     id: 'a_fan', cls: 'assassin', kind: 'active', name: '刃の扇', desc: '周りに刃をばらまき、半径 {radius} に {dmg} のダメージ。35% の確率で出血させる。',
     tags: ['attack', 'area'], element: 'phys', unlock: 1, behavior: 'nova',
-    cost: 22, cd: 0, castTime: 0.5, dmg: [170, 8], radius: 160, status: { id: 'bleed', chance: 0.35 },
+    cost: 22, cd: 0, castTime: 0.5, dmg: [115, 5.5], radius: 160, status: { id: 'bleed', chance: 0.35 },
     runes: [
       R('shadow', '影の扇', '虚無ダメージになり、ダメージ ×1.1', { element: 'void', dmgMul: 1.1 }),
       R('poison', '毒の扇', '毒ダメージになり、50% の確率で毒を与える', POIS(0.5)),
@@ -628,7 +628,7 @@ export const SKILLS = [
   {
     id: 'a_dash', cls: 'assassin', kind: 'active', name: '影走り', desc: '影になって {range} 先まで駆け抜け、通り抜けた敵に {dmg} のダメージ。クリティカル率 +20%。',
     tags: ['attack', 'melee', 'movement'], element: 'phys', unlock: 3, behavior: 'dash',
-    cost: 20, cd: 4, castTime: 0.35, dmg: [205, 10], range: 380, radius: 60, extra: { critBonus: 0.2 },
+    cost: 20, cd: 4, castTime: 0.35, dmg: [180, 9], range: 380, radius: 60, extra: { critBonus: 0.2 },
     runes: [
       R('poison', '毒の足跡', '毒ダメージになり、60% の確率で毒を与える', POIS(0.6)),
       R('return', '往復', '駆け抜けたあと戻りながらもう一度当てる（×0.7）', { extra: { back: 0.7 } }),
@@ -661,7 +661,7 @@ export const SKILLS = [
   {
     id: 'a_clone', cls: 'assassin', kind: 'summon', name: '影分身', desc: '影の分身を {summons} 体呼ぶ（{ttl} 秒）。分身は素早く切りつけ、武器ダメージの {dmgp} のダメージ。',
     tags: ['minion', 'summon'], element: 'phys', unlock: 11, behavior: 'summon',
-    cost: 35, cd: 12, castTime: 0.4, dmg: [85, 4], maxSummons: 2, summon: { unit: 'clone', life: 2, aps: 1.6, range: 100, ttl: 12 },
+    cost: 35, cd: 12, castTime: 0.4, dmg: [70, 3.3], maxSummons: 2, summon: { unit: 'clone', life: 2, aps: 1.6, range: 100, ttl: 12 },
     runes: [
       R('more', '分身の群れ', '分身 +1、1 体あたり ×0.8', { maxSummons: 1, dmgMul: 0.8 }),
       R('long', '長い残影', 'いる時間 +60%', { summon: { ttlMul: 1.6 } }),
@@ -672,7 +672,7 @@ export const SKILLS = [
   {
     id: 'a_mark', cls: 'assassin', kind: 'active', name: '死の刻印', desc: '敵に刻印を {dur} 秒刻む。刻印された敵は受けるダメージ +{curse}%、受けるクリティカルダメージ +50%。倒すと気力 +30。',
     tags: ['attack', 'curse'], element: 'void', unlock: 14, behavior: 'curse',
-    cost: 15, cd: 8, castTime: 0.3, range: 600, radius: 60, curse: { vuln: 0.25, mark: 0.5, dur: 8, resOnKill: 30 }, auto: 'elite',
+    cost: 15, cd: 8, castTime: 0.3, range: 600, radius: 60, curse: { vuln: 0.15, mark: 0.3, dur: 8, resOnKill: 30 }, auto: 'elite',
     runes: [
       R('spread', '広がる刻印', '半径 240 の敵すべてに刻む', { radius: 4 }),
       R('death', '死の連鎖', '刻印の敵が倒れると、320 以内の近くの敵に刻印が移る', { curse: { spread: true } }),
@@ -683,7 +683,7 @@ export const SKILLS = [
   {
     id: 'a_blades', cls: 'assassin', kind: 'active', name: '刃の嵐', desc: '{count} 枚の刃が {dur} 秒間まわりを回り、触れた敵に {dmg} のダメージ（同じ敵には {tick} 秒ごと）。',
     tags: ['attack', 'area'], element: 'phys', unlock: 18, behavior: 'orbit',
-    cost: 30, cd: 9, castTime: 0.4, dmg: [72, 3.5], count: 5, radius: 110, duration: 6, tick: 0.3,
+    cost: 30, cd: 9, castTime: 0.4, dmg: [50, 2.4], count: 5, radius: 110, duration: 6, tick: 0.3,
     runes: [
       R('more', '刃の竜巻', '刃 +3、1 枚あたり ×0.85', { countAdd: 3, dmgMul: 0.85 }),
       R('poison', '毒の嵐', '毒ダメージになり、30% の確率で毒を与える', POIS(0.3)),
@@ -716,7 +716,7 @@ export const SKILLS = [
   {
     id: 'a_flurry', cls: 'assassin', kind: 'active', name: '千刃', desc: '{dur} 秒間、目にも止まらぬ速さで切り続け、{tick} 秒ごとに半径 {radius} の敵に {dmg} のダメージ。',
     tags: ['attack', 'melee', 'channel'], element: 'phys', unlock: 37, behavior: 'flurry',
-    cost: 30, cd: 0, castTime: 0.2, duration: 1.2, tick: 0.1, dmg: [44, 2.1], range: 110, radius: 80,
+    cost: 30, cd: 0, castTime: 0.2, duration: 1.2, tick: 0.1, dmg: [38, 1.8], range: 110, radius: 80,
     runes: [
       R('poison', '毒の千刃', '毒ダメージになり、20% の確率で毒を与える', POIS(0.2)),
       R('long', '終わらぬ刃', '切り続ける時間 +60%、消費 +15', { durMul: 1.6, costAdd: 15 }),
@@ -727,7 +727,7 @@ export const SKILLS = [
   {
     id: 'a_ult', cls: 'assassin', kind: 'ult', name: '冥府の舞', desc: '【奥義】影となって敵から敵へ {count} 回跳び移り、そのたびに必ずクリティカルで {dmg} のダメージ。',
     tags: ['attack', 'melee', 'ult'], element: 'phys', unlock: 50, behavior: 'ult_shadowdance', auto: 'elite',
-    cost: 0, cd: 80, castTime: 0.3, dmg: [520, 26], range: 600, radius: 70, count: 10,
+    cost: 0, cd: 90, castTime: 0.3, dmg: [330, 16.5], range: 600, radius: 70, count: 7,
     runes: [
       R('poison', '毒の舞', '毒ダメージになり、100% の確率で毒を与える', { element: 'poison', status: { id: 'poison', chance: 1 } }),
       R('more', '終わらぬ舞', '跳ぶ回数 +5、1 回あたり ×0.85', { countAdd: 5, dmgMul: 0.85 }),

@@ -1,6 +1,6 @@
 // ウェーブの組み立て（worldHooks.waveComposer）。物語・苦行のステージ 1〜9 で使う。
 // 群れの型: 混成 / 同族の群れ / 前衛と後衛 / チャンピオンの群れ / 群れの長とお供 / 精鋭の行軍。
-// 数はステージで増える（ステージ 1: 3〜4 体 → ステージ 9: 6〜7 体、苦行 +1）。
+// 数はステージで増える（ステージ 1: 4〜5 体 → ステージ 9: 7〜8 体、苦行 +1）。
 // ときどき小さな出来事（待ち伏せ・祠・呪われた宝箱）。ため込み屋はここで群れの後ろに混ざる。
 
 import { worldHooks } from '../../systems/world.js';
@@ -31,7 +31,7 @@ const melee = (id) => !ranged(id);
 export function composeWave(sys, { zone, stage, wave, level, rng }) {
   const t = sys.w.torment || 0;
   const mons = zone.monsters.filter((id) => MONSTER[id]);
-  const n = 3 + Math.floor((stage - 1) / 3) + rng.int(0, 1) + (t > 0 ? 1 : 0) + (wave === 3 && stage >= 5 ? 1 : 0);
+  const n = 4 + Math.floor((stage - 1) / 3) + rng.int(0, 1) + (t > 0 ? 1 : 0) + (wave === 3 && stage >= 5 ? 1 : 0);
   const out = [];
   const elitePool = zone.elites?.length ? zone.elites : mons;
   // 出来事

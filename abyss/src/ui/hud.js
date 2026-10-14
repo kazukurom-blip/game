@@ -106,7 +106,10 @@ export class Hud {
         stt = `<b class="hud-bossl">ボス戦</b>${tl > 0 ? `　残り <span class="${tl < 10 ? 'hud-hurry' : ''}">${fmtClock(tl)}</span>` : ''}`;
       } else {
         stt = `ステージ ${w.stage} / ${STAGES_PER_ZONE}　<span class="dim">Lv ${ws.level()}</span>`;
-        wv = Array.from({ length: WAVES_PER_STAGE }, (_, i) => `<span class="wv ${i < ws.wave - (c.enemies().length ? 1 : 0) ? 'done' : i < ws.wave ? 'cur' : ''}"></span>`).join('');
+        // ウェーブが多いので点ではなく棒と数で出す（スマホでもはみ出さない）
+        const done = Math.max(0, ws.wave - (c.enemies().length ? 1 : 0));
+        const pct = Math.min(100, (done / WAVES_PER_STAGE) * 100);
+        wv = `<span class="wvbar"><i style="width:${pct.toFixed(1)}%"></i></span><span class="wvtx">ウェーブ ${Math.min(WAVES_PER_STAGE, Math.max(1, ws.wave))}/${WAVES_PER_STAGE}</span>`;
       }
     } else {
       zt = ws.modeLabel ? ws.modeLabel() : w.mode;

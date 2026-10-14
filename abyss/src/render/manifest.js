@@ -254,6 +254,7 @@ export function fxPartsOf(s) {
   for (const r of s.runes || []) {
     if (r.mod?.behavior) out.push(...(FX_PARTS[r.mod.behavior] || []));
     if (r.mod?.explode && !out.includes('area')) out.push('area');
+    if ((r.mod?.extra?.castStatus || r.mod?.castStatus) && !out.includes('area')) out.push('area'); // 唱えたときの範囲の状態異常（衝撃の輪を出す）
   }
   if (s.explode && !out.includes('area')) out.push('area');
   if ((s.ult || s.ultimate || (s.tags || []).includes('ultimate')) && !out.includes('cut')) out.push('cut', 'area', 'hit');

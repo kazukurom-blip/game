@@ -257,7 +257,7 @@ export const TREE_BOUNDS = (() => {
 
 /** 振り直しの費用（Lv30 までは無料）。points = 返ってくる点の数 */
 export const TREE_FREE_RESPEC_LEVEL = 30;
-export const treeRespecCost = (level, points, Pfn) => (level < TREE_FREE_RESPEC_LEVEL || points <= 0 ? 0 : Math.round(points * 6 * Pfn(level) ** 0.85));
+export const treeRespecCost = (level, points, Gfn) => (level < TREE_FREE_RESPEC_LEVEL || points <= 0 ? 0 : Math.round(points * 6 * Gfn(level))); // Gfn はゴールドの曲線 PG
 /** 主人公のレベルで手に入るパッシブの点の追加（10 レベルごとに +1） */
 export const treeBonusPoints = (level) => Math.floor(level / 10);
 

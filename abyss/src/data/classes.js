@@ -15,7 +15,7 @@ export const CLASSES = [
     weapons: ['sword', 'axe', 'mace', 'greatsword'],
     offhands: ['shield'],
     armorPref: ['plate', 'mail'],
-    baseMods: [{ s: 'inc_life', v: 20 }, { s: 'armor', v: 4 }, { s: 'block', v: 0 }],
+    baseMods: [{ s: 'inc_life', v: 20 }, { s: 'armor', v: 40 }, { s: 'block', v: 0 }],
     trait: {
       id: 'fury', name: '闘志',
       desc: '怒り 1 につき与えるダメージ +0.3%（最大 +30%）。怒りが 50 以上のあいだ、受けるダメージ -10%。',
@@ -32,11 +32,11 @@ export const CLASSES = [
     en: 'Ranger',
     desc: '弓で遠くから射抜く。矢の雨・罠・砲台、そして相棒の獣とともに群れを一掃する。集中は時間で回復する。',
     primary: 'dex',
-    resource: { id: 'focus', name: '集中', max: 100, regen: 10, onHit: 0, start: 100, color: '#7cff5a' },
+    resource: { id: 'focus', name: '集中', max: 100, regen: 14, onHit: 0, start: 100, color: '#7cff5a' },
     weapons: ['bow', 'crossbow'],
     offhands: ['quiver'],
     armorPref: ['leather', 'mail'],
-    baseMods: [{ s: 'dodge', v: 5 }, { s: 'move_speed', v: 5 }],
+    baseMods: [{ s: 'dodge', v: 5 }, { s: 'move_speed', v: 5 }, { s: 'inc_life', v: 15 }],
     trait: {
       id: 'hunter', name: '狩りの目',
       desc: '遠くの敵ほど大きなダメージ。距離 100 ごとに +4%（最大 +24%）。相棒の獣・砲台のダメージ +15%。',
@@ -57,7 +57,7 @@ export const CLASSES = [
     weapons: ['staff', 'wand'],
     offhands: ['orb'],
     armorPref: ['cloth'],
-    baseMods: [{ s: 'inc_elemental', v: 10 }, { s: 'res_all', v: 12 }, { s: 'inc_life', v: 10 }],
+    baseMods: [{ s: 'inc_elemental', v: 10 }, { s: 'res_all', v: 12 }, { s: 'inc_life', v: 30 }],
     trait: {
       id: 'surge', name: '魔力の奔流',
       desc: '呪文を 5 回唱えるごとに 4 秒間「奔流」になり、呪文のダメージ +30%・詠唱の速さ +20%。',
@@ -99,7 +99,7 @@ export const CLASSES = [
     weapons: ['dagger', 'claw'],
     offhands: ['offblade'],
     armorPref: ['leather'],
-    baseMods: [{ s: 'crit_chance', v: 5 }, { s: 'attack_speed', v: 10 }],
+    baseMods: [{ s: 'crit_chance', v: 5 }, { s: 'attack_speed', v: 10 }, { s: 'dodge', v: 6 }, { s: 'inc_life', v: 10 }],
     trait: {
       id: 'vital', name: '急所狙い',
       desc: 'クリティカルのたびに気力 +3。毒・出血を受けている敵へのクリティカル率 +10%。',

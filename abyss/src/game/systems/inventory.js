@@ -207,7 +207,7 @@ export class InventorySystem {
     slot ||= item.slot === 'ring' ? (this.hero.equip.ring1 ? (this.hero.equip.ring2 ? 'ring1' : 'ring2') : 'ring1') : item.slot;
     const st = this.game.state;
     const basic = st.hero.bar.find(Boolean);
-    const before = this.game.H || computeHero(st, this.game);
+    const before = computeHero(st, this.game); // 戦闘中の強化（バフ・祠）を入れずに比べる（after と同じ条件。入れると空いた枠にも着けなくなる）
     const over = { [slot]: item };
     if (slot === 'weapon' && weaponStats(item)?.twoHanded) over.offhand = null;
     const after = computeHero(st, this.game, { equipOverride: over });

@@ -77,8 +77,10 @@ const ARMOR_WORD = {
 export const BASES = [];
 function add(b) { BASES.push(b); }
 
+// 着けるのに要るレベルは、出始めるアイテム Lv の 8 割（強さ担当: 少し先の地域の装備も着けられるように。レベルが遅れて装備が止まるのを防ぐ）
+export const BASE_REQ_MUL = 0.8;
 for (let t = 1; t <= 11; t++) {
-  const req = TIER_REQ[t - 1];
+  const req = Math.max(1, Math.round(TIER_REQ[t - 1] * BASE_REQ_MUL));
   for (const [kind, w] of Object.entries(WEAPONS)) {
     add({ id: `${kind}_${t}`, slot: 'weapon', kind, tier: t, req, name: `${w.mats[t - 1]}${KIND_NAMES[kind]}`, dmg: w.dmg, aps: w.aps, twoHanded: !!w.twoHanded, range: w.range, implicit: w.implicit, art: `gear.${kind}`, icon: `icon.item.${kind}` });
   }
@@ -226,7 +228,7 @@ A('res_fire', 'res_fire', 'S', RES_ON, 60, [4, 8], [36, 42], { group: 'res_fire'
 A('res_cold', 'res_cold', 'S', RES_ON, 60, [4, 8], [36, 42], { group: 'res_cold' });
 A('res_lightning', 'res_lightning', 'S', RES_ON, 60, [4, 8], [36, 42], { group: 'res_lightning' });
 A('res_poison', 'res_poison', 'S', RES_ON, 50, [4, 8], [36, 42], { group: 'res_poison' });
-A('res_void', 'res_void', 'S', on('chest'), 15, [3, 6], [17, 21], { n: 6, group: 'res_void' });
+A('res_void', 'res_void', 'S', on('chest', 'boots'), 30, [4, 7], [26, 32], { n: 8, group: 'res_void' });
 A('res_all', 'res_all', 'S', on('helm', 'chest', 'boots', 'amulet', 'ring', OFF_ALL), 30, [2, 4], [17, 21], { n: 8 });
 A('dodge', 'dodge', 'S', on('chest', 'legs', 'boots'), 30, [1, 1.5], [6.2, 7.6], { n: 8 });
 A('block', 'block', 'S', on(['offhand', ['shield']]), 30, [2, 3], [10, 12.5], { n: 8 });

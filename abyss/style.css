@@ -173,6 +173,10 @@ textarea.savebox { width: 100%; font-family: monospace; font-size: 11px; }
 .hud-hurry { color: #ff6060; font-weight: 900; }
 .hud-waves { display: flex; gap: 4px; margin-top: 5px; }
 .hud-waves .wv { width: 20px; height: 5px; border-radius: 3px; background: #3a3142; }
+.hud-waves { align-items: center; }
+.hud-waves .wvbar { flex: 1; min-width: 60px; max-width: 150px; height: 5px; border-radius: 3px; background: #3a3142; overflow: hidden; }
+.hud-waves .wvbar > i { display: block; height: 100%; background: linear-gradient(90deg, #8a6a3a, var(--gold)); transition: width .2s; }
+.hud-waves .wvtx { font-size: 10px; color: var(--dim); white-space: nowrap; margin-left: 6px; }
 .hud-waves .wv.done { background: var(--gold); }
 .hud-waves .wv.cur { background: #8a6a3a; }
 .hud-ctrl { display: flex; gap: 6px; flex-wrap: wrap; }

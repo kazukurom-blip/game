@@ -14,8 +14,9 @@
 // 出来事（game.events）: stageStart, stageClear, bossSpawn, bossFail, zoneClear, storyClear, tormentUnlock, tormentChanged,
 //                         goblinSpawn, goblinKill, goblinEscape, miniEvent, autoBossRetry
 
-import { ZONES, ZONE, ACT, STAGES_PER_ZONE, WAVES_PER_STAGE, BOSS_TIME, ACT_BOSS_TIME_MUL, FINAL_BOSS_TIME_MUL, ACT_BOSS_LIFE_MUL, EARLY_BOSS, stageLevel, FINAL_ZONE } from '../../data/world.js';
+import { ZONES, ZONE, ACT, STAGES_PER_ZONE, WAVES_PER_STAGE, BOSS_TIME, ACT_BOSS_TIME_MUL, FINAL_BOSS_TIME_MUL, ACT_BOSS_LIFE_MUL, FINAL_BOSS_LIFE_MUL, FINAL_BOSS_DMG_MUL, BOSS_FAIL_EASE, BOSS_ULT_READY, EARLY_BOSS, stageLevel, FINAL_ZONE } from '../../data/world.js';
 import { MONSTER, ELITE_AFFIXES } from '../../data/monsters.js';
+import { SKILL } from '../../data/skills.js';
 import { BAL } from '../../data/balance.js';
 import { runSched, clearSched } from '../content/world/util.js';
 import { estimateDps } from '../skills.js';
@@ -38,7 +39,10 @@ export const GOBLIN_SPAWN = { first: [300, 600], every: [600, 900], weights: { g
 // 苦行の自動最適化
 export const TORMENT_AUTO = { window: 120, upRate: 0.9, downRate: 0.35, maxDeaths: 2 };
 // ボスの自動再挑戦
-export const AUTO_BOSS = { minGap: 45, maxGap: 300, margin: 1.0 };
+export const AUTO_BOSS = { minGap: 30, maxGap: 180, margin: 1.0 }; // 強さ担当: 45/300 → 30/180（負けるほどボスが弱る BOSS_FAIL_EASE と合わせて、壁を短く）
+// 見張り: ふつうのステージで、この秒数だれも倒れないか、STALL_WAVE_SEC 秒ウェーブが進まなければステージをやり直す
+export const STALL_RESTART_SEC = 120;
+export const STALL_WAVE_SEC = 600;
 
 export function isWeekend(date = new Date()) { const d = date.getDay(); return d === 0 || d === 6; }
 
@@ -152,10 +156,18 @@ export class WorldSystem {
   /** 地域のボスのライフの追加の倍率（章のボスは少し軽く、深淵王は重く） */
   bossLifeMul(z) {
     const def = MONSTER[z.boss];
-    if (def?.kind === 'final') return 1.5 * ACT_BOSS_LIFE_MUL;
-    if (EARLY_BOSS[z.global] && !(this.w.torment > 0)) return EARLY_BOSS[z.global][0];
+    const ease = this.bossEase(z).life;
+    if (def?.kind === 'final') return FINAL_BOSS_LIFE_MUL * ACT_BOSS_LIFE_MUL * ease;
+    if (EARLY_BOSS[z.global] && !(this.w.torment > 0)) return EARLY_BOSS[z.global][0] * ease;
     // 第一章のボスは「最初の壁」なので軽くしない
-    return z.zoneIdx === 4 && z.actIdx > 0 ? ACT_BOSS_LIFE_MUL : 1;
+    return (z.zoneIdx === 4 && z.actIdx > 0 ? ACT_BOSS_LIFE_MUL : 1) * ease * (this.w.torment > 0 ? BAL.TORMENT.bossLife ?? 1 : 1);
+  }
+
+  /** 続けて負けるほどボスが少し弱る（BOSS_FAIL_EASE。勝つと戻る）。{ life, dmg, pct } */
+  bossEase(z) {
+    const n = Math.max(0, this.w.bossLog?.[z.id]?.streak || 0);
+    const E = BOSS_FAIL_EASE;
+    return { life: 1 - Math.min(E.lifeMax, n * E.life), dmg: 1 - Math.min(E.dmgMax, n * E.dmg), pct: Math.round(Math.min(E.lifeMax, n * E.life) * 100) };
   }
 
   bossTimeFor(z) {
@@ -175,9 +187,11 @@ export class WorldSystem {
     if (this.isBossStage()) {
       const isAct = z.zoneIdx === 4;
       const def = MONSTER[z.boss];
-      const u = c.spawnMonster(z.boss, { level: L + 1, rank: isAct ? 'actboss' : 'boss', x: h.x + 620, y: 0, lifeMul: diff.life * this.bossLifeMul(z), dmgMul: diff.dmg * (EARLY_BOSS[z.global] && !(this.w.torment > 0) ? EARLY_BOSS[z.global][1] : 1) });
+      const u = c.spawnMonster(z.boss, { level: L + 1, rank: isAct ? 'actboss' : 'boss', x: h.x + 620, y: 0, lifeMul: diff.life * this.bossLifeMul(z), dmgMul: diff.dmg * this.bossEase(z).dmg * (def?.kind === 'final' ? FINAL_BOSS_DMG_MUL : 1) * (EARLY_BOSS[z.global] && !(this.w.torment > 0) ? EARLY_BOSS[z.global][1] : 1) });
       this.bossUnit = u;
       this.bossTimer = this.bossTimeFor(z);
+      // ボス戦の始めに奥義の待ち時間を BOSS_ULT_READY 秒以下にする（直前の群れで使ってしまい、勝ち負けが運で決まるのを防ぐ）
+      if (h?.cds) for (const id in h.cds) if (SKILL[id]?.kind === 'ult') h.cds[id] = Math.min(h.cds[id], BOSS_ULT_READY);
       this.bossStart = this.game.time;
       this.bossEstAtStart = this.estDpsRaw();
       // お供
@@ -282,6 +296,16 @@ export class WorldSystem {
     const h = c.hero;
     const wd = this.watch;
     if (!h || h.dead || this.transition > 0) { wd.t = 0; wd.dmg = c.stats.dmgDone; return; }
+    // 倒しきれない敵（再生するエリート・手下を呼び続ける敵など）に当て続けて止まるのを防ぐ: ふつうのステージで
+    // 2 分だれも倒れないか、10 分ウェーブが進まなければやり直す（手下は倒れ続けるので、撃破数だけでは見張れない。
+    // 弱い主人公の遅いウェーブまでやり直すと、ステージが終わらずボスに再挑戦できなくなるので、ウェーブの方は長めに）
+    const kills = this.game.state.meta.stats.kills;
+    const key = `${this.w.zone}:${this.w.stage}:${this.wave}`;
+    if (wd.key !== key || !c.enemies().length || this.bossUnit || this.w.mode !== 'campaign') { wd.key = key; wd.kills = kills; wd.kt = 0; wd.wt = 0; } else {
+      if (wd.kills !== kills) { wd.kills = kills; wd.kt = 0; } else wd.kt = (wd.kt || 0) + dt;
+      wd.wt = (wd.wt || 0) + dt;
+      if (wd.kt >= STALL_RESTART_SEC || wd.wt >= STALL_WAVE_SEC) { wd.kt = 0; wd.wt = 0; this.stuckRestarts = (this.stuckRestarts || 0) + 1; this.startStage(); return; }
+    }
     if (c.stats.dmgDone !== wd.dmg) { wd.dmg = c.stats.dmgDone; wd.t = 0; wd.nudged = false; return; }
     const foes = c.enemies();
     if (!foes.length) { wd.t = 0; return; }
@@ -341,7 +365,7 @@ export class WorldSystem {
     const L = this.campaignLevel(z, STAGES_PER_ZONE, torment) + 1;
     const rk = BAL.RANK[z.zoneIdx === 4 ? 'actboss' : 'boss'];
     const dl = (torment > 0 ? BAL.torment(torment).life : 1) * BAL.monsterScale(L - 1).life;
-    const life = BAL.monsterLife(L) * (def.life || 1) * rk.life * dl * this.bossLifeMul(z);
+    const life = BAL.monsterLife(L) * (def.life || 1) * (1 + (def.tax || 0)) * rk.life * dl * this.bossLifeMul(z); // tax: 特技の重さ（data/monsters.js）
     const time = this.bossTimeFor(z) + (def.phases ? def.phases.length * 20 : 0);
     return { life, need: life / (time * 0.85), time, def, level: L };
   }

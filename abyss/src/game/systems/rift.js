@@ -46,7 +46,7 @@ export function riftDifficulty(g) {
   };
 }
 /** 裂け目の中での耐性の減り（苦行の段に置き換える） */
-export const riftTormentTier = (g) => Math.min(BAL.MAX_TORMENT, Math.floor(g / 5));
+export const riftTormentTier = (g) => Math.min(BAL.MAX_TORMENT, Math.floor(g / 8)); // 耐性の減り（8 段ごとに魔境 1 段ぶん）
 /** セーブの中の裂け目の途中が使える形か */
 function validRun(r) {
   const fin = Number.isFinite;
@@ -403,7 +403,7 @@ export class RiftSystem {
     const sc = BAL.monsterScale(level);
     const lifeMul = BAL.torment(tier).life * sc.life;
     const dmgMul = BAL.torment(tier).dmg * sc.dmg;
-    const life = BAL.monsterLife(level) * (def.life || 1) * BAL.RANK.guardian.life * lifeMul;
+    const life = BAL.monsterLife(level) * (def.life || 1) * (1 + (def.tax || 0)) * BAL.RANK.guardian.life * lifeMul; // tax: 特技の重さ
     const dmg = BAL.monsterDmg(level) * (def.dmg || 1) * BAL.RANK.guardian.dmg * dmgMul;
     return { def, level, life, dmg, atkCd: def.atkCd || 1.8, time: GATE.time, el: def.element || 'phys', lifeMul, dmgMul, tier };
   }

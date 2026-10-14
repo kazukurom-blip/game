@@ -25,7 +25,8 @@ const BASE_SLOTS = ['weapon', 'offhand', 'helm', 'chest', 'gloves', 'belt', 'leg
 const SLOT_WEIGHT = { weapon: 14, offhand: 8, helm: 9, chest: 9, gloves: 9, belt: 8, legs: 9, boots: 9, amulet: 7, ring: 12 };
 
 /** レアリティを決める。rank は 'normal'|'champion'|'rare'|'boss'... 、mf はレア発見率（%） */
-export function rollRarity(rng, { mf = 0, rank = 'normal', minRarity = null, torment = 0 } = {}) {
+export function rollRarity(rng, opts = {}) {
+  const { mf = 0, rank = 'normal', minRarity = null, torment = 0 } = opts;
   const w = { ...BAL.RARITY_WEIGHTS };
   const mfe = BAL.mfEffective(mf);
   const boost = rank === 'normal' ? 1 : rank === 'champion' ? 2.5 : rank === 'rare' ? 3.5 : rank === 'goblin' ? 6 : 8;
@@ -34,6 +35,10 @@ export function rollRarity(rng, { mf = 0, rank = 'normal', minRarity = null, tor
     else if (r.idx >= 2) w[r.id] *= (1 + mfe / 100) * boost;
     if (r.idx === 1) w[r.id] *= 1 + mfe / 300;
   }
+  // 深く進むほどレジェンダリー・ユニーク・セットが増える（DESIGN §3: 序盤は 5〜10 分に 1 つ → 終盤は 1〜2 分に 1 つ）。ミシックは増やさない
+  const lb = BAL.legendaryBoost ? BAL.legendaryBoost(opts.ilvl || 1) : 1;
+  for (const id of ['legendary', 'unique', 'set']) if (w[id]) w[id] *= lb;
+  if (w.epic && BAL.epicBoost) w.epic *= BAL.epicBoost(opts.ilvl || 1);
   if (rank !== 'normal') w.common *= 0.3;
   if (torment > 0) { w.common *= Math.max(0.1, 1 - torment * 0.08); }
   if (minRarity) {

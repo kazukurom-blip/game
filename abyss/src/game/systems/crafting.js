@@ -12,11 +12,13 @@
 import { AFFIX, affixPool, BASE, socketKind } from '../../data/items.js';
 import { RARITY } from '../../data/rarity.js';
 import { MATERIAL } from '../../data/materials.js';
-import { P } from '../../data/balance.js';
+import { PG, curve } from '../../data/balance.js';
 import { rollTier, rollAffixValue, addAffixes, lootHooks } from '../loot.js';
 import { topTier, affixRoll, setAffixValue, specialDef, fixedValue, socketMax } from '../content/items/itemlib.js';
 
 export const ENH_MAX = 20;
+/** 強化 1 回の鉄屑 = (今の +値 + 1) × これ × 曲線^0.2（強さ担当: 1.5 → 1.0。第五章までに主な装備を +10 にできるくらい） */
+export const ENH_SCRAP = 1.0;
 /** +N → +N+1 の成功率（%） */
 export const ENH_RATE = [100, 100, 100, 100, 100, 90, 85, 80, 70, 60, 55, 50, 45, 40, 35, 30, 25, 20, 15, 10];
 export const ENH_MILESTONES = {
@@ -33,7 +35,7 @@ export const CORRUPT_IMPLICITS = {
 };
 export const CORRUPT_OUTCOMES = ['変化なし', '特別な内在が付く', 'オプション 1 行が上限を超える（×1.3）', 'オプションをすべて振り直す'];
 
-const gp = (item) => P(item.ilvl || 1) ** 0.85;
+const gp = (item) => PG(item.ilvl || 1);
 
 export class CraftingSystem {
   constructor(game) { this.game = game; this.id = 'crafting'; }
@@ -84,7 +86,7 @@ export class CraftingSystem {
     const pity = item.enhPity || 0;
     const need = base >= 100 ? 0 : Math.max(1, Math.ceil(100 / base) - 1);
     const chance = need && pity >= need ? 100 : Math.min(100, base + pity * base * 0.1);
-    const cost = { gold: Math.round(25 * gp(item) * 1.2 ** cur), mats: { scrap: Math.ceil((cur + 1) * 1.5 * P(item.ilvl || 1) ** 0.2) } };
+    const cost = { gold: Math.round(25 * gp(item) * 1.2 ** cur), mats: { scrap: Math.ceil((cur + 1) * ENH_SCRAP * curve(item.ilvl || 1) ** 0.2) } };
     return { ok: true, cur, next: cur + 1, base, chance: Math.round(chance * 10) / 10, pity, need, cost, milestone: ENH_MILESTONES[cur + 1] || null, missing: this.missing(cost) };
   }
 

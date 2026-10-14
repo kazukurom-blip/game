@@ -5,7 +5,7 @@
 
 import { generateItem } from '../loot.js';
 import { gameHooks } from '../game.js';
-import { BAL, P } from '../../data/balance.js';
+import { BAL, PG } from '../../data/balance.js';
 import { RARITY } from '../../data/rarity.js';
 import { MATERIAL } from '../../data/materials.js';
 import { MYTHIC, MYTHICS } from '../../data/uniques.js';
@@ -25,7 +25,7 @@ export const GAMBLE_SLOTS = ['weapon', 'offhand', 'helm', 'chest', 'gloves', 'be
 export const BAG_STEPS = [80, 100, 120, 140, 160, 180, 200];
 export const BAG_MAX = 200;
 export const STASH_MAX = 8;
-/** 素材の値段（1 つあたりの基準。実際は × P(主人公のレベル)^0.85）。buy: 商人から買える */
+/** 素材の値段（1 つあたりの基準。実際は × PG(主人公のレベル)）。buy: 商人から買える */
 export const MAT_PRICE = {
   scrap: { base: 2, buy: true, pack: 20 },
   dust: { base: 8, buy: true, pack: 10 },
@@ -99,7 +99,7 @@ export class MerchantSystem {
     const cur = this.inv.bagSize;
     const next = BAG_STEPS.find((s) => s > cur) || null;
     const step = BAG_STEPS.indexOf(next);
-    return { cur, next, max: BAG_MAX, cost: next ? Math.round(2000 * 4 ** step) : 0 };
+    return { cur, next, max: BAG_MAX, cost: next ? Math.round(20000 * 4 ** step) : 0 };
   }
   expandBag() {
     const b = this.bagInfo();
@@ -111,7 +111,7 @@ export class MerchantSystem {
   }
   stashInfo() {
     const n = this.inv.stash.length;
-    return { tabs: n, max: STASH_MAX, cost: n < STASH_MAX ? Math.round(5000 * 5 ** (n - 1)) : 0 };
+    return { tabs: n, max: STASH_MAX, cost: n < STASH_MAX ? Math.round(50000 * 5 ** (n - 1)) : 0 };
   }
   addStashTab() {
     const s = this.stashInfo();
@@ -123,7 +123,7 @@ export class MerchantSystem {
   }
 
   // ---------------- 素材
-  priceScale() { return P(this.st.hero.level) ** 0.85; }
+  priceScale() { return PG(this.st.hero.level); }
   matPrice(id) {
     const p = MAT_PRICE[id];
     if (!p) return null;

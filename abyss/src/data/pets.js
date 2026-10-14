@@ -75,8 +75,9 @@ export const EGG = Object.fromEntries(EGGS.map((e) => [e.id, e]));
 
 export const PET_BAL = {
   // 卵が落ちる確率（そのランクの敵 1 体あたり）。天井: 対象の敵を PITY 体倒すと必ず落ちる
-  EGG_CHANCE: { champion: 1 / 220, rare: 1 / 180, boss: 1 / 150, actboss: 1 / 80, guardian: 1 / 60, goblin: 1 / 12 },
-  PITY: 600,
+  // 強さ担当: 1 ステージのウェーブが増えてエリートも増えたので、エリートの卵を少し珍しく（1 周目の物語で卵 20 個前後・ペット 12 種ほど）
+  EGG_CHANCE: { champion: 1 / 350, rare: 1 / 300, boss: 1 / 150, actboss: 1 / 80, guardian: 1 / 60, goblin: 1 / 12 },
+  PITY: 900,
   LEVEL_GAP: 10, // 主人公より この Lv 以上低い敵からは卵が落ちない
   // 卵の種類の重み（ランク別）
   EGG_ODDS: {

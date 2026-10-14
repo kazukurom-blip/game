@@ -24,13 +24,14 @@ export const ACH_CATEGORIES = [
 export const TIER_POINTS = [5, 10, 15, 25, 40, 60, 90, 130];
 export const SECRET_POINTS = 25;
 
-/** 実績ポイント 1 あたりの効果 */
+/** 実績ポイント 1 あたりの効果（強さ担当: 全部で約 3,900 pt。物語の終わりで約 1,000 pt → ダメージ +50%・ライフ +20% くらい。
+ *  全部そろえてもダメージ +195%（祭壇・星晶の誉れで最大 ×2）。足し算の枠なので、終盤の増加 % の山の中では効きすぎない） */
 export const POINT_BONUS = [
-  { s: 'inc_dmg', v: 0.1 },
-  { s: 'inc_life', v: 0.04 },
-  { s: 'gold_find', v: 0.1 },
-  { s: 'xp_bonus', v: 0.05 },
-  { s: 'magic_find', v: 0.02 },
+  { s: 'inc_dmg', v: 0.05 },
+  { s: 'inc_life', v: 0.02 },
+  { s: 'gold_find', v: 0.05 },
+  { s: 'xp_bonus', v: 0.02 },
+  { s: 'magic_find', v: 0.01 },
 ];
 
 const L = [];

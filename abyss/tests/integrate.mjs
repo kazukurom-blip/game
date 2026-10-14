@@ -450,6 +450,7 @@ function richGame(seed = 31) {
   ok(g.sys.rift.begin(1).ok, 'rift');
   run(g, 15);
   eq(st.world.mode, 'rift', '裂け目の途中');
+  g.sys.achievements?.check?.({ silent: true }); // 実績は 2.5 秒ごとに調べるので、読み込みで調べた分と比べられるように先に済ませる
   return g;
 }
 
