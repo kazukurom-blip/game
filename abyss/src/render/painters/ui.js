@@ -134,3 +134,36 @@ export function paintTitle(ctx, spec, w, h) {
   ctx.fillStyle = rg(ctx, w / 2, h * 0.55, h * 0.3, w * 0.75, [[0, 'rgba(0,0,0,0)'], [1, 'rgba(0,0,0,0.75)']]); ctx.fillRect(0, 0, w, h);
   void shade; void blob; void star;
 }
+
+/** そのほかの画面の飾り（ui.*）: 枠・帯・紋章。ID の言葉で形を決める */
+const RAR = { common: '#c8c8c8', magic: '#5aa0ff', rare: '#ffe25a', epic: '#c56bff', legendary: '#ff9a2e', set: '#3dff7a', unique: '#e8b56b', mythic: '#ff4d6d' };
+export function paintUiMisc(ctx, spec, w, h) {
+  const id = spec.id;
+  const key = Object.keys(RAR).find((k) => id.includes(k));
+  const col = spec.params?.color || RAR[key] || '#d2ad55';
+  if (/frame|border|card|slot/.test(id)) {
+    const r = Math.min(w, h) * 0.12;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(0,0,0,0.85)'; ctx.lineWidth = 5; roundRect2(ctx, 4, 4, w - 8, h - 8, r); ctx.stroke();
+    ctx.strokeStyle = lg(ctx, 0, 0, 0, h, [[0, shade(col, 0.45)], [0.5, col], [1, shade(col, -0.4)]]); ctx.lineWidth = 3; roundRect2(ctx, 4, 4, w - 8, h - 8, r); ctx.stroke();
+    ctx.strokeStyle = rgba(col, 0.4); ctx.lineWidth = 1; roundRect2(ctx, 9, 9, w - 18, h - 18, r * 0.7); ctx.stroke();
+    for (const [x, y] of [[6, 6], [w - 6, 6], [6, h - 6], [w - 6, h - 6]]) { ctx.fillStyle = col; star(ctx, x, y, 4, Math.min(w, h) * 0.06, 1.5); ctx.fill(); }
+    ctx.restore();
+    return;
+  }
+  if (/beam|pillar|ray/.test(id)) {
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = lg(ctx, 0, 0, 0, h, [[0, rgba(col, 0)], [0.6, rgba(col, 0.5)], [1, rgba(col, 0.95)]]); ctx.fillRect(w * 0.3, 0, w * 0.4, h);
+    ctx.fillStyle = lg(ctx, 0, 0, 0, h, [[0, 'rgba(255,255,255,0)'], [1, 'rgba(255,255,255,0.8)']]); ctx.fillRect(w * 0.46, 0, w * 0.08, h);
+    ctx.restore();
+    return;
+  }
+  // 紋章
+  const s = Math.min(w, h);
+  ctx.save(); ctx.translate(w / 2, h / 2);
+  glow(ctx, 0, 0, s * 0.48, col, 0.35);
+  ctx.strokeStyle = col; ctx.lineWidth = s * 0.04; ctx.beginPath(); ctx.arc(0, 0, s * 0.36, 0, TAU); ctx.stroke();
+  ctx.fillStyle = rgba(col, 0.9); star(ctx, 0, 0, 6, s * 0.28, s * 0.1); ctx.fill();
+  ctx.restore();
+}
+function roundRect2(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }

@@ -228,7 +228,12 @@ export class FxSystem {
     const mode = this.s.dmgNumbers === false ? 'none' : (this.s.fxDmgMode || 'all');
     if (mode === 'none') return;
     if (mode === 'crit' && !e.crit && e.team !== 'hero') return;
-    const key = e.unit?.id ?? e.uid ?? e.target?.id ?? null;
+    let key = e.unit?.id ?? e.uid ?? e.target?.id ?? null;
+    if (key === null) {
+      // 出来事に相手が書かれていないときは、その位置にいる敵を探す（相手ごとに合算するため）
+      const us = this.scene.game?.combat?.units;
+      if (us) for (const u of us) if (u.y === e.y && Math.abs(u.x - e.x) < 8 && (u.team === 'hero') === (e.team === 'hero')) { key = u.id; break; }
+    }
     const now = this.time;
     const isHero = e.team === 'hero';
     // 100ms 以内の同じ相手への数字は合算する

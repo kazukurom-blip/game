@@ -2,6 +2,7 @@
 // 一番奥 = 空・遠い山や建物、中景 = 木・建物・柱などの影絵（下は地面で隠れる）、地面 = 歩く所（上の端は中景になじむ）。
 // 地面の上端（y=0）は画面の y=520、キャラの足元は地面の y≈8〜72。
 
+import { ZONE } from '../../data/world.js';
 import { TAU, rgba, shade, mix, lg, rg, roundRect, ellipse, blob, taper, poly, line, glow, rng, waveTable, wrapDraw, star } from './util.js';
 
 const W0 = 1280;
@@ -604,7 +605,8 @@ const ACT = {
 export function paintBackground(ctx, spec, w, h) {
   const p = spec.params || {};
   const parts = spec.id.split('.');
-  const act = p.act || parts[1];
+  let act = p.act || parts[1];
+  if (!ACT[act]) act = ZONE[parts[1]]?.act || (/^a(\d+)z/.test(parts[1] || '') ? `act${parts[1].match(/^a(\d+)z/)[1]}` : 'act1');
   const layerId = p.layer || (parts[2] === 'mid' ? 'mid' : parts[2] === 'ground' ? 'ground' : 'far');
   const A = ACT[act] || ACT.act1;
   const r = rng(`${act}:${layerId}`);

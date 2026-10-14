@@ -489,3 +489,12 @@ function relic(ctx, w, h, kind, P, id) {
   }
   void mix;
 }
+
+/** そのほかの装備の枠（gear.amulet / gear.ring / 知らない種類） */
+export function paintGearMisc(ctx, spec, w, h) {
+  const kind = spec.params?.kind || spec.id.split('.')[1];
+  if (WEAPON_KINDS_ALL.includes(kind)) return paintWeaponSlot(ctx, spec, w, h);
+  if (OFFHAND_KINDS_ALL.includes(kind)) return paintOffhandSlot(ctx, spec, w, h);
+  const P = { ...BASE_PAL, glow: '#ffd080' };
+  outlined(ctx, w, h, (c) => relic(c, w, h, kind, P, spec.id), { width: 0.8 });
+}

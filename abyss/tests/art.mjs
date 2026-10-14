@@ -75,7 +75,7 @@ await t('すべての枠を描いても例外が出ない', () => {
   ok(n > 100, `枠が少ない ${n}`);
 });
 await t('知らない ID でも描ける（宝石・ルーン・素材・召喚物・ユニーク・アイコン）', () => {
-  for (const id of ['icon.gem.ruby_7', 'icon.gem.abyss_heart', 'icon.gem.x', 'icon.rune.el', 'icon.rune.zod', 'icon.mat.reagent_fire', 'icon.mat.unknown_stuff', 'icon.foo.bar', 'icon.skill.unknown_skill', 'minion.bone_golem', 'minion.shadow_clone', 'minion.whatever', 'pet.unknown', 'gear.u.nothing', 'fx.unknown.proj', 'fx.enemy.weird', 'monster.unknown']) {
+  for (const id of ['icon.gem.ruby_7', 'icon.gem.abyss_heart', 'icon.gem.x', 'icon.rune.el', 'icon.rune.zod', 'icon.mat.reagent_fire', 'icon.mat.unknown_stuff', 'icon.foo.bar', 'icon.skill.unknown_skill', 'minion.bone_golem', 'minion.shadow_clone', 'minion.whatever', 'pet.unknown', 'gear.u.nothing', 'fx.unknown.proj', 'fx.enemy.weird', 'monster.unknown', 'gear.amulet', 'gear.ring', 'gear.weird', 'ui.frame.legendary', 'ui.beam.mythic', 'ui.badge', 'bg.a3z2', 'bg.a3z2.mid', 'bg.a1z1.ground', 'hero.warrior.pose']) {
     ok(assets.painterFor(id), `painter が無い ${id}`);
     assets.cache.delete(id); assets.fallbackCanvas(id);
   }
