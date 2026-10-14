@@ -234,6 +234,9 @@ const main = async () => {
     await mc.close();
   }
   // ===================== アイテム担当ここまで =====================
+  // ===== combat（戦闘・スキル担当）: 中身は下の smokeCombat =====
+  if (want('combat')) await smokeCombat(page, check);
+  // ===== /combat =====
   check('エラーが 0 件', errors.length === 0, errors.slice(0, 5).join(' | '));
   await browser.close();
   srv.close();
@@ -242,3 +245,110 @@ const main = async () => {
   process.exit(fail.length ? 1 : 0);
 };
 main().catch((e) => { console.error(e); process.exit(1); });
+
+// ===================== combat（戦闘・スキル担当）: スキルの窓・刻印・星座盤・パラゴン・奥義の演出 =====================
+async function smokeCombat(page, check) {
+  const shot = (name) => page.screenshot({ path: path.join(SHOTS, `combat_${name}.png`) });
+  const panelOk = async (label) => { const bad = await page.$('.panel .bad'); const t = bad ? await bad.textContent() : ''; check(label, !t.startsWith('表示できませんでした'), t); };
+  await page.evaluate(() => {
+    const g = window.__game;
+    g.newGame('warrior', '試し');
+    const h = g.state.hero;
+    h.level = 35; h.skillPoints = 12;
+    g.sys.skills.learnUnlocked(true);
+    for (const id of Object.keys(h.skills)) h.skills[id].lvl = 8;
+    h.skills.w_cleave.rune = 'bleed';
+    h.skills.w_cleave.mxp = 4000;
+    for (const id of ['sup_area', 'sup_brutal', 'sup_bleed', 'sup_haste', 'sup_area']) g.sys.skills.addGlyph(g.sys.skills.makeGlyph({ id, level: 40 }), { quiet: true });
+    const gl = g.state.inv.glyphs.find((x) => x.id === 'sup_brutal');
+    g.sys.skills.socket('w_cleave', 0, gl.uid);
+    h.tree.points = 30;
+    g.combat.recalc(true);
+    g.onSkillsChanged();
+    window.__ui.openPanel('skills');
+  });
+  await page.waitForTimeout(400);
+  check('スキルの窓に 12 個のスキル', (await page.$$('.sk2-card')).length === 12);
+  await page.click('.sk2-card .sk2-top');
+  await page.waitForTimeout(300);
+  check('スキルを押すとルーン・刻印・条件が出る', !!(await page.$('.sk2-detail .sk2-rune')) && !!(await page.$('.sk2-detail .sk2-sock')));
+  await shot('skills');
+  await panelOk('スキルの窓（戦闘）が開ける');
+  await page.click('.panel-skills .tabs .tab:nth-child(2)');
+  await page.waitForTimeout(300);
+  check('補助の刻印の一覧が出る', (await page.$$('.gl-row')).length >= 3);
+  await shot('glyphs');
+  // 星座盤
+  const okAlloc = await page.evaluate(() => { const r = window.__game.sys.tree.allocate('warrior.b1.n'); window.__ui.openPanel('tree'); return r.ok; });
+  await page.waitForTimeout(500);
+  check('星座盤で要の点を振れる', okAlloc);
+  const box = await (await page.$('.tr-canvas')).boundingBox();
+  for (let i = 0; i < 6; i++) { await page.mouse.move(box.x + box.width / 2 + (i - 3) * 9, box.y + box.height / 2 - 30 - i * 12); await page.waitForTimeout(60); }
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height * 0.42);
+  await page.waitForTimeout(250);
+  await shot('tree');
+  // ドラッグとホイール
+  await page.mouse.move(box.x + 100, box.y + 100); await page.mouse.down(); await page.mouse.move(box.x + 160, box.y + 180, { steps: 5 }); await page.mouse.up();
+  await page.mouse.wheel(0, 300);
+  await page.waitForTimeout(250);
+  await shot('tree_zoom');
+  await panelOk('星座盤の窓が開ける');
+  // パラゴン
+  await page.evaluate(() => { const g = window.__game; g.state.hero.level = 100; g.state.hero.paragon.level = 120; g.sys.tree.autoParagon(); window.__ui.renderPanel(); });
+  await page.click('.panel-tree .tabs .tab:nth-child(2)');
+  await page.waitForTimeout(300);
+  check('パラゴンの盤が 4 つ出る', (await page.$$('.pg-board')).length === 4);
+  await shot('paragon');
+  // 奥義の演出（各クラス）
+  for (const cls of ['warrior', 'ranger', 'sorcerer', 'necromancer', 'assassin']) {
+    const used = await page.evaluate((c) => {
+      const g = window.__game;
+      g.newGame(c, c);
+      const h = g.state.hero; h.level = 55;
+      g.sys.skills.learnUnlocked(true);
+      for (const id of Object.keys(h.skills)) h.skills[id].lvl = 10;
+      g.combat.recalc(true);
+      g.sys.skills.autoArrange(true);
+      g.onSkillsChanged();
+      let ult = false;
+      const hx = g.combat.hero.x;
+      g.combat.spawnMonster('boss_butcher', { level: 30, rank: 'boss', x: hx + 260 });
+      for (let i = 0; i < 6; i++) g.combat.spawnMonster('rot_zombie', { level: 30, x: hx + 300 + i * 40 });
+      for (let i = 0; i < 20 * 8 && !ult; i++) { g.tick(0.05); ult = g.combat.fx.some((e) => e.t === 'ult'); }
+      return ult;
+    }, cls);
+    await page.waitForTimeout(700);
+    await shot(`ult_${cls}`);
+    check(`${cls} が奥義を使う`, used);
+  }
+  // スマホの幅でスキルの窓と星座盤
+  const browser = page.context().browser();
+  const m = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+  const p2 = await m.newPage();
+  const errs = [];
+  p2.on('pageerror', (e) => errs.push(e.message));
+  p2.on('console', (msg) => { if (msg.type() === 'error') errs.push(msg.text()); });
+  await p2.goto(page.url());
+  await p2.waitForSelector('#title');
+  await p2.evaluate(() => localStorage.clear());
+  await p2.reload();
+  await p2.waitForSelector('#title');
+  await p2.click('.slot.empty .btn');
+  await p2.click('.title-box .btn-primary');
+  await p2.waitForSelector('#scene');
+  await p2.evaluate(() => { const g = window.__game; g.state.hero.level = 20; g.sys.skills.learnUnlocked(true); g.state.hero.tree.points = 10; g.combat.recalc(true); g.onSkillsChanged(); window.__ui.openPanel('skills'); });
+  await p2.waitForTimeout(400);
+  await p2.evaluate(() => document.querySelector('#panel')?.scrollIntoView());
+  await p2.waitForTimeout(200);
+  await p2.screenshot({ path: path.join(SHOTS, 'combat_mobile_skills.png') });
+  const over1 = await p2.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1 || [...document.querySelectorAll('.panel-skills .sk2-card, .panel-skills .sk2-bar')].some((e) => e.getBoundingClientRect().right > window.innerWidth + 1));
+  await p2.evaluate(() => window.__ui.openPanel('tree'));
+  await p2.waitForTimeout(500);
+  await p2.evaluate(() => document.querySelector('.tr-canvas')?.scrollIntoView({ block: 'center', inline: 'nearest' }));
+  await p2.waitForTimeout(200);
+  await p2.screenshot({ path: path.join(SHOTS, 'combat_mobile_tree.png') });
+  const over2 = await p2.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1 || [...document.querySelectorAll('.panel-tree .tr-wrap, .panel-tree .tr-head')].some((e) => e.getBoundingClientRect().right > window.innerWidth + 1));
+  check('スマホでスキル・星座盤が横にはみ出さない', !over1 && !over2);
+  check('スマホでスキル・星座盤のエラーが 0 件', errs.length === 0, errs.slice(0, 3).join(' | '));
+  await m.close();
+}
