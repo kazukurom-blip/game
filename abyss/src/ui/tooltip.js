@@ -6,7 +6,8 @@ import { fmt, fmtPct } from '../engine/format.js';
 import { describeMod, statDef } from '../data/stats.js';
 import { RARITY, QUALITY } from '../data/rarity.js';
 import { SLOT_NAMES, AFFIX, BASE, KIND_NAMES, STYLE_NAMES } from '../data/items.js';
-import { itemName, itemReq, weaponStats, itemArmor, implicitMods, sellValue, baseOf, enhMult } from '../game/items.js';
+import { itemName, itemReq, weaponStats, itemArmor, implicitMods, sellValue, baseOf, enhMult, offhandDamage } from '../game/items.js';
+import { shownValue } from '../game/content/items/itemlib.js';
 import { registry } from '../game/registry.js';
 import { assets } from '../render/assets.js';
 import { spriteImg } from './dom.js';
@@ -51,12 +52,19 @@ export function itemCard(game, item, opts = {}) {
     body.append(h('div.ic-main', [h('b', `${fmt(w.min)} 〜 ${fmt(w.max)}`), ' ダメージ']));
     body.append(h('div.ic-sub', `攻撃速度 ${w.aps.toFixed(2)}${w.twoHanded ? '　両手' : ''}　1 秒あたり ${fmt((w.min + w.max) / 2 * w.aps)}`));
   }
+  // 副刀（二刀流）: 平均の半分が武器のダメージに加わる（character.js）
+  const od = offhandDamage(item);
+  if (od) {
+    body.append(h('div.ic-main', [h('b', fmt(od)), ' 副手のダメージ（平均）']));
+    body.append(h('div.ic-sub', `二刀流: 武器のダメージ +${fmt(od / 2)}・攻撃速度 ×1.1`));
+  }
   const arm = itemArmor(item);
   if (arm) body.append(h('div.ic-main', [h('b', fmt(arm)), ' アーマー']));
   const imp = implicitMods(item);
   if (imp.length) body.append(h('div.ic-implicit', imp.map((m) => modLine(m))));
   if (item.affixes?.length) {
-    body.append(h('div.ic-affixes', item.affixes.map((a) => modLine({ s: a.s, v: a.v * (q?.mult || 1) }, { star: a.g, tier: opts.tiers !== false ? tierLabel(a) : null, cls: a.g ? 'greater' : null }))));
+    // 数は品質の倍率・強化のボーナス込み（実際に効く数）
+    body.append(h('div.ic-affixes', item.affixes.map((a) => modLine({ s: a.s, v: shownValue(item, a.v) }, { star: a.g, tier: opts.tiers !== false ? tierLabel(a) : null, cls: a.g ? 'greater' : null }))));
   }
   for (const f of tooltipHooks.afterAffixes) { try { const els = f(game, item); if (els) body.append(...[].concat(els)); } catch (e) { console.error(e); } }
   // 伝説の力
@@ -83,14 +91,15 @@ export function itemCard(game, item, opts = {}) {
   if (item.locked) card.append(h('div.ic-lock', '🔒 鍵つき（分解・売却しない）'));
   // 比べ
   if (opts.compare && game.sys.inv) {
-    const slot = item.slot === 'ring' ? null : item.slot;
-    const cur = item.slot === 'ring' ? null : game.state.hero.equip[slot];
     const prob = game.sys.inv.equipProblem(item, item.slot === 'ring' ? 'ring1' : item.slot);
     if (!opts.equipped) {
       try {
+        // 指輪は着けるときと同じく、入れ替えて強くなる方（弱い方）の指輪と比べる
         const c = game.sys.inv.compare(item);
+        const cur = game.state.hero.equip[c.slot];
+        const title = !cur ? '装備すると' : item.slot === 'ring' ? `今の${c.slot === 'ring2' ? '右' : '左'}の指輪と比べると` : '今の装備と比べると';
         card.append(h('div.ic-compare', [
-          h('div.cmp-title', cur ? '今の装備と比べると' : '装備すると'),
+          h('div.cmp-title', title),
           h('div.cmp-row', [deltaSpan('火力', c.dpsPct), deltaSpan('耐久', c.ehpPct)]),
           prob ? h('div.bad', `※ ${prob}`) : null,
         ]));

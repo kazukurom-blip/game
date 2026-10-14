@@ -36,25 +36,29 @@ function classOk(def, cls) {
   return true;
 }
 
-/** 候補から 1 つ選ぶ（同じ部位を優先・クラスに合う物を 80%） */
-function pickDef(rng, list, slot, ilvl, cls, { ignoreReq = false } = {}) {
+/**
+ * 候補から 1 つ選ぶ（同じ部位を優先・クラスに合う物を 80%）。
+ * strictSlot … 部位を必ず守る（商人の目利きのように部位を選んで買うとき）。その部位に候補が無ければ null
+ */
+function pickDef(rng, list, slot, ilvl, cls, { ignoreReq = false, strictSlot = false } = {}) {
   const okLvl = list.filter((d) => ignoreReq || (d.req || 1) <= ilvl);
   if (!okLvl.length) return null;
   const sameSlot = okLvl.filter((d) => d.slot === slot);
+  if (strictSlot && !sameSlot.length) return null;
   let pool = sameSlot.length ? sameSlot : okLvl;
   if (cls && rng.chance(SMART)) {
     const smart = pool.filter((d) => classOk(d, cls));
     if (smart.length) pool = smart;
-    else { const any = okLvl.filter((d) => classOk(d, cls)); if (any.length) pool = any; }
+    else if (!strictSlot) { const any = okLvl.filter((d) => classOk(d, cls)); if (any.length) pool = any; }
   }
   return rng.weighted(pool, (d) => d.weight || 1);
 }
 
 /** セットの部品を選ぶ */
-function pickSetPiece(rng, slot, ilvl, cls) {
+function pickSetPiece(rng, slot, ilvl, cls, o = {}) {
   const all = [];
   for (const s of SETS) for (const p of s.pieces) all.push({ ...p, set: s, cls: s.cls, req: 10 });
-  const d = pickDef(rng, all, slot, ilvl, cls);
+  const d = pickDef(rng, all, slot, ilvl, cls, o);
   return d ? { set: d.set, piece: SET_PIECE[d.id].piece } : null;
 }
 
@@ -64,8 +68,10 @@ export function makeSpecialItem(rng, item, kind, ctx = {}) {
   const cls = opts.cls || null;
   const ilvl = item.ilvl;
   const primal = item.q === 2;
+  // 部位を指定して作る（商人の目利き）ときは、その部位の物だけ。無ければ null → 同じ部位のレジェンダリーになる
+  const strictSlot = !!opts.slot;
   if (kind === 'set') {
-    const sp = opts.piece ? { set: SET_PIECE[opts.piece].set, piece: SET_PIECE[opts.piece].piece } : pickSetPiece(rng, item.slot, ilvl, cls);
+    const sp = opts.piece ? { set: SET_PIECE[opts.piece].set, piece: SET_PIECE[opts.piece].piece } : pickSetPiece(rng, item.slot, ilvl, cls, { strictSlot });
     if (!sp) return null;
     const b = baseFor(rng, sp.piece.base, sp.piece.slot, ilvl, cls, item);
     if (!b) return null;
@@ -76,7 +82,7 @@ export function makeSpecialItem(rng, item, kind, ctx = {}) {
     return item;
   }
   const list = kind === 'mythic' ? MYTHICS : UNIQUES;
-  const def = opts.def ? (UNIQUE[opts.def] || MYTHIC[opts.def]) : pickDef(rng, list, item.slot, ilvl, cls, { ignoreReq: kind === 'mythic' && opts.anyReq });
+  const def = opts.def ? (UNIQUE[opts.def] || MYTHIC[opts.def]) : pickDef(rng, list, item.slot, ilvl, cls, { ignoreReq: kind === 'mythic' && opts.anyReq, strictSlot });
   if (!def) return null;
   const b = baseFor(rng, def.base, def.slot, ilvl, cls, item.slot === def.slot ? item : null);
   if (!b) return null;

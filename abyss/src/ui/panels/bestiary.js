@@ -26,7 +26,7 @@ export const bestiaryPanel = {
   refreshOn: ['meta:bestiary'],
   help: `<p><b>魔物図鑑</b>: 魔物ごとに ${KILL_TIERS.map((n) => n.toLocaleString('en-US')).join(' / ')} 体倒すと段が上がり、1 段ごとにその種族へのダメージ +1%。見つけた種類の割合が 10% / 25% / 50% / 100% になると全ダメージと最大ライフが上がります。</p>
 <p><b>宝物図鑑</b>: ユニーク・セット・ミシック・伝説の力を初めて拾うと登録されます。1 つごとに小さな永続の効果、集めた割合でさらに大きな効果があります。</p>
-<p><b>落とし物の表</b>: いまのレア発見率・魔境で、どのレアリティが何 % で落ちるかを実際の計算で出しています。</p>`,
+<p><b>落とし物の表</b>: いまのレア発見率・魔境・場所のアイテム Lv で、どのレアリティが何 % で落ちるかを実際の計算で出しています（深く進むほどレジェンダリー以上が出やすくなります）。</p>`,
   badge: (g) => g.state.meta.codexSeen?.unseen || 0,
   render(ui, el) {
     injectCss('meta-best', CSS);
@@ -164,17 +164,19 @@ function renderDrops(ui, el) {
   const torment = st.world.torment || 0;
   const qty = H?.quantity || 0;
   el.append(h('div.mt-cards', [
-    card('レア発見率', fmtPct(mf), `実効 ${fmtPct(BAL.mfEffective(mf))}（多いほど逓減）`),
+    card('レア発見率', fmtPct(mf), mf > 0 ? `実際の効き ${fmtPct(BAL.mfEffective(mf))}（100% 未満は多めに効き、超えると伸びが鈍る）` : 'レア以上が出やすくなる'),
     card('アイテム発見数', `+${fmtPct(qty)}`, `魔境の倍率 ×${Number((diff.loot || 1).toFixed(2))}`),
     card('魔境', torment ? roman(torment) : 'なし', torment ? `覚醒 ${fmtPct((diff.ancient || 0) * 100)}・極致 ${fmtPct((diff.primal || 0) * 100, 2)}` : `覚醒 ${fmtPct((diff.ancient ?? 0.08) * 100)}（レジェンダリー以上）`),
   ]));
-  const odds = Object.fromEntries(RANKS.map(([rk]) => [rk, sys.rarityOdds({ mf, rank: rk, torment })]));
+  // アイテム Lv で上のレアリティの重みが変わる（loot.js の legendaryBoost など）ので、今の場所の Lv で出す
+  const ilvl = Math.max(1, Math.round(g.sys.world.level() || 1));
+  const odds = Object.fromEntries(RANKS.map(([rk]) => [rk, sys.rarityOdds({ mf, rank: rk, torment, ilvl })]));
   const head = h('tr', [h('th', 'レアリティ'), ...RANKS.map(([, n]) => h('th', n))]);
   const rows = RARITIES.map((r) => h('tr', [
     h('td', { style: { color: r.color } }, r.name),
     ...RANKS.map(([rk]) => h('td', pctText(odds[rk][r.id]))),
   ]));
-  el.append(h('h3.sec-title', '1 個落ちたときのレアリティ'), h('div.bs-scroll', h('table.bs-odds', [head, ...rows])));
+  el.append(h('h3.sec-title', ['1 個落ちたときのレアリティ', h('span.sec-right', `アイテム Lv ${ilvl}`)]), h('div.bs-scroll', h('table.bs-odds', [head, ...rows])));
   const per = (rk) => BAL.ITEM_DROP_CHANCE * (BAL.RANK[rk]?.loot || 1) * (1 + qty / 100) * (diff.loot || 1);
   const rate = g.sys.offline.rates();
   const legOdds = ['legendary', 'set', 'unique', 'mythic'].reduce((s, id) => s + odds.normal[id], 0);

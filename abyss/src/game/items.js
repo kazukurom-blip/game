@@ -46,19 +46,23 @@ export function tierScale(base) { return 1 + 0.04 * ((base?.tier || 1) - 1); }
 export function weaponStats(item) {
   const b = baseOf(item);
   if (!b || !b.dmg || item.slot !== 'weapon') return null;
-  const scale = P(item.ilvl) * tierScale(b) * enhMult(item.enh || 0) * (QUALITY[item.q || 0]?.mult ?? 1);
+  const qm = QUALITY[item.q || 0]?.mult ?? 1;
+  const scale = P(item.ilvl) * tierScale(b) * enhMult(item.enh || 0) * qm;
   let local = 0;
-  for (const a of item.affixes || []) if (a.s === 'weapon_dmg') local += a.v;
+  // オプションの「武器ダメージ %」にも品質の倍率（ほかのオプションと同じ。itemMods・説明の窓と合わせる）
+  for (const a of item.affixes || []) if (a.s === 'weapon_dmg') local += a.v * qm;
   for (const m of registry.uniqueMods(item)) if (m.s === 'weapon_dmg') local += m.v;
+  // ソケットのルーン（鉄・淵の「武器ダメージ %」）も武器の中で効く
+  for (const m of registry.socketMods(item)) if (m.s === 'weapon_dmg') local += m.v;
   const mul = 1 + local / 100;
   return { min: b.dmg[0] * scale * mul, max: b.dmg[1] * scale * mul, aps: b.aps, kind: b.kind, range: b.range, twoHanded: b.twoHanded };
 }
 
-/** 副刀（offblade）のダメージ（二刀流の上乗せ） */
+/** 副刀（offblade）のダメージの平均（二刀流の上乗せ。半分が武器のダメージに加わる）。強化・品質込み */
 export function offhandDamage(item) {
   const b = baseOf(item);
   if (!b || !b.dmg || item.slot !== 'offhand') return 0;
-  return ((b.dmg[0] + b.dmg[1]) / 2) * P(item.ilvl) * tierScale(b) * enhMult(item.enh || 0);
+  return ((b.dmg[0] + b.dmg[1]) / 2) * P(item.ilvl) * tierScale(b) * enhMult(item.enh || 0) * (QUALITY[item.q || 0]?.mult ?? 1);
 }
 
 /** 防具のアーマー値 */
@@ -97,7 +101,7 @@ export function itemMods(item) {
   if (b?.block && item.slot === 'offhand') out.push({ s: 'block', v: 0 }); // 盾のブロックは implicit で入る
   // ユニーク・セットの固定効果、ソケットの宝石、伝説の力の数値部分は登録先から
   out.push(...registry.uniqueMods(item).filter((m) => !(m.s === 'weapon_dmg' && item.slot === 'weapon')));
-  out.push(...registry.socketMods(item));
+  out.push(...registry.socketMods(item).filter((m) => !(m.s === 'weapon_dmg' && item.slot === 'weapon')));
   out.push(...registry.powerMods(item));
   return out;
 }

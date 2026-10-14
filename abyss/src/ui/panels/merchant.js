@@ -36,7 +36,7 @@ function renderGamble(ui, el) {
     h('div.ik-sub', [h('span', `品物のアイテム Lv ${info.ilvl}（今いる場所と主人公のレベルの高い方）`), h('span', ['1 回 ', h('b', `${info.cost}`), ' 欠片'])]),
     h('div.ik-cost', [matChip(g, 'shard', info.cost)]),
     h('div.ik-odds', info.odds.flatMap((o) => [h('span', { style: { color: o.color } }, o.name), h('div.bar', h('i', { style: { width: `${Math.max(1.5, Math.min(100, o.p * 1.6))}%`, background: o.color } })), h('span.pct', `${o.p}%`)])),
-    h('div.hint', '部位を押すと 1 回買います。クラスに合う種類が出やすくなります（8 割）。'),
+    h('div.hint', '部位を押すと 1 回買います。クラスに合う種類が出やすくなります（8 割）。選んだ部位にまだ出せるユニーク・セットが無いとき（アイテム Lv が低いとき）は、同じ部位のレジェンダリーになります。'),
     h('div.ik-slotbtns', GAMBLE_SLOTS.map((s) => button(SLOT_NAMES[s], () => {
       const r = g.sys.merchant.gamble(s);
       if (!r.ok) { ui.toast(r.msg, 'bad'); return; }

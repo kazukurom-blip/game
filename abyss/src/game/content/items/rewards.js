@@ -164,11 +164,12 @@ export function offlineHook(game, rep) {
   const legFound = LEG_PLUS.reduce((s, k) => s + (found[k] || 0), 0);
   const kept = [];
   // レジェンダリー以上
-  if (legFound > 0) l.leg = game.rng.int(0, Math.floor(Math.min(LUCK.leg.max - 1, nDrops / (legFound + 1)) * g));
+  // 出ていたら、最後に出た後の回数（平均の間隔まで）に戻す。上昇の倍率をかけても天井より下（出たのに確定ドロップしない）
+  if (legFound > 0) l.leg = game.rng.int(0, Math.floor(Math.min(LUCK.leg.max - 1, nDrops / (legFound + 1) * g)));
   else l.leg += nDrops * g;
   while (l.leg >= LUCK.leg.max) { l.leg -= LUCK.leg.max; const it = forcedDrop(game, 'leg'); if (it) { l.forcedLeg++; kept.push(it); } if (kept.length > 50) { l.leg = 0; break; } }
   // ミシック
-  if ((found.mythic || 0) > 0) l.myth = game.rng.int(0, Math.floor(Math.min(LUCK.myth.max - 1, nDrops / 2) * g));
+  if ((found.mythic || 0) > 0) l.myth = game.rng.int(0, Math.floor(Math.min(LUCK.myth.max - 1, nDrops / 2 * g)));
   else l.myth += nDrops * g;
   while (l.myth >= LUCK.myth.max) { l.myth -= LUCK.myth.max; const it = forcedDrop(game, 'myth'); if (it) { l.forcedMyth++; kept.push(it); } if (kept.length > 60) { l.myth = 0; break; } }
   l.rolls += nDrops;

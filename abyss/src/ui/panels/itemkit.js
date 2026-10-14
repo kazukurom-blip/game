@@ -15,7 +15,7 @@ import { MATERIAL } from '../../data/materials.js';
 import { UNIQUE, UNIQUES, MYTHIC, MYTHICS, SET, SETS, SET_PIECE } from '../../data/uniques.js';
 import { RUNEWORD, RUNE } from '../../data/gems.js';
 import { itemName } from '../../game/items.js';
-import { specialDef, fixedValue, parseSocket, gemName, runeName, gemMod, runeMod, enhBonusPct, runewordMods } from '../../game/content/items/itemlib.js';
+import { specialDef, fixedValue, parseSocket, gemName, runeName, gemMod, runeMod, enhBonusPct, runewordMods, shownValue } from '../../game/content/items/itemlib.js';
 import { setCounts } from '../../game/content/items/loot.js';
 import { socketKind } from '../../data/items.js';
 
@@ -240,19 +240,19 @@ export function luckMeters(game) {
 // ======================================================================
 // ツールチップの追加
 // ======================================================================
-function rangeText(m, ilvl, g) {
-  const a = fixedValue(m, 0, ilvl, g); const b = fixedValue(m, 1, ilvl, g);
+/** 固定のオプションの幅（品質・強化のボーナス込みの、出ている数と同じ物差し） */
+function rangeText(item, m, g) {
+  const a = shownValue(item, fixedValue(m, 0, item.ilvl, g)); const b = shownValue(item, fixedValue(m, 1, item.ilvl, g));
   return a === b ? '' : `〔${fmt(a)}〜${fmt(b)}〕`;
 }
 tooltipHooks.afterAffixes.push((game, item) => {
   const out = [];
   const def = specialDef(item);
-  const qm = item.q ? (item.q === 2 ? 1.6 : 1.3) : 1;
   if (item.fixed?.length) {
     out.push(h('div.ic-affixes.ik-fixed', item.fixed.map((f) => {
       const m = def?.mods?.[f.i];
-      const el = modLine({ s: f.s, v: f.v * qm }, { star: f.g, cls: f.g ? 'greater' : null });
-      if (m) el.append(h('span.ik-range', rangeText(m, item.ilvl, !!f.g)));
+      const el = modLine({ s: f.s, v: shownValue(item, f.v) }, { star: f.g, cls: f.g ? 'greater' : null });
+      if (m) el.append(h('span.ik-range', rangeText(item, m, !!f.g)));
       if (f.over) el.append(h('span.ik-range', '堕×1.3'));
       return el;
     })));
@@ -261,7 +261,7 @@ tooltipHooks.afterAffixes.push((game, item) => {
   if (item.cimp) out.push(h('div.ic-affixes.ik-cimp', [modLine(item.cimp, {}), h('div.small.dim', '（堕落で付いた内在）')]));
   if (item.enh) {
     const b = enhBonusPct(item.enh);
-    out.push(h('div.small', { style: { color: '#ffd27a', marginTop: '4px' } }, `強化 +${item.enh}: 基本性能 ×${(1 + 0.05 * item.enh + 0.0025 * item.enh * item.enh).toFixed(2)}・オプションの数値 +${b}%`));
+    out.push(h('div.small', { style: { color: '#ffd27a', marginTop: '4px' } }, `強化 +${item.enh}: 基本性能 ×${(1 + 0.05 * item.enh + 0.0025 * item.enh * item.enh).toFixed(2)}・オプションの数値 +${b}%（上の数に込み）`));
   }
   return out;
 });

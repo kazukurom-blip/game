@@ -37,6 +37,13 @@ export const CORRUPT_OUTCOMES = ['変化なし', '特別な内在が付く', '�
 
 const gp = (item) => PG(item.ilvl || 1);
 
+/** オプション・固定のオプションの数値がすべて段の最大か（極致のまま手を加えていない） */
+function primalAtMax(item) {
+  for (const a of item.affixes || []) if (AFFIX[a.id] && affixRoll(item, a) < 0.95) return false; // 0.1 刻みの丸めで少し下がることがある
+  for (const f of item.fixed || []) if (f.r !== undefined && f.r < 0.95) return false;
+  return true;
+}
+
 export class CraftingSystem {
   constructor(game) { this.game = game; this.id = 'crafting'; }
   get mats() { return this.game.state.inv.mats; }
@@ -129,6 +136,7 @@ export class CraftingSystem {
     const lock = this.lockReason(item);
     if (lock) return { ok: false, msg: lock };
     if (item.fp === undefined) return { ok: false, msg: '鍛造値が無い（レア以上の装備に付く）' };
+    if (item.rrPending) return { ok: false, msg: '付け替えの候補を先に選んでください', fp: item.fp };
     const a = item.affixes?.[idx];
     if (!a) return { ok: false, msg: 'オプションを選んでください', fp: item.fp };
     const af = AFFIX[a.id];
@@ -283,6 +291,9 @@ export class CraftingSystem {
     const lock = this.lockReason(item);
     if (lock) return { ok: false, msg: lock };
     if (!item.affixes?.length && !item.fixed?.length) return { ok: false, msg: '振り直す数値が無い' };
+    if (item.rrPending) return { ok: false, msg: '付け替えの候補を先に選んでください' };
+    // 極致はすべての数値が最大（makePrimal）。振り直すと下がるだけなので止める
+    if (item.q === 2 && primalAtMax(item)) return { ok: false, msg: '極致の装備は数値がすべて最大（祝福すると下がるだけ）' };
     const cost = { gold: Math.round(15 * gp(item)), mats: { bless: 1, dust: 3 } };
     return { ok: true, cost, missing: this.missing(cost) };
   }
@@ -344,6 +355,7 @@ export class CraftingSystem {
     const rng = this.game.rng;
     const outcome = rng.int(0, 3);
     let detail = '';
+    let noop = false; // 選ばれた結果の対象が無かった（オプションの無い装備）
     if (outcome === 1) {
       const m = rng.pick(CORRUPT_IMPLICITS[socketKind(item.slot)]);
       item.cimp = { ...m };
@@ -355,8 +367,9 @@ export class CraftingSystem {
         a.over = 1.3;
         a.v = Math.round(a.v * 1.3 * 10) / 10;
         detail = a.s;
-      }
+      } else noop = true;
     } else if (outcome === 3) {
+      if (!item.affixes?.length && !item.fixed?.length && !item.power) noop = true;
       if (item.affixes?.length) {
         const n = item.affixes.length;
         item.affixes = [];
@@ -369,6 +382,6 @@ export class CraftingSystem {
     item.corrupted = 1;
     delete item.rr;
     this.game.state.meta.crafting.corrupted++;
-    return this.done(f, { kind: 'corrupt', outcome, outcomeText: CORRUPT_OUTCOMES[outcome], detail });
+    return this.done(f, { kind: 'corrupt', outcome, outcomeText: noop ? `${CORRUPT_OUTCOMES[outcome]}（オプションが無いので変化なし）` : CORRUPT_OUTCOMES[outcome], detail });
   }
 }
