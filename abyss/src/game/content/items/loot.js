@@ -298,7 +298,7 @@ invHooks.salvageExtra.push((game, item, out) => {
     if (pw && rng.chance(pw.v / 100)) out.echo = (out.echo || 0) + 1;
   }
   // はまっていた宝石・ルーンは戻る（深淵の宝石も）
-  if (item.sockets?.length && !item.rw) game.sys.gems?.returnSockets?.(item, out);
+  if (item.sockets?.length) game.sys.gems?.returnSockets?.(item, out); // ルーン語の装備は深淵の宝石だけ外れる（returnSockets が見分ける）
 });
 
 export { baseSlotOf, AFFIX, BASE };

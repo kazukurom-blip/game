@@ -41,6 +41,7 @@ abyss/
 - セーブされるのは `game.state` だけ。JSON にできる値だけを入れる（Set・関数は不可）。
 - 担当ごとの名前空間: hero（主人公・スキル・パッシブ）/ inv（持ち物）/ world（場所・難易度・裂け目）/ meta（お金・転生・実績・図鑑・日課・ペット・統計・解放）/ settings。
 - 新しい項目は `state.js` の `newState()` に足す。古いセーブは `migrate()` の `fillDefaults` で自動的に埋まる。形を変えるときは `SAVE_VERSION` を上げて `migrate()` に変換を書く。
+- 壊れたセーブも読めるように、`Game.load` は「新しく始めた直後のすべての仕組みの形」（`referenceState`）を手本に `repairTypes` で形の違う値を直し、`sanitizeLoaded` で数・装備・持ち物（`items.sanitizeItem`）・uid を整えてから各仕組みの `ensureState` を呼ぶ。`ensureState` は自分の名前空間の中身（`x ||= {}` で済まない物）も確かめる。
 
 ## 能力（ステータス）
 - すべての効果は `{ s: '能力のキー', v: 数値 }`。キーは `data/stats.js`。`agg` が 'sum'（足し算）か 'mul'（掛け算）。

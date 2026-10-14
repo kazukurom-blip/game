@@ -338,7 +338,10 @@ t('苦行: 深淵王で I が開き、章のボスで次が開く。段で敵が
 t('苦行の自動最適化: ペースが良ければ上げ、倒れたら下げる', () => {
   const g = newGame('sorcerer', 20);
   const w = g.state.world; const ws = g.sys.world;
-  w.maxTorment = 3; w.torment = 1; ws.setTormentAuto(true);
+  w.maxTorment = 3; w.torment = 1;
+  ok(!ws.setTormentAuto(true) && !ws.tormentAutoOn(), '祭壇の「苦行の見極め」が無ければ使えない');
+  g.state.meta.upgrades.auto_torment = 1; g.sys.prestige.applyUnlocks(); // 祭壇で解放（スイッチは祭壇と同じ 1 つ）
+  ok(ws.setTormentAuto(true) && g.state.meta.unlocks.autoTorment === true, 'on');
   ws.tw = { t: 119.99, kills: 200, deaths: 0 };
   ws.tickCampaignExtras(0.05);
   ok(w.torment === 2, `up ${w.torment}`);

@@ -90,10 +90,25 @@ export class InventorySystem {
     return { ok: true };
   }
 
+  /**
+   * 外した装備を戻す。倉庫から着けたならその倉庫へ、ふつうはバッグへ。
+   * バッグが満杯なら空いている倉庫へ、どこも満杯ならバッグの一番弱い物（鍵なし・外した物よりレアリティが低い）を分解して空ける。
+   * それも無ければ外した物を分解する（鍵つきは捨てずに倉庫へ）。倉庫が上限を超えて増え続けないように。
+   */
   putBack(item, f) {
-    if (f?.where === 'stash') this.inv.stash[f.tab].push(item);
-    else if (this.bagFree() > 0) this.inv.bag.push(item);
-    else this.inv.stash[0].push(item);
+    const inv = this.inv; const cap = inv.stashTabSize;
+    if (f?.where === 'stash' && inv.stash[f.tab] && inv.stash[f.tab].length < cap) { inv.stash[f.tab].push(item); return 'stash'; }
+    if (this.bagFree() > 0) { inv.bag.push(item); return 'bag'; }
+    const tab = inv.stash.find((t) => t.length < cap);
+    if (tab) { tab.push(item); return 'stash'; }
+    const idx = RARITY[item.rarity]?.idx || 0;
+    const victim = inv.bag.filter((x) => !x.locked && (RARITY[x.rarity]?.idx || 0) < idx).sort((a, b) => (RARITY[a.rarity].idx - RARITY[b.rarity].idx) || a.ilvl - b.ilvl)[0];
+    if (victim) { this.salvage([victim.uid], { silent: true }); inv.bag.push(item); return 'bag'; }
+    if (item.locked) { inv.stash[0].push(item); return 'stash'; }
+    this.addMats(this.salvageYield(item)); // はまっている宝石は salvageExtra が持ち物に戻す
+    this.game.state.meta.stats.salvaged++;
+    this.game.events.emit('invChanged', { salvaged: 1 });
+    return 'salvaged';
   }
 
   unequip(slot) {

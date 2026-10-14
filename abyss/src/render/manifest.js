@@ -10,6 +10,7 @@
 //   facing  … 'right' | 'left' | 'up' | 'front' | 'none'（絵の向き。敵は左向き、主人公は右向き）
 //   fallback… 差し替えが無いときに代わりに使う枠（例: 鎧の姿 → 体、アイコン → 装備の絵）
 //   noInherit … 末尾を削った親の ID の画像を使わない
+//   dpr     … コードで描く絵の細かさ（既定: 大きな枠は 1、ほかは 2。assets.js の fallbackDpr）
 // 指示文は slotPrompt(spec)（prompts.js の buildPrompt）。画像の作り方は docs/ASSETS.md・docs/AI_PROMPTS.md。
 //
 // ほかの担当が枠を足すとき: addSlots([{ id, cat, label, w, h, ax, ay, ... }])。後から足しても登録される。
@@ -44,6 +45,14 @@ export const GROUPS = {};
 /** 主人公の体の基準点（差し替え画像でも同じ位置に手・頭が来るように描くと合う） */
 export const HERO_ANCHORS = { hand: [0.66, 0.56], offhand: [0.34, 0.56], head: [0.5, 0.17], back: [0.44, 0.38], chest: [0.5, 0.42] };
 
+/** 武器の握り（基準点の高さ ay）。弓・弩は真ん中を持つ。ほかは柄の下の方（0.82） */
+export const WEAPON_GRIP_AY = { bow: 0.5, crossbow: 0.5 };
+export const weaponGripAy = (kind) => WEAPON_GRIP_AY[kind] ?? 0.82;
+const GRIP_NOTE = {
+  bow: '弓は縦に立てて描きます（弦を左、背を右）。基準点は真ん中の握り。斜めの絵なら「回転」で縦に直せます',
+  crossbow: '弩は先（弓の部分）を上、銃床を下にして描きます。基準点は銃床の真ん中（持つ所）。斜めの絵なら「回転」で縦に直せます',
+};
+
 /** アンカーの名前（画像の窓の表示） */
 export const ANCHOR_NAMES = { hand: '手（武器）', offhand: '副手（盾）', head: '頭（兜）', back: '背中（矢筒）', chest: '胸' };
 
@@ -51,7 +60,7 @@ export const ANCHOR_NAMES = { hand: '手（武器）', offhand: '副手（盾）
 export const FX_PARTS = {
   melee: ['swing', 'hit'], projectile: ['proj', 'hit'], nova: ['area', 'hit'], rain: ['proj', 'area', 'hit'], chain: ['chain', 'hit'], summon: ['summon'], buff: ['buff'],
   leap: ['swing', 'area', 'hit'], dash: ['trail', 'swing', 'hit'], beam: ['beam', 'hit'], whirl: ['swing', 'area', 'hit'], channel: ['swing', 'area', 'hit'], aura: ['aura', 'hit'], trap: ['trap', 'area', 'hit'],
-  totem: ['totem', 'proj', 'hit'], turret: ['totem', 'proj', 'hit'], dot: ['area', 'hit'], cloud: ['area', 'hit'], meteor: ['proj', 'area', 'hit'], orbit: ['proj', 'hit'], wall: ['area', 'hit'], wave: ['area', 'hit'],
+  totem: ['totem', 'proj', 'hit'], turret: ['totem', 'proj', 'hit'], dot: ['area', 'hit'], cloud: ['area', 'hit'], meteor: ['proj', 'area', 'hit'], orbit: ['proj', 'area', 'hit'], wall: ['area', 'hit'], wave: ['proj', 'area', 'hit'],
   curse: ['curse', 'area'], shield: ['buff'], barrier: ['buff'], ult: ['cut', 'area', 'hit'],
 };
 const FX_PART_INFO = {
@@ -71,7 +80,11 @@ const FX_PART_INFO = {
   cut: { name: '奥義のカットイン（画面に大きく出す帯）', w: 1280, h: 360, blend: 'source-over' },
 };
 const ENEMY_FX = [['arrow', '矢'], ['fireball', '火の玉'], ['orb', '魔弾'], ['bone', '骨の破片'], ['ice', '氷の棘'], ['spit', '毒のつば']];
-const ENEMY_AREAS = [['area', '地面の危険な範囲'], ['slam', '叩きつけの衝撃'], ['blast', '死に際の爆発'], ['zap', '落ちる雷']];
+const ENEMY_AREAS = [['area', '地面の危険な範囲'], ['slam', '叩きつけの衝撃'], ['blast', '死に際の爆発'], ['zap', '落ちる雷'],
+  // ボスの特技・エリートの詞（content/world/abilities.js・elites.js の telegraph の art）
+  ['meteor', '降ってくる火の玉の着弾'], ['nova', '冷気の爆発（ボスの周り）'], ['pool', '毒の沼'], ['beam', '光線の通り道'], ['spikes', '地面から突き出す棘'],
+  ['breath', '吐く息（炎・冷気）'], ['quake', '地割れ・地震'], ['firewall', '炎の壁'], ['jail', '閉じこめる檻の紋'], ['warp', '時間を遅らせる渦'],
+  ['mortar', '放り投げた爆弾の着弾'], ['blood', '血を吸う渦'], ['whirl', '回転斬りの範囲（ボスの周りを回る）']];
 const MINION_NAMES = { skeleton: '骸骨の戦士', skelmage: '骸骨の魔術師', golem: 'ゴーレム', beast: '獣の相棒', clone: '影の分身', wolf: '狼', spirit: '霊' };
 
 const extra = []; // 担当が足す枠
@@ -99,7 +112,7 @@ export function buildManifest() {
 
   // ---------------- 装備（着た姿）
   group('gear', 'weapon', '武器'); group('gear', 'offhand', '副手'); group('gear', 'helm', '兜'); group('gear', 'part', '鎧の部品'); group('gear', 'unique', 'ユニーク');
-  for (const k of WEAPON_KINDS) S.push({ id: `gear.${k}`, cat: 'gear', group: 'weapon', kind: 'gear.weapon', label: `${KIND_NAMES[k]}（手に持った姿）`, w: 110, h: 150, ax: 0.5, ay: 0.82, facing: 'up', params: { kind: k }, note: '先を真上に、柄を下にして描きます。基準点は握る所。斜めの絵なら「回転」で縦に直せます' });
+  for (const k of WEAPON_KINDS) S.push({ id: `gear.${k}`, cat: 'gear', group: 'weapon', kind: 'gear.weapon', label: `${KIND_NAMES[k]}（手に持った姿）`, w: 110, h: 150, ax: 0.5, ay: weaponGripAy(k), facing: 'up', params: { kind: k }, note: GRIP_NOTE[k] || '先を真上に、柄を下にして描きます。基準点は握る所。斜めの絵なら「回転」で縦に直せます' });
   for (const k of OFFHAND_KINDS) S.push({ id: `gear.${k}`, cat: 'gear', group: 'offhand', kind: 'gear.offhand', label: `${KIND_NAMES[k]}（副手）`, w: 90, h: 110, ax: 0.5, ay: 0.55, facing: k === 'shield' ? 'front' : 'up', params: { kind: k }, note: '基準点は持つ所（取っ手）' });
   for (const st of ARMOR_STYLES) S.push({ id: `gear.helm.${st}`, cat: 'gear', group: 'helm', kind: 'gear.helm', label: `${STYLE_NAMES[st]}の兜`, w: 80, h: 70, ax: 0.5, ay: 0.72, facing: 'right', params: { style: st }, note: '体の「頭」のアンカーに重ねます（体を差し替えたときは描かれません）' });
   for (const slot of ['chest', 'gloves', 'belt', 'legs', 'boots']) for (const st of ARMOR_STYLES) S.push({ id: `gear.${slot}.${st}`, cat: 'gear', group: 'part', kind: 'gear.part', label: `${STYLE_NAMES[st]}の${KIND_NAMES[slot]}（重ね着の部品）`, w: 150, h: 200, ax: 0.5, ay: 0.97, anchors: HERO_ANCHORS, facing: 'right', params: { slot, style: st }, note: '体の画像の上に重ねる部品（任意）。全身を差し替えるなら hero.<クラス>.outfit.<スタイル> を使う' });
@@ -112,7 +125,7 @@ export function buildManifest() {
     const kind = b?.kind || u.base || 'sword';
     const slot = u.slot || b?.slot || 'weapon';
     const params = { unique: u.id, kind, slot, name: u.name, flavor: u.flavor || '' };
-    const look = slot === 'weapon' ? { w: 110, h: 150, ax: 0.5, ay: 0.82, facing: 'up' } : slot === 'offhand' ? { w: 90, h: 110, ax: 0.5, ay: 0.55, facing: kind === 'shield' ? 'front' : 'up' } : slot === 'helm' ? { w: 80, h: 70, ax: 0.5, ay: 0.72, facing: 'right' } : null;
+    const look = slot === 'weapon' ? { w: 110, h: 150, ax: 0.5, ay: weaponGripAy(kind), facing: 'up' } : slot === 'offhand' ? { w: 90, h: 110, ax: 0.5, ay: 0.55, facing: kind === 'shield' ? 'front' : 'up' } : slot === 'helm' ? { w: 80, h: 70, ax: 0.5, ay: 0.72, facing: 'right' } : null;
     if (look) S.push({ id: `gear.u.${u.id}`, cat: 'gear', group: 'unique', kind: 'gear.unique', label: `${what}「${u.name}」（着た姿）`, ...look, params, fallback: b?.art ? [b.art] : undefined, note: '無ければベースの絵（同じ種類の装備）を使います' });
     S.push({ id: `icon.u.${u.id}`, cat: 'icon', group: group('icon', 'unique', 'ユニーク'), kind: 'icon.unique', label: `${what}「${u.name}」のアイコン`, w: 96, h: 96, ax: 0.5, ay: 0.5, facing: 'none', params, fallback: look ? [`gear.u.${u.id}`] : undefined, note: '無ければ着た姿の画像、それも無ければベースのアイコン' });
   }
@@ -161,7 +174,7 @@ export function buildManifest() {
     for (const z of a.zones || []) for (const id of [...(z.monsters || []), ...(z.elites || []), z.boss]) if (id && !actOf.has(id)) actOf.set(id, ACTS[i].id);
   });
   for (const m of MONSTERS) {
-    const big = m.boss ? 1.6 : 1;
+    const big = m.boss ? BOSS_BOX : 1;
     const gid = actOf.get(m.id) || group('monster', 'other', 'そのほか');
     S.push({ id: `monster.${m.id}`, cat: 'monster', group: gid, kind: 'monster', label: `${m.boss ? 'ボス' : '敵'}「${m.name}」`, w: Math.round(150 * big), h: Math.round(150 * big), ax: 0.5, ay: m.flying ? 0.6 : 0.97, facing: 'left', params: { mon: m.id }, note: m.flying ? '飛ぶ敵。基準点は体の中心あたり' : '左向き（主人公の方を向く）。右向きの絵なら「左右反転」' });
   }
@@ -181,15 +194,15 @@ export function buildManifest() {
   // ---------------- 背景
   for (const a of ACTS) {
     const gid = group('bg', a.id, a.name.replace(/　.*$/, ''));
-    S.push({ id: `bg.${a.id}`, cat: 'bg', group: gid, kind: 'bg', label: `${a.name}（背景・一番奥）`, w: 1280, h: 720, ax: 0, ay: 0, fit: 'width', facing: 'none', params: { act: a.id, layer: 'far' }, note: 'ゆっくり横に流れます。下の方は暗めに' });
-    S.push({ id: `bg.${a.id}.mid`, cat: 'bg', group: gid, kind: 'bg', label: `${a.name}（背景・中景、横につながる絵）`, w: 1280, h: 720, ax: 0, ay: 0, fit: 'width', facing: 'none', params: { act: a.id, layer: 'mid' }, noInherit: true, note: '空の部分は透明に。左右の端がつながる絵（「左右をつなげる」でなじませられます）' });
-    S.push({ id: `bg.${a.id}.ground`, cat: 'bg', group: gid, kind: 'bg', label: `${a.name}（地面、横につながる絵）`, w: 1280, h: 220, ax: 0, ay: 0, fit: 'width', facing: 'none', params: { act: a.id, layer: 'ground' }, noInherit: true, note: '画面の下の帯（高さ 220）。上の端が歩く面。縦長の絵は「切り抜き」で上下を切ります' });
+    S.push({ id: `bg.${a.id}`, cat: 'bg', group: gid, kind: 'bg', label: `${a.name}（背景・一番奥）`, w: 1280, h: 720, ax: 0, ay: 0, fit: 'width', facing: 'none', dpr: 1, params: { act: a.id, layer: 'far' }, note: 'ゆっくり横に流れます。下の方は暗めに' });
+    S.push({ id: `bg.${a.id}.mid`, cat: 'bg', group: gid, kind: 'bg', label: `${a.name}（背景・中景、横につながる絵）`, w: 1280, h: 720, ax: 0, ay: 0, fit: 'width', facing: 'none', dpr: 1, params: { act: a.id, layer: 'mid' }, noInherit: true, note: '空の部分は透明に。左右の端がつながる絵（「左右をつなげる」でなじませられます）' });
+    S.push({ id: `bg.${a.id}.ground`, cat: 'bg', group: gid, kind: 'bg', label: `${a.name}（地面、横につながる絵）`, w: 1280, h: 220, ax: 0, ay: 0, fit: 'width', facing: 'none', dpr: 1, params: { act: a.id, layer: 'ground' }, noInherit: true, note: '画面の下の帯（高さ 220）。上の端が歩く面。縦長の絵は「切り抜き」で上下を切ります' });
   }
 
   // ---------------- 画面の飾り
   group('ui', 'title', 'タイトル');
   S.push({ id: 'ui.logo', cat: 'ui', group: 'title', kind: 'ui.logo', label: 'タイトルロゴ', w: 720, h: 240, ax: 0.5, ay: 0.5, facing: 'none', note: '背景は透明に' });
-  S.push({ id: 'ui.title', cat: 'ui', group: 'title', kind: 'ui.title', label: 'タイトル画面の背景', w: 1280, h: 720, ax: 0, ay: 0, fit: 'width', facing: 'none', note: '画面いっぱいに広げて表示（はみ出た所は切れる）' });
+  S.push({ id: 'ui.title', cat: 'ui', group: 'title', kind: 'ui.title', label: 'タイトル画面の背景', w: 1280, h: 720, ax: 0, ay: 0, fit: 'width', facing: 'none', dpr: 1, note: '画面いっぱいに広げて表示（はみ出た所は切れる）' });
 
   if (!optional) { try { optional = [...gemSlots(GEMS_MOD), ...supportSlots(SUPPORTS_MOD)]; } catch (e) { console.warn('[manifest] 宝石・刻印の枠', e); optional = []; } }
   S.push(...optional, ...extra);
@@ -244,6 +257,14 @@ export function fxPartsOf(s) {
   }
   if (s.explode && !out.includes('area')) out.push('area');
   if ((s.ult || s.ultimate || (s.tags || []).includes('ultimate')) && !out.includes('cut')) out.push('cut', 'area', 'hit');
+  // 召喚物の攻撃はそのスキルの演出を使う（近くは斬撃、遠くからは弾、叩きつけ・爆発は範囲）
+  const sums = [s.summon, ...(s.runes || []).map((r) => r.mod?.summon)].filter(Boolean);
+  if (s.behavior === 'summon' || sums.length) {
+    out.push('swing', 'hit', 'area');
+    if (sums.some((x) => (x.range || 0) > 200)) out.push('proj');
+  }
+  // 障壁が弾ける（ルーンの burst など）ときの範囲
+  if ((s.behavior === 'barrier' || s.behavior === 'shield') && (s.runes || []).some((r) => /burst|nova|explode/.test(r.id))) out.push('area');
   return out;
 }
 
@@ -268,6 +289,24 @@ export function describeUnknown(id) {
   if (p[0] === 'minion') return `召喚物（${p.slice(1).join('.')}）`;
   if (p[0] === 'pet') return `ペット（${p.slice(1).join('.')}）`;
   return `${kindNameJa(guessKind({ id }))}（${id}）`;
+}
+
+/** ボスの枠は普通の敵（150px）の何倍の箱で作るか（絵を細かくするため。画面での大きさは unitDrawScale で決める） */
+export const BOSS_BOX = 1.6;
+/** ボスの見た目の大きさ（普通の敵の枠 150px と比べて）。データの大きさ（1.5〜2.3）を base + (大きさ - 1.6) × k に詰め、min〜max に収める */
+export const BOSS_VIS = { base: 1.5, k: 0.3, min: 1.4, max: 1.85 };
+
+/**
+ * 敵・召喚物・ペットを画面に描く大きさ。{ art: 枠の絵（spec.h）に掛ける倍率, size: 普通の敵と比べた見た目の大きさ（影・揺れ・札の位置に使う） }
+ * ボスは枠が BOSS_BOX 倍で、さらに u.size（データで 1.5〜2.3）を掛けると普通の敵の 3 倍前後になって主人公が隠れる。
+ * そこでボスだけ見た目の大きさを詰める（1.47〜1.71）。ボスの絵は枠をよく埋める（約 95%、普通の敵は約 84%）ので、
+ * 画面の上の高さは普通の敵の 1.6〜1.9 倍になる。戦いの当たりの大きさ（u.size）は変えない。
+ */
+export function unitDrawScale(u) {
+  const size = u?.size || 1;
+  if (u?.kind !== 'monster' || !u.def?.boss) return { art: size, size };
+  const vis = Math.max(BOSS_VIS.min, Math.min(BOSS_VIS.max, BOSS_VIS.base + (size - BOSS_BOX) * BOSS_VIS.k));
+  return { art: vis / BOSS_BOX, size: vis };
 }
 
 /** 持ち物のマスに出すアイコンの枠 ID。ユニーク・セット・ミシックは専用の絵が入っていればそれを使う */

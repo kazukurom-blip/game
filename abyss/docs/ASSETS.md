@@ -7,6 +7,8 @@ ABYSS DROP の絵は、すべて**ほかの AI（ChatGPT・Midjourney・Stable D
 - いちばん簡単な方法: ゲームの右の窓の「🖼 画像」→ 枠のカードを押す →「AI で作る」の指示文をコピーして AI で作る → できた画像をその窓に落とす → 「保存して使う」。
 - 枠ごとの指示文の一覧: [docs/AI_PROMPTS.md](AI_PROMPTS.md)（表計算ソフトなら `docs/AI_PROMPTS.csv`）
 - 型紙（どこに描けばよいかの見本の画像）: `assets/templates/`（ゲームの「型紙を保存」でも作れます）
+- 枠の数: **絵 868**（主人公 30・装備（着た姿） 94・敵とボス 160・召喚物とペット 37・スキルの演出 194・アイコン 321・背景 30・画面の飾り 2）＋ **音 102**（効果音 `sfx.*` 87・BGM `bgm.*` 15 → 8-2 章）。
+  画面で召喚物の窓を開くと、召喚物の種類の枠がさらに足されます。
 
 ---
 
@@ -44,7 +46,8 @@ ABYSS DROP の絵は、すべて**ほかの AI（ChatGPT・Midjourney・Stable D
 | `minion.<種類>` | 召喚物（`minion` だけなら全部まとめて） | `minion.skeleton` |
 | `pet.<ペット ID>` | ペット | `pet.emberfox` |
 | `fx.<スキル ID>.<部品>` | スキルの演出（下の表） | `fx.s_bolt.proj` |
-| `fx.enemy.<種類>` | 敵の弾・攻撃（`fx.enemy` だけなら全部まとめて） | `fx.enemy.arrow` |
+| `fx.enemy.<種類>` | 敵の弾・攻撃（`fx.enemy` だけなら全部まとめて）。ボスの特技の範囲（`meteor`・`nova`・`pool`・`beam`・`spikes`・`breath`・`quake`・`firewall`・`jail`・`warp`・`mortar`・`blood`・`whirl`）にも枠があります | `fx.enemy.arrow`・`fx.enemy.pool` |
+| `fx.pet.<種類>` | ペットの手助け（`proj` 弾・`area` 範囲・`heal` 回復の光） | `fx.pet.heal` |
 | `icon.item.<種類>`／`icon.item.<部位>.<スタイル>` | 持ち物のアイコン。無ければ装備の絵 | `icon.item.sword`・`icon.item.helm.plate` |
 | `icon.u.<ユニーク ID>` | ユニークのアイコン。無ければ着た姿、それも無ければベースのアイコン | |
 | `icon.mat.<素材 ID>`・`icon.skill.<スキル ID>` | 素材・スキルのアイコン | `icon.mat.echo`・`icon.skill.w_slash` |
@@ -80,7 +83,7 @@ ABYSS DROP の絵は、すべて**ほかの AI（ChatGPT・Midjourney・Stable D
 |---|---|---|---|---|---|
 | 主人公の体・鎧の姿 | 150×200 | 2:3〜3:4 | 1024×1536（GPT）・832×1216（SDXL） | **右向き**・真横 | 透明 |
 | 立ち絵 | 300×420 | 2:3 | 1024×1536 | 自由 | 背景つきでよい |
-| 武器（手に持つ） | 110×150 | 2:3 | 1024×1536 | **先が真上・柄が下** | 透明 |
+| 武器（手に持つ） | 110×150 | 2:3 | 1024×1536 | **先が真上・柄が下**（弓・弩は真ん中が握り） | 透明 |
 | 副手・兜 | 90×110・80×70 | 1:1 | 1024×1024 | 盾は正面・兜は右向き | 透明 |
 | 敵 | 150×150（ボス 240×240） | 1:1〜2:3 | 1024×1024 | **左向き**・真横 | 透明 |
 | 召喚物・ペット | 120×140・90×90 | 1:1 | 1024×1024 | 右向き | 透明 |
@@ -93,6 +96,8 @@ ABYSS DROP の絵は、すべて**ほかの AI（ChatGPT・Midjourney・Stable D
 | タイトル画面 | 1280×720 | 16:9 | 1536×1024 | — | 画面いっぱい（はみ出た所は切れる） |
 
 - **キャラは 1 枚に 1 体、全身、真横**。周りに 5〜8% の余白。落ち影・地面・文字・枠は入れない。
+- ボスの枠（240×240）は細かく描くための大きさです。戦闘の画面では、ボスは普通の敵の**約 1.6〜1.9 倍の高さ**に詰めて描きます（主人公が隠れないように。ボスの大きさのデータ 1.5〜2.3 をそのまま掛けない）。
+- 背景・タイトル画面のように大きな枠は、差し替えが無いときのコードの絵を 1 倍の細かさで描きます（ほかは 2 倍）。差し替えの画像には関係ありません。
 - 光は正面のやや上から（敵は左右反転して使うことがあるので、横からの強い光は避ける）。
 - 向きが逆に出たら、画像の窓の「左右反転」で直せます。
 
@@ -113,6 +118,7 @@ ABYSS DROP の絵は、すべて**ほかの AI（ChatGPT・Midjourney・Stable D
 「足元を自動で」は一番下の不透明な行を探します。「アンカーを推定」は手・頭などのだいたいの位置を出します。左の試し表示で、武器が手に付いて振れるか見ながら合わせてください。
 
 武器の画像は**先を真上、柄を下**にして描き、基準点を握る所にします。AI が斜め 45° で描いたときは「回転」を −45° 前後にします。
+**弓と弩は基準点が絵の真ん中**（縦 50%）です。弓は縦に立てて真ん中の握り、弩は先（弓の部分）を上にして銃床の真ん中を持ちます。
 
 ## 5. 背景を透明にする
 
@@ -191,6 +197,25 @@ NovelAI の画像は透明チャンネルに情報が入っているので、透
 | `trim`・`flip`・`crop`・`seam` | 外側を切る・左右反転・上下左右を切る（%）・左右をつなげる（%） |
 
 音の差し替え（サウンドの担当の仕組み）は `assets/custom/audio/<音の ID>.ogg`（mp3・wav も可）に置くと、スキャンで custom.json の `"audio"` にまとめられます。
+
+## 8-2. 音の差し替えの枠（効果音 87・BGM 15）
+
+音も画像と同じように枠 ID があり、差し替えが無ければコードで作った音（WebAudio）が鳴ります。ゲームの「設定」→「音」→「音の差し替え」で、
+枠ごとに試し聞き・ファイルを入れる・元に戻すができます（ゲーム内で入れた音はこのブラウザの中に保存）。配るときは `assets/custom/audio/` に置きます。
+一覧は `src/audio/custom.js` の `audioSlots()`（効果音の名前は `src/audio/sfx.js`、曲は `src/audio/themes.js`）。
+
+| 種類 | 数 | 枠 ID（`sfx.` を付ける） |
+|---|---|---|
+| 攻撃・撃破 | 19 | `hit_phys`・`hit_fire`・`hit_cold`・`hit_lightning`・`hit_poison`・`hit_void`・`crit`・`kill`・`kill_elite`・`kill_boss`・`hero_hurt`・`hero_death`・`revive`・`low_life`・`enemy_attack`・`enemy_slam`・`dodge`・`block`・`telegraph` |
+| スキル | 21 | `swing`・`swing_heavy`・`bow`・`throw`・`cast_spell`・`cast_dark`・`nova`・`chain`・`explosion`・`beam`・`dash`・`leap`・`trap`・`curse`・`shield`・`buff`・`summon`・`ult`・`freeze`・`shock`・`stun` |
+| ドロップ | 11 | `drop_common`・`drop_magic`・`drop_rare`・`drop_epic`・`drop_legendary`・`drop_set`・`drop_unique`・`drop_mythic`・`drop_ancient`・`drop_primal`・`gold` |
+| 鍛冶・装備 | 11 | `salvage`・`equip`・`enhance_ok`・`enhance_fail`・`enhance_great`・`gem_combine`・`craft`・`socket`・`reroll`・`corrupt`・`buy` |
+| 画面の操作 | 8 | `ui_click`・`ui_confirm`・`ui_open`・`ui_close`・`ui_tab`・`ui_select`・`ui_toggle`・`ui_error` |
+| 出来事 | 17 | `boss_horn`・`goblin`・`level_up`・`paragon`・`prestige`・`achievement`・`rift_start`・`rift_complete`・`zone_clear`・`boss_fail`・`bag_full`・`set_bonus`・`pet_hatch`・`chest`・`notify`・`offline`・`unlock` |
+| BGM（`bgm.` を付ける） | 15 | `title`・`act1`〜`act10`（章ごと）・`boss`・`boss_act`（章のボス）・`boss_final`（最後のボス）・`rift`（深淵の裂け目） |
+
+- 効果音は短く（0.1〜2 秒）、頭に無音を入れない。BGM はつなぎ目の無いループにします（ゲームが最後から頭へつなぐ）。
+- どの出来事でどの音が鳴るかは `src/audio/hooks.js` の表（`EVENT_SFX`・戦闘の出来事）。
 
 ## 9. AI ごとの作り方
 

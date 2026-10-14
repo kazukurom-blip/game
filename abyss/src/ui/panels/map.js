@@ -104,7 +104,7 @@ export function tormentSelector(ui, opts = {}) {
       cell('敵のライフ', `×${fmt(info.life, { dec: 1 })}`, 'down'), cell('敵の攻撃', `×${fmt(info.dmg, { dec: 1 })}`, 'down'), cell('耐性', info.resPenalty ? `-${info.resPenalty}` : 'なし', 'down'), cell('覚醒 / 極致', `${Math.round((info.ancient || 0) * 100)}% / ${((info.primal || 0) * 100).toFixed(1)}%`, 'up'),
     ]),
     h('div.hint', `敵のレベル ${cur ? `${info.level}〜` : '地域どおり'}。魔境 ${roman(Math.min(BAL.MAX_TORMENT, max))} まで解放（今の段で章のボスを倒すと次の段が開く）。魔境では地域のボスが門の欠片を落とします。`),
-    h('label.chk', [h('input', { type: 'checkbox', checked: w.tormentAuto || undefined, onchange: (e) => { ws.setTormentAuto(e.target.checked); ui.renderPanel(); } }), ' 自動で最適な段（2 分ごとに、撃破のペースが 0.9 体/秒以上で倒れなければ 1 段上げ、0.35 体/秒未満か 2 回倒れたら 1 段下げる）']),
+    h(`label.chk${ws.canTormentAuto() ? '' : '.dim'}`, [h('input', { type: 'checkbox', checked: ws.tormentAutoOn() || undefined, disabled: !ws.canTormentAuto() || undefined, onchange: (e) => { ws.setTormentAuto(e.target.checked); ui.renderPanel(); } }), ' 自動で最適な段（2 分ごとに、撃破のペースが 0.9 体/秒以上で倒れなければ 1 段上げ、0.35 体/秒未満か 2 回倒れたら 1 段下げる）', ws.canTormentAuto() ? '' : '　※ 魂の祭壇「魔境の見極め」で解放（祭壇の ON/OFF と同じスイッチ）']),
     st ? h('div.dim.small', `この段の実測: ${st.rate.toFixed(2)} 体/秒・倒れた回数 ${st.deaths}（${Math.round(st.secs / 60)} 分）`) : null,
   ]);
   if (opts.compact) box.classList.add('compact');

@@ -38,6 +38,28 @@ function runHooks(list, ...args) { for (const f of list) { try { f(...args); } c
 const ELITE = Object.fromEntries(ELITE_AFFIXES.map((a) => [a.id, a]));
 
 export const GROUND_Y = 0;
+/** 弾の当たりの楕円の縦横比（縦は横の 0.9 倍） */
+const PROJ_Y_RATIO = 0.9;
+/**
+ * 1 ティックで弾が進んだ線分 (x0,y0)→(x1,y1) と、(cx,cy) を中心とする半径 r の円（縦は 0.9 倍の楕円）の当たり。
+ * 当たった位置を線分の割合 0〜1 で返す（始点が中に入っていれば 0）。外れは -1。
+ * 速い弾は 1 ティックに 60px 以上進むので、点で調べると近くの敵をすり抜ける（線分で調べる）。
+ */
+export function sweepHit(x0, y0, x1, y1, cx, cy, r) {
+  const k = 1 / PROJ_Y_RATIO;
+  const ax = x0 - cx; const ay = (y0 - cy) * k;
+  const c0 = ax * ax + ay * ay - r * r;
+  if (c0 <= 0) return 0;
+  const dx = x1 - x0; const dy = (y1 - y0) * k;
+  const a = dx * dx + dy * dy;
+  if (a < 1e-9) return -1;
+  const b = ax * dx + ay * dy;
+  if (b >= 0) return -1; // 離れていく向き
+  const disc = b * b - a * c0;
+  if (disc < 0) return -1;
+  const t = (-b - Math.sqrt(disc)) / a;
+  return t <= 1 ? t : -1;
+}
 const HERO_TEAM = 'hero';
 const ENEMY_TEAM = 'enemy';
 /** 詠唱し続ける動き（動作の後、duration の間ずっと続く） */
@@ -259,13 +281,16 @@ export class Combat {
   }
 
   enemies() { return this.units.filter((u) => u.team === ENEMY_TEAM && !u.dead); }
+  /** 生きている敵の数（配列を作らない。毎ティック使う所向け） */
+  enemyCount() { let n = 0; for (const u of this.units) if (u.team === ENEMY_TEAM && !u.dead) n++; return n; }
   allies() { return this.units.filter((u) => u.team === HERO_TEAM && !u.dead); }
   minionsOf(skillId) { return this.units.filter((u) => u.kind === 'minion' && !u.dead && u.skill === skillId); }
   enemiesNear(x, y, r) { const r2 = r * r; return this.units.filter((u) => u.team === ENEMY_TEAM && !u.dead && dist2(u.x, u.y, x, y) <= r2 + (u.size * 30) ** 2); }
-  nearestEnemy(x, y, maxR = Infinity, filter = null) {
+  /** 一番近い敵。xMin / xMax で横の範囲を絞れる（毎ティック関数を作らずに済む） */
+  nearestEnemy(x, y, maxR = Infinity, filter = null, xMin = -Infinity, xMax = Infinity) {
     let best = null; let bd = maxR * maxR;
     for (const u of this.units) {
-      if (u.team !== ENEMY_TEAM || u.dead) continue;
+      if (u.team !== ENEMY_TEAM || u.dead || u.x <= xMin || u.x >= xMax) continue;
       if (filter && !filter(u)) continue;
       const d = dist2(u.x, u.y, x, y);
       if (d < bd) { bd = d; best = u; }
@@ -316,7 +341,9 @@ export class Combat {
     this.tickProjectiles(dt);
     this.tickAreas(dt);
     // 片付け
-    this.units = this.units.filter((u) => !(u.dead && u.deadT > 1.2 && u.kind !== 'hero'));
+    // 片付ける物があるときだけ作り直す（毎ティック配列を作らない）
+    const gone = (u) => u.dead && u.deadT > 1.2 && u.kind !== 'hero';
+    if (this.units.some(gone)) this.units = this.units.filter((u) => !gone(u));
   }
 
   tickStatuses(u, dt) {
@@ -602,7 +629,7 @@ export class Combat {
       if (behaviors[ch.kind]?.move) behaviors[ch.kind].move(this, h, ch.p, ch, dt);
     }
     // 敵がいなくなったら止める
-    if (!this.enemies().length) { h.busy = 0; }
+    if (!this.enemyCount()) { h.busy = 0; }
   }
 
   endChannel(h) {
@@ -643,7 +670,7 @@ export class Combat {
       return;
     }
     // 主人公の近く（前 650・後ろ 200）の敵だけを狙う
-    const target = this.nearestEnemy(m.x, m.y, 900, (u) => u.x < hx + 650 && u.x > hx - 220);
+    const target = this.nearestEnemy(m.x, m.y, 900, null, hx - 220, hx + 650);
     if (!target) {
       // ついていく（後ろに並ぶ。飛ぶ物は肩の上）
       const slot = m.slot % 4;
@@ -754,11 +781,20 @@ export class Combat {
     } else if (u.anim.s !== 'attack' || u.anim.t > 0.6) u.anim = { s: 'idle', t: u.anim.t };
   }
 
+  /** 主人公側（主人公・召喚物）の一覧。敵の数 × 全員を毎ティック調べないように、units が変わるまで使い回す */
+  heroSide() {
+    if (!this._allies || this._alliesOf !== this.units || this._alliesN !== this.units.length) {
+      this._allies = this.units.filter((a) => a.team === HERO_TEAM);
+      this._alliesOf = this.units; this._alliesN = this.units.length;
+    }
+    return this._allies;
+  }
+
   targetFor(u) {
     // 召喚物が近ければそちらを狙う（盾になる）。引きつける召喚物（巨像・猪）はもっと狙われる
     let best = null; let bd = Infinity;
-    for (const a of this.units) {
-      if (a.team !== HERO_TEAM || a.dead) continue;
+    for (const a of this.heroSide()) {
+      if (a.dead) continue;
       const d = Math.abs(a.x - u.x) + (a.kind === 'hero' ? 40 : 0) - (a.taunt ? 220 : 0) + (a.fly ? 60 : 0);
       if (d < bd) { bd = d; best = a; }
     }
@@ -822,14 +858,25 @@ export class Combat {
         }
       }
       const dx = pr.vx * dt; const dy = pr.vy * dt;
-      pr.x += dx; pr.y += dy; pr.dist += Math.hypot(dx, dy);
-      if (pr.dist > pr.range) { pr.dead = true; continue; }
+      const x0 = pr.x; const y0 = pr.y;
+      const x1 = x0 + dx; const y1 = y0 + dy;
+      pr.x = x1; pr.y = y1; pr.dist += Math.hypot(dx, dy);
+      // このティックに進んだ線分（出た位置を含む）で当たりを調べ、近い順に当てる（すり抜け防止）
       const foes = pr.team === HERO_TEAM ? ENEMY_TEAM : HERO_TEAM;
+      let hits = null;
       for (const u of this.units) {
         if (u.dead || u.team !== foes || pr.hit.has(u.id)) continue;
         const rr = (pr.hitR || 34) * (pr.hitR ? 1 : (u.size || 1)) + 10 + (pr.hitR ? 20 * (u.size || 1) : 0);
-        if (Math.abs(u.x - pr.x) < rr && Math.abs(u.y - pr.y) < rr * 0.9) {
+        const at = sweepHit(x0, y0, x1, y1, u.x, u.y, rr);
+        // 出た位置が中に入っている敵（at = 0）は、中心が近い順に先に当てる
+        if (at >= 0) (hits ||= []).push({ u, at, key: at > 0 ? at : -1 + Math.hypot(u.x - x0, (u.y - y0) / PROJ_Y_RATIO) / 1e5 });
+      }
+      if (hits) {
+        if (hits.length > 1) hits.sort((a, b) => a.key - b.key);
+        for (const { u, at } of hits) {
+          if (u.dead) continue; // 先の爆発などで倒れた
           pr.hit.add(u.id);
+          pr.x = x0 + dx * at; pr.y = y0 + dy * at; // 当たった位置（爆発・演出はここ）
           if (pr.team === HERO_TEAM) {
             this.hitUnit(pr.src, u, pr.p, pr.mult, { aoeHit: pr.hit.size > 1 });
             if (pr.onHit) pr.onHit(this, pr, u);
@@ -845,9 +892,11 @@ export class Combat {
           if (!pr.wave) this.emit({ t: 'hit', x: pr.x, y: pr.y, z: pr.z, el: pr.el, skill: pr.p?.id });
           if (pr.pierce-- <= 0) { pr.dead = true; break; }
         }
+        if (!pr.dead) { pr.x = x1; pr.y = y1; }
       }
+      if (pr.dist > pr.range) pr.dead = true;
     }
-    this.projs = this.projs.filter((p) => !p.dead);
+    if (this.projs.some((p) => p.dead)) this.projs = this.projs.filter((p) => !p.dead);
   }
 
   /** from の敵から近くの敵へ n 回跳ねる */

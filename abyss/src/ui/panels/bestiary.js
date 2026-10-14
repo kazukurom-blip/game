@@ -92,10 +92,15 @@ function monsterModal(ui, e) {
 }
 
 function itemIconId(u) {
+  if (assets.isCustom(`icon.u.${u.id}`)) return `icon.u.${u.id}`; // 専用の絵があればそれ（持ち物・ドロップと同じ）
   const b = BASE[u.base] || Object.values(BASE).find((x) => x.kind === u.base && x.slot === (u.slot || x.slot));
   if (b?.icon) return b.icon;
-  if (u.slot && ['amulet', 'ring'].includes(u.slot)) return `icon.item.${u.slot}`;
-  return `icon.item.${u.base || u.slot || 'sword'}`;
+  // クラスで種類が変わる物（base 'any'）は部位の代表の絵
+  const slot = u.slot || 'weapon';
+  if (slot === 'amulet' || slot === 'ring') return `icon.item.${slot}`;
+  if (slot === 'weapon') return 'icon.item.sword';
+  if (slot === 'offhand') return 'icon.item.shield';
+  return `icon.item.${slot}.plate`;
 }
 
 function treasureCell(ui, u, kind, known) {

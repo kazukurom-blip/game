@@ -20,7 +20,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 process.env.PLAYWRIGHT_BROWSERS_PATH ||= '/opt/pw-browsers';
 const arg = (k, d = null) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : d; };
 const PORT = Number(arg('--port', process.env.PORT || 8299));
-const SIZE = Number(arg('--size', 512));
+const SIZE = Number(arg('--size', 400)); // 枠が 860 を超えて種類が増えたので、ひと揃いが 5 MB に収まる大きさ
 const OUT = path.resolve(arg('--out', path.join(ROOT, 'assets', 'templates')));
 const LIMIT = 5 * 1024 * 1024;
 
@@ -70,7 +70,7 @@ const main = async () => {
     const pick = new Map();
     const key = (s) => {
       const p = s.params || {};
-      if (s.kind === 'gear.weapon') return `${s.kind}:${['bow', 'crossbow'].includes(p.kind) ? 'bow' : ['staff', 'wand', 'rod', 'scythe'].includes(p.kind) ? 'staff' : 'blade'}`;
+      if (s.kind === 'gear.weapon') return `${s.kind}:${['bow', 'crossbow'].includes(p.kind) ? p.kind : ['staff', 'wand', 'rod', 'scythe'].includes(p.kind) ? 'staff' : 'blade'}`; // 弓・弩は真ん中が握り（別の型紙）
       if (s.kind === 'gear.offhand') return `${s.kind}:${p.kind === 'shield' ? 'shield' : 'other'}`;
       if (s.kind === 'monster') { const m = MONSTER[p.mon] || {}; return `monster:${m.boss ? 'boss' : m.body || ''}${m.flying ? ':fly' : ''}`; }
       if (s.kind === 'fx') return `fx:${p.part}`;

@@ -390,10 +390,17 @@ export function drawHelm(ctx, style, w, h, pal = {}) {
 }
 
 // ---------------- 枠の painter
+/** 武器の絵の「持つ所」が、描き方の原点からどれだけ先（上）にあるか。弩は銃床の真ん中を持つ（引き金は原点） */
+const HOLD_OFFSET = { crossbow: 32 };
+/** 枠の基準点（ay = 持つ所）に持つ所が来るように、描き方の原点を置く高さ */
+function gripOriginY(kind, spec, h) {
+  const ay = spec.ay ?? (kind === 'bow' || kind === 'crossbow' ? 0.5 : 0.82);
+  return h * ay + (HOLD_OFFSET[kind] || 0);
+}
 export function paintWeaponSlot(ctx, spec, w, h) {
   const kind = spec.params?.kind || spec.id.split('.')[1];
   const P = spec.params?.pal || BASE_PAL;
-  const gy = kind === 'bow' ? h * 0.5 : h * (spec.ay ?? 0.82);
+  const gy = gripOriginY(kind, spec, h);
   outlined(ctx, w, h, (c) => drawWeapon(c, kind, w * (spec.ax ?? 0.5), gy, P, { noString: spec.params?.noString }), { width: 0.8, glow: P.glow ? { color: P.glow, blur: 8, alpha: 0.7 } : null });
 }
 export function paintOffhandSlot(ctx, spec, w, h) {
@@ -456,7 +463,7 @@ export function paintUniqueSlot(ctx, spec, w, h) {
   const P = uniquePal(def, id);
   const aura = P.mythic ? '#ff4d6d' : P.glow;
   if (WEAPON_KINDS_ALL.includes(kind)) {
-    const gy = kind === 'bow' ? h * 0.5 : h * (spec.ay ?? 0.82);
+    const gy = gripOriginY(kind, spec, h);
     outlined(ctx, w, h, (c) => { drawWeapon(c, kind, w * (spec.ax ?? 0.5), gy, P, { noString: spec.params?.noString }); if (P.mythic) mythicSparks(c, w, h, id); }, { width: 0.8, glow: { color: aura, blur: P.mythic ? 12 : 8, alpha: 0.85, twice: P.mythic } });
   } else if (OFFHAND_KINDS_ALL.includes(kind)) {
     outlined(ctx, w, h, (c) => { drawOffhand(c, kind, w * 0.5, h * 0.55, P); if (P.mythic) mythicSparks(c, w, h, id); }, { width: 0.8, glow: { color: aura, blur: 9, alpha: 0.8 } });

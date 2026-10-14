@@ -14,6 +14,29 @@ import { registry } from './registry.js';
 
 export const baseOf = (item) => BASE[item.base];
 
+/**
+ * 読み込んだアイテムを検める（壊れたセーブ用）。使えない物は null。直せる所は直して同じ物を返す。
+ * ベースが無い・形が違う → null。レアリティ・段階・強化・オプション・ソケット・伝説の力の形を整える。
+ */
+export function sanitizeItem(it) {
+  if (!it || typeof it !== 'object' || Array.isArray(it)) return null;
+  const b = BASE[it.base];
+  if (!b) return null;
+  const num = (v, lo, hi, d) => (Number.isFinite(v) ? Math.max(lo, Math.min(hi, v)) : d);
+  if (typeof it.slot !== 'string' || it.slot !== b.slot) it.slot = b.slot;
+  if (!RARITY[it.rarity]) it.rarity = 'common';
+  it.ilvl = Math.round(num(it.ilvl, 1, 9999, 1));
+  it.q = [0, 1, 2].includes(it.q) ? it.q : 0;
+  it.enh = Math.round(num(it.enh, 0, 99, 0));
+  it.affixes = Array.isArray(it.affixes) ? it.affixes.filter((a) => a && typeof a === 'object' && typeof a.s === 'string' && Number.isFinite(a.v)) : [];
+  if (it.sockets !== undefined) it.sockets = Array.isArray(it.sockets) ? it.sockets.slice(0, 6).map((s) => (typeof s === 'string' ? s : null)) : [];
+  if (it.power !== undefined && !(it.power && typeof it.power === 'object' && typeof it.power.id === 'string' && Number.isFinite(it.power.r))) delete it.power;
+  for (const k of ['uniqueId', 'setId', 'pieceId', 'rw', 'name']) if (it[k] !== undefined && it[k] !== null && typeof it[k] !== 'string') delete it[k];
+  if (it.lgl !== undefined && (typeof it.lgl !== 'object' || Array.isArray(it.lgl) || it.lgl === null)) delete it.lgl;
+  if (!Number.isFinite(it.uid)) it.uid = 0; // 読み込みの後で新しい番号を振る
+  return it;
+}
+
 /** 強化値（+N）による基本性能の倍率 */
 export const enhMult = (enh) => 1 + 0.05 * enh + 0.0025 * enh * enh;
 
