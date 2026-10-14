@@ -6,7 +6,7 @@
 //   skillDesc(state, H, id)     … 説明文（数字入り）
 //   estimateDps(state, H, id)   … そのスキルだけを使い続けたときの目安の DPS
 //   estimateBuildDps(state, H)  … スキルの並び全体の目安の DPS（戦力・おまかせ編成・星座盤の比較に使う）
-//   castSpeed(H, p)             … 動作の速さの倍率（攻撃は武器の攻撃速度、呪文は攻撃速度の % だけ）
+//   castSpeed(H, p)             … 動作の速さの倍率（武器の攻撃速度と攻撃速度の %）
 //   masteryLevel(mxp)           … 熟練度の段（0〜10）
 
 import { SKILL, SKILL_MAX_LEVEL, MASTERY_XP, MASTERY_MAX, MASTERY_DMG, MASTERY_BONUS } from '../data/skills.js';
@@ -245,10 +245,9 @@ export function skillDesc(state, H, skillId, p = null) {
 }
 
 // ---------------- 目安の数値
-/** 動作の速さ（1 = 基準）。攻撃は武器の攻撃速度で、呪文は攻撃速度の % だけで速くなる */
+/** 動作の速さ（1 = 基準）。武器の攻撃速度（REF_APS = 1.3 が基準）と攻撃速度の % で、攻撃も呪文も速くなる */
 export function castSpeed(H, p) {
-  const isAttack = p.tags.includes('attack');
-  const s = isAttack ? H.aps / REF_APS : H.aps / (H.weapon?.aps || REF_APS);
+  const s = H.aps / REF_APS;
   return Math.max(0.25, Math.min(5, s || 1));
 }
 
@@ -335,33 +334,43 @@ export function estimateBuildDps(state, H, opts = {}) {
   if (!bar.length) return 0;
   const ps = bar.map((id) => resolveSkill(state, H, id)).filter(Boolean);
   const basic = ps.find((p) => p.basic) || null;
-  let time = 1; let dps = 0; let buffInc = 0;
-  const regen = Math.max(0, H.resourceRegen || 0);
-  let res = regen;
-  // 基本攻撃で得られるリソース（毎秒、基本攻撃だけをしたとき）
   const bp = basic ? skillProfile(H, basic) : null;
-  const basicGainRate = bp ? (bp.gain + (H.resourceOnHit || 0)) / Math.max(0.1, bp.period) : 0;
+  // リソースの出入り（1 秒あたり）: capLeft = 自然回復・強化の回復・撃破の回復 + 基本攻撃だけをしたときの回復
+  // 技を 1 回使うと「消費 + その間に基本攻撃で得られたはずの回復」だけ capLeft が減る
+  const ctb = bp ? Math.max(0.05, bp.period) : 1;
+  const tgtB = basic ? (basic.behavior === 'melee' ? Math.min(3, 1 + Math.max(0, (basic.radius || 50) - 50) / 70) : 1) : 0;
+  const gB = bp ? bp.gain + (H.resourceOnHit || 0) * tgtB : 0;
+  let capLeft = (H.resourceRegen || 0) + (H.resourceOnKill || 0) * 0.6 + gB / ctb;
+  for (const p of ps) if (!p.basic && p.cost < 0) capLeft += -p.cost / Math.max(1, p.cd || 1);
+  let time = 1; let dps = 0; let buffInc = 0;
   for (const p of ps) {
     if (p.basic) continue;
     const pr = skillProfile(H, p);
-    if (pr.minion) { dps += pr.minion; time -= Math.min(time, pr.busy / Math.max(pr.period, 4)); continue; }
+    const lost = gB * pr.busy / ctb;
+    if (pr.minion) {
+      dps += pr.minion;
+      const u = 1 / Math.max(pr.period, 4);
+      time -= Math.min(time, pr.busy * u); capLeft -= u * (pr.cost + lost);
+      continue;
+    }
     if (p.behavior === 'buff' || p.behavior === 'barrier') {
       const up = Math.min(1, (p.buff?.dur || 0) / Math.max(p.cd || 1, p.buff?.dur || 1));
       for (const m of p.buff?.mods || []) if (m.s === 'inc_dmg' || m.s === 'attack_speed') buffInc += (m.v / 100) * up * (m.s === 'attack_speed' ? 1 : 1 / (1 + (H.incBase || 0) / 100));
-      time -= Math.min(time, pr.ct / Math.max(1, p.cd || 1));
+      const u = 1 / Math.max(1, p.cd || 1);
+      time -= Math.min(time, pr.ct * u); capLeft -= u * (pr.cost + lost);
       continue;
     }
     if (!pr.per) continue;
     const ultFactor = p.ult ? 0.6 : 1; // 奥義はエリート・ボスにだけ使う
     let uses = (1 / Math.max(0.05, pr.period)) * ultFactor;
     uses = Math.min(uses, time / Math.max(0.05, pr.busy));
-    if (pr.cost > 0) uses = Math.min(uses, (res + basicGainRate * time * 0.5) / pr.cost);
+    if (pr.cost > 0) uses = Math.min(uses, Math.max(0, capLeft) / (pr.cost + lost));
     if (!(uses > 0)) continue;
     dps += uses * pr.per;
     time -= uses * pr.busy;
-    res = Math.max(0, res - uses * pr.cost);
+    capLeft -= uses * (pr.cost + lost);
   }
-  if (bp && time > 0) dps += (time / Math.max(0.05, bp.period)) * bp.per;
+  if (bp && time > 0) dps += (time / ctb) * bp.per;
   return dps * (1 + buffInc);
 }
 

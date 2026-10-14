@@ -42,6 +42,10 @@ const HERO_TEAM = 'hero';
 const ENEMY_TEAM = 'enemy';
 /** 詠唱し続ける動き（動作の後、duration の間ずっと続く） */
 export const CHANNEL_BEHAVIORS = new Set(['whirl', 'beam', 'flurry']);
+/** 敵がいないあいだ（ウェーブの合間・移動中）の回復: 1 秒に最大ライフの 6%（要石「渇きの王」では回復しない） */
+export const OUT_OF_COMBAT_REGEN = 0.06;
+/** 近接のクラスが離れた敵へ駆け寄るときの速さの倍率 */
+export const MELEE_RUSH = 2.5;
 
 // ---------------- 状態異常
 export const statusDefs = {
@@ -408,6 +412,7 @@ export class Combat {
     }
     const enemies = this.enemies();
     if (!enemies.length) {
+      if (h.life < h.maxLife && !H.ks.thirst) h.life = Math.min(h.maxLife, h.life + h.maxLife * OUT_OF_COMBAT_REGEN * dt);
       this.walk(h, dt, H.move);
       return;
     }
@@ -420,11 +425,13 @@ export class Combat {
       this.startCast(h, choice.p, target);
       return;
     }
-    // 近づく
+    // 近づく（近接のクラスは離れた敵へ駆け寄る）
     const basic = this.basicSkill();
     const want = basic ? Math.max(60, basic.range * 0.9) : 100;
-    if (d > want) this.walk(h, dt, H.move, target.x > h.x ? 1 : -1);
-    else h.anim.s = 'idle';
+    if (d > want) {
+      const rush = CLASS[this.state.hero.cls]?.range === 'melee' && d > want + 60 ? MELEE_RUSH : 1;
+      this.walk(h, dt, H.move * rush, target.x > h.x ? 1 : -1);
+    } else h.anim.s = 'idle';
   }
 
   basicSkill() {
@@ -437,6 +444,19 @@ export class Combat {
     const st = this.state.hero;
     let basic = null;
     const ctx = { near: null };
+    // 離れた敵へは、使える跳躍・突進を先に使う（並びの順より先）
+    if (d > 260) {
+      for (const id of st.bar) {
+        const def = SKILL[id];
+        if (!def || (def.behavior !== 'leap' && def.behavior !== 'dash') || !st.skills[id]) continue;
+        const ac = st.autocast[id];
+        if (ac && ac.on === false) continue;
+        const p = this.params(id);
+        if (!p || (h.cds[id] || 0) > 0 || (p.cost > 0 && h.resource < p.cost)) continue;
+        if (!this.condOk(ac?.cond || p.auto, h, target, enemies, p, ctx) || !this.inRange(p, h, target, d)) continue;
+        return { p };
+      }
+    }
     for (const id of st.bar) {
       if (!id || !st.skills[id]) continue;
       const def = SKILL[id];
@@ -506,6 +526,7 @@ export class Combat {
       case 'flurry': return d <= (p.range || 110) + 20;
       case 'leap': case 'ult_cataclysm': case 'dash': return d <= (p.range || 450);
       case 'turret': return d <= (p.range || 600);
+      case 'trap': return d <= (p.range || 380) + 320;
       default: return d <= (p.range || 120);
     }
   }

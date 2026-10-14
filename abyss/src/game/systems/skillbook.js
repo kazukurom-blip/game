@@ -250,13 +250,21 @@ export class SkillSystem {
     const dpsOf = (id) => { const p = resolveSkill(st, H, id); return p ? estimateDpsP(H, p) : 0; };
     const basic = basics.sort((a, b) => dpsOf(b.id) - dpsOf(a.id))[0]?.id || null;
     const slots = this.barSize() - 1;
+    const melee = CLASS[h.cls]?.range === 'melee';
     const pick = [];
     const ult = others.find((s) => s.kind === 'ult');
     if (ult) pick.push(ult.id);
     const score = (ids) => {
       const bar = [basic, ...ids].filter(Boolean);
       let v = estimateBuildDps(st, H, { bar });
-      for (const id of ids) { const k = SKILL[id]; if (k.behavior === 'barrier' || (k.kind === 'buff' && !k.buff?.mods?.some((m) => m.s === 'inc_dmg' || m.s === 'attack_speed'))) v *= 1.12; }
+      let mobility = false;
+      for (const id of ids) {
+        const k = SKILL[id];
+        if (k.behavior === 'barrier' || (k.kind === 'buff' && !k.buff?.mods?.some((m) => m.s === 'inc_dmg' || m.s === 'attack_speed'))) v *= 1.12;
+        if (k.behavior === 'leap' || k.behavior === 'dash') mobility = true;
+      }
+      // 近接のクラスは、間合いを詰める技（跳躍・突進）が 1 つあると群れに早く届く
+      if (melee && mobility) v *= 1.3;
       return v;
     };
     while (pick.length < slots) {
