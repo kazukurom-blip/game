@@ -1,29 +1,52 @@
-// 戦闘の画面（キャンバス）。背景の視差スクロール・主人公・敵・弾・演出・ダメージの数字・ドロップの光。
-// combat.fx を毎フレーム読み出して演出に変える。アート担当がもっと派手にする（fx.js に分けてよい）。
+// 戦闘の画面（キャンバス）。背景の視差スクロール・空気の粒・主人公・敵・弾・演出・ダメージの数字・ドロップの光。
+// combat.fx を毎フレーム読み出し、fx.js（FxSystem）で演出に変える。
+//
+// 手触り（REFERENCE F01〜F07）:
+//   ・被弾の白フラッシュ 50ms、会心だけヒットストップ（約 45ms）、エリート・ボス撃破は 90〜110ms。
+//     ヒットストップとスローは「見た目の時間」だけを遅くする（ゲームの計算は止めない）。
+//   ・トラウマ式の画面揺れ: 揺れ = trauma² × 8px × 設定。毎秒 1.5 減る。
+//   ・設定: fx（多い/ふつう/少ない）, shake, fxShake（0〜100）, dmgNumbers, fxDmgMode, lootBeams, fxHitStop, fxLootSlow, fxFlash, fxReduce。
+//
+// sceneHooks（他の担当が足せる口）:
+//   fx[type] = (scene, e) => void   … 出来事ごとの追加演出（自分の演出に加えて呼ばれる）
+//   onFx = [(scene, e) => void]     … すべての出来事を受け取る（音など）
+//   drawFx = [(scene, ctx, dt)]     … 毎フレームの追加描画（キャラの上）
+//   projectile / area               … 弾・地面の効果の描き方（true を返せば描いたことになる）。既定は fx.js
 
 import { assets } from './assets.js';
 import { drawHero, heroLook } from './paperdoll.js';
 import { ELEMENT_COLORS } from '../data/stats.js';
-import { RARITY } from '../data/rarity.js';
-import { ACTS } from '../data/world.js';
-import { ZONE } from '../data/world.js';
+import { ZONE, ACTS } from '../data/world.js';
 import { fmt } from '../engine/format.js';
-import { itemName } from '../game/items.js';
-import { BASE } from '../data/items.js';
 import { ELITE_AFFIXES } from '../data/monsters.js';
+import { statusDefs } from '../game/combat.js';
+import { SKILL } from '../data/skills.js';
+import { FxSystem, installFx, atlas, whiteOf, tintOf, haloOf, fxLabel } from './fx.js';
+import { monsterParts } from './painters/monsters.js';
+import { ACT_ATMOS } from './painters/backgrounds.js';
+import { makeCanvas } from './assets.js';
+import { settingsHooks } from '../ui/panels/settings.js';
+import { h as el } from '../ui/dom.js';
 
 export const VIEW_W = 1280;
 export const VIEW_H = 720;
 export const GROUND = 560;
 const HERO_SCREEN_X = 380;
+const TAU = Math.PI * 2;
+const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 
 export const sceneHooks = {
-  fx: {}, // type → (scene, e) => void … 演出の追加（アート担当）
+  fx: {}, // type → (scene, e) => void … 演出の追加
   onFx: [], // (scene, e) => void … すべての出来事を受け取る（音など、何人でも登録できる）
-  drawFx: [], // (scene, ctx) => void … 毎フレームの追加描画
+  drawFx: [], // (scene, ctx, dt) => void … 毎フレームの追加描画
   projectile: null, // (scene, ctx, pr, sx, sy) => bool … 弾の描き方（true なら描いた）
   area: null, // (scene, ctx, a, sx, sy) => bool
 };
+installFx(sceneHooks);
+const MY_PROJ = sceneHooks.projectile; const MY_AREA = sceneHooks.area;
+
+const ELITE_NAME = Object.fromEntries(ELITE_AFFIXES.map((a) => [a.id, a.name]));
+const RANK_GLOW = { champion: '#5a9cff', rare: '#ffc83a', boss: '#ff4030', actboss: '#ff2a50', guardian: '#c060ff' };
 
 export class Scene {
   constructor(canvas, game) {
@@ -31,18 +54,22 @@ export class Scene {
     this.ctx = canvas.getContext('2d');
     this.game = game;
     this.camX = 0;
-    this.shake = 0;
-    this.particles = [];
-    this.texts = [];
-    this.drops = [];
-    this.flashes = [];
     this.t = 0;
     this.dpr = 1;
     this.lookCache = null;
-    this.lookVer = -1;
+    this.fx = new FxSystem(this);
+    this.vis = new WeakMap();
+    this.trauma = 0; this.stopT = 0; this.slowT = 0; this.slowK = 1;
+    this.bg = null;
+    this.atmos = [];
+    this.atmosAct = null;
+    this.order = [];
+    this.labels = [];
+    this.vign = null;
+    this.reduce = !!globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
     this.resize();
     game.events.on('gearChanged', () => { this.lookCache = null; });
-    assets.onChange(() => { this.lookCache = null; });
+    assets.onChange(() => { this.lookCache = null; this.bg = null; });
   }
 
   resize() {
@@ -60,169 +87,399 @@ export class Scene {
   sx(x) { return x - this.camX; }
   sy(y, z = 0) { return GROUND + y * 0.9 - z; }
 
+  // ---------------- 手触り
+  hitstop(t) { if (this.reduce || this.settings.fxReduce) return; this.stopT = Math.max(this.stopT, t); }
+  slowmo(t, k) { if (!(t > 0) || this.reduce || this.settings.fxReduce) return; this.slowT = Math.max(this.slowT, t); this.slowK = Math.min(this.slowT > 0 ? this.slowK : 1, k); }
+  addTrauma(v) { this.trauma = Math.min(1, this.trauma + v); }
+  timeScale() { if (this.stopT > 0) return 0.05; if (this.slowT > 0) return this.slowK; return 1; }
+
+  /** キャラの見た目の状態（なめらかな位置・動きの時間・光） */
+  visOf(u) {
+    let v = this.vis.get(u);
+    if (!v) { v = { x: u.x, at: u.anim?.t || 0, animRef: u.anim, n: 0, flash: 0, recoil: 0, lastHF: 0, spawnT: u.kind === 'hero' ? 9 : 0, dieT: 0, chip: 1, castEl: null }; this.vis.set(u, v); }
+    return v;
+  }
+  /** 見た目の x（なめらか） */
+  vx(u) { return this.vis.get(u)?.x ?? u.x; }
+
   frame(dt) {
     const g = this.game;
     if (!g.state || !g.combat.hero) return;
-    this.t += dt;
+    const ts = this.timeScale();
+    const vdt = dt * ts;
+    if (this.stopT > 0) this.stopT -= dt; else if (this.slowT > 0) { this.slowT -= dt; if (this.slowT <= 0) this.slowK = 1; }
+    this.t += vdt;
     const ctx = this.ctx;
     const c = g.combat;
     const h = c.hero;
-    // カメラ
-    const target = h.x - HERO_SCREEN_X;
-    this.camX += (target - this.camX) * Math.min(1, dt * 6);
     this.consumeFx(c);
+    this.fx.update(vdt, dt);
+    this.updateVis(c, dt, vdt);
+    // カメラ
+    const hv = this.vx(h);
+    const target = hv - HERO_SCREEN_X;
+    if (Math.abs(target - this.camX) > 900) this.camX = target;
+    this.camX += (target - this.camX) * Math.min(1, dt * 5);
     ctx.setTransform(this.scale, 0, 0, this.scale, 0, 0);
+    ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+    // 揺れ（トラウマ式）
     let shx = 0; let shy = 0;
-    if (this.shake > 0 && this.settings.shake !== false) { shx = (Math.random() - 0.5) * this.shake * 2; shy = (Math.random() - 0.5) * this.shake * 2; this.shake = Math.max(0, this.shake - dt * 30); }
+    const s = this.settings;
+    if (this.trauma > 0) {
+      const amt = (s.shake === false || this.reduce || s.fxReduce ? 0 : (s.fxShake ?? 100) / 100) * 8;
+      const tr = this.trauma * this.trauma * amt;
+      const T = this.t * 38;
+      shx = tr * (Math.sin(T * 1.3) * 0.6 + Math.sin(T * 2.9 + 1.7) * 0.4);
+      shy = tr * (Math.sin(T * 1.7 + 0.5) * 0.6 + Math.sin(T * 3.3 + 2.2) * 0.4);
+      this.trauma = Math.max(0, this.trauma - dt * 1.5);
+    }
     ctx.translate(shx, shy);
-    this.drawBackground(ctx);
-    // 地面の効果
+    this.drawBackground(ctx, dt);
+    // 地面の効果・足元の演出
     for (const a of c.areas) this.drawArea(ctx, a);
+    this.drawBuffAuras(ctx, h);
+    this.fx.drawUnder(ctx);
     // キャラを奥から順に
-    const list = c.units.slice().sort((a, b) => a.y - b.y);
+    const list = this.order; list.length = 0;
+    for (const u of c.units) list.push(u);
+    list.sort(depthOrder);
+    this.labels.length = 0;
     for (const u of list) this.drawUnit(ctx, u);
     for (const pr of c.projs) this.drawProj(ctx, pr);
-    this.drawDrops(ctx, dt);
-    this.drawParticles(ctx, dt);
-    for (const f of sceneHooks.drawFx) f(this, ctx, dt);
-    this.drawTexts(ctx, dt);
+    this.fx.drawOver(ctx);
+    this.drawAtmos(ctx, true);
+    for (const f of sceneHooks.drawFx) { try { f(this, ctx, vdt); } catch (e) { console.error(e); } }
+    this.fx.drawDrops(ctx);
+    // 名前の札が重ならないように少しずつ上へずらす
+    const placed = [];
+    for (const l of this.labels) {
+      let y = l.y;
+      for (let k = 0; k < 4; k++) { if (!placed.some((p) => Math.abs(p.x - l.x) < 90 && Math.abs(p.y - y) < 14)) break; y -= 15; }
+      if (placed.some((p) => Math.abs(p.x - l.x) < 90 && Math.abs(p.y - y) < 14 && p.text === l.text)) continue;
+      placed.push({ x: l.x, y, text: l.text });
+      fxLabel(ctx, l.x, y, l.text, l.col, l.size);
+    }
+    this.fx.drawNumbers(ctx);
     ctx.setTransform(this.scale, 0, 0, this.scale, 0, 0);
     this.drawOverlay(ctx, dt);
+    this.fx.drawOverlay(ctx, VIEW_W, VIEW_H);
   }
 
   // ---------------- 背景
-  drawBackground(ctx) {
+  bgLayers(act) {
+    const k = Math.max(0.5, Math.min(1.5, Math.round(this.scale * 4) / 4));
+    if (this.bg && this.bg.act === act && this.bg.k === k) return this.bg;
+    const out = { act, k, layers: {} };
+    for (const [key, id] of [['far', `bg.${act}`], ['mid', `bg.${act}.mid`], ['ground', `bg.${act}.ground`]]) {
+      if (assets.isCustom(id)) { const sp = assets.sprite(id); out.layers[key] = { img: sp.img, w: sp.sw, h: sp.sh, fw: sp.img.width / (sp.frames || 1) }; continue; }
+      const spec = assets.spec(id) || { id, w: VIEW_W, h: key === 'ground' ? 220 : VIEW_H };
+      const pt = assets.painterFor(id);
+      const cv = makeCanvas(spec.w * k, spec.h * k);
+      if (cv && pt) { const x = cv.getContext('2d'); x.scale(k, k); try { pt.fn(x, { ...spec, id }, spec.w, spec.h); } catch (e) { console.error('[bg]', id, e); } }
+      out.layers[key] = cv ? { img: cv, w: spec.w, h: spec.h, fw: cv.width } : null;
+    }
+    this.bg = out;
+    return out;
+  }
+
+  drawBackground(ctx, dt) {
     const g = this.game;
     const z = ZONE[g.state.world.zone];
     const act = z ? z.act : ACTS[0].id;
-    const id = `bg.${act}`;
-    const far = assets.sprite(id);
-    const fw = far.sw;
+    const L = this.bgLayers(act).layers;
     ctx.fillStyle = '#0c0a10';
     ctx.fillRect(-20, -20, VIEW_W + 40, VIEW_H + 40);
-    // 一番奥: ゆっくり
-    this.tile(ctx, far, this.camX * 0.08, 0, fw, far.sh);
-    const mid = assets.sprite(`${id}.mid`);
-    this.tile(ctx, mid, this.camX * 0.35, 0, mid.sw, mid.sh);
-    const gr = assets.sprite(`${id}.ground`);
-    this.tile(ctx, gr, this.camX, GROUND - 40, gr.sw, gr.sh);
+    this.tile(ctx, L.far, this.camX * 0.08, 0);
+    this.drawAtmosSetup(act);
+    this.drawAtmos(ctx, false, dt);
+    this.tile(ctx, L.mid, this.camX * 0.35, 0);
+    this.tile(ctx, L.ground, this.camX, GROUND - 40);
     // 暗い縁
-    const v = ctx.createRadialGradient(VIEW_W / 2, VIEW_H * 0.55, VIEW_H * 0.3, VIEW_W / 2, VIEW_H * 0.55, VIEW_W * 0.75);
-    v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.55)');
-    ctx.fillStyle = v; ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    if (!this.vign) this.vign = vignette();
+    if (this.vign) ctx.drawImage(this.vign, 0, 0, VIEW_W, VIEW_H);
   }
 
-  tile(ctx, spr, offset, y, w, h) {
-    if (!spr?.img || w <= 0) return;
+  tile(ctx, Lr, offset, y) {
+    if (!Lr?.img || Lr.w <= 0) return;
+    const w = Lr.w;
     const start = -((offset % w) + w) % w;
-    for (let x = start; x < VIEW_W; x += w) ctx.drawImage(spr.img, 0, 0, spr.img.width / (spr.frames || 1), spr.img.height, Math.floor(x), y, Math.ceil(w) + 1, h);
+    for (let x = start; x < VIEW_W; x += w) ctx.drawImage(Lr.img, 0, 0, Lr.fw || Lr.img.width, Lr.img.height, Math.floor(x), y, Math.ceil(w) + 1, Lr.h);
+  }
+
+  // ---------------- 空気の粒（章ごと）
+  drawAtmosSetup(act) {
+    if (this.atmosAct === act) return;
+    this.atmosAct = act;
+    const A = ACT_ATMOS[act] || ACT_ATMOS.act1;
+    const n = Math.round(A.n * (this.settings.fx === 'low' ? 0.3 : this.settings.fx === 'mid' ? 0.6 : 1));
+    this.atmos = [];
+    for (let i = 0; i < n; i++) this.atmos.push(newAtmos(A, true));
+    this.atmosDef = A;
+  }
+  drawAtmos(ctx, front, dt = 0) {
+    const A = this.atmosDef; if (!A) return;
+    const W = VIEW_W + 120;
+    if (!front && dt) for (const p of this.atmos) { p.x += p.vx * dt * (this.timeScale()); p.y += p.vy * dt * this.timeScale(); p.ph += dt; if (p.y > VIEW_H + 30 || p.y < -40 || p.ph > p.life) Object.assign(p, newAtmos(A, false)); }
+    const img = atmosImg(A);
+    if (!img) return;
+    ctx.save();
+    ctx.globalCompositeOperation = A.add ? 'lighter' : 'source-over';
+    for (const p of this.atmos) {
+      if ((p.z > 1) !== front) continue;
+      const x = ((p.x - this.camX * p.par) % W + W) % W - 60;
+      const k = p.ph / p.life;
+      let a = p.a * (k < 0.15 ? k / 0.15 : k > 0.85 ? (1 - k) / 0.15 : 1);
+      if (A.kind === 'ember' || A.kind === 'star' || A.kind === 'blood') a *= 0.6 + 0.4 * Math.sin(p.ph * 7 + p.seed);
+      ctx.globalAlpha = a;
+      const sz = p.s * (A.kind === 'steam' || A.kind === 'cloud' ? 1 + k * 1.5 : 1);
+      const sw = A.kind === 'sand' ? sz * 5 : sz;
+      if (A.kind === 'snow' || A.kind === 'ash') { const sway = Math.sin(p.ph * 1.6 + p.seed) * 10; ctx.drawImage(img, x + sway - sz, p.y - sz, sz * 2, sz * 2); }
+      else ctx.drawImage(img, x - sw, p.y - sz, sw * 2, sz * 2);
+    }
+    ctx.restore();
   }
 
   // ---------------- キャラ
-  drawUnit(ctx, u) {
-    const x = this.sx(u.x); const y = this.sy(u.y);
-    if (x < -300 || x > VIEW_W + 300) return;
-    if (u.kind === 'hero') {
-      if (!this.lookCache) this.lookCache = heroLook(this.game.state);
-      drawHero(ctx, u, x, y, { look: this.lookCache, t: this.t, scale: 1 });
-      if (u.dead) this.label(ctx, x, y - 230, '復活まで…', '#ff8a8a');
-      return;
-    }
-    const s = assets.sprite(u.art);
-    const size = u.size || 1;
-    const a = u.anim || { s: 'idle', t: 0 };
-    let dx = 0; let dy = 0; let rot = 0; let sx = 1; let sy = 1; let alpha = 1;
-    const flying = u.z > 0;
-    if (a.s === 'walk') { dy = -Math.abs(Math.sin(a.t * 8)) * 4; rot = Math.sin(a.t * 8) * 0.04; }
-    else if (a.s === 'attack') { const k = Math.min(1, a.t / 0.35); dx = (u.face || -1) * (k < 1 ? -6 * k : 18 * Math.sin(Math.min(1, (a.t - 0.35) / 0.25) * Math.PI)); sy = 1 - 0.05 * Math.sin(k * Math.PI); }
-    else if (a.s === 'die') { alpha = Math.max(0, 1 - u.deadT / 1.0); sy = 1 - Math.min(0.5, u.deadT * 0.8); sx = 1 + Math.min(0.3, u.deadT * 0.5); }
-    else { const b = Math.sin(this.t * 3 + u.id); dy = b * 2; sy = 1 + b * 0.02; }
-    if (flying) dy += Math.sin(this.t * 4 + u.id) * 8 - u.z;
-    // 影
-    ctx.save(); ctx.globalAlpha = 0.35 * alpha; ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(x, y, 34 * size, 8 * size, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
-    // エリートの光
-    if (u.rank !== 'normal' && u.kind === 'monster' && !u.dead) {
-      ctx.save(); ctx.globalCompositeOperation = 'lighter';
-      const col = u.boss ? '#ff4040' : u.rank === 'rare' ? '#ffd040' : '#6aa0ff';
-      const gr = ctx.createRadialGradient(x, y - 60 * size, 10, x, y - 60 * size, 90 * size);
-      gr.addColorStop(0, `${col}55`); gr.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = gr; ctx.fillRect(x - 100 * size, y - 160 * size, 200 * size, 200 * size);
-      ctx.restore();
-    }
-    const flip = u.team === 'hero' ? (u.face || 1) < 0 : (u.face || -1) > 0;
-    assets.draw(ctx, s, x + dx, y + dy, { scale: size, sx, sy, rot, alpha, flip });
-    if (u.hitFlash > 0 && !u.dead) {
-      ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = Math.min(1, u.hitFlash * 8) * 0.6;
-      assets.draw(ctx, s, x + dx, y + dy, { scale: size, sx, sy, rot, flip });
-      ctx.restore();
-    }
-    // 状態異常の色
-    const st = u.statuses;
-    if (!u.dead && (st.freeze?.t > 0 || st.chill?.t > 0)) { ctx.save(); ctx.globalAlpha = 0.25; ctx.fillStyle = '#9ae8ff'; ctx.beginPath(); ctx.ellipse(x, y - s.sh * size * 0.45, s.sw * size * 0.35, s.sh * size * 0.45, 0, 0, 7); ctx.fill(); ctx.restore(); }
-    if (!u.dead && (st.ignite?.t > 0) && Math.random() < 0.4) this.particle(x + (Math.random() - 0.5) * 40 * size, y - Math.random() * 80 * size, { col: '#ff8a2a', vy: -60, life: 0.5, r: 4 });
-    if (!u.dead && (st.poison?.stacks?.length) && Math.random() < 0.3) this.particle(x + (Math.random() - 0.5) * 40 * size, y - Math.random() * 60 * size, { col: '#7cff5a', vy: -30, life: 0.6, r: 3 });
-    // ライフの棒
-    if (!u.dead && u.kind === 'monster' && !u.boss && (u.life < u.maxLife || u.rank !== 'normal')) {
-      const bw = 60 * Math.max(0.8, size); const top = y - s.sh * size - 14 + (flying ? -u.z : 0);
-      ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(x - bw / 2 - 1, top - 1, bw + 2, 7);
-      ctx.fillStyle = u.rank === 'normal' ? '#d33' : u.rank === 'rare' ? '#ffcc33' : '#5a9cff';
-      ctx.fillRect(x - bw / 2, top, bw * Math.max(0, u.life / u.maxLife), 5);
-      if (u.rank !== 'normal') {
-        const names = (u.elite || []).map((id) => ELITE_NAME[id] || '').join('・');
-        this.label(ctx, x, top - 8, `${names ? `${names}の` : ''}${u.name}`, u.rank === 'rare' ? '#ffd860' : '#8ab8ff', 13);
+  updateVis(c, dt, vdt) {
+    const speed = Math.max(1, Math.min(4, this.settings.speed || 1));
+    for (const u of c.units) {
+      const v = this.visOf(u);
+      // 位置をなめらかに（20 回/秒の計算を 60fps で見せる）
+      if (Math.abs(u.x - v.x) > 120) v.x = u.x; else v.x += (u.x - v.x) * Math.min(1, dt * 22);
+      // 動きの時間
+      if (u.anim !== v.animRef || u.anim?.s !== v.animS) {
+        if (u.anim?.s === 'attack' || u.anim?.s === 'cast') { if (u.anim !== v.animRef) v.n++; }
+        v.animRef = u.anim; v.animS = u.anim?.s; v.at = u.anim?.t || 0;
+      } else if (!(u.statuses?.freeze?.t > 0)) {
+        v.at = clamp(v.at + vdt * speed, (u.anim?.t || 0) - 0.08, (u.anim?.t || 0) + 0.06);
       }
-    }
-    if (u.kind === 'minion' && !u.dead && u.life < u.maxLife) {
-      const bw = 40; const top = y - s.sh * size - 8;
-      ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(x - bw / 2, top, bw, 4);
-      ctx.fillStyle = '#5ad05a'; ctx.fillRect(x - bw / 2, top, bw * u.life / u.maxLife, 4);
+      // 被弾（白フラッシュ 50ms・のけぞり）
+      const hf = u.hitFlash || 0;
+      if (hf > v.lastHF + 0.005) { v.flash = 0.05; v.recoil = 1; }
+      v.lastHF = hf;
+      if (v.flash > 0) v.flash -= dt;
+      if (v.recoil > 0) v.recoil = Math.max(0, v.recoil - vdt * 7);
+      if (v.spawnT < 9) v.spawnT += vdt;
+      if (u.dead) { v.dieT += vdt; if (u.kind === 'hero') v.at = v.dieT; } else v.dieT = 0;
+      const ratio = u.maxLife ? Math.max(0, u.life / u.maxLife) : 1;
+      v.chip = ratio > v.chip ? ratio : v.chip + (ratio - v.chip) * Math.min(1, vdt * 2.5);
     }
   }
 
-  label(ctx, x, y, text, col = '#fff', size = 14) {
+  drawUnit(ctx, u) {
+    const v = this.visOf(u);
+    const x = v.x - this.camX; const y = this.sy(u.y);
+    if (x < -320 || x > VIEW_W + 320) return;
+    if (u.kind === 'hero') {
+      const st = this.game.state;
+      if (!this.lookCache || this.lookState !== st || this.lookCls !== st.hero.cls) { this.lookCache = heroLook(st); this.lookState = st; this.lookCls = st.hero.cls; }
+      this.drawStatusUnder(ctx, u, x, y, 1);
+      drawHero(ctx, u, x, y, { look: this.lookCache, t: this.t, scale: 1, vis: v, whiteOf });
+      this.drawStatusOver(ctx, u, x, y, 190, 60);
+      if (u.dead) this.labels.push({ x, y: y - 120, text: '復活まで…', col: '#ff8a8a', size: 14 });
+      return;
+    }
+    const s = assets.sprite(u.art);
+    if (!s?.img) return;
+    const size = u.size || 1;
+    const a = u.anim || { s: 'idle', t: 0 };
+    const faceDir = u.team === 'hero' ? 1 : -1; // 絵の向き（敵は左向き）
+    const flip = u.team === 'hero' ? (u.face || 1) < 0 : (u.face || -1) > 0;
+    const dirToward = flip ? -faceDir : faceDir; // 画面の上で前の向き
+    // 姿勢
+    let dx = 0; let dy = 0; let rot = 0; let sx = 1; let sy = 1; let alpha = 1;
+    const at = v.at;
+    const seed = u.id * 1.7;
+    if (u.dead) {
+      const k = clamp(v.dieT / 0.45, 0, 1);
+      rot = -dirToward * 1.35 * (k * k);
+      alpha = clamp(1 - (v.dieT - 0.35) / 0.7, 0, 1);
+      dy = k * 4;
+      if (v.dieT < 0.9 && Math.random() < 0.5 * (this.settings.fx === 'low' ? 0.3 : 1)) this.fx.parts.add({ x: u.x + (Math.random() - 0.5) * 50 * size, y: y - Math.random() * 90 * size, vy: -40 - Math.random() * 60, vx: (Math.random() - 0.5) * 20, life: 0.8, s: 3, img: atlas('glow', u.def?.palette?.eye || '#ffffff'), drag: 0.5 });
+    } else if (a.s === 'walk') { dy = -Math.abs(Math.sin(at * 8 + seed)) * 4 * size; rot = Math.sin(at * 8 + seed) * 0.045; }
+    else if (a.s === 'attack') {
+      const wind = clamp(at / 0.3, 0, 1); const lunge = clamp((at - 0.3) / 0.12, 0, 1); const rec = clamp((at - 0.42) / 0.2, 0, 1);
+      const back = wind * (1 - lunge); const fwd = lunge * (1 - rec);
+      dx = dirToward * (-7 * back + 18 * fwd) * size;
+      rot = dirToward * (-0.09 * back + 0.08 * fwd);
+      sy = 1 + 0.05 * back - 0.06 * fwd; sx = 1 - 0.03 * back + 0.08 * fwd;
+      if (u.kind === 'monster' && (u.def?.attack === 'caster' || u.def?.attack === 'ranged') && back > 0.2) this.castGlowAt(ctx, x + dirToward * 30 * size, y - 70 * size, back, u.element);
+    } else { const b = Math.sin(this.t * 2.8 + seed); dy = b * 1.6 * size; sy = 1 + b * 0.022; sx = 1 - b * 0.011; }
+    if (u.z > 0) dy += Math.sin(this.t * 4 + seed) * 8 - u.z;
+    if (v.recoil > 0 && !u.dead) { dx -= dirToward * 7 * v.recoil * (u.boss ? 0.3 : 1); sx *= 1 + 0.1 * v.recoil; sy *= 1 - 0.1 * v.recoil; }
+    // 出現（0 → 1.08 → 1.0）
+    let pop = 1;
+    if (v.spawnT < 0.28) { const k = v.spawnT / 0.28; pop = k < 0.7 ? (k / 0.7) * 1.08 : 1.08 - (k - 0.7) / 0.3 * 0.08; alpha *= Math.min(1, k * 2); }
+    const sc = size * pop;
+    // 影
+    ctx.save(); ctx.globalAlpha = 0.35 * alpha * (u.z > 0 ? 0.6 : 1); ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(x, y, 36 * size, 8 * size, 0, 0, TAU); ctx.fill(); ctx.restore();
+    const parts = !s.custom ? monsterParts(u.kind === 'monster' ? u.defId : (u.art || '').replace(/^pet\./, ''), u.kind === 'monster' ? 'monster' : 'pet') : null;
+    const usePets = u.kind !== 'monster' && !(u.art || '').startsWith('pet.');
+    const P = usePets ? null : parts;
+    const body = P ? P.body : s.img;
+    // エリート・ボスの光（輪郭が脈打つ）
+    const glowCol = !u.dead && u.kind === 'monster' && u.rank !== 'normal' ? (u.boss ? RANK_GLOW[u.rank] || RANK_GLOW.boss : RANK_GLOW[u.rank] || '#ffffff') : null;
+    if (glowCol) {
+      const hl = haloOf(body, glowCol);
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = (0.55 + 0.35 * Math.sin(this.t * 4 + seed)) * alpha;
+      this.blit(ctx, hl.img, s, x + dx, y + dy, sc, sx, sy, rot, flip, hl.pad, body);
+      ctx.restore();
+      this.eliteParticles(u, x, y, size);
+    }
+    ctx.save(); if (alpha < 1) ctx.globalAlpha = alpha;
+    const flap = P ? Math.cos(this.t * (u.z > 0 ? 14 : 6) + seed) : 0;
+    if (P?.far) this.blitWing(ctx, P.far, P, s, x + dx, y + dy, sc, sx, sy, rot, flip, flap);
+    this.blit(ctx, body, s, x + dx, y + dy, sc, sx, sy, rot, flip);
+    if (P?.near) this.blitWing(ctx, P.near, P, s, x + dx, y + dy, sc, sx, sy, rot, flip, flap);
+    // 状態異常の色
+    const st = u.statuses || {};
+    if (!u.dead) {
+      const tint = st.freeze?.t > 0 ? ['#9ae8ff', 0.55] : st.ignite?.t > 0 ? ['#ff7a2a', 0.22 + 0.1 * Math.sin(this.t * 20)] : st.poison?.stacks?.length ? ['#7cff5a', 0.22] : st.chill?.t > 0 ? ['#7fd8ff', 0.25] : st.shock?.t > 0 && Math.random() < 0.3 ? ['#fff07a', 0.4] : null;
+      if (tint) { ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = alpha * tint[1]; this.blit(ctx, tintOf(body, tint[0]), s, x + dx, y + dy, sc, sx, sy, rot, flip); }
+      if (v.flash > 0 && this.settings.fxFlash !== false) { ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = alpha * 0.85; this.blit(ctx, whiteOf(body), s, x + dx, y + dy, sc, sx, sy, rot, flip); }
+    } else if (v.dieT < 0.12) { ctx.globalAlpha = 0.9; this.blit(ctx, whiteOf(body), s, x + dx, y + dy, sc, sx, sy, rot, flip); }
+    ctx.restore();
+    const topH = s.sh * (s.ay ?? 0.97) * size;
+    if (!u.dead) this.drawStatusOver(ctx, u, x, y + dy, topH, 28 * size);
+    if (!u.dead) this.drawStatusUnder(ctx, u, x, y, size);
+    // ライフの棒
+    if (!u.dead && u.kind === 'monster' && !u.boss && (u.life < u.maxLife || u.rank !== 'normal')) {
+      const bw = 62 * Math.max(0.8, Math.min(1.4, size)); const top = y - topH - 12 + (u.z > 0 ? -u.z : 0);
+      this.lifeBar(ctx, x - bw / 2, top, bw, 6, u.life / u.maxLife, v.chip, u.rank === 'normal' ? '#d8352a' : u.rank === 'rare' ? '#ffc83a' : '#5a9cff');
+      if (u.rank !== 'normal') {
+        const names = (u.elite || []).map((id) => ELITE_NAME[id] || '').filter(Boolean).join('・');
+        this.labels.push({ x, y: top - 6, text: `${names ? `${names}の` : ''}${u.name}`, col: u.rank === 'rare' ? '#ffd860' : '#8ab8ff', size: 13 });
+      }
+    }
+    if (u.kind === 'minion' && !u.dead && u.life < u.maxLife) this.lifeBar(ctx, x - 20, y - topH - 6, 40, 4, u.life / u.maxLife, v.chip, '#5ad05a');
+  }
+
+  /** 絵を描く（assets.draw と同じ置き方。差し替えの横並び画像にも対応） */
+  blit(ctx, img, s, x, y, scale, sxx, syy, rot, flip, pad = 0, base = null) {
+    if (!img) return;
+    const ref = base || img;
+    const frames = s.custom ? s.frames || 1 : 1;
+    const fw = ref.width / frames;
+    const w = (s.sw) * scale * sxx; const h = (s.sh) * scale * syy;
+    const kx = w / fw; const ky = h / ref.height;
+    let frame = 0;
+    if (frames > 1) frame = Math.floor(this.t * (s.fps || 10)) % frames;
     ctx.save();
-    ctx.font = `bold ${size}px "M PLUS 1p", "Hiragino Sans", sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,0.85)'; ctx.strokeText(text, x, y);
-    ctx.fillStyle = col; ctx.fillText(text, x, y);
+    ctx.translate(x + (s.ox || 0) * scale, y + (s.oy || 0) * scale);
+    if (rot) ctx.rotate(rot);
+    if (flip !== !!s.flip) ctx.scale(-1, 1);
+    if (pad) ctx.drawImage(img, -w * s.ax - pad * kx, -h * s.ay - pad * ky, img.width * kx, img.height * ky);
+    else ctx.drawImage(img, frame * fw, 0, fw, img.height, -w * s.ax, -h * s.ay, w, h);
+    ctx.restore();
+  }
+  blitWing(ctx, img, P, s, x, y, scale, sxx, syy, rot, flip, flap) {
+    if (!img) return;
+    const w = s.sw * scale * sxx; const h = s.sh * scale * syy;
+    const kx = w / P.w; const ky = h / P.h;
+    const rx = (P.root[0] - P.w * s.ax) * kx; const ry = (P.root[1] - P.h * s.ay) * ky;
+    ctx.save();
+    ctx.translate(x, y);
+    if (rot) ctx.rotate(rot);
+    if (flip !== !!s.flip) ctx.scale(-1, 1);
+    ctx.translate(rx, ry);
+    ctx.scale(1, 0.55 + 0.45 * flap);
+    ctx.translate(-rx, -ry);
+    ctx.drawImage(img, -w * s.ax, -h * s.ay, w, h);
+    ctx.restore();
+  }
+
+  lifeBar(ctx, x, y, w, h, ratio, chip, col) {
+    ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(x - 1, y - 1, w + 2, h + 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.75)'; ctx.fillRect(x, y, w * clamp(chip, 0, 1), h);
+    ctx.fillStyle = col; ctx.fillRect(x, y, w * clamp(ratio, 0, 1), h);
+    ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.fillRect(x, y, w * clamp(ratio, 0, 1), h * 0.4);
+  }
+
+  castGlowAt(ctx, x, y, k, elId) {
+    const img = atlas('glow', ELEMENT_COLORS[elId] || '#ff6040');
+    if (!img) return;
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = k; const r = 12 + 18 * k; ctx.drawImage(img, x - r, y - r, r * 2, r * 2); ctx.restore();
+  }
+
+  /** エリートの詞ごとの粒 */
+  eliteParticles(u, x, y, size) {
+    const d = this.settings.fx === 'low' ? 0.25 : this.settings.fx === 'mid' ? 0.5 : 1;
+    if (Math.random() > 0.35 * d) return;
+    const fl = u.flags || {};
+    const px = u.x + (Math.random() - 0.5) * 50 * size; const py = y - Math.random() * 90 * size;
+    let col = null; let img = null; let vy = -40; let add = true;
+    if (fl.deathBlast || fl.element === 'fire') { img = atlas('flame', '#ff8a2a', '#ff3a10'); vy = -60; }
+    else if (fl.chill || fl.element === 'cold') img = atlas('flake', '#e8faff');
+    else if (fl.zap || fl.element === 'lightning') { img = atlas('spark', '#fff07a'); vy = 0; }
+    else if (fl.leech) { img = atlas('soft', '#c0102a'); add = false; vy = -20; }
+    else if (fl.regen) img = atlas('spark', '#7cff7a');
+    else if (fl.dmg) img = atlas('glow', '#ff3030');
+    else { col = RANK_GLOW[u.rank] || '#ffffff'; img = atlas('glow', col); }
+    this.fx.parts.add({ x: px, y: py, vx: (Math.random() - 0.5) * 20, vy, life: 0.7, s: 4 + Math.random() * 3, img, add, a: add ? 1 : 0.5, drag: 0.5 });
+  }
+
+  /** 足元（状態異常の印・呪い） */
+  drawStatusUnder(ctx, u, x, y, size) {
+    const st = u.statuses; if (!st || u.dead) return;
+    if (st.vuln?.t > 0) { const rune = atlas('rune', '#c77dff'); if (rune) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.7; ctx.translate(x, y); ctx.scale(1, 0.3); ctx.rotate(this.t * 1.4); ctx.drawImage(rune, -44 * size, -44 * size, 88 * size, 88 * size); ctx.restore(); } }
+    if (st.freeze?.t > 0) { const sh = atlas('shard', '#9ae8ff'); if (sh) { ctx.save(); for (let i = 0; i < 5; i++) { const a = (i / 5) * Math.PI - Math.PI; ctx.save(); ctx.translate(x + Math.cos(a) * 30 * size, y + 4); ctx.rotate(Math.cos(a) * 0.5); ctx.drawImage(sh, -6 * size, -30 * size, 12 * size, 30 * size); ctx.restore(); } ctx.restore(); } }
+  }
+  /** 体の上（燃える・毒・感電・気絶） */
+  drawStatusOver(ctx, u, x, y, topH, wd) {
+    const st = u.statuses; if (!st || u.dead) return;
+    const d = this.settings.fx === 'low' ? 0.3 : this.settings.fx === 'mid' ? 0.6 : 1;
+    const rx = () => u.x + (Math.random() - 0.5) * wd * 1.6;
+    const ry = () => y - Math.random() * topH * 0.8;
+    if (st.ignite?.t > 0 && Math.random() < 0.55 * d) this.fx.parts.add({ x: rx(), y: ry(), vx: 0, vy: -70, life: 0.45, s: 8, s1: 2, img: atlas('flame', '#ff8a2a', '#ff3a10'), drag: 1 });
+    if (st.poison?.stacks?.length && Math.random() < 0.35 * d) this.fx.parts.add({ x: rx(), y: ry(), vy: -30, life: 0.7, s: 4, img: atlas('bubble', '#9aff6a'), drag: 0.5 });
+    if (st.bleed?.t > 0 && Math.random() < 0.3 * d) this.fx.parts.add({ x: rx(), y: ry(), vy: 20, g: 400, life: 0.5, s: 3, img: atlas('soft', '#c0101a'), add: false });
+    if (st.chill?.t > 0 && Math.random() < 0.2 * d) this.fx.parts.add({ x: rx(), y: ry(), vy: 20, life: 0.8, s: 3, img: atlas('flake', '#e8faff'), vr: 2 });
+    if (st.shock?.t > 0 && Math.random() < 0.25) {
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = '#fff6a0'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); let px = x + (Math.random() - 0.5) * wd * 1.5; let py = y - Math.random() * topH; ctx.moveTo(px, py); for (let i = 0; i < 4; i++) { px += (Math.random() - 0.5) * 22; py += (Math.random() - 0.5) * 22; ctx.lineTo(px, py); } ctx.stroke(); ctx.restore();
+    }
+    if (st.stun?.t > 0) { const img = atlas('star', '#ffe060'); if (img) for (let i = 0; i < 3; i++) { const a = this.t * 5 + (i / 3) * TAU; ctx.drawImage(img, x + Math.cos(a) * 20 - 6, y - topH - 8 + Math.sin(a) * 6 - 6, 12, 12); } }
+    for (const id in st) {
+      if (['ignite', 'poison', 'bleed', 'chill', 'shock', 'stun', 'freeze', 'vuln'].includes(id)) continue;
+      const def = statusDefs[id]; const s0 = st[id];
+      if (def?.color && s0?.t > 0 && Math.random() < 0.15 * d) this.fx.parts.add({ x: rx(), y: ry(), vy: -30, life: 0.6, s: 4, img: atlas('glow', def.color) });
+    }
+  }
+
+  /** 主人公の強化の気配 */
+  drawBuffAuras(ctx, h) {
+    const bs = this.game.combat.buffs; if (!bs?.length || !h || h.dead) return;
+    const x = this.vx(h) - this.camX; const y = this.sy(h.y);
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    let i = 0;
+    for (const b of bs) {
+      if (i >= 3) break;
+      const col = ELEMENT_COLORS[SKILL_EL(b.id)] || '#ffd860';
+      const ring = atlas('ring', col); if (!ring) continue;
+      const s = 58 + i * 12 + Math.sin(this.t * 3 + i) * 4;
+      ctx.globalAlpha = 0.35 * Math.min(1, b.t);
+      ctx.drawImage(ring, x - s, y - s * 0.3, s * 2, s * 0.6);
+      if (Math.random() < 0.25) this.fx.parts.add({ x: h.x + (Math.random() - 0.5) * 70, y: y - Math.random() * 20, vy: -60 - Math.random() * 40, life: 0.8, s: 3, img: atlas('spark', col), drag: 0.4 });
+      i++;
+    }
     ctx.restore();
   }
 
   // ---------------- 弾と範囲
   drawProj(ctx, pr) {
-    const x = this.sx(pr.x); const y = this.sy(pr.y, pr.z);
-    if (sceneHooks.projectile && sceneHooks.projectile(this, ctx, pr, x, y)) return;
-    const ang = Math.atan2(pr.vy * 2, pr.vx);
-    if (assets.isCustom(pr.art)) { assets.draw(ctx, pr.art, x, y, { rot: ang, t: pr.t }); return; }
-    const col = ELEMENT_COLORS[pr.el] || '#fff';
-    ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.globalCompositeOperation = 'lighter';
-    const len = 34 * (pr.size || 1);
-    const gr = ctx.createLinearGradient(-len, 0, 10, 0);
-    gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, col);
-    ctx.fillStyle = gr; ctx.fillRect(-len, -4, len + 10, 8);
-    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(8, 0, 5, 0, 7); ctx.fill();
-    ctx.restore();
-    if (Math.random() < 0.5) this.particle(x, y, { col, life: 0.25, r: 3, vx: -pr.vx * 0.05, vy: 0 });
+    // 計算の合間をなめらかに（次の計算までの時間ぶん先へ）
+    const ahead = Math.min(0.05, this.game.acc || 0);
+    const x = this.sx(pr.x + pr.vx * ahead); const y = this.sy(pr.y + pr.vy * ahead, pr.z);
+    if (x < -100 || x > VIEW_W + 100) return;
+    if (sceneHooks.projectile && sceneHooks.projectile !== MY_PROJ && sceneHooks.projectile(this, ctx, pr, x, y)) return;
+    MY_PROJ(this, ctx, pr, x, y);
   }
 
   drawArea(ctx, a) {
     const x = this.sx(a.x); const y = this.sy(a.y);
-    if (sceneHooks.area && sceneHooks.area(this, ctx, a, x, y)) return;
-    const col = a.team === 'hero' ? (ELEMENT_COLORS[a.el] || '#fff') : '#ff3030';
-    ctx.save();
-    if (!a.fired) {
-      // 予告の円
-      const k = Math.min(1, a.t / Math.max(0.01, a.delay));
-      ctx.globalAlpha = 0.5;
-      ctx.strokeStyle = col; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.ellipse(x, y, a.r, a.r * 0.35, 0, 0, 7); ctx.stroke();
-      ctx.globalAlpha = 0.25 * k; ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(x, y, a.r * k, a.r * 0.35 * k, 0, 0, 7); ctx.fill();
-    } else if (a.dur) {
-      ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.25 + 0.1 * Math.sin(this.t * 10);
-      if (assets.isCustom(a.art)) assets.draw(ctx, a.art, x, y - a.r * 0.2, { w: a.r * 2, h: a.r * 2, t: a.t });
-      else { ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(x, y, a.r, a.r * 0.35, 0, 0, 7); ctx.fill(); }
-    }
-    ctx.restore();
+    if (x < -400 || x > VIEW_W + 400) return;
+    if (sceneHooks.area && sceneHooks.area !== MY_AREA && sceneHooks.area(this, ctx, a, x, y)) return;
+    MY_AREA(this, ctx, a, x, y);
   }
 
   // ---------------- 出来事 → 演出
@@ -230,187 +487,118 @@ export class Scene {
     const fx = c.fx;
     if (!fx.length) return;
     c.fx = [];
-    const s = this.settings;
-    let dmgShown = 0;
     for (const e of fx) {
       for (const f of sceneHooks.onFx) { try { f(this, e); } catch (err) { console.error(err); } }
+      this.fx.handle(e);
       const custom = sceneHooks.fx[e.t];
       if (custom) { try { custom(this, e); } catch (err) { console.error(err); } }
-      switch (e.t) {
-        case 'dmg':
-          if (s.dmgNumbers === false) break;
-          if (dmgShown++ > 40) break;
-          this.texts.push({ x: e.x + (Math.random() - 0.5) * 30, y: e.y, z: e.z || 80, text: fmt(e.v), col: e.team === 'hero' ? '#ff5050' : e.crit ? '#ffd040' : (e.dot ? (ELEMENT_COLORS[e.el] || '#ddd') : (e.el === 'phys' ? '#ffffff' : ELEMENT_COLORS[e.el])), size: e.crit ? 30 : e.dot ? 15 : 20, life: e.crit ? 1.0 : 0.8, t: 0, crit: e.crit, vy: -70 });
-          break;
-        case 'text': this.texts.push({ x: e.x, y: e.y, z: e.z || 100, text: e.text, col: e.color || '#fff', size: 18, life: 0.9, t: 0, vy: -50 }); break;
-        case 'hit': this.burst(e.x, e.y, e.z || 50, ELEMENT_COLORS[e.el] || '#fff', 6, 140); break;
-        case 'swing': this.flashes.push({ kind: 'swing', x: e.x, y: e.y, el: e.el, t: 0, life: 0.22, r: e.r || 60, enemy: e.enemy, skill: e.skill }); break;
-        case 'nova': this.flashes.push({ kind: 'nova', x: e.x, y: e.y, el: e.el, t: 0, life: 0.4, r: e.r, skill: e.skill }); this.burst(e.x, e.y, 30, ELEMENT_COLORS[e.el] || '#fff', e.small ? 8 : 24, 300); break;
-        case 'pulse': if (e.team === 'hero') { this.flashes.push({ kind: 'nova', x: e.x, y: e.y, el: e.el, t: 0, life: 0.3, r: e.r, skill: e.skill }); } else { this.burst(e.x, e.y, 10, '#ff4040', 12, 200); } break;
-        case 'chain': this.flashes.push({ kind: 'chain', pts: e.pts, el: e.el, t: 0, life: 0.25 }); break;
-        case 'death': this.burst(e.unit.x, e.unit.y, 50 * (e.unit.size || 1), e.unit.def?.palette?.main || '#888', e.unit.boss ? 60 : 14, 220); if (e.unit.boss) this.shake = Math.max(this.shake, 10); break;
-        case 'shake': this.shake = Math.max(this.shake, e.power || 3); break;
-        case 'gold': this.drops.push({ kind: 'gold', x: e.x, y: e.y, t: 0, life: 1.0, v: e.v }); break;
-        case 'loot': this.addLoot(e); break;
-        case 'levelup': this.flashes.push({ kind: 'level', t: 0, life: 1.6, paragon: e.paragon }); this.burst(c.hero.x, c.hero.y, 60, '#ffe080', 40, 260); break;
-        case 'summon': this.burst(e.x, e.y, 20, '#b080ff', 16, 120); break;
-        case 'buff': this.burst(e.unit.x, e.unit.y, 60, ELEMENT_COLORS[e.el] || '#fff', 18, 160); break;
-        case 'boss': this.shake = Math.max(this.shake, 6); break;
-        default: break;
-      }
     }
   }
 
-  addLoot(e) {
-    const it = e.item;
-    const r = RARITY[it.rarity];
-    if (!r) return;
-    if (e.where === 'salvaged' && r.idx < 2) return; // 自動分解のノーマル・マジックは光らせない
-    const icon = BASE[it.base]?.icon || 'icon.item.sword';
-    this.drops.push({ kind: 'item', x: e.x, y: e.y, t: 0, life: r.idx >= 4 ? 3.2 : 2.0, r, icon, name: itemName(it), salvaged: e.where === 'salvaged', q: it.q });
-    if (r.idx >= 4) this.shake = Math.max(this.shake, 4);
-  }
-
-  burst(x, y, z, col, n, speed) {
-    const lim = this.settings.fx === 'low' ? 0.3 : this.settings.fx === 'mid' ? 0.6 : 1;
-    n = Math.ceil(n * lim);
-    for (let i = 0; i < n; i++) {
-      const a = Math.random() * Math.PI * 2; const v = speed * (0.3 + Math.random() * 0.7);
-      this.particle(this.sx(x), this.sy(y, z), { col, vx: Math.cos(a) * v, vy: Math.sin(a) * v * 0.7 - 40, life: 0.3 + Math.random() * 0.4, r: 2 + Math.random() * 3, g: 300 });
-    }
-  }
-
-  /** 画面座標のパーティクル */
-  particle(x, y, o) {
-    if (this.particles.length > 900) return;
-    this.particles.push({ x, y, vx: o.vx || 0, vy: o.vy || 0, life: o.life || 0.5, t: 0, r: o.r || 3, col: o.col || '#fff', g: o.g || 0, cam: this.camX });
-  }
-
-  drawParticles(ctx, dt) {
-    ctx.save(); ctx.globalCompositeOperation = 'lighter';
-    for (const p of this.particles) {
-      p.t += dt; p.vy += p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt;
-      const k = 1 - p.t / p.life;
-      if (k <= 0) continue;
-      const x = p.x - (this.camX - p.cam);
-      ctx.globalAlpha = k; ctx.fillStyle = p.col;
-      ctx.beginPath(); ctx.arc(x, p.y, p.r * (0.5 + k * 0.5), 0, 7); ctx.fill();
-    }
-    ctx.restore();
-    this.particles = this.particles.filter((p) => p.t < p.life);
-    // 斬撃・爆発・連鎖
-    for (const f of this.flashes) {
-      f.t += dt;
-      const k = f.t / f.life;
-      if (k >= 1) continue;
-      ctx.save(); ctx.globalCompositeOperation = 'lighter';
-      const col = f.enemy ? '#ff6060' : (ELEMENT_COLORS[f.el] || '#fff');
-      if (f.kind === 'swing') {
-        const x = this.sx(f.x); const y = this.sy(0) - 60 + (f.y || 0) * 0.9;
-        const id = f.skill ? `fx.${f.skill}.swing` : null;
-        if (id && assets.isCustom(id)) assets.draw(ctx, id, x, y, { alpha: 1 - k, scale: 0.8 + k * 0.4, t: f.t });
-        else { ctx.globalAlpha = 1 - k; ctx.strokeStyle = col; ctx.lineWidth = 10 * (1 - k) + 2; ctx.beginPath(); ctx.arc(x - 20, y + 10, (f.r || 60) * 0.7 + 30 * k, -1.6 + k, 0.9 + k); ctx.stroke(); }
-      } else if (f.kind === 'nova') {
-        const x = this.sx(f.x); const y = this.sy(f.y || 0);
-        const id = f.skill ? `fx.${f.skill}.area` : null;
-        if (id && assets.isCustom(id)) assets.draw(ctx, id, x, y - f.r * 0.2, { w: f.r * 2 * (0.6 + 0.4 * k), h: f.r * 2 * (0.6 + 0.4 * k), alpha: 1 - k, t: f.t });
-        else { ctx.globalAlpha = (1 - k) * 0.8; ctx.strokeStyle = col; ctx.lineWidth = 14 * (1 - k) + 2; ctx.beginPath(); ctx.ellipse(x, y, f.r * (0.3 + 0.7 * k), f.r * 0.35 * (0.3 + 0.7 * k), 0, 0, 7); ctx.stroke(); ctx.globalAlpha = (1 - k) * 0.25; ctx.fillStyle = col; ctx.fill(); }
-      } else if (f.kind === 'chain') {
-        ctx.globalAlpha = 1 - k; ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.beginPath();
-        f.pts.forEach((p, i) => { const x = this.sx(p.x) + (Math.random() - 0.5) * 8; const y = this.sy(p.y || 0, p.z || 50) + (Math.random() - 0.5) * 8; if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); });
-        ctx.stroke();
-      } else if (f.kind === 'level') {
-        const h = this.game.combat.hero;
-        const x = this.sx(h.x); const y = this.sy(h.y);
-        ctx.globalAlpha = 1 - k; ctx.strokeStyle = '#ffe080'; ctx.lineWidth = 6; ctx.beginPath(); ctx.ellipse(x, y, 60 + 80 * k, 20 + 26 * k, 0, 0, 7); ctx.stroke();
-        ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = Math.min(1, (1 - k) * 2);
-        this.label(ctx, x, y - 230 - 30 * k, f.paragon ? `パラゴン ${f.paragon}` : 'LEVEL UP!', '#ffe080', 30);
-      }
-      ctx.restore();
-    }
-    this.flashes = this.flashes.filter((f) => f.t < f.life);
-  }
-
-  drawDrops(ctx, dt) {
-    const s = this.settings;
-    for (const d of this.drops) {
-      d.t += dt;
-      const x = this.sx(d.x); const y = this.sy(d.y || 0);
-      const k = d.t / d.life;
-      if (k >= 1) continue;
-      if (d.kind === 'gold') {
-        const jump = Math.sin(Math.min(1, d.t * 3) * Math.PI) * 40;
-        ctx.save(); ctx.globalAlpha = 1 - k * k;
-        ctx.fillStyle = '#ffd040'; ctx.beginPath(); ctx.arc(x, y - 10 - jump, 6, 0, 7); ctx.fill();
-        ctx.restore();
-        continue;
-      }
-      const jump = Math.sin(Math.min(1, d.t * 2.5) * Math.PI) * 70;
-      const col = d.r.color;
-      ctx.save();
-      ctx.globalAlpha = k > 0.75 ? (1 - k) * 4 : 1;
-      if (d.r.beam && s.lootBeams !== false) {
-        // 光の柱
-        ctx.globalCompositeOperation = 'lighter';
-        const bh = 160 + d.r.beam * 90;
-        const gr = ctx.createLinearGradient(0, y - bh, 0, y);
-        gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, col);
-        ctx.fillStyle = gr; ctx.globalAlpha *= 0.5 + 0.2 * Math.sin(this.t * 8);
-        const bw = 10 + d.r.beam * 6;
-        ctx.fillRect(x - bw / 2, y - bh, bw, bh);
-        ctx.globalCompositeOperation = 'source-over';
-      }
-      ctx.globalAlpha = k > 0.75 ? (1 - k) * 4 : 1;
-      assets.draw(ctx, d.icon, x, y - 22 - jump, { w: 40, h: 40 });
-      if (d.r.idx >= 2) this.label(ctx, x, y - 54 - jump, `${d.q === 2 ? '原初の' : d.q === 1 ? '太古の' : ''}${d.name}${d.salvaged ? '（分解）' : ''}`, col, d.r.idx >= 4 ? 16 : 13);
-      ctx.restore();
-    }
-    this.drops = this.drops.filter((d) => d.t < d.life);
-  }
-
-  drawTexts(ctx, dt) {
-    ctx.save();
-    ctx.textAlign = 'center';
-    for (const tx of this.texts) {
-      tx.t += dt;
-      const k = tx.t / tx.life;
-      if (k >= 1) continue;
-      const x = this.sx(tx.x); const y = this.sy(tx.y || 0, tx.z) + tx.vy * tx.t;
-      const pop = tx.crit ? 1 + 0.6 * Math.max(0, 1 - tx.t * 6) : 1;
-      ctx.globalAlpha = k > 0.6 ? (1 - k) / 0.4 : 1;
-      ctx.font = `900 ${Math.round(tx.size * pop)}px "M PLUS 1p", Impact, sans-serif`;
-      ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,0.9)'; ctx.strokeText(tx.text, x, y);
-      ctx.fillStyle = tx.col; ctx.fillText(tx.text, x, y);
-    }
-    ctx.restore();
-    this.texts = this.texts.filter((tx) => tx.t < tx.life);
-    if (this.texts.length > 120) this.texts.splice(0, this.texts.length - 120);
-  }
+  // 互換のため（古い呼び出し）
+  burst(x, y, z, col, n, speed) { this.fx.burst(x, this.sy(y, z), col, n, speed, { kind: 'spark' }); }
+  particle(x, y, o) { this.fx.parts.add({ x: x + this.camX, y, vx: o.vx, vy: o.vy, life: o.life, s: o.r || 3, img: atlas('glow', o.col || '#fff'), g: o.g }); }
+  label(ctx, x, y, text, col = '#fff', size = 14) { fxLabel(ctx, x, y, text, col, size); }
 
   // ---------------- 上に重ねる物（ボスのライフ・知らせ）
   drawOverlay(ctx) {
     const w = this.game.sys.world;
     if (w.bossUnit && !w.bossUnit.dead) {
       const b = w.bossUnit;
-      const bw = 640; const x = (VIEW_W - bw) / 2; const y = 28;
-      ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(x - 4, y - 4, bw + 8, 26);
-      ctx.fillStyle = '#5a0a0a'; ctx.fillRect(x, y, bw, 18);
-      ctx.fillStyle = '#e02a2a'; ctx.fillRect(x, y, bw * Math.max(0, b.life / b.maxLife), 18);
-      this.label(ctx, VIEW_W / 2, y + 15, `${b.name}　${fmt(Math.max(0, b.life))} / ${fmt(b.maxLife)}`, '#fff', 15);
+      const v = this.visOf(b);
+      const bw = 640; const x = (VIEW_W - bw) / 2; const y = 30;
+      ctx.save();
+      ctx.fillStyle = 'rgba(0,0,0,0.75)'; ctx.fillRect(x - 6, y - 6, bw + 12, 30);
+      ctx.strokeStyle = '#8a6a3a'; ctx.lineWidth = 2; ctx.strokeRect(x - 6, y - 6, bw + 12, 30);
+      ctx.fillStyle = '#3a0808'; ctx.fillRect(x, y, bw, 18);
+      ctx.fillStyle = 'rgba(255,240,220,0.8)'; ctx.fillRect(x, y, bw * clamp(v.chip, 0, 1), 18);
+      if (!this.bossGrad) { const gr = ctx.createLinearGradient(0, y, 0, y + 18); gr.addColorStop(0, '#ff5a3a'); gr.addColorStop(0.5, '#c81e1e'); gr.addColorStop(1, '#6a0a0a'); this.bossGrad = gr; }
+      ctx.fillStyle = this.bossGrad; ctx.fillRect(x, y, bw * clamp(b.life / b.maxLife, 0, 1), 18);
+      for (let i = 1; i < 10; i++) { ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect(x + (bw / 10) * i, y, 1, 18); }
+      // 角の飾り
+      ctx.fillStyle = '#c8a050'; for (const sx of [x - 10, x + bw + 10]) { ctx.beginPath(); ctx.moveTo(sx, y + 9 - 12); ctx.lineTo(sx + 8, y + 9); ctx.lineTo(sx, y + 9 + 12); ctx.lineTo(sx - 8, y + 9); ctx.closePath(); ctx.fill(); }
+      ctx.restore();
+      fxLabel(ctx, VIEW_W / 2, y + 15, `${b.name}　${fmt(Math.max(0, b.life))} / ${fmt(b.maxLife)}`, '#fff', 15);
       const tl = Math.max(0, w.bossTimer);
-      this.label(ctx, VIEW_W / 2, y + 48, `残り ${Math.ceil(tl)} 秒`, tl < 10 ? '#ff6060' : '#ffd080', 20);
+      if (tl > 0) fxLabel(ctx, VIEW_W / 2, y + 50, `残り ${Math.ceil(tl)} 秒`, tl < 10 ? '#ff6060' : '#ffd080', 20);
     }
-    if (w.banner) {
+    if (w.banner && !(w.banner.boss && this.fx.bossCard)) {
       const k = w.banner.t;
       ctx.save(); ctx.globalAlpha = Math.min(1, k * 2);
       const y = 150;
       const gr = ctx.createLinearGradient(0, y - 34, 0, y + 20);
       gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(0.5, 'rgba(0,0,0,0.6)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = gr; ctx.fillRect(0, y - 34, VIEW_W, 56);
-      this.label(ctx, VIEW_W / 2, y, w.banner.text, w.banner.bad ? '#ff7070' : w.banner.good ? '#ffe070' : w.banner.boss ? '#ff9050' : '#f0e6d0', 28);
+      const col = w.banner.bad ? '#ff7070' : w.banner.good ? '#ffe070' : w.banner.boss ? '#ff9050' : '#f0e6d0';
+      ctx.strokeStyle = col; ctx.globalAlpha *= 0.6; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(VIEW_W / 2 - 260, y + 12); ctx.lineTo(VIEW_W / 2 + 260, y + 12); ctx.stroke();
+      ctx.globalAlpha = Math.min(1, k * 2);
+      ctx.restore();
+      ctx.save(); ctx.globalAlpha = Math.min(1, k * 2);
+      ctx.font = '800 28px "Shippori Mincho B1", "M PLUS 1p", serif'; ctx.textAlign = 'center'; ctx.lineWidth = 5; ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(0,0,0,0.9)';
+      ctx.strokeText(w.banner.text, VIEW_W / 2, y); ctx.fillStyle = col; ctx.fillText(w.banner.text, VIEW_W / 2, y);
       ctx.restore();
     }
   }
 }
 
-const ELITE_NAME = Object.fromEntries(ELITE_AFFIXES.map((a) => [a.id, a.name]));
+/** 奥から順（同じ深さなら主人公を手前に、大きなボスを奥に） */
+function depthOrder(a, b) { return (a.y + (a.kind === 'hero' ? 24 : 0) - (a.boss ? 14 : 0)) - (b.y + (b.kind === 'hero' ? 24 : 0) - (b.boss ? 14 : 0)); }
+function SKILL_EL(id) { return SKILL[id]?.element || 'phys'; }
+
+function vignette() {
+  const c = makeCanvas(320, 180);
+  if (!c) return null;
+  const x = c.getContext('2d');
+  const g = x.createRadialGradient(160, 99, 54, 160, 99, 190);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(0.7, 'rgba(0,0,0,0.25)'); g.addColorStop(1, 'rgba(0,0,0,0.62)');
+  x.fillStyle = g; x.fillRect(0, 0, 320, 180);
+  return c;
+}
+
+// 空気の粒の作り方
+function newAtmos(A, scatter) {
+  const z = 0.3 + Math.random() * 1.0;
+  const p = { x: Math.random() * (VIEW_W + 120), y: 0, z, par: 0.1 + z * 0.75, vx: 0, vy: 0, s: 2, a: 0.5, ph: 0, life: 6 + Math.random() * 6, seed: Math.random() * 10 };
+  const big = z > 1 ? 1.8 : 1;
+  switch (A.kind) {
+    case 'snow': p.vx = -10 - Math.random() * 20; p.vy = 30 + 40 * z; p.s = (1.5 + Math.random() * 2) * z * big; p.a = 0.8; p.y = scatter ? Math.random() * VIEW_H : -20; break;
+    case 'ash': p.vx = -8 - Math.random() * 14; p.vy = 12 + 18 * z; p.s = (1.4 + Math.random() * 1.6) * z * big; p.a = 0.5; p.y = scatter ? Math.random() * VIEW_H : -20; break;
+    case 'sand': p.vx = -160 - 140 * z; p.vy = 6 + Math.random() * 10; p.s = (1 + Math.random()) * z * big; p.a = 0.45; p.y = Math.random() * VIEW_H * 0.95; p.life = 3 + Math.random() * 3; break;
+    case 'bubble': p.vx = (Math.random() - 0.5) * 10; p.vy = -30 - 40 * z; p.s = (2 + Math.random() * 4) * z * big; p.a = 0.6; p.y = scatter ? Math.random() * VIEW_H : VIEW_H + 20; break;
+    case 'ember': case 'blood': p.vx = (Math.random() - 0.5) * 30; p.vy = -30 - 50 * z; p.s = (1.5 + Math.random() * 2.5) * z * big; p.a = 0.9; p.y = scatter ? Math.random() * VIEW_H : VIEW_H + 10; break;
+    case 'spore': p.vx = (Math.random() - 0.5) * 16; p.vy = -6 - Math.random() * 10; p.s = (1.5 + Math.random() * 2) * z * big; p.a = 0.8; p.y = Math.random() * VIEW_H; break;
+    case 'cloud': p.vx = -20 - 20 * z; p.vy = 0; p.s = (40 + Math.random() * 60) * z; p.a = 0.12; p.y = 300 + Math.random() * 300; p.life = 14 + Math.random() * 10; break;
+    case 'steam': p.vx = (Math.random() - 0.5) * 10; p.vy = -20 - Math.random() * 20; p.s = (14 + Math.random() * 20) * z; p.a = 0.14; p.y = scatter ? 300 + Math.random() * 420 : VIEW_H + 20; p.life = 5 + Math.random() * 4; break;
+    case 'star': p.vx = -2; p.vy = 0; p.s = (1.5 + Math.random() * 2.5) * z * big; p.a = 0.8; p.y = Math.random() * VIEW_H * 0.85; break;
+    default: p.vy = 20; p.y = Math.random() * VIEW_H;
+  }
+  if (scatter) p.ph = Math.random() * p.life;
+  return p;
+}
+const ATMOS_IMG = new Map();
+function atmosImg(A) {
+  if (ATMOS_IMG.has(A.kind)) return ATMOS_IMG.get(A.kind);
+  const img = A.kind === 'snow' ? atlas('soft', '#ffffff') : A.kind === 'bubble' ? atlas('bubble', '#c8fff8') : A.kind === 'sand' ? atlas('soft', A.col) : A.kind === 'cloud' || A.kind === 'steam' ? atlas('soft', A.col) : A.kind === 'star' ? atlas('spark', A.col) : atlas(A.kind === 'ash' ? 'soft' : 'glow', A.col);
+  A.add = ['ember', 'spore', 'star', 'blood'].includes(A.kind);
+  ATMOS_IMG.set(A.kind, img);
+  return img;
+}
+
+// ---------------- 設定の窓に「演出の細かい設定」を足す
+settingsHooks.sections.push((ui, root) => {
+  const s = ui.game.state.settings;
+  const chk = (key, label, def = true) => el('label.chk', [el('input', { type: 'checkbox', checked: (s[key] ?? def) !== false || undefined, onchange: (e) => { s[key] = e.target.checked; } }), ` ${label}`]);
+  const slider = el('input', { type: 'range', min: 0, max: 100, step: 5, value: s.fxShake ?? 100, oninput: (e) => { s.fxShake = Number(e.target.value); val.textContent = `${s.fxShake}%`; } });
+  const val = el('span.dim', `${s.fxShake ?? 100}%`);
+  const sel = el('select', { onchange: (e) => { s.fxDmgMode = e.target.value; } }, [['all', 'すべて'], ['crit', '会心だけ'], ['none', '出さない']].map(([v, l]) => el('option', { value: v, selected: (s.fxDmgMode || 'all') === v || undefined }, l)));
+  root.append(el('section.sec', [
+    el('h3.sec-title', '演出の細かい設定'),
+    el('div.row', ['画面の揺れの強さ ', slider, ' ', val]),
+    el('div.row', ['ダメージの数字 ', sel]),
+    chk('fxHitStop', '会心・撃破の一瞬の止まり（ヒットストップ）'),
+    chk('fxLootSlow', 'レジェンダリー以上のドロップでスローにする'),
+    chk('fxFlash', '光のフラッシュ（被弾の白い光・画面の閃き）'),
+    chk('fxReduce', '動きを減らす（揺れ・スロー・止まりを切る）', false),
+    el('p.dim', '「演出の量」を「少ない」にすると粒が減って軽くなります。'),
+  ]));
+});

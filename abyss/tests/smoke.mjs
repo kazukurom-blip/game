@@ -760,6 +760,66 @@ const main = async () => {
     await mc.close();
   }
   // ==================== ここまでメタ担当 ====================
+  // ======== アート担当（art）: 戦闘の画面の絵と演出 ========
+  if (want('art')) {
+    const canvasShot = async (file) => {
+      const url = await page.evaluate(() => document.getElementById('scene').toDataURL('image/jpeg', 0.82));
+      fs.writeFileSync(path.join(SHOTS, file), Buffer.from(url.split(',')[1], 'base64'));
+    };
+    // 5 クラス
+    for (const cls of classes) {
+      await page.evaluate((c) => { const g = window.__game; g.newGame(c, c); for (let i = 0; i < 20 * 4; i++) g.tick(0.05); }, cls);
+      await page.waitForTimeout(900);
+      await canvasShot(`art_${cls}.jpg`);
+    }
+    // 章ごとの背景（無い章は仮の地域で見る）
+    const acts = await page.evaluate(async () => {
+      const W = await import('./src/data/world.js');
+      const out = [];
+      for (const a of W.ACTS) {
+        let z = W.ZONES.find((x) => x.act === a.id);
+        if (!z) { z = { id: `__art_${a.id}`, name: a.name, level: 3, monsters: ['rot_zombie', 'ash_wolf', 'cultist'], boss: 'boss_butcher', act: a.id, actIdx: 0, zoneIdx: 0, global: 0 }; W.ZONE[z.id] = z; }
+        out.push([a.id, z.id]);
+      }
+      return out;
+    });
+    for (const [act, zid] of acts) {
+      await page.evaluate((id) => { const g = window.__game; g.state.world.zone = id; g.sys.world.startStage(); for (let i = 0; i < 20 * 2; i++) g.tick(0.05); }, zid);
+      await page.waitForTimeout(700);
+      await canvasShot(`art_${act}.jpg`);
+    }
+    await page.evaluate(async () => { const W = await import('./src/data/world.js'); window.__game.sys.world.travel(W.ZONES[0].id, 1); for (const k of Object.keys(W.ZONE)) if (k.startsWith('__art_')) delete W.ZONE[k]; });
+    // ボス・ドロップ・奥義・状態異常
+    await page.evaluate(() => { const g = window.__game; g.state.world.stage = 10; g.sys.world.startStage(); for (let i = 0; i < 20 * 2; i++) g.tick(0.05); });
+    await page.waitForTimeout(900);
+    await canvasShot('art_boss.jpg');
+    await page.evaluate(async () => {
+      const { generateItem } = await import('./src/game/loot.js');
+      const { RNG } = await import('./src/engine/rng.js');
+      const g = window.__game; const h = g.combat.hero;
+      ['rare', 'epic', 'legendary', 'unique', 'mythic'].forEach((r, i) => { const it = generateItem(new RNG(11 + i), { ilvl: 12, minRarity: r, cls: g.state.hero.cls }); if (it) { it.rarity = r; g.combat.emit({ t: 'loot', x: h.x + 100 + i * 60, y: 0, item: it, where: 'bag' }); } });
+    });
+    await page.waitForTimeout(700);
+    await canvasShot('art_loot.jpg');
+    await page.evaluate(() => { const g = window.__game; g.combat.emit({ t: 'ult', skill: g.state.hero.bar[1] || g.state.hero.bar[0], cls: g.state.hero.cls, unit: g.combat.hero }); });
+    await page.waitForTimeout(300);
+    await canvasShot('art_ult.jpg');
+    const perf = await page.evaluate(async () => {
+      const sc = window.__ui.scene; const g = window.__game;
+      const ids = ['ignite', 'freeze', 'poison', 'shock', 'stun', 'vuln'];
+      g.combat.enemies().forEach((u, i) => { const id = ids[i % ids.length]; if (id === 'poison') u.statuses.poison = { stacks: [{ t: 5, dps: 0 }] }; else u.statuses[id] = { t: 5, dps: 0 }; });
+      const orig = sc.frame.bind(sc); let tot = 0; let n = 0;
+      sc.frame = (dt) => { const t0 = performance.now(); orig(dt); tot += performance.now() - t0; n++; };
+      g.state.settings.speed = 4;
+      await new Promise((r) => setTimeout(r, 2500));
+      sc.frame = orig; g.state.settings.speed = 1;
+      return { avg: n ? tot / n : 0, n, err: String(window.__lastError || '') };
+    });
+    await canvasShot('art_status.jpg');
+    check('アート: 演出のループでエラーが無い', !perf.err, perf.err);
+    check('アート: 戦闘の画面の 1 フレームが軽い（×4 速）', perf.avg < 16, `${perf.avg.toFixed(2)}ms × ${perf.n}`);
+  }
+  // ======== ここまで（art） ========
   check('エラーが 0 件', errors.length === 0, errors.slice(0, 5).join(' | '));
   await browser.close();
   srv.close();

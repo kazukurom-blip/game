@@ -149,6 +149,8 @@ export function buildManifest() {
   for (const [k, name] of projKinds) S.push({ id: `fx.enemy.${k}`, cat: 'fx', group: eg, kind: 'fx.enemy', label: `敵の弾（${name}）`, w: 70, h: 40, ax: 0.5, ay: 0.5, blend: 'lighter', facing: 'left', params: { proj: k } });
   for (const [k, name] of ENEMY_AREAS) S.push({ id: `fx.enemy.${k}`, cat: 'fx', group: eg, kind: 'fx.enemy', label: `敵の攻撃（${name}）`, w: 256, h: 256, ax: 0.5, ay: 0.5, blend: 'lighter', facing: 'none', params: { proj: k } });
   // 親の枠: 専用の画像が無い敵の攻撃（ボスの特技など、あとから増える物も）はこの画像を使う
+  // ペットの手助けの演出
+  for (const [k, name, w, hh] of [['proj', '弾', 70, 40], ['area', '爆発・範囲', 200, 200], ['heal', '回復の光', 140, 140]]) S.push({ id: `fx.pet.${k}`, cat: 'fx', group: eg, kind: 'fx.pet', label: `ペットの手助け（${name}）`, w, h: hh, ax: 0.5, ay: 0.5, blend: 'lighter', facing: k === 'proj' ? 'right' : 'none', params: { proj: k === 'proj' ? 'orb' : k, pet: true } });
   S.push({ id: 'fx.enemy', cat: 'fx', group: eg, kind: 'fx.enemy', label: '敵の攻撃の演出（全部まとめて）', w: 128, h: 128, ax: 0.5, ay: 0.5, blend: 'lighter', facing: 'none', params: { proj: 'orb' }, note: 'ここに入れると、専用の画像が無い敵の弾・攻撃すべてに使われます（ボスの特技も）' });
 
   // ---------------- 敵・ボス（章ごと）
