@@ -91,7 +91,7 @@ function audioSection(A, ui) {
       h('div.snd-sub', 'ドロップの音（自動で分解された物は鳴りません。0.4 秒に 1 回まで、珍しい物を優先）'),
       h('div.snd-chips', [
         ...RARITIES.map((r) => chk(r.name, () => a.loot[r.id] !== false, (v) => { a.loot[r.id] = v; }, { color: r.color })),
-        chk('太古・原初のきらめき', () => a.loot.quality !== false, (v) => { a.loot.quality = v; }, { color: '#ffd27a' }),
+        chk('覚醒・極致のきらめき', () => a.loot.quality !== false, (v) => { a.loot.quality = v; }, { color: '#ffd27a' }),
       ]),
     );
     // ---- 曲

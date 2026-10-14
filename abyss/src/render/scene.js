@@ -17,7 +17,7 @@ import { assets } from './assets.js';
 import { drawHero, heroLook } from './paperdoll.js';
 import { ELEMENT_COLORS } from '../data/stats.js';
 import { ZONE, ACTS } from '../data/world.js';
-import { fmt } from '../engine/format.js';
+import { fmt, fmtClock } from '../engine/format.js';
 import { ELITE_AFFIXES } from '../data/monsters.js';
 import { statusDefs } from '../game/combat.js';
 import { SKILL } from '../data/skills.js';
@@ -520,7 +520,7 @@ export class Scene {
       ctx.restore();
       fxLabel(ctx, VIEW_W / 2, y + 15, `${b.name}　${fmt(Math.max(0, b.life))} / ${fmt(b.maxLife)}`, '#fff', 15);
       const tl = Math.max(0, w.bossTimer);
-      if (tl > 0) fxLabel(ctx, VIEW_W / 2, y + 50, `残り ${Math.ceil(tl)} 秒`, tl < 10 ? '#ff6060' : '#ffd080', 20);
+      if (tl > 0) fxLabel(ctx, VIEW_W / 2, y + 50, `残り ${fmtClock(tl)}`, tl < 10 ? '#ff6060' : '#ffd080', 20);
     }
     if (w.banner && !(w.banner.boss && this.fx.bossCard)) {
       const k = w.banner.t;

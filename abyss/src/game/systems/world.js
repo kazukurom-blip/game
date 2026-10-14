@@ -57,7 +57,7 @@ export class WorldSystem {
     this.samples = []; // 1 体に与えた火力の測定 { life, ttk }
     this.pendingGoblin = null;
     this.lastEventAt = -999;
-    this.tw = { t: 0, kills: 0, deaths: 0 }; // 苦行の自動最適化の窓
+    this.tw = { t: 0, kills: 0, deaths: 0 }; // 魔境の自動最適化の窓
     this.festivalOverride = null; // テスト用（true/false で週末の祭を固定）
     this.watch = { t: 0, dmg: 0, nudged: false }; // 止まってしまったときの見張り
     this.bossStart = 0;
@@ -102,7 +102,7 @@ export class WorldSystem {
 
   campaignLevel(z, stage, t = 0) {
     const base = stageLevel(z, stage);
-    if (t > 0) return Math.max(base, BAL.torment(t).level) + Math.floor((z.global || 0) / 10); // 苦行では 2 章ごとに +1
+    if (t > 0) return Math.max(base, BAL.torment(t).level) + Math.floor((z.global || 0) / 10); // 魔境では 2 章ごとに +1
     return base;
   }
 
@@ -421,7 +421,7 @@ export class WorldSystem {
     if (z.id === FINAL_ZONE && (w.maxTorment || 0) < 1) {
       w.maxTorment = 1;
       w.rift.unlocked = Math.max(1, w.rift.unlocked || 1);
-      this.banner = { text: '深淵王を討った！　苦行と深淵の裂け目が開いた', t: 5, good: true };
+      this.banner = { text: '深淵王を討った！　魔境と深淵の裂け目が開いた', t: 5, good: true };
       this.game.events.emit('storyClear', {});
       this.game.events.emit('tormentUnlock', { tier: 1 });
     }
@@ -429,7 +429,7 @@ export class WorldSystem {
     const t = w.torment || 0;
     if (t >= 1 && z.zoneIdx === 4 && t >= (w.maxTorment || 0) && t < BAL.MAX_TORMENT) {
       w.maxTorment = t + 1;
-      this.banner = { text: `苦行 ${roman(t + 1)} が解放された`, t: 3.5, good: true };
+      this.banner = { text: `魔境 ${roman(t + 1)} が解放された`, t: 3.5, good: true };
       this.game.events.emit('tormentUnlock', { tier: t + 1 });
     }
     if (w.autoAdvance && next) { w.zone = next.id; w.stage = 1; } else { w.stage = Math.max(1, STAGES_PER_ZONE - 1); }
@@ -503,7 +503,7 @@ export class WorldSystem {
   tormentInfo(t) {
     const tt = BAL.torment(t);
     if (t <= 0) return { t: 0, name: 'なし', life: 1, dmg: 1, xp: 1, gold: 1, loot: 1, mf: 0, resPenalty: 0, level: 0, ancient: 0.08, primal: 0 };
-    return { t, name: `苦行 ${roman(t)}`, ...tt };
+    return { t, name: `魔境 ${roman(t)}`, ...tt };
   }
 
   setTorment(t, { auto = false } = {}) {
@@ -514,7 +514,7 @@ export class WorldSystem {
     this.game.onStatsChanged(); // 耐性の減り
     if (w.mode === 'campaign') this.startStage();
     this.game.events.emit('tormentChanged', { tier: t, auto });
-    if (auto) this.banner = { text: `苦行を ${t ? roman(t) : 'なし'} に自動で切り替えた`, t: 2.5 };
+    if (auto) this.banner = { text: `魔境を ${t ? roman(t) : 'なし'} に自動で切り替えた`, t: 2.5 };
     return true;
   }
 
@@ -539,7 +539,7 @@ export class WorldSystem {
   // ---------------- 戦力（地図の目安）
   heroPower(H = this.game.H) {
     if (!H) return 0;
-    if (typeof character.heroPower === 'function') { try { return character.heroPower(H, this.game); } catch { /* 下へ */ } }
+    if (typeof character.heroPower === 'function') { try { return character.heroPower(H, this.game.state); } catch { /* 下へ */ } }
     return this.basePower(H);
   }
 

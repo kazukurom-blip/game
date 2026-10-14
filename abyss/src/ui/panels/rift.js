@@ -43,7 +43,7 @@ let tab = 'rift';
 let sel = null;
 
 function tabs(ui) {
-  const items = [['rift', '深淵の裂け目'], ['torment', '苦行'], ['gate', '門番'], ['log', '記録']];
+  const items = [['rift', '深淵の裂け目'], ['torment', '魔境'], ['gate', '門番'], ['log', '記録']];
   return h('div.tabs', items.map(([id, name]) => h(`button.tab${tab === id ? '.on' : ''}`, { onclick: () => { tab = id; ui.renderPanel(); } }, name)));
 }
 
@@ -111,7 +111,7 @@ function riftTab(ui, el) {
       h('div', [h('b', `×${fmt(info.d.riftLife, { dec: 2 })}`), '敵のライフ（段階）']),
       h('div', [h('b', `×${fmt(info.d.riftDmg, { dec: 2 })}`), '敵の攻撃（段階）']),
       h('div', [h('b', `${Math.round(info.time / 60)} 分`), '制限時間']),
-      h('div', [h('b', info.resPenalty ? `-${info.resPenalty}` : 'なし'), `耐性の減り（苦行 ${riftTormentTier(sel) ? roman(riftTormentTier(sel)) : 'なし'} 相当）`]),
+      h('div', [h('b', info.resPenalty ? `-${info.resPenalty}` : 'なし'), `耐性の減り（魔境 ${riftTormentTier(sel) ? roman(riftTormentTier(sel)) : 'なし'} 相当）`]),
       h('div', [h('b', R.bestTime?.[sel] ? fmtClock(R.bestTime[sel]) : '—'), 'この段階の最短']),
       h('div', [h('b', `${info.shards}〜${info.shards + 1}`), '深淵の欠片']),
       h('div', [h('b', `${info.items} 個`), '装備（1 つはレジェンダリー）']),
@@ -124,7 +124,7 @@ function riftTab(ui, el) {
         ['off', '物語に戻る'], ['same', '同じ段階にもう一度'], ['push', '記録を目指して続ける（失敗したら 1 段下げる）'],
       ].map(([v, l]) => h('option', { value: v, selected: (R.auto || 'off') === v || undefined }, l)))]),
     ]),
-    h('div.hint', '敵のライフと攻撃は「段階の倍率」に加えて、レベル 100 の敵の強さが土台になります。挑んでいる間の耐性の減りは段階に合わせて決まり、物語の苦行の設定は戻ったときに元に戻ります。'),
+    h('div.hint', '敵のライフと攻撃は「段階の倍率」に加えて、レベル 100 の敵の強さが土台になります。挑んでいる間の耐性の減りは段階に合わせて決まり、物語の魔境の設定は戻ったときに元に戻ります。'),
   ]));
   el.append(h('div.dim.small', `挑戦 ${R.runs || 0} 回・踏破 ${R.clears || 0} 回`));
 }
@@ -135,10 +135,10 @@ function gateTab(ui, el) {
   const w = g.state.world;
   el.append(h('section.sec', [
     h('h3.sec-title', '門番'),
-    h('p.dim', `苦行（I 以上）で地域のボス（各章の 1〜4 番目）を倒すと、50% + 苦行の段 × 2%（最大 80%）で「門の欠片」が落ちます。2 章で 1 組、4 種そろうと門番を呼べます（制限 ${GATE.time} 秒）。`),
-    h('p.dim', `勝てば レジェンダリー 2 つを含む装備 5 つ・深淵の欠片・次の門の欠片（必ず 1 つ）。ミシックは ${Math.round(GATE.mythicBase * 100)}% + 苦行の段 × ${(GATE.mythicPerTier * 100).toFixed(1)}%（最大 ${Math.round(GATE.mythicCap * 100)}%）。負けても欠片を ${GATE.refund} つ取り戻します。初めて倒した門番 1 体ごとに、永続で全ダメージ +${GATE.badge.dmg}%・ライフ +${GATE.badge.life}%（門番の証）。`),
+    h('p.dim', `魔境（I 以上）で地域のボス（各章の 1〜4 番目）を倒すと、50% + 魔境の段 × 2%（最大 80%）で「門の欠片」が落ちます。2 章で 1 組、4 種そろうと門番を呼べます（制限 ${GATE.time} 秒）。`),
+    h('p.dim', `勝てば レジェンダリー 2 つを含む装備 5 つ・深淵の欠片・次の門の欠片（必ず 1 つ）。ミシックは ${Math.round(GATE.mythicBase * 100)}% + 魔境の段 × ${(GATE.mythicPerTier * 100).toFixed(1)}%（最大 ${Math.round(GATE.mythicCap * 100)}%）。負けても欠片を ${GATE.refund} つ取り戻します。初めて倒した門番 1 体ごとに、永続で全ダメージ +${GATE.badge.dmg}%・ライフ +${GATE.badge.life}%（門番の証）。`),
   ]));
-  if ((w.maxTorment || 0) < 1) { el.append(h('p', '苦行が開くと集められます（第十章の深淵王を倒す）。')); return; }
+  if ((w.maxTorment || 0) < 1) { el.append(h('p', '魔境が開くと集められます（第十章の深淵王を倒す）。')); return; }
   for (const s of sys.gateStatus()) {
     const odds = sys.gateOdds(s.gi);
     const pct = Math.round(odds.win * 100);
@@ -156,7 +156,7 @@ function gateTab(ui, el) {
     ]);
     el.append(card);
   }
-  el.append(h('div.hint', `推定勝率は、今の火力（ばらつき ±15%）と受けるダメージ（±25%）で 100 回戦った見積もりです。挑む苦行の段は今の段（最低 I）。`));
+  el.append(h('div.hint', `推定勝率は、今の火力（ばらつき ±15%）と受けるダメージ（±25%）で 100 回戦った見積もりです。挑む魔境の段は今の段（最低 I）。`));
 }
 
 function logTab(ui, el) {
@@ -170,7 +170,7 @@ function logTab(ui, el) {
     h('h3.sec-title', ['裂け目の記録', h('span.sec-right', `最高 ${R.best || 0}`)]),
     rows.length ? h('table.rf-hist', [h('tr', ['段階', '結果', '時間', '倒れた', '撃破', '報酬', '日時'].map((t) => h('th', t))), ...rows]) : h('p.dim', 'まだ挑んでいません。'),
   ]));
-  const gh = (w.gate.history || []).map((x) => h('tr', [h('td', GATE_GROUPS[x.gi]?.name || ''), h(`td.${x.ok ? 'ok' : 'ng'}`, x.ok ? (x.mythic ? '勝利（ミシック！）' : '勝利') : '敗北'), h('td', `苦行 ${roman(x.tier || 1)}`), h('td.dim', x.ok ? `装備 ${x.items}・欠片 ${x.shards}・${x.next}` : `返った欠片 ${(x.refund || []).join('・')}`)]));
+  const gh = (w.gate.history || []).map((x) => h('tr', [h('td', GATE_GROUPS[x.gi]?.name || ''), h(`td.${x.ok ? 'ok' : 'ng'}`, x.ok ? (x.mythic ? '勝利（ミシック！）' : '勝利') : '敗北'), h('td', `魔境 ${roman(x.tier || 1)}`), h('td.dim', x.ok ? `装備 ${x.items}・欠片 ${x.shards}・${x.next}` : `返った欠片 ${(x.refund || []).join('・')}`)]));
   el.append(h('section.sec', [h('h3.sec-title', '門番の記録'), gh.length ? h('table.rf-hist', [h('tr', ['門', '結果', '段', '内容'].map((t) => h('th', t))), ...gh]) : h('p.dim', 'まだ戦っていません。')]));
   const st = g.state.meta.stats;
   el.append(h('div.dim.small', `ため込み屋 撃破 ${st.goblins || 0}・逃がした ${w.goblinEscaped || 0}　遊んだ時間 ${fmtTime(g.state.playTime)}`));
@@ -181,7 +181,7 @@ export const riftPanel = {
   refreshOn: ['world', 'level'],
   visible: () => true,
   badge: (g) => (g.sys.rift?.gateStatus?.().some((s) => s.ready) ? 1 : 0),
-  help: '<p><b>深淵の裂け目</b>は物語の後の終わりのない挑戦です。段階が上がるほど敵は強く、報酬は良くなります。</p><p><b>苦行</b>は物語の地域の難しさです。<b>門番</b>は苦行で集めた欠片で呼ぶ強敵で、ミシックを落とすことがあります。</p>',
+  help: '<p><b>深淵の裂け目</b>は物語の後の終わりのない挑戦です。段階が上がるほど敵は強く、報酬は良くなります。</p><p><b>魔境</b>は物語の地域の難しさです。<b>門番</b>は魔境で集めた欠片で呼ぶ強敵で、ミシックを落とすことがあります。</p>',
   render(ui, el) {
     injectCss('world', WORLD_CSS);
     injectCss('world-rift', RIFT_CSS);

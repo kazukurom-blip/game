@@ -12,7 +12,7 @@ import { MONSTER, FAMILIES } from '../data/monsters.js';
 import { ensurePetPainter, drawPetUnit } from './petart.js';
 import { sceneHooks } from '../render/scene.js';
 
-export const MAT_NAMES = { scrap: '鉄屑', dust: '魔塵', crystal: '秘晶', echo: '伝説の残響', core: '原初の核', shard: '深淵の欠片' };
+export const MAT_NAMES = { scrap: '鉄屑', dust: '魔塵', crystal: '秘晶', echo: '伝説の残響', core: '極致の核', shard: '深淵の欠片' };
 export const matName = (id) => MATERIAL[id]?.name || MAT_NAMES[id] || id;
 export const matColor = (id) => MATERIAL[id]?.color || '#aaa';
 
@@ -86,7 +86,7 @@ export function bindMetaUi(ui) {
   on('automationUnlocked', (e) => ui.toast(`⚙ 自動化「${e.name}」を解放した（転生の窓の「自動化」で ON/OFF）`, 'good'));
   on('eggFound', (e) => ui.toast(`🥚 ${e.name}${e.n > 1 ? ` ×${e.n}` : ''} を手に入れた！ ペットの窓で孵卵器へ`, 'good.mtegg'));
   on('eggReady', (e) => { if (!ui.game.state.meta.unlocks.autoHatch) ui.toast(`🥚 ${e.name || '卵'}が孵ります！ ペットの窓で孵そう`, 'good.mtegg'); });
-  on('petHatched', (e) => ui.toast(e.dup ? (e.stars ? `🐾 ${e.name} が重なった　覚醒 ★${e.stars}` : `🐾 ${e.name} が重なった　経験値 +`) : `🐾 ${e.name} が生まれた！`, e.rarity === 'legendary' ? 'r-legendary' : 'good'));
+  on('petHatched', (e) => ui.toast(e.dup ? (e.stars ? `🐾 ${e.name} が重なった　進化 ★${e.stars}` : `🐾 ${e.name} が重なった　経験値 +`) : `🐾 ${e.name} が生まれた！`, e.rarity === 'legendary' ? 'r-legendary' : 'good'));
   on('petLevel', (e) => ui.toastOnce(`pl-${e.id}`, `🐾 ${e.name} が Lv ${e.lvl} になった`, 'good'));
   on('bountyDone', (e) => ui.toast(`📜 ${e.name} を達成！ 日課の窓で受け取れます`, 'good'));
   on('loginClaim', (e) => ui.toast(`🎁 ログインの贈り物（${e.day} 日目）を受け取った`, 'good'));
@@ -151,7 +151,5 @@ injectCss('meta-ui', `
   background: radial-gradient(circle at 35% 30%, #fff8, transparent 45%), var(--mc, #6a5a4a); box-shadow: inset 0 -2px 0 #0005, 0 0 0 1px #0008; }
 .mt-medal.off { filter: grayscale(1) brightness(.45); }
 .mt-cards.w { grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); }
-/* スマホ: 窓のタブ（横に長い）に引っぱられて右の窓が画面より広がるのを防ぐ（全体の並びの直し。style.css に移してよい） */
-@media (max-width: 900px) { #main > * { min-width: 0; } }
 @media (max-width: 900px) { .mt-cards, .mt-cards.w { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 `);

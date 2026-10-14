@@ -45,7 +45,7 @@ abyss/
 ## 能力（ステータス）
 - すべての効果は `{ s: '能力のキー', v: 数値 }`。キーは `data/stats.js`。`agg` が 'sum'（足し算）か 'mul'（掛け算）。
 - `computeHero(state, game, { extraMods, equipOverride })` が装備・クラス・レベル・`registry.heroMods()` を集めて H を作る。
-- 主人公への効果の出どころ（パッシブ・パラゴン・転生・実績・図鑑・ペット・セット効果）は `registry.addHeroSource(id, (state, game) => mods)` で登録する。
+- 主人公への効果の出どころ（パッシブ・アビスLv・転生・実績・図鑑・ペット・セット効果）は `registry.addHeroSource(id, (state, game) => mods)` で登録する。
 - 能力に効く物が変わったら `game.onStatsChanged()`（装備は `onGearChanged()`、スキルは `onSkillsChanged()`）を呼ぶ → combat.recalc。
 
 ## ダメージの式
@@ -72,7 +72,7 @@ abyss/
 ## 進行（systems/world.js）
 - ステージ = ウェーブ 3 回（全滅で次）。ステージ 10 は地域のボス（30 秒）。勝つと次の地域を解放、自動前進なら移動。
 - 失敗（時間切れ・倒れた）→ 自動前進を切ってステージ 9 で稼ぐ。HUD の「ボスに挑む」で再挑戦。
-- 苦行（torment）・深淵の裂け目などのモードは `worldHooks.modes[mode] = { start, tick, onKill, onHeroDeath, level }` で足す。ウェーブの中身は `worldHooks.waveComposer`。
+- 魔境（torment）・深淵の裂け目などのモードは `worldHooks.modes[mode] = { start, tick, onKill, onHeroDeath, level }` で足す。ウェーブの中身は `worldHooks.waveComposer`。
 
 ## 画像の差し替え（render/assets.js）
 - すべての絵に枠 ID がある（manifest.js がデータから作る）。探す順: ゲーム内で入れた画像（IndexedDB）→ `assets/custom/custom.json` の画像 → 予備の ID → コードで描いた絵。
@@ -82,8 +82,15 @@ abyss/
 
 ## UI
 - `ui/panels/index.js` の PANELS が右の窓のタブ。パネルは `{ id, name, icon, render(ui, el), refreshOn: ['inv','gear','skills','level','stats','world'], badge?(game), visible?(game), help? }`。
-- 出来事（'invChanged' など）で印が付き、関係するパネルだけ描き直す（マウスが乗っている間は待つ）。
-- 共通の部品: `ui/dom.js`（h, button, spriteImg）、`ui/panels/common.js`（itemCell, itemMenu, kvTable, itemMenuHooks）、`ui/tooltip.js`（itemCard, attachTip, tooltipHooks）。
+- 出来事（'invChanged' など）で印が付き、関係するパネルだけ描き直す（マウスが窓の上にある間は待つ。窓の中で押した・変えた直後はすぐ描き直す＝ `ui.afterAction()`）。
+- タブは 5 つのまとまり（キャラ・鍛える・冒険・集める・その他）＋その中の窓（`ui/nav.js` の NAV_GROUPS。一覧に無い新しい窓は「その他」に入る）。印（数・NEW）はまとまりにも上がる。スマホではまとまりが画面の下のタブになる。
+- 機能は少しずつ開く（`ui/unlocks.js` の FEATURES: 条件・いつ開くか・初めて開いたときの説明）。記録は `state.meta.tutorial.unlocked / seen`。設定の「機能を少しずつ開く」を OFF（`settings.progressive = false`）にすると全部見える。コードから `ui.openPanel(id)` で開くと、まだの機能も開いたことになる。テストは `window.__ui.unlockAll()`。
+- 戦闘の画面の下の欄（`ui/dock.js`）: 次の目標（`ui/goals.js` の nextGoal: 必要 DPS・目安の時間・手段・次に開く機能）・直近のドロップ・進み具合・戦闘の記録。
+- はじめての案内（`ui/guide.js`、6 歩・飛ばせる・`state.meta.tutorial.guide`）、キー操作（`ui/keys.js`）、上の帯の戦力（heroPower、変わると ▲▼）。
+- 表示の言葉: パラゴン → **アビスLv**、苦行 → **魔境**（段は必ずローマ数字 I〜XVI）、品質の太古 → **覚醒**（★）、原初 → **極致**（✦）、ペットの重なり → **進化★**。内部の id・state のキー（paragon・torment・ancient・primal）はそのまま。
+- レアリティは色だけで示さない: マスの左下に 1 文字（並・魔・稀・秀・伝・組・唯・神。`RARITY_MARK`）、説明の窓に ●の数。
+- 共通の部品: `ui/dom.js`（h, button, spriteImg）、`ui/panels/common.js`（itemCell, itemMenu, kvTable, itemMenuHooks, rarityMark）、`ui/tooltip.js`（itemCard, attachTip, tooltipHooks）。
+- 埋め込み先（iframe）では window.confirm / alert / prompt が出ない。確認は `ui.confirm()`（ページの中の窓）、書き出しは文字列の欄も必ず出す。
 
 ## テスト
 - `npm run test:unit`（tests/unit.mjs）… データの整合・計算

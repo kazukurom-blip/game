@@ -62,7 +62,7 @@ export const treePanel = {
   refreshOn: ['level', 'stats', 'gear'],
   visible: () => true,
   badge: (g) => (g.state.hero.tree?.points || 0) + (g.sys.tree?.paragonFree?.() || 0),
-  help: '星座盤: レベルが 1 上がるごとに 1 点（10 レベルごとに +1）。点を押すと、振ってある点から一番近い道で振ります（道の長さぶん点を使う）。振ってある点を押すと外します（つながらなくなる点も一緒に外れる）。<br>要の星（名前のある大きな点）は強い効果、要石（赤い大きな点）はルールを変える効果と代償があります。<br>Lv 30 までは振り直しが無料、それ以降はゴールドがかかります。構成は 2 つまで保存できます。<br>パラゴン: Lv 100 からは経験値でパラゴンのレベルが上がり、1 つごとに 1 点。4 つの盤に振ります（主の線は上限なし、それ以外は 50 点まで）。',
+  help: '星座盤: レベルが 1 上がるごとに 1 点（10 レベルごとに +1）。点を押すと、振ってある点から一番近い道で振ります（道の長さぶん点を使う）。振ってある点を押すと外します（つながらなくなる点も一緒に外れる）。<br>要の星（名前のある大きな点）は強い効果、要石（赤い大きな点）はルールを変える効果と代償があります。<br>Lv 30 までは振り直しが無料、それ以降はゴールドがかかります。構成は 2 つまで保存できます。<br>アビスLv: Lv 100 からは経験値でアビスLvが上がり、1 つごとに 1 点。4 つの盤に振ります（主の線は上限なし、それ以外は 50 点まで）。',
   render(ui, el) {
     injectCss('tree', CSS);
     const g = ui.game;
@@ -72,7 +72,7 @@ export const treePanel = {
     const free = g.sys.tree.paragonFree();
     el.append(h('div.tabs', [
       h(`button.tab${tab === 'tree' ? '.on' : ''}`, { onclick: () => { tab = 'tree'; ui.renderPanel(); } }, `星座盤（${g.state.hero.tree.points}）`),
-      h(`button.tab${tab === 'paragon' ? '.on' : ''}`, { onclick: () => { tab = 'paragon'; ui.renderPanel(); } }, `パラゴン${g.state.hero.paragon.level ? `（Lv ${g.state.hero.paragon.level}${free ? `・${free}` : ''}）` : ''}`),
+      h(`button.tab${tab === 'paragon' ? '.on' : ''}`, { onclick: () => { tab = 'paragon'; ui.renderPanel(); } }, `アビスLv${g.state.hero.paragon.level ? ` ${g.state.hero.paragon.level}${free ? `（残り ${free}）` : ''}` : ''}`),
     ]));
     if (tab === 'paragon') renderParagon(ui, el); else renderTree(ui, el);
   },
@@ -387,10 +387,10 @@ function renderParagon(ui, el) {
   const free = sys.paragonFree();
   const unlocked = st.hero.level >= BAL.MAX_LEVEL;
   el.append(h('div.tr-head', [
-    h('div', [h('div.tr-pts', ['パラゴン Lv ', h('b', String(par.level)), `　残り ${free} 点`]), h('div.tr-sub', unlocked ? `次のパラゴンまで 経験値 ${fmt(par.xp)} / ${fmt(BAL.paragonXpToNext(par.level))}` : `主人公 Lv ${BAL.MAX_LEVEL} から、経験値でパラゴンのレベルが上がります（上限なし）`)]),
+    h('div', [h('div.tr-pts', ['アビスLv ', h('b', String(par.level)), `　残り ${free} 点`]), h('div.tr-sub', unlocked ? `次のアビスLvまで 経験値 ${fmt(par.xp)} / ${fmt(BAL.paragonXpToNext(par.level))}` : `主人公 Lv ${BAL.MAX_LEVEL} から、経験値でアビスLvが上がります（上限なし）`)]),
     h('div.toolbar', [
       button('おまかせで振る', () => { const n = sys.autoParagon(); ui.toast(n ? `${n} 点を振りました` : '振る点がありません', n ? 'good' : ''); }, { kind: 'small', disabled: !free }),
-      button('全部戻す', async () => { if (!sys.paragonSpent()) return; if (await ui.confirm('パラゴンの点をすべて戻します（無料）。', '戻す')) { sys.resetParagon(); ui.renderPanel(); } }, { kind: 'small' }),
+      button('全部戻す', async () => { if (!sys.paragonSpent()) return; if (await ui.confirm('アビスLvの点をすべて戻します（無料）。', '戻す')) { sys.resetParagon(); ui.renderPanel(); } }, { kind: 'small' }),
     ]),
   ]));
   const cls = CLASS[st.hero.cls];
@@ -417,5 +417,5 @@ function renderParagon(ui, el) {
     }
     el.append(box);
   }
-  if (!unlocked) el.append(h('p.hint', 'いまは見るだけです。Lv 100 になると、レベルの代わりにパラゴンのレベルが上がり、1 つごとに 1 点もらえます。'));
+  if (!unlocked) el.append(h('p.hint', 'いまは見るだけです。Lv 100 になると、レベルの代わりにアビスLvが上がり、1 つごとに 1 点もらえます。'));
 }

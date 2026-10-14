@@ -93,7 +93,7 @@ tiered('growth', 'level', [
 ], (n) => `レベル ${n} になる`);
 tiered('growth', 'paragon', [
   [1, '限界の向こう'], [10, '果てなき修練'], [50, '求道者'], [100, '百の悟り'], [250, '深き悟り'], [500, '無限の階'], [1000, '無限の求道者', 'title_paragon'],
-], (n) => `パラゴン ${n} になる`);
+], (n) => `アビスLv ${n} になる`);
 tiered('growth', 'skillMax', [
   [5, '技を磨く'], [10, '技の達人'], [20, '奥義の域'],
 ], (n) => `どれか 1 つのスキルを Lv ${n} にする`);
@@ -110,8 +110,8 @@ const LOOT_ROWS = {
   mythic: [[1, '神話の担い手', 'title_mythic'], [5, '神話を重ねる'], [12, '神話の蒐集家']],
 };
 for (const [r, rows] of Object.entries(LOOT_ROWS)) tiered('loot', `found:${r}`, rows, (n, s) => `${RNAME[r]}を ${s} 個拾う`, { idp: `found_${r}`, arg: r });
-tiered('loot', 'ancient', [[1, '太古の輝き'], [10, '太古の目'], [100, '太古の蔵'], [1000, '太古の王']], (n, s) => `太古の装備を ${s} 個拾う`);
-tiered('loot', 'primal', [[1, '原初の目', 'title_primal'], [10, '原初を知る者'], [50, '原初の主']], (n, s) => `原初の装備を ${s} 個拾う`);
+tiered('loot', 'ancient', [[1, '覚醒の輝き'], [10, '覚醒の目'], [100, '覚醒の蔵'], [1000, '覚醒の王']], (n, s) => `覚醒の装備を ${s} 個拾う`);
+tiered('loot', 'primal', [[1, '極致の目', 'title_primal'], [10, '極致を知る者'], [50, '極致の主']], (n, s) => `極致の装備を ${s} 個拾う`);
 tiered('loot', 'salvaged', [[100, '分解の手始め'], [1000, '分解職人'], [10000, '素材の山'], [100000, '解体の鬼']], (n, s) => `装備を ${s} 個分解する`);
 
 // ---------------- 鍛冶と宝石
@@ -123,7 +123,7 @@ tiered('craft', 'runewords', [[1, '言葉を刻む'], [5, '刻まれた詩'], [2
 tiered('craft', 'codex', [[1, '書庫の扉'], [10, '書庫の司書'], [50, '力の書庫の主']], (n, s) => `力の書庫に伝説の力を ${s} 種類しまう`);
 
 // ---------------- 深淵（苦行・裂け目）
-tiered('endgame', 'torment', [[1, '苦行の門'], [4, '苦行 IV'], [8, '苦行 VIII'], [12, '苦行 XII'], [16, '苦行の果て', 'title_torment']], (n) => `苦行 ${['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI'][n]} を解放する`);
+tiered('endgame', 'torment', [[1, '魔境の門'], [4, '魔境 IV'], [8, '魔境 VIII'], [12, '魔境 XII'], [16, '魔境の果て', 'title_torment']], (n) => `魔境 ${['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI'][n]} を解放する`);
 tiered('endgame', 'riftBest', [[1, '裂け目を覗く'], [10, '裂け目の十'], [25, '裂け目の二十五'], [50, '裂け目の五十'], [75, '深き裂け目'], [100, '裂け目の覇者', 'title_rift'], [150, '底なしの底']], (n) => `深淵の裂け目の段階 ${n} をクリアする`);
 tiered('endgame', 'riftRuns', [[1, '初めての裂け目'], [10, '裂け目の常連'], [100, '裂け目の住人'], [500, '裂け目に生きる']], (n, s) => `深淵の裂け目を ${s} 回クリアする`);
 
@@ -183,9 +183,9 @@ export const TITLES = [
   { id: 'title_master', name: '極めし者', desc: '全能力 +20', mods: [{ s: 'all_attr', v: 20 }] },
   { id: 'title_paragon', name: '無限の求道者', desc: '最大ライフ +10%', mods: [{ s: 'inc_life', v: 10 }] },
   { id: 'title_mythic', name: '神話の担い手', desc: 'レア発見率 +10%', mods: [{ s: 'magic_find', v: 10 }] },
-  { id: 'title_primal', name: '原初の目', desc: 'レア発見率 +5%・クリティカルダメージ +10%', mods: [{ s: 'magic_find', v: 5 }, { s: 'crit_damage', v: 10 }] },
+  { id: 'title_primal', name: '極致の目', desc: 'レア発見率 +5%・クリティカルダメージ +10%', mods: [{ s: 'magic_find', v: 5 }, { s: 'crit_damage', v: 10 }] },
   { id: 'title_smith', name: '名工', desc: 'アーマー +12%', mods: [{ s: 'inc_armor', v: 12 }] },
-  { id: 'title_torment', name: '苦行の果て', desc: '受けるダメージ -3%', mods: [{ s: 'dr', v: 3 }] },
+  { id: 'title_torment', name: '魔境の果て', desc: '受けるダメージ -3%', mods: [{ s: 'dr', v: 3 }] },
   { id: 'title_rift', name: '裂け目の覇者', desc: 'ボスへのダメージ +8%・全ダメージ +5%', mods: [{ s: 'dmg_boss', v: 8 }, { s: 'inc_dmg', v: 5 }] },
   { id: 'title_reborn', name: '輪廻を巡る者', desc: '経験値 +10%', mods: [{ s: 'xp_bonus', v: 10 }] },
   { id: 'title_star', name: '星を纏う者', desc: '与えるダメージ ×1.02（最終）・最大ライフ +3%', mods: [{ s: 'more_dmg', v: 2 }, { s: 'inc_life', v: 3 }] },

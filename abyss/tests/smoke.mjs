@@ -36,6 +36,14 @@ function serve() {
   });
 }
 
+/** 窓を開く: まとまりのタブ → 窓のタブの順に押す（まだ開いていない機能は、テストのために全部開く） */
+async function nav(p, id) {
+  await p.evaluate((x) => { const ui = window.__ui; if (ui && !ui.canOpen(x)) ui.unlockAll(); }, id);
+  const grp = await p.getAttribute(`.navbtn[data-id="${id}"]`, 'data-grp');
+  if (grp && !(await p.isVisible(`.navbtn[data-id="${id}"]`))) await p.click(`.navgrp[data-g="${grp}"]`);
+  await p.click(`.navbtn[data-id="${id}"]`);
+}
+
 const results = [];
 function check(name, ok, info = '') { results.push({ name, ok: !!ok, info }); console.log(`${ok ? '✔' : '✘'} ${name}${info ? `  (${info})` : ''}`); }
 
@@ -83,7 +91,7 @@ const main = async () => {
   if (want('panels')) {
     const ids = await page.evaluate(() => [...document.querySelectorAll('.navbtn')].map((b) => b.dataset.id));
     for (const id of ids) {
-      await page.click(`.navbtn[data-id="${id}"]`);
+      await nav(page, id);
       await page.waitForTimeout(250);
       await page.screenshot({ path: path.join(SHOTS, `panel_${id}.png`) });
       const bad = await page.$('.panel .bad');
@@ -91,7 +99,7 @@ const main = async () => {
       check(`窓「${id}」が開ける`, !t.startsWith('表示できませんでした'), t);
     }
     // アイテムのツールチップ
-    await page.click('.navbtn[data-id="bag"]');
+    await nav(page, 'bag');
     const cell = await page.$('.grid .cell:not(.empty)');
     if (cell) { await cell.hover(); await page.waitForTimeout(200); await page.screenshot({ path: path.join(SHOTS, 'tooltip.png') }); check('アイテムの説明が出る', await page.$('#tooltip .itemcard')); }
   }
@@ -122,7 +130,7 @@ const main = async () => {
   // ===================== アイテム担当（鍛冶・宝石・極意・商人・持ち物）ここから =====================
   if (want('items')) {
     const shot = (n) => page.screenshot({ path: path.join(SHOTS, `items_${n}.png`) });
-    const openP = async (id) => { await page.click(`.navbtn[data-id="${id}"]`); await page.waitForTimeout(200); };
+    const openP = async (id) => { await nav(page, id); await page.waitForTimeout(200); };
     const clickTab = async (name) => { await page.evaluate((nm) => { const b = [...document.querySelectorAll('#panelbody .tabs .tab')].find((x) => x.textContent.startsWith(nm)); b?.click(); }, name); await page.waitForTimeout(150); };
     const clickBtn = async (txt) => page.evaluate((t) => { const b = [...document.querySelectorAll('#panelbody button.btn')].find((x) => x.textContent.startsWith(t) && !x.disabled); if (b) { b.click(); return true; } return false; }, txt);
     // 豊かな状態を作る（装備・素材・宝石・ルーン・深淵の宝石・極意）
@@ -287,7 +295,7 @@ const main = async () => {
     check('音: 曲を選んで試聴できる（凍てつく峰）', d.music === 'act3', d.music);
     await page.evaluate(() => { window.__audio.setMusic('auto'); const g = window.__game; g.state.world.stage = 1; g.sys.world.startStage(); });
     // 3) 設定の「音」
-    await page.click('.navbtn[data-id="settings"]');
+    await nav(page, 'settings');
     await page.waitForSelector('.snd');
     const ranges = await page.$$eval('.snd input.snd-range', (els) => els.length);
     check('音: 設定に音の区切り（音量 3 本）がある', ranges === 3, `ranges=${ranges}`);
@@ -445,7 +453,7 @@ const main = async () => {
     await ap.click('.title-box .btn-primary');
     await ap.waitForSelector('#scene');
     await ap.waitForTimeout(800);
-    await ap.click('.navbtn[data-id="assets"]');
+    await nav(ap, 'assets');
     await ap.waitForSelector('.panel-assets .as-card');
     await shot('panel');
     // 1) 調整の窓から入れる（白い背景 → 自動で抜く・足元を合わせる）→ 保存
@@ -481,13 +489,13 @@ const main = async () => {
     await ap.evaluate(() => { const g = window.__game; for (let i = 0; i < 20 * 40; i++) g.tick(0.05); });
     await ap.waitForTimeout(900);
     await shot('battle');
-    await ap.click('.navbtn[data-id="hero"]');
+    await nav(ap, 'hero');
     await ap.waitForTimeout(400);
     await shot('doll');
-    await ap.click('.navbtn[data-id="bag"]');
+    await nav(ap, 'bag');
     await ap.waitForTimeout(300);
     const cellSel = await ev(() => { const g = window.__game; const it = g.state.inv.bag.find((x) => x.base.startsWith('sword')) || g.state.hero.equip.weapon; return it ? 'ok' : ''; });
-    await ap.click('.navbtn[data-id="hero"]');
+    await nav(ap, 'hero');
     // 窓が描き直されると要素が入れ替わるので、見つけ直しながら乗せる
     let eqCell = null;
     for (let i = 0; i < 5 && !eqCell; i++) { try { await ap.hover('.eq-weapon .cell', { timeout: 2000 }); eqCell = await ap.$('.eq-weapon .cell'); } catch { await ap.waitForTimeout(200); } }
@@ -509,7 +517,7 @@ const main = async () => {
     await ap.waitForSelector('#scene');
     await ap.waitForTimeout(600);
     // 6) 戦闘画面で見る（下書きのまま窓を隠す）・型紙
-    await ap.click('.navbtn[data-id="assets"]');
+    await nav(ap, 'assets');
     await ap.click('.st-tabs .tab >> text=敵・ボス');
     await ap.click('.as-card[data-id="monster.ash_wolf"]');
     await ap.waitForSelector('.modal.studio');
@@ -568,7 +576,7 @@ const main = async () => {
     await shot('panel_after');
     // 10) スマホの幅でも窓が使える
     await ap.setViewportSize({ width: 390, height: 844 });
-    await ap.click('.navbtn[data-id="assets"]');
+    await nav(ap, 'assets');
     await ap.click('.st-tabs .tab >> text=敵・ボス');
     await ap.click('.as-card[data-id="monster.ash_wolf"]');
     await ap.waitForSelector('.modal.studio');
@@ -583,7 +591,7 @@ const main = async () => {
   // ======== ワールド担当（world）: 地図・苦行・裂け目・門番・ため込み屋・ボスの特技 ========
   if (want('world')) {
     await page.evaluate(() => { const g = window.__game; g.newGame('sorcerer', 'world'); for (let i = 0; i < 20 * 60; i++) g.tick(0.05); });
-    await page.click('.navbtn[data-id="map"]');
+    await nav(page, 'map');
     await page.waitForTimeout(400);
     await page.screenshot({ path: path.join(SHOTS, 'world_map.png') });
     check('地図: 章のカードが出る', (await page.$$('.wm-act')).length === 10);
@@ -596,8 +604,8 @@ const main = async () => {
       g.state.hero.level = 70; g.combat.recalc(true);
       g.sys.world.setTorment(2);
     });
-    await page.click('.navbtn[data-id="rift"]');
-    await page.click('.navbtn[data-id="map"]');
+    await nav(page, 'rift');
+    await nav(page, 'map');
     await page.waitForTimeout(300);
     await page.screenshot({ path: path.join(SHOTS, 'world_map_torment.png') });
     check('地図: 苦行の段を選べる', (await page.$$('.tm-btn:not([disabled])')).length >= 5);
@@ -615,7 +623,7 @@ const main = async () => {
     await page.screenshot({ path: path.join(SHOTS, 'world_boss.png') });
     check('ボス戦: 必要 DPS の目安が出る', await page.$('.hud-line.wl.boss'));
     // 裂け目
-    await page.click('.navbtn[data-id="rift"]');
+    await nav(page, 'rift');
     await page.waitForTimeout(250);
     await page.screenshot({ path: path.join(SHOTS, 'world_rift_select.png') });
     await page.click('.panel-rift .btn-primary');
@@ -648,7 +656,7 @@ const main = async () => {
   if (want('meta')) {
     const shot = (n) => page.screenshot({ path: path.join(SHOTS, `meta_${n}.png`) });
     const openTab = async (panel, tab) => {
-      await page.click(`.navbtn[data-id="${panel}"]`);
+      await nav(page, panel);
       await page.waitForTimeout(150);
       if (tab) { await page.click(`.panel .tabs .tab:has-text("${tab}")`); await page.waitForTimeout(200); }
     };
@@ -820,6 +828,7 @@ const main = async () => {
     check('アート: 戦闘の画面の 1 フレームが軽い（×4 速）', perf.avg < 16, `${perf.avg.toFixed(2)}ms × ${perf.n}`);
   }
   // ======== ここまで（art） ========
+  if (want('ui')) await smokeUi(browser, check, errors);
   check('エラーが 0 件', errors.length === 0, errors.slice(0, 5).join(' | '));
   await browser.close();
   srv.close();
@@ -933,5 +942,200 @@ async function smokeCombat(page, check) {
   const over2 = await p2.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1 || [...document.querySelectorAll('.panel-tree .tr-wrap, .panel-tree .tr-head')].some((e) => e.getBoundingClientRect().right > window.innerWidth + 1));
   check('スマホでスキル・星座盤が横にはみ出さない', !over1 && !over2);
   check('スマホでスキル・星座盤のエラーが 0 件', errs.length === 0, errs.slice(0, 3).join(' | '));
+  await m.close();
+}
+
+// ===================== ui（UI 担当）: タイトル・まとまりのタブ・少しずつ開く・案内・キー操作・下の欄・スマホ =====================
+async function smokeUi(browser, check, errors) {
+  const url = `http://127.0.0.1:${PORT}/index.html`;
+  const watch = (p, tag) => {
+    p.on('pageerror', (e) => errors.push(`ui ${tag} pageerror: ${e.message}`));
+    p.on('console', (m) => { if (m.type() === 'error') errors.push(`ui ${tag} console: ${m.text()}`); });
+    p.on('dialog', (d) => { errors.push(`ui ${tag}: ブラウザの確認の窓が出た（${d.message()}）`); d.dismiss(); });
+  };
+  const fresh = async (p) => {
+    await p.goto(url); await p.waitForSelector('#title');
+    await p.evaluate(() => localStorage.clear());
+    await p.reload(); await p.waitForSelector('#title');
+  };
+  const start = async (p) => { await p.click('.slot.empty .btn'); await p.waitForSelector('.classcards'); await p.click('.title-box .btn-primary'); await p.waitForSelector('#scene'); await p.waitForTimeout(400); };
+  const shot = (p, name) => p.screenshot({ path: path.join(SHOTS, `ui_${name}.png`) });
+  const ctx = await browser.newContext({ viewport: { width: 1600, height: 900 } });
+  const page = await ctx.newPage();
+  watch(page, 'pc');
+  await fresh(page);
+  // ---- タイトル
+  const tt = await page.textContent('#title');
+  check('UI: タイトルに 無課金・広告なし・スタミナなし と版', ['無課金', '広告なし', 'スタミナなし', 'v0.'].every((s) => tt.includes(s)) && tt.includes('コードで生成'));
+  await page.click('.slot.empty .btn'); await page.waitForSelector('.classcard');
+  const cards = await page.$$eval('.classcard', (els) => els.map((e) => e.querySelector('.cc-role')?.textContent || ''));
+  check('UI: クラスのカードに役割（近接・遠距離・召喚）', cards.length === 5 && cards.some((c) => c.includes('召喚')) && cards.some((c) => c.includes('遠距離')), cards.join('/'));
+  await shot(page, 'class');
+  await page.click('.title-box .btn-primary'); await page.waitForSelector('#scene'); await page.waitForTimeout(500);
+  // ---- 枠を消す確認（ページの中で）
+  await page.evaluate(() => window.__ui.opts.onTitle());
+  await page.waitForSelector('#title .slot-del');
+  await page.click('#title .slot-del');
+  const conf = await page.$('#title .slot.confirming');
+  await page.click('#title .slot.confirming .btn >> text=やめる');
+  const kept = !!(await page.$('#title .slot-del'));
+  await page.click('#title .slot-del'); await page.click('#title .slot-del-ok');
+  const gone = (await page.$$('#title .slot.empty')).length === 3;
+  check('UI: 枠を消す確認がページの中に出る（やめる・消す）', !!conf && kept && gone);
+  // ---- 新しく始める: 最初は少しだけ
+  await start(page);
+  const vis = async () => page.evaluate(() => ({
+    grp: [...document.querySelectorAll('.navgrp')].filter((b) => !b.hidden).map((b) => b.dataset.g),
+    sub: [...document.querySelectorAll('.navbtn')].filter((b) => !b.hidden).map((b) => b.dataset.id),
+  }));
+  const v0 = await vis();
+  check('UI: 最初はまとまり 3 つ（キャラ・冒険・その他）', v0.grp.join(',') === 'chara,adv,other', v0.grp.join(','));
+  check('UI: キャラの中は 装備・持ち物・スキル', v0.sub.join(',') === 'hero,bag,skills', v0.sub.join(','));
+  const dockH = await page.evaluate(() => { const r = document.querySelector('#dock').getBoundingClientRect(); const s = document.querySelector('#scene').getBoundingClientRect(); return { dock: r.height, ratio: s.width / s.height, bottom: r.bottom }; });
+  check('UI: 戦闘の画面（16:9）の下に下の欄', dockH.dock >= 140 && Math.abs(dockH.ratio - 16 / 9) < 0.02 && dockH.bottom <= 901, JSON.stringify(dockH));
+  // ---- 少しずつ開く: Lv 5 で鍛冶
+  await page.evaluate(() => { const g = window.__game; g.addXp(1e6); });
+  await page.waitForTimeout(1400);
+  const v1 = await vis();
+  const ftoast = await page.$('.toast.feature');
+  check('UI: レベルが上がると「新しい機能」の知らせと 鍛える のまとまり', !!ftoast && v1.grp.includes('forge') && v1.sub.includes('tree'), v1.grp.join(','));
+  const newBadge = await page.textContent('.navgrp[data-g="forge"] .nav-badge');
+  check('UI: まとまりのタブに NEW', newBadge === 'NEW', newBadge);
+  await page.click('.navgrp[data-g="forge"]');
+  await page.waitForTimeout(200);
+  await page.evaluate(() => window.__ui.renderPanel()); // 描き直しても、読むまでは残る
+  const intro = await page.$('.feature-intro');
+  await shot(page, 'feature_intro');
+  if (intro) await page.click('.feature-intro .btn >> text=わかった');
+  const seen = await page.evaluate(() => !!window.__game.state.meta.tutorial.seen.craft && !document.querySelector('.feature-intro'));
+  check('UI: 初めて開くと短い説明（わかった で消える・見た印が残る）', !!intro && seen);
+  const nb = await page.evaluate(() => document.querySelector('.navbtn[data-id="craft"] .nav-badge').textContent);
+  check('UI: 見たら NEW が消える', nb !== 'NEW', nb);
+  // ---- 案内（3〜6 歩・飛ばせる）
+  await page.evaluate(() => window.__ui.guide.start());
+  await page.waitForSelector('.guide-bubble');
+  const steps = await page.textContent('.gb-step');
+  const ringOk = await page.evaluate(() => { const r = document.querySelector('.guide-ring').getBoundingClientRect(); const t = document.querySelector('#hud .hud-auto').getBoundingClientRect(); return Math.abs(r.left + 6 - t.left) < 3 && r.width > t.width; });
+  await shot(page, 'guide');
+  let n = 0;
+  while (await page.$('.guide .gb-next') && n < 10) { await page.click('.guide .gb-next'); await page.waitForTimeout(80); n++; }
+  const gdone = await page.evaluate(() => window.__game.state.meta.tutorial.guide);
+  check('UI: 案内が 6 歩で、目印が HUD を指し、最後まで進める', steps.endsWith('/ 6') && ringOk && n === 6 && gdone === 'done', `${steps} ring=${ringOk} n=${n} ${gdone}`);
+  await page.evaluate(() => window.__ui.guide.start());
+  await page.click('.guide .gb-skip');
+  check('UI: 案内は飛ばせる', !(await page.$('.guide')) && (await page.evaluate(() => window.__game.state.meta.tutorial.guide)) === 'skip');
+  // ---- キー操作
+  await page.mouse.click(300, 300);
+  const keyRes = [];
+  for (const [k, id] of [['b', 'bag'], ['k', 'skills'], ['p', 'tree'], ['m', 'map'], ['i', 'hero']]) { await page.keyboard.press(k); await page.waitForTimeout(80); keyRes.push((await page.evaluate(() => window.__ui.current.id)) === id); }
+  const a0 = await page.evaluate(() => window.__game.state.world.autoAdvance);
+  await page.keyboard.press('Space'); await page.waitForTimeout(60);
+  const a1 = await page.evaluate(() => window.__game.state.world.autoAdvance);
+  await page.keyboard.press('Space');
+  await page.keyboard.press('2'); await page.waitForTimeout(60);
+  const sp = await page.evaluate(() => window.__game.state.settings.speed);
+  await page.keyboard.press('1');
+  await page.click('.panel-title .help'); await page.waitForSelector('.modal-wrap');
+  await page.keyboard.press('Escape'); await page.waitForTimeout(80);
+  const closed = !(await page.$('.modal-wrap'));
+  check('UI: キー操作（I・B・K・P・M・Space・数字・Esc）', keyRes.every(Boolean) && a0 !== a1 && sp === 2 && closed, `${keyRes} auto ${a0}→${a1} speed=${sp} esc=${closed}`);
+  await page.click('.navgrp[data-g="other"]'); await nav(page, 'settings');
+  const howto = await page.textContent('.panel-settings');
+  check('UI: 設定に 遊び方 とキーの一覧', howto.includes('遊び方') && howto.includes('Space') && howto.includes('Esc'));
+  // ---- 戦力・下の欄・レアリティの印
+  await page.evaluate(() => { const g = window.__game; for (let i = 0; i < 20 * 90; i++) g.tick(0.05); });
+  await page.waitForTimeout(300);
+  await nav(page, 'bag');
+  const marks = await page.$$eval('#panelbody .grid .cell .rmark', (els) => els.map((e) => e.textContent));
+  check('UI: マスにレアリティの文字（色だけに頼らない）', marks.length > 0 && marks.every((m) => /^[並魔稀秀伝組唯神][★✦]?$/.test(m)), marks.slice(0, 6).join(''));
+  const pw = await page.evaluate(async () => {
+    const g = window.__game;
+    const it = g.state.inv.bag.find((x) => !g.sys.inv.equipProblem(x, x.slot === 'ring' ? 'ring1' : x.slot) && g.sys.inv.isUpgrade(x));
+    if (!it) return { skip: true };
+    g.sys.inv.equip(it.uid);
+    await new Promise((r) => setTimeout(r, 400));
+    return { v: document.querySelector('.tb-power .v').textContent, d: document.querySelector('.tb-power .d').textContent };
+  });
+  check('UI: 上の帯の戦力が ▲▼ で変わる', pw.skip || /[▲▼]/.test(pw.d), JSON.stringify(pw));
+  await page.click('#dock .dock-tab[data-t="loot"]');
+  await page.click('#dock .chipbtn >> text=すべて');
+  await page.waitForTimeout(100);
+  const rows = (await page.$$('#dock .dl-row')).length;
+  if (rows) { await page.click('#dock .dl-row'); await page.waitForTimeout(150); }
+  const opened = await page.evaluate(() => !!document.querySelector('.modal-wrap') || [...document.querySelectorAll('.toast')].some((t) => t.textContent.includes('手元') || t.textContent.includes('倉庫')));
+  await shot(page, 'dock_loot');
+  check('UI: 直近のドロップ（押すとアイテムの窓）', rows > 0 && opened, `rows=${rows}`);
+  await page.keyboard.press('Escape');
+  for (const t of ['pace', 'log', 'goal']) { await page.click(`#dock .dock-tab[data-t="${t}"]`); await page.waitForTimeout(60); }
+  const goal = await page.textContent('#dock .dock-body');
+  check('UI: 次の目標（ボス・必要 DPS・手段）', goal.includes('次の目標') && (goal.includes('必要') || goal.includes('魔境')), goal.slice(0, 60));
+  // ---- 操作の直後はマウスが乗っていても描き直す
+  await nav(page, 'hero');
+  await page.mouse.move(1400, 600); await page.mouse.move(1402, 602);
+  const rr = await page.evaluate(async () => {
+    const mark = () => { document.querySelector('.panel-hero').dataset.mark = '1'; };
+    mark();
+    window.__game.events.emit('gearChanged', {});
+    await new Promise((r) => setTimeout(r, 400));
+    const deferred = document.querySelector('.panel-hero')?.dataset.mark === '1';
+    return { deferred };
+  });
+  await page.click('.panel-hero .dollwrap', { position: { x: 5, y: 5 } });
+  await page.waitForTimeout(120);
+  const after = await page.evaluate(() => document.querySelector('.panel-hero')?.dataset.mark !== '1');
+  check('UI: マウスが乗っている間は待ち、押した直後に描き直す', rr.deferred && after, JSON.stringify({ ...rr, after }));
+  // ---- ボスの残り時間 m:ss・魔境のローマ数字
+  const hud = await page.evaluate(async () => {
+    const g = window.__game; const w = g.state.world;
+    w.maxStage[w.zone] = 10; g.sys.world.challengeBoss();
+    for (let i = 0; i < 400 && !(g.sys.world.bossTimer > 0); i++) g.tick(0.05);
+    window.__ui.hud.update(1);
+    const boss = document.querySelector('#hud .hud-stage').textContent;
+    w.maxTorment = 3; w.torment = 3;
+    window.__ui.hud.update(1);
+    const tor = document.querySelector('#hud .hud-zone').textContent;
+    w.torment = 0; w.maxTorment = 0;
+    return { boss, tor };
+  });
+  check('UI: ボスの残り時間は m:ss、魔境はローマ数字', /残り \d+:\d\d/.test(hud.boss) && hud.tor.includes('魔境 III'), JSON.stringify(hud));
+  // ---- 画面の大きさ（1280×720・1920×1080）
+  for (const [w, hh] of [[1280, 720], [1920, 1080]]) {
+    await page.setViewportSize({ width: w, height: hh });
+    await page.waitForTimeout(250);
+    const lay = await page.evaluate(() => { const d = document.querySelector('#dock').getBoundingClientRect(); const s = document.querySelector('#scene').getBoundingClientRect(); return { dock: Math.round(d.height), r: s.width / s.height, over: document.documentElement.scrollWidth > innerWidth + 1 || document.documentElement.scrollHeight > innerHeight + 1 }; });
+    await shot(page, `pc_${w}`);
+    check(`UI: ${w}×${hh} で 16:9 の画面と下の欄が収まる`, lay.dock >= 140 && Math.abs(lay.r - 16 / 9) < 0.02 && !lay.over, JSON.stringify(lay));
+  }
+  await ctx.close();
+  // ---- スマホ: 下のタブ・横に流せる窓のタブ・はみ出し 0（visualViewport で確かめる）
+  const m = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+  const mp = await m.newPage();
+  watch(mp, 'mobile');
+  await fresh(mp);
+  await start(mp);
+  const bar = await mp.evaluate(() => { const r = document.querySelector('.nav-groups').getBoundingClientRect(); return { bottom: Math.round(r.bottom), h: Math.round(r.height), vh: Math.round(window.visualViewport?.height || innerHeight), fixed: getComputedStyle(document.querySelector('.nav-groups')).position }; });
+  check('UI: スマホでまとまりのタブが画面の下', bar.fixed === 'fixed' && Math.abs(bar.bottom - bar.vh) <= 1 && bar.h >= 44, JSON.stringify(bar));
+  await mp.evaluate(() => { const g = window.__game; for (let i = 0; i < 20 * 60; i++) g.tick(0.05); window.__ui.unlockAll(); });
+  let wide = '';
+  for (const id of await mp.evaluate(() => [...document.querySelectorAll('.navbtn')].map((b) => b.dataset.id))) {
+    await mp.evaluate((x) => window.__ui.openPanel(x), id);
+    await mp.waitForTimeout(120);
+    const o = await mp.evaluate(() => ({ doc: document.documentElement.scrollWidth, body: document.body.scrollWidth, vv: Math.round(window.visualViewport?.width || innerWidth), panel: Math.round(document.querySelector('#panel').getBoundingClientRect().width) }));
+    if (o.doc > o.vv + 1 || o.body > o.vv + 1 || o.panel > o.vv + 1) wide += `${id}:${o.doc}/${o.panel}>${o.vv} `;
+  }
+  check('UI: スマホで どの窓も横にはみ出さない（visualViewport）', !wide, wide);
+  const subs = await mp.evaluate(() => { const s = document.querySelector('.nav-subs'); return { ox: getComputedStyle(s).overflowX, w: s.getBoundingClientRect().width, vv: window.visualViewport?.width || innerWidth }; });
+  check('UI: スマホの窓のタブは横に流せる', subs.ox === 'auto' && subs.w <= subs.vv + 1, JSON.stringify(subs));
+  await mp.tap('.dock-strip');
+  await mp.waitForTimeout(150);
+  const dopen = await mp.evaluate(() => document.querySelector('#dock').classList.contains('open') && document.querySelector('#dock .dock-body').getBoundingClientRect().height > 40);
+  await shot(mp, 'mobile_dock');
+  check('UI: スマホで 次の目標の帯を押すと開く', dopen);
+  await mp.tap('.dock-strip');
+  await mp.tap('.navgrp[data-g="collect"]');
+  await mp.waitForTimeout(150);
+  await shot(mp, 'mobile_collect');
+  const grpOk = await mp.evaluate(() => window.__ui.current && ['pets', 'bounties', 'achievements', 'bestiary', 'stats'].includes(window.__ui.current.id));
+  check('UI: スマホで 下のタブから窓を開ける', grpOk);
   await m.close();
 }

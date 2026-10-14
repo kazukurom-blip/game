@@ -15,8 +15,8 @@ export const RARITY = Object.fromEntries(RARITIES.map((r) => [r.id, r]));
 
 export const QUALITY = {
   0: { id: 'normal', name: '', mult: 1, color: null },
-  1: { id: 'ancient', name: '太古の', mult: 1.3, color: '#ffd27a', badge: '太古' },
-  2: { id: 'primal', name: '原初の', mult: 1.6, color: '#ff3355', badge: '原初' },
+  1: { id: 'ancient', name: '覚醒の', mult: 1.3, color: '#ffd27a', badge: '覚醒' },
+  2: { id: 'primal', name: '極致の', mult: 1.6, color: '#ff3355', badge: '極致' },
 };
 
 export const rarityColor = (id) => RARITY[id]?.color ?? '#fff';

@@ -288,7 +288,7 @@ export class FxSystem {
     if (q === 2) L = 5; else if (q === 1 && L < 4) L = 4;
     if (salv) L = 0;
     const icon = BASE[it.base]?.icon || 'icon.item.sword';
-    const name = `${q === 2 ? '原初の' : q === 1 ? '太古の' : ''}${itemName(it)}`;
+    const name = `${q === 2 ? '極致の' : q === 1 ? '覚醒の' : ''}${itemName(it)}`;
     if (L === 0) { if (r.idx >= 2) this.add(0.9, (ctx, k, f, cam) => { ctx.globalAlpha = 1 - k; label(ctx, e.x - cam, this.wy(e.y, 70 + k * 30), '分解', '#9a9aa0', 12); }); return; }
     this.lootN = (this.lootN || 0) + 1;
     const d = { x: e.x, y: e.y || 0, x0: e.x - (rnd() - 0.2) * 20, t: 0, life: L >= 4 ? 4.2 : L === 3 ? 3.2 : 2.4, L, r, icon, name, col: r.color, where: e.where, seed: rnd() * 10, row: this.lootN % 3 };
@@ -838,7 +838,7 @@ const HANDLERS = {
       ctx.globalAlpha = k > 0.75 ? (1 - k) / 0.25 : 1;
       ctx.save(); ctx.translate(x, y - 250 - 20 * k); ctx.scale(sc, sc);
       ctx.font = '900 38px "M PLUS 1p", Impact, sans-serif'; ctx.textAlign = 'center';
-      ctx.lineWidth = 7; ctx.strokeStyle = 'rgba(40,20,0,0.9)'; const txt = paragon ? `パラゴン ${paragon}` : 'LEVEL UP!';
+      ctx.lineWidth = 7; ctx.strokeStyle = 'rgba(40,20,0,0.9)'; const txt = paragon ? `アビスLv ${paragon}` : 'LEVEL UP!';
       ctx.strokeText(txt, 0, 0); const g = ctx.createLinearGradient(0, -30, 0, 6); g.addColorStop(0, '#fffbe0'); g.addColorStop(0.5, col); g.addColorStop(1, '#c87a10'); ctx.fillStyle = g; ctx.fillText(txt, 0, 0);
       if (e.level && !paragon) { ctx.font = '700 18px "M PLUS 1p", sans-serif'; ctx.lineWidth = 4; ctx.strokeText(`Lv ${e.level}`, 0, 26); ctx.fillStyle = '#fff4c8'; ctx.fillText(`Lv ${e.level}`, 0, 26); }
       ctx.restore();

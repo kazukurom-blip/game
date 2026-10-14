@@ -188,7 +188,7 @@ function renderLgems(ui, el) {
   for (const lg of LEGENDARY_GEMS) {
     const o = owned.find((x) => x.id === lg.id);
     const p = registry.power(lg.power);
-    if (!o) { list.append(h('div.ik-lg.miss', [h('div.orb'), h('div', [h('div.nm', { style: { fontWeight: 700 } }, lg.name), h('div.sub.small.dim', '未入手（深淵の裂け目・苦行の章のボスから）'), h('div.small.dim', p ? p.desc(1) : '')]), h('span')])); continue; }
+    if (!o) { list.append(h('div.ik-lg.miss', [h('div.orb'), h('div', [h('div.nm', { style: { fontWeight: 700 } }, lg.name), h('div.sub.small.dim', '未入手（深淵の裂け目・魔境の章のボスから）'), h('div.small.dim', p ? p.desc(1) : '')]), h('span')])); continue; }
     const where = o.uid ? g.sys.inv.findItem(o.uid) : null;
     const chance = lgemUpgradeChance(Math.max(best, 1), o.lvl);
     list.append(h(`div.ik-lg${target === lg.id ? '.on' : ''}`, { style: { '--gc': lg.color } }, [

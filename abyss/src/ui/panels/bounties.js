@@ -55,7 +55,7 @@ export const bountiesPanel = {
 function rewardText(got) {
   const parts = [];
   if (got.gold) parts.push(`${fmt(got.gold)} G`);
-  for (const [k, v] of Object.entries(got.mats || {})) parts.push(`${{ dust: '魔塵', crystal: '秘晶', echo: '残響', core: '原初の核', shard: '欠片', scrap: '鉄屑' }[k] || k} ×${v}`);
+  for (const [k, v] of Object.entries(got.mats || {})) parts.push(`${{ dust: '魔塵', crystal: '秘晶', echo: '残響', core: '極致の核', shard: '欠片', scrap: '鉄屑' }[k] || k} ×${v}`);
   for (const k of Object.keys(got.eggs || {})) parts.push(EGG[k]?.name || k);
   for (const gm of got.gems || []) parts.push(gm?.name || '宝石');
   return parts.join('・') || 'なし';

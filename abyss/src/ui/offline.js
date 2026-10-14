@@ -39,7 +39,7 @@ export function showOfflineReport(ui, rep) {
   // 数字
   root.append(S(h('div.ofr-cards', [
     ocard('倒した敵', fmt(rep.kills), rep.elites ? `エリート ${fmt(rep.elites)}` : `${fmt((rep.rate?.kills || 0) * 3600)} 体/時`),
-    ocard('経験値', `+${fmt(rep.xp)}`, rep.levels ? `Lv ${rep.levelFrom} → ${rep.levelTo}` : rep.paragon ? `パラゴン ${rep.paragonFrom} → ${rep.paragonTo}` : `Lv ${g.state.hero.level}`, rep.levels || rep.paragon ? 'up' : ''),
+    ocard('経験値', `+${fmt(rep.xp)}`, rep.levels ? `Lv ${rep.levelFrom} → ${rep.levelTo}` : rep.paragon ? `アビスLv ${rep.paragonFrom} → ${rep.paragonTo}` : `Lv ${g.state.hero.level}`, rep.levels || rep.paragon ? 'up' : ''),
     ocard('ゴールド', `+${fmt(rep.gold)}`, `いま ${fmt(g.state.meta.gold)}`, 'gold'),
     ocard('拾った装備', fmt(rep.drops ?? Object.values(rep.found || {}).reduce((s, v) => s + v, 0)), `分解 ${fmt(rep.salvaged || 0)}`),
   ])));
@@ -102,7 +102,7 @@ function bestRow(ui, it, rep) {
   const g = ui.game; const inv = g.sys.inv;
   const r = RARITY[it.rarity];
   const where = rep.where?.[it.uid];
-  const info = h('div.ofr-bi', [h('div.ofr-bn', { style: { color: r.color } }, `${it.q === 2 ? '原初の ' : it.q === 1 ? '太古の ' : ''}${itemName(it)}`), h('div.dim.small', `${r.name}　アイテム Lv ${it.ilvl}`)]);
+  const info = h('div.ofr-bi', [h('div.ofr-bn', { style: { color: r.color } }, `${it.q === 2 ? '極致の ' : it.q === 1 ? '覚醒の ' : ''}${itemName(it)}`), h('div.dim.small', `${r.name}　アイテム Lv ${it.ilvl}`)]);
   const act = h('div.ofr-ba');
   const fill = () => {
     act.replaceChildren();
