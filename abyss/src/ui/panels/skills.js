@@ -156,8 +156,8 @@ function renderSkills(ui, el) {
       button('おまかせで並べる', () => { sys.autoArrange(); ui.toast('おすすめの並びにしました', 'good'); }, { kind: 'small', title: '今のスキルから、火力の目安が一番高い並びを選びます' }),
       button(resetCost ? `振り直し（${fmt(resetCost)} G）` : '振り直し（無料）', async () => {
         if (!sys.spentPoints()) { ui.toast('振り直すポイントがありません'); return; }
-        if (!(await ui.confirm(`スキルのレベルを Lv1 に戻し、ポイント ${sys.spentPoints()} を返します。${resetCost ? `${fmt(resetCost)} G かかります。` : '（Lv 20 までは無料）'}`, '振り直す'))) return;
-        if (!sys.reset()) ui.toast('お金が足りません', 'bad'); else { ui.toast('スキルを振り直しました', 'good'); ui.renderPanel(); }
+        if (!(await ui.confirm(`スキルのレベルを Lv 1 に戻し、ポイント ${sys.spentPoints()} を返します。${resetCost ? `${fmt(resetCost)} G かかります。` : '（Lv 20 までは無料）'}`, '振り直す'))) return;
+        if (!sys.reset()) ui.toast('ゴールドが足りません', 'bad'); else { ui.toast('スキルを振り直しました', 'good'); ui.renderPanel(); }
       }, { kind: 'small' }),
     ]),
   ]));

@@ -74,6 +74,7 @@ kbd { display: inline-block; min-width: 22px; padding: 1px 6px; border: 1px soli
 .tb-hero { display: grid; grid-template-columns: auto auto; gap: 1px 10px; align-items: baseline; min-width: 190px; }
 .tb-name { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
 .tb-level { color: var(--gold2); white-space: nowrap; font-size: 13px; }
+.tbl-par { margin-left: 1em; }
 .tb-xp { grid-column: 1 / 3; height: 6px; background: #2a2230; border-radius: 3px; overflow: hidden; margin-top: 3px; }
 .tb-xpfill { height: 100%; background: linear-gradient(90deg, #8a5ad0, #c890ff); width: 0; transition: width .25s; }
 .tb-power { position: relative; display: flex; align-items: baseline; gap: 6px; padding: 3px 10px; border: 1px solid var(--line2); border-radius: 8px; background: linear-gradient(#241c18, #16110f); white-space: nowrap; transition: box-shadow .3s; }
@@ -143,7 +144,8 @@ textarea.savebox { width: 100%; font-family: monospace; font-size: 11px; }
 .nav-badge { flex: none; background: #c2382a; color: #fff; border-radius: 9px; font-size: 10px; line-height: 15px; padding: 0 5px; min-width: 16px; text-align: center; font-weight: 700; pointer-events: none; }
 .nav-badge.new { background: linear-gradient(#f5d98a, #b88a2a); color: #2a1a04; font-size: 9px; letter-spacing: .5px; }
 /* まとまりのタブの印は右上の角に小さく（名前を押しのけない）。NEW は金の点 */
-.navgrp .nav-badge { position: absolute; top: 2px; right: 3px; font-size: 9px; line-height: 13px; min-width: 14px; padding: 0 4px; }
+/* 数の印は名前に重ならないよう、ボタンの上の縁にかける（.nav-groups の上の余白に出る） */
+.navgrp .nav-badge { position: absolute; top: -5px; right: 2px; font-size: 9px; line-height: 13px; min-width: 14px; padding: 0 4px; box-shadow: 0 0 0 2px var(--bg2); }
 .navgrp .nav-badge.new { font-size: 0; min-width: 0; width: 9px; height: 9px; padding: 0; border-radius: 50%; top: 5px; right: 6px; box-shadow: 0 0 6px rgba(245,217,138,.8); }
 
 /* ---------- 新しい機能の説明 */
@@ -191,18 +193,19 @@ textarea.savebox { width: 100%; font-family: monospace; font-size: 11px; }
 .hud-bottom { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 5px; width: min(560px, 92%); }
 .hud-bars { width: 100%; display: flex; flex-direction: column; gap: 3px; }
 .bar { position: relative; height: 16px; background: rgba(0,0,0,.72); border: 1px solid #5a4a3a; border-radius: 8px; overflow: hidden; }
-.bar.res { height: 11px; }
+.bar.res { height: 13px; }
 .bar .fill { height: 100%; transition: width .12s; }
 .bar.life .fill { background: linear-gradient(#e04a3a, #8a1a12); }
 .bar.life.low { border-color: #ff5a4a; box-shadow: 0 0 10px rgba(255,60,40,.5); }
 .bar .txt { position: absolute; inset: 0; text-align: center; font-size: 11px; line-height: 15px; text-shadow: 0 0 3px #000, 0 0 3px #000; white-space: nowrap; }
-.bar.res .txt { line-height: 10px; font-size: 9.5px; }
+/* リソースの棒は明るい色で塗られるので、文字を太く・影を濃くして読めるように */
+.bar.res .txt { line-height: 12px; font-size: 10.5px; font-weight: 700; text-shadow: 0 0 2px #000, 0 1px 2px #000, 0 0 4px #000; }
 .hud-skills { display: flex; gap: 6px; }
 .skslot { position: relative; width: 50px; height: 50px; border: 1px solid var(--line2); border-radius: 8px; background: rgba(10,8,12,.82); display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; }
 .skslot.nores { filter: grayscale(.8) brightness(.6); }
 .skslot.casting { box-shadow: 0 0 10px var(--gold2); border-color: var(--gold2); }
 .skslot .cd { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: rgba(0,0,0,.65); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
-.skslot .key { position: absolute; left: 3px; top: 1px; font-size: 9px; color: var(--dim); text-shadow: 0 0 2px #000; }
+.skslot .key { position: absolute; left: 2px; top: 1px; font-size: 9px; line-height: 1.25; color: #d8cfbf; text-shadow: 0 0 2px #000; background: rgba(0,0,0,.55); border-radius: 3px; padding: 0 2px; z-index: 1; }
 .skslot .empty { color: var(--dim); }
 .hud-buffs { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; }
 .hud-buffs:empty { display: none; }
@@ -309,8 +312,9 @@ textarea.savebox { width: 100%; font-family: monospace; font-size: 11px; }
 .eqslot .cell { width: 62px; height: 62px; margin: auto; }
 .dollwrap { text-align: center; min-width: 0; }
 .doll { width: 100%; max-width: 300px; height: auto; }
-.dollname { color: var(--dim); }
+.dollname { color: var(--dim); display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 0 .8em; }
 .dollname b { color: var(--gold2); }
+.dn-part { white-space: nowrap; }
 .statgrid { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 10px; }
 table.kv { width: 100%; border-collapse: collapse; font-size: 12.5px; background: #120f16; border: 1px solid var(--line); border-radius: 6px; }
 table.kv th { text-align: left; color: var(--dim); font-weight: 400; padding: 3px 8px; width: 45%; }
@@ -471,6 +475,13 @@ html.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after 
   :root { --panel-w: 420px; }
   .tb-logo { display: none; }
   .tb-mats { gap: 8px; }
+  /* 窓が 420px のとき 5 つのタブ（印つき）が 1 段に入るように詰める */
+  .nav-subs { gap: 2px; }
+  .navbtn { padding: 5px 7px; gap: 4px; }
+}
+/* パソコンでは横に流すスクロールが見えないので、入りきらないタブは隠さずに 2 段目へ */
+@media (min-width: 901px) {
+  .nav-subs { flex-wrap: wrap; overflow-x: visible; }
 }
 @media (min-width: 1800px) { :root { --panel-w: 520px; } }
 @media (max-width: 1100px) and (min-width: 901px) {
@@ -485,9 +496,11 @@ html.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after 
   #topbar { gap: 8px; padding: 4px 12px; flex-wrap: nowrap; }
   .tb-logo, .tb-mats, .tb-souls, .tb-res.souls, .tb-save, .tb-speed { display: none !important; }
   #speed { display: inline-block; min-width: 40px; }
-  .tb-hero { min-width: 0; flex: 1; grid-template-columns: minmax(0, auto) auto; }
-  .tb-name { max-width: 96px; font-size: 13px; }
-  .tb-level { font-size: 12px; }
+  /* 名前とレベルは 2 段に（Lv 100・アビスLv で横に並べると名前が 1 文字しか残らない） */
+  .tb-hero { min-width: 0; flex: 1; grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .tb-name { max-width: none; font-size: 13px; line-height: 1.25; }
+  .tb-level { font-size: 11px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; }
+  .tb-xp { grid-column: 1; margin-top: 2px; }
   .tb-power { padding: 2px 8px; flex-direction: column; align-items: flex-end; gap: 0; }
   .tb-power .k { font-size: 9.5px; line-height: 1.1; }
   .tb-power .v { font-size: 14px; line-height: 1.15; }
@@ -521,9 +534,9 @@ html.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after 
   .hud-bottom:has(.hud-buffs:empty) .hud-skills, .hud-bottom:has(.hud-buffs:empty) .hud-bars { grid-row: 1; }
   .skslot { width: 36px; height: 36px; border-radius: 7px; }
   .skslot canvas { width: 30px !important; height: 30px !important; }
-  .skslot .key { font-size: 8px; }
+  .skslot .key { font-size: 8.5px; }
   .bar { height: 14px; } .bar .txt { line-height: 13px; font-size: 10px; }
-  .bar.res { height: 10px; } .bar.res .txt { line-height: 9px; font-size: 8.5px; }
+  .bar.res { height: 12px; } .bar.res .txt { line-height: 11px; font-size: 10px; }
   /* 知らせは戦闘の画面の下の端（HUD の帯のすぐ上）に小さく */
   #toasts { top: calc(56.25vw - 6px); right: 8px; left: 8px; width: auto; transform: translateY(-100%); align-items: center; flex-direction: column; }
   .toast { font-size: 11px; padding: 3px 10px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: rgba(16,12,20,.9); }
@@ -564,7 +577,7 @@ html.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after 
 }
 @media (max-width: 380px) {
   .tb-power .k { display: none; }
-  .tb-name { max-width: 70px; }
+  .tbl-lv { display: none; } .tbl-par { margin-left: 0; }
   .skslot { width: 32px; height: 32px; }
   .skslot canvas { width: 26px !important; height: 26px !important; }
 }
@@ -574,6 +587,9 @@ html.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after 
   :root { --bottom-h: 0px; --top-h: 40px; }
   #main { margin-bottom: 0; }
   #topbar { padding: 2px 12px; min-height: 40px; }
+  /* 横向きは幅があるので、名前とレベルを 1 段に戻す */
+  .tb-hero { grid-template-columns: minmax(0, auto) auto; gap: 1px 10px; }
+  .tb-xp { grid-column: 1 / 3; margin-top: 3px; }
   #main { grid-template-columns: minmax(0, 1fr) minmax(300px, 44%); grid-template-rows: minmax(0, 1fr); }
   #left { container-type: size; display: flex; }
   #battle { height: min(calc(100cqw * 9 / 16), 100cqh); display: flex; }
@@ -587,9 +603,9 @@ html.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after 
   .tb-power { flex-direction: row; align-items: baseline; gap: 5px; }
   .tb-power .d { position: static; background: none; padding: 0; }
   #toasts { top: 8px; transform: none; left: auto; right: 8px; width: min(320px, 60%); align-items: flex-end; }
-  .nav-groups { position: static; height: auto; box-shadow: none; padding: 4px 4px 0; border-top: none; background: var(--bg2); }
+  .nav-groups { position: static; height: auto; box-shadow: none; padding: 8px 4px 0; border-top: none; background: var(--bg2); }
   .navgrp { flex-direction: row; font-size: 11px; padding: 5px 2px; }
   .navgrp .ng-ic { font-size: 14px; }
-  .navgrp .nav-badge { top: 1px; right: 2px; left: auto; box-shadow: none; }
+  .navgrp .nav-badge { top: -7px; right: 2px; left: auto; box-shadow: 0 0 0 2px var(--bg2); }
   .navgrp .nav-badge.new { top: 3px; right: 3px; left: auto; }
 }

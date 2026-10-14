@@ -37,7 +37,13 @@ export const heroPanel = {
     const R = ['weapon', 'offhand', 'ring1', 'ring2', 'legs', 'boots'];
     el.append(h('div.equip-grid', [
       h('div.eqcol', L.map((s) => equipSlot(ui, s))),
-      h('div.dollwrap', [cv, h('div.dollname', [h('b', st.hero.name), `${st.hero.name === cls.name ? '' : ` ${cls.name}`}　Lv ${st.hero.level}${st.hero.level >= 100 ? `　アビスLv ${st.hero.paragon.level}` : ''}`])]),
+      // 名前・クラス・Lv・アビスLv はそれぞれ途中で折り返さない（「アビ／スLv 120」のように切れないように）
+      h('div.dollwrap', [cv, h('div.dollname', [
+        h('b.dn-part', st.hero.name),
+        st.hero.name === cls.name ? null : h('span.dn-part', cls.name),
+        h('span.dn-part', `Lv ${st.hero.level}`),
+        st.hero.level >= 100 ? h('span.dn-part', `アビスLv ${st.hero.paragon.level}`) : null,
+      ])]),
       h('div.eqcol', R.map((s) => equipSlot(ui, s))),
     ]));
     const basic = st.hero.bar.find(Boolean);

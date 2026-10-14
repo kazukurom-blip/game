@@ -76,7 +76,7 @@ function renderGems(ui, el) {
     ]), h('span')]));
   }
   el.append(h('section.sec', [h('h3.sec-title', '効果（持っている一番上の段階）'), list]));
-  el.append(h('p.hint', '宝石はエリート（10%）・ボス（60%）・章のボス・宝ゴブリンが落とします。段階の上限はエリアレベルで上がります（12 ごとに 1 段）。'));
+  el.append(h('p.hint', '宝石はエリート（10%）・ボス（60%）・章のボス・ため込み屋が落とします。段階の上限はエリアレベルで上がります（12 ごとに 1 段）。'));
 }
 
 function renderSocket(ui, el) {

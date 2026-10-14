@@ -65,6 +65,7 @@ export class Hud {
     clear(this.skillRow);
     this.skillEls = [];
     const size = this.game.sys.skills.barSize();
+    this.skillSig = this.barSig();
     for (let i = 0; i < size; i++) {
       const id = st.hero.bar[i];
       const def = id ? SKILL[id] : null;
@@ -76,6 +77,12 @@ export class Hud {
     }
   }
 
+  /** スキルの並びの形（枠の数と中身）。出来事を出さずに変わっても（祭壇の「第六の構え」・静かに覚えたスキル）HUD を合わせる */
+  barSig() {
+    const st = this.game.state;
+    return st ? `${this.game.sys.skills.barSize()}|${st.hero.bar.join(',')}` : '';
+  }
+
   update(dt) {
     this.t += dt;
     if (this.t < 0.1) return;
@@ -85,6 +92,7 @@ export class Hud {
     const c = g.combat;
     const h0 = c.hero;
     if (!st || !h0) return;
+    if (this.barSig() !== this.skillSig) this.buildSkills();
     const w = st.world;
     const z = ZONE[w.zone];
     const ws = g.sys.world;

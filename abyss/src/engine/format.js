@@ -62,8 +62,9 @@ export function fmtTime(sec, short = false) {
   sec = Math.max(0, sec || 0);
   if (sec < 60) return sec < 10 && !Number.isInteger(sec) ? `${sec.toFixed(1)}秒` : `${Math.floor(sec)}秒`;
   const d = Math.floor(sec / 86400); const h = Math.floor((sec % 86400) / 3600); const m = Math.floor((sec % 3600) / 60); const s = Math.floor(sec % 60);
-  if (d > 0) return short ? `${d}日${h}時間` : `${d}日${h}時間${m}分`;
-  if (h > 0) return short ? `${h}時間${m}分` : `${h}時間${m}分${String(s).padStart(2, '0')}秒`;
+  // 短い形はちょうどのとき 0 を出さない（「6時間0分」→「6時間」・「1日0時間」→「1日」）
+  if (d > 0) return short ? `${d}日${h ? `${h}時間` : ''}` : `${d}日${h}時間${m}分`;
+  if (h > 0) return short ? `${h}時間${m ? `${m}分` : ''}` : `${h}時間${m}分${String(s).padStart(2, '0')}秒`;
   return `${m}分${String(s).padStart(2, '0')}秒`;
 }
 

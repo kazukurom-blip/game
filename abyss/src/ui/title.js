@@ -137,12 +137,12 @@ function renderNew(box, slot, onStart) {
       h('div.ci-head', [h('b', c.name), h('span.cc-role', { style: { '--cc': c.color } }, r.role), h('span.dim.small', `難しさ: ${DIFF_NAME[r.diff]}`)]),
       h('p', c.desc),
       r.tip ? h('p.gold', r.tip) : null,
-      h('div.dim.small', `主能力: ${{ str: '筋力', dex: '敏捷', int: '知力' }[c.primary]}　力: ${c.resource.name}`),
+      h('div.dim.small', `主能力: ${{ str: '筋力', dex: '敏捷', int: '知力' }[c.primary]}　リソース: ${c.resource.name}`),
     );
   };
   draw();
   box.append(h('h3.sec-title', `枠 ${slot + 1}　クラスを選ぶ`), cards, info, name, h('div.toolbar', [
-    button('この職業で始める', () => onStart({ slot, cls: pick, name: name.value.trim() || CLASS[pick].name }), { kind: 'primary' }),
+    button('このクラスで始める', () => onStart({ slot, cls: pick, name: name.value.trim() || CLASS[pick].name }), { kind: 'primary' }),
     button('もどる', () => renderSlots(box, onStart)),
   ]));
 }

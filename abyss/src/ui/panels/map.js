@@ -2,7 +2,7 @@
 // あわせて、戦闘の画面の HUD に「必要 DPS の目安」「ため込み屋」「裂け目の残り時間と進行」を出し、ワールドの知らせ（トースト）を出す。
 
 import { h, button, injectCss, clear, append } from '../dom.js';
-import { fmt } from '../../engine/format.js';
+import { fmt, fmtPct } from '../../engine/format.js';
 import { ACTS, ZONES, STAGES_PER_ZONE, GATE_GROUPS } from '../../data/world.js';
 import { MONSTER, FAMILIES, ATTACK_NAMES, BOSS_ABILITIES } from '../../data/monsters.js';
 import { ELEMENT_NAMES, ELEMENT_COLORS } from '../../data/stats.js';
@@ -21,6 +21,7 @@ export const WORLD_CSS = `
 .wm-power > div { background: #0f0d13; border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; font-size: 11px; color: var(--dim); }
 .wm-power b { display: block; font-size: 15px; color: var(--text); }
 .wm-adv { font-weight: 700; }
+.wm-weak { display: inline-block; white-space: nowrap; font-size: .8em; }
 .wm-adv.easy { color: #6ee08a; } .wm-adv.ok { color: #d9e86e; } .wm-adv.hard { color: #ffb050; } .wm-adv.danger { color: #ff6b6b; }
 .wm-act { border: 1px solid var(--line); border-left: 4px solid var(--ac); border-radius: 8px; margin-bottom: 10px; background: #120f16; overflow: hidden; }
 .wm-act.locked { opacity: .55; }
@@ -59,6 +60,7 @@ export const WORLD_CSS = `
 .hud-line.wl { background: rgba(10,8,12,.72); border: 1px solid var(--line); border-radius: 7px; padding: 4px 9px; font-size: 12px; max-width: 360px; line-height: 1.45; }
 .hud-line.wl b { color: var(--gold2); }
 .hud-line.wl .ok { color: #6ee08a; font-weight: 700; } .hud-line.wl .ng { color: #ff8a7a; font-weight: 700; }
+.hud-line.wl .ok, .hud-line.wl .ng { white-space: nowrap; } /* 「あと 82% 足りない」を途中で折らない */
 .hud-line.wl.boss { border-color: #7a3a2a; }
 .hud-line.wl.gob { border-color: #c8a040; color: #ffe08a; animation: wlpulse .8s infinite alternate; }
 .hud-line.wl.rift { border-color: #7a4ac0; min-width: 240px; }
@@ -76,6 +78,10 @@ const openActs = new Set();
 let openInit = false;
 
 const elName = (el) => ELEMENT_NAMES[el] || el;
+/** 倍率: 小数 2 桁まで・末尾の 0 は出さない（×1・×1.5・×1.25。大きければ 万・億） */
+const xm = (v) => (Math.abs(v) >= 10000 ? fmt(v) : String(Number((v || 0).toFixed(2))));
+/** ボスに対する耐久・火力の割合。桁外れに余裕があるときは「1000% 以上」でまとめる */
+const ratioText = (r) => (r >= 10 ? '1000% 以上' : `${Math.round((r || 0) * 100)}%`);
 
 /** 苦行の選択（地図と裂け目の窓で共通） */
 export function tormentSelector(ui, opts = {}) {
@@ -100,8 +106,9 @@ export function tormentSelector(ui, opts = {}) {
     h('h3.sec-title', ['魔境（難しさ）', h('span.sec-right', cur ? info.name : 'ふつう')]),
     grid,
     h('div.tm-mult', [
-      cell('経験値', `×${info.xp.toFixed(2)}`, 'up'), cell('ゴールド', `×${info.gold.toFixed(2)}`, 'up'), cell('ドロップ数', `×${info.loot.toFixed(2)}`, 'up'), cell('レア発見率', `+${info.mf}%`, 'up'),
-      cell('敵のライフ', `×${fmt(info.life, { dec: 1 })}`, 'down'), cell('敵の攻撃', `×${fmt(info.dmg, { dec: 1 })}`, 'down'), cell('耐性', info.resPenalty ? `-${info.resPenalty}` : 'なし', 'down'), cell('覚醒 / 極致', `${Math.round((info.ancient || 0) * 100)}% / ${((info.primal || 0) * 100).toFixed(1)}%`, 'up'),
+      // 倍率は小数 2 桁まで・末尾の 0 は出さない（×1・×1.5・×1.25）。割合も同じ（8%・0.5%）
+      cell('経験値', `×${xm(info.xp)}`, 'up'), cell('ゴールド', `×${xm(info.gold)}`, 'up'), cell('ドロップ数', `×${xm(info.loot)}`, 'up'), cell('レア発見率', `+${fmtPct(info.mf)}`, 'up'),
+      cell('敵のライフ', `×${fmt(info.life, { dec: 1 })}`, 'down'), cell('敵の攻撃', `×${fmt(info.dmg, { dec: 1 })}`, 'down'), cell('耐性', info.resPenalty ? `-${info.resPenalty}` : 'なし', 'down'), cell('覚醒 / 極致', `${fmtPct((info.ancient || 0) * 100)} / ${fmtPct((info.primal || 0) * 100)}`, 'up'),
     ]),
     h('div.hint', `敵のレベル ${cur ? `${info.level}〜` : '地域どおり'}。魔境 ${roman(Math.min(BAL.MAX_TORMENT, max))} まで解放（今の段で章のボスを倒すと次の段が開く）。魔境では地域のボスが門の欠片を落とします。`),
     h(`label.chk${ws.canTormentAuto() ? '' : '.dim'}`, [h('input', { type: 'checkbox', checked: ws.tormentAutoOn() || undefined, disabled: !ws.canTormentAuto() || undefined, onchange: (e) => { ws.setTormentAuto(e.target.checked); ui.renderPanel(); } }), ' 自動で最適な段（2 分ごとに、撃破のペースが 0.9 体/秒以上で倒れなければ 1 段上げ、0.35 体/秒未満か 2 回倒れたら 1 段下げる）', ws.canTormentAuto() ? '' : '　※ 魂の祭壇「魔境の見極め」で解放（祭壇の ON/OFF と同じスイッチ）']),
@@ -118,8 +125,8 @@ function powerRow(g, z) {
   const est = ws.estDps(z.id);
   return h('div.wm-power', [
     h('div', [h('b', fmt(adv.power)), '今の戦力']),
-    h('div', [h('b', fmt(adv.rec)), `推奨の戦力（敵 Lv ${adv.level}）`]),
-    h('div', [h(`b.wm-adv.${adv.cls}`, `${adv.label}${adv.weak ? `（${adv.weak}不足）` : ''}`), `ボス必要 DPS ${fmt(nd.need)} ／ 今 ${fmt(est)}　耐久 ${Math.round(adv.ehpRatio * 100)}%`]),
+    h('div', [h('b', fmt(adv.rec)), `推奨の戦力（敵 Lv\u00a0${adv.level}）`]),
+    h('div', [h(`b.wm-adv.${adv.cls}`, [adv.label, adv.weak ? h('span.wm-weak', `（${adv.weak}不足）`) : null]), `ボス必要 DPS ${fmt(nd.need)} ／ 今 ${fmt(est)}　耐久 ${ratioText(adv.ehpRatio)}`]),
   ]);
 }
 
@@ -142,7 +149,7 @@ function zoneRow(ui, z, act) {
   append(row, [
     h('div.wm-zn', [
       h('span', [h('b', z.name), w.cleared[z.id] ? h('span.ok', '踏破') : null, cur ? h('span.ok', '　いまここ') : null]),
-      h('span', [h('span.dim', `Lv ${L}〜${L + 1}${w.torment ? '' : `・推奨 Lv ${adv.recLevel}`}　`), h(`span.wm-adv.${adv.cls}`, { title: `火力 ${Math.round(adv.dpsRatio * 100)}%・耐久 ${Math.round(adv.ehpRatio * 100)}%（ボスに対して）` }, `${adv.label}${adv.weak ? `（${adv.weak}）` : ''}`)]),
+      h('span', [h('span.dim', `Lv ${L}〜${L + 1}${w.torment ? '' : `・推奨 Lv ${adv.recLevel}`}　`), h(`span.wm-adv.${adv.cls}`, { title: `火力 ${ratioText(adv.dpsRatio)}・耐久 ${ratioText(adv.ehpRatio)}（ボスに対して）` }, `${adv.label}${adv.weak ? `（${adv.weak}）` : ''}`)]),
     ]),
     h('div.wm-zdesc', z.desc || ''),
     h('div.wm-pbar', { title: `到達 ${maxS} / ${STAGES_PER_ZONE}` }, h('i', { style: { width: `${(Math.min(maxS, STAGES_PER_ZONE) / STAGES_PER_ZONE) * 100}%` } })),

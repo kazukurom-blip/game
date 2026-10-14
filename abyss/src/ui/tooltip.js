@@ -117,13 +117,19 @@ class Tooltip {
     }
     return this.el;
   }
-  show(content, rect) {
+  /** anchor: 説明の元の要素。窓が描き直されて元の要素が消えたら、check() で隠す（mouseleave が来ないので） */
+  show(content, rect, anchor = null) {
     const el = this.ensure();
+    this.anchor = anchor;
     el.innerHTML = '';
     el.append(content);
     el.style.display = 'block';
+    el.style.transform = '';
     const vw = window.innerWidth; const vh = window.innerHeight;
-    const tw = el.offsetWidth; const th = el.offsetHeight;
+    let tw = el.offsetWidth; let th = el.offsetHeight;
+    // 画面より背の高い説明（横向きのスマホ・低い窓）は、縮めて全部見せる（スクロールできない物なので）
+    const k = th > vh - 16 ? Math.max(0.5, (vh - 16) / th) : 1;
+    if (k < 1) { el.style.transformOrigin = '0 0'; el.style.transform = `scale(${k})`; tw *= k; th *= k; }
     let x = rect.right + 10; let y = rect.top;
     if (x + tw > vw - 8) x = rect.left - tw - 10;
     if (x < 8) x = Math.max(8, (vw - tw) / 2);
@@ -131,14 +137,25 @@ class Tooltip {
     if (y < 8) y = 8;
     el.style.left = `${x}px`; el.style.top = `${y}px`;
   }
-  hide() { if (this.el) this.el.style.display = 'none'; }
+  hide() { this.anchor = null; if (this.el) this.el.style.display = 'none'; }
+  /** 毎フレーム（ui.update）: 元の要素が画面から消えていたら隠す */
+  check() { if (this.anchor && !this.anchor.isConnected) this.hide(); }
 }
 export const tooltip = new Tooltip();
 
+// 最後に使われた指し方（mouse / touch / pen）。指で触ったときに出る互換の mouseenter では説明を出さない
+// （スマホで説明が出たまま残る・iPhone で 1 回目の指が「乗せる」扱いになって押せないのを防ぐ。スマホは押すと窓が開く）
+let lastPointer = 'mouse';
+if (typeof window !== 'undefined' && window.addEventListener) {
+  const note = (e) => { if (e.pointerType) lastPointer = e.pointerType; };
+  window.addEventListener('pointerover', note, true);
+  window.addEventListener('pointerdown', note, true);
+}
+
 /** el にマウスを乗せたら make() の中身を出す */
 export function attachTip(el, make) {
-  const show = () => { const c = make(); if (c) tooltip.show(c, el.getBoundingClientRect()); };
-  el.addEventListener('mouseenter', show);
+  const show = () => { const c = make(); if (c) tooltip.show(c, el.getBoundingClientRect(), el); };
+  el.addEventListener('mouseenter', () => { if (lastPointer !== 'touch') show(); });
   el.addEventListener('mouseleave', () => tooltip.hide());
   // キーボードで移ってきたときも出す（マウスのクリックで付いたフォーカスでは出さない）
   el.addEventListener('focus', () => { if (el.matches(':focus-visible')) show(); });

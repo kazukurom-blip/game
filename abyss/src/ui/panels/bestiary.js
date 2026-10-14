@@ -165,7 +165,7 @@ function renderDrops(ui, el) {
   const qty = H?.quantity || 0;
   el.append(h('div.mt-cards', [
     card('レア発見率', fmtPct(mf), `実効 ${fmtPct(BAL.mfEffective(mf))}（多いほど逓減）`),
-    card('アイテム発見数', `+${fmtPct(qty)}`, `魔境の数 ×${(diff.loot || 1).toFixed(2)}`),
+    card('アイテム発見数', `+${fmtPct(qty)}`, `魔境の倍率 ×${Number((diff.loot || 1).toFixed(2))}`),
     card('魔境', torment ? roman(torment) : 'なし', torment ? `覚醒 ${fmtPct((diff.ancient || 0) * 100)}・極致 ${fmtPct((diff.primal || 0) * 100, 2)}` : `覚醒 ${fmtPct((diff.ancient ?? 0.08) * 100)}（レジェンダリー以上）`),
   ]));
   const odds = Object.fromEntries(RANKS.map(([rk]) => [rk, sys.rarityOdds({ mf, rank: rk, torment })]));
@@ -233,7 +233,7 @@ const CSS = `
 .bs-mon { position: relative; border: 1px solid var(--line); border-radius: 8px; padding: 5px 5px 6px; background: radial-gradient(circle at 50% 35%, #2a2230, #110e14 75%); text-align: center; cursor: pointer; display: flex; flex-direction: column; gap: 3px; align-items: center; min-width: 0; }
 .bs-mon:hover { filter: brightness(1.2); }
 .bs-mon.boss { border-color: #6a3a2a; background: radial-gradient(circle at 50% 35%, #3a2020, #110e14 75%); }
-.bs-mon .mt-bar { width: 100%; height: 10px; } .bs-mon .mt-bar > span { font-size: 8.5px; line-height: 9px; }
+.bs-mon .mt-bar { width: 100%; height: 12px; } .bs-mon .mt-bar > span { font-size: 9.5px; line-height: 11px; }
 .bs-pic { height: 64px; display: flex; align-items: center; justify-content: center; }
 .bs-mon.unknown .bs-pic canvas, .bs-big.unknown canvas { filter: brightness(0) drop-shadow(0 0 2px #6a5a7a); opacity: .85; }
 .bs-nm { font-size: 11.5px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }

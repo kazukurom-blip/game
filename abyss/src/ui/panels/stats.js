@@ -1,7 +1,7 @@
 // 記録の窓: 一生の記録・この周回の記録・能力の詳しい内訳（どこから来た効果か）・スキル別のダメージ（DPS の内訳）。担当: メタ担当。
 
 import { h, injectCss } from '../dom.js';
-import { fmt, fmtPct, fmtTime, roman } from '../../engine/format.js';
+import { fmt, fmtInt, fmtPct, fmtTime, roman } from '../../engine/format.js';
 import { STATS, statDef, describeMod } from '../../data/stats.js';
 import { RARITIES } from '../../data/rarity.js';
 import { SLOT_NAMES } from '../../data/items.js';
@@ -43,12 +43,12 @@ function renderRecord(ui, el) {
   el.append(h('div.mt-cards', [
     card('遊んだ時間', fmtTime(st.playTime, true), `放置 ${fmtTime(s.offlineSec, true)}`),
     card('倒した敵', fmt(s.kills), `1 分あたり ${(g.sys.offline.rates().kills * 60).toFixed(0)} 体`),
-    card('稼いだゴールド', fmt(s.goldEarned), `いま ${fmt(st.meta.gold)}`),
-    card('最大の一撃', fmt(s.highestHit || 0)),
+    card('稼いだゴールド', fmtInt(s.goldEarned), `いま ${fmtInt(st.meta.gold)}`),
+    card('最大の一撃', fmtInt(s.highestHit || 0)),
   ]));
   if (st.meta.rebirths > 0 || p?.unlocked) {
     el.append(h('h3.sec-title', 'この周回'));
-    el.append(kv([['時間', fmtTime(lifeSec, true)], ['倒した敵', fmt(lifeKills)], ['最高のエリア Lv', String(p?.life?.maxLevel || 0)], ['稼いだゴールド', fmt(s.goldEarned - (p?.life?.gold0 || 0))]]));
+    el.append(kv([['時間', fmtTime(lifeSec, true)], ['倒した敵', fmt(lifeKills)], ['最高のエリア Lv', String(p?.life?.maxLevel || 0)], ['稼いだゴールド', fmtInt(s.goldEarned - (p?.life?.gold0 || 0))]]));
   }
   const cols = h('div.st-cols');
   cols.append(h('div', [h('h3.sec-title', '戦い'), kv([

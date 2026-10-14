@@ -3,7 +3,7 @@
 // 記録は遊んでいる間だけ（セーブしない）。
 
 import { h, clear, spriteImg } from './dom.js';
-import { fmt, fmtTime } from '../engine/format.js';
+import { fmt, fmtInt, fmtTime } from '../engine/format.js';
 import { RARITY } from '../data/rarity.js';
 import { itemName } from '../game/items.js';
 import { assets } from '../render/assets.js';
@@ -100,7 +100,7 @@ export class Dock {
     on('levelUp', (e) => this.addLog(`レベル ${e.level} になった`, 'level'));
     on('paragonUp', (e) => this.addLog(`アビスLv ${e.level} になった`, 'level'));
     on('skillLearned', (e) => { if (!e.quiet && SKILL[e.id]) this.addLog(`スキル「${SKILL[e.id].name}」を覚えた`, 'level'); });
-    on('achievement', (e) => { if (e.def) this.addLog(`実績「${e.def.name}」`, 'good'); });
+    on('achievement', (e) => { if (e.def) this.addLog(`実績「${e.def.name}」を達成`, 'good'); });
     on('eggFound', (e) => this.addLog(`${e.name || '卵'}を手に入れた`, 'good'));
     on('autoEquip', (e) => { if (e.item) this.addLog(`自動で装備: ${itemName(e.item)}`, 'good'); });
     on('goblinSpawn', (e) => this.addLog(`${MONSTER[e.unit?.defId]?.name || 'ため込み屋'}が現れた`, 'gob'));
@@ -196,7 +196,7 @@ export class Dock {
       right.append(h('div.dg-h', '手段'));
       g.hints.forEach((x, i) => right.append(h('button.dg-hint', { type: 'button', onclick: () => ui.openPanel(x.panel) }, [h('span.dg-no', String(i + 1)), x.text])));
     }
-    if (g.unlock) right.append(h('div.dg-unlock', [h('span.fi-tag', '次に開く機能'), ' ', h('b', g.unlock.name), ` … ${g.unlock.when}`]));
+    if (g.unlock) right.append(h('div.dg-unlock', [h('span.fi-tag', '次に開く機能'), ' ', h('b', g.unlock.name), `（条件: ${g.unlock.when}）`]));
     if (!g.hints.length && !g.unlock) right.append(h('div.dim.small', 'いまは放置で十分です。'));
     b.append(h('div.dock-goal', [left, right]));
   }
@@ -244,7 +244,7 @@ export class Dock {
     const cards = [
       ['撃破', `${fmt(p.killsMin, { dec: p.killsMin < 10 ? 1 : 0 })}`, '体 / 分'],
       ['経験値', fmt(p.xpH), '/ 時'],
-      ['ゴールド', fmt(p.goldH), 'G / 時'],
+      ['ゴールド', fmtInt(p.goldH), 'G / 時'],
       ['ドロップ', fmt(p.dropsH, { dec: 0 }), '個 / 時'],
       ['エリート', fmt(p.elitesH, { dec: 0 }), '体 / 時'],
       [lv >= 100 ? '次のアビスLv' : `Lv ${lv + 1} まで`, p.levelEta ? fmtTime(p.levelEta, true) : '-', '目安'],

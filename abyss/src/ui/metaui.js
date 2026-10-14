@@ -7,7 +7,7 @@ import { hudHooks } from './hud.js';
 import { MATERIAL } from '../data/materials.js';
 import { fmt } from '../engine/format.js';
 import { assets } from '../render/assets.js';
-import { PET } from '../data/pets.js';
+import { PET, PET_BAL } from '../data/pets.js';
 import { MONSTER, FAMILIES } from '../data/monsters.js';
 import { ensurePetPainter, drawPetUnit } from './petart.js';
 import { sceneHooks } from '../render/scene.js';
@@ -86,7 +86,7 @@ export function bindMetaUi(ui) {
   on('automationUnlocked', (e) => ui.toast(`⚙ 自動化「${e.name}」を解放した（転生の窓の「自動化」で ON/OFF）`, 'good'));
   on('eggFound', (e) => ui.toast(`🥚 ${e.name}${e.n > 1 ? ` ×${e.n}` : ''} を手に入れた！ ペットの窓で孵卵器へ`, 'good.mtegg'));
   on('eggReady', (e) => { if (!ui.game.state.meta.unlocks.autoHatch) ui.toast(`🥚 ${e.name || '卵'}が孵ります！ ペットの窓で孵そう`, 'good.mtegg'); });
-  on('petHatched', (e) => ui.toast(e.dup ? (e.stars ? `🐾 ${e.name} が重なった　進化 ★${e.stars}` : `🐾 ${e.name} が重なった　経験値 +`) : `🐾 ${e.name} が生まれた！`, e.rarity === 'legendary' ? 'r-legendary' : 'good'));
+  on('petHatched', (e) => ui.toast(e.dup ? (e.stars ? `🐾 ${e.name} が重なった　進化 ★${e.stars}` : `🐾 ${e.name} が重なった　経験値 +${fmt(PET_BAL.DUP_XP)}`) : `🐾 ${e.name} が生まれた！`, e.rarity === 'legendary' ? 'r-legendary' : 'good'));
   on('petLevel', (e) => ui.toastOnce(`pl-${e.id}`, `🐾 ${e.name} が Lv ${e.lvl} になった`, 'good'));
   on('bountyDone', (e) => ui.toast(`📜 ${e.name} を達成！ 日課の窓で受け取れます`, 'good'));
   on('loginClaim', (e) => ui.toast(`🎁 ログインの贈り物（${e.day} 日目）を受け取った`, 'good'));
