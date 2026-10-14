@@ -374,9 +374,13 @@ export class Scene {
     let frame = 0;
     if (frames > 1) frame = Math.floor(this.t * (s.fps || 10)) % frames;
     ctx.save();
-    ctx.translate(x + (s.ox || 0) * scale, y + (s.oy || 0) * scale);
+    // assets.draw と同じ順: 動きの回転・向き → 差し替え画像の補正（ずらし・回転。絵の向きと一緒に回る）
+    ctx.translate(x, y);
     if (rot) ctx.rotate(rot);
-    if (flip !== !!s.flip) ctx.scale(-1, 1);
+    if (flip) ctx.scale(-1, 1);
+    if (s.ox || s.oy) ctx.translate((s.ox || 0) * scale, (s.oy || 0) * scale);
+    if (s.rot) ctx.rotate(s.rot);
+    if (s.flip) ctx.scale(-1, 1);
     if (pad) ctx.drawImage(img, -w * s.ax - pad * kx, -h * s.ay - pad * ky, img.width * kx, img.height * ky);
     else ctx.drawImage(img, frame * fw, 0, fw, img.height, -w * s.ax, -h * s.ay, w, h);
     ctx.restore();

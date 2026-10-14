@@ -1,7 +1,8 @@
 // 戦闘の演出（コードで描くエフェクト）。scene.js から使い、sceneHooks（projectile / area / fx / drawFx）にも登録する。
 //
 // ・加算合成の光の部品（光の玉・輪・斬撃・尾・火花・炎・氷の欠片）をキャッシュしておき、毎フレームは drawImage だけで描く。
-// ・差し替え画像（fx.<skill>.proj/hit/area/swing, fx.enemy.*）があればそれを描き、無ければコードの演出（assets.isCustom で分ける）。
+// ・差し替え画像（fx.<skill>.proj/hit/area/swing/chain/beam/buff/aura/summon/totem/trap/trail/curse, fx.enemy.*, fx.pet.*）があればそれを描き、
+//   無ければコードの演出（assets.isCustom で分ける。customId・customFx）。置き方は画像の窓の試し表示（ui/panels/assets_preview.js）と同じ。
 // ・combat.js が出す出来事（fx）: dmg hit swing nova pulse chain death shake gold loot levelup summon buff boss cast text heroDeath revive
 //   さらに戦闘担当が足す beam leap dash ult crit whirl aura trap totem meteor orbit wall wave curse barrier shield teleport telegraph
 //   explode heal spawn … も受け取る。知らない種類も、持っている値（x,y / unit / pts / x2）から見た目を決めて必ず何か出す。
@@ -385,7 +386,11 @@ export class FxSystem {
   // ---------------- 弾
   drawProjectile(ctx, pr, x, y) {
     const enemy = pr.team !== 'hero';
-    if (pr.art && assets.isCustom(pr.art)) { const ang = Math.atan2(pr.vy * 2, pr.vx); assets.draw(ctx, pr.art, x, y, { rot: ang, t: pr.t, blend: 'lighter' }); return true; }
+    if (pr.art && assets.isCustom(pr.art)) {
+      // 差し替え画像は枠の向き（facing）で描かれている: 敵の弾（fx.enemy.*）は左向き、主人公の弾は右向き。飛ぶ向きとの差だけ回す
+      const ang = Math.atan2(pr.vy * 2, pr.vx) - (assets.spec(pr.art)?.facing === 'left' ? Math.PI : 0);
+      assets.draw(ctx, pr.art, x, y, { rot: ang, t: pr.t, blend: 'lighter' }); return true;
+    }
     const ang = Math.atan2(pr.vy * 2, pr.vx);
     const def = pr.p ? SKILL[pr.p.id] : null;
     const cls = def?.cls || (pr.src?.kind === 'minion' ? 'minion' : null);
@@ -482,12 +487,19 @@ export class FxSystem {
         ctx.restore();
         if ((a.art || '').includes('zap')) skyBolt(ctx, x, y, k, E, true);
       } else {
+        // 差し替え画像の罠: 置いてある間ずっと地面に置く
+        const trapId = a.kind === 'trap' ? customId(a.p?.id, 'trap') : null;
+        if (trapId) { ctx.save(); ctx.globalAlpha = Math.min(1, 0.4 + k); assets.draw(ctx, trapId, x, y, { t: a.t }); ctx.restore(); return true; }
         ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.35 * k;
         const ring = atlas('ring', E.mid); if (ring) ctx.drawImage(ring, x - rr, y - rr * 0.35, rr * 2, rr * 0.7);
         ctx.restore();
-        // 空から降ってくる物
+        // 空から降ってくる物（差し替えの弾の絵があればそれを落とす）
         const beh = def?.behavior;
-        if (!(a.art && assets.isCustom(a.art)) && (beh === 'rain' || beh === 'meteor' || a.fall)) fallFrom(ctx, x, y, k, el, def, E, a);
+        if (beh === 'rain' || beh === 'meteor' || a.fall) {
+          const projId = customId(a.p?.id, 'proj');
+          if (projId) { const fp = fallPose(x, y, k); ctx.save(); ctx.globalAlpha = fp.alpha; assets.draw(ctx, projId, fp.x, fp.y, { rot: fp.rot, t: a.t }); ctx.restore(); }
+          else if (!(a.art && assets.isCustom(a.art))) fallFrom(ctx, x, y, k, el, def, E, a);
+        }
       }
       return true;
     }
@@ -549,6 +561,11 @@ function projKind(def, pr) {
 }
 
 /** 空から降る（矢の雨・隕石・氷柱・雷） */
+/** 差し替えの弾の絵（右向き）を斜め上から (x, y) へ落とす位置と向き（fallFrom と同じ道筋） */
+function fallPose(x, y, k) {
+  const h0 = 420; const kk = 1 - k * k;
+  return { x: x + kk * 120, y: y - h0 * kk, rot: Math.atan2(h0, -120), alpha: Math.min(1, k * 6) };
+}
 function fallFrom(ctx, x, y, k, el, def, E, a) {
   const h0 = 420;
   const fy = y - h0 * (1 - k * k);
@@ -662,6 +679,43 @@ function slashArc(fx, x, wy, r, el, dir, o = {}) {
   });
 }
 
+// ---------------- 差し替え画像の演出（fx.<スキル>.<部品>。画像の窓で入れた物）。部品の置き方は画像の窓の試し表示（assets_preview.js）と同じ
+/** スキルの部品の差し替え画像があればその枠 ID（parts を順に探す）。無ければ null */
+function customId(skill, ...parts) {
+  if (!skill) return null;
+  for (const p of parts) { const id = `fx.${skill}.${p}`; if (assets.isCustom(id)) return id; }
+  return null;
+}
+/** 差し替え画像を life 秒出す。pose(k, f, cam) → { x, y, w?, h?, scale?, rot?, alpha?, flip? }（null なら描かない） */
+function customFx(fx, id, life, pose, o = {}) {
+  fx.add(life, (ctx, k, f, cam) => {
+    const p = pose(k, f, cam);
+    if (!p) return;
+    ctx.globalAlpha = Math.max(0, Math.min(1, p.alpha ?? 1));
+    assets.draw(ctx, id, p.x, p.y, { w: p.w, h: p.h, scale: p.scale, rot: p.rot, flip: p.flip, t: f.t });
+  }, o);
+}
+/** 範囲の差し替え画像（広がって消える） */
+function customArea(fx, id, x, y, r) {
+  const wy = fx.wy(y);
+  fx.add(0.4, (ctx, k, f, cam) => { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 1 - k; const s = r * 2 * (0.6 + 0.4 * k); assets.draw(ctx, id, x - cam, wy - r * 0.2, { w: s, h: s, t: k * 0.4 }); });
+}
+/** 範囲の技の「当たった瞬間」の差し替え画像を、範囲の中の敵（5 体まで）に出す */
+function hitsNear(fx, e, r) {
+  const id = customId(e.skill, 'hit');
+  const us = id ? fx.scene.game?.combat?.units : null;
+  if (!us) return;
+  let n = 0;
+  for (const u of us) {
+    if (n >= 5) break;
+    // その一撃で倒れた敵（倒れてすぐ）にも出す
+    if ((u.dead && (u.deadT || 0) > 0.3) || u.team === 'hero' || Math.abs(u.x - e.x) > r || Math.abs((u.y || 0) - (e.y || 0)) > r * 0.6) continue;
+    n++;
+    const x = u.x; const wy = fx.wy(u.y, 50 * (u.size || 1));
+    customFx(fx, id, 0.3, (k, f, cam) => ({ x: x - cam, y: wy, scale: 0.6 + k * 0.6, alpha: 1 - k }));
+  }
+}
+
 const HANDLERS = {
   dmg(fx, e) {
     fx.addNumber(e);
@@ -687,6 +741,9 @@ const HANDLERS = {
   swing(fx, e) {
     const src = e.src; const dir = src && src.x > e.x ? -1 : 1;
     const wy = fx.wy(e.y, 55);
+    // 近接の当たった瞬間（差し替え画像があるときだけ。コードの演出は斬撃と火花でまかなう）
+    const hitId = !e.enemy ? customId(e.skill, 'hit') : null;
+    if (hitId) { const x = e.x; customFx(fx, hitId, 0.3, (k, f, cam) => ({ x: x - cam, y: wy, scale: 0.6 + k * 0.6, alpha: 1 - k })); }
     const id = e.skill ? `fx.${e.skill}.swing` : null;
     if (id && assets.isCustom(id)) { const x = e.x; fx.add(0.24, (ctx, k, f, cam) => { ctx.globalAlpha = 1 - k; assets.draw(ctx, id, x - cam, wy, { scale: 0.8 + k * 0.4, t: k * 0.24, flip: dir < 0 }); }); return; }
     if (e.enemy) {
@@ -707,6 +764,10 @@ const HANDLERS = {
     const el = elFor(e); const r = e.r || 150; const E = elOf(el);
     const id = e.skill ? `fx.${e.skill}.area` : null;
     const x = e.x; const wy = fx.wy(e.y);
+    hitsNear(fx, e, r);
+    // 跳んで着地する技（land）は、振りの軌跡の差し替え画像も着地点に出す
+    const landSwing = e.land ? customId(e.skill, 'swing') : null;
+    if (landSwing) customFx(fx, landSwing, 0.26, (k, f, cam) => ({ x: x - cam, y: fx.wy(e.y, 55), scale: 0.8 + k * 0.4, alpha: 1 - k }));
     if (id && assets.isCustom(id)) { fx.add(0.4, (ctx, k, f, cam) => { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 1 - k; const s = r * 2 * (0.6 + 0.4 * k); assets.draw(ctx, id, x - cam, wy - r * 0.2, { w: s, h: s, t: k * 0.4 }); }); return; }
     const def = e.skill ? SKILL[e.skill] : null;
     if (def && (def.tags || []).includes('attack') && (def.tags || []).includes('melee') || def?.cls === 'warrior') {
@@ -740,14 +801,18 @@ const HANDLERS = {
     const el = elFor(e); const r = e.r || 100;
     if (e.team !== 'hero') {
       const art = e.art || '';
+      // 敵の攻撃の差し替え画像（fx.enemy.slam・meteor・nova… 無ければ親の fx.enemy）。続く範囲（毒の沼など）は drawArea が描く
+      if (art && !persistent && assets.isCustom(art)) { customArea(fx, art, e.x, e.y, r); if (art.includes('blast')) fx.scene.addTrauma(0.2); return; }
       if (art.includes('slam')) { explosion(fx, e.x, e.y, r, 'phys'); crack(fx, e.x, e.y, r); }
       else if (art.includes('zap')) { explosion(fx, e.x, e.y, r * 0.8, 'lightning'); fx.add(0.15, (ctx, k, f, cam) => skyBolt(ctx, e.x - cam, fx.wy(e.y), 1, EL.lightning, false)); }
       else if (art.includes('blast')) { explosion(fx, e.x, e.y, r, 'fire', { big: 1.3 }); fx.scene.addTrauma(0.2); }
       else if (!persistent) explosion(fx, e.x, e.y, r * 0.8, el === 'phys' ? 'enemy' : el);
       return;
     }
+    hitsNear(fx, e, r);
     if (persistent) { if (rnd() < 0.5) impact(fx, e.x + (rnd() - 0.5) * r, fx.wy(e.y, 10), el, 0.5); return; }
-    const id = e.skill ? `fx.${e.skill}.area` : null;
+    // 範囲の絵: 出来事の art（ペットの手助け fx.pet.area・fx.pet.heal など）→ スキルの範囲 fx.<スキル>.area
+    const id = e.art && assets.isCustom(e.art) ? e.art : e.skill ? `fx.${e.skill}.area` : null;
     if (id && assets.isCustom(id)) { const x = e.x; const wy = fx.wy(e.y); fx.add(0.4, (ctx, k, f, cam) => { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 1 - k; assets.draw(ctx, id, x - cam, wy - r * 0.2, { w: r * 2, h: r * 2, t: k * 0.4 }); }); return; }
     explosion(fx, e.x, e.y, r, el);
     if (el === 'fire' && r >= 90) fx.scene.addTrauma(0.08);
@@ -756,6 +821,19 @@ const HANDLERS = {
     const el = elFor(e); const E = elOf(el);
     const pts = (e.pts || []).map((p) => ({ x: p.x, wy: fx.wy(p.y, p.z ?? 50) }));
     if (pts.length < 2) return;
+    // 差し替え画像: 連鎖の稲妻（左端から右へ伸びる絵）を区間ごとに引き伸ばす・当たった所に「当たった瞬間」
+    const chainId = customId(e.skill, 'chain'); const hitId = customId(e.skill, 'hit');
+    if (hitId) for (const p of pts.slice(1)) customFx(fx, hitId, 0.3, (k, f, cam) => ({ x: p.x - cam, y: p.wy, scale: 0.6 + k * 0.6, alpha: 1 - k }));
+    if (chainId) {
+      const life = e.small ? 0.16 : 0.3;
+      for (let i = 0; i < pts.length - 1; i++) {
+        const a = pts[i]; const b = pts[i + 1];
+        const len = Math.max(8, Math.hypot(b.x - a.x, b.wy - a.wy)); const rot = Math.atan2(b.wy - a.wy, b.x - a.x);
+        const hh = assets.spec(chainId)?.h || 60;
+        customFx(fx, chainId, life, (k, f, cam) => ({ x: a.x - cam, y: a.wy, w: len, h: hh * (e.small ? 0.6 : 1), rot, alpha: 1 - k }));
+      }
+      return;
+    }
     let seed = []; let lastT = -1;
     fx.add(e.small ? 0.16 : 0.3, (ctx, k, f, cam) => {
       if (f.t - lastT > 0.035 || !seed.length) { lastT = f.t; seed = []; for (let i = 0; i < pts.length - 1; i++) { const a = pts[i]; const b = pts[i + 1]; const seg = []; const n = Math.max(3, Math.round(Math.hypot(b.x - a.x, b.wy - a.wy) / 22)); for (let j = 0; j <= n; j++) { const tt = j / n; seg.push(a.x + (b.x - a.x) * tt + (j && j < n ? (rnd() - 0.5) * 18 : 0), a.wy + (b.wy - a.wy) * tt + (j && j < n ? (rnd() - 0.5) * 18 : 0)); } seed.push(seg); } }
@@ -772,6 +850,16 @@ const HANDLERS = {
     const p = pos(fx, e); const tg = target(e) || { x: p.x + 500 * ((e.unit?.face || 1) >= 0 ? 1 : -1), y: p.y };
     const el = elFor(e); const E = elOf(el); const wdt = e.w || e.width || 18;
     const y0 = fx.wy(p.y, e.z ?? 60); const y1 = fx.wy(tg.y, e.tz ?? 50);
+    // 差し替え画像: 光線（左端から右へ伸びる絵）を手元から先まで引き伸ばす・先に「当たった瞬間」
+    const beamId = customId(e.skill, 'beam');
+    if (beamId) {
+      const dur = e.dur || 0.28; const len = Math.max(8, Math.hypot(tg.x - p.x, y1 - y0)); const rot = Math.atan2(y1 - y0, tg.x - p.x);
+      const hh = Math.max(assets.spec(beamId)?.h || 80, wdt * 2);
+      customFx(fx, beamId, dur, (k, f, cam) => ({ x: p.x - cam, y: y0, w: len, h: hh, rot, alpha: Math.min(1, f.t * 12) * (k > 0.85 ? (1 - k) / 0.15 : 1) }));
+      const hitId = customId(e.skill, 'hit');
+      if (hitId) customFx(fx, hitId, Math.min(dur, 0.6), (k, f, cam) => ({ x: tg.x - cam, y: y1, scale: 0.7 + 0.2 * Math.sin(f.t * 30), alpha: 1 - k * k }));
+      return;
+    }
     fx.add(e.dur || 0.28, (ctx, k, f, cam) => {
       const a = Math.atan2(y1 - y0, tg.x - p.x); const len = Math.hypot(tg.x - p.x, y1 - y0);
       ctx.globalCompositeOperation = 'lighter'; ctx.translate(p.x - cam, y0); ctx.rotate(a);
@@ -847,6 +935,13 @@ const HANDLERS = {
   },
   summon(fx, e) {
     const u = e.unit; const x = e.x ?? u?.x; const wy = fx.wy(e.y ?? u?.y ?? 0);
+    // 差し替え画像: 呼び出す魔法陣（トーテム・砲台の技はその絵）を足元に
+    const sid = customId(e.skill || u?.skill, 'summon', 'totem');
+    if (sid) {
+      customFx(fx, sid, 0.9, (k, f, cam) => ({ x: x - cam, y: wy, scale: 0.7 + 0.3 * Math.min(1, k * 2.5), alpha: k < 0.15 ? k / 0.15 : 1 - (k - 0.15) / 0.85 }), { under: true });
+      if (u) fx.scene.visOf(u).spawnT = 0;
+      return;
+    }
     const def = u?.skill ? SKILL[u.skill] : null; const col = def ? (ELEMENT_COLORS[def.element] || '#b080ff') : '#b080ff';
     const rc = def?.cls === 'necromancer' || !def ? '#b47cff' : col;
     const rune = atlas('rune', rc);
@@ -858,6 +953,9 @@ const HANDLERS = {
   buff(fx, e) {
     const u = e.unit; if (!u) return;
     const el = elFor(e); const E = elOf(el);
+    // 差し替え画像: 体を包む強化のオーラ（足元が基準）
+    const bid = customId(e.skill, 'buff');
+    if (bid) { customFx(fx, bid, 0.9, (k, f, cam) => ({ x: fx.scene.vx(u) - cam, y: fx.wy(u.y), scale: u.size || 1, alpha: k < 0.15 ? k / 0.15 : 1 - (k - 0.15) / 0.85 })); return; }
     fx.add(0.7, (ctx, k, f, cam) => { const x = fx.scene.vx(u) - cam; const y = fx.wy(u.y); ctx.globalCompositeOperation = 'lighter'; const ring = atlas('ring', E.mid); for (let i = 0; i < 3; i++) { const kk = clamp(k * 1.4 - i * 0.18, 0, 1); if (kk <= 0 || kk >= 1) continue; ctx.globalAlpha = 1 - kk; const s = 46 + 10 * i; if (ring) ctx.drawImage(ring, x - s, y - 10 - kk * 150 - s * 0.3, s * 2, s * 0.6); } });
     fx.burst(u.x, fx.wy(u.y, 60), E.mid, 16, 80, { kind: 'spark', s: 4, life: 0.8, g: -220, jx: 50, jy: 30 });
   },
@@ -904,22 +1002,75 @@ const HANDLERS = {
   dash(fx, e) {
     const p = pos(fx, e); const tg = target(e) || { x: p.x + 200 * ((e.unit?.face || 1) >= 0 ? 1 : -1), y: p.y };
     const E = elOf(elFor(e));
+    // 差し替え画像: 突進の残像（右向きの絵）を、出発点から着いた所まで伸ばす
+    const tid = customId(e.skill, 'trail');
+    if (tid) {
+      const x0 = e.x0 ?? p.x; const x1 = e.x1 ?? tg.x; const y0 = fx.wy(e.y0 ?? p.y, 60);
+      const len = Math.max(60, Math.abs(x1 - x0)); const hh = assets.spec(tid)?.h || 90; const back = x1 < x0;
+      customFx(fx, tid, 0.3, (k, f, cam) => ({ x: x1 - cam, y: y0, w: len / 0.8, h: hh, flip: back, alpha: 1 - k }));
+      return;
+    }
     fx.add(0.3, (ctx, k, f, cam) => { ctx.globalCompositeOperation = 'lighter'; const st = atlas('streak', E.mid); if (!st) return; const y0 = fx.wy(p.y, 60); const len = tg.x - p.x; ctx.globalAlpha = 1 - k; ctx.translate(p.x - cam, y0); ctx.scale(Math.sign(len) || 1, 1); for (let i = 0; i < 3; i++) ctx.drawImage(st, 0, -40 + i * 30, Math.abs(len), 12); });
     fx.burst(p.x, fx.wy(p.y), '#9a8a74', 6, 100, { kind: 'smoke', add: false, s: 10, s1: 18, life: 0.5, g: -10, a: 0.4 });
   },
   teleport(fx, e) { const p = pos(fx, e); const tg = target(e); const E = elOf(elFor(e)); fx.burst(p.x, fx.wy(p.y, 60), E.mid, 16, 160, { kind: 'glow', s: 5, life: 0.5, g: 0 }); if (tg) fx.burst(tg.x, fx.wy(tg.y, 60), E.mid, 16, 160, { kind: 'glow', s: 5, life: 0.5, g: 0 }); },
-  whirl(fx, e) { const p = pos(fx, e); HANDLERS.nova(fx, { ...e, x: p.x, y: p.y, r: e.r || 140, skill: e.skill || null, small: true }); },
-  aura(fx, e) { const u = e.unit; const p = pos(fx, e); const E = elOf(elFor(e)); const r = e.r || 160; fx.add(0.6, (ctx, k, f, cam) => { const x = (u ? fx.scene.vx(u) : p.x) - cam; ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = (1 - k) * 0.7; const ring = atlas('ring', E.mid); const s = r * (0.6 + 0.4 * k); if (ring) ctx.drawImage(ring, x - s, fx.wy(u ? u.y : p.y) - s * 0.33, s * 2, s * 0.66); }, { under: true }); },
-  curse(fx, e) { const p = pos(fx, e); const E = elOf(e.el || 'void'); const r = e.r || 120; const rune = atlas('rune', E.mid); fx.add(e.dur || 1.0, (ctx, k, f, cam) => { if (!rune) return; ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = Math.min(1, f.t * 5) * (1 - k) * 0.8; ctx.translate(p.x - cam, fx.wy(p.y)); ctx.scale(1, 0.32); ctx.rotate(-f.t * 1.2); ctx.drawImage(rune, -r, -r, r * 2, r * 2); }, { under: true }); fx.burst(p.x, fx.wy(p.y, 40), E.mid, 10, 60, { kind: 'glow', s: 5, life: 0.8, g: -60, jx: r }); },
-  barrier(fx, e) { const u = e.unit; if (!u) return; const E = elOf(e.el || 'holy'); const dur = e.dur || 1.2; fx.add(dur, (ctx, k, f, cam) => { const x = fx.scene.vx(u) - cam; const y = fx.wy(u.y, 80 * (u.size || 1)); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = Math.min(1, f.t * 6) * (1 - Math.max(0, (k - 0.8) / 0.2)) * (0.35 + 0.1 * Math.sin(f.t * 8)); const g = atlas('ring', E.mid); if (g) ctx.drawImage(g, x - 80, y - 90, 160, 180); }); },
+  whirl(fx, e) {
+    const p = pos(fx, e); const u = e.unit;
+    // 差し替え画像: 振りの軌跡を体の周りで回す
+    const sw = customId(e.skill, 'swing');
+    if (sw) customFx(fx, sw, 0.3, (k, f, cam) => ({ x: (u ? fx.scene.vx(u) : p.x) - cam, y: fx.wy(u ? u.y : p.y, 55), rot: k * TAU, scale: 0.9, alpha: 1 - k }));
+    HANDLERS.nova(fx, { ...e, x: p.x, y: p.y, r: e.r || 140, skill: e.skill || null, small: true });
+  },
+  aura(fx, e) {
+    const u = e.unit; const p = pos(fx, e); const E = elOf(elFor(e)); const r = e.r || 160;
+    // 差し替え画像: 足元のオーラ（体についていく）
+    const aid = customId(e.skill, 'aura');
+    if (aid) { customFx(fx, aid, 0.6, (k, f, cam) => ({ x: (u ? fx.scene.vx(u) : p.x) - cam, y: fx.wy(u ? u.y : p.y), w: r * 2 * (0.85 + 0.15 * k), h: r * 0.9 * (0.85 + 0.15 * k), alpha: (1 - k) * 0.85 }), { under: true }); return; }
+    fx.add(0.6, (ctx, k, f, cam) => { const x = (u ? fx.scene.vx(u) : p.x) - cam; ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = (1 - k) * 0.7; const ring = atlas('ring', E.mid); const s = r * (0.6 + 0.4 * k); if (ring) ctx.drawImage(ring, x - s, fx.wy(u ? u.y : p.y) - s * 0.33, s * 2, s * 0.66); }, { under: true }); },
+  curse(fx, e) {
+    const p = pos(fx, e); const E = elOf(e.el || 'void'); const r = e.r || 120;
+    // 差し替え画像: 呪いの紋（相手の頭の上に浮かぶ）・地面の範囲
+    const cid = customId(e.skill, 'curse'); const aid = customId(e.skill, 'area', 'aura');
+    if (cid || aid) {
+      const dur = e.dur || 1.0;
+      const fade = (k, f) => Math.min(1, f.t * 5) * (k > 0.7 ? (1 - k) / 0.3 : 1);
+      if (aid) customFx(fx, aid, dur, (k, f, cam) => ({ x: p.x - cam, y: fx.wy(p.y), w: r * 2, h: r * 2 * 0.45, alpha: fade(k, f) * 0.8 }), { under: true });
+      if (cid) customFx(fx, cid, dur, (k, f, cam) => ({ x: p.x - cam, y: fx.wy(p.y, 150 + 6 * Math.sin(f.t * 3)), scale: 1, alpha: fade(k, f) }));
+      return;
+    }
+    const rune = atlas('rune', E.mid); fx.add(e.dur || 1.0, (ctx, k, f, cam) => { if (!rune) return; ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = Math.min(1, f.t * 5) * (1 - k) * 0.8; ctx.translate(p.x - cam, fx.wy(p.y)); ctx.scale(1, 0.32); ctx.rotate(-f.t * 1.2); ctx.drawImage(rune, -r, -r, r * 2, r * 2); }, { under: true }); fx.burst(p.x, fx.wy(p.y, 40), E.mid, 10, 60, { kind: 'glow', s: 5, life: 0.8, g: -60, jx: r }); },
+  barrier(fx, e) {
+    const u = e.unit; if (!u) return; const E = elOf(e.el || 'holy'); const dur = e.dur || 1.2;
+    // 差し替え画像: 障壁も「強化のオーラ」の枠（体を包む）
+    const bid = customId(e.skill, 'buff');
+    if (bid) { customFx(fx, bid, dur, (k, f, cam) => ({ x: fx.scene.vx(u) - cam, y: fx.wy(u.y), scale: u.size || 1, alpha: Math.min(1, f.t * 6) * (1 - Math.max(0, (k - 0.8) / 0.2)) * (0.6 + 0.15 * Math.sin(f.t * 8)) })); return; }
+    fx.add(dur, (ctx, k, f, cam) => { const x = fx.scene.vx(u) - cam; const y = fx.wy(u.y, 80 * (u.size || 1)); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = Math.min(1, f.t * 6) * (1 - Math.max(0, (k - 0.8) / 0.2)) * (0.35 + 0.1 * Math.sin(f.t * 8)); const g = atlas('ring', E.mid); if (g) ctx.drawImage(g, x - 80, y - 90, 160, 180); }); },
   shield(fx, e) { HANDLERS.barrier(fx, e); },
-  meteor(fx, e) { const p = pos(fx, e); const r = e.r || 140; const el = e.el || 'fire'; const E = elOf(el); const dl = e.delay || 0.5; fx.add(dl, (ctx, k, f, cam) => fallFrom(ctx, p.x - cam, fx.wy(p.y), k, el, null, E, { r })); setTimeoutFx(fx, dl, () => { explosion(fx, p.x, p.y, r, el, { big: 1.5 }); crack(fx, p.x, p.y, r); fx.scene.addTrauma(0.35); }); },
+  meteor(fx, e) {
+    const p = pos(fx, e); const r = e.r || 140; const el = e.el || 'fire'; const E = elOf(el); const dl = e.delay || 0.5;
+    // 差し替え画像: 弾の絵（右向き）を斜め上から落とす
+    const pid = customId(e.skill, 'proj');
+    if (pid) customFx(fx, pid, dl, (k, f, cam) => fallPose(p.x - cam, fx.wy(p.y), k));
+    else fx.add(dl, (ctx, k, f, cam) => fallFrom(ctx, p.x - cam, fx.wy(p.y), k, el, null, E, { r }));
+    setTimeoutFx(fx, dl, () => { explosion(fx, p.x, p.y, r, el, { big: 1.5 }); crack(fx, p.x, p.y, r); fx.scene.addTrauma(0.35); }); },
   explode(fx, e) { const p = pos(fx, e); explosion(fx, p.x, p.y, e.r || 120, elFor(e)); },
   telegraph(fx, e) { const p = pos(fx, e); const r = e.r || 100; const dur = e.dur || e.delay || 1; fx.add(dur, (ctx, k, f, cam) => { ctx.globalCompositeOperation = 'lighter'; const x = p.x - cam; const y = fx.wy(p.y); ctx.globalAlpha = 0.6 + 0.3 * Math.sin(f.t * 16); ctx.strokeStyle = '#ff4030'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.ellipse(x, y, r, r * 0.35, 0, 0, TAU); ctx.stroke(); ctx.globalAlpha = 0.25 * k; ctx.fillStyle = '#ff4030'; ctx.beginPath(); ctx.ellipse(x, y, r * k, r * 0.35 * k, 0, 0, TAU); ctx.fill(); }, { under: true }); },
   heal(fx, e) { const p = pos(fx, e); fx.burst(p.x, fx.wy(p.y, 50), '#7cff7a', 10, 60, { kind: 'spark', s: 4, life: 0.8, g: -120, jx: 40 }); if (e.v) fx.addNumber({ x: p.x, y: p.y, z: 90, v: e.v, team: 'none', el: 'poison' }); },
-  trap(fx, e) { const p = pos(fx, e); const E = elOf(elFor(e)); const rune = atlas('rune', E.mid); fx.add(0.5, (ctx, k, f, cam) => { if (!rune) return; ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 1 - k; ctx.translate(p.x - cam, fx.wy(p.y)); ctx.scale(1, 0.3); ctx.drawImage(rune, -40, -40, 80, 80); }, { under: true }); },
+  trap(fx, e) {
+    const p = pos(fx, e); const E = elOf(elFor(e));
+    if (customId(e.skill, 'trap')) return; // 差し替え画像の罠は drawArea が置いてある間ずっと描く
+    const rune = atlas('rune', E.mid); fx.add(0.5, (ctx, k, f, cam) => { if (!rune) return; ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 1 - k; ctx.translate(p.x - cam, fx.wy(p.y)); ctx.scale(1, 0.3); ctx.drawImage(rune, -40, -40, 80, 80); }, { under: true }); },
   totem(fx, e) { HANDLERS.summon(fx, e); },
-  orbit(fx, e) { const u = e.unit; if (!u) return; const E = elOf(elFor(e)); const dur = e.dur || 2; const n = e.count || 3; const r = e.r || 70; fx.add(dur, (ctx, k, f, cam) => { const x = fx.scene.vx(u) - cam; const y = fx.wy(u.y, 60); ctx.globalCompositeOperation = 'lighter'; const g = atlas('glow', E.mid); ctx.globalAlpha = 1 - Math.max(0, (k - 0.85) / 0.15); for (let i = 0; i < n; i++) { const a = f.t * 4 + (i / n) * TAU; if (g) ctx.drawImage(g, x + Math.cos(a) * r - 14, y + Math.sin(a) * r * 0.35 - 14, 28, 28); } }); },
+  orbit(fx, e) {
+    const u = e.unit; if (!u) return; const E = elOf(elFor(e)); const dur = e.dur || 2; const n = e.n || e.count || 3; const r = e.r || 70;
+    // 差し替え画像: 回る刃は弾の絵（進む向きに回す）、足元に範囲の絵
+    const pid = customId(e.skill, 'proj'); const aid = customId(e.skill, 'area');
+    if (aid) customFx(fx, aid, dur, (k, f, cam) => ({ x: fx.scene.vx(u) - cam, y: fx.wy(u.y), w: r * 2.4, h: r * 2.4 * 0.45, alpha: 0.7 * (1 - Math.max(0, (k - 0.85) / 0.15)) }), { under: true });
+    if (pid) {
+      for (let i = 0; i < n; i++) customFx(fx, pid, dur, (k, f, cam) => { const a = f.t * (e.speed || 4) + (i / n) * TAU; return { x: fx.scene.vx(u) - cam + Math.cos(a) * r, y: fx.wy(u.y, 60) + Math.sin(a) * r * 0.35, rot: a + Math.PI / 2, scale: 0.7, alpha: 1 - Math.max(0, (k - 0.85) / 0.15) }; });
+      return;
+    }
+    fx.add(dur, (ctx, k, f, cam) => { const x = fx.scene.vx(u) - cam; const y = fx.wy(u.y, 60); ctx.globalCompositeOperation = 'lighter'; const g = atlas('glow', E.mid); ctx.globalAlpha = 1 - Math.max(0, (k - 0.85) / 0.15); for (let i = 0; i < n; i++) { const a = f.t * 4 + (i / n) * TAU; if (g) ctx.drawImage(g, x + Math.cos(a) * r - 14, y + Math.sin(a) * r * 0.35 - 14, 28, 28); } }); },
   wave(fx, e) { const p = pos(fx, e); const dir = (e.dir || (target(e) ? Math.sign(target(e).x - p.x) : 1)) || 1; const E = elOf(elFor(e)); const len = e.range || e.len || 500; fx.add(0.6, (ctx, k, f, cam) => { const x = p.x + dir * len * k - cam; ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 1 - k; const sl = atlas('slash', E.mid); if (sl) { ctx.translate(x, fx.wy(p.y, 50)); ctx.scale(dir, 1); ctx.drawImage(sl, -40, -70, 80, 140); } }); },
   wall(fx, e) { HANDLERS.wave(fx, e); },
 };

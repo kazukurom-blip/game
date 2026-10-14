@@ -32,6 +32,14 @@ export function fallbackDpr(spec) {
 export const CACHE_BUDGET = 64 * 1024 * 1024;
 const MAX_SIDE = 2048; // 差し替え画像の 1 コマの長い辺の上限（大きすぎると重い）
 const AUDIO_PREFIX = 'audio:';
+/** 足元（基準点）を自動で合わせる種類 */
+export const FEET_KINDS = new Set(['hero.body', 'hero.outfit', 'monster', 'minion', 'pet']);
+/**
+ * 外側を切った差し替え画像を、コードの絵と同じ「絵のある範囲」に置き直す種類（artBox）。
+ * 外側を切っただけだと絵が枠の高さいっぱいになり、短剣が両手剣ほど・狼が 1.4 倍の大きさになる。
+ * 置き直すと大きさがコードの絵とそろい、既定のアンカー（手・頭）もコードの体と同じ所に来る。
+ */
+export const BOX_KINDS = new Set(['hero.body', 'hero.outfit', 'gear.weapon', 'gear.offhand', 'gear.helm', 'gear.unique', 'monster', 'minion', 'pet']);
 
 class AssetRegistry {
   constructor() {
@@ -43,6 +51,7 @@ class AssetRegistry {
     this.cache = new Map(); // id → コードの絵（canvas）。CACHE_BUDGET を超えたら長く使っていない物から捨てる
     this.cacheBytes = 0;
     this.useTick = 0; // sprite() で使った順（捨てる順を決める）
+    this.boxes = new Map(); // id → コードの絵のある範囲（artBox）
     this.sprites = new Map(); // id → sprite()（使い回し）
     this.thumbs = new Map(); // `${id}|${w}x${h}` → 小さな絵
     this.painters = []; // { prefix, fn(ctx, spec, w, h) }
@@ -53,6 +62,7 @@ class AssetRegistry {
     this.version = 0;
     this.folderList = []; // custom.json の中身（normalizeCustomList）
     this.persistent = null; // IndexedDB に保存できるか（init で調べる。false なら閉じると消える）
+    this.lastImportUnsaved = 0; // importPack で保存できなかった枚数（容量がいっぱい等）
   }
 
   // ---------- 枠
@@ -82,10 +92,33 @@ class AssetRegistry {
     this.painters.sort((a, b) => b.prefix.length - a.prefix.length);
     this.cache.clear();
     this.cacheBytes = 0;
+    this.boxes.clear();
     this.sprites.clear();
     this.thumbs.clear();
   }
   painterFor(id) { return this.painters.find((p) => id === p.prefix || id.startsWith(`${p.prefix}.`) || id.startsWith(p.prefix)); }
+
+  /**
+   * コードの絵が枠の中で絵のある範囲 { x0, y0, x1, y1 }（0〜1）。コードの絵が無い ID・描けない環境は null。
+   * 差し替え画像の外側を切ったあと、この範囲に置き直す（processImage の fitBox）。
+   */
+  artBox(id) {
+    if (typeof id !== 'string') return null;
+    if (this.boxes.has(id)) return this.boxes.get(id);
+    let box = null;
+    if (this.painterFor(id)) {
+      try {
+        const c = this.fallbackCanvas(id);
+        if (c) {
+          const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+          const bb = alphaBBox(d, c.width, c.height, 40);
+          if (bb) box = { x0: bb.x0 / c.width, y0: bb.y0 / c.height, x1: (bb.x1 + 1) / c.width, y1: (bb.y1 + 1) / c.height };
+        }
+      } catch { box = null; }
+    }
+    this.boxes.set(id, box);
+    return box;
+  }
 
   fallbackCanvas(id) {
     if (this.cache.has(id)) return this.cache.get(id);
@@ -310,10 +343,10 @@ class AssetRegistry {
     await Promise.all(this.folderList.map(async (e) => {
       try {
         const raw = await loadImage(`${this.baseUrl}assets/custom/${e.file}`);
-        const proc = procFromOpts(e.opts);
         const spec = this.spec(e.id) || {};
-        const { canvas } = processImage(raw, proc, spec, { frames: e.opts?.frames || 1, scale: e.opts?.scale });
-        this.folder.set(e.id, { img: canvas || raw, opts: cleanOpts(e.opts), source: 'folder', url: e.file, raw });
+        // ゲーム内で入れたときと同じ自動の加工（背景を抜く・外側を切る・足元）。設定の .json に書いた項目はそちらを使う
+        const { canvas, proc, opts } = autoImport(raw, spec, e.opts || {});
+        this.folder.set(e.id, { img: canvas || raw, opts, proc, source: 'folder', url: e.file, raw });
       } catch (err) { console.warn('[assets] 読めない画像', e.file, err?.message || err); }
     }));
     this.rebuild();
@@ -343,7 +376,8 @@ class AssetRegistry {
    * opts: 描き方 { frames, fps, scale, ax, ay, flip, ox, oy, rot（度）, anchors, blend }
    * proc: 加工 { bg: 'none'|'auto'|'color'|'black', tol, color, contiguous, holes, feather, trim, crop:{l,t,r,b}（%）, seam（%）, crush }
    *   古い呼び方 opts.chroma / opts.trim も使える。
-   * extra: { processed（加工済みの canvas。あれば加工し直さない）, keepOrig: true, name }
+   * extra: { processed（加工済みの canvas。あれば加工し直さない）, blob（processed を PNG にした物。あれば作り直さない）, keepOrig: true, name }
+   * 戻り値: このブラウザに保存できたか（false = 今だけ使える。容量がいっぱい・保存できない環境）
    */
   async setCustom(id, file, opts = {}, proc = null, extra = {}) {
     const o = { ...opts };
@@ -355,15 +389,15 @@ class AssetRegistry {
       const raw = await blobToImage(file);
       img = processImage(raw, pr, this.spec(id) || {}, { frames: saveOpts.frames || 1, scale: saveOpts.scale }).canvas || raw;
     }
-    const blob = (await canvasToBlob(img)) || file;
+    const blob = extra.blob || (await canvasToBlob(img)) || file; // PNG にするのは遅い（1 枚 1 秒かかることもある）ので、あれば使う
     const row = { blob, opts: saveOpts, proc: pr, orig: extra.keepOrig === false ? null : file, name: extra.name || file?.name || '', at: Date.now() };
-    await idb.put('assets', id, row);
+    const saved = (await idb.put('assets', id, row)) !== undefined; // 失敗（容量がいっぱい等）は undefined
     this.studio.set(id, { img, opts: saveOpts, source: 'studio', blob, orig: row.orig, proc: pr, name: row.name, at: row.at });
     this.drafts.delete(id);
     this.rebuild();
     this.changed();
     persistStorage();
-    return true;
+    return saved;
   }
 
   /** 数値の設定だけ変える（加工はそのまま） */
@@ -424,11 +458,11 @@ class AssetRegistry {
     return out;
   }
 
-  /** 画像パックを取り込む（version 1・2）。戻り値は取り込んだ数 */
+  /** 画像パックを取り込む（version 1・2）。戻り値は取り込んだ数（this.lastImportUnsaved に保存できなかった数） */
   async importPack(pack) {
     const err = validatePack(pack);
     if (err) throw new Error(err);
-    let n = 0;
+    let n = 0; let unsaved = 0;
     for (const [id, v] of Object.entries(pack.assets || {})) {
       try {
         const blob = dataUrlToBlob(v.data);
@@ -436,10 +470,12 @@ class AssetRegistry {
         const processed = await blobToImage(blob);
         // 元の画像が無いパックは、加工済みの画像を元の画像として扱う（もう一度加工しない）
         const proc = orig ? (v.proc || { bg: 'none', trim: false }) : { bg: 'none', trim: false };
-        await this.setCustom(id, orig || blob, v.opts || {}, proc, { processed, name: v.name || '' });
+        // パックの画像はもう加工済みの PNG なので、そのまま保存する（作り直さない）
+        if (!(await this.setCustom(id, orig || blob, v.opts || {}, proc, { processed, blob, name: v.name || '' }))) unsaved++;
         n++;
       } catch (e) { console.warn('[assets] 取り込めない', id, e); }
     }
+    this.lastImportUnsaved = unsaved;
     return n;
   }
 
@@ -487,19 +523,47 @@ export function cleanOpts(o = {}) {
   return out;
 }
 
-/** 古い形（opts.chroma・opts.trim）とフォルダの設定から加工の設定を作る */
-export function procFromOpts(o = {}) {
-  const p = { bg: 'none', trim: false };
-  if (o?.proc && typeof o.proc === 'object') Object.assign(p, o.proc);
-  if (o?.chroma) { p.bg = o.chroma.color ? 'color' : 'auto'; p.tol = o.chroma.tol ?? 48; if (o.chroma.color) p.color = o.chroma.color; }
-  if (o?.trim) p.trim = true;
-  if (o?.crop) p.crop = o.crop;
-  if (o?.seam) p.seam = o.seam;
-  if (o?.bg && typeof o.bg === 'string') p.bg = o.bg;
-  if (o?.flip) p.flip = true;
-  for (const k of ['tol', 'color', 'holes', 'feather', 'contiguous', 'crush', 'pad']) if (o?.[k] !== undefined) p[k] = o[k];
+/**
+ * 設定（フォルダの .json・まとめて取り込むときの .json）に書かれた加工の項目だけを取り出す（書いていない項目は入れない）。
+ * 古い書き方 chroma: { tol, color } と proc: { ... } も読む。
+ */
+export function procOverrides(o = {}) {
+  const p = {};
+  if (!o || typeof o !== 'object') return p;
+  if (o.proc && typeof o.proc === 'object') Object.assign(p, o.proc);
+  if (o.chroma) { p.bg = o.chroma.color ? 'color' : 'auto'; p.tol = o.chroma.tol ?? 48; if (o.chroma.color) p.color = o.chroma.color; }
+  if (typeof o.bg === 'string' && o.bg) p.bg = o.bg;
+  if (o.trim !== undefined) p.trim = o.trim === 'top' ? 'top' : !!o.trim;
+  if (o.flip !== undefined) p.flip = !!o.flip;
+  for (const k of ['crop', 'seam', 'tol', 'color', 'holes', 'feather', 'contiguous', 'crush', 'pad']) if (o[k] !== undefined) p[k] = o[k];
   return p;
 }
+
+/** 古い形（opts.chroma・opts.trim）とフォルダの設定から加工の設定を作る（書いていない項目は「しない」） */
+export function procFromOpts(o = {}) {
+  return { bg: 'none', trim: false, ...procOverrides(o) };
+}
+
+/**
+ * 画像を 1 枚、自動の加工で取り込む（フォルダの画像を読むときに使う。ゲーム内の quickImport と同じ決まり）。
+ * 背景を抜く・外側を切る（autoProc）→ 設定に書いた項目で上書き → 加工 → 足元を合わせる（設定に ay が無いとき）。
+ * 戻り値 { canvas, proc, opts }
+ */
+export function autoImport(raw, spec = {}, o = {}) {
+  const ins = inspectImage(raw);
+  const proc = { ...autoProc(spec, ins.transparent, ins.bg), ...procOverrides(o) };
+  const frames = Math.max(1, o.frames || 1);
+  const { canvas } = processImage(raw, proc, spec, { frames, scale: o.scale });
+  const opts = cleanOpts(o);
+  if (spec.cat === 'fx' && !opts.blend) opts.blend = spec.blend || 'lighter';
+  if (canvas && FEET_KINDS.has(spec.kind) && (spec.ay ?? 1) >= 0.8 && opts.ay === undefined) {
+    const det = detectAnchors(canvas, frames);
+    if (det.feet) { if (opts.ax === undefined) opts.ax = round3(det.feet.ax); opts.ay = round3(det.feet.ay); }
+  }
+  return { canvas, proc, opts };
+}
+
+const round3 = (v) => Math.round(v * 1000) / 1000;
 
 // ---------------------------------------------------------------- ファイル名・一覧・パック（Node でも使える）
 const EXT_RE = /\.(png|jpe?g|webp|gif|avif)$/i;
@@ -539,6 +603,8 @@ export function validatePack(pack) {
   if (!pack.assets || typeof pack.assets !== 'object') return '画像パックに画像が入っていません';
   for (const [id, v] of Object.entries(pack.assets)) {
     if (!v || typeof v.data !== 'string' || !v.data.startsWith('data:image/')) return `「${id}」の画像が壊れています`;
+    // 元の画像も中に入った画像（data URL）だけ。外の URL は読みに行かない
+    if (v.orig !== undefined && v.orig !== null && (typeof v.orig !== 'string' || !v.orig.startsWith('data:image/'))) return `「${id}」の元の画像が壊れています`;
   }
   return null;
 }
@@ -726,7 +792,10 @@ export function alphaBBox(d, w, h, thr = 8, x0 = 0, x1 = w - 1) {
   return bx1 < 0 ? null : { x0: bx0, y0: by0, x1: bx1, y1: by1 };
 }
 
-/** 足元の基準点を探す（一番下の、不透明な画素が 3 つ以上ある行。x は下 4% の中央値）→ { ax, ay } */
+/**
+ * 足元の基準点を探す（一番下の、不透明な画素が 3 つ以上ある行。x は下 4% の中央値）→ { ax, ay }
+ * 中央値は数が偶数なら真ん中の 2 つの平均（四つ足の獣は前足と後ろ足の間になり、左右反転しても同じ所を指す）
+ */
 export function findFeet(d, w, h, x0 = 0, x1 = w - 1) {
   let py = -1;
   for (let y = h - 1; y >= 0 && py < 0; y--) {
@@ -740,7 +809,9 @@ export function findFeet(d, w, h, x0 = 0, x1 = w - 1) {
   for (let y = Math.max(0, py - band + 1); y <= py; y++) for (let x = x0; x <= x1; x++) if (d[(y * w + x) * 4 + 3] > 128) xs.push(x);
   xs.sort((a, b) => a - b);
   const fw = x1 - x0 + 1;
-  return { ax: (xs[xs.length >> 1] - x0 + 0.5) / fw, ay: (py + 1) / h };
+  const n = xs.length;
+  const med = n % 2 ? xs[(n - 1) / 2] : (xs[n / 2 - 1] + xs[n / 2]) / 2;
+  return { ax: (med - x0 + 0.5) / fw, ay: (py + 1) / h };
 }
 
 /** 右向きの体のアンカーを推定（手・副手・頭・背中・胸）。だいたいの位置なので、あとで画像の窓で直す */
@@ -788,16 +859,24 @@ export function autoProc(spec = {}, transparent = false, bgInfo = null) {
   const isFx = spec.cat === 'fx' && (spec.blend || 'lighter') === 'lighter';
   if (isFx) return { bg: 'none', trim: false, crush: true };
   if (kind === 'icon.skill' || kind === 'icon.support' || kind === 'hero.portrait' || kind === 'ui.title' || (kind === 'bg' && spec.params?.layer === 'far')) return { bg: 'none', trim: false };
+  // 背景が緑・マゼンタの単色（AI に頼んだ抜くための色）なら、腕と体・足の間などの囲まれた所も抜く（白・黒の背景は白い目や服が消えるので抜かない）
+  const chroma = isChroma(bgInfo?.color);
+  const holes = chroma ? { holes: true } : {};
   // 重ね着の部品は体の画像と同じ位置に重ねるので、外側を切らない
-  if (kind === 'gear.part') return { bg: transparent ? 'none' : 'auto', tol: 48, trim: false, feather: 2 };
+  if (kind === 'gear.part') return { bg: transparent ? 'none' : 'auto', tol: 48, trim: false, feather: 2, ...holes };
   if (kind === 'bg') {
     // 中景・地面: 空が緑やマゼンタの単色なら抜く
-    const c = bgInfo?.color;
-    const chroma = c && ((c[1] > 180 && c[0] < 120 && c[2] < 120) || (c[0] > 180 && c[2] > 180 && c[1] < 100));
-    return transparent || !chroma ? { bg: 'none', trim: false } : { bg: 'auto', tol: 60, trim: false, feather: 2 };
+    // 地面: 帯の上の端が歩く面。上の透明な所（抜いた空）を残すと、キャラが宙に浮いて見えるので切る（横幅はそのまま）
+    const trim = spec.params?.layer === 'ground' ? 'top' : false;
+    return transparent || !chroma ? { bg: 'none', trim } : { bg: 'auto', tol: 60, trim, feather: 2, ...holes };
   }
   if (transparent) return { bg: 'none', trim: true };
-  return { bg: 'auto', tol: 48, trim: true, feather: 2, contiguous: true };
+  return { bg: 'auto', tol: 48, trim: true, feather: 2, contiguous: true, ...holes };
+}
+
+/** 抜くための単色（緑 #00FF00・マゼンタ #FF00FF に近い色）か */
+export function isChroma(c) {
+  return !!c && ((c[1] > 180 && c[0] < 120 && c[2] < 120) || (c[0] > 180 && c[2] > 180 && c[1] < 100));
 }
 
 /** ゲームで使う大きさ（縮めるだけ。広げない）。1 コマの { w?, h? } */
@@ -808,8 +887,10 @@ export function targetSize(spec = {}, scale = 1) {
 }
 
 /**
- * 画像を加工する: 大きすぎれば縮める → 切り抜き → 背景を抜く／黒を透明に → 透明な外側を切る → 左右をつなげる → ゲームの大きさに縮める。
- * src: 画像か canvas。proc: setCustom の proc。o: { frames, scale, noResize }
+ * 画像を加工する: 大きすぎれば縮める → 切り抜き → 背景を抜く／黒を透明に → 透明な外側を切る（→ コードの絵と同じ範囲に置き直す）
+ * → 左右をつなげる → 左右反転 → ゲームの大きさに縮める。
+ * src: 画像か canvas。proc: setCustom の proc（trim: true = 外側を全部切る、'top' = 上の透明な行だけ切る〔地面〕）。
+ * o: { frames, scale, noResize, box（false で置き直さない） }
  * 戻り値 { canvas, info: { srcW, srcH, removed, bg, transparent } }
  */
 export function processImage(src, proc = {}, spec = {}, o = {}) {
@@ -841,8 +922,14 @@ export function processImage(src, proc = {}, spec = {}, o = {}) {
     crushBlack(data.data, proc.crushLevel ?? 16);
     ctx.putImageData(data, 0, 0);
   }
-  // 4. 透明な外側を切る（コマ送りは全コマ共通の外枠で）
-  if (proc.trim) c = trimFrames(c, frames, proc.pad ?? 2) || c;
+  // 4. 透明な外側を切る（コマ送りは全コマ共通の外枠で）。地面は上の透明な行だけ
+  if (proc.trim === 'top') c = trimTop(c, proc.pad ?? 2) || c;
+  else if (proc.trim) {
+    c = trimFrames(c, frames, proc.pad ?? 2) || c;
+    // 4-2. コードの絵と同じ「絵のある範囲」に置き直す（大きさ・足元・握り・アンカーの位置がコードの絵とそろう）
+    const box = o.box !== false && BOX_KINDS.has(spec.kind) ? assets.artBox(spec.id) : null;
+    if (box) c = fitBox(c, frames, box, spec) || c;
+  }
   // 5. 左右をつなげる（1 枚絵だけ）
   if (proc.seam && frames === 1) {
     ctx = c.getContext('2d', { willReadFrequently: true });
@@ -928,6 +1015,38 @@ function trimFrames(c, frames, pad = 2) {
   const out = makeCanvas(w * frames, h);
   const oc = out.getContext('2d');
   for (let i = 0; i < frames; i++) oc.drawImage(c, i * fw + x0, y0, w, h, i * w, 0, w, h);
+  return out;
+}
+
+/** 上の透明な行だけ切る（地面の帯: 横幅はそのまま。全部透明なら null） */
+function trimTop(c, pad = 2) {
+  const d = c.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, c.width, c.height).data;
+  const bb = alphaBBox(d, c.width, c.height, 8);
+  if (!bb) return null;
+  const y0 = Math.max(0, bb.y0 - pad);
+  if (y0 <= 0) return c;
+  const out = makeCanvas(c.width, c.height - y0);
+  out.getContext('2d').drawImage(c, 0, y0, c.width, c.height - y0, 0, 0, c.width, c.height - y0);
+  return out;
+}
+
+/**
+ * 外側を切った画像（コマごとに fw×h）を、コードの絵が枠の中で占める範囲 box（0〜1）に置き直す（透明な余白をつける）。
+ * 高さ: 絵の高さが box の高さになるように。横: 枠の縦横比の幅（絵の方が広ければ絵の幅）で、絵の中心を box の中心に。
+ */
+export function fitBox(c, frames, box, spec = {}) {
+  const fw = Math.floor(c.width / frames); const fh = c.height;
+  const bh = box.y1 - box.y0; const bw = box.x1 - box.x0;
+  if (!(bh > 0.15 && bh <= 1) || !(bw > 0.05 && bw <= 1) || !fw || !fh) return null;
+  const H = Math.max(fh, Math.round(fh / bh));
+  const top = Math.min(H - fh, Math.round(box.y0 * H));
+  const aspect = spec.w && spec.h ? spec.w / spec.h : fw / fh;
+  const W = Math.max(fw, Math.round(H * aspect));
+  const left = Math.max(0, Math.min(W - fw, Math.round(((box.x0 + box.x1) / 2) * W - fw / 2)));
+  const out = makeCanvas(W * frames, H);
+  if (!out) return null;
+  const ctx = out.getContext('2d');
+  for (let i = 0; i < frames; i++) ctx.drawImage(c, i * fw, 0, fw, fh, i * W + left, top, fw, fh);
   return out;
 }
 
