@@ -481,7 +481,18 @@ export class Combat {
   basicSkill() {
     const bar = this.state.hero.bar;
     for (const id of bar) { const def = SKILL[id]; if (def?.basic && this.state.hero.skills[id]) return this.params(id); }
-    return bar[0] && SKILL[bar[0]] ? this.params(bar[0]) : null;
+    return this.fallbackBasic() || (bar[0] && SKILL[bar[0]] ? this.params(bar[0]) : null);
+  }
+
+  /**
+   * 並びに基本攻撃が無いとき（基本の枠を外した・技を入れた）に使う、覚えている基本攻撃（レベルの高い物）。
+   * 基本攻撃はリソースを使わず、いつでも使える。無いと怒りのたまらない剣闘士などが何もできずに止まる
+   */
+  fallbackBasic() {
+    const sk = this.state.hero.skills;
+    let best = null;
+    for (const id in sk) { if (SKILL[id]?.basic && sk[id]?.lvl > 0 && (!best || sk[id].lvl > sk[best].lvl)) best = id; }
+    return best ? this.params(best) : null;
   }
 
   chooseSkill(h, target, d, enemies) {
@@ -517,6 +528,7 @@ export class Combat {
       if (!this.condOk(ac?.cond || p.auto, h, target, enemies, p, ctx)) continue;
       usable.push(p);
     }
+    basic ||= this.fallbackBasic();
     // 射程の中の技を左から。ただし待ち時間の無い消費の技（扇射ちなど）は、それを使うとリソースが足りなくなる
     // 右の待ち時間の技（矢の雨など）に先を譲る（左の技がリソースを使い続けて、右の技がいつまでも使われないのを防ぐ）
     let pick = null;
@@ -529,6 +541,12 @@ export class Combat {
     //   止まっている敵 … 使う技より左にある、射程の外の技（基本攻撃の射程の端に立ったまま、扇射ち・砲台・罠などが使えないのを防ぐ）
     //   逃げる敵       … 射程の外の技のうち一番近くでしか使えない技（ため込み屋に全部の技を当てる）
     const motion = this.motionOf(target, h);
+    // 逃げる敵には、届くうちに使わないと使えなくなる技（一番近くでしか使えない技）から使う
+    if (motion < 0 && pick) {
+      let best = null;
+      for (const p of usable) if (this.inRange(p, h, target, d) && (!best || this.reach(p, motion) < this.reach(best, motion))) best = p;
+      if (best) pick = best;
+    }
     let far = null;
     if (motion <= 0 && basic) {
       const minR = this.reach(basic, motion) * 0.5;
@@ -1119,7 +1137,8 @@ export class Combat {
       if (target.dotAcc > target.maxLife * 0.05 || target.life <= 0) { this.emit({ t: 'dmg', x: target.x, y: target.y, z: target.z + 70 * target.size, v: target.dotAcc, el, dot: true, team: target.team }); target.dotAcc = 0; }
     } else {
       target.hitFlash = 0.12;
-      if (!target.boss && target.kind === 'monster') target.x += 4 * (src && src.x > target.x ? -1 : 1);
+      // 当たると少し押し返す（ボスと、逃げるため込み屋は押さない。押すと逃げる手助けになる）
+      if (!target.boss && !target.goblin && target.kind === 'monster') target.x += 4 * (src && src.x > target.x ? -1 : 1);
       this.emit({ t: 'dmg', x: target.x, y: target.y, z: target.z + 70 * target.size, v: dmg, crit, el, team: target.team });
       if (crit && fromHero && this.critFxT <= 0) { this.critFxT = 0.15; this.emit({ t: 'crit', x: target.x, y: target.y, z: target.z + 70 * target.size, v: dmg, el, skill: p.id }); }
     }
@@ -1266,7 +1285,8 @@ export class Combat {
     if (isHero) this.stats.dmgTaken += amount;
     this.emit({ t: 'dmg', x: u.x, y: u.y, z: 80, v: amount, el: element, team: HERO_TEAM, hero: isHero });
     if (from && !isDot && isHero && !from.dead) {
-      if (H.thorns > 0) { from.life -= H.thorns; if (from.life <= 0) this.killUnit(from, u); }
+      // 反射ダメージも敵の耐性・守り（鋼鉄・結界・ボスの障壁・無敵の間）を通す（以前はライフを直接減らしていた）
+      if (H.thorns > 0 && from.team === ENEMY_TEAM) this.applyDot(from, H.thorns, 'phys', u);
       const rt = u.retaliate;
       if (rt && !from.dead && from.team === ENEMY_TEAM) {
         if (rt.chill) this.addStatus(from, 'chill', {});

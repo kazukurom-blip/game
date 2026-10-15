@@ -312,7 +312,7 @@ export function skillProfile(H, p) {
     case 'ult_barrage': per = hit * p.count * 0.5; break;
     case 'ult_starfall': per = hit * p.count * 0.8 * 1.8; break;
     case 'ult_deathmarch': per = hit * 3 + avgHit(H, p) * (p.summon?.dmgPct || 0.25) * p.count * (p.summon?.ttl || 15) * 1.2; break;
-    case 'ult_shadowdance': per = hit * p.count * (H.critMult / (1 + H.critChance * (H.critMult - 1))); break;
+    case 'ult_shadowdance': per = hit * p.count * (H.ks?.precise ? 1 : H.critMult / (1 + H.critChance * (H.critMult - 1))); break; // 必ずクリティカル（一点の要石ではクリティカルしない）
     default: per = 0;
   }
   if (p.twin && per) per *= 2;

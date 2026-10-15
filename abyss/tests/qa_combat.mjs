@@ -271,5 +271,47 @@ t('毒・炎上・出血も敵の守り（鋼鉄 -40%・ボスの無敵の間）
   ok(life([], (u) => { u.boss = true; u._invT = c.time + 99; }) < base * 0.1, '無敵の間');
 });
 
+t('反射ダメージも敵の守り（鋼鉄 -40%・ボスの無敵の間）を通り、与えたダメージに数える', () => {
+  const g = kitted('warrior', 40);
+  const c = g.combat; const h = c.hero;
+  c.H.thorns = 5000; c.H.dodge = 0; c.H.block = 0;
+  const reflect = (elite, setup) => {
+    c.clearEnemies();
+    const u = c.spawnMonster('rot_zombie', { level: 40, x: h.x + 60, lifeMul: 1e6, dmgMul: 0.001, elite });
+    setup?.(u);
+    const before = u.life; const d0 = c.stats.dmgDone;
+    c.damageAlly(h, 1, 'phys', u);
+    return { lost: before - u.life, counted: c.stats.dmgDone - d0 };
+  };
+  const base = reflect([]);
+  near(base.lost, 5000, 1, '反射');
+  near(base.counted, 5000, 1, '与えたダメージに数えない');
+  near(reflect(['armored']).lost, 3000, 1, '鋼鉄');
+  ok(reflect([], (u) => { u.boss = true; u._invT = c.time + 99; }).lost < 500, '無敵の間');
+});
+
+t('ため込み屋は当たっても押し返されない（逃げる手助けにならない）', () => {
+  const g = kitted('ranger', 30);
+  const c = g.combat; const h = c.hero;
+  c.clearEnemies();
+  const gob = c.spawnMonster('goblin_gold', { level: 30, rank: 'goblin', x: h.x + 300, y: 0, lifeMul: 1e6 });
+  gob.statuses.stun = { t: 999 };
+  const x0 = gob.x;
+  for (let i = 0; i < 10; i++) c.hitUnit(h, gob, c.params('r_snipe'), 1, { noProc: true });
+  near(gob.x, x0, 1e-9, '押し返された');
+});
+
+t('並びから基本攻撃を外しても、覚えている基本攻撃で戦い続ける（怒りがたまらず止まらない）', () => {
+  const g = kitted('warrior', 20, { bar: ['w_cleave'] });
+  const c = g.combat; const h = c.hero;
+  c.clearEnemies();
+  const u = c.spawnMonster('rot_zombie', { level: 20, x: h.x + 90, y: 0, lifeMul: 1e9, dmgMul: 0 });
+  u.statuses.stun = { t: 999 };
+  tick(g, 30);
+  const d0 = c.stats.dmgDone;
+  tick(g, 20);
+  ok(c.stats.dmgDone - d0 > 0, '30 秒後から何もしていない');
+});
+
 console.log(`qa_combat: ${pass} 通過 / ${fail} 失敗`);
 if (fail) process.exit(1);
