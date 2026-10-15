@@ -44,6 +44,16 @@ function toTitle() {
   showTitle(root, game, { onStart: startGame });
 }
 
+/** 古いセーブを読んだときの、更新の知らせ（一度だけ。state.meta.updateNotes は migrate が足す） */
+const UPDATE_NOTES = {
+  v3: '更新: 敵が強くなり、拾うアイテムの数が減りました（そのぶん良い物が出やすくなっています）。自動装備をオンにしました（持ち物の窓で切れます）',
+};
+function showUpdateNotes(ui, st) {
+  const notes = Array.isArray(st.meta.updateNotes) ? st.meta.updateNotes : [];
+  for (const id of notes) if (UPDATE_NOTES[id]) ui.toast(UPDATE_NOTES[id], 'good');
+  st.meta.updateNotes = [];
+}
+
 /** ゲームを始める: { slot, state? , cls?, name? } */
 function startGame(opts) {
   slot = opts.slot ?? 0;
@@ -72,6 +82,7 @@ function startGame(opts) {
   const away = (Date.now() - (game.state.lastTick || Date.now())) / 1000;
   if (!opts.cls && away > 60) game.sys.offline.grant(away, { reason: 'offline' });
   game.state.lastTick = Date.now(); // 渡し終えた（毎フレームの「長い空白」の計算で、もう一度渡さない）
+  showUpdateNotes(ui, game.state);
   save();
   running = true;
   lastFrame = performance.now();

@@ -21,6 +21,8 @@ export const OVER_EFF = 0.25;
 /** これより短い留守は放置の稼ぎにしない（Game.catchUp がその時間ぶんふつうに進める） */
 export const MIN_OFFLINE_SEC = 30;
 export const MAX_CAP_HOURS = 48;
+// 強さの決まりの版。変えたら、セーブに残った古い稼ぎの速さ（meta.rates）を使わない
+export const BAL_STAMP = 'r2-difficulty';
 const FULL_ITEMS = 1500;
 const MAX_ROLLS = 200000;
 
@@ -62,16 +64,20 @@ export class OfflineSystem {
   rates() {
     const all = [...this.buckets, this.cur];
     const t = all.reduce((s, b) => s + b.t, 0);
-    if (t < 20) return this.game.state.meta.rates || this.fallback();
+    if (t < 20) {
+      // セーブに残った稼ぎは、同じ強さの決まり（BAL_STAMP）で測った物だけ使う（手応えの見直しの前の速さで放置の稼ぎを出さない）
+      const saved = this.game.state.meta.rates;
+      return saved && saved.bal === BAL_STAMP ? saved : this.fallback();
+    }
     const sum = (k) => all.reduce((s, b) => s + (b[k] || 0), 0);
     const kills = sum('kills');
-    return { kills: kills / t, xp: sum('xp') / t, gold: sum('gold') / t, drops: sum('drops') / t, elites: sum('elites') / t, bosses: sum('bosses') / t, level: kills ? sum('levelSum') / kills : this.game.sys.world.level(), measured: t };
+    return { kills: kills / t, xp: sum('xp') / t, gold: sum('gold') / t, drops: sum('drops') / t, elites: sum('elites') / t, bosses: sum('bosses') / t, level: kills ? sum('levelSum') / kills : this.game.sys.world.level(), heroLevel: this.game.state.hero.level, measured: t, bal: BAL_STAMP };
   }
 
   fallback() {
     // まだ測れていないとき: 今の場所で 2 秒に 1 体と仮定
     const L = this.game.sys.world.level();
-    return { kills: 0.5, xp: 0.5 * BAL.monsterXp(L), gold: 0.5 * BAL.GOLD_DROP_CHANCE * BAL.monsterGold(L), drops: 0.5 * BAL.ITEM_DROP_CHANCE, elites: 0.5 * 0.05, bosses: 0, level: L, measured: 0 };
+    return { kills: 0.5, xp: 0.5 * BAL.monsterXp(L) * BAL.xpLevelPenalty(this.game.state.hero.level, L), gold: 0.5 * BAL.GOLD_DROP_CHANCE * BAL.monsterGold(L), drops: 0.5 * BAL.ITEM_DROP_CHANCE, elites: 0.5 * 0.05, bosses: 0, level: L, heroLevel: this.game.state.hero.level, measured: 0, bal: BAL_STAMP };
   }
 
   capHours() {
@@ -84,6 +90,25 @@ export class OfflineSystem {
   baseEfficiency() { return Math.min(1, BAL.OFFLINE_EFFICIENCY + (this.game.state.meta.unlocks.offlineEff || 0) / 100); }
   /** 実際の効率（放置の稼ぎ % を掛ける） */
   efficiency() { return this.baseEfficiency() * (1 + (this.game.H?.offline || 0) / 100); }
+
+  /** 放置の経験値を渡す。sec は効率をかけた秒。戻り値は渡した経験値 */
+  grantXp(r, sec) {
+    const g = this.game; const h = g.state.hero;
+    const L = r.level || g.sys.world.level();
+    const pen0 = BAL.xpLevelPenalty(r.heroLevel ?? h.level, L) || 1;
+    const rateAt = () => (r.xp || 0) * BAL.xpLevelPenalty(h.level, L) / pen0;
+    let left = sec; let total = 0;
+    for (let guard = 0; left > 0 && h.level < BAL.MAX_LEVEL && guard < 200; guard++) {
+      const rate = rateAt();
+      if (!(rate > 0)) return total;
+      const need = Math.max(0, BAL.xpToNext(h.level) - h.xp);
+      const v = Math.min(need, rate * left);
+      g.addXp(v, { quiet: true }); total += v; left -= v / rate;
+      if (v < need) return total;
+    }
+    if (left > 0) { const v = rateAt() * left; g.addXp(v, { quiet: true }); total += v; } // Lv100 から先はアビスLv
+    return total;
+  }
 
   /** 離れていた seconds ぶんの稼ぎを渡して報告を返す */
   grant(seconds, { reason = 'offline' } = {}) {
@@ -99,10 +124,10 @@ export class OfflineSystem {
     const kills = Math.floor(r.kills * effSec * eff);
     const elites = Math.floor((r.elites || 0) * effSec * eff);
     const bosses = Math.floor((r.bosses || 0) * effSec * eff);
-    const xp = r.xp * effSec * eff;
     const gold = Math.floor(r.gold * effSec * eff);
     const before = { level: st.hero.level, paragon: st.hero.paragon.level };
-    g.addXp(xp, { quiet: true });
+    // 経験値は 1 Lv ずつ、そのレベルでの Lv 差の補正をかけ直して渡す（測ったときのレベルのまま 8 時間ぶん渡すと、地域より上がりすぎた分も満額になる）
+    const xp = this.grantXp(r, effSec * eff);
     g.addGold(gold);
     st.meta.stats.kills += kills;
     st.meta.stats.elites += elites;

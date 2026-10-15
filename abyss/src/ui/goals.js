@@ -42,11 +42,19 @@ function levelEta(game, ratio) {
   if (lv >= BAL.MAX_LEVEL) return null;
   // 1 レベルでおよそ +11%（曲線 P(L) と能力の伸び）
   const levels = Math.min(BAL.MAX_LEVEL - lv, Math.ceil(Math.log(ratio) / Math.log(1.11)));
-  const xps = game.sys.offline.rates().xp || 0;
+  const r = game.sys.offline.rates();
+  const xps = r.xp || 0;
   if (!(xps > 0)) return { levels, sec: null };
-  let need = BAL.xpToNext(lv) - st.hero.xp;
-  for (let i = 1; i < levels; i++) need += BAL.xpToNext(lv + i);
-  return { levels, sec: need / xps };
+  // 地域より上がるほど経験値が減る（BAL.xpLevelPenalty）。レベルごとに、今の補正との比で時間を延ばす
+  const L = r.level || game.sys.world.level();
+  const pen0 = BAL.xpLevelPenalty(lv, L) || 1;
+  let sec = 0;
+  for (let i = 0; i < levels; i++) {
+    const need = i === 0 ? BAL.xpToNext(lv) - st.hero.xp : BAL.xpToNext(lv + i);
+    sec += need / (xps * BAL.xpLevelPenalty(lv + i, L) / pen0);
+  }
+  // 地域より 7 Lv 以上上がる必要があるなら、ここで稼ぐのは現実的でない（装備・スキルで伸ばす）
+  return { levels, sec, impractical: lv + levels - L >= 7 };
 }
 
 function zoneTitle(z) {
@@ -139,7 +147,8 @@ export function nextGoal(game) {
       const le = levelEta(game, 1 / Math.max(0.01, g.ratio));
       g.short = Math.max(1, Math.round((1 - g.ratio) * 100));
       g.extra.unshift({ text: `ボスには火力があと ${g.short}% 足りません。手段を試すか、レベルを上げてから挑みます` });
-      if (le?.sec) { g.eta = le.sec; g.etaText = `目安 約 ${fmtTime(le.sec, true)}（Lv +${le.levels}）`; }
+      if (le?.impractical) g.extra.unshift({ text: 'レベルだけで追いつくのは難しい（地域より上がるほど経験値が減ります）。装備・スキル・強化で火力を伸ばします' });
+      else if (le?.sec) { g.eta = le.sec; g.etaText = `目安 約 ${fmtTime(le.sec, true)}（Lv +${le.levels}）`; }
     } else if (!ws.isBossStage() && (reached >= STAGES_PER_ZONE || w.bossFailZone === target.id)) {
       g.extra.unshift({ text: '火力は十分です。ここを押すとボスに挑みます', act: 'boss' });
     }

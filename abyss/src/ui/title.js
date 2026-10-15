@@ -15,9 +15,9 @@ export const VERSION = '0.2.0';
 export const CLASS_ROLE = {
   warrior: { role: '近接・耐久', diff: 1, tip: '打たれ強く、迷わず戦える。はじめての人に。' },
   ranger: { role: '遠距離・罠', diff: 2, tip: '離れて射つ。砲台と相棒の獣が助けてくれる。' },
-  sorcerer: { role: '魔法・範囲', diff: 2, tip: '群れをまとめて焼く。ライフは低め。' },
-  necromancer: { role: '召喚・呪い', diff: 1, tip: '呼び出した兵が壁になる。放置向き。' },
-  assassin: { role: '近接・連撃', diff: 3, tip: '会心と毒で手数を重ねる。打たれ弱く、上級者向け。' },
+  sorcerer: { role: '魔法・範囲', diff: 2, tip: '群れをまとめて焼く。鎧が薄く、近づかれると危ない。' },
+  necromancer: { role: '召喚・呪い', diff: 1, tip: '呼び出した兵が近接の敵を食い止める。放置向き。' },
+  assassin: { role: '近接・連撃', diff: 3, tip: '会心と毒で手数を重ねる。吸収と回避で粘るが、囲まれると危ない。上級者向け。' },
 };
 const DIFF_NAME = ['', 'やさしい', 'ふつう', 'むずかしい'];
 

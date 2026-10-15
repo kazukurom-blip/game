@@ -1043,7 +1043,8 @@ async function smokeUi(browser, check, errors) {
   const howto = await page.textContent('.panel-settings');
   check('UI: 設定に 遊び方 とキーの一覧', howto.includes('遊び方') && howto.includes('Space') && howto.includes('Esc'));
   // ---- 戦力・下の欄・レアリティの印
-  await page.evaluate(() => { const g = window.__game; for (let i = 0; i < 20 * 90; i++) g.tick(0.05); });
+  // 自動装備は最初からオンで、ドロップも少ないので、ここだけオフにしてバッグに何か入るまで進める
+  await page.evaluate(() => { const g = window.__game; g.state.inv.filter.autoEquip = false; for (let i = 0; i < 20 * 600 && (i < 20 * 90 || g.state.inv.bag.length < 3); i++) g.tick(0.05); });
   await page.waitForTimeout(300);
   await nav(page, 'bag');
   const marks = await page.$$eval('#panelbody .grid .cell .rmark', (els) => els.map((e) => e.textContent));

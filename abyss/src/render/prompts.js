@@ -232,7 +232,7 @@ const article = (word) => (/^[aeiou]/i.test(String(word).trim()) ? 'an ' : 'a ')
 /** スキルの説明の {dmg} などを、指示文に向く言葉にする */
 function plainDesc(desc) {
   if (!desc) return '';
-  return desc.replace(/の\s*\{dmg\}\s*で/g, 'で').replace(/\{count\}\s*体まで/g, '何体も').replace(/\{dmg\}\s*の?ダメージ/g, '大きなダメージ').replace(/\{count\}\s*本/g, '何本も').replace(/\{count\}\s*体/g, '何体か').replace(/\{radius\}/g, '広い範囲').replace(/\{dur\}\s*秒/g, 'しばらく')
+  return desc.replace(/の\s*\{dmg\}\s*で/g, 'で').replace(/\{count\}\s*体まで/g, '何体も').replace(/\{dmg\}\s*の?ダメージ/g, '大きなダメージ').replace(/\{count\}\s*本/g, '何本も').replace(/\{count\}\s*体/g, '何体か').replace(/半径\s*\{radius\}\s*の?/g, '広い範囲の').replace(/\{radius\}/g, '広い範囲').replace(/\{dur\}\s*秒/g, 'しばらく')
     .replace(/\{[a-z]+\}\s*の?/g, '').replace(/\s+/g, '');
 }
 

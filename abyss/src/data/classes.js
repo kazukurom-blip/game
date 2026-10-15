@@ -15,7 +15,7 @@ export const CLASSES = [
     weapons: ['sword', 'axe', 'mace', 'greatsword'],
     offhands: ['shield'],
     armorPref: ['plate', 'mail'],
-    baseMods: [{ s: 'inc_life', v: 20 }, { s: 'armor', v: 40 }, { s: 'block', v: 0 }, { s: 'dr', v: 12 }], // 受けるダメージ -12%: 敵を強くしたので、群れに飛び込む近接職を少し硬く
+    baseMods: [{ s: 'inc_life', v: 20 }, { s: 'armor', v: 40 }, { s: 'block', v: 0 }, { s: 'dr', v: 15 }], // 受けるダメージ -15%: 敵を強くしたので、群れに飛び込む近接職を少し硬く（初心者向け。-12% では序盤 30 分に 10 回倒れた）
     trait: {
       id: 'fury', name: '闘志',
       desc: '怒り 1 につき与えるダメージ +0.3%（最大 +30%）。怒りが 50 以上のあいだ、受けるダメージ -10%。',
@@ -51,13 +51,13 @@ export const CLASSES = [
     id: 'sorcerer',
     name: '魔導士',
     en: 'Sorcerer',
-    desc: '火・氷・雷の呪文を操る。隕石・連鎖する雷・光線で敵をまとめて焼き払う。マナは時間で回復する。ライフは低いが範囲の火力は随一。',
+    desc: '火・氷・雷の呪文を操る。隕石・連鎖する雷・光線で敵をまとめて焼き払う。マナは時間で回復する。鎧は薄いが、範囲の火力は随一。',
     primary: 'int',
     resource: { id: 'mana', name: 'マナ', max: 120, regen: 10, onHit: 0, start: 120, color: '#4a8cff' },
     weapons: ['staff', 'wand'],
     offhands: ['orb'],
     armorPref: ['cloth'],
-    baseMods: [{ s: 'inc_elemental', v: 20 }, { s: 'res_all', v: 15 }, { s: 'inc_life', v: 45 }], // 敵を強くしたので 属性 +10 → +20%・ライフ +30 → +45%・耐性 12 → 15（中盤に倒れ続け、群れも遅かったため）
+    baseMods: [{ s: 'inc_elemental', v: 30 }, { s: 'res_all', v: 15 }, { s: 'inc_life', v: 45 }], // 敵を強くしたので 属性 +10 → +30%・ライフ +30 → +45%・耐性 12 → 15（中盤に倒れ続け、物語の終わりまで他より 3 割遅かったため）
     trait: {
       id: 'surge', name: '魔力の奔流',
       desc: '呪文を 5 回唱えるごとに 4 秒間「奔流」になり、呪文のダメージ +30%・詠唱の速さ +20%。',
@@ -72,7 +72,7 @@ export const CLASSES = [
     id: 'necromancer',
     name: '死霊術師',
     en: 'Necromancer',
-    desc: '骸骨の兵と屍の巨像を呼び出し、呪い・骨の術・死体の爆発で戦う。霊気は攻撃と敵を倒すことでたまる。召喚物が壁になる。',
+    desc: '骸骨の兵と屍の巨像を呼び出し、呪い・骨の術・死体の爆発で戦う。霊気は攻撃と敵を倒すことでたまる。召喚物が近接の敵を食い止める（遠くから撃つ敵は主人公を狙う）。',
     primary: 'int',
     resource: { id: 'essence', name: '霊気', max: 100, regen: 3, onHit: 3, onKill: 3, start: 50, color: '#b47cff' },
     weapons: ['scythe', 'rod'],
@@ -99,7 +99,7 @@ export const CLASSES = [
     weapons: ['dagger', 'claw'],
     offhands: ['offblade'],
     armorPref: ['leather'],
-    baseMods: [{ s: 'crit_chance', v: 5 }, { s: 'attack_speed', v: 10 }, { s: 'dodge', v: 8 }, { s: 'inc_life', v: 20 }, { s: 'leech', v: 1.5 }, { s: 'dr', v: 15 }], // 敵が強くなったので、打たれ弱い近接職に吸収と軽減を少し
+    baseMods: [{ s: 'crit_chance', v: 5 }, { s: 'attack_speed', v: 10 }, { s: 'dodge', v: 8 }, { s: 'inc_life', v: 20 }, { s: 'leech', v: 1.5 }, { s: 'dr', v: 13 }], // 敵が強くなったので、打たれ弱い近接職に吸収と軽減を少し（15% だと素の耐久が剣闘士を超え、10% だと序盤 30 分に 9〜12 回倒れた）
     trait: {
       id: 'vital', name: '急所狙い',
       desc: 'クリティカルのたびに気力 +3。毒・出血を受けている敵へのクリティカル率 +10%。',

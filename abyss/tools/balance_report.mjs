@@ -5,7 +5,7 @@
 //   node tools/balance_report.mjs --hours=12 --stop=5 --workers=2 --classes=warrior,ranger
 //   node tools/balance_report.mjs --rebirth          … 第五章で転生して、2 周目の第五章までを測る
 //   node tools/balance_report.mjs --json=out.json    … 記録を JSON にも書く
-// 目安（docs/DESIGN.md §3）: Lv10 約 10 分 / 第一章 30〜45 分 / 第五章 6〜10 時間 / 第十章 25〜35 時間 / 壁 10〜20 分 / クラスの差 ±25%
+// 目安（docs/DESIGN.md §3）: Lv10 約 20〜25 分 / 第一章 30〜50 分 / 第五章 7〜10 時間 / 第十章 33〜43 時間 / 壁 10〜20 分 / クラスの差 ±25%
 
 import { fork } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -58,7 +58,7 @@ const pad = (s, n) => { s = String(s); let w = 0; for (const ch of s) w += ch.ch
 const median = (a) => { const s = [...a].sort((x, y) => x - y); return s.length ? s[Math.floor(s.length / 2)] : null; };
 
 console.log(`\n■ 進み具合（${hours} 時間まで・第${stop}章で止める・seed ${seed}・自動装備/自動スキル/星座盤の自動/autoBoss・${flag('craft') ? `強化あり（+${arg('enh', 10)} まで）` : 'クラフトなし'}）`);
-console.log('  目安: Lv10 約10分 / 章1 30〜45分 / 章5 6〜10h / 章10 25〜35h / 壁 10〜20分 / クラス差 ±25%\n');
+console.log('  目安: Lv10 約20〜25分 / 章1 30〜50分 / 章5 7〜10h / 章10 33〜43h / 壁 10〜20分 / クラス差 ±25%\n');
 const head = ['クラス', 'Lv10', ...Array.from({ length: stop }, (_, i) => `章${i + 1}`), '壁 中央/最大', '20分超', '倒れた', '最後'];
 console.log(head.map((h, i) => pad(h, i === 0 ? 10 : i <= stop + 1 ? 9 : 14)).join(''));
 for (const r of results) {

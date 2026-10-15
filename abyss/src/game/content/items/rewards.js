@@ -11,10 +11,11 @@ import { RARITY } from '../../../data/rarity.js';
 import { MAT_DROPS, TORMENT_ABYSSDROP } from '../../../data/materials.js';
 import { GEMS, GEM_TIERS, RUNES, LEGENDARY_GEMS } from '../../../data/gems.js';
 
+// 天井はドロップを振った回数で数える。手応えの見直しでドロップを 12% → 3.5% にしたので、天井も同じ割合で下げた
+// （400 → 120・20000 → 6000。序盤は 1 時間に約 190 回で、レジェンダリー以上の天井 約 40 分・ミシック 約 32 時間のまま）
 export const LUCK = {
-  leg: { max: 400, soft: 0.6, name: 'レジェンダリー以上' },
-  // 序盤（1 時間に約 600 回）で約 33 時間。自然に出る分と合わせて 15〜25 時間に 1 個ほど
-  myth: { max: 20000, soft: 0.6, name: 'ミシック' },
+  leg: { max: 120, soft: 0.6, name: 'レジェンダリー以上' },
+  myth: { max: 6000, soft: 0.6, name: 'ミシック' },
 };
 const LEG_PLUS = ['legendary', 'set', 'unique', 'mythic'];
 const LEG_WEIGHTS = [['legendary', 0.35], ['unique', 0.12], ['set', 0.08]];

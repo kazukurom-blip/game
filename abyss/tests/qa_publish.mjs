@@ -318,7 +318,7 @@ async function runNoStorage(browser) {
   await page.screenshot({ path: path.join(SHOTS, 'publish_nostorage_title.png') });
   await startNew(f);
   await f.click('#scene', { position: { x: 300, y: 200 } });
-  await f.waitForTimeout(2500);
+  await f.waitForFunction(() => window.__game?.state?.meta?.stats?.kills > 0, null, { timeout: 15000 }).catch(() => {}); // 最初の 1 体まで（敵を硬くしてから 2〜4 秒）
   const st = await f.evaluate(() => ({ kills: window.__game.state.meta.stats.kills, err: String(window.__lastError || '') }));
   check('B: 保存できなくても遊べる', st.kills > 0 && !st.err, `kills=${st.kills} ${st.err}`);
   await f.evaluate(() => { const g = window.__game; for (let i = 0; i < 20 * 60; i++) g.tick(0.05); });
@@ -368,7 +368,8 @@ async function runSrcdoc(browser) {
   await page.goto(`http://${HOST}/__parent_srcdoc.html`);
   const f = await frameOf(page);
   await startNew(f, 3);
-  await f.waitForTimeout(2500);
+  // 最初の 1 体を倒すまで待つ（敵を硬くしてから、最初の 1 体に 2〜4 秒かかる）
+  await f.waitForFunction(() => window.__game?.state?.meta?.stats?.kills > 0, null, { timeout: 15000 }).catch(() => {});
   const st = await f.evaluate(() => ({ kills: window.__game.state.meta.stats.kills, wide: document.documentElement.scrollWidth > window.innerWidth + 1 }));
   check('C: srcdoc の iframe（スマホ横）でも始めて戦える・横にはみ出さない', st.kills > 0 && !st.wide, JSON.stringify(st));
   await page.screenshot({ path: path.join(SHOTS, 'publish_srcdoc.png') });

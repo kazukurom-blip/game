@@ -30,7 +30,7 @@ export const ACTS = [
     theme: '灰の降る寒村・腐った森・墓地・沼・礼拝堂。灰色と枯れた茶、遠くに赤い月',
     zones: [
       { id: 'a1z1', name: '灰降る村はずれ', level: 1, desc: '灰に埋もれた畑と、戸の開いたままの家々。', monsters: ['rot_zombie', 'ash_wolf', 'grave_bat'], boss: 'boss_butcher' },
-      { id: 'a1z2', name: '腐れ森の入口', level: 3, desc: '枯れ木に白い糸が絡みつく森の入口。', monsters: ['rot_zombie', 'ash_wolf', 'bog_slime', 'carrion_spider'], boss: 'boss_widow' },
+      { id: 'a1z2', name: '腐れ森の入口', level: 3, desc: '枯れ木に白い糸が絡みつく森の入口。', monsters: ['rot_zombie', 'ash_wolf', 'bog_slime', 'carrion_spider', 'bone_archer'], boss: 'boss_widow' }, // 射手: 遠くから撃つクラスにも早めに手応えを（a1z1 は練習で近接だけ）
       { id: 'a1z3', name: '静かな墓地', level: 5, desc: '墓石がすべて内側から押し開けられている。', monsters: ['rot_zombie', 'bone_archer', 'grave_bat', 'ghoul'], elites: ['bone_archer'], boss: 'boss_gravewarden' },
       { id: 'a1z4', name: '沈む沼地', level: 7, desc: '灰の混じった黒い泥が、足をつかんで離さない。', monsters: ['bog_slime', 'ash_wolf', 'cultist', 'ash_wisp'], boss: 'boss_bogmother' },
       { id: 'a1z5', name: '灰の礼拝堂', level: 9, desc: '灰を崇める信徒たちの祈りが響く、崩れかけた礼拝堂。', monsters: ['cultist', 'bone_archer', 'rot_zombie', 'ghoul', 'ash_wisp'], elites: ['cultist'], boss: 'boss_ashlord' },

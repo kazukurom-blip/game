@@ -268,7 +268,7 @@ export function ensureFilter(state) {
   f.autoSalvage ||= { common: true, magic: true, rare: false, epic: false, legendary: false, set: false, unique: false, mythic: false };
   for (const [k, v] of Object.entries(FILTER_DEFAULTS)) if (f[k] === undefined) f[k] = Array.isArray(v) ? [...v] : v;
   if (typeof f.keepUpgrades !== 'boolean') f.keepUpgrades = true;
-  if (typeof f.autoEquip !== 'boolean') f.autoEquip = false;
+  if (typeof f.autoEquip !== 'boolean') f.autoEquip = true; // 既定はオン（state.js の newState と同じ）
   return f;
 }
 /** ルーン語に使えるソケットの数（部位ごと） */

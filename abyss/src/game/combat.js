@@ -62,6 +62,7 @@ export function sweepHit(x0, y0, x1, y1, cx, cy, r) {
 }
 // 駆け足で詰める敵（突進・自爆はそれぞれの仕組みで詰めるので含めない）
 const RUSH_ATTACKS = new Set(['melee', 'slam']);
+const SHOOTERS = new Set(['ranged', 'caster']);
 const HERO_TEAM = 'hero';
 const ENEMY_TEAM = 'enemy';
 /** 詠唱し続ける動き（動作の後、duration の間ずっと続く） */
@@ -229,7 +230,8 @@ export class Combat {
     const elite = opts.elite || [];
     let lifeMul = (def.life || 1) * rk.life * (opts.lifeMul || 1);
     let dmgMul = (def.dmg || 1) * rk.dmg * (opts.dmgMul ?? 1);
-    let speed = (def.speed || 80) * (BAL.MONSTER_SPEED || 1);
+    // 0 は動かない（柱のトーテムなど）。ため込み屋は 0 でも今まで通り 80（逃げる動きは goblins.js が足し引きする前提で合わせてある）
+    let speed = (def.speed === 0 && !def.goblin ? 0 : def.speed || 80) * (BAL.difficultyAt(L).speed || 1);
     let atkCd = def.atkCd || 1.6;
     let size = (def.size || 1) * (rank === 'champion' || rank === 'rare' ? 1.15 : 1) * (opts.sizeMul || 1);
     let element = def.element || 'phys';
@@ -856,8 +858,10 @@ export class Combat {
     if (!tgt) { u.anim.s = 'idle'; return; }
     const d = Math.abs(tgt.x - u.x);
     if (d > u.range) {
-      // 近接の敵は、遠くの相手へは駆け足で詰める（遠くから撃つクラスが一方的に倒せないように）
-      const rush = d > 260 && !u.boss && RUSH_ATTACKS.has(u.def?.attack || 'melee') ? (BAL.MONSTER_RUSH || 1) : 1;
+      // 近接の敵は遠くの相手へ、撃つ敵は射程の外から撃てる位置まで、駆け足で詰める（遠くから撃つクラスが一方的に倒せないように）
+      const atk = u.def?.attack || 'melee';
+      const far = RUSH_ATTACKS.has(atk) ? d > 260 : SHOOTERS.has(atk) && !u.isSummoner && d > u.range + 150;
+      const rush = far && !u.boss ? (u.rush ??= BAL.difficultyAt(u.level || 1).rush) : 1;
       this.walk(u, dt, u.speed * rush, tgt.x > u.x ? 1 : -1);
       // y も少し寄せる
       u.y += Math.sign(tgt.y - u.y) * Math.min(Math.abs(tgt.y - u.y), 20 * dt);
@@ -885,11 +889,13 @@ export class Combat {
   targetFor(u) {
     // 召喚物が近ければそちらを狙う（盾になる）。引きつける召喚物（巨像・猪）はもっと狙われる
     // 遠くから撃つ敵は主人公を狙いたがる（召喚物の陰に隠れていれば安全、にならないように）
-    const shooter = u.def?.attack === 'ranged' || u.def?.attack === 'caster'; // 呼び出し役（summoner）は前に出ないので含めない
+    // 呼び出し役（summoner）は前に出ないので含めない（content/world/attacks.js が出たときに attack を 'caster' に書きかえ、isSummoner を立てる）
+    const shooter = !u.isSummoner && (u.def?.attack === 'ranged' || u.def?.attack === 'caster');
     let best = null; let bd = Infinity;
     for (const a of this.heroSide()) {
       if (a.dead) continue;
-      const d = Math.abs(a.x - u.x) + (a.kind === 'hero' ? (shooter ? -260 : 40) : 0) - (a.taunt ? 220 : 0) + (a.fly ? 60 : 0);
+      // 引きつける召喚物（巨像・猪）は、撃つ敵の「主人公を狙いたがる」より強く引きつける
+      const d = Math.abs(a.x - u.x) + (a.kind === 'hero' ? (shooter ? -260 : 40) : 0) - (a.taunt ? (shooter ? 320 : 220) : 0) + (a.fly ? 60 : 0);
       if (d < bd) { bd = d; best = a; }
     }
     return best;

@@ -101,7 +101,7 @@ const paceArg = process.argv.find((a) => a.startsWith('--pace'));
 if (paceArg) {
   const PMIN = Number(paceArg.split('=')[1]) || 600;
   const only = (process.argv.find((a) => a.startsWith('--classes=')) || '').slice(10).split(',').filter(Boolean);
-  console.log(`\n── 進み具合（${PMIN} 分まで）　目安: Lv10 約10分 / 章1 30〜45分 / 章5 6〜10時間 / 章10 25〜35時間 / 壁 10〜20分`);
+  console.log(`\n── 進み具合（${PMIN} 分まで）　目安: Lv10 約20〜25分 / 章1 30〜50分 / 章5 7〜10時間 / 章10 33〜43時間 / 壁 10〜20分`);
   for (const c of CLASSES) {
     if (only.length && !only.includes(c.id)) continue;
     const r = await runLife({ cls: c.id, hours: PMIN / 60 });

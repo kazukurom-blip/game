@@ -10,7 +10,7 @@ import { statDef } from '../data/stats.js';
 import { NUM } from '../data/balance.js';
 
 // 版 2: 数字の大きさを 10 倍にした（balance.js の NUM）。古い装備の「大きくなる値」とゴールドを直す。
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3; // 3: 手応えの見直し（自動装備をオンに・更新の知らせ）
 
 export function newState(cls = 'warrior', name = '名もなき者') {
   const now = Date.now();
@@ -125,6 +125,11 @@ export function migrate(state, ref = null) {
   repairTypes(state, ref || d);
   // 版ごとの変換はここに足す
   if (v0 < 2) rescaleNumbers(state, NUM);
+  if (v0 < 3) {
+    // 敵を硬くしたので、自動装備をオンにする（前は既定がオフで、触らない放置だと最初の地域で倒れ続けた）。読み込んだときに一度だけ知らせる
+    state.inv.filter.autoEquip = true;
+    state.meta.updateNotes = [...(Array.isArray(state.meta.updateNotes) ? state.meta.updateNotes : []), 'v3'];
+  }
   state.version = SAVE_VERSION;
   return state;
 }

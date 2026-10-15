@@ -47,8 +47,9 @@ export const BAL = {
   MAX_LEVEL: 100,
   ITEM_REQ_PER_ILVL: 0.82, // 装備に要るレベル = アイテム Lv × これ − 2（ベースの要求とどちらか高い方）
   // レベル l → l+1 に必要な経験値。「同じレベルの敵を何体倒すか」で決める
-  // レベルが地域より上がりすぎると敵が弱く感じる（ユーザーの声）ので、主人公のレベルは地域のレベル +2〜3 くらいに保つ
-  killsToLevel: (l) => Math.round(48 * l ** 1.45 * Math.min(1, 0.03 + 0.024 * l)),
+  // レベルが地域より上がりすぎると敵が弱く感じる（ユーザーの声）。それは xpLevelPenalty（地域より 3 Lv 上から減らす）で抑える。
+  // ここを 40 → 48 にもしてみたが、終盤（主人公が敵より下）の伸びまで遅くなり、第十章が 49 時間になったので 40 に戻した
+  killsToLevel: (l) => Math.round(40 * l ** 1.45 * Math.min(1, 0.03 + 0.024 * l)),
   xpToNext: (l) => Math.round(BAL.killsToLevel(l) * BAL.monsterXp(l)),
   // パラゴン（Lv100 以降、上限なし）
   paragonXpToNext: (p) => Math.round(BAL.xpToNext(100) * 0.12 * (1 + p * 0.015)),
@@ -58,15 +59,21 @@ export const BAL = {
 
   // ---- 敵
   // 手応え（ユーザーの声「敵が弱すぎる・ヌルゲー」で強くした）: 序盤の敵のライフ ×2.5・攻撃 ×1.6。
-  // 序盤（Lv12 まで）は主人公の伸びが速く楽すぎたので満額、後半（Lv42 から）はもともと壁があるので ×1.3・×1.12 まで弱める
-  DIFFICULTY: { life: 2.5, dmg: 1.6, full: 12, low: 42, lowShare: 0.2 },
+  // 序盤（Lv12 まで）は主人公の伸びが速く楽すぎたので満額。Lv42 で ×1.3・×1.12 まで弱め、Lv70 からは元の強さ（終盤・魔境・裂け目はもともと壁がある。
+  // 全体に強いままだと第十章が 47 時間・魔導士が a10z4 で 13 時間止まった）
+  DIFFICULTY: { life: 2.5, dmg: 1.6, full: 12, mid: 42, midShare: 0.2, end: 70, moveFloor: 0.3 },
   difficultyAt: (L) => {
     const D = BAL.DIFFICULTY;
-    const w = Math.max(D.lowShare, Math.min(1, 1 - (1 - D.lowShare) * (L - D.full) / (D.low - D.full)));
-    return { life: 1 + (D.life - 1) * w, dmg: 1 + (D.dmg - 1) * w };
+    let w;
+    if (L <= D.full) w = 1;
+    else if (L <= D.mid) w = 1 - (1 - D.midShare) * (L - D.full) / (D.mid - D.full);
+    else w = Math.max(0, D.midShare * (1 - (L - D.mid) / (D.end - D.mid)));
+    // 足の速さ・駆け足も同じ割合で弱める。ただし終盤も 3 割は残す（離れて撃つクラスが一方的に倒せないように）
+    const wm = Math.max(w, D.moveFloor);
+    return { life: 1 + (D.life - 1) * w, dmg: 1 + (D.dmg - 1) * w, speed: 1 + (BAL.MONSTER_SPEED - 1) * wm, rush: 1 + (BAL.MONSTER_RUSH - 1) * wm };
   },
-  MONSTER_SPEED: 1.35, // 敵の足を速く（遠くから撃つクラスにも敵が届くように）
-  MONSTER_RUSH: 1.6, // 近接の敵が 260px より遠い相手へ詰めるときの足の倍率（ボスは除く）
+  MONSTER_SPEED: 1.35, // 敵の足を速く（遠くから撃つクラスにも敵が届くように）。序盤の値。後半は difficultyAt で弱める
+  MONSTER_RUSH: 1.6, // 近接の敵が 260px より遠い相手へ詰めるときの足の倍率（ボスは除く）。同上
   monsterLife: (L) => 15 * BAL.difficultyAt(L).life * P(L),
   monsterDmg: (L) => 2.5 * BAL.difficultyAt(L).dmg * P(L),
   monsterXp: (L) => 5 * (1 + 0.15 * (L - 1)) * 1.02 ** (L - 1),
@@ -134,7 +141,8 @@ export const BAL = {
   ITEM_DROP_CHANCE: 0.035, // 普通の敵 1 体あたり
   GOLD_DROP_CHANCE: 0.7, // 倒す数が減ったぶん、1 体あたりのゴールドを増やす（0.35 → 0.7）
   // レアリティの重み（普通の敵）。MF はレア以上を (1+MF/100) 倍
-  // アイテム担当が調整: 1〜1.5 体/秒でレア ≈1 分に 1 個・エピック ≈8〜10 分に 1 個（REFERENCE A09）。旧: rare 10.5・epic 2.0・legendary 0.35
+  // アイテム担当が調整した頃（アイテム率 12%）: 1〜1.5 体/秒でレア ≈1 分に 1 個・エピック ≈8〜10 分に 1 個（REFERENCE A09）。旧: rare 10.5・epic 2.0・legendary 0.35
+  // 手応えの見直しの後（3.5%）: 序盤はレア ≈3 分に 1 個・エピック ≈30 分に 1 個、レジェンダリー以上は物語全体で 4〜7 分に 1 個（幸運ゲージ込み）
   // ミシック 0.003 → 0.012（強さ担当: 1 体/秒で 15〜25 時間に 1 個。物語 1 周で 1〜2 個）
   // 「アイテムが出すぎる」で数を減らしたぶん、1 つの中身を良くする: ノーマル 56 → 30・マジック 33 → 28（レア以上はそのまま。割合は約 1.4 倍）
   RARITY_WEIGHTS: { common: 30, magic: 28, rare: 7.5, epic: 0.8, legendary: 0.45, unique: 0.12, set: 0.08, mythic: 0.012 },
