@@ -75,7 +75,7 @@ unitHooks.onMonsterHit.push((c, u, hit) => {
   if (!f) return;
   if (u._shieldT > 0) hit.dmg *= 0.15;
   if (f.stalwart) hit.dmg = Math.min(hit.dmg, u.maxLife * f.stalwart);
-  if (f.electrified && (u._elT || 0) <= c.time && c.rng.chance(f.electrified)) {
+  if (f.electrified && !hit.dot && (u._elT || 0) <= c.time && c.rng.chance(f.electrified)) { // 継続ダメージの刻みでは雷を返さない
     u._elT = c.time + 0.6;
     const h = heroAlive(c);
     if (h) {

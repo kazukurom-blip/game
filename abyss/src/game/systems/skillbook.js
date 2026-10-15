@@ -83,6 +83,13 @@ export class SkillSystem {
     h.skillResets ||= 0;
     const inv = state.inv;
     inv.glyphs = Array.isArray(inv.glyphs) ? inv.glyphs.filter((g) => g && SUPPORT[g.id]) : [];
+    // はめる決まりに合わなくなった刻印（効かない組み合わせを外した: 拡散 → 連鎖・砲台、貫き・追尾 → 弾を撃たない技）は持ち物へ戻す
+    for (const [sid, sk] of Object.entries(h.skills)) {
+      sk.supports = sk.supports.map((g) => {
+        if (g?.id && SUPPORT[g.id] && !supportFits(SUPPORT[g.id], SKILL[sid])) { inv.glyphs.push(g); return null; }
+        return g;
+      });
+    }
     inv.glyphAutoFuse ??= true;
     let maxUid = inv.nextGlyphUid || 1;
     const scan = (g) => { if (g?.uid >= maxUid) maxUid = g.uid + 1; };

@@ -1,11 +1,13 @@
-// ため込み屋（宝ゴブリン）。主人公が近づくと逃げ出し、気づかれてから 14 秒で裂け目に消える。
+// ため込み屋（宝ゴブリン）。主人公が近づくと逃げ出し、気づかれてから 14 秒（主人公が追える距離にいる間だけ数える）で裂け目に消える。
 // 2 秒ごとに 0.7 秒つまずく（自動戦闘でも追いつけるように）。倒すと種類ごとの大きな報酬（rewards.js）。
 // 見た目の出来事: { t: 'goblin', unit, kind: 'spawn' | 'flee' | 'escape' }
 
 import { unitHooks } from '../../combat.js';
 import { control } from './util.js';
 
-export const GOBLIN = { notice: 650, escapeSec: 14, speedMul: 0.42, stumbleEvery: 2.0, stumbleSec: 0.7, lifeMul: 0.75 };
+// chase: 逃げる時間（escapeSec）は、主人公がこの距離より近くにいる間だけ進む。群れの向こうから貫く矢・爆発に当たって逃げ出し、
+//        主人公が手前の群れと戦っている間に時間切れになっていた（狩人はほとんど逃がしていた）
+export const GOBLIN = { notice: 650, escapeSec: 14, speedMul: 0.42, stumbleEvery: 2.0, stumbleSec: 0.7, lifeMul: 0.75, chase: 800 };
 
 unitHooks.onSpawn.push((c, u) => {
   if (u.def?.kind !== 'goblin') return;
@@ -28,7 +30,7 @@ unitHooks.onMonsterTick.push((c, u, dt) => {
     if (d < GOBLIN.notice || u.life < u.maxLife) { g.state = 'flee'; g.t = 0; c.emit({ t: 'goblin', unit: u, kind: 'flee' }); }
     return;
   }
-  g.t += dt;
+  if (d <= GOBLIN.chase) g.t += dt;
   if (g.t >= GOBLIN.escapeSec) {
     // 逃げられた（報酬なし。すぐに消す）
     u.dead = true; u.deadT = 2; u.life = 0; u.escaped = true; u.anim = { s: 'die', t: 0 };
