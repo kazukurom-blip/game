@@ -15,7 +15,7 @@ export const CLASSES = [
     weapons: ['sword', 'axe', 'mace', 'greatsword'],
     offhands: ['shield'],
     armorPref: ['plate', 'mail'],
-    baseMods: [{ s: 'inc_life', v: 20 }, { s: 'armor', v: 40 }, { s: 'block', v: 0 }],
+    baseMods: [{ s: 'inc_life', v: 20 }, { s: 'armor', v: 40 }, { s: 'block', v: 0 }, { s: 'dr', v: 12 }], // 受けるダメージ -12%: 敵を強くしたので、群れに飛び込む近接職を少し硬く
     trait: {
       id: 'fury', name: '闘志',
       desc: '怒り 1 につき与えるダメージ +0.3%（最大 +30%）。怒りが 50 以上のあいだ、受けるダメージ -10%。',
@@ -57,7 +57,7 @@ export const CLASSES = [
     weapons: ['staff', 'wand'],
     offhands: ['orb'],
     armorPref: ['cloth'],
-    baseMods: [{ s: 'inc_elemental', v: 10 }, { s: 'res_all', v: 12 }, { s: 'inc_life', v: 30 }],
+    baseMods: [{ s: 'inc_elemental', v: 20 }, { s: 'res_all', v: 15 }, { s: 'inc_life', v: 45 }], // 敵を強くしたので 属性 +10 → +20%・ライフ +30 → +45%・耐性 12 → 15（中盤に倒れ続け、群れも遅かったため）
     trait: {
       id: 'surge', name: '魔力の奔流',
       desc: '呪文を 5 回唱えるごとに 4 秒間「奔流」になり、呪文のダメージ +30%・詠唱の速さ +20%。',
@@ -99,7 +99,7 @@ export const CLASSES = [
     weapons: ['dagger', 'claw'],
     offhands: ['offblade'],
     armorPref: ['leather'],
-    baseMods: [{ s: 'crit_chance', v: 5 }, { s: 'attack_speed', v: 10 }, { s: 'dodge', v: 6 }, { s: 'inc_life', v: 10 }],
+    baseMods: [{ s: 'crit_chance', v: 5 }, { s: 'attack_speed', v: 10 }, { s: 'dodge', v: 8 }, { s: 'inc_life', v: 20 }, { s: 'leech', v: 1.5 }, { s: 'dr', v: 15 }], // 敵が強くなったので、打たれ弱い近接職に吸収と軽減を少し
     trait: {
       id: 'vital', name: '急所狙い',
       desc: 'クリティカルのたびに気力 +3。毒・出血を受けている敵へのクリティカル率 +10%。',

@@ -60,6 +60,8 @@ export function sweepHit(x0, y0, x1, y1, cx, cy, r) {
   const t = (-b - Math.sqrt(disc)) / a;
   return t <= 1 ? t : -1;
 }
+// 駆け足で詰める敵（突進・自爆はそれぞれの仕組みで詰めるので含めない）
+const RUSH_ATTACKS = new Set(['melee', 'slam']);
 const HERO_TEAM = 'hero';
 const ENEMY_TEAM = 'enemy';
 /** 詠唱し続ける動き（動作の後、duration の間ずっと続く） */
@@ -225,7 +227,7 @@ export class Combat {
     const elite = opts.elite || [];
     let lifeMul = (def.life || 1) * rk.life * (opts.lifeMul || 1);
     let dmgMul = (def.dmg || 1) * rk.dmg * (opts.dmgMul || 1);
-    let speed = def.speed || 80;
+    let speed = (def.speed || 80) * (BAL.MONSTER_SPEED || 1);
     let atkCd = def.atkCd || 1.6;
     let size = (def.size || 1) * (rank === 'champion' || rank === 'rare' ? 1.15 : 1) * (opts.sizeMul || 1);
     let element = def.element || 'phys';
@@ -766,7 +768,9 @@ export class Combat {
     if (!tgt) { u.anim.s = 'idle'; return; }
     const d = Math.abs(tgt.x - u.x);
     if (d > u.range) {
-      this.walk(u, dt, u.speed, tgt.x > u.x ? 1 : -1);
+      // 近接の敵は、遠くの相手へは駆け足で詰める（遠くから撃つクラスが一方的に倒せないように）
+      const rush = d > 260 && !u.boss && RUSH_ATTACKS.has(u.def?.attack || 'melee') ? (BAL.MONSTER_RUSH || 1) : 1;
+      this.walk(u, dt, u.speed * rush, tgt.x > u.x ? 1 : -1);
       // y も少し寄せる
       u.y += Math.sign(tgt.y - u.y) * Math.min(Math.abs(tgt.y - u.y), 20 * dt);
       return;
@@ -792,10 +796,12 @@ export class Combat {
 
   targetFor(u) {
     // 召喚物が近ければそちらを狙う（盾になる）。引きつける召喚物（巨像・猪）はもっと狙われる
+    // 遠くから撃つ敵は主人公を狙いたがる（召喚物の陰に隠れていれば安全、にならないように）
+    const shooter = u.def?.attack === 'ranged' || u.def?.attack === 'caster'; // 呼び出し役（summoner）は前に出ないので含めない
     let best = null; let bd = Infinity;
     for (const a of this.heroSide()) {
       if (a.dead) continue;
-      const d = Math.abs(a.x - u.x) + (a.kind === 'hero' ? 40 : 0) - (a.taunt ? 220 : 0) + (a.fly ? 60 : 0);
+      const d = Math.abs(a.x - u.x) + (a.kind === 'hero' ? (shooter ? -260 : 40) : 0) - (a.taunt ? 220 : 0) + (a.fly ? 60 : 0);
       if (d < bd) { bd = d; best = a; }
     }
     return best;

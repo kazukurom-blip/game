@@ -47,7 +47,8 @@ export const BAL = {
   MAX_LEVEL: 100,
   ITEM_REQ_PER_ILVL: 0.82, // 装備に要るレベル = アイテム Lv × これ − 2（ベースの要求とどちらか高い方）
   // レベル l → l+1 に必要な経験値。「同じレベルの敵を何体倒すか」で決める
-  killsToLevel: (l) => Math.round(40 * l ** 1.45 * Math.min(1, 0.03 + 0.024 * l)),
+  // レベルが地域より上がりすぎると敵が弱く感じる（ユーザーの声）ので、主人公のレベルは地域のレベル +2〜3 くらいに保つ
+  killsToLevel: (l) => Math.round(48 * l ** 1.45 * Math.min(1, 0.03 + 0.024 * l)),
   xpToNext: (l) => Math.round(BAL.killsToLevel(l) * BAL.monsterXp(l)),
   // パラゴン（Lv100 以降、上限なし）
   paragonXpToNext: (p) => Math.round(BAL.xpToNext(100) * 0.12 * (1 + p * 0.015)),
@@ -56,8 +57,18 @@ export const BAL = {
   TREE_POINTS_PER_LEVEL: 1,
 
   // ---- 敵
-  monsterLife: (L) => 15 * P(L),
-  monsterDmg: (L) => 2.5 * P(L),
+  // 手応え（ユーザーの声「敵が弱すぎる・ヌルゲー」で強くした）: 序盤の敵のライフ ×2.5・攻撃 ×1.6。
+  // 序盤（Lv12 まで）は主人公の伸びが速く楽すぎたので満額、後半（Lv42 から）はもともと壁があるので ×1.3・×1.12 まで弱める
+  DIFFICULTY: { life: 2.5, dmg: 1.6, full: 12, low: 42, lowShare: 0.2 },
+  difficultyAt: (L) => {
+    const D = BAL.DIFFICULTY;
+    const w = Math.max(D.lowShare, Math.min(1, 1 - (1 - D.lowShare) * (L - D.full) / (D.low - D.full)));
+    return { life: 1 + (D.life - 1) * w, dmg: 1 + (D.dmg - 1) * w };
+  },
+  MONSTER_SPEED: 1.35, // 敵の足を速く（遠くから撃つクラスにも敵が届くように）
+  MONSTER_RUSH: 1.6, // 近接の敵が 260px より遠い相手へ詰めるときの足の倍率（ボスは除く）
+  monsterLife: (L) => 15 * BAL.difficultyAt(L).life * P(L),
+  monsterDmg: (L) => 2.5 * BAL.difficultyAt(L).dmg * P(L),
   monsterXp: (L) => 5 * (1 + 0.15 * (L - 1)) * 1.02 ** (L - 1),
   monsterGold: (L) => 1.5 * PG(L),
   // 敵の強さの上乗せ（ワールド担当）。物語の進み具合（DESIGN §3）に合わせる係数。主人公はレベル・スキル・パッシブで
@@ -77,8 +88,8 @@ export const BAL = {
     champion: { life: 4, dmg: 1.4, xp: 4, gold: 3, loot: 3 },
     rare: { life: 6, dmg: 1.6, xp: 6, gold: 4, loot: 4 }, // 群れの長（エリート詞つき）
     goblin: { life: 3.6, dmg: 0, xp: 3, gold: 30, loot: 12 }, // ため込み屋は逃がしにくい硬さに（6.4 → 3.6。REFERENCE 3.1）
-    boss: { life: 26, dmg: 1.7, xp: 30, gold: 25, loot: 10 },
-    actboss: { life: 52, dmg: 2.0, xp: 80, gold: 60, loot: 18 },
+    boss: { life: 26, dmg: 1.8, xp: 30, gold: 25, loot: 10 }, // 攻撃 1.7 → 1.8（ライフは DIFFICULTY で硬くなる）
+    actboss: { life: 52, dmg: 2.1, xp: 80, gold: 60, loot: 18 },
     guardian: { life: 96, dmg: 2.2, xp: 60, gold: 50, loot: 15 },
   },
   // 経験値の Lv 差の補正（低すぎる敵は少なく、自分より強い敵は多めに。先へ進みすぎて装備を着けられなくなるのを防ぐ追い上げ）
@@ -86,8 +97,9 @@ export const BAL = {
   xpLevelPenalty: (heroLvl, L) => {
     const d = heroLvl - L;
     if (d < 0) return 1 + Math.min(BAL.XP_CATCHUP.max, -d * BAL.XP_CATCHUP.per);
-    if (d <= 5) return 1;
-    return Math.max(0.05, 1 - (d - 5) * 0.08);
+    // 地域より 2 Lv 上までは満額。そこから 1 Lv ごとに −20%（上がりすぎると敵が弱く感じる。ユーザーの声「ヌルゲー」）
+    if (d <= 2) return 1;
+    return Math.max(0.05, 1 - (d - 2) * 0.2);
   },
 
   // ---- 苦行（物語クリア後の難易度。0 = 通常）
@@ -118,12 +130,14 @@ export const BAL = {
   }),
 
   // ---- ドロップ
-  ITEM_DROP_CHANCE: 0.12, // 普通の敵 1 体あたり
-  GOLD_DROP_CHANCE: 0.35,
+  // ユーザーの声「アイテムが出すぎる」で減らした（0.12 → 0.035。敵が硬くなり倒す数も減るので、1 分あたりは約 1/5）
+  ITEM_DROP_CHANCE: 0.035, // 普通の敵 1 体あたり
+  GOLD_DROP_CHANCE: 0.7, // 倒す数が減ったぶん、1 体あたりのゴールドを増やす（0.35 → 0.7）
   // レアリティの重み（普通の敵）。MF はレア以上を (1+MF/100) 倍
   // アイテム担当が調整: 1〜1.5 体/秒でレア ≈1 分に 1 個・エピック ≈8〜10 分に 1 個（REFERENCE A09）。旧: rare 10.5・epic 2.0・legendary 0.35
   // ミシック 0.003 → 0.012（強さ担当: 1 体/秒で 15〜25 時間に 1 個。物語 1 周で 1〜2 個）
-  RARITY_WEIGHTS: { common: 56, magic: 33, rare: 7.5, epic: 0.8, legendary: 0.45, unique: 0.12, set: 0.08, mythic: 0.012 },
+  // 「アイテムが出すぎる」で数を減らしたぶん、1 つの中身を良くする: ノーマル 56 → 30・マジック 33 → 28（レア以上はそのまま。割合は約 1.4 倍）
+  RARITY_WEIGHTS: { common: 30, magic: 28, rare: 7.5, epic: 0.8, legendary: 0.45, unique: 0.12, set: 0.08, mythic: 0.012 },
   // レジェンダリー以上（ミシックを除く）の重みの倍率。アイテム Lv 1 で ×0.58、50 で ×4.25、100 で ×8（それ以上は伸びない）
   legendaryBoost: (ilvl) => 0.5 + 0.075 * Math.min(100, Math.max(1, ilvl)),
   // エピックの重みの倍率（終盤は倒す速さが落ちるので少しだけ増やす）

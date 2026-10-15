@@ -502,11 +502,12 @@ t('敵の強さの曲線: Lv 100 で頭打ち・単調に増える', () => {
   for (let L = 1; L <= 100; L++) { const s = BAL.monsterScale(L); ok(s.life >= prev && s.dmg >= 1, `L${L}`); prev = s.life; }
   ok(BAL.monsterScale(150).life === BAL.monsterScale(100).life, 'cap');
 });
-t('20 分の放置で第一章を進める（剣闘士）', () => {
+// 敵を硬くした（ユーザーの声「ヌルゲー」）ので 20 分 → 25 分。3 つ目の地域に入っていること
+t('25 分の放置で第一章を進める（剣闘士）', () => {
   const g = newGame('warrior', 7);
   g.state.inv.filter.autoEquip = true;
   g.state.meta.unlocks.autoBoss = true;
-  for (let m = 0; m < 20; m++) { run(g, 60); for (const id of Object.keys(g.state.hero.skills)) while (g.sys.skills.canLevel(id)) g.sys.skills.levelUp(id); }
+  for (let m = 0; m < 25; m++) { run(g, 60); for (const id of Object.keys(g.state.hero.skills)) while (g.sys.skills.canLevel(id)) g.sys.skills.levelUp(id); }
   ok(g.state.hero.level >= 8 && g.state.world.maxZone >= 2, `Lv${g.state.hero.level} zone ${g.state.world.maxZone}`);
 });
 

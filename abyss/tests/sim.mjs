@@ -86,10 +86,10 @@ for (const c of CLASSES) {
   const ok = s.hero.level > 1 && s.meta.stats.kills > 0;
   if (!ok) bad++;
   console.log(`${c.id.padEnd(12)} Lv${s.hero.level} 到達 ${ZONES[s.world.maxZone]?.name} 撃破 ${s.meta.stats.kills} 死亡 ${deaths} 金 ${fmt(s.meta.gold)} 発見 ${JSON.stringify(s.meta.stats.itemsFound)} (${Date.now() - t0}ms)\n   ${rows.join(' / ')}`);
-  // 目安: 20 分で Lv8 以上・第一章の 3 つ目の地域まで（DESIGN §3 の Lv10 約 10 分・第一章 30〜45 分の手前）
+  // 目安: 20 分で Lv8 以上・第一章の 2 つ目の地域まで（敵を硬くしてから。DESIGN §3）
   if (MIN >= 20) {
     const zi = s.world.maxZone;
-    if (s.hero.level < 8 || zi < 2) { bad++; console.log(`✘ ${c.id}: 序盤が遅い（Lv${s.hero.level}・地域 ${zi + 1}）`); }
+    if (s.hero.level < 8 || zi < 1) { bad++; console.log(`✘ ${c.id}: 序盤が遅い（Lv${s.hero.level}・地域 ${zi + 1}）`); }
     if (zi >= 10) { bad++; console.log(`✘ ${c.id}: 序盤が速すぎる（${MIN} 分で地域 ${zi + 1}）`); }
   }
 }

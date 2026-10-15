@@ -19,10 +19,11 @@ export const MATERIAL = Object.fromEntries(MATERIALS.map((m) => [m.id, m]));
 
 /** 分解したときに出る素材（レアリティごと）。[素材, 最小, 最大] */
 export const SALVAGE = {
-  common: [['scrap', 1, 2]],
-  magic: [['dust', 1, 2], ['scrap', 1, 2]],
-  rare: [['crystal', 1, 1], ['dust', 1, 2]],
-  epic: [['crystal', 2, 3], ['dust', 2, 3]],
+  // アイテムが減ったぶん、1 つあたりの素材を増やす（ノーマル・マジック・レア・エピックはおよそ 2 倍）
+  common: [['scrap', 2, 4]],
+  magic: [['dust', 2, 4], ['scrap', 2, 3]],
+  rare: [['crystal', 2, 2], ['dust', 2, 4]],
+  epic: [['crystal', 4, 5], ['dust', 4, 5]],
   legendary: [['echo', 1, 1], ['crystal', 1, 2]],
   set: [['echo', 1, 1], ['crystal', 1, 2]],
   unique: [['echo', 1, 2], ['crystal', 1, 2]],

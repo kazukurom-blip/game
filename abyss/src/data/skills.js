@@ -604,9 +604,9 @@ export const SKILLS = [
   // 影刃（気力）: 二刀・毒・分身・踏み込み・クリティカル
   // =====================================================================
   {
-    id: 'a_stab', cls: 'assassin', kind: 'basic', name: '連刃', desc: '素早く切りつけ {dmg} のダメージ。',
+    id: 'a_stab', cls: 'assassin', kind: 'basic', name: '連刃', desc: '素早く切りつけ、半径 {radius} の敵に {dmg} のダメージ。',
     tags: ['attack', 'melee'], element: 'phys', unlock: 1, basic: true, behavior: 'melee',
-    cost: 0, cd: 0, castTime: 0.38, dmg: [92, 4], range: 100, radius: 40,
+    cost: 0, cd: 0, castTime: 0.38, dmg: [92, 4], range: 100, radius: 65, // 半径 40 → 65（隣の敵にも当たる。序盤に囲まれて倒れ続けたため）
     runes: [
       R('venom', '毒刃', '毒ダメージになり、40% の確率で毒を与える', POIS(0.4)),
       R('twin', '双刃', '2 回切りつける（1 回 ×0.6）', { dmgMul: 0.6, extra: { hits: 2 } }),
@@ -617,7 +617,7 @@ export const SKILLS = [
   {
     id: 'a_fan', cls: 'assassin', kind: 'active', name: '刃の扇', desc: '周りに刃をばらまき、半径 {radius} に {dmg} のダメージ。35% の確率で出血させる。',
     tags: ['attack', 'area'], element: 'phys', unlock: 1, behavior: 'nova',
-    cost: 22, cd: 0, castTime: 0.5, dmg: [115, 5.5], radius: 160, status: { id: 'bleed', chance: 0.35 },
+    cost: 18, cd: 0, castTime: 0.5, dmg: [115, 5.5], radius: 160, status: { id: 'bleed', chance: 0.35 }, // 消費 22 → 18
     runes: [
       R('shadow', '影の扇', '虚無ダメージになり、ダメージ ×1.1', { element: 'void', dmgMul: 1.1 }),
       R('poison', '毒の扇', '毒ダメージになり、50% の確率で毒を与える', POIS(0.5)),

@@ -9,7 +9,7 @@
 // 苦行（物語クリア後）では地域のボスが「門の欠片」を落とす（GATE_GROUPS）。
 
 export const STAGES_PER_ZONE = 10;
-export const WAVES_PER_STAGE = 20;
+export const WAVES_PER_STAGE = 15; // 敵を硬くしたぶん 20 → 15（1 ステージの長さをおよそ保つ）
 export const BOSS_TIME = 30; // ボスの制限時間（秒）。章のボスは ×1.8、深淵王は ×2.5
 export const ACT_BOSS_TIME_MUL = 1.8;
 export const FINAL_BOSS_TIME_MUL = 2.5;

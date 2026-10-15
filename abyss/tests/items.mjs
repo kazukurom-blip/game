@@ -212,7 +212,8 @@ t('幸運ゲージ: 天井で必ずレジェンダリー以上・ミシック', 
 });
 t('幸運ゲージ: 戦闘で進み、オフラインでも進む', () => {
   const g = newGame('necromancer', 33);
-  for (let i = 0; i < 20 * 120; i++) g.tick(0.05);
+  // ドロップを減らしたので（ITEM_DROP_CHANCE 0.035）、4 分戦えば必ず何か出る
+  for (let i = 0; i < 20 * 240; i++) g.tick(0.05);
   ok(g.state.inv.luck.rolls > 0, 'rolls');
   const before = g.state.inv.luck.rolls;
   const rep = g.sys.offline.grant(6 * 3600, { reason: 'offline' });

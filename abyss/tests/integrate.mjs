@@ -570,13 +570,17 @@ await t('セーブの大きさ: 遊ぶほど増え続ける所が無い（2 時�
   for (const id of ['auto_skill', 'auto_boss', 'auto_salvage', 'auto_hatch', 'auto_bounty']) st.meta.upgrades[id] = 1;
   g.sys.prestige.applyUnlocks();
   const H = QUICK ? 1 : 2;
+  // バッグと倉庫は上限まで埋まると止まる（ドロップが少ないと 30 分ではまだ埋まりきらず、伸びを大きく見積もってしまう）ので別に調べる
+  const size = () => { const snap = g.snapshot(); return JSON.stringify({ ...snap, inv: { ...snap.inv, bag: [], stash: [] } }).length; };
   run(g, 1800);
-  const s0 = JSON.stringify(g.snapshot()).length;
+  const s0 = size();
   for (let h = 0; h < H; h++) { run(g, 3600 - (h === 0 ? 1800 : 0)); g.sys.offline.grant(8 * 3600); }
-  const s1 = JSON.stringify(g.snapshot()).length;
+  const s1 = size();
+  ok(st.inv.bag.length <= st.inv.bagSize && st.inv.stash.every((tab) => tab.length <= st.inv.stashTabSize), `バッグ ${st.inv.bag.length}/${st.inv.bagSize}`);
+  const full = JSON.stringify({ inv: { bag: Array.from({ length: st.inv.bagSize }, () => st.inv.bag[0] || null), stash: st.inv.stash.map(() => Array.from({ length: st.inv.stashTabSize }, () => st.inv.bag[0] || null)) } }).length;
   const perHour = Math.max(0, (s1 - s0) / (H - 0.5));
-  const est50 = s1 + perHour * 50;
-  ok(est50 < 1024 * 1024, `30 分 ${Math.round(s0 / 1024)}KB → ${H} 時間 ${Math.round(s1 / 1024)}KB、50 時間の見積もり ${Math.round(est50 / 1024)}KB`);
+  const est50 = s1 + perHour * 50 + full; // バッグと倉庫は満杯の大きさで足す
+  ok(est50 < 1024 * 1024, `30 分 ${Math.round(s0 / 1024)}KB → ${H} 時間 ${Math.round(s1 / 1024)}KB（バッグと倉庫を除く）、満杯のバッグと倉庫 ${Math.round(full / 1024)}KB、50 時間の見積もり ${Math.round(est50 / 1024)}KB`);
   // 上限のある記録
   ok((st.world.rift.history || []).length <= 30 && (st.meta.prestige.history || []).length <= 50 && (st.meta.ach?.unseen || []).length <= 300);
 });
