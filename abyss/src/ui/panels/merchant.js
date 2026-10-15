@@ -103,13 +103,16 @@ function renderMythic(ui, el) {
   for (const m of MYTHICS) {
     const p = registry.power(m.power);
     const owned = g.state.meta.collection.mythics?.[m.id];
+    const lv = g.sys.merchant.exchangeLevel(m.id);
+    const low = g.state.hero.level < lv.req;
     cards.append(h('div.ik-mcard', [
       h('div.nm', m.name),
       h('div.sl', `${SLOT_NAMES[m.slot]}${owned ? `・手に入れた ${owned}` : ''}`),
+      h(`div.sl${low ? '.bad' : ''}`, `アイテム Lv ${lv.ilvl}・必要 Lv ${lv.req}${low ? '（まだ着けられない）' : ''}`),
       p ? h('div.ds', p.desc(registry.powerValue(m.power, 0.5))) : null,
       h('div.ik-flavor', `「${m.flavor}」`),
       button('これと交換', async () => {
-        const okk = await ui.confirm(`極致の核 ${MYTHIC_COST.core}・伝説の残響 ${MYTHIC_COST.echo} で「${m.name}」と交換します。`, '交換する');
+        const okk = await ui.confirm(`極致の核 ${MYTHIC_COST.core}・伝説の残響 ${MYTHIC_COST.echo} で「${m.name}」と交換します。${low ? `着けるには Lv ${lv.req} が必要です（いま Lv ${g.state.hero.level}）。` : ''}`, '交換する');
         if (!okk) return;
         const r = g.sys.merchant.exchangeMythic(m.id);
         ui.toast(r.ok ? `ミシック「${m.name}」を手に入れた！` : r.msg, r.ok ? 'r-mythic' : 'bad');

@@ -97,7 +97,7 @@ export function itemCard(game, item, opts = {}) {
         // 指輪は着けるときと同じく、入れ替えて強くなる方（弱い方）の指輪と比べる
         const c = game.sys.inv.compare(item);
         const cur = game.state.hero.equip[c.slot];
-        const title = !cur ? '装備すると' : item.slot === 'ring' ? `今の${SLOT_NAMES[c.slot]}と比べると` : '今の装備と比べると';
+        const title = !cur ? '装備すると' : item.slot === 'ring' ? `今の${SLOT_NAMES[c.slot]} と比べると` : '今の装備と比べると';
         card.append(h('div.ic-compare', [
           h('div.cmp-title', title),
           h('div.cmp-row', [deltaSpan('火力', c.dpsPct), deltaSpan('耐久', c.ehpPct)]),

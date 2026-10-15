@@ -113,7 +113,7 @@ if (want('node')) {
     g.state.hero.equip.ring1 = strong; g.state.hero.equip.ring2 = weak; g.onGearChanged();
     const inv = g.sys.inv;
     const c2 = inv.compare(cand, 'ring2');
-    ok(c2.dpsPct > 5, `右と比べると強い ${c2.dpsPct.toFixed(1)}`);
+    ok(c2.dpsPct > 5, `指輪 2 と比べると強い ${c2.dpsPct.toFixed(1)}`);
     const c = inv.compare(cand);
     ok(c.slot === 'ring2', `比べる枠 ${c.slot}`);
     ok(Math.abs(c.dpsPct - c2.dpsPct) < 1e-9, '弱い方との差');
@@ -346,6 +346,18 @@ if (want('node')) {
     ok(g2.state.meta.rates.gold === 20, `放置の稼ぎ ${g2.state.meta.rates.gold}`);
   });
 
+  // ---------------- QA-I21 ミシックの交換: 着けられないレベルの物でも何も知らせずに交換できる（Lv30 で必要 Lv47 の物）
+  t('I21 ミシックの交換: 交換の前に出す必要 Lv = 手に入った物の必要 Lv', () => {
+    const g = richGame('ranger', 30);
+    ok(typeof g.sys.merchant.exchangeLevel === 'function', 'exchangeLevel');
+    for (const id of ['m_fate', 'm_starmaw', 'm_voidwalk']) {
+      const lv = g.sys.merchant.exchangeLevel(id);
+      const r = g.sys.merchant.exchangeMythic(id);
+      ok(r.ok, r.msg);
+      ok(r.item.ilvl === lv.ilvl && ITEMS.itemReq(r.item) === lv.req, `${id}: 表示 ${lv.ilvl}/${lv.req} 実際 ${r.item.ilvl}/${ITEMS.itemReq(r.item)}`);
+    }
+  });
+
   // ---------------- QA-I13 比べの火力が「基本攻撃だけ」で、召喚・呪文のビルドで装備の良し悪しが出ない
   t('I13 比べの火力はスキルの並び全体（召喚物のダメージ % で死霊術師の火力が上がる）', () => {
     const g = newGame('necromancer', 3);
@@ -441,7 +453,7 @@ if (want('ui')) {
       const it = generateItem(g.rng, { ilvl: 30, rarity: 'rare', slot: 'ring' }); g.state.inv.bag.push(it); return it.uid;
     });
     const txt = await cardText(uid);
-    ok(/今の指輪 [12]と比べると/.test(txt), txt.slice(-80));
+    ok(/今の指輪 [12] と比べると/.test(txt), txt.slice(-80));
   });
 
   await ta('I02 図鑑: 発見率の「実際の効き」の説明が数と食い違わない', async () => {
@@ -493,6 +505,21 @@ if (want('ui')) {
     await page.evaluate(() => { const b = [...document.querySelectorAll('.modal .modal-foot button')].find((e) => /やめる|キャンセル|閉じる/.test(e.textContent)); if (b) b.click(); else document.querySelector('.modal .modal-x')?.click(); });
     await page.waitForTimeout(150);
     await click('やめる');
+  });
+
+  await ta('I22 次の目標の手段: ゴールドが足りないときは「宝石を合成できる」と出さない', async () => {
+    const r = await page.evaluate(async () => {
+      const g = window.__game; const { hints } = await import('/src/ui/goals.js');
+      const keep = g.state.meta.gold;
+      g.state.inv.gems = { ember_6: 3 };
+      g.state.meta.gold = 10;
+      const poor = hints(g, { max: 20 }).some((x) => /宝石を合成/.test(x.text));
+      g.state.meta.gold = 1e12;
+      const rich = hints(g, { max: 20 }).some((x) => /宝石を合成/.test(x.text));
+      g.state.meta.gold = keep;
+      return { poor, rich };
+    });
+    ok(!r.poor && r.rich, JSON.stringify(r));
   });
 
   ok(true);

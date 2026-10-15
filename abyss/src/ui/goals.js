@@ -7,6 +7,7 @@ import { BAL } from '../data/balance.js';
 import { MONSTER } from '../data/monsters.js';
 import { fmt, fmtTime, roman } from '../engine/format.js';
 import { nextFeature, isOpen } from './unlocks.js';
+import { gemCombineGold } from '../data/gems.js';
 
 let upCache = { key: '', n: 0, t: -1e9 };
 
@@ -75,7 +76,8 @@ export function hints(game, { max = 3 } = {}) {
     } catch { /* 無視 */ }
   }
   const gm = st.inv.gems || {};
-  if (isOpen(game, 'gems') && Object.entries(gm).some(([k, v]) => v >= 3 && !/_10$/.test(k))) out.push({ text: '宝石を合成できる（3 つで 1 段上）', panel: 'gems' });
+  // ゴールドが足りる物だけ（合成の費用は段で増える）
+  if (isOpen(game, 'gems') && Object.entries(gm).some(([k, v]) => { const t = Number(k.split('_').pop()); return v >= 3 && t < 10 && gemCombineGold(t) <= (st.meta.gold || 0); })) out.push({ text: '宝石を合成できる（3 つで 1 段上）', panel: 'gems' });
   const bc = game.sys.bounties?.claimable?.() || 0;
   if (bc > 0 && isOpen(game, 'bounties')) out.push({ text: `日課の報酬を ${bc} つ受け取れる`, panel: 'bounties' });
   return out.slice(0, max);
