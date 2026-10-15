@@ -577,7 +577,7 @@ export class Combat {
     return Math.max(650, b && b.range > 200 ? b.range + 40 : 0);
   }
 
-  /** 近くの敵の数（主人公から横に r 以内） */
+  /** 近くの敵の数（h〔主人公・敵〕から横に r 以内） */
   countNear(h, r) {
     let n = 0;
     for (const u of this.units) if (u.team === ENEMY_TEAM && !u.dead && Math.abs(u.x - h.x) <= r) n++;
@@ -585,7 +585,11 @@ export class Combat {
   }
 
   condOk(cond, h, target, enemies, p, ctx = {}) {
-    const near = (r) => this.countNear(h, r);
+    // 「敵が N 体以上」「大群」は、遠くへ撃つ技（矢の雨・扇射ちなど）なら狙う敵のまわり、主人公のまわりの技（環・強化など）なら主人公のまわりで数える
+    // （以前は主人公のまわりだけで、離れて撃つクラスは群れが寄ってくるまで使わなかった）
+    const r0 = this.reach(p, 1);
+    const at = target && Number.isFinite(r0) && r0 > 300 ? target : h;
+    const near = (r) => this.countNear(at, r);
     switch (cond) {
       case 'elite': if (!(target.rank !== 'normal' || target.boss || near(450) >= 5)) return false; break;
       case 'boss': if (!target.boss) return false; break;

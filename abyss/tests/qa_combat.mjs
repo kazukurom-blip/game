@@ -313,5 +313,17 @@ t('並びから基本攻撃を外しても、覚えている基本攻撃で戦�
   ok(c.stats.dmgDone - d0 > 0, '30 秒後から何もしていない');
 });
 
+t('自動の条件「敵が 3 体以上」: 遠くへ撃つ技は、狙う群れのまわりで数える（離れて撃つクラスでも使われる）', () => {
+  const L = 30;
+  const g = kitted('ranger', L, { bar: ['r_snipe', 'r_volley'] });
+  g.state.hero.autocast.r_volley = { cond: 'pack3' };
+  const c = g.combat; const h = c.hero;
+  c.clearEnemies();
+  for (let i = 0; i < 6; i++) { const u = c.spawnMonster('rot_zombie', { level: L, x: h.x + 560 + i * 25, y: (i % 3 - 1) * 15, lifeMul: 1e6, dmgMul: 0 }); u.statuses.stun = { t: 999 }; }
+  const casts = countCasts(g);
+  tick(g, 10);
+  ok((casts.r_volley || 0) >= 2, `矢の雨 ${casts.r_volley || 0} 回`);
+});
+
 console.log(`qa_combat: ${pass} 通過 / ${fail} 失敗`);
 if (fail) process.exit(1);
