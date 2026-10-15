@@ -5,7 +5,7 @@
 //   .end(c, h, p, ch)               … 詠唱し続ける技の終わり
 // 出す見た目の出来事（fx）は game/content/combat.js の先頭の一覧を参照。
 
-import { behaviors, pullTo, spawnCloneAt } from '../../combat.js';
+import { behaviors, pullTo, spawnCloneAt, TRAP_LEAD } from '../../combat.js';
 
 const HERO = 'hero';
 const dirTo = (h, t) => (t ? (t.x >= h.x ? 1 : -1) : h.face || 1);
@@ -205,7 +205,10 @@ behaviors.trap = (c, h, p, target) => {
   const mine = c.areas.filter((a) => a.kind === 'trap' && a.p?.id === p.id && !a.dead);
   while (mine.length >= p.count) { const old = mine.shift(); old.dead = true; }
   const dir = dirTo(h, target);
-  const dist = target ? Math.min(p.range || 380, Math.abs(target.x - h.x) - 30) : 200;
+  // 歩いてくる敵には通り道（少し手前）、止まっている敵には足元、逃げる敵には少し先へ投げる
+  const motion = target ? c.motionOf(target, h) : 1;
+  const lead = motion > 0 ? -30 : motion < 0 ? TRAP_LEAD : 0;
+  const dist = target ? Math.min(p.range || 380, Math.abs(target.x - h.x) + lead) : 200;
   const x = h.x + dir * Math.max(60, dist);
   const y = target ? target.y : h.y;
   const a = c.spawnArea({ team: HERO, kind: 'trap', x, y, r: p.radius || 130, delay: p.delay || 0.4, life: p.duration || 12, trigger: (p.radius || 130) * 0.55, p, src: h, el: p.element });

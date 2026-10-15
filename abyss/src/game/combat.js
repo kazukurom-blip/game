@@ -70,6 +70,8 @@ export const CHANNEL_BEHAVIORS = new Set(['whirl', 'beam', 'flurry']);
 export const OUT_OF_COMBAT_REGEN = 0.06;
 /** 近接のクラスが離れた敵へ駆け寄るときの速さの倍率 */
 export const MELEE_RUSH = 2.5;
+/** 逃げる敵へ罠を投げるとき、敵の少し先へ置く距離（仕掛かるまでの間に敵が進む分） */
+export const TRAP_LEAD = 25;
 
 // ---------------- 状態異常
 export const statusDefs = {
@@ -226,7 +228,7 @@ export class Combat {
     const rk = BAL.RANK[rank] || BAL.RANK.normal;
     const elite = opts.elite || [];
     let lifeMul = (def.life || 1) * rk.life * (opts.lifeMul || 1);
-    let dmgMul = (def.dmg || 1) * rk.dmg * (opts.dmgMul || 1);
+    let dmgMul = (def.dmg || 1) * rk.dmg * (opts.dmgMul ?? 1);
     let speed = (def.speed || 80) * (BAL.MONSTER_SPEED || 1);
     let atkCd = def.atkCd || 1.6;
     let size = (def.size || 1) * (rank === 'champion' || rank === 'rare' ? 1.15 : 1) * (opts.sizeMul || 1);
@@ -376,7 +378,14 @@ export class Combat {
     if (u.team === ENEMY_TEAM) {
       const res = Math.max(-100, Math.min(90, (u.res[element] || 0) - (this.H?.resPen || 0)));
       amount *= 1 - res / 100;
-      amount *= this.takenMul(u);
+      amount *= this.takenMul(u) * (1 - (u.dr || 0));
+      // 毒・炎上・出血も、敵の守り（鋼鉄・結界・ボスの障壁・無敵の間など）を通す（hit.dot = true の刻み）
+      if (unitHooks.onMonsterHit.length) {
+        const hit = { src: src || this.hero, target: u, dmg: amount, crit: false, element, skill: null, tags: ['dot'], dot: true };
+        runHooks(unitHooks.onMonsterHit, this, u, hit);
+        amount = hit.dmg;
+        if (!(amount > 0)) return;
+      }
       u.dotAcc = (u.dotAcc || 0) + amount;
       u.life -= amount;
       this.stats.dmgDone += amount;
@@ -451,13 +460,20 @@ export class Combat {
     const d = Math.abs(target.x - h.x);
     // スキルを選ぶ（バーの左から。基本攻撃は最後）
     const choice = this.chooseSkill(h, target, d, enemies);
-    if (choice) {
-      this.startCast(h, choice.p, target);
+    const basic = this.basicSkill();
+    let want = basic ? Math.max(60, basic.range * 0.9) : 100;
+    // 待っていても近づいてこない敵（逃げるため込み屋・離れて撃つ敵・召喚物と戦う敵）には、使える技が届く所まで寄る。
+    // 基本攻撃の射程の端に立ったままだと、射程の短い技（扇射ち・矢の雨・砲台・罠など）がいつまでも使えない
+    // 逃げる敵には、強化・召喚（距離を問わない）のほかは、寄ってから使う
+    const close = choice?.far ? this.reach(choice.far, choice.motion) * 0.9 : 0;
+    if (close > 0 && close < want) want = close;
+    const p = choice?.p;
+    const walkFirst = close > 0 && d > close && p && (p.basic || (choice.motion < 0 && Number.isFinite(this.reach(p, choice.motion))));
+    if (p && !walkFirst) {
+      this.startCast(h, p, target);
       return;
     }
     // 近づく（近接のクラスは離れた敵へ駆け寄る）
-    const basic = this.basicSkill();
-    const want = basic ? Math.max(60, basic.range * 0.9) : 100;
     if (d > want) {
       const rush = CLASS[this.state.hero.cls]?.range === 'melee' && d > want + 60 ? MELEE_RUSH : 1;
       this.walk(h, dt, H.move * rush, target.x > h.x ? 1 : -1);
@@ -467,7 +483,18 @@ export class Combat {
   basicSkill() {
     const bar = this.state.hero.bar;
     for (const id of bar) { const def = SKILL[id]; if (def?.basic && this.state.hero.skills[id]) return this.params(id); }
-    return bar[0] && SKILL[bar[0]] ? this.params(bar[0]) : null;
+    return this.fallbackBasic() || (bar[0] && SKILL[bar[0]] ? this.params(bar[0]) : null);
+  }
+
+  /**
+   * 並びに基本攻撃が無いとき（基本の枠を外した・技を入れた）に使う、覚えている基本攻撃（レベルの高い物）。
+   * 基本攻撃はリソースを使わず、いつでも使える。無いと怒りのたまらない剣闘士などが何もできずに止まる
+   */
+  fallbackBasic() {
+    const sk = this.state.hero.skills;
+    let best = null;
+    for (const id in sk) { if (SKILL[id]?.basic && sk[id]?.lvl > 0 && (!best || sk[id].lvl > sk[best].lvl)) best = id; }
+    return best ? this.params(best) : null;
   }
 
   chooseSkill(h, target, d, enemies) {
@@ -487,6 +514,8 @@ export class Combat {
         return { p };
       }
     }
+    // 今使える技（待ち時間・リソース・条件。射程はまだ問わない）を並びの順に集める
+    const usable = [];
     for (const id of st.bar) {
       if (!id || !st.skills[id]) continue;
       const def = SKILL[id];
@@ -499,14 +528,58 @@ export class Combat {
       if ((h.cds[id] || 0) > 0) continue;
       if (p.cost > 0 && h.resource < p.cost) continue;
       if (!this.condOk(ac?.cond || p.auto, h, target, enemies, p, ctx)) continue;
-      if (!this.inRange(p, h, target, d)) continue;
-      return { p };
+      usable.push(p);
     }
-    if (basic && this.inRange(basic, h, target, d)) return { p: basic };
-    return null;
+    basic ||= this.fallbackBasic();
+    // 射程の中の技を左から。ただし待ち時間の無い消費の技（扇射ちなど）は、それを使うとリソースが足りなくなる
+    // 右の待ち時間の技（矢の雨など）に先を譲る（左の技がリソースを使い続けて、右の技がいつまでも使われないのを防ぐ）
+    let pick = null;
+    for (const p of usable) {
+      if (!this.inRange(p, h, target, d)) continue;
+      if (!pick) { pick = p; if (!(p.cd <= 0 && p.cost > 0)) break; continue; }
+      if (p.cd > 0 && p.cost > 0 && h.resource - pick.cost < p.cost) { pick = p; break; }
+    }
+    // 寄れば使える技（近づいてこない敵だけ。基本攻撃の射程の半分より遠くまで届く技。近くでしか当たらない爆発・回る刃のためには寄らない）
+    //   止まっている敵 … 使う技より左にある、射程の外の技（基本攻撃の射程の端に立ったまま、扇射ち・砲台・罠などが使えないのを防ぐ）
+    //   逃げる敵       … 射程の外の技のうち一番近くでしか使えない技（ため込み屋に全部の技を当てる）
+    const motion = this.motionOf(target, h);
+    // 逃げる敵には、届くうちに使わないと使えなくなる技（一番近くでしか使えない技）から使う
+    if (motion < 0 && pick) {
+      let best = null;
+      for (const p of usable) if (this.inRange(p, h, target, d) && (!best || this.reach(p, motion) < this.reach(best, motion))) best = p;
+      if (best) pick = best;
+    }
+    let far = null;
+    if (motion <= 0 && basic) {
+      const minR = this.reach(basic, motion) * 0.5;
+      for (const p of usable) {
+        if (this.inRange(p, h, target, d)) { if (motion === 0 && p === pick) break; continue; }
+        const r = this.reach(p, motion);
+        if (motion === 0) { if (r >= minR) far = p; break; }
+        if (r >= minR && (!far || r < this.reach(far, motion))) far = p;
+      }
+    }
+    if (pick) return { p: pick, far: motion < 0 ? far : null, motion };
+    if (basic && this.inRange(basic, h, target, d)) return { p: basic, far, motion };
+    return far ? { p: null, far, motion } : null;
   }
 
-  /** 近くの敵の数（主人公から横に r 以内） */
+  /** 敵の動き: 1 = こちらへ歩いてくる（待っていれば射程に入る）/ -1 = 離れていく（逃げる）/ 0 = 止まっている */
+  motionOf(u, h) {
+    if (!u || u.dead || !h) return 0;
+    if (u.goblin) return u.goblin.state === 'flee' ? -1 : 0; // ため込み屋は逃げ出したら、つまずいて止まっている間も「逃げる敵」
+    if (u.ctl) return u.ctl.kind === 'dash' ? 1 : 0;
+    if (u.anim?.s !== 'walk' || this.isFrozen(u)) return 0; // 凍結・気絶の間は歩く姿のまま止まっている
+    return (u.face || 0) === (h.x >= u.x ? 1 : -1) ? 1 : -1;
+  }
+
+  /** 召喚物が主人公から離れて戦ってよい距離（主人公の基本攻撃が届く所までは助けに行く） */
+  minionLeash() {
+    const b = this.basicSkill();
+    return Math.max(650, b && b.range > 200 ? b.range + 40 : 0);
+  }
+
+  /** 近くの敵の数（h〔主人公・敵〕から横に r 以内） */
   countNear(h, r) {
     let n = 0;
     for (const u of this.units) if (u.team === ENEMY_TEAM && !u.dead && Math.abs(u.x - h.x) <= r) n++;
@@ -514,7 +587,11 @@ export class Combat {
   }
 
   condOk(cond, h, target, enemies, p, ctx = {}) {
-    const near = (r) => this.countNear(h, r);
+    // 「敵が N 体以上」「大群」は、遠くへ撃つ技（矢の雨・扇射ちなど）なら狙う敵のまわり、主人公のまわりの技（環・強化など）なら主人公のまわりで数える
+    // （以前は主人公のまわりだけで、離れて撃つクラスは群れが寄ってくるまで使わなかった）
+    const r0 = this.reach(p, 1);
+    const at = target && Number.isFinite(r0) && r0 > 300 ? target : h;
+    const near = (r) => this.countNear(at, r);
     switch (cond) {
       case 'elite': if (!(target.rank !== 'normal' || target.boss || near(450) >= 5)) return false; break;
       case 'boss': if (!target.boss) return false; break;
@@ -547,17 +624,27 @@ export class Combat {
   }
 
   inRange(p, h, target, d) {
+    return d <= this.reach(p, this.motionOf(target, h));
+  }
+
+  /**
+   * そのスキルが使える、主人公から敵までの横の距離。motion = 敵の動き（motionOf）。こちらへ歩いてくる敵には、近づくのを見越して早めに使える。
+   * 回る刃・オーラ（主人公のまわり）と罠（投げた所を踏ませる）は、近づいてこない敵には本当に届く距離でしか使わない
+   */
+  reach(p, motion = 1) {
+    const coming = motion > 0;
     switch (p.behavior) {
-      case 'buff': case 'summon': case 'barrier': case 'corpse': return true;
-      case 'aura': return d <= Math.max(200, p.radius || 220) * 1.2;
-      case 'nova': case 'ult_deathmarch': return d <= (p.radius || 150) * 0.85;
-      case 'whirl': return d <= (p.radius || 150) + 140;
-      case 'orbit': return d <= (p.radius || 120) + 280;
-      case 'flurry': return d <= (p.range || 110) + 20;
-      case 'leap': case 'ult_cataclysm': case 'dash': return d <= (p.range || 450);
-      case 'turret': return d <= (p.range || 600);
-      case 'trap': return d <= (p.range || 380) + 320;
-      default: return d <= (p.range || 120);
+      case 'buff': case 'summon': case 'barrier': case 'corpse': return Infinity;
+      case 'aura': return coming ? Math.max(200, p.radius || 220) * 1.2 : Math.max(200, p.radius || 220);
+      case 'nova': case 'ult_deathmarch': return (p.radius || 150) * 0.85;
+      case 'whirl': return (p.radius || 150) + 140;
+      case 'orbit': return (p.radius || 120) + (coming ? 280 : 30);
+      case 'flurry': return (p.range || 110) + 20;
+      case 'leap': case 'ult_cataclysm': case 'dash': return p.range || 450;
+      case 'turret': return p.range || 600;
+      // 罠: 歩いてくる敵には通り道に先に置く。止まっている敵には足元へ（踏む範囲の分だけ遠くまで）、逃げる敵には少し先へ投げる
+      case 'trap': return (p.range || 380) + (coming ? 320 : motion < 0 ? -TRAP_LEAD : (p.radius || 130) * 0.45);
+      default: return p.range || 120;
     }
   }
 
@@ -666,13 +753,14 @@ export class Combat {
       return;
     }
     // 主人公から離れすぎたら戻る
-    if (Math.abs(m.x - hx) > 650) {
+    const leash = this.minionLeash();
+    if (Math.abs(m.x - hx) > leash) {
       this.walk(m, dt, Math.max(m.speed, this.H.move) * 1.6, hx > m.x ? 1 : -1);
       m.y += Math.sign((m.homeY ?? 0) - m.y) * Math.min(Math.abs((m.homeY ?? 0) - m.y), 40 * dt);
       return;
     }
-    // 主人公の近く（前 650・後ろ 200）の敵だけを狙う
-    const target = this.nearestEnemy(m.x, m.y, 900, null, hx - 220, hx + 650);
+    // 主人公の近く（前 650〜基本攻撃の射程・後ろ 220）の敵だけを狙う。ただし手の届く敵（自分を攻撃している敵など）とは、その範囲の外でも戦う
+    const target = this.nearestEnemy(m.x, m.y, 900, null, hx - 220, hx + leash) || this.nearestEnemy(m.x, m.y, m.range + 40);
     if (!target) {
       // ついていく（後ろに並ぶ。飛ぶ物は肩の上）
       const slot = m.slot % 4;
@@ -1032,8 +1120,9 @@ export class Combat {
     if (!opts.dot) {
       let cc = H.critChance + (ex.critBonus || 0);
       if (tr?.id === 'vital' && (target.statuses.poison || target.statuses.bleed?.t > 0)) cc += tr.critVsAfflicted;
-      if (H.ks.precise) cc = 0;
-      crit = !!opts.forceCrit || rng.chance(cc);
+      cc = Math.min(BAL.CRIT_CAP / 100, cc); // スキル・特性の上乗せ込みで上限 95%
+      // 要石「研ぎ澄まされた一点」はクリティカルしない（「必ずクリティカル」の技も）
+      crit = !H.ks.precise && (!!opts.forceCrit || rng.chance(cc));
       if (crit) dmg *= H.critMult + (ex.critDmgBonus || 0) + (target.statuses.curse?.t > 0 ? target.statuses.curse.mark || 0 : 0);
     }
     if (opts.flatAdd) dmg += opts.flatAdd;
@@ -1041,7 +1130,7 @@ export class Combat {
     dmg *= 1 - res / 100;
     dmg *= this.takenMul(target) * (1 - (target.dr || 0));
     if (!(dmg > 0)) return 0;
-    const hit = { src, target, dmg, crit, element: el, skill: p, tags };
+    const hit = { src, target, dmg, crit, element: el, skill: p, tags, dot: !!opts.dot };
     const proc = !opts.noProc && !opts.dot;
     if (proc) {
       this.hook('onHit', hit);
@@ -1058,7 +1147,8 @@ export class Combat {
       if (target.dotAcc > target.maxLife * 0.05 || target.life <= 0) { this.emit({ t: 'dmg', x: target.x, y: target.y, z: target.z + 70 * target.size, v: target.dotAcc, el, dot: true, team: target.team }); target.dotAcc = 0; }
     } else {
       target.hitFlash = 0.12;
-      if (!target.boss && target.kind === 'monster') target.x += 4 * (src && src.x > target.x ? -1 : 1);
+      // 当たると少し押し返す（ボスと、逃げるため込み屋は押さない。押すと逃げる手助けになる）
+      if (!target.boss && !target.goblin && target.kind === 'monster') target.x += 4 * (src && src.x > target.x ? -1 : 1);
       this.emit({ t: 'dmg', x: target.x, y: target.y, z: target.z + 70 * target.size, v: dmg, crit, el, team: target.team });
       if (crit && fromHero && this.critFxT <= 0) { this.critFxT = 0.15; this.emit({ t: 'crit', x: target.x, y: target.y, z: target.z + 70 * target.size, v: dmg, el, skill: p.id }); }
     }
@@ -1205,7 +1295,8 @@ export class Combat {
     if (isHero) this.stats.dmgTaken += amount;
     this.emit({ t: 'dmg', x: u.x, y: u.y, z: 80, v: amount, el: element, team: HERO_TEAM, hero: isHero });
     if (from && !isDot && isHero && !from.dead) {
-      if (H.thorns > 0) { from.life -= H.thorns; if (from.life <= 0) this.killUnit(from, u); }
+      // 反射ダメージも敵の耐性・守り（鋼鉄・結界・ボスの障壁・無敵の間）を通す（以前はライフを直接減らしていた）
+      if (H.thorns > 0 && from.team === ENEMY_TEAM) this.applyDot(from, H.thorns, 'phys', u);
       const rt = u.retaliate;
       if (rt && !from.dead && from.team === ENEMY_TEAM) {
         if (rt.chill) this.addStatus(from, 'chill', {});

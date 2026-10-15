@@ -320,9 +320,9 @@ t('長い放置の報告の「拾った数」と、記録・実績の拾った�
   const g = fresh('warrior', 8);
   run(g, 120);
   const before = { ...g.state.meta.stats.itemsFound };
-  // ドロップを減らしたので（8 時間で約 800 個）、拾う速さを 3 倍にして 1,500 個を超えさせる
+  // ドロップを減らしたので（8 時間で数百個）、拾う速さを 1 秒に 0.15 個以上にして 1,500 個を超えさせる
   const rates = g.sys.offline.rates.bind(g.sys.offline);
-  g.sys.offline.rates = () => { const r = rates(); return { ...r, drops: r.drops * 3 }; };
+  g.sys.offline.rates = () => { const r = rates(); return { ...r, drops: Math.max(r.drops * 3, 0.15) }; };
   const rep = g.sys.offline.grant(8 * 3600);
   ok(rep.drops > 1500, `前提: 1,500 個を超える（${rep.drops}）`);
   let got = 0; let shown = 0;

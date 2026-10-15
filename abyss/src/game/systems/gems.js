@@ -258,10 +258,19 @@ export class GemSystem {
   onLoad() {
     // つながりを装備のソケットから作り直す（壊れたセーブで uid が振り直された・はまっているはずの装備が無い）
     const st = this.game.state;
-    const items = [...st.inv.bag, ...st.inv.stash.flat(), ...Object.values(st.hero.equip || {})];
+    // 壊れたセーブ: 深淵の宝石の記録が数や true になっていることがある（{ lvl, uid } に直す）
+    const isObj = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
+    if (!isObj(this.inv.lgems)) this.inv.lgems = {};
+    for (const id of Object.keys(this.inv.lgems)) {
+      const lg = this.inv.lgems[id];
+      if (!isObj(lg)) this.inv.lgems[id] = { lvl: Math.max(1, Math.floor(Number(lg) || 1)), uid: null };
+      else if (!(lg.lvl >= 1)) lg.lvl = 1;
+    }
+    const items = [...st.inv.bag, ...st.inv.stash.flat(), ...Object.values(st.hero.equip || {})].filter(isObj);
     const holder = {};
     for (const it of items) {
-      (it?.sockets || []).forEach((key, i) => {
+      if (it.lgl !== undefined && !isObj(it.lgl)) delete it.lgl;
+      (Array.isArray(it.sockets) ? it.sockets : []).forEach((key, i) => {
         const s = parseSocket(key);
         if (s?.type !== 'lgem') return;
         // 持ち物の記録が無い（消えた）宝石は、はまっている物から戻す。同じ宝石が 2 か所にあれば後の方は外す（1 種 1 つ）

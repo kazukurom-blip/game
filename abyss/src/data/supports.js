@@ -12,7 +12,9 @@
 //   buff: true                   … 強化（バフ・障壁）
 //   summon: true                 … 召喚物を出す
 //   duration: true               … 続く時間がある（霧・罠・回る刃・強化・召喚物の時間など）
+//   shots: true                  … まっすぐ飛ぶ弾を撃つ（動きが projectile / roll。貫通・追尾が効く）
 //   not: ['ult']                 … このタグのスキルには付けられない
+//   notBehaviors: ['chain']      … この動きのスキルには付けられない（弾の数を使わない連鎖・砲台など）
 
 export const SUPPORT_MAX_LEVEL = 20;
 /** そのレベルになるのに必要な合成の経験（累計）。同じ刻印 1 つ = (そのレベルの累計 + 1) */
@@ -29,9 +31,9 @@ const mul = (x) => `×${Math.round(x * 100) / 100}`;
 
 export const SUPPORTS = [
   // ---- 形（投射・範囲・連鎖）
-  { id: 'sup_multi', name: '拡散の刻印', cat: 'shape', req: { tags: ['projectile'] },
+  { id: 'sup_multi', name: '拡散の刻印', cat: 'shape', req: { tags: ['projectile'], notBehaviors: ['chain', 'turret'] },
     desc: (lv) => `弾 +2。弾 1 つのダメージ ${mul(0.7 + 0.01 * lv)}`, mod: (lv) => ({ countAdd: 2, dmgMul: 0.7 + 0.01 * lv }) },
-  { id: 'sup_pierce', name: '貫きの刻印', cat: 'shape', req: { tags: ['projectile'] },
+  { id: 'sup_pierce', name: '貫きの刻印', cat: 'shape', req: { shots: true },
     desc: (lv) => `貫通 +${2 + Math.floor(lv / 10)}。ダメージ +${10 + lv}%`, mod: (lv) => ({ pierce: 2 + Math.floor(lv / 10), dmgMul: 1.1 + 0.01 * lv }) },
   { id: 'sup_chain', name: '連鎖の刻印', cat: 'shape', req: { behaviors: ['chain'] },
     desc: (lv) => `跳ねる回数 +${2 + Math.floor(lv / 10)}。ダメージ ${mul(0.85 + 0.01 * lv)}`, mod: (lv) => ({ chain: 2 + Math.floor(lv / 10), dmgMul: 0.85 + 0.01 * lv }) },
@@ -39,7 +41,7 @@ export const SUPPORTS = [
     desc: (lv) => `範囲 +${20 + lv}%`, mod: (lv) => ({ radius: 1.2 + 0.01 * lv }) },
   { id: 'sup_conc', name: '集束の刻印', cat: 'shape', req: { tags: ['area'] },
     desc: (lv) => `範囲 -25%。ダメージ ${mul(1.3 + 0.015 * lv)}`, mod: (lv) => ({ radius: 0.75, dmgMul: 1.3 + 0.015 * lv }) },
-  { id: 'sup_seek', name: '追尾の刻印', cat: 'shape', req: { tags: ['projectile'] },
+  { id: 'sup_seek', name: '追尾の刻印', cat: 'shape', req: { shots: true },
     desc: (lv) => `弾が敵を追いかける。弾の速さ +20%。ダメージ +${5 + lv}%`, mod: (lv) => ({ speedMul: 1.2, dmgMul: 1.05 + 0.01 * lv, extra: { homing: true } }) },
   { id: 'sup_burst', name: '爆裂の刻印', cat: 'shape', req: { tags: ['projectile', 'melee'] },
     desc: (lv) => `当たった所で半径 70 の小爆発（${pct(0.4 + 0.02 * lv)}）`, mod: (lv) => ({ extra: { burst: 0.4 + 0.02 * lv } }) },
@@ -102,6 +104,7 @@ export function supportFits(sup, def) {
   const tags = def.tags || [];
   if (r.not && r.not.some((t) => tags.includes(t))) return false;
   const beh = def.behavior;
+  if (r.notBehaviors && r.notBehaviors.includes(beh)) return false;
   const isSummon = beh === 'summon' || beh === 'turret' || beh === 'ult_deathmarch';
   const isBuff = beh === 'buff' || beh === 'barrier';
   const deals = !!def.dmg && !isBuff;
@@ -109,6 +112,7 @@ export function supportFits(sup, def) {
   const checks = [];
   if (r.tags) checks.push(r.tags.some((t) => tags.includes(t)));
   if (r.behaviors) checks.push(r.behaviors.includes(beh));
+  if (r.shots) checks.push(beh === 'projectile' || beh === 'roll');
   if (r.cd) checks.push((def.cd || 0) > 0);
   if (r.cost) checks.push((def.cost || 0) > 0);
   if (r.damage) checks.push(deals);
@@ -125,11 +129,13 @@ export function supportReqText(sup) {
   const parts = [];
   if (r.tags) parts.push(`${r.tags.map((t) => TAGJ[t] || t).join('・')}のスキル`);
   if (r.behaviors) parts.push('連鎖するスキル');
+  if (r.shots) parts.push('まっすぐ飛ぶ弾を撃つスキル');
   if (r.cd) parts.push('待ち時間のあるスキル');
   if (r.cost) parts.push('リソースを使うスキル');
   if (r.damage) parts.push('ダメージを出すスキル');
   if (r.buff) parts.push('強化・障壁のスキル');
   if (r.summon) parts.push('召喚のスキル');
   if (r.duration) parts.push('効果が続くスキル');
-  return parts.join(' / ') || 'どのスキルにも';
+  const out = parts.join(' / ') || 'どのスキルにも';
+  return r.notBehaviors ? `${out}（連鎖・砲台を除く）` : out;
 }

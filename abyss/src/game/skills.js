@@ -130,6 +130,8 @@ export function resolveSkill(state, H, skillId) {
     if (p.summon.slam) p.summon.slam *= (p.summon.slamMul || 1) * (H.area || 1);
     if (p.summon.dmgPct) p.summon.dmgPct *= p.summon.dmgPctMul || 1;
   }
+  // 召喚物の状態異常（狼の出血・毒蜘蛛・毒の分身・溶岩の巨像など）は、召喚物の攻撃（p で当てる）に乗せる
+  if (p.summon?.status) addStatus(p, p.summon.status);
   // 範囲の外れ値
   p.count = Math.max(1, Math.round(p.count));
   if (p.behavior === 'summon' || p.behavior === 'turret') p.maxSummons = Math.max(1, Math.round(p.maxSummons));
@@ -166,8 +168,13 @@ export function applyMod(p, mod) {
     else if (k === 'behavior') p.behavior = v;
     else if (k === 'spread') p.spread = v;
     else if (PROD_KEYS.includes(k)) p[k] = (p[k] ?? 1) * v;
-    else if (MUL_KEYS[k]) p[MUL_KEYS[k]] = (p[MUL_KEYS[k]] || 0) * v;
-    else if (k === 'radius') p.radius = (p.radius || 100) * v;
+    else if (MUL_KEYS[k]) {
+      p[MUL_KEYS[k]] = (p[MUL_KEYS[k]] || 0) * v;
+      if (k === 'durMul' && p.curse) p.curse.dur = (p.curse.dur || 4) * v; // 呪い・刻印の続く時間も延びる（持続の刻印・深い刻印）
+    } else if (k === 'radius') {
+      p.radius = (p.radius || 100) * v;
+      if (p.explode) p.explode *= v; // 当たって弾ける範囲も「範囲」（広域・集束の刻印、熟練度 10 段）
+    }
     else if (k === 'count') p.count = typeof v === 'number' && v > 1 ? Math.max(p.count, v) : p.count + v;
     else if (ADD_KEYS[k]) p[ADD_KEYS[k]] = (p[ADD_KEYS[k]] || 0) + v;
     else if (k === 'explode') p.explode = Math.max(p.explode || 0, v);
@@ -236,6 +243,7 @@ export function skillDesc(state, H, skillId, p = null) {
     shield: r0(p.shield?.pct || 0),
     curse: r0((p.curse?.vuln || 0) * 100),
     explode: r0(p.explode),
+    mark: r0((p.curse?.mark || 0) * 100),
     len: r0((p.extra.len || 0) * (p.extra.lenMul || 1) * (H.area || 1)),
     b0: r1(p.buff?.mods?.[0]?.v || 0),
     b1: r1(p.buff?.mods?.[1]?.v || 0),
@@ -255,7 +263,7 @@ export function castSpeed(H, p) {
 export function avgHit(H, p) {
   const w = (H.weapon.min + H.weapon.max) / 2 + H.addTotal;
   const inc = incFor(H, p.element, p.tags, p.id);
-  const cc = Math.min(1, H.critChance + (p.extra?.critBonus || 0));
+  const cc = H.ks?.precise ? 0 : Math.min(BAL.CRIT_CAP / 100, H.critChance + (p.extra?.critBonus || 0));
   const crit = 1 + cc * (H.critMult + (p.extra?.critDmgBonus || 0) - 1);
   return w * (p.dmgPct / 100) * p.dmgMul * (1 + inc / 100) * H.more * crit;
 }
@@ -304,7 +312,7 @@ export function skillProfile(H, p) {
     case 'ult_barrage': per = hit * p.count * 0.5; break;
     case 'ult_starfall': per = hit * p.count * 0.8 * 1.8; break;
     case 'ult_deathmarch': per = hit * 3 + avgHit(H, p) * (p.summon?.dmgPct || 0.25) * p.count * (p.summon?.ttl || 15) * 1.2; break;
-    case 'ult_shadowdance': per = hit * p.count * (H.critMult / (1 + H.critChance * (H.critMult - 1))); break;
+    case 'ult_shadowdance': per = hit * p.count * (H.ks?.precise ? 1 : H.critMult / (1 + H.critChance * (H.critMult - 1))); break; // 必ずクリティカル（一点の要石ではクリティカルしない）
     default: per = 0;
   }
   if (p.twin && per) per *= 2;

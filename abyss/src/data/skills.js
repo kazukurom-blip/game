@@ -3,7 +3,7 @@
 //
 // 形（スキル定義）:
 // {
-//   id, cls, name, desc,            desc の {dmg} {radius} {count} {dur} {cd} {chain} {pierce} {summons} {ttl} {tick} {shield} {b0} {b1} {b2} {curse}
+//   id, cls, name, desc,            desc の {dmg} {radius} {count} {dur} {cd} {chain} {pierce} {summons} {ttl} {tick} {shield} {b0} {b1} {b2} {curse} {mark}
 //                                   はレベル・ルーン・補助の刻印を反映した値に置き換わる（skills.js の skillDesc）
 //   kind: 'basic'|'active'|'buff'|'summon'|'ult'
 //   tags: ['attack','melee','area'], element: 'phys'|'fire'|'cold'|'lightning'|'poison'|'void'
@@ -240,7 +240,7 @@ export const SKILLS = [
     ],
   },
   {
-    id: 'r_beast', cls: 'ranger', kind: 'summon', name: '狩りの相棒', desc: '狼の相棒を {summons} 体呼ぶ。狼は素早く噛みつき、武器ダメージの {dmgp} のダメージ。',
+    id: 'r_beast', cls: 'ranger', kind: 'summon', name: '狩りの相棒', desc: '狼の相棒を {summons} 体呼ぶ。狼は素早く噛みつき、武器ダメージの {dmgp} のダメージ（20% の確率で出血）。',
     tags: ['minion', 'summon'], element: 'phys', unlock: 9, behavior: 'summon',
     cost: 30, cd: 6, castTime: 0.6, dmg: [105, 5], maxSummons: 1, summon: { unit: 'wolf', life: 3, aps: 1.4, range: 80, status: { id: 'bleed', chance: 0.2 } },
     runes: [
@@ -257,7 +257,7 @@ export const SKILLS = [
     runes: [
       R('heavy', '重い矢', 'ダメージ ×1.3、動作 +20%', { dmgMul: 1.3, castMul: 1.2 }),
       R('frost', '凍てる狙撃', '冷気ダメージになり、15% の確率で凍結させる', COLD(0.15)),
-      R('explode', '炸裂弾', '当たると半径 90 で爆発する（×0.6）', { explode: 90 }),
+      R('explode', '炸裂弾', '弾ける範囲 +50%', { explodeMul: 1.5 }),
       R('quick', '早撃ち', '動作 ×0.8、ダメージ ×0.85', { castMul: 0.8, dmgMul: 0.85 }),
     ],
   },
@@ -670,7 +670,7 @@ export const SKILLS = [
     ],
   },
   {
-    id: 'a_mark', cls: 'assassin', kind: 'active', name: '死の刻印', desc: '敵に刻印を {dur} 秒刻む。刻印された敵は受けるダメージ +{curse}%、受けるクリティカルダメージ +50%。倒すと気力 +30。',
+    id: 'a_mark', cls: 'assassin', kind: 'active', name: '死の刻印', desc: '敵に刻印を {dur} 秒刻む。刻印された敵は受けるダメージ +{curse}%、受けるクリティカルダメージ +{mark}%。倒すと気力 +30。',
     tags: ['attack', 'curse'], element: 'void', unlock: 14, behavior: 'curse',
     cost: 15, cd: 8, castTime: 0.3, range: 600, radius: 60, curse: { vuln: 0.15, mark: 0.3, dur: 8, resOnKill: 30 }, auto: 'elite',
     runes: [
