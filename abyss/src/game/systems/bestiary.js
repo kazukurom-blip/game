@@ -6,7 +6,7 @@
 //            1 つごとに ユニーク: 全ダメージ +0.2% / セット: 最大ライフ +0.2% / ミシック: 最終ダメージ +0.5% / 伝説の力: 全ダメージ +0.2%。
 //            登録の割合（10% / 25% / 50% / 100%）でレア発見率・ゴールド・全ダメージが上がる。
 // 外から: game.sys.bestiary.tierOf(id) / speciesCount() / tierCount(t) / treasureCount() / treasureTotal() / entries()
-//         rarityOdds({ mf, rank, torment }) → { rarityId: 確率 } / milestones()
+//         rarityOdds({ mf, rank, torment, ilvl }) → { rarityId: 確率 } / milestones()
 // 状態: state.meta.bestiary { 魔物 id: 撃破数 }（game.js が数える）・state.meta.collection { uniques, sets, mythics, powers }・state.meta.codexSeen
 // 出来事: 'bestiaryNew' { id } / 'bestiaryTier' { id, tier } / 'collectionFind' { kind, id, name } / 'metaChanged'
 

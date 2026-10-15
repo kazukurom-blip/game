@@ -7,7 +7,7 @@ import { RARITIES, RARITY } from '../../data/rarity.js';
 import { fmt } from '../../engine/format.js';
 import { MATERIALS } from '../../data/materials.js';
 import { statDef } from '../../data/stats.js';
-import { ensureCss, luckMeters } from './itemkit.js';
+import { ensureCss, luckMeters, stashAny } from './itemkit.js';
 
 let view = 'bag';
 let stashTab = 0;
@@ -30,7 +30,7 @@ export const bagPanel = {
   id: 'bag', name: '持ち物', icon: '🎒',
   refreshOn: ['inv', 'gear', 'level'],
   badge: (g) => g.state.inv.bag.filter((x) => x.isNew).length,
-  help: 'アイテムを押すと操作（装備・鍵・分解・売る・鍛冶へ・ソケット・抽出）。右クリック（長押し）で倉庫へ。<br>「選んで分解」で複数を選んでまとめて分解・売却できます。<br>自動の振り分けで、拾ったときに分解する物を決められます（放置向け）。',
+  help: 'アイテムを押すと操作（装備・鍵・分解・売る・倉庫へ・鍛冶へ・ソケット・抽出）。右クリックですぐ倉庫へ。<br>「選んで分解」で複数を選んでまとめて分解・売却できます。<br>自動の振り分けで、拾ったときに分解する物を決められます（放置向け）。',
   render(ui, el) {
     ensureCss();
     const g = ui.game;
@@ -65,8 +65,14 @@ function renderBag(ui, el) {
         ui.toast(`${r.n} 個を分解: ${matText(r.got)}`, 'good');
         ui.renderPanel();
       }, { kind: 'danger', disabled: !sel.length }),
-      button('売る', () => { const r = sys.sell(sel.map((x) => x.uid)); picked.clear(); ui.toast(`${r.n} 個を ${fmt(r.gold)} G で売った`, 'good'); ui.renderPanel(); }, { kind: 'small', disabled: !sel.length }),
-      button(`倉庫 ${stashTab + 1} へ`, () => { let n = 0; for (const x of sel) if (sys.toStash(x.uid, stashTab)) n++; picked.clear(); ui.toast(`${n} 個を倉庫へ`, 'good'); ui.renderPanel(); }, { kind: 'small', disabled: !sel.length }),
+      button('売る', async () => {
+        if (!sel.length) return;
+        // レジェンダリー以上・覚醒/極致・強化 +5 以上が入っていたら確かめる（1 つずつ売るときと同じ。元に戻せない）
+        const precious = sel.filter((x) => (RARITY[x.rarity]?.idx || 0) >= 4 || x.q || (x.enh || 0) >= 5).length;
+        if (precious && !(await ui.confirm(`${sel.length} 個を売ります（レジェンダリー以上・覚醒・強化した物 ${precious} 個を含む）。元に戻せません。`, '売る'))) return;
+        const r = sys.sell(sel.map((x) => x.uid)); picked.clear(); ui.toast(`${r.n} 個を ${fmt(r.gold)} G で売った`, 'good'); ui.renderPanel();
+      }, { kind: 'small', disabled: !sel.length }),
+      button('倉庫へ', () => { let n = 0; for (const x of sel) if (stashAny(g, x.uid, stashTab) >= 0) n++; picked.clear(); ui.toast(n < sel.length ? `${n} 個を倉庫へ（倉庫がいっぱいで ${sel.length - n} 個は残った）` : `${n} 個を倉庫へ`, n < sel.length ? 'bad' : 'good'); ui.renderPanel(); }, { kind: 'small', disabled: !sel.length }),
       button('やめる', () => { multi = false; picked.clear(); ui.renderPanel(); }, { kind: 'small' }),
     ]));
   } else {
@@ -88,14 +94,14 @@ function renderBag(ui, el) {
         if (multi) { if (it.locked) { ui.toast('鍵つきは選べない'); return; } if (picked.has(it.uid)) picked.delete(it.uid); else picked.add(it.uid); ui.renderPanel(); return; }
         itemMenu(ui, it);
       },
-      onRight: () => { if (!it.locked) { sys.toStash(it.uid, stashTab); ui.renderPanel(); } },
+      onRight: () => { if (stashAny(g, it.uid, stashTab) < 0) ui.toast('倉庫がいっぱい', 'bad'); ui.renderPanel(); },
     });
     if (picked.has(it.uid)) cell.classList.add('ik-pick');
     grid.append(cell);
   }
   for (let i = inv.bag.length; i < inv.bagSize; i++) grid.append(emptyCell());
   el.append(grid);
-  el.append(h('div.hint', multi ? 'アイテムを押して選ぶ。もう一度押すと外す。' : 'アイテムを押すと操作。右クリック（長押し）で倉庫へ。▲ は今の装備より強くなりそうな物。'));
+  el.append(h('div.hint', multi ? 'アイテムを押して選ぶ。もう一度押すと外す。' : 'アイテムを押すと操作（倉庫へ入れるのもここ。右クリックならすぐ倉庫へ）。▲ は今の装備より強くなりそうな物。'));
   el.append(luckMeters(g));
   // 素材・宝石・ルーンの数
   const gemN = Object.values(inv.gems || {}).reduce((s, n) => s + n, 0);
@@ -121,7 +127,7 @@ function renderStash(ui, el) {
   const grid = h('div.grid');
   for (const it of tab) grid.append(itemCell(ui, it, { onClick: () => { if (!sys.fromStash(it.uid)) ui.toast('バッグがいっぱい', 'bad'); ui.renderPanel(); }, onRight: () => itemMenu(ui, it) }));
   for (let i = tab.length; i < inv.stashTabSize; i++) grid.append(emptyCell());
-  el.append(h('div.hint', `押すとバッグへ戻す。右クリック（長押し）で詳しい操作。倉庫のタブ ${inv.stash.length}/8（1 枚 ${inv.stashTabSize} 枠）。`), grid);
+  el.append(h('div.hint', `押すとバッグへ戻す。右クリックで詳しい操作（鍛冶・分解など）。倉庫のタブ ${inv.stash.length}/8（1 枚 ${inv.stashTabSize} 枠）。`), grid);
 }
 
 async function salvageBelow(ui, maxIdx) {

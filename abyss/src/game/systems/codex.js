@@ -67,7 +67,9 @@ export class CodexSystem {
   extractInfo(item) {
     if (!item?.power) return { ok: false, msg: '伝説の力が付いていない' };
     const def = registry.power(item.power.id);
-    if (!def || !EXTRACTABLE.has(def.pool)) return { ok: false, msg: 'ユニーク・セット・ミシックの力は抽出できない（レジェンダリーだけ）' };
+    // ルーン語の装備（力はレジェンダリーの山の物を使う）も抽出できない。レジェンダリーの装備だけ
+    if (item.rw) return { ok: false, msg: 'ルーン語の力は抽出できない（レジェンダリーだけ）' };
+    if (!def || !EXTRACTABLE.has(def.pool) || item.rarity !== 'legendary') return { ok: false, msg: 'ユニーク・セット・ミシックの力は抽出できない（レジェンダリーだけ）' };
     const f = this.game.sys.inv.findItem(item.uid);
     if (!f) return { ok: false, msg: '見つからない' };
     if (f.where === 'equip') return { ok: false, msg: '装備中の物は抽出できない（外してから）' };

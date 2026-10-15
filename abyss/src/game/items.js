@@ -28,7 +28,15 @@ export function sanitizeItem(it) {
   it.ilvl = Math.round(num(it.ilvl, 1, 9999, 1));
   it.q = [0, 1, 2].includes(it.q) ? it.q : 0;
   it.enh = Math.round(num(it.enh, 0, 99, 0));
-  it.affixes = Array.isArray(it.affixes) ? it.affixes.filter((a) => a && typeof a === 'object' && typeof a.s === 'string' && Number.isFinite(a.v)) : [];
+  const line = (a) => a && typeof a === 'object' && typeof a.s === 'string' && Number.isFinite(a.v);
+  it.affixes = Array.isArray(it.affixes) ? it.affixes.filter(line) : [];
+  // ユニーク・セットの固定のオプション・堕落の内在・付け替えの候補も、壊れた行は捨てる（NaN が能力に入らないように）
+  if (it.fixed !== undefined) it.fixed = Array.isArray(it.fixed) ? it.fixed.filter(line) : [];
+  if (it.cimp !== undefined && !line(it.cimp)) delete it.cimp;
+  if (it.rrPending !== undefined && !(it.rrPending && Number.isInteger(it.rrPending.i) && it.rrPending.i >= 0 && it.rrPending.i < it.affixes.length && Array.isArray(it.rrPending.opts))) delete it.rrPending;
+  else if (it.rrPending) it.rrPending.opts = it.rrPending.opts.filter(line);
+  if (it.rr !== undefined && !(it.rr && Number.isInteger(it.rr.i) && it.rr.i >= 0 && it.rr.i < it.affixes.length)) delete it.rr;
+  for (const k of ['fp', 'enhPity']) if (it[k] !== undefined && !Number.isFinite(it[k])) delete it[k];
   if (it.sockets !== undefined) it.sockets = Array.isArray(it.sockets) ? it.sockets.slice(0, 6).map((s) => (typeof s === 'string' ? s : null)) : [];
   if (it.power !== undefined && !(it.power && typeof it.power === 'object' && typeof it.power.id === 'string' && Number.isFinite(it.power.r))) delete it.power;
   for (const k of ['uniqueId', 'setId', 'pieceId', 'rw', 'name']) if (it[k] !== undefined && it[k] !== null && typeof it[k] !== 'string') delete it[k];
@@ -46,19 +54,23 @@ export function tierScale(base) { return 1 + 0.04 * ((base?.tier || 1) - 1); }
 export function weaponStats(item) {
   const b = baseOf(item);
   if (!b || !b.dmg || item.slot !== 'weapon') return null;
-  const scale = P(item.ilvl) * tierScale(b) * enhMult(item.enh || 0) * (QUALITY[item.q || 0]?.mult ?? 1);
+  const qm = QUALITY[item.q || 0]?.mult ?? 1;
+  const scale = P(item.ilvl) * tierScale(b) * enhMult(item.enh || 0) * qm;
   let local = 0;
-  for (const a of item.affixes || []) if (a.s === 'weapon_dmg') local += a.v;
+  // オプションの「武器ダメージ %」にも品質の倍率（ほかのオプションと同じ。itemMods・説明の窓と合わせる）
+  for (const a of item.affixes || []) if (a.s === 'weapon_dmg') local += a.v * qm;
   for (const m of registry.uniqueMods(item)) if (m.s === 'weapon_dmg') local += m.v;
+  // ソケットのルーン（鉄・淵の「武器ダメージ %」）も武器の中で効く
+  for (const m of registry.socketMods(item)) if (m.s === 'weapon_dmg') local += m.v;
   const mul = 1 + local / 100;
   return { min: b.dmg[0] * scale * mul, max: b.dmg[1] * scale * mul, aps: b.aps, kind: b.kind, range: b.range, twoHanded: b.twoHanded };
 }
 
-/** 副刀（offblade）のダメージ（二刀流の上乗せ） */
+/** 副刀（offblade）のダメージの平均（二刀流の上乗せ。半分が武器のダメージに加わる）。強化・品質込み */
 export function offhandDamage(item) {
   const b = baseOf(item);
   if (!b || !b.dmg || item.slot !== 'offhand') return 0;
-  return ((b.dmg[0] + b.dmg[1]) / 2) * P(item.ilvl) * tierScale(b) * enhMult(item.enh || 0);
+  return ((b.dmg[0] + b.dmg[1]) / 2) * P(item.ilvl) * tierScale(b) * enhMult(item.enh || 0) * (QUALITY[item.q || 0]?.mult ?? 1);
 }
 
 /** 防具のアーマー値 */
@@ -97,7 +109,7 @@ export function itemMods(item) {
   if (b?.block && item.slot === 'offhand') out.push({ s: 'block', v: 0 }); // 盾のブロックは implicit で入る
   // ユニーク・セットの固定効果、ソケットの宝石、伝説の力の数値部分は登録先から
   out.push(...registry.uniqueMods(item).filter((m) => !(m.s === 'weapon_dmg' && item.slot === 'weapon')));
-  out.push(...registry.socketMods(item));
+  out.push(...registry.socketMods(item).filter((m) => !(m.s === 'weapon_dmg' && item.slot === 'weapon')));
   out.push(...registry.powerMods(item));
   return out;
 }

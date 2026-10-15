@@ -36,6 +36,8 @@ export const MAT_PRICE = {
   ascend: { base: 200 },
 };
 export const MYTHIC_COST = { core: 6, echo: 40 };
+// 素材の売値は基準の 1/10（以前は基準のままで、レアを分解して素材を売ると、レアを売る値の 10 倍になった。放置 3 時間で稼ぎの 7 倍）
+export const MAT_SELL_RATE = 0.1;
 
 let hooked = false;
 
@@ -128,7 +130,7 @@ export class MerchantSystem {
     const p = MAT_PRICE[id];
     if (!p) return null;
     const unit = p.base * this.priceScale();
-    return { id, name: MATERIAL[id]?.name || id, sell: Math.max(1, Math.round(unit)), buy: p.buy ? Math.round(unit * 4 * p.pack) : null, pack: p.pack || 1, have: this.inv.mats[id] || 0 };
+    return { id, name: MATERIAL[id]?.name || id, sell: Math.max(1, Math.round(unit * MAT_SELL_RATE)), buy: p.buy ? Math.round(unit * 4 * p.pack) : null, pack: p.pack || 1, have: this.inv.mats[id] || 0 };
   }
   buyMat(id, packs = 1) {
     const p = this.matPrice(id);
@@ -158,13 +160,19 @@ export class MerchantSystem {
     const m = this.inv.mats;
     return { cost: MYTHIC_COST, have: { core: m.core || 0, echo: m.echo || 0 }, ok: (m.core || 0) >= MYTHIC_COST.core && (m.echo || 0) >= MYTHIC_COST.echo, list: MYTHICS };
   }
+  /** 交換で手に入るミシックのアイテム Lv と、着けるのに要るレベル（items.js の itemReq と同じ式） */
+  exchangeLevel(id) {
+    const def = MYTHIC[id];
+    const ilvl = Math.max(def?.req || 60, this.gambleIlvl());
+    return { ilvl, req: Math.max(1, Math.min(BAL.MAX_LEVEL, Math.floor(ilvl * (BAL.ITEM_REQ_PER_ILVL ?? 0.9)) - 2)) };
+  }
   exchangeMythic(id) {
     const def = MYTHIC[id];
     if (!def) return { ok: false, msg: 'ミシックを選んでください' };
     const info = this.exchangeInfo();
     if (!info.ok) return { ok: false, msg: `極致の核 ${MYTHIC_COST.core}・伝説の残響 ${MYTHIC_COST.echo} が必要` };
     if (this.game.sys.inv.bagFree() <= 0) return { ok: false, msg: 'バッグがいっぱい' };
-    const ilvl = Math.max(def.req || 60, this.gambleIlvl());
+    const { ilvl } = this.exchangeLevel(id);
     const it = generateItem(this.game.rng, { ilvl, rarity: 'mythic', slot: def.slot, cls: this.st.hero.cls, def: id, anyReq: true, source: 'exchange' });
     if (!it || it.uniqueId !== id) return { ok: false, msg: '交換に失敗した' };
     this.inv.mats.core -= MYTHIC_COST.core;

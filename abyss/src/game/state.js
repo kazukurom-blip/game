@@ -172,6 +172,14 @@ export function rescaleNumbers(state, k) {
   if (typeof m.gold === 'number') m.gold *= k;
   if (m.stats && typeof m.stats.goldEarned === 'number') m.stats.goldEarned *= k;
   if (m.stats && typeof m.stats.highestHit === 'number') m.stats.highestHit *= k;
+  // ゴールドで数える日課（稼いだ額の差で進む）と、日課の報酬・放置の稼ぎの記録も同じ桁に（直さないと日課がすぐ終わり、報酬と放置のゴールドが 1/10 になる）
+  const bounty = (b) => {
+    if (!b || typeof b !== 'object') return;
+    if (b.type === 'gold') for (const key of ['target', 'base', 'prog']) if (typeof b[key] === 'number') b[key] *= k;
+    if (b.reward && typeof b.reward.gold === 'number') b.reward.gold *= k;
+  };
+  if (m.bounties) { (Array.isArray(m.bounties.list) ? m.bounties.list : []).forEach(bounty); bounty(m.bounties.weekly); }
+  if (m.rates && typeof m.rates.gold === 'number') m.rates.gold *= k;
   return state;
 }
 

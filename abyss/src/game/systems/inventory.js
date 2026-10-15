@@ -8,7 +8,7 @@ import { RARITY } from '../../data/rarity.js';
 import { SALVAGE } from '../../data/materials.js';
 import { CLASS } from '../../data/classes.js';
 import { computeHero, effectiveLife } from '../character.js';
-import { estimateDps } from '../skills.js';
+import { estimateDps, estimateBuildDps } from '../skills.js';
 import { itemReq, sellValue, weaponStats, baseOf } from '../items.js';
 
 export const invHooks = {
@@ -64,10 +64,7 @@ export class InventorySystem {
   /** 空いている方・弱い方の指輪の枠を選ぶ */
   slotFor(item) {
     if (item.slot !== 'ring') return item.slot;
-    if (!this.hero.equip.ring1) return 'ring1';
-    if (!this.hero.equip.ring2) return 'ring2';
-    const a = this.compare(item, 'ring1'); const b = this.compare(item, 'ring2');
-    return (a.dpsPct + a.ehpPct) >= (b.dpsPct + b.ehpPct) ? 'ring1' : 'ring2';
+    return this.compare(item).slot;
   }
 
   equip(uid, slot = null) {
@@ -150,7 +147,9 @@ export class InventorySystem {
     const table = SALVAGE[item.rarity] || SALVAGE.common;
     const mult = 1 + (this.game.H?.matFind || 0) / 100;
     for (const [id, lo, hi] of table) {
-      const k = Math.floor(rng.int(lo, hi) * mult + (rng.next() < ((mult % 1) || 0) ? 1 : 0));
+      // 素材獲得の倍率をかけた数の端数は、その割合で 1 つ増やす（平均がちょうど × 倍率になる）
+      const x = rng.int(lo, hi) * mult;
+      const k = Math.floor(x) + (rng.next() < x % 1 ? 1 : 0);
       if (k > 0) out[id] = (out[id] || 0) + k;
     }
     if (item.q >= 1) out.core = (out.core || 0) + (item.q === 2 ? 3 : 1);
@@ -202,19 +201,58 @@ export class InventorySystem {
     this.game.events.emit('invChanged', {});
   }
 
-  /** 今の装備と比べる（実際の計算で DPS と耐久の変化を出す） */
+  /**
+   * 今の装備と比べる（実際の計算で DPS と耐久の変化を出す）。
+   * 指輪で slot を省くと、空いている枠、両方着けていれば入れ替えて強くなる方（slotFor と同じ）と比べる。
+   * DPS はスキルの並び全体の目安（estimateBuildDps。戦力の表示と同じ）。召喚・呪文のビルドでも装備の良し悪しが出る
+   */
   compare(item, slot = null) {
-    slot ||= item.slot === 'ring' ? (this.hero.equip.ring1 ? (this.hero.equip.ring2 ? 'ring1' : 'ring2') : 'ring1') : item.slot;
+    if (!slot && item.slot === 'ring') {
+      const eq = this.hero.equip;
+      if (!eq.ring1) slot = 'ring1';
+      else if (!eq.ring2) slot = 'ring2';
+      else {
+        const a = this.compare(item, 'ring1'); const b = this.compare(item, 'ring2');
+        return (a.dpsPct + a.ehpPct) >= (b.dpsPct + b.ehpPct) ? a : b;
+      }
+    }
+    slot ||= item.slot;
     const st = this.game.state;
-    const basic = st.hero.bar.find(Boolean);
-    const before = computeHero(st, this.game); // 戦闘中の強化（バフ・祠）を入れずに比べる（after と同じ条件。入れると空いた枠にも着けなくなる）
+    const base = this.baseline(); // 今の装備の数値（戦闘中の強化（バフ・祠）は入れない。after と同じ条件。入れると空いた枠にも着けなくなる）
+    const before = base.H;
     const over = { [slot]: item };
     if (slot === 'weapon' && weaponStats(item)?.twoHanded) over.offhand = null;
     const after = computeHero(st, this.game, { equipOverride: over });
-    const dpsB = basic ? estimateDps(st, before, basic) : 0;
-    const dpsA = basic ? estimateDps(st, after, basic) : 0;
-    const ehpB = effectiveLife(before); const ehpA = effectiveLife(after);
+    const dpsB = base.dps; const dpsA = this.dpsOf(after);
+    const ehpB = base.ehp; const ehpA = effectiveLife(after);
     return { slot, dps: dpsA, ehp: ehpA, dpsPct: dpsB > 0 ? (dpsA / dpsB - 1) * 100 : 0, ehpPct: ehpB > 0 ? (ehpA / ehpB - 1) * 100 : 0, before, after };
+  }
+
+  /**
+   * 比べの元（今の装備の H・DPS・耐久）。持ち物を並べるときに何百回も作り直さないように、
+   * 戦闘の数値（combat.H。能力が変わると作り直される）と装備の中身が同じ間は使い回す
+   */
+  baseline() {
+    const st = this.game.state;
+    const eq = st.hero.equip;
+    const sk = Object.entries(st.hero.skills || {}).map(([k, v]) => `${k}${v?.lvl || 0}${v?.rune || ''}`).join(',');
+    const sig = `${st.hero.cls}|${st.hero.level}|${(st.hero.bar || []).join(',')}|${sk}|${SLOTS.map((s) => { const it = eq[s]; return it ? `${it.uid}.${it.enh || 0}.${(it.sockets || []).join('/')}.${it.affixes?.length || 0}.${it.q || 0}` : '-'; }).join(',')}`;
+    const H0 = this.game.combat?.H || null;
+    const c = this._base;
+    if (c && H0 && c.H0 === H0 && c.sig === sig) return c;
+    const H = computeHero(st, this.game);
+    this._base = { H0, sig, H, dps: this.dpsOf(H), ehp: effectiveLife(H) };
+    return this._base;
+  }
+
+  /** 比べに使う DPS: スキルの並び全体の目安。並びが無い・出せないときは先頭のスキル（基本攻撃）だけ */
+  dpsOf(H) {
+    const st = this.game.state;
+    let d = 0;
+    try { d = estimateBuildDps(st, H); } catch { d = 0; }
+    if (d > 0) return d;
+    const basic = st.hero.bar.find(Boolean);
+    return basic ? estimateDps(st, H, basic) : 0;
   }
 
   isUpgrade(item) {
@@ -232,7 +270,7 @@ export class InventorySystem {
     return n >= (f.wantMin || 1);
   }
 
-  /** ドロップを受け取る。戻り値: 'bag' | 'salvaged' | 'equipped' */
+  /** ドロップを受け取る。戻り値: 'bag' | 'stash'（バッグが満杯のときのレジェンダリー以上） | 'salvaged' | 'equipped' */
   receive(item, { quiet = false } = {}) {
     const g = this.game;
     const meta = g.state.meta;
@@ -262,7 +300,13 @@ export class InventorySystem {
       // バッグが満杯: 鍵の無い一番弱いマジック以下を分解して空ける。無理ならこれを分解
       const victim = this.inv.bag.filter((x) => !x.locked && (RARITY[x.rarity]?.idx || 0) < r.idx).sort((a, b) => (RARITY[a.rarity].idx - RARITY[b.rarity].idx) || a.ilvl - b.ilvl)[0];
       if (victim) this.salvage([victim.uid], { silent: true });
-      else { this.addMats(this.salvageYield(item)); g.events.emit('bagFull', {}); return 'salvaged'; }
+      else {
+        // レジェンダリー以上・覚醒/極致は、倉庫に空きがあればそこへ（その場で分解すると取り戻せない）
+        const tab = (r.idx >= 4 || (item.q || 0) >= 1) ? this.inv.stash.find((t) => t.length < this.inv.stashTabSize) : null;
+        g.events.emit('bagFull', {});
+        if (tab) { tab.push(item); if (!quiet) g.events.emit('invChanged', { added: item }); return 'stash'; }
+        this.addMats(this.salvageYield(item)); return 'salvaged';
+      }
     }
     this.inv.bag.push(item);
     if (!quiet) g.events.emit('invChanged', { added: item });

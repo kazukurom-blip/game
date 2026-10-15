@@ -9,6 +9,7 @@ import { RARITY } from '../../data/rarity.js';
 import { ENH_RATE, ENH_MAX, ENH_MILESTONES } from '../../game/systems/crafting.js';
 import { ensureCss, selectItem, selectedItem, itemPicker, costRow } from './itemkit.js';
 import { itemName } from '../../game/items.js';
+import { shownValue } from '../../game/content/items/itemlib.js';
 
 const OPS = [
   { id: 'enhance', name: '強化', help: '+0〜+20。武器ダメージ・アーマーとオプションの数値が上がる。失敗しても壊れず、下がらない。' },
@@ -65,13 +66,12 @@ function opBox(title, children) { return h('div.ik-op', [h('h4', title), ...chil
 
 /** オプションの行を選べる一覧 */
 function affList(ui, item, { locked = null, disabled = () => false, extra = () => null } = {}) {
-  const q = item.q ? (item.q === 2 ? 1.6 : 1.3) : 1;
   return h('div', (item.affixes || []).map((a, i) => {
     const af = AFFIX[a.id];
     const dis = disabled(i) || (locked !== null && locked !== i);
     const row = h(`div.ik-aff${i === affIdx ? '.on' : ''}${dis ? '.lock' : ''}${a.g ? '.greater' : ''}`, { onclick: () => { if (dis) return; affIdx = i; ui.renderPanel(); } }, [
       a.g ? h('span.star', '★') : null,
-      modLine({ s: a.s, v: a.v * q }).textContent,
+      modLine({ s: a.s, v: shownValue(item, a.v) }).textContent,
       extra(i),
       h('span.tier', af ? `T${af.tiers.length - a.t}` : ''),
     ]);
@@ -141,11 +141,10 @@ const OP_RENDER = {
     const pend = item.rrPending;
     const children = [affList(ui, item, { locked: item.rr?.i ?? null })];
     if (pend) {
-      const q = item.q ? (item.q === 2 ? 1.6 : 1.3) : 1;
       const cur = item.affixes[pend.i];
       const choice = (a, k, keep = false) => {
         const af = AFFIX[a.id];
-        return h(`div.ik-choice${keep ? '.keep' : ''}`, [modLine({ s: a.s, v: a.v * q }), h('span.dim.small', af ? `T${af.tiers.length - a.t}` : ''), button(keep ? 'そのまま' : 'これにする', () => act(ui, item.uid, () => c.rerollChoose(item.uid, k), keep ? '元のオプションを残した' : '付け替えた'), { kind: keep ? 'small' : 'primary' })]);
+        return h(`div.ik-choice${keep ? '.keep' : ''}`, [modLine({ s: a.s, v: shownValue(item, a.v) }), h('span.dim.small', af ? `T${af.tiers.length - a.t}` : ''), button(keep ? 'そのまま' : 'これにする', () => act(ui, item.uid, () => c.rerollChoose(item.uid, k), keep ? '元のオプションを残した' : '付け替えた'), { kind: keep ? 'small' : 'primary' })]);
       };
       children.push(h('p', { style: { color: '#ffd27a' } }, '候補から 1 つ選んでください（選ぶまで残ります）'), h('div.ik-choices', [...pend.opts.map((a, k) => choice(a, k)), choice(cur, 2, true)]));
       return opBox('付け替え', children);

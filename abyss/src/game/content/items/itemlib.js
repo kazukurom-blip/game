@@ -176,6 +176,14 @@ export function makePrimal(item) {
 /** 品質（太古・原初）の倍率 */
 export const qualityMult = (item) => QUALITY[item.q || 0]?.mult ?? 1;
 
+/**
+ * 説明に出すオプション・固定のオプションの数（品質の倍率と強化のボーナス込み）。
+ * 実際に効く数（itemMods = 値 × 品質 ＋ 強化のボーナス）と同じになる。v は保存された値（a.v / f.v）
+ */
+export function shownValue(item, v) {
+  return v * qualityMult(item) * (1 + enhBonusPct(item.enh || 0) / 100);
+}
+
 /** ルーン語の固定の効果 */
 export function runewordMods(item) {
   const rw = item.rw ? RUNEWORD[item.rw] : null;

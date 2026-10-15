@@ -24,8 +24,22 @@ export const lootHooks = {
 const BASE_SLOTS = ['weapon', 'offhand', 'helm', 'chest', 'gloves', 'belt', 'legs', 'boots', 'amulet', 'ring'];
 const SLOT_WEIGHT = { weapon: 14, offhand: 8, helm: 9, chest: 9, gloves: 9, belt: 8, legs: 9, boots: 9, amulet: 7, ring: 12 };
 
-/** レアリティを決める。rank は 'normal'|'champion'|'rare'|'boss'... 、mf はレア発見率（%） */
+/** レアリティを決める。rank は 'normal'|'champion'|'rare'|'boss'... 、mf はレア発見率（%）、ilvl はアイテムレベル */
 export function rollRarity(rng, opts = {}) {
+  const w = rarityWeights(opts);
+  const pick = rng.weighted(RARITIES, (r) => w[r.id] || 0);
+  return pick ? pick.id : 'common';
+}
+
+/** 1 個落ちたときのレアリティの確率 { rarityId: 0..1 }（rollRarity と同じ式。図鑑の落とし物の表に出す） */
+export function rarityOdds(opts = {}) {
+  const w = rarityWeights(opts);
+  const total = RARITIES.reduce((s, r) => s + Math.max(0, w[r.id] || 0), 0) || 1;
+  return Object.fromEntries(RARITIES.map((r) => [r.id, Math.max(0, w[r.id] || 0) / total]));
+}
+
+/** レアリティの重み（opts は rollRarity と同じ） */
+export function rarityWeights(opts = {}) {
   const { mf = 0, rank = 'normal', minRarity = null, torment = 0 } = opts;
   const w = { ...BAL.RARITY_WEIGHTS };
   const mfe = BAL.mfEffective(mf);
@@ -45,8 +59,7 @@ export function rollRarity(rng, opts = {}) {
     const min = RARITY[minRarity].idx;
     for (const r of RARITIES) if (r.idx < min) w[r.id] = 0;
   }
-  const pick = rng.weighted(RARITIES, (r) => w[r.id] || 0);
-  return pick ? pick.id : 'common';
+  return w;
 }
 
 /** ベースを選ぶ。cls があればそのクラスの武器・副手を 70% で優先（スマートドロップ） */

@@ -15,7 +15,7 @@ import { MATERIAL } from '../../data/materials.js';
 import { UNIQUE, UNIQUES, MYTHIC, MYTHICS, SET, SETS, SET_PIECE } from '../../data/uniques.js';
 import { RUNEWORD, RUNE } from '../../data/gems.js';
 import { itemName } from '../../game/items.js';
-import { specialDef, fixedValue, parseSocket, gemName, runeName, gemMod, runeMod, enhBonusPct, runewordMods } from '../../game/content/items/itemlib.js';
+import { specialDef, fixedValue, parseSocket, gemName, runeName, gemMod, runeMod, enhBonusPct, runewordMods, shownValue } from '../../game/content/items/itemlib.js';
 import { setCounts } from '../../game/content/items/loot.js';
 import { socketKind } from '../../data/items.js';
 
@@ -149,7 +149,8 @@ const CSS = `
 .ik-presets .btn small { display: block; font-size: 10px; color: var(--dim); }
 .ik-chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
 .ik-multi { background: #1a2a1f; border: 1px solid #3a6a4a; border-radius: 8px; padding: 6px 8px; margin: 6px 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px; }
-.ik-sub { display: flex; justify-content: space-between; align-items: baseline; color: var(--dim); font-size: 12px; margin: 4px 0; }
+.ik-sub { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; color: var(--dim); font-size: 12px; margin: 4px 0; }
+.ik-sub > :last-child { flex: none; white-space: nowrap; }
 .ik-sub b { color: #fff; }
 .ik-result { border: 1px solid var(--gold); border-radius: 8px; padding: 6px; margin: 8px 0; background: #1a1610; }
 .ik-result .t { font-size: 12px; color: var(--gold2); margin: 0 0 4px 4px; }
@@ -240,19 +241,19 @@ export function luckMeters(game) {
 // ======================================================================
 // ツールチップの追加
 // ======================================================================
-function rangeText(m, ilvl, g) {
-  const a = fixedValue(m, 0, ilvl, g); const b = fixedValue(m, 1, ilvl, g);
+/** 固定のオプションの幅（品質・強化のボーナス込みの、出ている数と同じ物差し） */
+function rangeText(item, m, g) {
+  const a = shownValue(item, fixedValue(m, 0, item.ilvl, g)); const b = shownValue(item, fixedValue(m, 1, item.ilvl, g));
   return a === b ? '' : `〔${fmt(a)}〜${fmt(b)}〕`;
 }
 tooltipHooks.afterAffixes.push((game, item) => {
   const out = [];
   const def = specialDef(item);
-  const qm = item.q ? (item.q === 2 ? 1.6 : 1.3) : 1;
   if (item.fixed?.length) {
     out.push(h('div.ic-affixes.ik-fixed', item.fixed.map((f) => {
       const m = def?.mods?.[f.i];
-      const el = modLine({ s: f.s, v: f.v * qm }, { star: f.g, cls: f.g ? 'greater' : null });
-      if (m) el.append(h('span.ik-range', rangeText(m, item.ilvl, !!f.g)));
+      const el = modLine({ s: f.s, v: shownValue(item, f.v) }, { star: f.g, cls: f.g ? 'greater' : null });
+      if (m) el.append(h('span.ik-range', rangeText(item, m, !!f.g)));
       if (f.over) el.append(h('span.ik-range', '堕×1.3'));
       return el;
     })));
@@ -261,7 +262,7 @@ tooltipHooks.afterAffixes.push((game, item) => {
   if (item.cimp) out.push(h('div.ic-affixes.ik-cimp', [modLine(item.cimp, {}), h('div.small.dim', '（堕落で付いた内在）')]));
   if (item.enh) {
     const b = enhBonusPct(item.enh);
-    out.push(h('div.small', { style: { color: '#ffd27a', marginTop: '4px' } }, `強化 +${item.enh}: 基本性能 ×${(1 + 0.05 * item.enh + 0.0025 * item.enh * item.enh).toFixed(2)}・オプションの数値 +${b}%`));
+    out.push(h('div.small', { style: { color: '#ffd27a', marginTop: '4px' } }, `強化 +${item.enh}: 基本性能 ×${(1 + 0.05 * item.enh + 0.0025 * item.enh * item.enh).toFixed(2)}・オプションの数値 +${b}%（上の数に込み）`));
   }
   return out;
 });
@@ -330,9 +331,21 @@ export const clsName = (id) => CLS[id] || id;
 // ======================================================================
 // アイテムの操作の近道
 // ======================================================================
+/** 倉庫の空いているタブへ（prefer を先に）。入れたタブの番号か -1 */
+export function stashAny(game, uid, prefer = 0) {
+  const st = game.state.inv.stash;
+  const order = [prefer, ...st.map((_, i) => i).filter((i) => i !== prefer)];
+  for (const t of order) if (st[t] && game.sys.inv.toStash(uid, t)) return t;
+  return -1;
+}
+
 itemMenuHooks.push((ui, item, equipped) => {
   const btns = [];
   const g = ui.game;
+  // 倉庫との出し入れ（スマホでは長押しのメニューが出ないことがあるので、ここにも置く）
+  const where = equipped ? 'equip' : g.sys.inv.findItem(item.uid)?.where;
+  if (where === 'bag') btns.push({ label: '倉庫へ', onclick: () => { const t = stashAny(g, item.uid); ui.toast(t >= 0 ? `倉庫 ${t + 1} へ入れた` : '倉庫がいっぱい', t >= 0 ? 'good' : 'bad'); ui.afterAction?.(); } });
+  if (where === 'stash') btns.push({ label: 'バッグへ', onclick: () => { const okk = g.sys.inv.fromStash(item.uid); ui.toast(okk ? 'バッグへ戻した' : 'バッグがいっぱい', okk ? 'good' : 'bad'); ui.afterAction?.(); } });
   btns.push({ label: '鍛冶へ', onclick: () => { selectItem('craft', item.uid); ui.openPanel('craft'); } });
   if (item.sockets?.length) btns.push({ label: 'ソケット', onclick: () => { selectItem('gems', item.uid); setGemsTab('socket'); ui.openPanel('gems'); } });
   const info = g.sys.codex.extractInfo(item);

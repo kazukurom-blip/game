@@ -7,6 +7,8 @@
 // ルーン: ソケットのキーは 'r:<id>'。ノーマル（オプション無し）の装備に、ルーン語の順番どおりにちょうどの数だけはめると
 //   ルーン語の装備（名前つき・特別な力）に変わる。ルーン語にしたルーンは外せない。
 
+import { NUM } from './balance.js';
+
 export const GEM_TIERS = 10;
 export const GEM_TIER_NAMES = ['欠けた', '小さな', 'ふつうの', '磨かれた', '美しい', '見事な', '完璧な', '至高の', '王者の', '深淵の'];
 /** 段階ごとのレベル（scale のある能力の伸び） */
@@ -32,8 +34,8 @@ export const GEMS = [
 ];
 export const GEM = Object.fromEntries(GEMS.map((g) => [g.id, g]));
 
-/** 宝石を合成するゴールド（段階 t の 3 つ → t+1） */
-export const gemCombineGold = (t) => Math.round(40 * 2.6 ** t);
+/** 宝石を合成するゴールド（段階 t の 3 つ → t+1）。ゴールドの桁（NUM）に合わせる（1→2 段 ≒ Lv1 の敵 70 体ぶん） */
+export const gemCombineGold = (t) => Math.round(40 * NUM * 2.6 ** t);
 
 // ---------------- 深淵の宝石
 export const LEGENDARY_GEMS = [
@@ -89,8 +91,8 @@ export const RUNES = [
 ];
 export const RUNE = Object.fromEntries(RUNES.map((r) => [r.id, r]));
 export const runeLevel = (r) => 4 * r.tier;
-/** ルーンを合成するゴールド（段階 t の 3 つ → t+1） */
-export const runeCombineGold = (t) => Math.round(60 * 1.45 ** t);
+/** ルーンを合成するゴールド（段階 t の 3 つ → t+1）。ゴールドの桁（NUM）に合わせる */
+export const runeCombineGold = (t) => Math.round(60 * NUM * 1.45 ** t);
 
 // ---------------- ルーン語（20）
 // mods の v: scale のある能力は Lv1 の値（装備のアイテムレベルで伸びる）。power の r は力の強さ（0..1）の範囲

@@ -142,7 +142,8 @@ export const BAL = {
   legendaryBoost: (ilvl) => 0.5 + 0.075 * Math.min(100, Math.max(1, ilvl)),
   // エピックの重みの倍率（終盤は倒す速さが落ちるので少しだけ増やす）
   epicBoost: (ilvl) => 0.85 + 0.006 * Math.min(100, Math.max(1, ilvl)),
-  mfEffective: (mf) => (mf <= 0 ? mf : mf * 100 / (mf + 100) * 2), // 逓減（MF 100 → 実効 100、300 → 150）
+  // 実際の効き = 2 × MF × 100 / (MF + 100)。伸びは多いほど鈍る（MF 100 → 100、300 → 150）。100 未満は多めに効く（25 → 40、50 → 66.7）
+  mfEffective: (mf) => (mf <= 0 ? mf : mf * 100 / (mf + 100) * 2),
 
   // ---- 経済
   sellValue: (ilvl, rarityIdx) => Math.round(2 * PG(ilvl) * (1 + rarityIdx * 1.5)),
