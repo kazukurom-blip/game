@@ -254,12 +254,15 @@ t('ログインの贈り物: 1 日 1 回・7 日で 1 巡り', () => {
     ok(!sys.canClaimLogin());
   }
   eq(st.meta.daily.total, 8); eq(st.meta.daily.cycle % 7, 1);
-  ok(st.meta.pets.eggs.egg_ash >= 1 && st.meta.pets.eggs.egg_ember >= 1, JSON.stringify(st.meta.pets.eggs));
+  // 卵は空いた孵卵器へ自動で入るので、持ち物と孵卵器の両方で数える
+  const eggsOf = (k) => (st.meta.pets.eggs[k] || 0) + st.meta.pets.incubator.filter((x) => x.kind === k).length;
+  ok(eggsOf('egg_ash') >= 1 && eggsOf('egg_ember') >= 1, JSON.stringify([st.meta.pets.eggs, st.meta.pets.incubator]));
 });
 
 // ---------------- ペット
 t('ペット: 卵 → 孵卵器 → 倒して孵る → 持つ・連れる', () => {
   const g = fresh(); const sys = g.sys.pets; const ps = g.state.meta.pets;
+  sys.setAutoFill(false); // 手で入れる流れ（自動で入る方は tests/qa_progress.mjs）
   sys.addEgg('egg_ash', 2);
   ok(sys.incubate('egg_ash')); ok(sys.incubate('egg_ash')); ok(!sys.incubate('egg_ash'));
   for (let i = 0; i < 200; i++) sys.onKill({ rank: 'normal' });
@@ -283,7 +286,7 @@ t('ペット: 天井で必ず卵', () => {
   const g = fresh(); const sys = g.sys.pets; const ps = g.state.meta.pets;
   g.rng.chance = () => false; // 運が悪くても
   for (let i = 0; i < PET_BAL.PITY; i++) sys.onKill({ rank: 'champion', x: 0, y: 0 });
-  eq(sys.eggCount(), 1); eq(ps.pity, 0);
+  eq(sys.eggCount() + ps.incubator.length, 1); eq(ps.pity, 0);
 });
 t('ペット: 戦闘で手助けする（倒れない・ダメージを数える）', () => {
   const g = fresh('warrior', 5); const sys = g.sys.pets;
@@ -355,7 +358,7 @@ t('セーブして読み直すと、メタの状態がそのまま残る', () =>
   const json = JSON.stringify(g.snapshot());
   const g2 = new Game({ seed: 4 }); g2.load(JSON.parse(json));
   const s2 = g2.state;
-  eq(s2.meta.upgrades.soul_life, 3); eq(s2.meta.pets.active, 'frostkit'); eq(s2.meta.pets.eggs.egg_ember, 1);
+  eq(s2.meta.upgrades.soul_life, 3); eq(s2.meta.pets.active, 'frostkit'); eq(s2.meta.pets.incubator[0]?.kind, 'egg_ember'); eq(JSON.stringify(s2.meta.pets.incubator), JSON.stringify(st.meta.pets.incubator));
   eq(Object.keys(s2.meta.achievements).length, Object.keys(st.meta.achievements).length);
   eq(s2.meta.bounties.list.length, st.meta.bounties.list.length);
   const H2 = computeHero(s2, g2);

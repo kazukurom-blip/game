@@ -160,7 +160,7 @@ SECRET('secret_oneshot', 'oneShotBoss', 1, '一撃必殺', 'ボスをまだ傷�
 SECRET('secret_longsleep', 'longOffline', 1, '果報は寝て待て', '1 回で 20 時間以上離れてから戻る');
 SECRET('secret_fastrebirth', 'fastRebirth', 1, '急ぎの輪廻', '周回を始めて 30 分以内に転生する');
 SECRET('secret_legendpet', 'legendPet', 1, '伝説との邂逅', 'レジェンダリーのペットを孵す');
-SECRET('secret_curious', 'panels', 15, '好奇心', 'すべての窓を開いてみる');
+SECRET('secret_curious', 'panels', 15, '好奇心', '15 種類の窓を開いてみる');
 SECRET('secret_closecall', 'lowLifeBoss', 1, '紙一重', 'ライフ 5% 未満でボスを倒す');
 SECRET('secret_naked', 'nakedBoss', 1, '裸の勇者', '武器のほかに何も身に着けずにボスを倒す');
 SECRET('secret_deaths', 'deaths', 1000, '死を恐れぬ者', '1,000 回倒れる');

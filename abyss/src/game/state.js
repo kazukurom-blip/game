@@ -47,7 +47,7 @@ export function newState(cls = 'warrior', name = '名もなき者') {
       filter: {
         autoSalvage: { common: true, magic: true, rare: false, epic: false, legendary: false, set: false, unique: false, mythic: false },
         keepUpgrades: true, // 今の装備より良さそうな物は残す
-        autoEquip: false,
+        autoEquip: true, // 最初からオン（敵を硬くしたので、装備を触らない放置だと最初の地域で倒れ続けた。持ち物の窓で切れる）
         wantStats: [], // この能力が N 個以上ついていたら残す
         wantMin: 2,
       },

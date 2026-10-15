@@ -8,12 +8,13 @@ import { describeMod } from '../../data/stats.js';
 import { tabs, card, bar, live, setBar } from '../metaui.js';
 
 let view = 'active';
+const odds = (rank) => Math.round(1 / PET_BAL.EGG_CHANCE[rank]);
 
 export const petsPanel = {
   id: 'pets', name: 'ペット', icon: '🐾',
   refreshOn: ['meta:pets', 'gold'],
-  help: `<p>エリート・ボスを倒すと、まれに<b>卵</b>が落ちます（チャンピオン 1/220、ボス 1/150、章のボス 1/80 など）。エリート・ボスを ${PET_BAL.PITY} 体倒しても出なければ必ず落ちます（天井）。主人公より ${PET_BAL.LEVEL_GAP} Lv 以上低い敵からは落ちません。</p>
-<p>卵は<b>孵卵器</b>（${PET_BAL.INCUBATORS} つ）に入れ、決まった数の敵を倒すと孵ります。放置していた間も進みます。</p>
+  help: `<p>エリート・ボスを倒すと、まれに<b>卵</b>が落ちます（チャンピオン 1/${odds('champion')}、群れの長 1/${odds('rare')}、ボス 1/${odds('boss')}、章のボス 1/${odds('actboss')} など）。エリート・ボスを ${PET_BAL.PITY} 体倒しても出なければ必ず落ちます（天井）。主人公より ${PET_BAL.LEVEL_GAP} Lv 以上低い敵からは落ちません。</p>
+<p>卵は空いた<b>孵卵器</b>（${PET_BAL.INCUBATORS} つ）へ自動で入り（「卵と孵卵器」のスイッチで切れます）、決まった数の敵を倒すと孵ります。放置していた間も進みます。孵ったら「孵す」を押します（魂の祭壇「孵化の番人」で自動）。</p>
 <p>連れているペット 1 匹が戦闘で手助けをし（主人公の後ろにいて敵には狙われにくい）、効果を与えます。持っているペットすべての<b>所持効果</b>も効きます。</p>
 <p>同じペットが出ると<b>進化 ★</b>（最大 5、1 つごとに効果 +20%）。餌（ゴールド）でレベルが上がります（最大 ${PET_BAL.MAX_LEVEL}）。</p>`,
   badge: (g) => (g.sys.pets?.hatchReady?.() || 0) + (g.sys.pets?.freeIncubators?.() > 0 && g.sys.pets?.eggCount?.() > 0 ? 1 : 0),
@@ -124,6 +125,14 @@ function renderEggs(ui, el) {
     ]));
   }
   el.append(incs);
+  const autoHatch = !!g.state.meta.unlocks.autoHatch;
+  el.append(h('div.toolbar', [
+    h('label.chk', { title: '卵を手に入れたとき・孵卵器が空いたときに、良い卵から自動で入れます' }, [
+      h('input', { type: 'checkbox', checked: (ps.autoFill !== false || autoHatch) || undefined, disabled: autoHatch || undefined, onchange: (e) => { sys.setAutoFill(e.target.checked); ui.renderPanel(); } }),
+      ' 卵を空いた孵卵器へ自動で入れる',
+    ]),
+    h('span.dim.small', autoHatch ? '孵化の番人: 孵るのも自動' : '孵ったら「孵す」を押す（魂の祭壇「孵化の番人」で自動）'),
+  ]));
   // 卵
   el.append(h('h3.sec-title', '持っている卵'));
   const eggs = h('div.pt-eggs');

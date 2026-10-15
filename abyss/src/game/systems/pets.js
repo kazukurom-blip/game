@@ -1,15 +1,17 @@
 // ペット（卵から孵す・レベル・覚醒★・連れて歩く 1 匹＋所持の効果）。担当: メタ担当。
 //
-// 卵: エリート・ボスから落ちる（チャンピオン 1/200 など）。対象の敵を 600 体倒すと必ず落ちる（天井。画面に出す）。
+// 卵: エリート・ボスから落ちる（確率と天井は data/pets.js の PET_BAL。天井は画面に出す）。
 // 孵卵器（2 つ）に入れて、決まった数の敵を倒すと孵る（放置の間も進む）。
+// 卵は最初から空いた孵卵器へ自動で入る（ps.autoFill。ペットの窓で切れる）。孵すのは手で（「孵す」を押す。
+// 魂の祭壇「孵化の番人」で自動）。以前は入れるのも手だったので、放置だと卵がたまるだけでペットが 0 匹のままだった。
 // 同じペットが出たら覚醒 ★+1（最大 5。1 つごとに効果 +20%）。5★のあとは経験値。
 // 餌（ゴールド）でも経験値が入る。レベル 1〜50。
 // 連れているペットは戦闘で手助けする。体は game.sys.pets.unit（combat.units の外。敵に狙われず、攻撃も当たらない）。
 //
 // 外から: game.sys.pets.addEgg(kind, n) / incubate(kind) / hatch(i) / hatchReady() / setActive(id) / feed(id, n) / feedCost(id)
-//         ownedList() / petBonus(id) / abilityText(id) / pity()
-// 状態: state.meta.pets { owned: { id: { lvl, xp, stars, at } }, active, eggs: { kind: 数 }, incubator: [{ kind, prog, need }], pity, seen: {} }
-// 出来事: 'eggFound' { kind } / 'eggReady' { kind } / 'petHatched' { id, dup, stars } / 'petLevel' { id, lvl } / 'metaChanged'
+//         fillIncubators() / setAutoFill(bool) / ownedList() / petBonus(id) / abilityText(id) / pity()
+// 状態: state.meta.pets { owned: { id: { lvl, xp, stars, at } }, active, eggs: { kind: 数 }, incubator: [{ kind, prog, need }], pity, seen: {}, autoFill }
+// 出来事: 'eggFound' { kind, n, incubated（自動で孵卵器へ入った数） } / 'eggReady' { kind } / 'petHatched' { id, dup, stars } / 'petLevel' { id, lvl } / 'metaChanged'
 
 import { PETS, PET, EGGS, EGG, PET_BAL, PET_RARITIES } from '../../data/pets.js';
 import { BAL } from '../../data/balance.js';
@@ -50,6 +52,7 @@ export class PetSystem {
     p.pity ??= 0;
     p.seen ||= {};
     p.eggsFound ??= 0;
+    if (typeof p.autoFill !== 'boolean') p.autoFill = true;
     this.ver++;
     this.unit = null;
   }
@@ -93,10 +96,29 @@ export class PetSystem {
     ps.eggs[kind] = (ps.eggs[kind] || 0) + n;
     ps.eggsFound += n;
     if (opts.drop) this.game.combat.emit({ t: 'text', x: opts.x || 0, y: opts.y || 0, z: 120, text: `${EGG[kind].name}！`, color: EGG[kind].color });
-    if (!opts.quiet) this.game.events.emit('eggFound', { kind, name: EGG[kind].name, n });
-    this.game.events.emit('metaChanged', { kind: 'pets' });
+    const before = ps.incubator.length;
     if (this.game.state.meta.unlocks.autoHatch) this.autoHatch();
+    else this.fillIncubators();
+    const incubated = Math.max(0, ps.incubator.length - before);
+    if (!opts.quiet) this.game.events.emit('eggFound', { kind, name: EGG[kind].name, n, incubated });
+    this.game.events.emit('metaChanged', { kind: 'pets' });
     return true;
+  }
+
+  /** 空いた孵卵器に卵を入れる（良い卵から）。ps.autoFill が OFF なら force のときだけ。戻り値: 入れた数 */
+  fillIncubators(force = false) {
+    const ps = this.ps;
+    if (!force && ps.autoFill === false) return 0;
+    let n = 0;
+    for (const e of [...EGGS].reverse()) while (this.freeIncubators() > 0 && ps.eggs[e.id] > 0 && this.incubate(e.id)) n++;
+    return n;
+  }
+
+  /** 卵を自動で孵卵器へ入れるか（ペットの窓のスイッチ） */
+  setAutoFill(on) {
+    this.ps.autoFill = !!on;
+    if (on) this.fillIncubators();
+    this.game.events.emit('metaChanged', { kind: 'pets' });
   }
 
   eggCount() { return Object.values(this.ps.eggs).reduce((s, v) => s + (v || 0), 0); }
@@ -128,16 +150,23 @@ export class PetSystem {
     const rec = this.game.state.meta.record;
     if (rec) { rec.hatched = (rec.hatched || 0) + 1; if (def.rarity === 'legendary') rec.legendPet = 1; }
     this.game.events.emit('petHatched', { id: def.id, name: def.name, rarity: def.rarity, ...res });
+    if (!this.hatching) this.fillIncubators(); // 空いた孵卵器に次の卵
     this.game.events.emit('metaChanged', { kind: 'pets' });
     return { id: def.id, ...res };
   }
 
-  hatchAll() { const out = []; for (let i = this.ps.incubator.length - 1; i >= 0; i--) { const r = this.hatch(i); if (r) out.push(r); } return out; }
+  hatchAll() {
+    const out = [];
+    this.hatching = true;
+    try { for (let i = this.ps.incubator.length - 1; i >= 0; i--) { const r = this.hatch(i); if (r) out.push(r); } } finally { this.hatching = false; }
+    this.fillIncubators();
+    return out;
+  }
 
+  /** 魂の祭壇「孵化の番人」: 孵った卵を孵し、空いた孵卵器に良い卵から入れる（スイッチに関係なく） */
   autoHatch() {
     this.hatchAll();
-    // 良い卵から入れる
-    for (const e of [...EGGS].reverse()) while (this.freeIncubators() > 0 && this.ps.eggs[e.id] > 0) this.incubate(e.id);
+    this.fillIncubators(true);
   }
 
   givePet(id) {
@@ -400,6 +429,7 @@ export class PetSystem {
     if (this.t < 2) return;
     this.t = 0;
     if (this.game.state.meta.unlocks.autoHatch && (this.hatchReady() || (this.freeIncubators() > 0 && this.eggCount() > 0))) this.autoHatch();
+    else if (this.freeIncubators() > 0 && this.eggCount() > 0) this.fillIncubators();
   }
 
   onOffline(rep) {

@@ -74,7 +74,8 @@ export const METRICS = {
   codex: (g) => Object.keys(g.state.meta.codex?.powers || {}).length,
   torment: (g) => g.state.world.maxTorment || 0,
   riftBest: (g) => g.state.world.rift?.best || 0,
-  riftRuns: (g) => g.state.world.rift?.runs || 0,
+  // 「裂け目を N 回クリアする」: 踏破した回数（runs はやめた・時間切れも数えるので使わない）
+  riftRuns: (g) => riftClears(g.state),
   rebirths: (g) => g.state.meta.rebirths || 0,
   totalSouls: (g) => g.state.meta.totalSouls || 0,
   transcends: (g) => g.state.meta.prestige?.transcends || 0,
@@ -105,6 +106,14 @@ export const METRICS = {
 };
 
 export const SOURCE_NAMES_SKILL = { pet: 'ペット', dot: '継続ダメージ・その他' };
+
+/** 深淵の裂け目を踏破した回数（rift.clears。古いセーブで無いときは記録の成功から数える） */
+export function riftClears(state) {
+  const R = state?.world?.rift;
+  if (!R) return 0;
+  if (Number.isFinite(R.clears)) return R.clears;
+  return (R.history || []).filter((x) => x?.ok).length;
+}
 
 export class AchievementSystem {
   constructor(game) {

@@ -11,7 +11,7 @@
 //   autoSalvage, autoHatch, autoBounty, autoTorment, autoRebirth, prestige, transcend }
 // 出来事: 'prestigeUnlocked' / 'rebirth' { souls, total, count } / 'transcend' { stars } / 'altarBuy' { id, lvl } / 'automationUnlocked' { id } / 'metaChanged'
 
-import { ZONES, STAGES_PER_ZONE } from '../../data/world.js';
+import { ZONES, STAGES_PER_ZONE, FINAL_ZONE } from '../../data/world.js';
 import { PRESTIGE, ALTAR, ALTAR_BY_ID, STAR_UPGRADES, STAR_BY_ID, baseSouls, levelForSouls, starsFor, altarCost, starCost } from '../../data/prestige.js';
 
 const SALVAGE_PRESETS = {
@@ -108,6 +108,18 @@ export class PrestigeSystem {
   // ---------------- 転生
   isUnlocked() { return !!this.p?.unlocked; }
 
+  /**
+   * 魂の元になる「今いる所のエリア Lv」。魔境・深淵の裂け目・門番の Lv（100 以上）は、この周回で物語を終えてから数える。
+   * 魔境の解放は転生しても残るので、数えると「転生の直後に魔境へ入って 20 分で Lv100 ぶんの魂」をくり返せてしまう
+   * （物語 1 周 35 時間で約 280 の魂が、20 分ごとに 300 以上になっていた）。物語の地域の Lv はいつでも数える。
+   */
+  soulLevel() {
+    const ws = this.game.sys.world; const w = this.state.world;
+    if (w.cleared?.[FINAL_ZONE]) return ws.level();
+    if (w.mode !== 'campaign') return 0;
+    return ws.campaignLevel(ws.zone(), w.stage, 0);
+  }
+
   lifeSec() { return Math.max(0, (this.state.playTime || 0) - (this.p.life.start || 0)); }
 
   previewSouls() {
@@ -177,6 +189,9 @@ export class PrestigeSystem {
   /** 物語の進み・お金・この周回の数え上げを戻して、前回の最高の地域の何割かへ飛ぶ */
   resetLife() {
     const st = this.state; const m = this.meta; const p = this.p; const w = st.world;
+    // 裂け目・門番の途中なら先に終わらせる（超越はどこからでもできる。終わらせないと途中の記録が残り、門番の欠片も戻らなかった）
+    const ws = this.game.sys.world;
+    if (w.mode !== 'campaign') { try { ws.mode()?.abort?.(ws, 'reset'); } catch (e) { console.error('[prestige:abort]', e); } }
     p.bestZone = Math.max(p.bestZone || 0, w.maxZone || 0);
     const target = this.warpTarget();
     const keep = Math.min(0.5, this.effect('keepGold') / 100);
@@ -384,7 +399,7 @@ export class PrestigeSystem {
     this.t += dt; this.t2 += dt; this.t5 += dt;
     if (this.t >= 1) {
       this.t = 0;
-      const lvl = this.game.sys.world.level();
+      const lvl = this.soulLevel();
       if (lvl > p.life.maxLevel) p.life.maxLevel = lvl;
       if ((st.world.maxZone || 0) > p.bestZone) p.bestZone = st.world.maxZone;
     }

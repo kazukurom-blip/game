@@ -203,7 +203,7 @@ export const mapPanel = {
         h('div.wm-row', [
           button(w.autoAdvance ? '自動前進 ON' : '自動前進 OFF', () => { ws.setAutoAdvance(!w.autoAdvance); ui.renderPanel(); }, { kind: w.autoAdvance ? 'primary' : null, class: 'btn-small' }),
           (w.maxStage[z.id] || 1) >= STAGES_PER_ZONE || w.cleared[z.id] ? button(`ボス「${MONSTER[z.boss]?.name}」に挑む`, () => { if (ws.challengeBoss()) ui.toast('ボスに挑戦！', 'boss'); ui.renderPanel(); }, { class: 'btn-small' }) : null,
-          g.state.meta.unlocks?.autoBoss ? h('span.dim.small', '火力が足りたら自動で再挑戦します') : null,
+          g.state.meta.unlocks?.autoBoss ? h('span.dim.small', '負けたボスには、火力が足りたら（届かなくても数分ごとに）自動で挑み直します') : null,
         ]),
       );
     }

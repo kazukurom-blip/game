@@ -2,9 +2,9 @@
 
 import { h, button } from '../dom.js';
 import { fmt, fmtTime } from '../../engine/format.js';
-import { ZONES } from '../../data/world.js';
+import { ZONES, FINAL_ZONE } from '../../data/world.js';
 import { MONSTER } from '../../data/monsters.js';
-import { PRESTIGE, ALTAR, ALTAR_CATS, STAR_UPGRADES, upgradeDesc } from '../../data/prestige.js';
+import { PRESTIGE, ALTAR, ALTAR_CATS, STAR_UPGRADES, upgradeDesc, baseSouls } from '../../data/prestige.js';
 import { SALVAGE_PRESET_NAMES } from '../../game/systems/prestige.js';
 import { tabs, card, bar, live, setBar } from '../metaui.js';
 import { injectCss } from '../dom.js';
@@ -15,7 +15,7 @@ let altarCat = 'offense';
 
 const HELP = `
 <p><b>転生</b>は、物語の進み（章・地域・ステージ）とお金を手放して<b>魂</b>を得る仕組みです。第五章のボスを初めて倒すと解放されます。</p>
-<p>魂 = ⌊ ${PRESTIGE.SOUL_K} × √(この周回で着いた最高のエリア Lv − ${PRESTIGE.SOUL_BASE_LEVEL}) ⌋ × 倍率。深く潜るほど多くなります。</p>
+<p>魂 = ⌊ ${PRESTIGE.SOUL_K} × ((この周回で着いた最高のエリア Lv − ${PRESTIGE.SOUL_BASE_LEVEL}) ÷ ${PRESTIGE.SOUL_DIV})<sup>${PRESTIGE.SOUL_POW}</sup> ⌋ × 倍率（Lv 50 で ${baseSouls(50)}・Lv 70 で ${baseSouls(70)}・Lv 100 で ${baseSouls(100)}）。深く潜るほど多くなります。魔境・深淵の裂け目の Lv は、その周回で物語（第十章の深淵王）を終えてから数えます。</p>
 <p>レベル・アビスLv・装備・素材・宝石・力の書庫・ペット・実績・図鑑・星座盤は<b>残ります</b>。転生の直後は前回の最高の地域の 65%（祭壇で 85% まで）へ飛ぶので、やり直しはすぐ終わります。</p>
 <p>魂は<b>魂の祭壇</b>で永続の強化に使います。自動化（ボスの再挑戦・スキルの自動振り・自動転生など）もここで解放します。</p>
 <p>転生を ${PRESTIGE.TRANSCEND_REBIRTHS} 回すると<b>超越</b>が解放されます。魂と祭壇（自動化などは残る）を手放して<b>星晶</b>を得て、大きな倍率を買えます。</p>`;
@@ -73,6 +73,7 @@ function renderRebirth(ui, el) {
   const rate = h('div.pr-line');
   const warp = h('div.pr-line');
   const life = h('div.pr-line');
+  const soulNote = h('div.dim.small');
   const reason = h('div.bad.small');
   const btn = button('転生する', () => doRebirth(ui), { kind: 'primary', class: 'big' });
   const lvlBar = bar(0, '', 'soul');
@@ -82,6 +83,8 @@ function renderRebirth(ui, el) {
     const nl = ps.nextSoulLevel();
     const curL = p.life.maxLevel;
     next.innerHTML = `次の 1 点まで: エリア Lv <b>${nl}</b>（この周回の最高 Lv ${curL}）`;
+    const w = st.world;
+    soulNote.textContent = (w.mode !== 'campaign' || (w.torment || 0) > 0) && !w.cleared?.[FINAL_ZONE] ? '魔境・裂け目の Lv は、この周回で物語（第十章の深淵王）を終えてから魂に数えます' : '';
     setBar(lvlBar, curL >= nl ? 100 : Math.max(0, ((curL - PRESTIGE.SOUL_BASE_LEVEL) / Math.max(1, nl - PRESTIGE.SOUL_BASE_LEVEL)) * 100), `Lv ${curL} / ${nl}`);
     rate.innerHTML = `この周回の魂/時: <b>${fmt(ps.soulsPerHour())}</b>`;
     life.innerHTML = `この周回の時間: ${fmtTime(ps.lifeSec(), true)}　撃破 ${fmt(st.meta.stats.kills - (p.life.kills0 || 0))}`;
@@ -96,7 +99,7 @@ function renderRebirth(ui, el) {
     h('div.pr-label', '今転生すると 魂'),
     big,
     h('div.pr-mul', `倍率 ×${ps.soulMul().toFixed(2)}（祭壇「魂の収穫」・星晶「魂の泉」）`),
-    next, lvlBar, rate, life, warp,
+    next, soulNote, lvlBar, rate, life, warp,
     h('div.pr-btn', [btn, reason]),
   ]));
   live(el, 1000, upd);

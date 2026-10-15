@@ -18,6 +18,8 @@ import { RARITY } from '../../data/rarity.js';
 const BUCKET_SEC = 10;
 const WINDOW = 30; // 5 分
 export const OVER_EFF = 0.25;
+/** これより短い留守は放置の稼ぎにしない（Game.catchUp がその時間ぶんふつうに進める） */
+export const MIN_OFFLINE_SEC = 30;
 export const MAX_CAP_HOURS = 48;
 const FULL_ITEMS = 1500;
 const MAX_ROLLS = 200000;
@@ -89,7 +91,7 @@ export class OfflineSystem {
     const st = g.state;
     const cap = this.capSeconds();
     const capped = Math.min(seconds, cap);
-    if (capped < 30) return null;
+    if (capped < MIN_OFFLINE_SEC) return null;
     const over = Math.min(Math.max(0, seconds - cap), cap);
     const effSec = capped + over * OVER_EFF;
     const r = this.rates();
@@ -161,6 +163,8 @@ export class OfflineSystem {
     for (const [rar, n0] of Object.entries(lowExtra)) {
       const n = Math.round(n0);
       found[rar] = (found[rar] || 0) + n;
+      // 拾った数（記録・実績「マジックを N 個拾う」など）にも数える。作って受け取った分は receive() が数える
+      const fs = st.meta.stats.itemsFound; fs[rar] = (fs[rar] || 0) + n;
       rolledSalvaged += n;
       const per = lowMats[rar]; const cnt = lowN[rar] || 0;
       const add = {};

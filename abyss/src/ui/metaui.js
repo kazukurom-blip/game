@@ -11,6 +11,8 @@ import { PET, PET_BAL } from '../data/pets.js';
 import { MONSTER, FAMILIES } from '../data/monsters.js';
 import { ensurePetPainter, drawPetUnit } from './petart.js';
 import { sceneHooks } from '../render/scene.js';
+import { ALTAR_BY_ID } from '../data/prestige.js';
+import { isOpen } from './unlocks.js';
 
 export const MAT_NAMES = { scrap: '鉄屑', dust: '魔塵', crystal: '秘晶', echo: '伝説の残響', core: '極致の核', shard: '深淵の欠片' };
 export const matName = (id) => MATERIAL[id]?.name || MAT_NAMES[id] || id;
@@ -83,8 +85,17 @@ export function bindMetaUi(ui) {
   on('prestigeUnlocked', () => ui.toast('♻ 転生が解放された！ 転生の窓で魂の見込みを確かめよう', 'level.mtbig'));
   on('rebirth', (e) => ui.toast(`♻ 転生した　魂 +${fmt(e.souls)}（${e.count} 回目）`, 'level.mtbig'));
   on('transcend', (e) => ui.toast(`✧ 超越した　星晶 +${e.stars}`, 'level.mtbig'));
-  on('automationUnlocked', (e) => ui.toast(`⚙ 自動化「${e.name}」を解放した（転生の窓の「自動化」で ON/OFF）`, 'good'));
-  on('eggFound', (e) => ui.toast(`🥚 ${e.name}${e.n > 1 ? ` ×${e.n}` : ''} を手に入れた！ ペットの窓で孵卵器へ`, 'good.mtegg'));
+  // 節目でただで開く自動化（はじめてボスに負けた・バッグが半分）は、転生の窓がまだ見えないので何が起きるかを書く
+  on('automationUnlocked', (e) => {
+    const what = ALTAR_BY_ID[e.id]?.desc;
+    const where = isOpen(ui.game, 'prestige') ? '（転生の窓の「自動化」で ON/OFF）' : '';
+    ui.toast(`⚙ 自動化「${e.name}」が開いた${e.why ? `（${e.why}）` : ''}${what ? `: ${what}` : ''}${where}`, 'good');
+  });
+  on('eggFound', (e) => {
+    const auto = ui.game.state.meta.pets?.autoFill !== false || ui.game.state.meta.unlocks.autoHatch;
+    const next = e.incubated ? '孵卵器に入れた（戦っていると孵る）' : auto ? '孵卵器が空いたら自動で入る' : 'ペットの窓で孵卵器へ';
+    ui.toast(`🥚 ${e.name}${e.n > 1 ? ` ×${e.n}` : ''} を手に入れた！ ${next}`, 'good.mtegg');
+  });
   on('eggReady', (e) => { if (!ui.game.state.meta.unlocks.autoHatch) ui.toast(`🥚 ${e.name || '卵'}が孵ります！ ペットの窓で孵そう`, 'good.mtegg'); });
   on('petHatched', (e) => ui.toast(e.dup ? (e.stars ? `🐾 ${e.name} が重なった　進化 ★${e.stars}` : `🐾 ${e.name} が重なった　経験値 +${fmt(PET_BAL.DUP_XP)}`) : `🐾 ${e.name} が生まれた！`, e.rarity === 'legendary' ? 'r-legendary' : 'good'));
   on('petLevel', (e) => ui.toastOnce(`pl-${e.id}`, `🐾 ${e.name} が Lv ${e.lvl} になった`, 'good'));

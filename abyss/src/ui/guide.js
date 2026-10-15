@@ -7,6 +7,8 @@ import { RARITIES } from '../data/rarity.js';
 import { SHORTCUTS } from './keys.js';
 import { tutorialOf } from './unlocks.js';
 import { RARITY_MARK } from './panels/common.js';
+import { WAVES_PER_STAGE } from '../data/world.js';
+import { WAVE_CHECKPOINT } from '../game/systems/world.js';
 
 const isPhone = () => (globalThis.innerWidth || 1200) <= 900;
 
@@ -14,7 +16,7 @@ export const GUIDE_STEPS = [
   { id: 'auto', target: '#hud .hud-auto', title: '自動で戦います',
     text: '主人公は自動で歩き、自動で戦います。「自動前進」が ON なら、ステージを片づけるたびに次へ進みます（Space キーでも切り替え）。' },
   { id: 'boss', target: '#hud .hud-loc', title: 'ステージとボス',
-    text: '1 つの地域は 10 ステージで、10 番目がボスです。ボスに負けると手前のステージで稼ぎ直します。強くなったら「ボスに挑む」で挑み直しましょう。' },
+    text: '1 つの地域は 10 ステージで、10 番目がボスです。ボスに負けると手前のステージで稼ぎ直し、ときどき自動で挑み直します。すぐ挑みたいときは「ボスに挑む」を押します。' },
   { id: 'skills', target: '#hud .hud-skills', title: 'スキルは左から自動で',
     text: 'スキルの並びの左から順に、使えるものを自動で使います。レベルが上がるとスキルポイントがもらえるので、スキルの窓で強化します。' },
   { id: 'compare', target: '.panel-bag .grid', panel: 'bag', title: '装備を比べる',
@@ -135,8 +137,8 @@ export class Guide {
 const HOWTO = [
   ['基本の流れ', [
     '主人公は自動で歩いて戦い、スキルも左から順に自動で使います。手を離していても進みます。',
-    '1 つの地域は 10 ステージ（各 3 波）。10 番目がボスで、倒すと次の地域が開きます。',
-    'ボスに負けると「自動前進」が OFF になり、手前で稼ぎ直します。HUD の「必要 DPS」が足りたら「ボスに挑む」で挑み直します。',
+    `1 つの地域は 10 ステージ（各 ${WAVES_PER_STAGE} 波）。10 番目がボスで、倒すと次の地域が開きます。倒れても、ステージの ${WAVE_CHECKPOINT} 波ごとの区切りから続きます。`,
+    'ボスに負けると「自動前進」が OFF になり、手前で稼ぎ直します。はじめて負けると「再挑戦の誓い」が開き、火力が足りたとき（届かなくても数分ごと）に自動で挑み直します。すぐ挑むときは「ボスに挑む」を押します。',
     'ブラウザを閉じていた間も稼ぎます（はじめは 8 時間まで。転生で延びます）。',
   ]],
   ['装備とレアリティ', [
